@@ -1,0 +1,101 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<!--复制链接用到的-->
+<script type="text/javascript" src='/Public/js/jquery.zclip.js'></script>
+<style type="text/css">
+.line{margin-bottom:20px;}
+/* 复制提示 */
+.copy-tips{position:fixed;z-index:999;bottom:50%;left:50%;margin:0 0 -20px -80px;background-color:rgba(0, 0, 0, 0.2);filter:progid:DXImageTransform.Microsoft.Gradient(startColorstr=#30000000, endColorstr=#30000000);padding:6px;}
+.copy-tips-wrap{padding:10px 20px;text-align:center;border:1px solid #F4D9A6;background-color:#FFFDEE;font-size:14px;}
+</style>
+<body>
+    <div class="search_box">
+        <form method="get" action="__URL__/external_promotion_list" name="external_promotion_list" id="external_promotion_list">
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="19%">
+                        <label>页面名称：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_page_name" id="search_page_name" value="{$search_page_name}"/>
+                    </td>
+                    <td width="10%"><input type="submit" value="搜索" class="search_btn" style="line-height:20px;"/></td>
+                    <td width="10%"><a href='__URL__/promotion_add_show?from={$function_name}&{$url_param}' class="search_btn">添加页面</a></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="5%">页面ID</th>
+                    <th width="15%">页面名称</th>
+                    <th width="10%">类型</th>
+					<th width="18%">导向页面</th>
+                    <th width="15%">推广渠道</th>
+					<th width="25%">页面地址</th>
+                    <th width="12%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                    <td>{$list.prid}</td>
+                    <td>{$list.page_name}</td>
+                    <td>
+                        <switch name="list.content_type">
+                            <case value="1">软件</case>
+                            <case value="2">活动</case>
+                            <case value="3">专题</case>
+                            <case value="4">页面</case>
+                            <case value="5">网页</case>
+							<case value="6">礼包</case>
+							<case value="7">攻略</case>
+                        </switch>
+                    </td>
+                    <td>
+                        <if condition='$list.content_type eq 1'>{$list.package}
+                        <elseif condition='$list.content_type eq 2'/>{$list.activity_name}
+                        <elseif condition='$list.content_type eq 3'/>{$list.feature_name}
+                        <elseif condition='$list.content_type eq 4'/>{$list.content_page_name}
+                        <elseif condition='$list.content_type eq 5'/>{$list.website}
+						<elseif condition='$list.content_type eq 6'/>{$list.gift_id}
+						<elseif condition='$list.content_type eq 7'/>{$list.strategy_id}
+                        </if>
+                    </td>
+                    <td>{$list.chname}</td>
+					<td style="position:relative;">
+						<input style="width:350px; height:28px; border:none;background:none;" id="view_url" name="view_url" value="{$list.preview_url}{$list.prid}.html" />
+						<a style="display:block" class="copy-input" href="#">复制链接</a>
+					</td>
+                    <td>
+                        <a href="__URL__/promotion_edit_show?id={$list.prid}&{$url_param}">编辑</a>
+                        <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                        <a href="__URL__/promotion_del?id={$list.prid}" onClick="return confirm('确定要删除此条记录吗？');">删除</a>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>
+<script>
+$(document).ready(function(){
+/* 定义所有class为copy-input标签，点击后可复制class为input的文本 */
+	$(".copy-input").zclip({
+		path: "/Public/js/ZeroClipboard.swf",
+		copy: function(){
+		return $(this).prev('input[name="view_url"]').val();
+		},
+		afterCopy:function(){/* 复制成功后的操作 */
+			var $copysuc = $("<div class='copy-tips'><div class='copy-tips-wrap'>☺ 复制成功</div></div>");
+			$("body").find(".copy-tips").remove().end().append($copysuc);
+			$(".copy-tips").fadeOut(3000);
+        }
+	});
+});
+</script>

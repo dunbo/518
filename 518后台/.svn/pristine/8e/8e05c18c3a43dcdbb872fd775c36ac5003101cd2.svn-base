@@ -1,0 +1,435 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<style type=text/css>
+.intb td {
+border-right:none;
+border-bottom: none;
+}
+.fixlong {
+  table-layout: fixed;
+}
+.fixlong td {
+  word-break: break-all;
+}
+</style>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+
+
+<div class="main" >
+<div class="content">
+<center>
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" >
+<tr><td align='left' colspan='11'><button  onclick="send_remind();show_editor();">发送邮件</button></td></tr>
+</table>
+<form method='get' action="__URL__/email_list" >
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td width="100">标题：</td>
+    <td width="100"><input size='15' type="text" name="subject" id="subject" value="{$subject}" /></td>   
+	<td width="100">开发者ID：</td>
+    <td width="100"><input size='15' type="text" name="devid" id="devid" value="{$devid}" /></td>
+	<td width="100">开发者类型：</td>
+    <td width="100">
+	<select id="send_obj" name="send_obj" style="width:100px;">
+		<option value=""selected="selected">请选择</option>
+		<option value="3" <if condition="$send_obj eq '3'">selected="selected"</if> >全部</option>
+		<option value="0"<if condition="$send_obj eq '0'">selected="selected"</if>>公司</option>
+		<option value="1"<if condition="$send_obj eq '1'">selected="selected"</if>>个人</option>
+	</select></td>
+	<td width="100">联运状态：</td>
+    <td width="100">
+	<select id="whitelist_type2" name="whitelist_type2" style="width:100px;">
+		<option value='' >请选择</option>
+		<option value="0" <if condition="$whitelist_type2 eq '0'">selected="selected"</if> >全部</option>
+		<option value="1"<if condition="$whitelist_type2 eq '1'">selected="selected"</if>>联运</option>
+		<option value="2"<if condition="$whitelist_type2 eq '2'">selected="selected"</if>>非联运</option>
+	</select></td>
+	<td width="150" rowspan="2" align="center"><input type="submit" name="button" id="button" value="&nbsp;搜 索&nbsp;"  onclick="return checkinput()" style="width:100px;" /></td>
+	</tr>
+	<tr>
+	<td width="100">起止日期：</td>
+    <td width="300" colspan='3'><?php showDatePicker('begintime','endtime', $begintime,$endtime);?></td>
+    <td width="100">软件大类：</td>
+    <td width="100">
+		<select name="soft_parent_category2" id="soft_parent_category2" style='width:100px' onchange="pubpro_type_select2(this.value);">
+			<!-- <option value='' >请选择</option> -->
+			<option value='0' <if condition="$soft_parent_category2 eq '0'">selected="selected"</if>>全部</option>
+			<volist name='category_parent' id='category'>
+				<option value="{$category.category_id}" <if condition="$soft_parent_category2 eq $category['category_id']">selected="selected"</if>>{$category.name}</option>
+			</volist>
+		</select>
+	</td>
+	<td width="100">软件分类：</td>
+    <td width="100">
+		<select name="soft_two_category2" style='width:100px' id='soft_two_category2'>
+			<!-- <option value='' >请选择</option> -->
+			<option value='0' <if condition="$soft_two_category2 eq '0'">selected="selected"</if>>全部</option>
+			<volist name='category_two' id='category'>
+				<option value="{$category.category_id}" alt="2parent_{$category.parentid}" <if condition="$soft_two_category2 eq $category['category_id']">selected="selected"</if>>{$category.name}</option>
+			</volist>
+		</select>
+	</td>
+  </tr>	
+</table>
+	<input type='hidden' name='cateid' id='cateid' value="{$init_cateid}"/>
+</form>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr align='left' bgcolor="" height='30'>
+  <td><?php echo $total;?>条</td>
+</tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+  <tr>
+	<!-- <td width="6%" bgcolor="#e3e2fe"><input type="checkbox" id="id_all[]" name="id_all[]" onclick="selectAll();"></td> -->
+	<td align='center' width="20%" height="30" bgcolor="#e3e2fe">
+	<font style="color:#000; font-weight:bold">发送时间</font></td>
+	<td align='center' width="15%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">发送对象</font></td>
+	<td align='center' width="30%" height="30" bgcolor="#e3e2fe" > <font style="color:#000; font-weight:bold">标题</font></td>
+    <td align='center' width="30%" height="30" bgcolor="#e3e2fe" > <font style="color:#000; font-weight:bold">正文</font></td>
+    <td align='center' width="15%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">操作人</font></td>
+  </tr>
+  <volist name='list' id='remindlist'>
+  <tr id='tr{$remindlist.id}'>
+	<!-- <td align='left'>
+	<input type="checkbox" name="id[]" value="{$remindlist.id}" /><br/><br/>
+	</td> -->
+	<td align='center'>
+	{$remindlist.create_tm}
+	</td>
+	</div>
+	<td align='left'>
+	<if condition="$remindlist.type eq 2">
+		开发者类型：
+			<if condition="$remindlist.send_obj eq 3">
+			全部
+			<elseif condition="$remindlist.send_obj eq  1" />
+			个人
+			<elseif condition="$remindlist.send_obj eq  0" />
+			公司
+			</if>
+		<br/>
+		联运状态：
+			<if condition="$remindlist.whitelist_type eq 0">
+			全部
+			<elseif condition="$remindlist.whitelist_type eq  1" />
+			联运
+			<elseif condition="$remindlist.whitelist_type eq  2" />
+			非联运
+			</if>
+		<br/>
+		软件大类：{$remindlist.soft_parent_category_name}
+		<br/>	
+		软件分类：{$remindlist.soft_two_category_name}
+	<else/>
+		<a href="javascript:;" onclick="open_send('{$remindlist.id}');">
+		{$remindlist.send_id_5}</a>
+	</if>
+	</td>
+	<div id="send{$remindlist.id}" style="padding:10px; width:350px;display:none; word-break:break-all; word-wrap:break-word;">
+	{$remindlist.send_id}
+	</div>
+	<td align='center'>
+	{$remindlist.subject}
+	</td>
+	<td align='center'>
+	<a href="javascript:;" onclick="open_content('{$remindlist.id}');">
+	查看
+	</a>
+	</td>
+	<div id="content{$remindlist.id}" style="padding:10px; width:500px;display:none; word-break:break-all; word-wrap:break-word;">
+	<h2 style="margin-bottom:30px;">{$remindlist.subject}</h2>
+	{$remindlist.content}
+	</div>
+	
+	
+    <td width='100px' align="center" valign="middle">
+    	{$remindlist.admin_name}
+	<!-- <button  onclick="del('{$remindlist.id}')" >&nbsp;删&nbsp;除&nbsp;</button> -->
+	</td>
+  </tr>
+  </volist>
+  <!-- <tr height='50px'>
+	<td align='left' colspan='8'>
+	<input type="checkbox" id="id_all[]" name="id_all[]" onclick="selectAll();">
+	<button onclick="del_arr()">批量删除</button>
+	</td>
+  </tr> -->
+</table>
+<div  align='left'>{$page}</div>
+</center>
+</div>
+</div>
+<!---------------发送提醒信息------------------>
+
+<div id='remind' style="padding:15px; width:500px; height:350px;display:none;" >
+<form action="__URL__/send_email_add" method="post" enctype="multipart/form-data" id='send_email_add'>
+
+<input type="radio" id="is_type" name="is_type" value="1" checked='checked' onclick="showDiv('1')"/>开发者ID&nbsp;&nbsp;
+<input type="radio" id="is_type" name="is_type" value="2" onclick="showDiv('2')"/>开发者类型
+
+	<div id="dev_man" >
+		选择接收人：<input size='15' type="text" name="dev_id" id="dev_id" value="" onchange="if(!/^[0-9;]*$/.test(this.value)){alert('只能输入数字加分号');this.value='';}" style='height:20px;'/>
+		<input type="file" name="csv" value="上传csv文件" />
+		<a href='__PUBLIC__/sample.csv'>下载csv模版</a>
+	</div>
+	
+	<div id="dev_type" style="display:none;">
+		<span style='margin-left:-12px;'>开发者类型：</span><select name="sendobj" id="sendobj" style='width:100px'>
+			<!-- <option value='' >请选择</option> -->
+			<option value='3' >全部</option>
+			<option value="1" >个人</option>
+			<option value="0" >公司</option>
+		</select>
+		<br/>
+		联运状态：<select name="whitelist_type" id="whitelist_type" style='width:100px'>
+			<!-- <option value='' >请选择</option> -->
+			<option value='0' >全部</option>
+			<option value="1" >联运</option>
+			<option value="2" >非联运</option>
+		</select>
+		<br/>
+		软件大类：<select name="soft_parent_category" id="soft_parent_category" style='width:100px' onchange="pubpro_type_select(this.value);">
+			<!-- <option value='0' >请选择</option> -->
+			<option value='0' >全部</option>
+			<volist name='category_parent' id='category'>
+				<option value="{$category.category_id}" >{$category.name}</option>
+			</volist>
+		</select>
+		<div id='soft_two_categorys' style="display:none;float:right;margin-right:165px;">
+		软件分类：<select name="soft_two_category" style='width:100px' id='soft_two_category'>
+			<!-- <option value='' >请选择</option> -->
+			<option value='0' >全部</option>
+			<volist name='category_two' id='category'>
+				<option value="{$category.category_id}" alt="parent_{$category.parentid}">{$category.name}</option>
+			</volist>
+		</select>
+		</div>
+		<div style="clear:both;"></div>
+	</div>
+	<div id="email_title">
+	邮件主题：<input  type="text" name="title_email" id="title_email" value="【安智提醒】_" style='width:345px;height:20px;'/>
+	</div>
+	正文：<textarea style="height: 64px;  width: 345px;" name="content_P" id='content_P' wrap=PHYSICAL></textarea>
+	<br/>
+	<input name="" type="button" value="发送"  style="width:100px;height:25px;margin-left:30px;margin-right:30px;" onclick="sub_form()" />
+	<input name="" type="button" value="预览"  onclick="preview()" style="width:100px;height:25px;margin-left:30px;margin-right:30px;"/>
+	<input name="" type="button" onclick="closes()" value="取消" style="width:100px;height:25px;margin-left:30px;margin-right:30px;"/>
+	<a id='show' href=""></a>
+</form>
+</div>
+<div style="display:none;">
+	<form name="searchform" method="post" action="__URL__/send_email_add" target="_blank" id='searchform'>
+		<input type='hidden' name='title_email2' id='title_email2'/>
+		<input type='hidden' name='preview_content2' id='preview_content2'/>
+		<input type='hidden' name='width' value="600px;" />
+	</form>
+</div>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script language="javascript">
+function sub_form(){
+	var is_type=$('input[name="is_type"]:checked ').val();
+	var whitelist_type=$('#whitelist_type').val();
+	var soft_parent_category=$('#soft_parent_category').val();
+	if(is_type==2 && whitelist_type==1 && soft_parent_category==1){
+		alert("未找到收件人,请重新配置");
+		return false;
+	}else{
+		$('#send_email_add').submit();
+	}
+	
+}
+function pubpro_type_select(value){
+	$('#soft_two_categorys').hide();
+	if(value==1 || value==2 || value==3){
+		$("option[alt^='parent_']").hide();
+		$("option[alt='parent_"+value+"']").show();
+		$('#soft_two_categorys').show();
+		$('#soft_two_category').val(0);
+	}
+}
+// alert(123);
+
+$(document).ready(function() {
+	var soft_parent_category2=<?php echo $soft_parent_category2?$soft_parent_category2:'';?>;
+	if(soft_parent_category2){
+		pubpro_type_select2(soft_parent_category2);
+		var soft_two_category2=<?php echo $soft_two_category2?$soft_two_category2:'';?>;
+		$('#soft_two_category2').val(soft_two_category2);
+	}else{
+		pubpro_type_select2('');
+	}
+}); 
+function pubpro_type_select2(value){
+	if(value==1 || value==2 || value==3){
+		$("option[alt^='2parent_']").hide();
+		$("option[alt='2parent_"+value+"']").show();
+		// $('#soft_two_categorys').show();
+		$('#soft_two_category2').val(0);
+	}else if(value!=''){
+		$("option[alt^='2parent_']").show();
+		$('#soft_two_category2').val(0);
+		$('#soft_parent_category2').val(0);
+	}else{
+		$('#soft_two_category2').val('');
+		$("option[alt^='2parent_']").show();
+	}
+}
+function show_editor(){
+		window.editor = KindEditor.create('#content_P',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'bold','italic','underline','fontsize','forecolor','|','image','anchor', 'link', 'unlink', 'justifyleft', 'justifycenter', 'justifyright','source'
+			],
+			width:"100%",
+			afterBlur: function(){this.sync();}
+		});
+}
+KindEditor.options.cssData = 'body { font-size: 14px; }'
+function preview(){
+	var title_email=$('#title_email').val();
+	var preview_content=$(document.getElementsByTagName('iframe')[0].contentWindow.document.body).html();
+	$('#title_email2').val(title_email);
+	$('#preview_content2').val(preview_content);
+	$('#searchform').submit();
+}
+function send_remind(){	
+	$("#remind").zxxbox(
+		{
+			bgclose:false,
+		}
+	);
+}
+//内容
+function open_content(id){	
+	$("#content"+id).zxxbox();
+}
+function open_send(id){	
+	$("#send"+id).zxxbox();
+}
+function closes(){
+	location.reload();	
+	 $.zxxbox.hide();
+}
+// function gbcount(message,total,used,remain)
+// {
+//   var max1;
+//   max1 = total.value;
+//   if (message.value.length > max1) {
+//   message.value = message.value.substring(0,max1);
+//   used.value = max1;
+//   remain.value = 0;
+//  <!-- alert("留言不能超过 200 个字!");-->
+//  alert("不能超过"+total.value+"个字!");
+//   }
+//   else {
+//   used.value = message.value.length;
+//   remain.value = max1 - used.value;
+//   }
+// }
+// var flag = false;
+// function selectAll() {	//全选
+// 	if(!flag){
+// 		$("[name='id[]']").each(function(){
+// 			$(this).attr('checked',true);
+// 		});
+// 		$("[name='id_all[]']").each(function(){
+// 			$(this).attr('checked',true);
+// 		});
+// 		flag = true;
+// 		return;
+// 	}
+// 	if(flag){
+// 		$("[name='id[]']").each(function(){
+// 			$(this).attr('checked',false);
+// 		});
+// 		$("[name='id_all[]']").each(function(){
+// 			$(this).attr('checked',false);
+// 		});
+// 		flag = false;
+// 		return;
+// 	}	
+// }
+//删除
+// function del(id) {
+// 	if(confirm('您确定要执行该操作吗？')) {
+// 		if(!id) {
+// 			alert('请选择要通过的对象！');
+// 			return false;
+// 		}
+// 		$.ajax({
+// 			url: '__URL__/remind_del/id/'+id,
+// 			data: '',
+// 			type: 'get',
+// 			dataType: 'json',
+// 			success: function(ret) {
+// 				if(ret['code']==0) {	//失败
+// 					alert(ret['msg']);
+// 					location.reload();//加载页面
+// 					return false;
+// 				} else if(ret['code']==1) {	//成功
+// 					//变灰不可点击处理
+// 					for(var i in ret['msg']) {
+// 						var delid = '#tr'+ret['msg'][i];
+// 						var aid = '#tr'+ret['msg'][i]+' a';
+// 						var iid = '#tr'+ret['msg'][i]+' input';
+// 						var imgid = '#tr'+ret['msg'][i]+' img';
+// 						var bid = '#tr'+ret['msg'][i]+' td button';
+// 						$(delid+' td').removeAttr('bgcolor');
+// 						$(delid).css({color:'#bcbcbc',background:'#ececec'});
+// 						$(aid).css('color', '#bcbcbc');
+// 						$(aid).removeAttr('href');
+// 						$(aid).removeAttr('onclick');
+// 						$(iid).attr({disabled:'disabled', name:'disabled'});
+// 						$(iid).attr('checked', false);
+// 						$(imgid).removeAttr('onclick');
+// 						$(bid).removeAttr('onclick');
+// 						$(bid).attr({disabled:'disabled', name:'disabled'});
+// 					}
+// 				}
+// 			}
+// 		});
+// 	}
+// }
+// //批量删除
+// function del_arr() {
+// 	var id_arr = new Array();
+// 	var i = 0;
+// 	$("[name='id[]']").each(function(){
+// 		if($(this).is(':checked')) {
+// 			id_arr[i] = $(this).val();
+// 			i++;
+// 		}
+// 	});
+// 	var id_str = id_arr.join(',');
+// 	if(id_str=='') {
+// 		alert('请选择要操作的对象！');
+// 		return false;
+// 	}
+
+// 	del(id_str);
+// }
+function showDiv(id)
+{
+	if(id ==1){
+		$('#dev_man').show();
+		$('#dev_type').hide();
+	}else if(id == 2){
+		$('#dev_type').show();
+		$('#dev_man').hide();
+	}
+}
+// function email_title(){
+// 	$("[name='mail']").each(function(){
+// 		if($(this).is(':checked')) {
+// 			$('#email_title').show();
+// 		}else{
+// 			$('#email_title').hide();
+// 		}
+// 	});
+// }
+</script>

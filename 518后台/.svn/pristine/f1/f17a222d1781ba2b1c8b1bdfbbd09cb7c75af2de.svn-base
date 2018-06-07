@@ -1,0 +1,78 @@
+<div id="downloaded_surplus" style="padding:10px; width:300px; height:200px;   display:none;" >
+	<table>
+	<tr><td align='center'><font color='red'>确定要执行些操作吗？</font></td></tr>
+	<tr><td >&nbsp;</td></tr>	
+	<tr>
+		<td id='surplus_content1' ></td>
+	</tr>
+	<tr><td >&nbsp;</td></tr>	
+	<tr><td ><input type="checkbox" id='read' name='read' value='1' onclick="if($(this).attr('checked') == 'checked'){ $('#sub_pass').removeAttr('disabled'); }else{ $('#sub_pass').attr({disabled:'disabled'}); }" />我已阅读完毕并明白上述警告事项</td></tr>	
+	<tr><td >&nbsp;</td></tr>	
+	<tr><td id='sub_surplus' align='center'></td></tr>
+	</table>
+</div>
+<script>
+function pass_old(id){
+	if(confirm('您确定要执行该操作吗？')) {
+		pass_do(id,'old'); 
+	}else{
+		remove_color(id);
+	}
+}
+//通过
+function pass(id) {
+	open_color(id);
+	$.ajax({
+		url: '__URL__/pub_downloaded_surplus_check',
+		data: 'id='+id,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code'] == 0){
+				pass_old(id);
+			}else{
+				$("#downloaded_surplus").zxxbox();
+				$('#read').attr('checked',false) 
+				$('#surplus_content1').html("<font color='red'>"+ret['msg']+"软件用户较多，若通过此次申请<br/>			请开发者修改新包的软件名称加上（原旧包名称）</font>");
+				$('#sub_surplus').html("<button disabled id='sub_pass' onclick=\"pass_do('"+id+"');\">确定下架</button>&nbsp;&nbsp;&nbsp;&nbsp;<button onclick=\"zxxbox_hide('"+id+"');\">取消</button>");
+			}
+		}
+	});	
+}
+
+function pass_do(id,from){ 
+	if(!id) {
+		alert('请选择要通过的对象！');
+		return false;
+	}
+	var buid = '#tr'+id+' td button';
+	$(buid).attr({disabled:'disabled', name:'disabled'});
+	$.ajax({
+		url: '__URL__/undercarriage_pass/id/'+id,
+		data: '',
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				location.reload();//加载页面
+				return false;
+			} else if(ret['code']==1) {	//成功
+				if(from != 'old'){
+					//变灰不可点击处理
+					$.zxxbox.hide();
+				}
+				gray_processing(ret['msg']);
+			}
+		}
+	});
+}
+//批量通过
+function batch_pass() {
+	id_str = Selected_check();
+	if(id_str){
+		pass(id_str);
+	}
+}
+
+</script>

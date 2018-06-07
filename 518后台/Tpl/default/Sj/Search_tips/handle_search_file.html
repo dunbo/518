@@ -1,0 +1,49 @@
+<include file="../Public/header"/>
+
+<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript">
+function upload(type) {
+	var import_file = $.trim($("#upload_file"+type).val());
+	if (import_file.length == 0) {
+		alert("请上传文件！");
+		return;
+	}
+	$.ajaxFileUpload({
+		url:'__URL__/handle_search_file',
+		data: { type: type }, //此参数非常严谨，写错一个引号都不行
+		type:'POST',
+		files:[$('#upload_file'+type)],
+		secureuri:false,
+		dataType:'json',
+		success:function(data){
+			var str = ''
+			for (var i in data) {
+				str += "<a href='__URL__/pub_get_file/file_name/"+data[i]+"' >"+data[i]+"</a><br/>";
+			}
+			$("#file_name").html(str);
+		}
+	});
+}
+    
+</script>
+
+<body>
+<div style="width:97%; margin:10px auto;">
+    <div style="margin:10px 0 15px;">
+		生成提示词文件<input type="file" id="upload_file1" name="upload_file1"  />
+		 <input type="button" value="提交" onClick="upload(1)" class="search_btn"  style=" margin-left:15px; display:inline; height:30px;"/>
+		提示词文件切分成小文件3000一组<input type="file" id="upload_file3" name="upload_file3"  />
+		 <input type="button" value="提交" onClick="upload(3)" class="search_btn"  style=" margin-left:15px; display:inline; height:30px;"/>
+    </div>
+	<div style="margin:10px 0 15px;">
+		生成相关词文件<input type="file" id="upload_file2" name="upload_file2"  />
+		 <input type="button" value="提交" onClick="upload(2)" class="search_btn" style=" margin-left:15px; display:inline; height:30px;"/>
+		 相关词文件切分成小文件3000一组<input type="file" id="upload_file4" name="upload_file4"  />
+		 <input type="button" value="提交" onClick="upload(4)" class="search_btn"  style=" margin-left:15px; display:inline; height:30px;"/>
+	</div>
+	<div id='file_name' style="margin:10px 0 15px;"></div>	
+</div>
+</body>

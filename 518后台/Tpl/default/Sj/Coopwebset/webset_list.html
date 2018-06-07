@@ -1,0 +1,164 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css?1" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<style>
+    .future_class {
+        background-color:#CCCCCC
+    }
+</style>
+
+<body style="position:relative;">
+    <!-- <div class="search_box">
+        <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+            <tr>
+                <td>资讯内容排序<input type="text" id='rank' name='rank' /><input type='button' value='编辑' style='width:50px'/></td>
+            </tr>
+        </table>
+    </div> -->
+    <!-- <div class="search_box"> -->
+    <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;资讯内容排序&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id='rank' name='rank'  style='height:25px' value="{$configcontent}"/>&nbsp;&nbsp;&nbsp;&nbsp;<input type='button' value='编辑' style='width:50px' onclick="change_rank()"  />
+    &nbsp;&nbsp;&nbsp;&nbsp;资讯内容优先级&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" id='c_rank' name='c_rank'  style='height:25px' value="{$c_conf_val}"/>&nbsp;&nbsp;&nbsp;&nbsp;<input type='button' value='编辑' style='width:50px' onclick="change_c_rank()"  />
+    <br><br>
+    <!-- </div> -->
+<script type="text/javascript">
+ function change_rank(){
+    if(check_num('rank')){
+        var num=$("#rank").val();
+        $.ajax({    
+                url:'/index.php/Sj/Coopwebset/change_rank/num/'+num+'/conf_id/'+{$conf_id},
+                type: 'get',
+                async:false,
+                success: function(data)
+                {   
+                    alert(data);
+                }
+            });
+    }
+
+ }
+ function change_c_rank(){
+     if(check_num('c_rank')){
+         var num=$("#c_rank").val();
+         $.ajax({
+             url:'/index.php/Sj/Coopwebset/pub_change_rank/num/'+num+'/conf_id/'+{$c_conf_id},
+             type: 'get',
+             async:false,
+             success: function(data)
+             {
+                 alert(data);
+             }
+         });
+     }
+
+ }
+ function check_num(id){
+    var num=$("#"+id).val();
+    if(!num.match(/^\d+$/g)){
+        $("#"+id).val("");
+        if(id == "c_rank"){
+            alert('资讯内容优先级必须为正整数');
+        }else{
+            alert('资讯内容排序值必须为正整数');
+        }
+
+        return false;
+    }
+    if(num<=0){
+        $("#"+id).val("");
+        if(id == 'c_rank'){
+            alert('资讯内容优先级必须为正整数');
+        }else{
+            alert('资讯内容排序值必须为正整数');
+        }
+        return false;
+    }
+    return true;
+}
+ function appear_pic(id)
+ {
+   var pic=document.getElementById(id);
+    pic.style.display="block";
+ }
+ function disappear_pic(id)
+ {
+   var pic=document.getElementById(id);
+    pic.style.display="none";
+ }
+</script>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="4%">合作站点</th>
+                    <th width="5%">优先级</th>
+                    <th width="8%">展现次数</th>
+					<th width="4%">精准投放</th>
+                    <th width="18%">渠道包</th>
+                    <th width="8%">状态</th>
+                    <th width="6%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr <if condition='$list.start_time gt $now'>class='future_class'</if>>
+                    <td>{$list.website_name}</td>
+                    <!-- <td>{$list.rank}</td> -->
+                    <td><a href="__URL__/edit_coop_num?id={$list['id']}&width=450&height=300&type=rank"  class="thickbox" style="text-decoration:none;"><?php echo $list['rank'];?></a></td>
+
+                    <!-- <td>{$list.show_count}</td> -->
+                    <td><a href="__URL__/edit_coop_num?id={$list['id']}&width=450&height=300&type=show_count"  class="thickbox" style="text-decoration:none;"><?php echo $list['show_count'];?></a></td>
+					<td><a class="thickbox" href="__URL__/jztf_downset_show?id={$list.id}">查看</a></td>
+                    <td>
+                        <?php
+						//var_dump($chl_soft_arr["com.tencent.news"],$list['package']);
+							if($chl_soft_arr[$list['package']]['version_code']){
+								echo "软件名称：<a href='".IMGATT_HOST . $chl_soft_arr[$list['package']]['url']."' >".$chl_soft_arr[$list['package']]['softname']."</a>";
+                        echo "<br/>包名：".$chl_soft_arr[$list['package']]['package'];
+                        echo "<br/>版本名：".$chl_soft_arr[$list['package']]['version'];
+                        }else{
+                        echo "软件名称：<a href='".IMGATT_HOST . $soft_arr[$list['package']]['url']."' >".$soft_arr[$list['package']]['softname']."</a>";
+                        echo "<br/>包名：".$soft_arr[$list['package']]['package'];
+
+                        echo "<br/>版本名：<font style='color:red'>通用包</font>";
+                        }
+                        if($chl_soft_arr[$list['package']]['version_code'] && $chl_soft_arr[$list['package']]['version_code'] < $soft_arr[$list['package']]['version_code']){
+                        echo "<font style='color:red'>(需更新)</font>";
+                        }
+                        ?>
+                    </td>
+                    <if condition="$list.status eq 1 ">
+                    <td>启用</td>
+                    <else/>
+                    <td>停用</td>
+                    </if>
+                    <td>
+                        <if condition='$overdue eq 1'><a href="__URL__/update_downset?id={$list.id}&life=1" class="thickbox">复制上线</a><!--过期数据不可以编辑和删除-->
+                        <else/>
+                            <a href="__URL__/update_webset?id={$list.id}" class="thickbox blue">编辑投放条件</a>
+                            <br>
+                            <if condition="$list.status eq 1 ">
+                            <a href="__URL__/del_webset?id={$list.id}" class="blue" onClick="return confirm('确定要停用吗？');">停用</a>
+                            <else/>
+                            <a href="__URL__/del_webset?id={$list.id}" class="blue" onClick="return confirm('确定要启用吗？');">启用</a>
+                            </if>
+                        </if>
+                        <br/>
+                        <?php
+							if($chl_soft_arr[$list['package']]['version_code'] && $chl_soft_arr[$list['package']]['version_code'] < $soft_arr[$list['package']]['version_code']){
+								echo '<a title ="更新渠道包" class="thickbox" href="/index.php/Cooperate/Contentcooperation/save_chl_pkg?package='.$list['package'].'&softid='.$soft_arr[$list['package']]['softid'].'" class="blue">更新渠道包</a>';
+                        }else if(!$chl_soft_arr[$list['package']]['version_code']){
+                        echo '<a title ="添加渠道包" class="thickbox" href="/index.php/Cooperate/Contentcooperation/save_chl_pkg?package='.$list['package'].'&softid='.$soft_arr[$list['package']]['softid'].'" class="blue">添加渠道包</a>';
+                        }
+                        ?>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>

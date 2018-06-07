@@ -1,0 +1,131 @@
+<include file="../Public/header" />
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script>
+function editFilter(obj)
+{
+	$('#source_value').val(obj.source_value);
+	$('#source_type').val(obj.source_type);
+	$('#limit_time').val(obj.limit_time);
+	if (obj.limit_time == 1) {
+		$('#begintime').val(timetodate(obj.begintime));
+		$('#endtime').val(timetodate(obj.endtime));
+	} else {
+		$('#begintime').val('');
+		$('#endtime').val('');
+	}
+	$('#id').val(obj.id);
+	$('#add_td').hide();
+	$('#edit_td').show();
+}
+
+function backToAddMode()
+{
+	$('#edit_td').hide();
+	$('#add_td').show();
+	$('#addFilterForm')[0].reset();
+	$('#id').val(0);
+}
+function  timetodate(tim){
+	var d = new Date(parseInt(tim)*1000);
+	return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+} 
+
+function checkForm()
+{
+	if ($('#source_value').val() == '') {
+		alert('请填写需要过滤的值');
+		return false;
+	}
+	return true;
+	
+}
+</script>
+
+<h2>添加评论过滤条件</h2>
+<form id="addFilterForm" name="addFilterForm" method="post" action="__URL__/addBadFilter">
+<input type="hidden" id="id" value="0" name="id"/>
+	<table cellpadding="0" cellspacing="0" border="0" class="tb">
+		<tr><td>值</td><td><input type="text" value="" name="source_value" id="source_value"/>
+		</td></tr>
+		<tr>
+		<td>类型</td><td>
+<select name="source_type" id="source_type">
+				<option value="1">IP</option>
+				<option value="2">IMEI</option>
+				<option value="3">用户名</option>
+				<option value="4">soft id</option>
+				</select>
+		
+		</td></tr>
+			<td>
+			
+			是否限制时间
+			</td>
+			<td>
+<select name="limit_time" id="limit_time">
+				<option value="0">不限制时间</option>
+				<option value="1">限制时间</option>
+				</select>
+			
+			</td>
+			</tr>
+<tr>
+    <td width="125">起始时间:</td>
+    <td width="150">
+		<input id="begintime" name="begintime"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			onclick="return showCalendar('begintime', 'y-m-d');"
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px">
+	</td>
+			</tr>
+<tr>
+    <td width="125">结束时间：</td>
+    <td width="150">
+		<input id="endtime" name="endtime"
+			style="border: 0px none black; width: 100px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			onclick="return showCalendar('endtime', 'y-m-d');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+	</td>
+		</tr>
+		<tr id="add_td">
+			<td colspan="2"><input type="submit" id="addbtn" value="添加" name="addbtn"/>&nbsp;&nbsp;<input type="reset" value="重置"/></td>
+		</tr>
+		<tr id="edit_td" style="display:none">
+			<td colspan="2"><input type="submit" id="addbtn" value="保存编辑" name="addbtn"/>&nbsp;&nbsp;<input type="button" id="backbtn" value="取消编辑" name="backbtn" onclick="backToAddMode()"/></td>
+		</tr>
+	</table>
+</form>
+
+<h2>评论过滤列表</h2>
+<form id="filterForm" onsubmit="return checkForm()">
+	<table border="0" cellpadding="0" cellspacing="0" class="tb">
+		<tr>
+		<td>ID</td>
+		<td>&nbsp;&nbsp;类型</td>
+		<td>&nbsp;&nbsp;值</td>
+		<td>&nbsp;&nbsp;起始时间</td>
+		<td>&nbsp;&nbsp;结束时间</td>
+		<td>&nbsp;&nbsp;操作</td>
+		</tr>
+		<volist name='black_list' id='filter'>
+		<tr>
+			<td>{$filter.id}</td>
+			<td>{$filterDesc[$filter[source_type]]}</td>
+			<td>{$filter.source_value}</td>
+			<td><if condition="$filter.limit_time eq 1">{$filter.begintime|date='Y-m-d H:i:s',###|default='&nbsp;'}<else/>-</if></td>
+			<td><if condition="$filter.limit_time eq 1">{$filter.endtime|date='Y-m-d H:i:s',###|default='&nbsp;'}<else/>-</if></td>
+			<td><a href="#" onclick='return editFilter(<?php echo json_encode($filter);?>)'>编辑</a>&nbsp;&nbsp;<a href="/index.php/Admin/Filter/delBadFilter/id/{$filter.id}" onclick="return checkit();">删除</a></td>
+		</tr>
+		</volist>
+	</table>
+</form>

@@ -1,0 +1,170 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<style>
+.sub_tr {
+	height: 35px;
+	text-align: left;
+}
+</style>
+<script type="text/javascript">
+
+$(function(){
+	options = {
+		serviceUrl:'__URL__/showchannel',
+		minChars:0,
+		width: '140px',
+		deferRequestBy: 0,
+		autoFill:true,
+		onSelect: function(value,data){
+			var str_arr = data.split('_');
+			$('#chl_cid').val(str_arr[1]);
+			$('#cid').val(str_arr[0]);
+		}
+	};
+	$('#channel_name').autocomplete(options);
+});
+
+function checkPost()
+{
+	var regex = /^[0-9]+(.[0-9]{1,2})?$/;
+	var regex_2  = /^[0-9a-zA-Z]*$/;
+	var regex_3  = /^[A-Za-z0-9_\u2E80-\u9FFF]+$/;
+	
+	if( !$("input[name='name']").val() ) {
+		alert('渠道名称不能为空');
+		return false;
+	}
+	if ( !regex_3.test($("input[name='name']").val()) ) {
+		alert('渠道名称只能输入中文数字下划线字母');
+		return false;
+	}
+	if( !$("input[name='username']").val() ) {
+		alert('账号不能为空');
+		return false;
+	}
+	if ( !regex_2.test($("input[name='username']").val()) ) {
+		alert('账号只能输数字和英文大小写的字符');
+		return false;
+	}
+	if( !$("input[name='password']").val() ) {
+		alert('密码不能为空');
+		return false;
+	}
+	if ( !regex_2.test($("input[name='password']").val()) ) {
+		alert('密码只能输数字和英文大小写的字符');
+		return false;
+	}
+	if( $("input[name='password']").val().length < 4 ) {
+		alert('密码设置不能少于4个字符');
+		return false;
+	}
+	if( !$("input[name='kou_set']").val() ) {
+		alert('扣量系数-渠道用不能为空');
+		return false;
+	}
+	if ( !regex.test($("input[name='kou_set']").val()) ) {
+		alert('扣量系数-渠道用只能为整数或小数二位');
+		return false;
+	}
+	if( $("input[name='kou_set']").val() > 100 ) {
+		alert('扣量系数-渠道用不能超过100');
+		return false;
+	}
+	if( !$("input[name='kou_set_in']").val() ) {
+		alert('扣量系数-内部用不能为空');
+		return false;
+	}
+	if ( !regex.test($("input[name='kou_set_in']").val()) ) {
+		alert('扣量系数-内部用只能为整数或小数二位');
+		return false;
+	}
+	if( $("input[name='kou_set_in']").val() > 100 ) {
+		alert('扣量系数-内部用不能超过100');
+		return false;
+	}
+}
+</script>
+<FORM method="POST" action="__URL__/ch_edit?" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<input type="hidden" name="id" value="<?php echo $list['id']?>">
+	<input type="hidden" name="channel_id" value="<?php echo $list['channel_id']?>">
+	<input type="hidden" name="kouset" value="<?php echo $list['kou_set']?>">
+	<input type="hidden" name="kouset_in" value="<?php echo $list['kou_set_in']?>">
+	<tr class="sub_tr">
+		<td>渠道名称：</td>
+		<td><input type="text" name="name" id="channel_name" value="<?php echo $list['name']?>" readonly style='color:#7B7B7B' /></td>
+		<td><input type="hidden" name="cid" id="cid" value="<?php echo $list['cid']?>"  ></td>
+		<td><input type="hidden" name="chl_cid" id="chl_cid" value="<?php echo $list['chl_cid']?>"></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>用户名：</td>
+		<td><input name='username' type='text'  value="<?php echo $list['username']?>" readonly style='color:#7B7B7B' /></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>密码：</td>
+		<td><input name='password' type='text' value="<?php echo $list['password'];?>"/></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr class='sub_tr'>
+		<td>合作类型：</td>
+		<td>
+			<select name="co_type" disabled="disabled">
+				<option <?php if($list['co_type']==1){echo 'selected';} ?> value='1'>按下载请求计费</option>
+				<option <?php if($list['co_type']==2){echo 'selected';} ?> value='2'>按下载完成计费</option>
+			</select>
+		</td>
+		</td>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>扣量系数-渠道用：</td>
+		<td>
+			<input name='kou_set' type='text' value="<?php echo $list['kou_set']?>" style="width:50px"/>% <span style="color:#666666">下载量（扣量后）=下载量（扣量前）*扣量系数，结果向下取整</span> <input type="button" onclick="location.href='__URL__/kouset_list?channel_id=<?php echo $list['id']?>'" value="历史记录" />
+		</td>
+		<td></td>
+		<td></td>	
+	</tr>
+	<tr class="sub_tr">
+		<td>扣量系数-内部用：</td>
+		<td>
+			<input name='kou_set_in' type='text' value="<?php echo $list['kou_set_in']?>" style="width:50px"/>% <span style="color:#666666">下载量（扣量后）=下载量（扣量前）*扣量系数，结果向下取整</span> <input type="button" onclick="location.href='__URL__/kouset_in_list?channel_id=<?php echo $list['id']?>'" value="历史记录" />
+		</td>
+		<td></td>
+		<td></td>	
+	</tr>
+	
+	<tr class="sub_tr">
+		<td>分成比例：</td>
+		<td>
+		安智<?php echo $list_split['anzhi']?>%<span style="margin: 0px 5px 0 5px;">|</span>
+		渠道<?php echo $list_split['other']?>%
+		生效日期：<?php echo $list_split['ef_date']?>
+		<input type="button" onclick="location.href='__URL__/split_list?channel_id=<?php echo $list['id']?>'" value="配置分成比例" />
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>税率：</td>
+		<td>
+		税率<?php echo $list_tax['tax_rate']?>%
+		生效日期：<?php echo substr($list_tax['sl_date'],0,-3)?>
+		<input type="button" onclick="location.href='__URL__/tax_rate_list?channel_id=<?php echo $list['id']?>'" value="配置税率" />
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="2"> 
+			<input type='submit' value="&nbsp;&nbsp;提交&nbsp;&nbsp;"/>&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+</table>
+</FORM>	

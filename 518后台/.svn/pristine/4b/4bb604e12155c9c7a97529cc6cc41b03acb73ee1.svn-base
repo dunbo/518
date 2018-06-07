@@ -1,0 +1,112 @@
+<script>
+    function submit_check() {
+        var invoice_input = $.trim($("#invoice_input").val());
+        var invoice_input_time = $.trim($("#invoice_input_time").val());
+        if (!invoice_input) {
+            $("#invoice_input_hint").html('<br/><label>&nbsp;</label><label style="width:200px;text-align:left"><font color="red">请输入发票金额</font></label>');
+            return false;
+        } else {
+            var ret = check_input(false, 1);
+            if (!ret)
+                return false;
+            $("#invoice_input_hint").html('');
+        }
+        if (!invoice_input_time) {
+            $("#invoice_input_time_hint").html('<br/><label>&nbsp;</label><label style="width:200px;text-align:left"><font color="red">请输入收款时间</font></label>');
+            return false;
+        } else {
+            $("#invoice_input_time_hint").html('');
+        }
+        return true;
+    }
+    
+    // 检查金额是否合理    
+    function check_input(b_async, type) {
+        var input = 0;
+        if (type == 1)
+            input = $.trim($("#account_input").val());
+        else
+            input = $.trim($("#invoice_input").val());
+        if (!input)
+            return true;
+        var contract_id = $.trim($("#contract_id").val());
+        var month = $.trim($("#month").val());
+        var id = $.trim($("#id").val());
+        var ret = true;
+        var param = {
+            contract_id : contract_id,
+            month : month,
+            input : input,
+            id : id
+        };
+        var url = "__URL__/";
+        var hint_id = '';
+        if (type == 1) {
+            url += 'check_account_input';
+            hint_id = "#account_input_hint";
+        } else {
+            url += 'check_invoice_input';
+            hint_id = "#invoice_input_hint";
+        }
+        
+        $.ajax({
+            url:url,
+            type:'POST',
+            async:b_async,
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data) {
+                if(data.status != 0) {
+                    $(hint_id).html('<br/><label>&nbsp;</label><label style="width:200px;text-align:left"><font color="red">' + data.info + '</font></label>');
+                    ret = false;
+                } else {
+                    $(hint_id).html('');
+                    ret = true;
+                }
+            }
+        });
+        return ret;
+    }
+    
+    
+</script>
+
+<div>
+    <form action="__URL__/edit_invoice" method="post">
+        <div class="form_list_one">
+            <label><font>*</font>发票金额：</label>
+            <input type="text" class="input_text widen" name="invoice_input" id="invoice_input" onblur="check_input(true, 2)" <if condition="$record.invoice_input neq 0">value="{$record.invoice_input}"</if>/>
+            <span id="invoice_input_hint"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label><font>*</font>开票日期：</label>
+            <input type="text" class="Wdate input_text widen" name="invoice_input_time" id="invoice_input_time" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="{$record.invoice_input_time|date='Y-m-d H:i:s',###}"/>
+            <span id="invoice_input_time_hint"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label><font>*</font>发票号：</label>
+            <input type="text" class="input_text widen" name="invoice_number" id="invoice_number" value="{$record.invoice_number}"/>
+            <span id="invoice_number_hint"></span>
+        </div>
+        <div class="clear"></div>
+        <div>
+            <hr style="border-top:1px dashed #cccccc; height:1px">
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>备注：</label>
+            <textarea style="width:200px" name="remark" id="remark">{$record.remark}</textarea>
+        </div>
+        <div class="clear"></div>
+        <input type="hidden" name="contract_id" id="contract_id" value="{$record.contract_id}">
+        <input type="hidden" name="month" id="month" value="{$record.month}">
+        <input type="hidden" name="id" id="id" value="{$record.id}">
+        <div class="form_btns_box">
+            <input type="submit" value="确定" onclick="return submit_check();" style="margin-left:155px"/>
+            <input type="button" onclick="tb_remove()" value="取消"/>
+        </div>
+    <form>
+</div>

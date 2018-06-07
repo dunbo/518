@@ -1,0 +1,71 @@
+<if condition="$type neq '1'">
+<form action="__URL__/passTvCheck" method="POST">
+</if>
+<table><BR/>
+<?php foreach ($category as $key => $value):?>
+<tr>
+<td><input type="checkbox" value="<?php echo $key?>" name="provider[]" id='provider_pass'/><?php echo $provider[$key]?></td>
+<td>
+<select name="category_id_<?php echo $key?>">
+<?php foreach ($value as $v):?>
+<option value="<?php echo $v['id']?>"> <?php echo $v['category_name'] ?></option>
+<?php endforeach;?>	
+</select>
+</td>
+</tr>
+<?php endforeach;?>
+</table><BR/>
+<input type="hidden" value="<?php echo $softid ?>" name="softid" id='softid_str'>
+<if condition="$type eq '1'">
+<input  onclick="pass_tv();" type="submit" value='提交'>
+<button type="button" onclick="hidediv()">取消</button> 
+<else/>
+<input type="submit" value='提交'>
+<input type="reset">
+</if>
+<if condition="$type neq '1'">
+</form>
+</if>
+<script>
+function hidediv(){
+	tb_remove();
+}
+function pass_tv(){
+	var id = $('#softid_str').val(); 
+	if ($("#provider_pass").attr("checked")) {
+		var provider = $("#provider_pass").val();
+		var catgory = $("#category_id_"+provider).val();	
+	}
+	$.ajax({
+		url: '/index.php/Dev/Authentication/passTvCheck',
+		data: 'softid='+id+'&provider='+provider+'&category_id_'+provider+'='+catgory+'&type=1',
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				//location.reload();//加载页面
+				return false;
+			} else if(ret['code']==1) {	//成功
+				tb_remove();
+				//变灰不可点击处理
+				var delid = '#tr'+ret['msg'];
+				var aid = '#tr'+ret['msg']+' a';
+				var iid = '#tr'+ret['msg']+' input';
+				var imgid = '#tr'+ret['msg']+' img';
+				var bid = '#tr'+ret['msg']+' td button';
+				$(delid+' td').removeAttr('bgcolor');
+				$(delid).css({color:'#bcbcbc',background:'#ececec'});
+				$(aid).css('color', '#bcbcbc');
+				$(aid).removeAttr('href');
+				$(aid).removeAttr('onclick');
+				$(iid).attr({disabled:'disabled', name:'disabled'});
+				$(iid).attr('checked', false);
+				$(imgid).removeAttr('onclick');
+				$(bid).removeAttr('onclick');
+				$(bid).attr({disabled:'disabled', name:'disabled'});
+			}
+		}
+	});
+}	
+</script>	

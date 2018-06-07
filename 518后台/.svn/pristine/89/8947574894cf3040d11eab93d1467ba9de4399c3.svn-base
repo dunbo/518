@@ -1,0 +1,690 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox1.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?3"></script>
+
+<style>
+.sub_tr {
+    height: 35px;
+    text-align: left;
+}
+</style>
+<script language="JavaScript">
+
+	
+$(function(){
+    /*
+    ** generate_content_type_href 函数：生成推荐内容的链接
+    ** 第一个参数是要append到的div的id，必填
+    ** 第二个参数是可推荐的内容类型，非必填，默认为'1,2,3,4,5,6,7'
+    ** 第三个参数是数组类型，如果要自定义元素名称或者传编辑的值，需要用到此值
+    ** 返回：生成的链接
+    */
+    href = generate_content_type_href('content_type_div');
+    //$("#content_type_a").attr("href", href);
+    pid = $("#pid").val();
+    $("#content_type_a").attr("href", href+'&pid='+pid);
+});
+
+// 提交前的检查
+function checkPost() {
+    var ad_name = $("#add_content_form #ad_name").val();
+    if (!ad_name) {
+        alert("广告名称不能为空！");
+        return false;
+    }
+    var image_url = $("#add_content_form #image_url").val();
+    if (!image_url) {
+        alert("图片不能为空！");
+        return false;
+    }
+    var button_name = $("#add_content_form #button_name").val();
+    if (!button_name) {
+        alert("按钮名称不能为空！");
+        return false;
+    }
+    var pkg=$('#package').val();
+    var enable=true;
+    if(pkg){
+	    	$.ajax({
+			url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					if(!confirm(data)){
+						 enable=false;
+					}
+				}
+			}
+		});
+    	if(!enable){
+    		return false;
+    	}
+    }
+	return checkRcontent("#add_content_form");
+    
+    var start_at = $("#add_content_form #start_at").val();
+    if (!start_at) {
+        alert("开始时间不能为空！");
+        return false;
+    }
+    var end_at = $("#add_content_form #end_at").val();
+    if (!end_at) {
+        alert("结束时间不能为空！");
+        return false;
+    }
+    if (start_at > end_at) {
+        alert("开始时间不能大于结束时间！");
+        return false;
+    }
+	return true;
+}
+
+// 提交前的检查
+function checkPost_two() {
+    var pkg=$('#package').val();
+    var enable=true;
+    if(pkg){
+	    	$.ajax({
+			url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					if(!confirm(data)){
+						 enable=false;
+					}
+				}
+			}
+		});
+    	if(!enable){
+    		return false;
+    	}
+    }
+	return true;
+}
+	/*$(document).ready(function(){
+		var obj = $('#ad_type').val();
+		if(obj == 1){
+			$('#my_package').css('display','');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+			$('#uninstalled_download').css('display','');
+			$('#installed_select').css('display','');
+			$('#lower_select').css('display','');
+			$('#installed_select1').css('display','');
+			$('#installed_select2').css('display','');
+			$('#installed_select3').css('display','');
+			$('#installed_select4').css('display','');
+			$('#lower_select1').css('display','');
+			$('#lower_select2').css('display','');
+			$('#nbs_1').css('display','');
+			$('#nbs_2').css('display','');
+		}else if(obj == 2){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+			$('#uninstalled_download').css('display','none');
+			$('#installed_select').css('display','none');
+			$('#lower_select').css('display','none');
+			$('#installed_select1').css('display','none');
+			$('#installed_select2').css('display','none');
+			$('#installed_select3').css('display','none');
+			$('#installed_select4').css('display','none');
+			$('#lower_select1').css('display','none');
+			$('#lower_select2').css('display','none');
+			$('#nbs_1').css('display','none');
+			$('#nbs_2').css('display','none');
+		}else if(obj == 3){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+			$('#uninstalled_download').css('display','none');
+			$('#installed_select').css('display','none');
+			$('#lower_select').css('display','none');
+			$('#installed_select1').css('display','none');
+			$('#installed_select2').css('display','none');
+			$('#installed_select3').css('display','none');
+			$('#installed_select4').css('display','none');
+			$('#lower_select1').css('display','none');
+			$('#lower_select2').css('display','none');
+			$('#nbs_1').css('display','none');
+			$('#nbs_2').css('display','none');
+		}else if(obj == 4){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','');
+			$('#my_webpage').css('display','none');
+			$('#uninstalled_download').css('display','none');
+			$('#installed_select').css('display','none');
+			$('#lower_select').css('display','none');
+			$('#installed_select1').css('display','none');
+			$('#installed_select2').css('display','none');
+			$('#installed_select3').css('display','none');
+			$('#installed_select4').css('display','none');
+			$('#lower_select1').css('display','none');
+			$('#lower_select2').css('display','none');
+			$('#nbs_1').css('display','none');
+			$('#nbs_2').css('display','none');
+		}else if(obj == 5){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','');
+			$('#uninstalled_download').css('display','none');
+			$('#installed_select').css('display','none');
+			$('#lower_select').css('display','none');
+			$('#installed_select1').css('display','none');
+			$('#installed_select2').css('display','none');
+			$('#installed_select3').css('display','none');
+			$('#installed_select4').css('display','none');
+			$('#lower_select1').css('display','none');
+			$('#lower_select2').css('display','none');
+			$('#nbs_1').css('display','none');
+			$('#nbs_2').css('display','none');
+		}else if(obj == 0){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+			$('#uninstalled_download').css('display','none');
+			$('#installed_select').css('display','none');
+			$('#lower_select').css('display','none');
+			$('#installed_select1').css('display','none');
+			$('#installed_select2').css('display','none');
+			$('#installed_select3').css('display','none');
+			$('#installed_select4').css('display','none');
+			$('#lower_select1').css('display','none');
+			$('#lower_select2').css('display','none');
+			$('#nbs_1').css('display','none');
+			$('#nbs_2').css('display','none');
+		}
+		
+		var objs = $('#page_type').val();
+		if(objs == 1){
+			$('#page_name1').css('display','');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','none');
+		}else if(objs == 2){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','none');
+		}else if(objs == 3){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','');
+			$('#page_name4').css('display','none');
+		}else if(objs == 4){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','');
+		}
+	});
+	
+	function select_ad(obj){
+		if(obj == 1){
+			$('#my_package').css('display','');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+			$('#uninstalled_download').css('display','');
+			$('#installed_select').css('display','');
+			$('#lower_select').css('display','');
+			$('#installed_select1').css('display','');
+			$('#installed_select2').css('display','');
+			$('#installed_select3').css('display','');
+			$('#installed_select4').css('display','');
+			$('#lower_select1').css('display','');
+			$('#lower_select2').css('display','');
+			$('#nbs_1').css('display','');
+			$('#nbs_2').css('display','');
+		}else if(obj == 2){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+			$('#uninstalled_download').css('display','none');
+			$('#installed_select').css('display','none');
+			$('#lower_select').css('display','none');
+			$('#installed_select1').css('display','none');
+			$('#installed_select2').css('display','none');
+			$('#installed_select3').css('display','none');
+			$('#installed_select4').css('display','none');
+			$('#lower_select1').css('display','none');
+			$('#lower_select2').css('display','none');
+			$('#nbs_1').css('display','none');
+			$('#nbs_2').css('display','none');
+		}else if(obj == 3){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+			$('#uninstalled_download').css('display','none');
+			$('#installed_select').css('display','none');
+			$('#lower_select').css('display','none');
+			$('#installed_select1').css('display','none');
+			$('#installed_select2').css('display','none');
+			$('#installed_select3').css('display','none');
+			$('#installed_select4').css('display','none');
+			$('#lower_select1').css('display','none');
+			$('#lower_select2').css('display','none');
+			$('#nbs_1').css('display','none');
+			$('#nbs_2').css('display','none');
+		}else if(obj == 4){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','');
+			$('#my_webpage').css('display','none');
+			$('#uninstalled_download').css('display','none');
+			$('#installed_select').css('display','none');
+			$('#lower_select').css('display','none');
+			$('#installed_select1').css('display','none');
+			$('#installed_select2').css('display','none');
+			$('#installed_select3').css('display','none');
+			$('#installed_select4').css('display','none');
+			$('#lower_select1').css('display','none');
+			$('#lower_select2').css('display','none');
+			$('#nbs_1').css('display','none');
+			$('#nbs_2').css('display','none');
+		}else if(obj == 5){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','');
+			$('#uninstalled_download').css('display','none');
+			$('#installed_select').css('display','none');
+			$('#lower_select').css('display','none');
+			$('#installed_select1').css('display','none');
+			$('#installed_select2').css('display','none');
+			$('#installed_select3').css('display','none');
+			$('#installed_select4').css('display','none');
+			$('#lower_select1').css('display','none');
+			$('#lower_select2').css('display','none');
+			$('#nbs_1').css('display','none');
+			$('#nbs_2').css('display','none');
+		}else if(obj == 0){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+			$('#uninstalled_download').css('display','none');
+			$('#installed_select').css('display','none');
+			$('#lower_select').css('display','none');
+			$('#installed_select1').css('display','none');
+			$('#installed_select2').css('display','none');
+			$('#installed_select3').css('display','none');
+			$('#installed_select4').css('display','none');
+			$('#lower_select1').css('display','none');
+			$('#lower_select2').css('display','none');
+			$('#nbs_1').css('display','none');
+			$('#nbs_2').css('display','none');
+		}
+	}
+	
+	
+	function select_page(obj){
+		if(obj == 1){
+			$('#page_name1').css('display','');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','none');
+		}else if(obj == 2){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','none');
+		}else if(obj == 3){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','');
+			$('#page_name4').css('display','none');
+		}else if(obj == 4){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','');
+		}else if(!obj){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','none');
+		}
+	
+	}
+
+var options, a;
+jQuery(function(){
+	options = {
+		serviceUrl:'/index.php/Sj/Splashmanage/splash_list/ad_type/1',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+		}
+	};
+	$('#package').autocomplete(options);
+	
+
+	options = {
+		serviceUrl:'/index.php/Sj/Splashmanage/splash_list/ad_type/2',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+		}
+	};
+	$('#activity_name').autocomplete(options);
+
+
+	options = {
+		serviceUrl:'/index.php/Sj/Splashmanage/splash_list/ad_type/3',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+		}
+	};
+	$('#feature_name').autocomplete(options);
+
+	options = {
+		serviceUrl:'/index.php/Public/showCategoryPage',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+		}
+	};
+	$('#page_name1').autocomplete(options);
+	
+	// 标签类型
+	options = {
+		serviceUrl:'/index.php/Public/showTagPage',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+		}
+	};
+	$('#page_name2').autocomplete(options);
+	
+	// 常用标签类型
+	options = {
+		serviceUrl:'/index.php/Public/showCommonTagPage',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+		}
+	};
+	$('#page_name3').autocomplete(options);
+	
+	// 其他页面
+	options = {
+		serviceUrl:'/index.php/Public/showOtherFixedPage',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+		}
+	};
+	$('#page_name4').autocomplete(options);
+});
+*/
+function select_pic(obj){
+	if(obj == 2){
+		$('#logo_pic').css('display','');
+	}else{
+		$('#logo_pic').css('display','none');
+	}
+}
+
+
+function showDiv(e) {
+	var o = document.getElementById("hidDiv"); 
+	o.style.left = e.clientX+"px"; 
+	o.style.top = e.clientY+10+"px"; 
+	o.style.display="block"; 
+}
+
+function hideDiv(e){
+	var o = document.getElementById("hidDiv"); 
+	o.style.left = e.clientX+"px";; 
+	o.style.top = e.clientX+10+"px"; 
+	o.style.display="none"; 
+}
+
+$(document).ready(function(){
+	var obj = $('#pic_type').val();
+	if(obj == 2){
+		$('#logo_pic').css('display','');
+	}else{
+		$('#logo_pic').css('display','none');
+	}
+});
+	//精准投放
+	function choose_condition()
+	{
+		var div_val=$("#choose_div_id").html();
+		if(div_val=="")
+		{
+			$.ajax({
+				url:'/index.php/Public/showContions',
+				type: 'POST',
+				dataType:'html',
+				success: function(data)
+				{
+					$("#choose_div_id").html(data);
+					$("#choose_div_id #think_page_trace").remove();
+					$("#choose_div_id #think_run_time").remove();
+					tb_init('#choose_div_id a.thickbox');//pass where to apply thickbox
+					imgLoader = new Image();// preload image
+					imgLoader.src = tb_pathToImage;
+				}
+			});
+		}
+		else
+		{
+			$("#choose_div_id").toggle();
+		}
+	}
+	function show_activation_date(num){
+		if(num==2){
+			$('#activation_date').show();
+	    }else{
+	   	    $('#activation_date').hide();
+	    }
+	}
+
+	function change_type(target){
+		var type = $(target).val();
+		if(type == 1){
+			$(".pic_url1").hide();
+		}else{
+			$(".pic_url1").show();
+		}
+	}
+</script>
+
+<body>
+<div  style="margin:20px;">
+<form action="__URL__/add_splash_do" method="post" enctype="multipart/form-data" onsubmit="return checkPost_two();">
+<?php if($splash_type == 1){ ?><h3>添加普通闪屏</h3><?php }elseif($splash_type == 2){ ?>添加广告闪屏<?php } ?>
+<br />
+<br />
+<input type="hidden" name="p" value="{$p}" />
+<input type="hidden" name="lr" value="{$lr}" />
+<input type="hidden" id="pid" value="{$platform}" />
+<table>
+<?php if($splash_type == 2){ ?>
+<tr>
+<td>闪屏类型：</td>
+<td>
+<select name="pic_type" id="pic_type" onchange="select_pic(this.value);">
+<option value="1">静态图</option>
+<!--<option value="2" selected>特效图</option>-->
+</select>
+&nbsp;&nbsp;<span onMouseOver="showDiv(event);" onMouseOut="hideDiv(event);"><img src="/Public/images/circle.jpg"></span>
+</td>
+</tr>
+<?php } ?>
+<tr>
+<td>安智品牌banner</td>
+<td>
+	<label><input type="radio" name="show_az_banner" value="1" checked>展示</label>
+	<label><input type="radio" name="show_az_banner" value="0">不展示</label>
+</td>
+</tr>
+<tr>
+<td style="width:90px;">名称：
+<input type="hidden" name="splash_type" value="{$splash_type}" />
+<input type="hidden" name="platform" value="{$platform}" />
+<input type="hidden" name="p" value="{$p}" />
+<input type="hidden" name="lr" value="{$lr}" />
+</td>
+<td><input type="text" name="splash_name" /></td>
+</tr>
+<tr class="pic_url1">
+	<td>图片1(648以及以下版本):</td>
+	<td>
+		<input type="file" name="pic_url" /><br />请上传480*960的JPG/PNG，若不填加该图片，则648及以下版本使用图片2
+	</td>
+</tr>
+<tr>
+<td><font color="red">*</font>图片2(649)：</td>
+<td><input type="file" name="pic_url1" /><br />请上传480*960的JPG/PNG</td>
+</tr>
+
+<?php if($splash_type == 1){ ?>
+<tr>
+<td>跳过：</td>
+<td>
+<select name="jump">
+<option value="1" selected>是</option>
+<option value="0" >否</option>
+</select>
+</td>
+</tr>
+<?php } ?>
+<?php if($splash_type == 2){ ?>
+<tr id="logo_pic">
+<td>LOGO图：</td>
+<td><input type="file" name="logo_url" /><br />请上传JPG/PNG</td>
+</tr>
+<tr>
+<td>展示频率：</td>
+<td>
+<select name="show_rate">
+<option value="1">只显示1次</option>
+<option value="2">只显示2次</option>
+<option value="3">只显示3次</option>
+</select>
+</td>
+</tr>
+<?php } ?>
+<?php if($splash_type == 2){ ?>
+<tr class="sub_tr">
+	<td><font color="red">*</font>推荐内容</td>
+	<td>
+		<!--下面a里的href的url里append_div_id参数表示新增内容append的地方-->
+		<a id="content_type_a" href="javascript:void(0)" class="thickbox" style="color:blue">选择推荐内容</a>
+		<!--下面的content_type_div是给showPromotion用的-->
+		<div id="content_type_div"/>
+	</td>
+	<td/>
+</tr>
+<?php } ?>
+<?php if($splash_type == 2){ ?>
+<tr>
+<td>倒计时：</td>
+<td>
+<select name="count_down">
+<option value="1" selected>是</option>
+<option value="0" >否</option>
+</select>
+</td>
+</tr>
+<?php } ?>
+<tr class="sub_tr">
+	<td>精准投放</td>
+	<td>
+		<a href="#" onclick="choose_condition()"><font color="blue">选择投放条件</font></a><br />
+		<div id="choose_div_id"></div>
+	</td>
+	<td></td>
+</tr>
+<tr>
+    <td>覆盖用户类型：</td>
+	<td>
+	    <input type="radio" name='cover_user_type' id="cover_user_type" value="0"   onclick="show_activation_date(0)" checked />全部
+        <span>&nbsp;</span>
+	    <input type="radio" name='cover_user_type' id="cover_user_type" value="1"   onclick="show_activation_date(1)"/>新用户
+        <span>&nbsp;</span>
+        <input type="radio" name='cover_user_type' id="cover_user_type" value="2"  onclick="show_activation_date(2)"/>定向用户
+		<span>&nbsp;</span>
+	</td>
+</tr>
+<tr id='activation_date' style="display:none;">
+	<td >激活日期:</td>
+    <td>开始日期：<input name="activation_date_start" id="activation_date_start" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px;height:20px;"/></td>
+	<td>结束日期：<input name="activation_date_end" id="activation_date_end" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px;height:20px;"/></td>
+</tr>
+<tr>
+	<td>开始时间：</td>
+	<td>
+		<input id="begintime" name="start_tm" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" style="width:140px; height:20px" />
+	</td>
+</tr>
+<tr>
+	<td>结束时间：</td>
+	<td>
+		<input id="endtime" name="end_tm" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" style="width:140px; height:20px" />
+	</td>
+</tr>
+<tr class="sub_tr">
+	<td>合作形式</td>
+	<td>
+		<SELECT name='co_type'>
+			<?php foreach($typelist as $key => $val): ?>
+				<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+			<?php endforeach; ?>				
+		</SELECT>
+	</td>
+</tr>
+</table>
+<table>
+<tr>
+<td><input type="submit" class="search_btn" value="确定" /></td>
+<td><input type="button" class="search_btn" value="取消"  onclick="location.href='/index.php/Sj/Splashmanage/splash_list'" /></td>
+</tr>
+</table>
+</form>
+<div id="hidDiv" style="width: 238px; position: absolute; display: none; height: 120px;left: 228px; top: 22px; background-color: #ffcc33;"><img src="/Public/images/splash.jpg" width="100%"></div> 
+</div>
+</body>
+</html>

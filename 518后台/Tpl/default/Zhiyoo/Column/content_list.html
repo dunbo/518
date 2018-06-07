@@ -1,0 +1,125 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style>
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+ul li {
+    float:left;
+    list-style:none;
+    margin-right:10px;
+}
+</style>
+<body>
+<div style="margin:20px;" ><ul>
+
+<li>前台展示标签：</li>
+<?php foreach($alltags as $val):?>
+<li><input type="checkbox" disabled="disabled"<?php if($val['status'] == 1) echo ' checked="checked"';?>>{$val.tagname}</li>
+<?php endforeach;?>
+<li><a href="__URL__/edit_tags/cid/{$cid}/" class="thickbox ">编辑</a></li>
+</ul>
+
+</div>
+<div class="clear"></div>
+<div style="float:right;margin:20px;" >
+<form action="__URL__/edit_content_rank/cid/{$cid}" method="post">
+<?php if(!$_GET['edit_rank']){ ?>
+<span style="margin:10px;padding:3px;background-color:white">
+<a href="__URL__/content_list/cid/{$cid}/edit_rank/1/"  style="display:inline-block;" class="search_btn" >编辑优先级</a>
+</span>
+<?php }else{ ?>
+<span style="margin:10px;padding:3px;background-color:white">
+<input type="submit" style="display:inline-block;" class="search_btn" value="保存优先级" name="submit">
+</span>
+<span style="margin:10px;padding:3px;background-color:white">
+<a href="__URL__/content_list/cid/{$cid}/"  style="display:inline-block;" class="search_btn" >取消</a>
+</span>
+<?php } ?>
+<span style="margin:10px;padding:3px;background-color:white">
+<a href="__URL__/add_content_show/cid/{$cid}/?mm" style="display:inline-block;" class="thickbox search_btn">添加新内容</a>
+</span>
+</div>
+<div class="clear"></div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list" >
+	<thead>
+		<tr>
+			<th width="50px"><a href="__URL__/content_list/cid/{$cid}/type/rank/order/<?php $order = isset($th['rank']) ? $th['rank'] : 'asc';echo $order?>">优先级↑↓</a></th>
+			<th width="50px"><a href="__URL__/content_list/cid/{$cid}/type/advid/order/<?php $order = isset($th['advid']) ? $th['advid'] : 'asc';echo $order?>">排期ID↑↓</a></th>
+			<th width="60px"><a href="__URL__/content_list/cid/{$cid}/type/tid/order/<?php $order = isset($th['tid']) ? $th['tid'] : 'asc';echo $order?>">TID↑↓</a></th>
+			<th width="200px"><a href="__URL__/content_list/cid/{$cid}/type/title/order/<?php $order = isset($th['title']) ? $th['title'] : 'asc';echo $order?>">宣传图片标题↑↓</a></th>
+			<th width="150px">推荐理由</th>
+			<th width="130px">标签</th>
+			<th width="80px"><a href="__URL__/content_list/cid/{$cid}/type/author/order/<?php $order = isset($th['author']) ? $th['author'] : 'asc';echo $order?>">作者↑↓</a></th>
+			<th width="60px"><a href="__URL__/content_list/cid/{$cid}/type/views/order/<?php $order = isset($th['views']) ? $th['views'] : 'asc';echo $order?>">点击量↑↓</a></th>
+			<th width="60px"><a href="__URL__/content_list/cid/{$cid}/type/replies/order/<?php $order = isset($th['replies']) ? $th['replies'] : 'asc';echo $order?>">回复量↑↓</a></th>
+			<th width="100px"><a href="__URL__/content_list/cid/{$cid}/type/addschtime/order/<?php $order = isset($th['addschtime']) ? $th['addschtime'] : 'asc';echo $order?>">添入排期表时间↑↓</a></th>
+			<th width="30px">平台</th>
+			<th width="100px"><a href="__URL__/content_list/cid/{$cid}/type/starttime/order/<?php $order = isset($th['starttime']) ? $th['starttime'] : 'asc';echo $order?>">开始时间↑↓</a></th>
+			<th width="100px"><a href="__URL__/content_list/cid/{$cid}/type/endtime/order/<?php $order = isset($th['endtime']) ? $th['endtime'] : 'asc';echo $order?>">结束时间↑↓</a></th>
+			<th width="100px">操作</th>
+			<th width="100px">备注</th>
+		</tr>
+	</thead>
+	<?php foreach($con as $k => $conlist){ ?>
+	<tr>
+	<td><?php if(!$_GET['edit_rank']){ ?>
+		{$conlist.rank}
+		<?php }else{ ?>
+		<input type="text" value="{$conlist.rank}" name="rank[{$conlist.aid}]" onkeyup="this.value=this.value.replace(/\D/g,'')" size="6" />
+		<?php } ?>
+	</td>
+	<td>{$conlist.aid}</td>
+	<td>{$conlist.tid}</td>
+	<td><a href="{$conlist.url}" target="_blank">
+	<?php if($conlist['img_path1']){ ?>
+	<img width="180px" src="<?php echo IMGATT_HOST;?>/{$conlist.img_path1}"/><br/>
+	<?php }elseif($conlist['img_path2']) { ?>
+	<img width="180px" src="<?php echo IMGATT_HOST;?>/{$conlist.img_path2}"/><br/>
+	<?php } ?>
+	{$conlist.ext_title}</a></td>
+	<td>{$conlist.description}</td>
+	<td>
+		<?php
+		foreach($tag_result[$k] as $group){
+			echo $group['name'].'：';
+			$i=0;
+			foreach($group['tag_arr'] as $tagid ){
+				$i++;$point=',';if($i==1) $point='';echo $point;
+				if($taglist[$taglist[$tagid]['parentid']]['tagname']) echo $taglist[$taglist[$tagid]['parentid']]['tagname'].'>';
+				echo $taglist[$tagid]['tagname'];
+			}
+		echo '<br/>';
+		}?>
+	</td>
+	<td>{$conlist.author}</td>
+	<td>{$conlist.views}</td>
+	<td>{$conlist.replies}</td>
+	<td><?php echo date('Y/n/d H:i:s',$conlist['addschtime']); ?></td>
+	<td>{$conlist.platform}</td>
+	<td><?php echo date('Y/n/d H:i:s',$conlist['starttime']); ?></td>
+	<td><?php echo date('Y/n/d H:i:s',$conlist['endtime']); ?></td>
+	<td>
+	<p><?php if($from == 'content_list_filter'): ?>
+        <a href="/index.php/Zhiyoo/Collectresult/edit_content/from/content_list_filter/advid/{$conlist.aid}/id/{$conlist.id}/cid/{$cid}" style="text-decoration:underline;color:blue;">编辑</a>
+        <?php else:?>
+        <a href="/index.php/Zhiyoo/Collectresult/edit_content/from/column_content/advid/{$conlist.aid}/id/{$conlist.id}/cid/{$cid}" style="text-decoration:underline;color:blue;">编辑</a>
+        <?php endif;?></p>
+	<br/>
+	<p><a href="<?php echo BBSLUNTAN_HOST;echo '&anzhirefersalt='.$bbs_model->anzhiauthkey($conlist['tid']); ?>&fid={$conlist.fid}&tid={$conlist.tid}&pid={$conlist.pid}" style="text-decoration:underline;color:blue;" target="_blank">编辑内容</a></p>
+	<br/>
+	<p><a href="__URL__/overonline/advid/{$conlist.aid}/cid/{$cid}"  style="text-decoration:underline;color:blue;">结束</a></p>
+	<td>{$conlist.comment}</td>
+	</tr>
+	<?php } ?>
+</table>
+</form>
+
+<div class="navgition">
+	{$page|default='&nbsp;'}
+</div>
+</body>
+</html>

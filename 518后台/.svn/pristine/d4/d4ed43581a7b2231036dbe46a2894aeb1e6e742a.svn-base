@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>区间软件列表</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css?version1" />
+<?php if (!$isAjax) : ?>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<script type="text/javascript" src="/index.php/Sj/ExtentV1/pub_get_address?1"></script>
+<?php endif;?>
+<script>
+var extents = new Array();
+<?php $i=0;foreach($extents as $val): ?>
+extents[<?php echo $i?>] = {extent_id:'<?php echo $val['extent_id']?>',extent_name:'<?php echo $val['extent_name']?>',type:<?php echo $val['type']?>,parent_id:<?php echo $val['parent_id']?>};
+<?php $i++;endforeach; ?>
+
+function showExtent(c, parent_id)
+{
+	var id = c + '_' + parent_id;
+	var path = '#' + c + ' .' + id
+	if (!$(path)[0]) {
+		var html = '<select class=' + id + ' onchange="showExtent(\'TB_ajaxContent\',$(this).val())">';
+		var has_item = false;
+		$(extents).each(function(){
+			if(this.parent_id == parent_id) {
+				html += '<option value="'+this.extent_id+'">'+this.extent_name+'</option>';
+				has_item = true;
+			}
+		});
+		html += '</select>';
+		if(has_item) $('#'+c+' p').append(html);
+	}
+}
+function switchTab(url, op_id)
+{
+	$('#' + op_id).load(url + '/op_id/' + op_id, function(){
+		tb_init('#' + op_id + ' .thickbox');
+	});
+}
+
+function changePid(obj)
+{
+  window.location.href = '__URL__/list_area_soft/pid/' + $(obj).val();
+}
+</script>
+</head>
+
+<body>
+<div class="main_r">
+	<h3 class="current_h3">区域投放列表</h3>
+	<div class="currentNav2">
+		<div class="currentNav2_l">
+		<form method='get' action="__URL__/list_area_soft/srch_type/<?php echo $srch_type;?>">
+		请选择要操作的产品:<select name="pid" id="pid" onchange="changePid(this)">
+			<?php foreach($product_list as $k => $v): ?>
+			<option value="<?php echo $k;?>"<?php if ($v[1] == true):?> selected="true"<?php endif; ?> ><?php echo $v[0] ?></option>
+			<?php endforeach; ?>
+			</select>
+区域投放搜索：<span id="top_area"></span>
+<input type='submit' />
+<input type="hidden" name='srch_type' value="<?php echo $srch_type?>"/>
+<form>
+		</div>
+	</div>
+	<div class="currentNav">
+		<div class="currentNav_l"><a href="/index.php/Sj/ExtentV1/index/pid/<?php echo $pid?>">推荐区位管理</a></div>
+		<div class="currentNav_r">
+		<a class="recBtn_bg<?php if ($srch_type == 'e'):?> currentSel<?php endif;?>" href="__URL__/list_area_soft/srch_type/e<?php if($province){echo '/province/'.$province;};if($city){echo '/city/'.$city;}?>">过期</a>
+		<a class="recBtn_bg<?php if ($srch_type == 'n'):?> currentSel<?php endif;?>" href="__URL__/list_area_soft/srch_type/n<?php if($province){echo '/province/'.$province;};if($city){echo '/city/'.$city;}?>">当前</a>
+		<a class="recBtn_bg<?php if ($srch_type == 'f'):?> currentSel<?php endif;?>" href="__URL__/list_area_soft/srch_type/f<?php if($province){echo '/province/'.$province;};if($city){echo '/city/'.$city;}?>">未开始</a>
+		</div>
+	</div>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="softlist_tab">
+		<thead>
+			<tr>
+				<td width="18%">软件名</td>
+				<td width="18%">包名</td>
+				<td width="18%">区间</td>
+				<td width="5%">投放区域</td>
+				<td width="5%">显示概率</td>
+				<td width="15%">开始时间</td>
+				<td width="15%">结束时间</td>
+			</tr>
+		</thead>
+		<tbody>
+<?php foreach($list as $val): ?>
+	<TR>
+		<TD><?php echo $val['softname'] ?></TD>
+		<TD><?php echo $val['package'] ?></TD>
+		<TD><a href="/index.php/Sj/ExtentV1/list_soft/extent_id/<?php echo $val['extent_id']?>/srch_type/<?php echo $srch_type?>"><?php echo $extent_select[$val['extent_id']] ?></a></TD>
+		<td><?php echo str_replace(';', '<br>', $val['location']); ?></td>
+		<TD><?php echo $val['prob'] ?></TD>
+		<TD><?php echo date('Y-m-d H:i:s', $val['start_at']); ?></TD>
+		<TD><?php echo date('Y-m-d H:i:s', $val['end_at']); ?></TD>
+	</TR>
+<?php endforeach;?>
+		</tbody>
+	</table>
+{$page}
+</div>
+<script>
+var g = new GoAddress();
+g.tpl = '<span><select name=""></select>-<select></select><input type="button" value="添加"><span style="color:red"></span></span>';
+g.multi=false;
+<?php if(!empty($province)): ?>
+g.addTopArea('<?php echo $province?>', '<?php echo $city?>');
+<?php else: ?>
+g.addTopArea();
+<?php endif; ?>
+</script>
+</body>
+</html>

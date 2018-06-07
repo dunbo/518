@@ -1,0 +1,231 @@
+<!--{include file="header-new.html"}-->
+<!--{include file="header_search_2.html"}-->
+<script type="text/javascript" src="/js/drawImage.js"></script>
+<script type="text/javascript">
+var php_param = {};
+$(document).ready(function(){
+	$('.toggle_btn span').bind('click',function(){
+		if($(this).html()=='')
+		{
+			$('#appcntlist').css('height','auto');
+			$(this).html('');
+			$(this).addClass('up');
+		}
+		else{
+			$('#appcntlist').css('height','34px');
+			$(this).html('');
+			$(this).removeClass('up');
+		}
+		
+	});
+	
+	if($('#az_appcntlist1 p').height()>76){
+		$('#az_appcntlist1').next('.az_toggle_btn').show();
+	}
+	else{
+		$('#az_appcntlist1').css('height','auto');
+	}
+	if($('#az_appcntlist2 p').height()>76){
+		$('#az_appcntlist2').next('.az_toggle_btn').show();
+	}
+	else{
+		$('#az_appcntlist2').css('height','auto');
+	}
+	$('.az_toggle_btn span').bind('click',function(){
+		if($(this).attr('id')=='az_open'&& $(this).attr('class')=='')
+		{
+			$(this).parents('.az_cnt_ul').find('.az_appcntlist').css('height','auto');
+			$(this).addClass('az_up');
+		}
+		else
+		{
+		if($(this).attr('class')=='az_up'&& $(this).attr('id')=='az_open')
+		{
+			$(this).parents('.az_cnt_ul').find('.az_appcntlist').css('height','70px');
+			$(this).removeClass('az_up');
+		}
+		}
+		
+	});
+    
+    if (is_weixin()) {
+        document.getElementById("az-down-sm").style.display = "block";
+    }
+    
+<!--{if $out.share}-->
+    var proid_arr = getArgs();
+    var aztype = proid_arr.aztype;
+    var from = 3;
+    if (aztype == 'qr') {
+        from = 1;
+    }
+<!--{if $out.aid}-->
+	var js_param = {type:'action', id:<!--{$out.aid}-->, from:from};
+	php_param = {type:'action', aid:<!--{$out.aid}-->};
+	if (typeof(proid_arr.actsid) != 'undefined') {
+		js_param.actsid = proid_arr.actsid;
+		js_param.type = 'launchact';
+		php_param.actsid = proid_arr.actsid;
+		php_param.type = 'launchact';
+	}
+	var url_query = '';
+	for (var i in php_param) {
+		if (url_query != '') {
+			url_query += '&';
+		}
+		url_query += i + '=' + php_param[i];
+	}
+	var fast_url = 'fast.php?' + url_query;
+	//$('#download_btn').attr('href', 'fast.php?type=action&aid=<!--{$out.aid}-->);
+	$('#download_btn').attr('href', fast_url);
+<!--{else}-->
+	var js_param = {type:'details', id:<!--{$out.info.ID}-->, pkg:'<!--{$out.info.PACKAGENAME}-->', flag:1, from:from};
+	if (typeof(proid_arr.azinvitepid) != 'undefined') {
+		js_param['callback'] = 'invite_callback';
+		js_param['type'] = 'inviteInstall';
+		js_param['pid'] = proid_arr.azinvitepid;
+		php_param = {type:'invite', uid:proid_arr.azinvitepid};
+		
+		if (typeof(proid_arr.chcode) != 'undefined') {
+			var chl_cid = proid_arr.chcode;
+			php_param['chl_cid'] = chl_cid;
+		} else {
+			php_param['chl_cid'] = '4fb52a893294';
+		}
+		$('#download_btn').attr('href', 'fast.php?type=invite&uid=' + proid_arr.azinvitepid + '&chl_cid=' + php_param['chl_cid']);
+	} else {
+		php_param = {type:'details', softid:<!--{$out.info.ID}-->};
+	}
+<!--{/if}-->
+    if (is_weixin()) {
+    	php_param['disable_auto'] = 1;
+    }
+	share_download(js_param, php_param);
+<!--{/if}-->
+
+<!--{if $out.acts}-->
+	var proid_arr = getArgs();
+    var actid = 18;
+    var php_param = {type:'launch', id:actid};
+    var url = 'fast.php?type=launch&id=' + actid;
+	if (typeof(proid_arr.chcode) != 'undefined') {
+		var chl_cid = proid_arr.chcode;
+		php_param['chl_cid'] = chl_cid;
+		url += '&chl_cid=' + php_param['chl_cid'];
+	} 
+    var js_param = {type:'launch', id:actid};
+    if (is_weixin()) {
+    	php_param['disable_auto'] = 1;
+    }
+	share_download(js_param, php_param);
+	$('#download_btn').attr('href', url);
+<!--{/if}-->
+
+});
+function invite_callback()
+{
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if (flag == 1 && version<5500) {
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;
+		}
+	}
+}
+function getArgs() {
+    var args = {};
+    var query = location.search.substring(1);
+    var pairs = query.split("&");
+    for(var i = 0; i < pairs.length; i++) {
+        var pos = pairs[i].indexOf('=');
+        if (pos == -1) continue;
+        var argname = pairs[i].substring(0,pos);
+        var value = pairs[i].substring(pos+1);
+        value = decodeURIComponent(value);
+        args[argname] = value;
+    }
+    return args;
+}
+function is_weixin(){  
+    var ua = navigator.userAgent.toLowerCase();  
+    if(ua.match(/MicroMessenger/i)=="micromessenger") {  
+        return true;  
+    } else {  
+        return false;  
+    }  
+}  
+</script>
+<section id="az-main-free">
+	   <div class="az_xqsm" style="margin-bottom:20px; margin-left:0px; margin-right:0px; margin-top:35px;padding:0px;">
+    	<div class="az_xqsm_module">
+        	<p class="az_detial_logo"><img src="/images/az_images/az_down_logo.png?v6.4.5"  style="width:190px; height:123px"><span><!--{$out.info.SOFT_VERSION}--></span></p>
+			<!--<p class="az-zyxq-bykh">上安智，下软件</p>-->
+            <ul id="az_xh_module" style=" width:40%;">
+            	<li>版本：<!--{$out.info.SOFT_VERSION}--></li>
+            	<li>大小：<!--{$out.info.SOFT_SIZE}--></li>
+            	<li>更新：<!--{$out.info.SOFT_PROMULGATE_TIMES}--></li>
+            </ul>
+            <p class="az-down-bt">
+                <a href="download.php?softid=<!--{$out.info.ID}-->" id="download_btn"><input type="submit" class="submit" value="立即下载"></a>
+            </p>
+            <p class="view_history">
+                <a href="<!--{url2static_url}-->app.php?type=history&softid=<!--{$out.info.ID}--><!--{/url2static_url}-->">查看历史版本</a>
+            </p>
+
+            <p class="az-down-sm" id="az-down-sm" style="display:none; "><!--{$out.weixin_hint}--></p>
+
+        </div>
+    </div>
+    <div class="az_xqsm_contant1">
+        <div class="appdetail_imgs bggray">
+            <img class="appdetail_icon" src="/images/az_images/appdetail_01.jpg?v6.44" alt=""/>
+			<h3>全新改版</h3>
+			<h6 style="line-height:28px;">发现快乐很简单</h6>
+            <img src="/images/az_images/appdetail_02.jpg?v6.45" alt="" style="width:323px; height:553px; border:1px solid #e9e9e9"/>
+        </div>
+        <div class="appdetail_imgs">
+			<img class="appdetail_icon" src="/images/az_images/appdetail_03.jpg?v6.44" alt=""/>
+			<h3>发现频道</h3>
+			<h6>告诉你什么值得玩</h6>
+            <img src="/images/az_images/appdetail_04.jpg?v6.45" alt="" style="width:323px; height:553px; border:1px solid #e9e9e9"/>
+        </div>
+		<div class="appdetail_imgs bggray">
+            <img class="appdetail_icon" src="/images/az_images/appdetail_05.jpg?v6.44" alt=""/>
+			<h3>游戏频道</h3>
+			<h6>适合玩儿啥直接拿</h6>
+            <img src="/images/az_images/appdetail_06.jpg?v6.45" alt="" style="width:323px; height:553px; border:1px solid #e9e9e9"/>
+        </div>
+        <div class="appdetail_imgs">
+            <img class="appdetail_icon" src="/images/az_images/appdetail_07.jpg?v6.44" alt=""/>
+			<h3>榜单</h3>
+			<h6>适合你的全新榜单</h6>
+            <img src="/images/az_images/appdetail_08.jpg?v6.45" alt="" style="width:323px; height:553px; border:1px solid #e9e9e9"/>
+        </div>
+        <div class="appdetail_imgs bggray">
+            <div id="appdetail_more">
+				<p>更多功能</p>
+				<ul>
+					<li id="appdetail_more01">内存小</li>
+					<li id="appdetail_more02">简洁易用</li>
+					<li id="appdetail_more03">历史版本</li>
+					<li id="appdetail_more04">安智汉化</li>
+				</ul>
+				<div style="clear:both"></div>
+			</div>
+        </div>
+            <div class="az_xqsm_ff az_update_sm" style="width:260px">
+                <h3 style="">更新说明</h3>
+                <div id="az_update_list">
+                    <p>【看】新增热搜内容，多色热词不落潮流</br>【玩】预约功能优化，新奇游戏先人一步<br/>【用】新增单句描述，合适再去了解详情<br/>【乐】信息流优化，远离无趣内容</p>
+                </div>
+            </div>
+    </div>
+</section>
+<div id="az_spirit"></div>
+<!--{include file="foot.html"}-->

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>安智购省钱 福利进校园</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/store/css/common.css?v1"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/store/js/common.js"></script>
+<script type="text/javascript">
+/*
+        $(function () {
+		$('#feedback_select li').click(function(){
+                    $("#sel_school").empty();
+                    var city = $(this).attr('rel');
+                    var param = {
+                            city_select : city
+                    };
+
+                    $.ajax({
+                            url: '/lottery/store/register2.php?sid='+sid,
+                            type:'POST',
+                            data:param,
+                            secureuri:false,
+                            dataType:'json',
+                            success:function(data){
+                                for(j=0;j<data.length;j++){
+                                        $("#sel_school").append("<li>"+data[j]['name']+"</li>");
+                                }
+                            }
+                    });
+		});
+        });
+*/
+
+var sid='<!--{$out.sid}-->';
+
+function select_school(obj){
+                    $("#sel_school").empty();
+                    //var city = $(this).attr('rel');
+                    var city = $(obj).attr('rel');
+                    var param = {
+                            city_select : city
+                    };
+
+                    $.ajax({
+                            url: '/lottery/store/register2.php?sid='+sid,
+                            type:'POST',
+                            data:param,
+                            secureuri:false,
+                            dataType:'json',
+                            success:function(data){
+                                for(j=0;j<data.length;j++){
+                                        $("#sel_school").append("<li>"+data[j]['name']+"</li>");
+                                }
+                            }
+                    });
+}
+
+        function save(){
+            $("span").html('');
+            var city = $("#city").val();
+            var school = $("#school").val();
+                if(city.trim().length==0){
+                    $("#city_mess").html("请选择城市");
+                    return;
+                }
+
+                if(school.trim().length==0){
+                    $("#school_mess").html("请选择学校");
+                    return;
+                }
+                
+                if($("#store_name").val().trim().length==0){
+                    $("#store_name_mess").html("店铺名称不能为空");
+                    return;
+                }
+                var matchstr = /^.{1,30}$/;
+                if(matchstr.test($("#store_name").val())==false){
+                    $("#store_name_mess").html("店铺名称只能是30个字符以内");
+                    return;
+                }
+
+                if($("#shopkeeper").val().trim().length==0){
+                    $("#shopkeeper_mess").html("店主姓名不能为空");
+                    return;
+                }
+                var matchstr = /^.{1,10}$/;
+                if(matchstr.test($("#shopkeeper").val())==false){
+                    $("#shopkeeper_mess").html("店主姓名只能是10个字符以内");
+                    return;
+                }
+
+                if($("#tel").val().trim().length==0){
+                    $("#tel_mess").html("联系电话不能为空");
+                    return;
+                }
+                if(!isMobel($("#tel").val())){
+                    $("#tel_mess").html("联系电话格式不正确");
+                    return;
+                }
+
+                if($("#alipay").val().trim().length==0){
+                    $("#alipay_mess").html("支付宝账户不能为空");
+                    return;
+                }
+                var matchstr = /^.{1,50}$/;
+                if(matchstr.test($("#alipay").val())==false){
+                    $("#alipay_mess").html("支付宝账户只能是50个字符以内");
+                    return;
+                }
+                if($("#alipay_name").val().trim().length==0){
+                    $("#alipay_name_mess").html("账户姓名不能为空");
+                    return;
+                }
+                var matchstr = /^.{1,10}$/;
+                if(matchstr.test($("#alipay_name").val())==false){
+                    $("#alipay_name_mess").html("账户姓名只能是10个字符以内");
+                    return;
+                }
+                if($("#id_number").val().trim().length==0){
+                    $("#id_number_mess").html("身份证号码不能为空");
+                    return;
+                }
+
+           if (!(/(^\d{15}$)|(^\d{17}([0-9]|X)$)/.test($("#id_number").val())))  {
+                    $("#id_number_mess").html("请输入有效的身份证号");
+                    return;
+           }
+
+                /*
+                var matchstr = /^.{1,18}$/;
+                if(matchstr.test($("#id_number").val())==false){
+                    $("#id_number_mess").html("身份证号码只能是18个字符以内");
+                    return;
+                }
+                */
+
+                if($("#yzm").val().trim().length==0){
+                    $("#yzm_mess").html("验证码不能为空");
+                    return;
+                }
+
+                var param = {
+                        city : city,
+                        school : school,
+                        store_name: $("#store_name").val(),
+                        shopkeeper: $("#shopkeeper").val(),
+                        tel: $("#tel").val(),
+                        alipay: $("#alipay").val(),
+                        alipay_name: $("#alipay_name").val(),
+                        id_number: $("#id_number").val(),
+                        yzm : $("#yzm").val()
+                };
+
+                $.ajax({
+                        url: '/lottery/store/register2.php?sid='+sid,
+                        type:'POST',
+                        data:param,
+                        secureuri:false,
+                        dataType:'json',
+                        success:function(data){
+                                if(data==2){
+                                    $("#tel_mess").html("手机号已存在");
+                                    return;
+                                }else if(data==3){
+                                    location.href="/lottery/store/register2.php?sid="+sid; 
+                                }else if(data==4){
+                                    $("#yzm_mess").html("验证码错误或已失效");
+                                    return;
+                                }else if(data==5){
+                                    $("#yzm_mess").html("网络原因注册失败，请重试");
+                                    return;
+                                }else{
+                                    $("#yzm_mess").html("注册成功!");
+                                    setTimeout(3000);
+                                    //location.href="/lottery/store/login.php?sid="+sid; 
+                                    location.href="/lottery/store/seller_index.php?sid="+sid; 
+                                }
+                        }
+                });
+        };
+
+        function isMobel(value)  {  
+                //if((/^13\d{9}$/g.test(value))||(/^14\d{9}$/g.test(value))||(/^15\d{9}$/g.test(value))||(/^18\d{9}$/g.test(value))){
+                if(/^1[34578]\d{9}$/g.test(value)){
+                        return true;  
+                }else{
+                        return false;  
+                }
+        }
+</script>
+</head>
+<body class="body2">
+<div class="main2">
+	<div class="register_wrap">
+		<h3>卖家注册<span>（所有信息必填）</span></h3>
+		<form method="post" action="">
+			<div class="feedback_form_item">
+				<input type="text" class="inputtext select_input" readonly="readonly" placeholder="选择城市" id="city" readonly/>
+				<span class="form_arrow arrow_down"></span>
+				<ul class="select_type" id="feedback_select">
+                                    <!--{foreach from=$out.citylist item=vo}-->
+					<li onclick="select_school(this)"  rel="<!--{$vo.name}-->"><!--{$vo.name}--></li>
+                                    <!--{/foreach}-->
+				</ul>
+			</div>
+			<div class="error_form red"><span id="city_mess"></span></div>
+			<div class="feedback_form_item">
+				<input type="text" class="inputtext select_input" readonly="readonly" placeholder="选择学校" id="school" readonly/>
+				<span class="form_arrow arrow_down"></span>
+				<ul class="select_type" id="sel_school">
+				</ul>
+			</div>
+			<div class="error_form red"><span id="school_mess"></span></div>
+			<input type="text" placeholder="店铺名称" class="inputtext" id="store_name"/>
+			<div class="error_form red"><span id="store_name_mess"></span></div>
+			<input type="text" placeholder="店主姓名" class="inputtext" id="shopkeeper"/>
+			<div class="error_form red"><span id="shopkeeper_mess"></span></div>
+			<input type="text" placeholder="联系电话（可修改）" class="inputtext" id="tel"/>
+			<div class="error_form red"><span id="tel_mess"></span></div>
+			<input type="text" placeholder="支付宝账户" class="inputtext" id="alipay"/>
+			<div class="error_form red"><span id="alipay_mess"></span></div>
+			<input type="text" placeholder="支付宝账户姓名" class="inputtext" id="alipay_name"/>
+			<div class="error_form red"><span id="alipay_name_mess"></span></div>
+			<input type="text" placeholder="身份证号码" class="inputtext" id="id_number"/>
+			<div class="error_form red"><span id="id_number_mess"></span></div>
+			<input type="text" placeholder="验证码（推荐人提供）" class="inputtext" id="yzm"/>
+			<div class="error_form red"><span id="yzm_mess"></span></div>
+			<ul class="btns">
+                            <li><a href="/lottery/store/register.php?sid=<!--{$out.sid}-->">上一步</a></li>
+				<li class="login_btns"><a href="javascript:;" onclick="save()">注册</a></li>
+				<div class="clear"></div>
+			</ul>
+		</form>
+	</div>
+</div>
+<div class="footer">
+	<p>客服电话：010-58851836-8002</p>
+</div>
+</body>
+</html>

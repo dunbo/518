@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="/Public/css/style.css" />
+<script type="text/javascript" src="/Public/js/Base.js"></script>
+<script type="text/javascript" src="/Public/js/Form/CheckForm.js"></script>
+<script type="text/javascript" src="/Public/js/common.js"></script>
+<script type="text/javascript" src="/Public/js/Util/ImageLoader.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/default.js'></script>
+<script type="text/javascript" src='/Public/js/rcalendar.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+</head>
+<script type="text/javascript">
+	function list_type(type){
+		if(type == 1){
+			document.getElementById("list_category").value = 1;
+		}else if(type == 2){
+			document.getElementById("list_category").value = 2;
+		}
+	}
+</script>
+<body>
+	<table width="80%">
+	<tr>
+		<form action="__URL__/apply_list" method="get">
+		<td>
+			<input type="submit" value="活动报名列表" name="apply_list" onclick="list_type(1)"/><input type="hidden" id="list_category" name="category" />
+			<input type="submit" value="拒绝报名列表" name="refuse_list" onclick="list_type(2)" />
+		</td>
+		</form>
+		<td colspan="8"></td>
+		<form action="__URL__/derive_list" method="get">
+		<td>
+			活动期:<select name="activate_times">
+					<option value="all" >全部</option>
+				<volist name="activate_times_category" id="item">
+					<option value="{$item.id}" <?php if($activate_times == $item['id']){ ?> selected <?php } ?> >{$item.id}</option>
+				</volist>
+			</select>
+			状态:<select name="activate_status">
+				<option value="all">全部</option>
+				<volist name="user_status" id="vo">
+				<option value="{$vo.value}" <?php if($activate_status == $vo['value']){ ?> selected <?php } ?> >{$vo.name}</option>
+				</volist>
+			</select>
+			<input type="submit" value="导出列表" name="apply_list"/>
+		</td>
+	</tr>
+	</form>
+	<table border="1" cellpadding="0" cellspacing="0" width="80%" name="table_apply">
+		<tr>
+			<td>ID</td>
+			<td>姓名</td>
+			<td>手机</td>
+			<td>邮箱</td>
+			<td>公司</td>
+			<td>职务</td>
+			<td>活动期</td>
+			<td>状态</td>
+			<td>操作</td>
+		</tr>
+		<volist name="apply_list" id="info">
+		<tr>
+			<td>{$info.id}</td>
+			<td>{$info.user_name}</td>
+			<td>{$info.mobile}</td>
+			<td>{$info.email}</td>
+			<td>{$info.company}</td>
+			<td>{$info.level}</td>
+			<td>{$info.activate_id}</td>
+			<?php if($info['status'] == "0"){ ?>
+			<td>拒绝</td>
+			<?php }elseif($info['status'] == "1"){ ?>
+			<td>通过</td>
+			<?php }elseif($info['status'] == "2"){ ?>
+			<td>未审核</td>
+			<?php }?>
+			<?php if($info['status'] == "0"){ ?>
+			<td><a href="__URL__/editor_apply/id/{$info.id}/status/1" onclick="return checkit();">恢复</a></td>
+			<?php }elseif($info['status'] == "1"){ ?>
+			<td><a href="__URL__/editor_apply/id/{$info.id}/status/0" onclick="return checkit();">拒绝</a></td>
+			<?php }elseif($info['status'] == "2"){ ?>
+			<td><a href="__URL__/editor_apply/id/{$info.id}/status/1" onclick="return checkit();">通过</td>
+			<?php }?>
+		</tr>
+		</volist>
+	</table>
+	{$page}
+</body>
+</html>
+

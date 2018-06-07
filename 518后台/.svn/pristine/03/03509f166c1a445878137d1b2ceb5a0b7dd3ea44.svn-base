@@ -1,0 +1,122 @@
+<include file="../Public/header" />
+<form  method="POST" action="__URL__/channels_edit" enctype="multipart/form-data">
+<table width="60%" height="80%" border="10" cellspacing="5" align= "center">
+<tbody>
+<tr>
+<td align ="center">渠道编辑</td>
+</tr>
+<if condition="$show_chl eq true" >
+<tr>
+<td >渠道号&nbsp;:&nbsp;<input id="chl" name="chl" size="50" type="text" value="{$vo.chl}" ></td>
+</tr>
+</if>
+<tr>
+<td >渠道名 &nbsp;：&nbsp;<input id="chname" name="chname" type="text" value="{$vo.chname}" ></td>
+</tr>
+<tr>
+<td >渠道=运营商&nbsp;：&nbsp;
+<select id="oid" name="oid" >
+	<option value="0" selected>忽略</option>
+    <volist name="list1" id="v">
+    <option value="{$v.oid}" <if condition="$v['oid'] eq $l1.oid " > selected </if> >{$v.mname}</option>
+	</volist>
+</select>
+<tr>
+<td >渠道类型选择&nbsp;：&nbsp;
+<input type='hidden' value='<?php echo $vo['category_id']; ?>' name='org_category_id' />
+<select id="category_id" name="category_id" >
+    <?php foreach ($category_list as $key => $value): ?>
+    <option value="<?php echo $key?>" <?php if($vo['category_id'] == $key):?>selected <?php endif; ?> ><?php echo $value['name']?></option>
+	<?php endforeach; ?>
+</select>
+</td>
+</tr>
+<tr>
+<td >独立更新选项 &nbsp;：&nbsp;<select name="alone_update">
+			<option value="0" {~echo $vo['alone_update'] == 0 ? selected : ''}>否
+			<option value="1" {~echo $vo['alone_update'] == 1 ? selected : ''}>是
+		</select> &nbsp;&nbsp;是否为独立更新</td>
+</tr>
+<tr>
+<td >软件更新选项 &nbsp;：&nbsp;<select name="soft_update">
+			<option value="0" {~echo $vo['soft_update'] == 0 ? selected : ''}>否
+			<option value="1" {~echo $vo['soft_update'] == 1 ? selected : ''}>是
+		</select> &nbsp;&nbsp;该渠道软件是否更新</td>
+</tr>
+<tr>
+<td >软件搜索时是否过滤 &nbsp;：&nbsp;<select name="is_filter">
+			<option value="0" {~echo $vo['is_filter'] == 0 ? selected : ''}>否
+			<option value="1" {~echo $vo['is_filter'] == 1 ? selected : ''}>是
+		</select> &nbsp;&nbsp;软件搜索时是否过滤</td>
+</tr>
+<tr>
+<td >渠道用途选择&nbsp;：&nbsp;
+<select id=activation_type name="activation_type" >
+    <option value="5" {~echo $vo['activation_type'] == 5 ? selected : ''}>普通非山寨</option>
+	<option value="9" {~echo $vo['activation_type'] == 9 ? selected : ''}>普通山寨</option>
+</select>
+</td>
+</tr>
+<tr>
+<td >渠道device_id选择&nbsp;：&nbsp;
+<select id=purpose name="purpose" >
+
+    <option value="1" {~echo $vo['purpose'] == 1 ? selected : ''}>imei</option>
+	<option value="2" {~echo $vo['purpose'] == 2 ? selected : ''}>imsi</option>
+	<option value="3" {~echo $vo['purpose'] == 3 ? selected : ''}>wifi_mac</option>
+</select>
+</td>
+</tr>
+<tr>
+<td >轮播图接口(GET_RECOMMEND_NEW)轮播图显示方式: &nbsp;&nbsp;
+<select name="channel_ad" >
+	<option value="3" {~echo $vo['channel_ad'] == 3 ? selected : ''}>显示通用+渠道</option>
+    <option value="1" {~echo $vo['channel_ad'] == 1 ? selected : ''}>只显示通用</option>
+	<option value="2" {~echo $vo['channel_ad'] == 2 ? selected : ''}>只显示本渠道内容</option>
+</select>
+</tr>
+<tr>
+<td>渠道推送开关
+	<select name="switch">
+		<option value="1" <?php if($vo['switch'] == '' || $vo['switch'] == 1) echo "selected"; ?> >开</option>
+		<option value="0" <?php if($vo['switch'] == 0) echo "selected"; ?> >关</option>
+	</select>
+</td>
+</tr>
+<tr>
+	<td>性质
+	<select name="co_group">
+	<option value="0" {~echo $vo['co_group'] == 0 ? selected : ''}>未选择</option>
+	<option value="1" {~echo $vo['co_group'] == 1 ? selected : ''}>换量</option>
+	<option value="2" {~echo $vo['co_group'] == 2 ? selected : ''}>激活</option>
+	<option value="3" {~echo $vo['co_group'] == 3 ? selected : ''}>预装</option>
+	<option value="4" {~echo $vo['co_group'] == 4 ? selected : ''}>其他</option>
+	</select>
+	</td>
+</tr>
+<tr>
+<td >备注 &nbsp;：&nbsp;<textarea name="note" cols="50" rows="5" >{$vo.note}</textarea>
+</tr>
+<tr id="softtoobar">
+<td colspan="2" align="center">
+<input type="hidden" id="cid" name="cid" value="{$vo.cid}">
+<input id="save" name="save" value="保存" type="submit">&nbsp;&nbsp;<input type="reset" value="清空">
+</td>
+</tr>
+</tbody>
+</table>
+</form>
+
+<script language="javascript">
+cottage_control();
+$('#activation_type').bind('change',function(event){cottage_control();});
+function cottage_control() {
+	var	val = $('#activation_type option:selected').text();
+	$("#purpose").empty();
+	if(val == '普通山寨' || val == '严格山寨') {
+		$("#purpose").prepend('<option value="2" {~echo $vo['purpose'] == 2 ? selected : ''}>imsi</option><option value="3" {~echo $vo['purpose'] == 3 ? selected : ''}>wifi_mac</option><option value="4" {~echo $vo['purpose'] == 4 ? selected : ''}>sn</option>');
+	} else {
+		$("#purpose").prepend('<option value="1" {~echo $vo['purpose'] == 1 ? selected : ''}>imei</option><option value="2" {~echo $vo['purpose'] == 2 ? selected : ''}>imsi</option><option value="3" {~echo $vo['purpose'] == 3 ? selected : ''}>wifi_mac</option>');
+	}
+}
+</script>

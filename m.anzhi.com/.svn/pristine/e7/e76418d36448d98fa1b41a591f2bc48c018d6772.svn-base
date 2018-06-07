@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>安智答题助手</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/common.css?v3"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/js/public.js"></script>
+<style type="text/css">
+.pre_time p a{font-size: 0.28rem; color:#fff; text-align: right;}
+.tab_cnt_top{padding-bottom:0.14rem}
+.tab_cnt_b{margin-top:-0.1rem}
+</style>
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/banner.png" />
+</div>
+<div class="notice">
+	<div class="notice_list">
+		<marquee scrollamount="2" scrolldelay="90" direction="left">
+			<span>近期将支持更多APP，敬请期待，以下问题结果仅供参考~</span>
+		</marquee>
+	</div>
+	<a href="javascript:;" class="share_btn" onclick="go_share();">分享</a>
+</div>
+<div class="main">
+	<div class="wrap">
+		<div class="tab_title">
+			<ul>
+			<!--{if $out.hidden == 1}-->
+				<li class="tab_title1 current" onclick="change_tab('<!--{$out.click.1}-->',<!--{$out.category.1}-->,this)">百万英雄</li>
+				<li class="tab_title2" onclick="change_tab('<!--{$out.click.2}-->',<!--{$out.category.2}-->,this)">百万赢家</li>
+			<!--{elseif $out.hidden == 2}-->
+				<li class="tab_title2 current" onclick="change_tab('<!--{$out.click.2}-->',<!--{$out.category.2}-->,this)">百万赢家</li>
+			<!--{/if}-->
+				<li class="tab_title3" onclick="change_tab('<!--{$out.click.3}-->',<!--{$out.category.3}-->,this)">冲顶大会</li>
+				<li class="tab_title4" onclick="change_tab('<!--{$out.click.4}-->',<!--{$out.category.4}-->,this)">芝士超人</li>
+			</ul>
+		</div>
+		<div class="tab_cnt">
+			<div class="tab_cnt_top">
+				<div class="pre_time" id='pre_time' style='display:none'>
+					<p><a href='javascript:;' id='mingtian'>明天</a><span id='changci'>20:00</span>场</p>
+				</div>
+				<ul class="answer_list" id='answer_list'>
+					<li>
+						<p>12.对C919中型客机描述准确的一项是什么？</p>
+						<p class='red'>安智君答案：载客量190座</p>
+					</li>
+					<li>
+						<p>11.游戏“抓拐”使用的道具，一般情况下没用过以下哪种动物的骨头作为原材料？</p>
+						<p class='red'>安智君答案：鸡</p>
+					</li>
+					<li>
+						<p>10.88个琴键的钢琴，白键和黑键数量相乘是多少？</p>
+						<p class='red'>安智君答案：1873</p>
+					</li>
+				</ul>
+				<p class="answer_title">玩法如下：</p>
+				<ul class="answer_list answer_tips">
+					<li>
+						<p>1.准备2部手机</p>
+					</li>
+					<li>
+						<p>2.分别打开安智市场和<span id='softnames'>西瓜视频/今日头条/抖音</span></p>
+					</li>
+					<li>
+						<p>3.开始答题后，此页面将自动显示题目及答案</p>
+					</li>
+					<li>
+						<p>4.眼疾手快，在答题APP中选择答案</p>
+					</li>
+				</ul>
+				<div class="soft_wrap">
+					<div class="soft_title"></div>
+					<ul class="soft_list" id='soft-list'>
+						<!-- <li>
+							<p class="soft_icon"><a href="javacript:;"><img src="../../../static/activity/dati/images/app_icon.png"/></a></p>
+							<p class="soft_name"><a href="javacript:;">今日头条</a></p>
+							<div class="clear"></div>
+							<a href="javacript:;" class="download">下载</a>
+						</li> -->
+					</ul>
+				</div>
+			</div>
+			<div class="tab_cnt_b"></div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
+
+<script type="text/javascript">
+var cate_id = <!--{$out['category'][$out['hidden']]}-->;
+var click = "<!--{$out['click'][$out['hidden']]}-->";
+var sid = '<!--{$out.sid}-->';
+var aid = <!--{$out.aid}-->,soft_arr=[],flags={canMove:true};
+var prefix = "<!--{$out.prefix}-->";
+var title = '';
+var dati_status = false;
+Date.prototype.format = function(format){
+	var o = {
+		"M+" : this.getMonth()+1, //month
+		"d+" : this.getDate(),    //day
+		"h+" : this.getHours(),   //hour
+		"m+" : this.getMinutes(), //minute
+		"s+" : this.getSeconds(), //second
+		"q+" : Math.floor((this.getMonth()+3)/3),  //quarter
+		"S" : this.getMilliseconds() //millisecond
+	}
+	if(/(y+)/.test(format)) format=format.replace(RegExp.$1,
+	(this.getFullYear()+"").substr(4 - RegExp.$1.length));
+	for(var k in o)if(new RegExp("("+ k +")").test(format))
+	format = format.replace(RegExp.$1,
+	RegExp.$1.length==1 ? o[k] :
+	("00"+ o[k]).substr((""+ o[k]).length));
+	return format;
+}
+$(document).ready(function () {
+<!--{if $out.version_code}-->
+	$('#answer_list').html('');
+	dati(click);
+<!--{/if}-->
+	if(typeof(window.AnzhiActivitys)!='undefined'){
+		my_soft();
+		get_soft();
+	}
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+});
+
+function change_tab(tab,category_id,obj){
+	$.ajax({
+		url: '/lottery/'+prefix+'/index.php',
+		data: 'sid='+sid+'&aid='+aid+'&click='+tab,
+		type: 'get',
+		success: function(data){}
+	});
+	$(obj).siblings().removeClass('current');
+	$(obj).addClass('current');
+	if(tab!=click){
+		title = '';
+		click = tab;
+		dati_status = false;
+		<!--{if $out.version_code}-->
+		$('#answer_list').html('');
+		<!--{/if}-->
+	}
+	cate_id = category_id;
+	if(typeof(window.AnzhiActivitys)!='undefined'){
+		get_soft();
+	}
+}
+
+<!--{if $out.version_code}-->
+function dati(old_click){
+	$.ajax({
+		url: 'http://wenda.anzhi.com/answer.php?app='+old_click,
+		dataType: 'jsonp',
+		type: 'get',
+		jsonp: 'callback',
+		success: function(data){
+			window.setTimeout("dati('"+click+"')", 300);
+			if(click == old_click){
+				if(data.time>data.startTime && (data.title!='' || dati_status==true)){
+					//答题中
+					dati_status = true;
+					$('#pre_time').css('display','none');
+					$('#answer_list').css('display','');
+					if(title!=data.title && data.title!=''){
+						title = data.title;
+						$('#answer_list').prepend("<li><p>"+title+"</p><p class='red'>安智君答案："+data.result+"</p></li>");
+					}
+				}else{
+					/*if(dati_status==true){
+						if(data.title==''){
+							console.log('title为空2');
+						}
+						console.log('dati_status为true2');
+						console.log(data.time);
+						console.log(data.startTime);
+					}*/
+					//即将开始
+					dati_status = false;
+					$('#answer_list').html('');
+					$('#answer_list').css('display','none');
+					var curDate = new Date(data.time*1000).format('yyyy-MM-dd');
+					if(curDate != data.startDate){
+						$('#mingtian').css('display', '');
+					}else{
+						$('#mingtian').css('display', 'none');
+					}
+					$('#changci').text(data.changci);
+					$('#pre_time').css('display','');
+				}
+			}
+		}
+	});
+}
+<!--{/if}-->
+
+function my_soft(){
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	soft_arr = soft_list.DATA;
+}
+
+function get_soft(){
+	var soft_lists = [];
+	for(j=0; j<soft_arr.length; j++) {
+		if(soft_arr[j][soft_arr[j].length-2] == cate_id){
+			soft_lists.push(soft_arr[j]);
+		}
+	}
+	
+	var open_list = [];
+	var install_list = [];
+	var down_list = [];
+	for(j=0; j<soft_lists.length; j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var json_data =  window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(json_data == 0 || json_data == 1 ){
+			open_list.push(soft_lists[j]);
+		}
+		if(json_data == -2 && soft_status_gos == 5){
+			install_list.push(soft_lists[j]);
+		}
+		if((json_data == -2 && soft_status_gos != 5 ) || json_data == -1){
+			down_list.push(soft_lists[j]);
+		}
+	}
+	var soft_lists_go = [];
+  	for(var ii in open_list) {
+		soft_lists_go.push(open_list[ii]);
+	}  
+  	for(var ii in install_list) {
+		soft_lists_go.push(install_list[ii]);
+	}
+  	for(var ii in down_list) {
+		soft_lists_go.push(down_list[ii]);
+	}
+
+	var str = '';
+	var pkg = '';
+	for(i = 0; i < soft_lists_go.length; i++) {
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists_go[i][0]));
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);		
+		if(soft_lists_go[i][soft_lists_go[i].length-1] != ''){
+			var size = soft_lists_go[i][soft_lists_go[i].length-1];
+		}else{
+			var size = soft_lists_go[i][27];
+		}			
+		if(soft_lists_go[i][2].length > 6){
+			var softname = soft_lists_go[i][2].substring(0,5)+'...';
+		}else{
+			var softname = soft_lists_go[i][2];
+		}		
+		str += get_soft_li(soft_status,parseInt(soft_lists_go[i][0]),soft_lists_go[i][7],softname,parseInt(soft_lists_go[i][13]),size,soft_lists_go[i][1]);
+		pkg = pkg + softname + '/';
+	}
+	pkg = pkg.replace(/\/$/, '');
+	$('#softnames').html(pkg);
+	$('#soft-list').html(str);
+}
+
+function get_soft_li(soft_status,softid,my_package,softname,versioncode,size,src){
+	if(soft_status == 1){
+		var soft_li = '<li id="li_'+softid+'" ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name"><a href="javascript:;">'+softname+'</a></p><div class="clear"></div><a href="javascript:;" class="download" >下载中</a></li>';
+	}else if(soft_status == 2 || soft_status == 3 || soft_status == 8){
+		var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name"><a href="javascript:;">'+softname+'</a></p><div class="clear"></div><a id="'+softid+'" href="javascript:;" class="download" >继续</a></li>';
+	}else if(soft_status == 4){
+		var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name"><a href="javascript:;">'+softname+'</a></p><div class="clear"></div><a id="'+softid+'" href="javascript:;" class="download"  >下载</a></li>';
+	}else if(soft_status == 5){
+		var soft_li = '<li onclick="installApp('+softid+',\''+my_package+'\')" ><p class="soft_icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft_name"><a href="javascript:;">'+softname+'</a></p><div class="clear"></div><a href="javascript:;" class="download" >安装</a></li>';
+	}else if(soft_status == 6){
+		var soft_li = '<li onclick="openApp(\''+my_package+'\','+softid+')" ><p class="soft_icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft_name"><a href="javascript:;">'+softname+'</a></p><div class="clear"></div><a href="javascript:;" class="download"  >打开</a></li>';
+	}else if(soft_status == 9){
+		var soft_li = '<li onclick="installApp('+softid+',\''+my_package+'\')" ><p class="soft_icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft_name"><a href="javascript:;">'+softname+'</a></p><div class="clear"></div><a href="javascript:;" class="download"  >校验中</a></li>';
+	}else if(soft_status == 10){
+		var soft_li = '<li><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name"><a href="javascript:;">'+softname+'</a></p><div class="clear"></div><a id="'+softid+'" href="javascript:;" class="download" >已下载</a></li>';
+	}else if(soft_status == -1){
+		var soft_other_status = window.AnzhiActivitys.isInstalledApp(my_package,parseInt(versioncode));
+		if(soft_other_status == -2){
+			var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name"><a href="javascript:;">'+softname+'</a></p><div class="clear"></div><a id="'+softid+'" href="javascript:;" class="download"  >下载</a></li>';
+		}else if(soft_other_status == -1){
+			var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name"><a href="javascript:;">'+softname+'</a></p><div class="clear"></div><a id="'+softid+'" href="javascript:;" class="download"  >更新</a></li>';
+		}else if(soft_other_status == 0){
+			var soft_li = '<li onclick="openApp(\''+my_package+'\','+softid+')" ><p class="soft_icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft_name"><a href="javascript:;">'+softname+'</a></p><div class="clear"></div><a href="javascript:;" class="download" >打开</a></li>';
+		}else if(soft_other_status == 1){
+			var soft_li = '<li ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name"><a href="javascript:;">'+softname+'</a></p><div class="clear"></div><a id="'+softid+'" href="javascript:;" class="download" >已下载</a></li>';
+		}
+	}
+	return soft_li;
+}
+
+function openApp(pkg,softid){
+	the_soft = [softid];
+	$.ajax({
+		url: '/lottery/'+prefix+'/download.php',
+		data: 'type=3&softid='+softid+'&sid='+sid+'&package='+pkg+'&aid='+aid,
+		type: 'post',
+		success: function(data){
+			window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+		}
+	});
+}
+
+function go_softinfo_down(softid,my_package,softname,versioncode,size){
+	$('#li_'+softid+'').removeAttr("onclick");
+	$('#'+softid+'').html("下载中").removeAttr("onclick");
+	$.ajax({
+		url: '/lottery/'+prefix+'/download.php',  //supwater  点击详情 点击下载
+		data:"type=1&softid="+softid+"&sid="+sid+"&aid="+aid+"&package="+my_package, 
+		type:"post",
+		success:function(data) {
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),softid,my_package,softname,versioncode,size,0);
+		},
+	});
+}
+
+function installApp(softid,pkgname){
+	$.ajax({
+		url: '/lottery/'+prefix+'/download.php',
+		data: 'type=2&softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+		type: 'post',
+		success: function(data){
+			window.AnzhiActivitys.installAppForActivity(softid);
+		}
+	});
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		$('#'+softid+'').html("下载中");
+	}else if(newState == 2 || newState == 3 || newState == 8){
+		$('#'+softid+'').html("继续");
+		for(i=0;i < soft_arr.length;i++){
+			if(soft_arr[i][0] == softid){
+				if(soft_arr[i][2].length > 6){
+					var softname = soft_arr[i][2].substring(0,5)+'...';
+				}else{
+					var softname = soft_arr[i][2];
+				}				
+				$('#li_'+softid+'').attr('onclick',"go_softinfo_down("+parseInt(softid)+",'"+soft_arr[i][7]+"','"+softname+"','"+soft_arr[i][13]+"','"+soft_arr[i][soft_arr[i].length-1]+"')");
+			}
+		}				
+	}else if(newState == 4){
+		$('#'+softid+'').html("重试");			
+	}else if(newState == 5){		
+		$('#'+softid+'').html("安装");
+		$('#li_'+softid+'').removeAttr("onclick");
+		for(i=0;i < soft_arr.length;i++){
+			if(soft_arr[i][0] == softid){
+				$('#li_'+softid+'').attr('onclick',"installApp("+parseInt(softid)+",'"+soft_arr[i][7]+"')");
+			}
+		}
+	}else if(newState == 6){
+		$('#'+softid).html("打开");
+		$('#li_'+softid+'').removeAttr("onclick");
+		for(var i=0;i < soft_arr.length;i++){		
+			if(soft_arr[i][0] == softid){
+				$('#li_'+softid).attr('onclick',"openApp('"+soft_arr[i][7]+"',"+parseInt(softid)+")");
+                break;
+			}
+		}
+	}else if(newState == 9){
+		$('#'+softid+'').html("检查中");			
+	}
+}
+
+//分享
+function go_share(){
+	/*$.ajax({
+		url: '/lottery/'+prefix+'/share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+		}
+	});*/
+	var share_text="我在安智市场用答题神器成功瓜分奖金啦！你也快来试试！";	
+	var share_url='<!--{$out.activity_host}-->/lottery/'+prefix+'/index.php?is_share=1&aid='+aid;
+<!--{if $out['is_test'] == 1}-->
+	var icon_url = 	"<!--{$out.activity_host}-->/static/activity/"+prefix+"/images/share_icon.png";
+<!--{else}-->
+	var icon_url = 	"http://img3.anzhi.com/static/activity/"+prefix+"/images/share_icon.png";
+<!--{/if}-->
+	var share_json = '{"TEXT":"'+share_text+'","URL":"'+icon_url+'","ACTIONURL":"'+share_url+'","URLWEIXIN":"'+icon_url+'"}';
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+
+<!--{if $out['is_share'] == 1}-->
+document.write(unescape("%3Cscript src='/js/anzhi-fd-min1.js?v"+Math.round(Math.random()*100)+"' type='text/javascript'%3E%3C/script%3E"));
+var js_param = {type:'action', id:aid, callback:invite_callback};
+var php_param = {type:'action', aid:aid};
+$(document).ready(function () {
+	Azfd.share_download(js_param, php_param);
+});	
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6200){
+			js_param = {type:'action', id:aid, callback:null};
+			Azfd.lock = false;
+			share_download(js_param, php_param);			
+		}else {
+			setTimeout(function(){
+				var php_url = 'fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;			
+			},1000);		
+		} 
+	}else{
+		setTimeout(function(){
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;			
+		},1000);		
+	}
+}
+function is_null(){}
+<!--{/if}-->
+</script>

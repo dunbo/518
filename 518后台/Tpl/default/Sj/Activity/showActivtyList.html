@@ -1,0 +1,353 @@
+<include file="../../Public/header" />
+<script src="/Public/js/thickbox.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox1.css" />
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+<style type=text/css>
+.intb td {
+border-right:none;
+border-bottom: none;
+}
+.fixlong {
+  table-layout: fixed;
+}
+.fixlong td {
+  word-break: break-all;
+}
+</style>
+</head>
+
+<body>
+<div style="width:95%; margin-top:4px">
+	<div width="99%" style="margin-top:10px" align="right">
+		<a href="/index.php/Sj/Config/active_config">活动设置</a>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<a href="__URL__/addActivity_show{$url_subff}?mm">添加活动</a>
+	</div>
+	<table  width="90%" border="1px" align="center" cellpadding="0" cellspacing="0" style="margin:10px auto;border:0px;">
+		<tbody>
+			<tr>
+				<td colspan="10">活动搜索</td>
+			</tr>
+			<tr>
+				<td>Id</td>
+				<td><input type="text" style="width:80%;"name="id" value="{$id}"id="id" /></td>
+				<td>活动名称：</td>
+				<td><input type="text" style="width:80%;"name="activityName" value="{$activityName}"id="activityName"placeholder="模糊查询"/></td>
+				<td>网址</td>
+				<td><input type="text" style="width:80%;" name="activitySite"  value="{$activitySite}"id="activitySite"placeholder="模糊查询"/></td>
+				<td rowspan="2">活动标签：<select name="filter_label_id" id="filter_label_id">
+					<option value="">请选择</option>
+					<option value="0" <?php if($filter_label_id!=''&&$filter_label_id<1){echo "selected=''selected";}?>>无</option>
+				<volist name="labels" id="label">
+					<option value="{$label.id}" <?php if($label['id']==$filter_label_id){echo "selected=''selected";}?>>{$label.label_name}</option>
+				</volist>
+				</select></td>	
+				<td rowspan="2">&nbsp;<button id="searchGo">确认搜索</button>&nbsp;&nbsp;<button id="ressetSearch">清空</button></td>
+			</tr>
+			<tr>
+				<td >活动分类：</td>
+				<td>
+					<select style='width:85px' name="activity_category" id="activity_category">
+						<option value="">请选择</option>
+						<option value="0" <if condition="$activity_category  eq '0'">selected</if>>全部</option>
+						<option value="1" <if condition="$activity_category  eq '1'">selected</if>>游戏活动</option>
+						<option value="2" <if condition="$activity_category  eq '2'">selected</if>>应用活动</option>
+					</select>
+				</td>			
+				<td>活动开始时间：</td>
+				<td><input type="text" style="width:80%;" name="startDate" value="{$startDate}" id="startDate"placeholder="全匹配,格式:2014-07-07"/><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"startDate",dateFmt:"yyyy-MM-dd"})'  style="border:1px solid #000;vertical-align:middle;line-height:30px;"/></td>
+				<td>活动结束时间</td>
+				<td><input type="text" style="width:80%;" name="endDate" value="{$endDate}" id="endDate"placeholder="全匹配,格式:2014-07-07"/><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"endDate",dateFmt:"yyyy-MM-dd"})'  style="border:1px solid #000;vertical-align:middle;line-height:30px;"/></td>
+			</tr>
+			<tr>
+				<td colspan="10">活动状态：<select style='width:85px' name="is_start" id="is_start">
+						<option value="">请选择</option>
+						<option value="3" <if condition="$is_start  eq '3'">selected</if>>全部</option>
+						<option value="1" <if condition="$is_start  eq '1'">selected</if>>已启动</option>
+						<option value="2" <if condition="$is_start  eq '2'">selected</if>>未启动</option>
+					</select></td>
+			</tr>
+		</tbody>
+	</table>
+	<script type="text/javascript">
+				$(function(){
+                                        document.onkeydown = function(e){
+                                            if(e.keyCode==13) {
+                                                search();
+                                             }
+                                        }
+					$("#searchGo").click(function(){
+                                                search();
+					}
+					);
+
+					$("#ressetSearch").click(function(){
+						$("#id").val("");
+						$("#activity_category").val("");
+						$("#activityName").val("");
+						$("#startDate").val("")
+						$("#endDate").val("")
+						$("#filter_label_id").val("")
+						$("#activitySite").val("")
+					});
+				});
+
+                                function search(){
+                                        var activity_category = $("#activity_category").find("option:selected").val();
+                                        var id = $("#id").val();
+                                        var activityName = $("#activityName").val();
+                                        var startDate = $("#startDate").val();
+                                        var endDate = $("#endDate").val();
+                                        var filter_label_id = $("#filter_label_id").val();
+                                        var is_start = $("#is_start").val();
+                                        var activitySite = $("#activitySite").val();
+                                        activitySite = activitySite.replace(/\//g,"$");
+                                        var go_url = "__URL__/showActivityList?activityName="+activityName+"&startDate="+startDate+"&endDate="+endDate+"&activitySite="+activitySite+"&id="+id+"&filter_label_id="+filter_label_id+"&is_start="+is_start+"&activity_category="+activity_category;
+                                        window.location.href=go_url;
+                                }
+				</script>
+	<table width="99%" class='fixlong' border="1" align="center" cellpadding="0" cellspacing="0" style="margin-top:10px">
+		<thead>
+			<tr align="center">
+				<th width="3%"><input type="checkbox" id="id_all[]" name="id_all[]" onclick="selectAlls();"></th>
+				<th width="3%">ID</th>
+				<th width="5%" height="26" bgcolor="#E3E2FE">活动名称</th>
+				<th width="5%" bgcolor="#E3E2FE">图片</th>
+				<th width="5%" bgcolor="#E3E2FE">6.0低分图片</th>
+				<th width="5%" bgcolor="#E3E2FE">6.0高分图片</th>
+				<th width="6%" bgcolor="#E3E2FE">活动开始时间</th>
+				<th width="6%" bgcolor="#E3E2FE">活动结束时间</th>
+				<!--
+				<th width="10%" bgcolor="#E3E2FE">专区展示开始时间</th>
+				<th width="10%" bgcolor="#E3E2FE">专区展示结束时间</th>
+				-->
+				<th width="5%" bgcolor="#E3E2FE">渠道</th>
+				<th width="5%" bgcolor="#E3E2FE">市场版本</th>
+				<th width="5%" bgcolor="#E3E2FE">活动标签</th>
+				<th width="10%" bgcolor="#E3E2FE" >网址</th>
+				<th width="5%" bgcolor="#E3E2FE">排序</th>
+				<th width="5%" bgcolor="#E3E2FE">合作形式</th>
+				<th width="5%" bgcolor="#E3E2FE">活动状态</th>
+				<th  width="7%" bgcolor="#E3E2FE">推广外链</th>
+				<th width="10%" bgcolor="#E3E2FE">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="vo">
+			<tr style="color:#707070; background-color:#fff">
+				<td align='center'>
+					<input type="checkbox" name="id[]" value="{$vo.id}" />
+				</td>
+				<td align="center" id="name_{$vo.ids}">{$vo.id}</td>
+				<td align="center" id="name_{$vo.id}">{$vo.name}</td>
+				<td align="center" id="img_{$vo.id}">
+					<a target='_blank' href='<?php echo IMGATT_HOST;?>{$vo.imgurl}' >
+					<img src="<?php echo IMGATT_HOST;?>{$vo.imgurl}" width="50" height="50" >
+					</a>
+				</td>	
+				<td>	
+					<?php if($vo['low_image_url']){ ?>
+					<a target='_blank' href='<?php echo IMGATT_HOST;?>{$vo.low_image_url}' >
+					<img src="<?php echo IMGATT_HOST;?>{$vo.low_image_url}" width="50" height="50" >
+					</a>
+					<?php } ?>
+				</td>	
+				<td>	
+					<?php if($vo['high_image_url']){ ?>
+					<a target='_blank' href='<?php echo IMGATT_HOST;?>{$vo.high_image_url}' >
+					<img src="<?php echo IMGATT_HOST;?>{$vo.high_image_url}" width="50" height="50" >
+					</a>
+					<?php } ?>
+				</td>
+				<td align="center" id="start_tm_{$vo.id}">{$vo.start_tm}</td>
+				<td align="center" id="end_tm_{$vo.id}">{$vo.end_tm}</td>
+				<!--
+				<td align="center" id="show_start_tm_{$vo.id}">{$vo.show_start_tm}</td>
+				<td align="center" id="show_end_tm_{$vo.id}">{$vo.show_end_tm}</td>
+				-->
+				<td align="center">{$vo.chname|default='&nbsp;'}</td>
+				<td align="center">{$vo.version_code|default='&nbsp'}</td>
+				<td align="center">{$vo.filter_label_id|default='&nbsp'}</td>
+				<td align="center" ><a href='javascript:;' onclick="open_box('{$vo.url}')">{$vo.url|default='&nbsp;'}</a></td>
+				<td style="display:none;" align="center" id="url_{$vo.id}">{$vo.url|default='&nbsp;'}</td>
+				<td style="display:none;" align="center" id="pre_url_{$vo.id}">{$vo.pre_url|default='&nbsp;'}</td>
+				<td style="display:none;" align="center" id="end_url_{$vo.id}">{$vo.end_url|default='&nbsp;'}</td>
+				<td  align="center">
+				<?php if($vo['end_tm_str'] < time()){ echo '-'; }else{ ?>
+				<input size='3' type="text" name="pos" id="pos" value="<?php echo $vo['pos'] ? $vo['pos'] : ''; ?>" onchange="save_pos(this,{$vo.id},{$vo['start_tm_str']},{$vo['end_tm_str']});" />
+				<?php } ?>
+				</td>
+				<TD><?php if ($vo['co_type'] !=0) { echo $vo['co_types'] ; }else{ echo "-";} ?></TD>
+				<TD><?php if ($vo['is_start']==1) { echo '已启动' ; }else if($vo['is_start']==2){ echo "未启动";} ?></TD>
+				<td><a href='javascript:;' onclick="open_box('{$vo.extend_link}')">{$vo.extend_link}</a></td>
+				<td align="center">
+					<?php if( $vo['activity_type_bank'] == 2||$vo['activity_type_bank'] == 6){ ?>
+                                        <a href="__URL__/award_list/id/{$vo.id}/type/{$vo['activity_type_bank']}/p/{$p}/lr/{$lr}">奖品列表</a><br/>
+					<?php }else if($vo['activity_type_bank'] == 1){ ?>
+					<a href="__URL__/custom_award_list/id/{$vo.id}">奖品列表</a><br/>
+					<?php }else if($vo['activity_type_bank'] == 5){ ?>
+					<a href="__URL__/ranking_award_list/id/{$vo.id}/p/{$p}/lr/{$lr}">奖品列表</a><br/>
+					<?php }else if($vo['activity_type_bank'] == 7){ ?>
+					<a href="__URL__/pre_down_operation_award_list/id/{$vo.id}/p/{$p}/lr/{$lr}">奖品列表</a><br/>
+					<?php }else if($vo['activity_type_bank'] == 8){ ?>
+					<a href="__URL__/sign_award_list/id/{$vo.id}">奖品列表</a><br/>
+					<a href="__URL__/sign_template_list/id/{$vo.id}/">签到管理</a><br/>
+					<?php }?>
+					<a href="__URL__/edit_test_show/id/{$vo.id}/p/{$p}/lr/{$lr}{$url_subff}" >编辑</a><br/>
+					<a style="margin-right:5px;cursor:pointer;" href="javascript:delete_act({$vo.id});">删除</a><br />
+					<?php if($vo['activity_type'] == 1 && $vo['activity_type_bank'] == 2){ ?><a href="__URL__/edit_extend_page/id/{$vo.id}/p/{$p}/lr/{$lr}" class="thickbox">编辑推广页面</a><?php } ?>
+				</td>
+			</tr>
+			</volist>
+			<tr style="color:#707070; background-color:#fff">
+				<td>
+					
+					<input type="button" title="启动" class="search_btn" style="width:100px;margin-left:50px;" value="启动" onclick="batch_pass(1)" >
+					
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	{$page}
+</div>
+
+<!-- 添加活动 -->
+<style type="text/css">
+.tb_add .td1 {height:30px;line-height:30px;font-size:14px;}
+.tb_add input {width:300px;height:22px;font-size:14px;}
+.tb_add .td2 {height:30px;line-height:30px;font-size:14px;}
+</style>
+<div id="_add_div" style="position:absolute;top:0px;left:0px;display:none;background:#fff;width:500px;height:410px;border:1px solid #000;">
+
+</div>
+<div id="box" class="zxx_test_list" style="padding:10px; width:350px; height:100px; word-break:break-all; word-wrap:break-word;overflow-y:scroll  display:none;">
+	<table>
+		<tr>
+			<td align='center' id='link' ></td>
+		</tr>
+	</table>
+</div>
+
+
+
+<form method="post" action="" id="tmp_form">
+
+<input type="hidden" id="sta" name="sta" />
+</form>
+<div id="bgdiv" style="position:absolute;display:none; left:0px; top:0px; width:100%; height:100%; filter:alpha(opacity=40);opacity:0.4; background-color:#000000; z-index:1000;"></div>
+<script language="javascript">
+function edit(editid) {
+	popup('_edit_div');
+	$('#edit_name').val($('#name_'+editid).html());
+	$('#edit_url').val($('#url_'+editid).html());
+	$('#edit_pre_url').val($('#pre_url_'+editid).html());
+	$('#edit_end_url').val($('#end_url_'+editid).html());
+	$('#edit_start_tm').val($('#start_tm_'+editid).html());
+	$('#edit_end_tm').val($('#end_tm_'+editid).html());
+	$('#edit_show_start_tm').val($('#show_start_tm_'+editid).html());
+	$('#edit_show_end_tm').val($('#show_end_tm_'+editid).html());
+	$('#editid').val(editid);
+}
+
+function delete_act(deleteid) {
+	if (confirm('确定要删除指定活动么？'))
+	{
+		location.href='/index.php/Sj/Activity/deleteActivity/id/' + deleteid+"{$url_subff}";
+	}
+}
+
+function form_chk() {
+	return true;
+}
+function form_chk_edit() {
+	return true;
+}
+
+function status(beid,sta) {
+	if(confirm('你确认执行此操作！')) {
+		$('#tmp_form')[0].action = '/index.php/Sj/Products/push_oper';
+		$('#beid').val(beid);
+		$('#sta').val(sta);
+		$('#tmp_form').submit();
+	}
+}
+
+function popup(id) {
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+}
+function popclose(id) {
+	$("#"+id).css({display:"none"});
+	$("#bgdiv").css({display:"none"});
+}
+function save_pos(obj,id,start,end){
+	var pos = $(obj).val();
+	$.ajax({
+		'url': '/index.php/Sj/Activity/save_pos',
+		'type': 'get',
+		'data' : 'id='+id+'&pos='+pos+'&start='+start+'&end='+end,
+		'dataType': 'json',
+		'success': function(res){
+			//if(res.code == 1){
+				alert(res.msg);
+				location.reload(true);//加载页面
+			//}else{
+				//alert(res.msg);
+				//return false;
+			//}
+		}
+	});	
+}
+
+function open_box(txt){	
+	$('#link').html(txt);
+	$("#box").zxxbox();
+}
+
+
+
+function get_ids(){
+	var chks=$("input[name='id[]']:checked");
+	var ids=new Array();
+    $(chks).each(function(){
+       ids.push(this.value);        
+    });
+    return ids;
+}
+function batch_pass(is_start){
+
+	var ids=get_ids();
+	// alert(ids);
+    if(ids.length==0){
+		alert('请选择要操作的对象!');
+		return;
+	}
+	var str='';
+	if(is_start==1){
+		str='确认将该批次活动启动吗？';
+	}
+	if(!confirm(str))
+	{
+		return true;
+	}
+	
+	
+	window.location.href='__URL__/start_activty?id='+ids+'&is_start='+is_start+'&1/1';
+    
+}
+</script>
+</body>
+</html>

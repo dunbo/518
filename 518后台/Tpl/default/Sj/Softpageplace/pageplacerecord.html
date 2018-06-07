@@ -1,0 +1,90 @@
+<include file="../Public/header" />
+
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<center>
+<h1>页面软件管理历史记录</h1>
+	<form action="__URL__/pageplacerecord" method="get">
+
+	软件类别:<select name="soft_type_record">
+				<option <?php if($soft_type_record == "") echo "selected";?> >请选择...</option>
+				<option value="top_new" <?php if($soft_type_record == "top_new") echo "selected";?> >最新</option>
+				<option value="top_hot" <?php if($soft_type_record == "top_hot") echo "selected";?> >最热</option>
+				<option value="top_1d" <?php if($soft_type_record == "top_1d") echo "selected";?> >日排行</option>
+				<option value="top_7d" <?php if($soft_type_record == "top_7d") echo "selected";?> >周排行</option>
+				<option value="top_30d" <?php if($soft_type_record == "top_30d") echo "selected";?> >月排行</option>
+			<volist name="soft_page_category" id="infovo">
+				<option value="top_{$infovo.category_id}_new" <?php if($soft_type_record == "top_".$infovo['category_id']."_new") echo "selected";?> >{$infovo.name}-最新</option>
+				<option value="top_{$infovo.category_id}_hot" <?php if($soft_type_record == "top_".$infovo['category_id']."_hot") echo "selected";?> >{$infovo.name}-最热</option>
+			</volist>
+			</select>
+		开始时间(*)：<input id="begintime" name="begintime"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="{$start_tm}" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			onclick="return showCalendar('begintime', 'y-m-d');"
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px">
+		结束时间(*)：<input id="endtime" name="endtime"
+			style="border: 0px none black; width: 100px;" value="{$stop_tm}"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			onclick="return showCalendar('endtime', 'y-m-d');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		<input type="submit" value="查看">
+
+	</form>
+	<br />
+	<br />
+	 <td colspan="3" align="center" bgcolor="#606060" ><span style="color:red" >过期数据:红色</span>|<span style="color:#FF0">删除：黄色</span>|<span style="color:black">当前:白色</span>|<span style="color:green">未上线的:绿色</span></td>
+	<table border="1" cellpadding="0" cellspacing="0">
+		<tr>
+			<td>软件ID</td>
+			<td>软件名/软件包名</td>
+			<td>软件类别</td>
+			<td>开始时间</td>
+			<td>结束时间</td>
+			<td>最后修改时间</td>
+			<td>位置</td>
+		</tr>
+			<tr>
+		<volist name='soft_list' id='infovo' >
+			<?php  if($infovo['status']==0){ ?>
+			<tr bgcolor="#FF0">
+			<?php }elseif($infovo['stop_tm']<time()){ ?>
+			<tr bgcolor="red">
+			<?php }elseif($infovo['start_tm']>time()){ ?>
+			<tr bgcolor="green">
+			<?php }else{ ?>
+			<tr bgcolor="#FFF">
+			<?php } ?>
+			<td>{$infovo.id}</td>
+			<td>{$infovo.soft_name}({$infovo.package})</td>
+			<td>{$infovo.type_name}</td>
+			<td><?php echo date('Y-m-d',$infovo['start_tm']);?></td>
+			<td><?php echo date('Y-m-d',$infovo['stop_tm']);?></td>
+			<td colspan="2"></td>
+			</tr>
+			<volist name="log_list[$infovo[id]]" id="vo">
+			<tr>
+			
+			<td>{$infovo.id}</td>
+			<td>{$infovo.soft_name}({$infovo.package})</td>
+			<td>{$infovo.type_name}</td>
+			<td><?php echo date('Y-m-d',$infovo['start_tm']);?></td>
+			<td><?php echo date('Y-m-d',$infovo['stop_tm']);?></td>
+			<td>{$vo.update_tm}</td>
+			<td>{$vo.pos}</td>
+			</tr>
+			</volist>
+		</tr>
+		</volist>
+		</tr>
+	</table>
+	{$page}
+</center>

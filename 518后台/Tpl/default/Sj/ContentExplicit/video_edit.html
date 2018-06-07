@@ -1,0 +1,179 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+
+<style>
+.sub_tr {
+    height: 35px;
+    text-align: left;
+}
+td{height:  40px;}
+input{height: 17px;}
+</style>
+<script>
+// 提交前的检查
+function checkVideo() {
+	//http://v.youku.com/v_show/id_XMzQzODI3MDMyMA==.html?spm=a2hww.20027244.m_251620.5~5!2~5~5!6~5~1!2~3~A
+    var videourl = $("#videourl").val();
+    var type = $("input[name=videotype]:checked").val();
+    if(!type){
+    	alert('请选择添加的视频类型');
+    	return false;
+    }
+    if (type == 1 && !videourl) {
+        alert("视频链接不能为空！");
+        return false;
+    }
+    if (type == 1 && videourl.indexOf('youku') == -1) {
+        alert("只支持优酷外链视频");
+        return false;
+    }
+    if(type == 1 && !videourl.match(/v\.youku\.com\/v_show\/id_[^\.]+\.html.*$/) && !videourl.match(/player\.youku\.com\/embed\/\w+/)){
+    	 alert("优酷外链视频格式不合法");
+        return false;
+    }
+    if(type == 1){
+    	videourl = videourl.replace(/v\.youku\.com\/v_show\/id_([^\.]+)\.html.*$/,'player.youku.com/embed/$1');
+    	$("#videourl").val(videourl);
+    }
+
+    if(type == 3 && !$("#pkgname").val()){
+    	alert("软件包名不能为空！");
+        return false;
+    }
+    if(type==3 && $("#videoselect").val()=='选择视频'){
+    	alert("配置错误，请重试");
+    	return false;
+    }
+    $("#uptips").text("上传中，请稍等");
+    $("#upvideobtn").text("上传中，请稍等");
+    $("#upvideobtn").attr('disabled',true);
+    $.ajax({
+	    url: '__URL__/video_edit',
+	    type: 'POST',
+	    cache: false,
+	    data: new FormData($('#videobox')[0]),
+	    processData: false,
+	    contentType: false,
+	    dataType:"text"
+
+	}).done(function(res) {
+		var obj = JSON.parse(res);
+		if(obj.status == 0){
+			alert(obj.info);
+			$("#uptips").text("");
+	   		$("#upvideobtn").text("确定");
+	   		$("#upvideobtn").attr('disabled',false);
+		}else{
+			$("#savevideo").html("<input type='hidden' name='softvideoid' value='"+obj.data+"'>")
+			$("#videohref").attr('href','__URL__/video_edit/id/'+obj.data+'/');
+			tb_remove();
+		}
+
+	}).fail(function(res) {
+		$("#uptips").text("");
+   		$("#upvideobtn").text("确定");
+   		$("#upvideobtn").attr('disabled',false);
+		alert("上传失败，请重新上传");
+	});
+	
+}
+
+
+function get_video(){
+	var pkg=$('#pkgname').val();
+	if(pkg){
+    	$.ajax({
+			url: '__URL__/get_video_lib/',
+			type: 'post',
+			data:{'package':pkg},
+			async:false,
+			success: function(data){
+				var data = eval('(' + data + ')');
+				if(data.status==1){
+					$('#vsoftname').val(data.data.softname);
+					$("#videoselect").html('<option>选择视频</option>');
+					for(i in data.data.video_info)
+					{
+						console.log(data.data.video_info[i].video_title);
+						$("#videoselect").append("<option value='"+data.data.video_info[i].id+"'>"+data.data.video_info[i].video_title+"</option>")
+					}
+				}else{
+					alert(data.info);
+					$('#pkgname').val('');
+				}
+			}
+		});
+    }
+}
+</script>
+
+<body>
+<div  style="margin:20px;">
+	<form action="__URL__/video_edit" method="post" id="videobox" enctype="multipart/form-data" >
+		<div>
+		<h2 style="font-size:24">添加视频类型</h2>
+		<h1 id="uptips" style="color: red"></h1><br/>
+		<input type="hidden" name="id" value="{$video_data.id}">
+		<table>
+			<tr>
+				<td style="width:90px;"><input type="radio" name="videotype" value="1" <if condition="$video_data['type'] eq 1">checked</if>>插入视频链接</td>
+				<td><input type="text" name="videourl" id="videourl" value="<if condition="$video_data['type'] eq 1">{$video_data.videopath}</if>" /></td>
+				<td>优酷视频链接</td>
+			</tr>
+			<tr>
+				<td><input type="radio" name="videotype" value="2" <if condition="$video_data['type'] eq 2">checked</if>>上传视频：</td>
+				<td>上传视频文件<input type="file" name="videopath" id="videopath"/></td>
+				<td>支持MP4格式，100M以内，视频格式必须是h264编码，否则不能播放</td>
+			</tr>
+			<if condition="$video_data['type'] eq 2">
+			<tr>
+				<td>&nbsp;</td>
+				<td>
+					<video id="myVideo" width="320" height="240" controls>
+					  <source src="{$attachment_host}{$video_data.videopath}" type="video/mp4">
+					</video>
+				</td>
+			</tr>
+			</if>
+			<tr>
+				<td></td>
+				<td>视频默认图：<input type="file" name="coverpath" id="videocover"/></td>
+				<td>JPG/PNG图片</td>
+			</tr>
+			<if condition="$video_data['type'] eq 2">
+			<tr>
+				<td>&nbsp;</td>
+				<td><img src="{$attachment_host}{$video_data.coverpath}" width="320" height="240"></td>
+			</tr>
+			</if>
+			<tr>
+				<td><input type="radio" name="videotype" value="3" <if condition="$video_data['type'] eq 3">checked</if>>视频库</td>
+				<td>软件包名：<input type="text" name="pkgname" id="pkgname" value="<if condition="$video_data['type'] eq 3">{$video_data.pkgname}</if>" onblur="get_video()" /></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>软件名称：<input type="text" name="vsoftname" id="vsoftname" disabled style="background-color:#ccc;" value="<if condition="$video_data['type'] eq 3">{$video_data.softname}</if>"/></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>选择视频：<select id="videoselect" name="videoselect" width="200px">
+					<option>选择视频</option>
+					<volist name= "video_info" id= "vo"> 
+						<option value="{$vo.id}"<if condition="$vo['id'] eq $video_data['videolibid']">selected</if>>{$vo.video_title}</option>
+					</volist>
+				</select></td>
+			</tr>
+		</table>
+		<table>
+			<tr>
+				<td><button type="button" class="search_btn" id="upvideobtn" style="display:inline-block;" onclick="checkVideo();">确定</button></td>
+				<td><button type="button" class="search_btn" style="display:inline-block;" onclick="tb_remove();">取消</button></td>
+			</tr>
+		</table>
+	</div>
+	</form>
+</div>
+</body>
+</html>

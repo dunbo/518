@@ -1,0 +1,255 @@
+<style type="text/css">
+table{border-collapse:collapse; table-layout:fixed}
+</style>
+<script type="text/javascript">
+//批量下载apk
+function batch_download(){
+	id_str = Selected_check();
+    if (id_str && confirm("是否批量下载")) {
+		$.ajax({
+			url: '__URL__/batch_download_pkg',
+			data : 'id='+id_str+'&type='+cj_type,
+			type: 'post',
+			dataType: 'json',
+			success: function(ret) {
+				//console.log(ret);
+				for(var i in ret) {
+					//console.log(ret[i]);
+					window.open(ret[i]);
+				}
+			}
+		});
+    }
+}
+//多来源
+function open_appfrom(pkg){
+	var rel = $('#from_'+pkg).attr('rel');
+	if(rel == 0){
+		$('#img_'+pkg).attr('src','/Public/images/u497.png');
+		$('#from_'+pkg).attr('rel',1);
+		$('#from_'+pkg).css('display','');
+	}else{
+		$('#img_'+pkg).attr('src','/Public/images/u495.png');
+		$('#from_'+pkg).attr('rel',0);
+		$('#from_'+pkg).css('display','none');
+	}
+}
+//忽略
+function ignored(id){
+	open_color(id);	
+	$("input[value='"+id+"']").attr('checked',true);
+	tb_show('采集忽略','__URL__/update_ignored?type='+cj_type+'&id='+id+'&height=350&width=500',false);
+}
+function ignored_arr(){
+	id_str = Selected_check();
+	if(id_str){
+		open_color(id_str);
+		ignored(id_str);
+	}
+}
+//盗版提醒
+function Similar_soft(id){
+    var sim_status = $('#sim_soft_'+id).css('display');
+    $('.hide_soft').css('display','none');
+    if (sim_status == 'none') {
+        $('#sim_soft_'+id).css('display','block');
+    } else {
+        $('#sim_soft_'+id).css('display','none');
+    } 
+} 
+//md5验证
+function Md5_dif(id){
+    var md5_status = $('#md5_soft_'+id).css('display');
+    $('.hide_soft').css('display','none');
+    if (md5_status == 'none') {
+        $('#md5_soft_'+id).css('display','block');
+    } else {
+        $('#md5_soft_'+id).css('display','none');
+    } 
+} 
+//运营提醒
+function Operation_soft(softid){
+    var sim_status = $('#oper_soft_'+softid).css('display');
+    $('.hide_soft').css('display','none');
+    if (sim_status == 'none') {
+        $('#oper_soft_'+softid).css('display','block');
+    } else {
+        $('#oper_soft_'+softid).css('display','none');
+    } 
+}
+
+//签名风险
+function sign_soft(pkg){
+    var sign_status = $('#sign_'+pkg).css('display');
+    $('.hide_soft').css('display','none');
+    if (sign_status == 'none') {
+        $('#sign_'+pkg).css('display','block');
+    } else {
+        $('#sign_'+pkg).css('display','none');
+    } 
+}
+
+<?php
+$info = array();
+$info2 = array();
+foreach($list as $v) {
+	if (empty($v['Pirate'])) {
+		$info[$v['pkg_str']] = array(
+			'softname'=>$v['softname'],
+			'icon_md5'=>$v['icon_md5'],
+			'package'=>$v['package']
+		);
+	}
+	$info2[$v['pkg_str']] = array($v['softname'],'',$v['package']);
+	if($v['toal'] >1) 
+		$info3[$v['pkg_str']] = array(
+			'id' => $v['id'],
+			'softname' =>$v['softname'],
+			'icon_path' => $v['icon_path'],
+			'package' => $v['package'],
+			'dev_name' => $developer[$v['dev_id']]['dev_name'] ? $developer[$v['dev_id']]['dev_name'] : '',
+			'dev_id' => $developer[$v['dev_id']]['dev_id'] ? $developer[$v['dev_id']]['dev_id'] : '',
+			'email' => $developer[$v['dev_id']]['email'] ? $developer[$v['dev_id']]['email'] : '',
+			'version_code' => $v['version_code'],
+			'version_name' => $v['version_name'],
+			'az_version_code' => $v['az_version_code'],
+			'az_version' => $v['az_version'],
+			'az_category' => $v['az_category'],
+			'az_downloaded' => $v['az_downloaded'],
+			'is_office' => $v['is_office'],
+			'is_safe' => $v['is_safe'],
+			'is_ad' => $v['is_ad'],
+			'az_office' => $v['az_office'],
+			'az_safe' => $v['az_safe'],
+			'az_ad' => $v['az_ad'],
+		); 
+	$info4[] = $v['package'];	
+}
+$info = json_encode($info);
+$info2 = json_encode($info2);
+$info3 = json_encode($info3);
+$info4 = json_encode($info4);
+?>
+
+
+
+//山寨风险
+$(document).ready(function(){
+	var param = {data:<?php echo $info; ?>};
+	$.ajax({
+		url: '__URL__/pub_soft_notice',
+		data: param,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			for(var i in param['data']){
+				$('#cp_soft_'+i).html("<img src='/Public/images/loading.gif'/>");
+				if (typeof(ret[i]) != 'undefined' && i != '') {
+					$('#sim_soft_'+i+' table').html('<tr><td><a target="_blank" href="/index.php/Dev/Soft/global_search/softid_str/'+ret[i][1]+'/tmpid_str/'+ret[i][2]+'">名称和icon相同【'+ret[i][0]+'】</a></td></tr>');
+					$('#cp_soft_'+i).html('<button onclick="Similar_soft(\''+i+'\')" style="background:#0000FF; border:0; color:#fff; cursor:pointer;">山寨风险</button>');
+				} else {
+						$('#cp_soft_'+i).html('');
+				}
+			}
+		}
+	});
+});
+//运营提醒
+$(document).ready(function(){
+	var param = {data:<?php echo $info2; ?>};
+	$.ajax({
+		url: '/index.php/Dev/Soft/pub_soft_oper',
+		data: param,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			for(var i in param['data']){
+				$('#cp_soft_oper_'+i).html("<img src='/Public/images/loading.gif'/>");
+				//console.log(ret[i]);
+				//alert(ret[i])
+				if (ret[i] != false && i != '') {
+					$('#cp_soft_oper_'+i).html('<button onclick="Operation_soft(\''+i+'\')" style="background:#830700; border:0; color:#fff; cursor:pointer;">运营风险</button>');
+					var str = '';
+					for(var ii in ret[i]){
+						//console.log(ret[i][ii]);
+						//console.log(ret[i][ii].softname);
+						str += "<tr><td width='60'><a target='_blank' href='/index.php/Dev/Soft/softlist/package/"+ret[i][ii].apk_package+"'><img src='<?php echo IMGATT_HOST;?>"+ret[i][ii].apk_icon+"' width='48' height='48'/></a></td><td><a target='_blank' href='/index.php/Dev/Soft/softlist/package/"+ret[i][ii].apk_package+"'>"+ret[i][ii].apk_package+"<br/>"+ret[i][ii].softname+"</a></td></tr>";
+					}
+					$('#oper_soft_'+i+' table').html(str);
+				} else {
+					$('#cp_soft_oper_'+i).html('');
+				}
+			}
+		}
+	});
+}); 
+//多来源
+$(document).ready(function(){
+	var param = {type:cj_type, data:<?php echo $info3; ?>};
+	$.ajax({
+		url: '__URL__/pub_soft_from',
+		data: param,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if (ret != false) {
+				for(var i in ret){
+					var str = '';
+					for(var ii in ret[i]){
+
+						if(cj_type == 'update'){
+                            str += "<tr id='tr"+ret[i][ii].id+"'><td width='6%'><input type='checkbox' value="+ret[i][ii].id+" name='id[]'>"+ret[i][ii].icon_path+"</td>";
+                            str += "<td width='10%'>"+ret[i][ii].softname+"</td>";
+                            str += "<td width='12.1%'>"+ret[i][ii].package+"</td>";
+							str += "<td width='13.1%'>"+ret[i][ii].dev_name+"<br/>"+ret[i][ii].dev_id+"<br/>"+ret[i][ii].email+"</td>";
+							str += "<td width='8%'>"+ret[i][ii].version_code+"("+ret[i][ii].version_name+")<br/>"+ret[i][ii].is_office+ret[i][ii].is_safe+ret[i][ii].is_ad+"</td>";
+							str += "<td width='8.1%'>"+ret[i][ii].az_version_code+"("+ret[i][ii].az_version+")<br/>"+ret[i][ii].az_office+ret[i][ii].az_safe+ret[i][ii].az_ad+"</td>";
+							str += "<td width='6.1%'>"+ret[i][ii].az_category+"</td>";
+							str += "<td width='8.1%' align='center'>"+ret[i][ii].apk_path+"</td>";
+                            str += "<td width='6%'><a target='_black' href='"+ret[i][ii].detail_url+"'>"+ret[i][ii].appfrom+"</a></td>";
+							str += "<td width='8.1%'>"+ret[i][ii].az_downloaded+"</td>";
+							str += "<td width='7%' align='center'> <div style='width:70px;'>"+ret[i][ii].create_time+"</div></td>";
+							str += "<td><a target='_black' href='__URL__/collection_update_pass/id/"+ret[i][ii].id+"' >更新入库</a>|<a href='javascript:;' onclick='ignored(\""+ret[i][ii].id+"\");' >忽略</a></td>";
+							str +="</tr>";
+						}else{
+                            str += "<tr id='tr"+ret[i][ii].id+"'><td width='5%'><input type='checkbox' value="+ret[i][ii].id+" name='id[]'>"+ret[i][ii].icon_path+"</td>";
+                            str += "<td width='15%'>"+ret[i][ii].softname+"</td>";
+                            str += "<td width='10%'>"+ret[i][ii].package+"</td>";
+							str += "<td width='10%'>"+ret[i][ii].version_code+"("+ret[i][ii].version_name+")<br/>"+ret[i][ii].is_office+ret[i][ii].is_safe+ret[i][ii].is_ad+"</td>";
+							str += "<td width='10%' align='center'> <div style='width:70px;'>"+ret[i][ii].website_update_tm+"</div></td>";
+							str += "<td width='10%' align='center'>"+ret[i][ii].apk_path+"</td>";
+                            str += "<td width='10%'><a target='_black' href='"+ret[i][ii].detail_url+"'>"+ret[i][ii].appfrom+"</a></td>";
+							str += "<td width='10%'>"+ret[i][ii].download_count+"</td>";
+							str += "<td width='10%' align='center'> <div style='width:70px;'>"+ret[i][ii].create_time+"</div></td>";
+							str += "<td width='10%'><a target='_black' href='__URL__/collection_add_pass/id/"+ret[i][ii].id+"' >入库</a>|<a href='javascript:;' onclick='ignored(\""+ret[i][ii].id+"\");' >忽略</a></td>";
+							str +="</tr>";
+						}
+					}
+					$('#from_'+i).html(str);
+				}
+			}
+		}
+	});
+	filter_soft();
+}); 
+//去除上架列表已有的软件
+function filter_soft(){
+	var param = {type:cj_type,data:<?php echo $info4; ?>};
+	$.ajax({
+		url: '__URL__/pub_filter_soft',
+		data: param,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==1) {	//成功
+				location.reload();//加载页面
+			}else{
+				return false;
+			}
+		}
+	});	
+}
+function open_alert(div_id){
+	$("#"+div_id).zxxbox();  
+}
+</script>

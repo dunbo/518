@@ -1,0 +1,338 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+$(document).ready(function(){
+	get_site();
+	setTimeout(function(){
+		sel_contact_type(1);
+		change_card_type();
+		get_tags();
+		<?php if(isset($list['is_more']) && $list['is_more'] == 0){ ?>
+			coop_switch(0);
+		<?php }else{ ?>
+			coop_switch(1);
+		<?php } ?>
+	}, 500);
+});
+
+function change_contact_type(obj){
+	var contact_site_id = $('#contact_site_id').val();
+	if(contact_site_id == 1){
+		var contact_type = 1;
+	}else{
+		var contact_type = $('#contact_type').val();
+	}	
+	if(contact_type == 1){
+		get_channel();
+	}else{
+		get_site_tag();			
+	}
+	setTimeout(function(){
+		sel_contact_type(2);
+		//关联内容标签
+		get_tags();
+	}, 500);
+}
+
+function sel_contact_type(is_load){
+		var contact_site_id = $('#contact_site_id').val();
+		var contact_type_s = "{$list.contact_type}"; 
+		if(contact_site_id == 1){
+			//市场站点导向标签不展示
+			var str = '<select id="contact_type" name="contact_type" Onchange="change_contact_type(this)" >';
+				str += '<option selected="selected" value="1">频道</option>';
+				str += '</select>';
+		}else{
+			if(is_load == 1){
+				var str = '<select id="contact_type" name="contact_type" Onchange="change_contact_type(this)" >';
+				if(contact_type_s == 1){
+					str += '<option selected="selected" value="1">频道</option>';
+					str += '<option value="2">标签</option>';
+				}else{
+					str += '<option  value="1">频道</option>';
+					str += '<option selected="selected" value="2">标签</option>';				
+				}
+				str += '</select>';
+			}else{
+				var contact_type = $('#contact_type').val();
+				var str = '<select id="contact_type" name="contact_type" Onchange="change_contact_type(this)" >';
+				if(contact_type == 1){
+					str += '<option selected="selected" value="1">频道</option>';
+					str += '<option value="2">标签</option>';
+				}else{
+					str += '<option  value="1">频道</option>';
+					str += '<option selected="selected" value="2">标签</option>';				
+				}
+				str += '</select>';
+			}
+		}
+	$("#contact_type_td").html(str);	
+}
+function get_channel(){
+	var contact_id = "{$list.contact_id}";
+	var contact_site_id = $('#contact_site_id').val();
+	$.ajax({
+		url: '__URL__/pub_channel_list?from=1&site_id='+contact_site_id,
+		type: 'get',
+		dataType: 'json',
+		success: function(ret) {
+			var str = '<td>&nbsp;</td><td><select id="contact_id" name="contact_id">';
+			for(var i in ret){
+				if(ret[i].id != 'undefined'){
+					if(ret[i].id == contact_id){
+						var str2 = 'selected="selected"';
+					}else{
+						var str2 = '';
+					}	
+					//console.log(ret[i].id);
+					str += '<option value="'+ret[i].id+'"'+str2+'>'+ret[i].channel_name+'</option>';
+				}
+			}	
+			str += '</select></td>'; 	
+			$('#site_tr').html(str);
+		}
+	});	
+}
+function get_site_tag(){
+	var contact_site_id = $('#contact_site_id').val();
+	var contact_id = "{$list.contact_id}";	
+	$.ajax({
+		url: '__URL__/pub_tag_list?site_id='+contact_site_id,
+		type: 'get',
+		dataType: 'json',
+		success: function(ret) {
+			var str = '<td>&nbsp;</td><td><select id="contact_id" name="contact_id">';
+			for(var i in ret){
+				//console.log(ret[i].id);
+				if(ret[i].id == contact_id){
+					var str2 = 'selected="selected"';
+				}else{
+					var str2 = '';
+				}	
+				str += '<option value="'+ret[i].id+'"'+str2+'>'+ret[i].tag_anzhi_name+'</option>';
+			}	
+			str += '</select></td>'; 	
+			$('#site_tr').html(str);
+		}
+	});	
+}
+function change_card_type(){
+	var card_type = $('#card_type').val();
+	if(card_type == 3 || card_type == 4){
+		$('#is_mark_tr').css('display','');
+	}else{
+		$('#is_mark_tr').css('display','none');
+	}
+	get_site();
+	setTimeout(function(){
+		change_contact_type();
+	}, 500);
+}
+//导向页面、关联内容站点
+function get_site(){
+	var content_site_id = "{$list.content_site_id}";
+	var card_type = $('#card_type').val();
+	var site_id={$site_id};
+	if(card_type == 3 || card_type == 4){
+		var type = 2;
+	}else{
+		var type = 1;
+	}
+	$.ajax({
+		url: '__URL__/pub_get_site?type='+type+'&site_id='+site_id,
+		type: 'get',
+		dataType: 'json',
+		success: function(ret) {
+			var str2 = '<select id="content_site_id" name="content_site_id" Onchange="get_tags();" >';
+			for(var i in ret){
+				//console.log(ret[i].id);
+				if(ret[i].id != 1){
+					if(ret[i].id == content_site_id){
+						var sel2 = 'selected="selected"';
+					}else{
+						var sel2 = '';
+					}	
+					str2 += '<option value="'+ret[i].id+'"'+sel2+'>'+ret[i].anzhi_name+'</option>';	
+				}
+			}	
+			str2 += '</select>'; 	
+			$('#content_site_td').html(str2);
+		}
+	});	
+}
+function coop_switch(type){
+	if(type == 1){
+		$('.coop_switch').css('display','');
+	}else{
+		$('.coop_switch').css('display','none');
+	}
+}
+function get_tags(){
+	var contact_site_id = $('#content_site_id').val();
+	var tag_str = "{$tag_arr}";
+	var site_id={$site_id};
+	var zhiyoo_site_id={$zhiyoo_site_id};
+
+	var tag_arr= new Array(); //定义一数组
+	var tag_arr = tag_str.split(","); //字符分割 	
+	$.ajax({
+		url: '__URL__/pub_tag_list?site_id='+contact_site_id,
+		type: 'get',
+		dataType: 'json',
+		success: function(ret) {
+			var str = '';
+			var ii =0;
+			for(var i in ret){
+				ii++;
+				//console.log(ret[i]);
+				//console.log(tag_arr);
+				//console.log($.inArray(ret[i].id, tag_arr));
+				if($.inArray(ret[i].id,tag_arr) != -1){
+					var str2 = "checked='true'";
+				}else{
+					var str2 = '';
+				}
+				if(site_id!=zhiyoo_site_id){
+					if(zhiyoo_site_id!=contact_site_id){
+						str += "<input type='checkbox' name='content_tags[]' value='"+ret[i].id+"'"+str2+"/>"+ret[i].tag_anzhi_name+"&nbsp;&nbsp;&nbsp;&nbsp;";
+					}else{
+						str += "<input type='radio' name='content_tags' value='"+ret[i].id+"'"+str2+"/>"+ret[i].tag_anzhi_name+"&nbsp;&nbsp;&nbsp;&nbsp;";
+					}
+					
+				}else if(site_id==zhiyoo_site_id){
+					str += "<input type='radio' name='content_tags' value='"+ret[i].id+"'"+str2+"/>"+ret[i].tag_anzhi_name+"&nbsp;&nbsp;&nbsp;&nbsp;";
+				}				
+				
+				if(ii%2 == 0){
+					str += "<br/>";
+				}				
+			}	
+			$('#content_tag').html(str);
+		}
+	});	
+	if(contact_site_id==zhiyoo_site_id){
+		
+		
+		
+		if($('#contact_site_id').val()!=zhiyoo_site_id){
+			$('#contact_site_id').val(zhiyoo_site_id);
+			change_contact_type();
+		}
+
+
+	}
+					
+}
+</script>
+
+<form  method="POST" action="__URL__/<?php if($list['id']){ echo "save_card";}else{ echo "add_card"; }?>" >
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+
+	<tr class="sub_tr">
+		<td>卡片名称</td>
+		<td>
+			<input type="text" id='card_name' name='card_name'  style='height:25px' value="{$list.card_name}"/>
+		</td>
+	</tr>		
+	<tr class="sub_tr">
+		<td>卡片类型</td>
+		<td>
+			<select id="card_type" name="card_type" Onchange="change_card_type()">
+				<?php foreach($card_type_conf as $k => $v){ ?>
+					<option value="<?php echo $k; ?>" <?php if($k == $list['card_type']) echo 'selected="selected"'; ?> >
+						<?php echo $v; ?>
+					</option>
+				<?php } ?>
+			</select>		
+		</td>
+	</tr>
+	<tr class="sub_tr" id='is_mark_tr' >
+		<td>内容类型角标</td>
+		<td>
+			<input type="radio"  name="is_mark" value="0" <?php if($list['is_mark'] == 0) echo "checked"; ?> />无
+			<input type="radio"  name="is_mark" value="1" <?php if($list['is_mark'] == 1) echo "checked"; ?> />有
+		</td>
+	</tr>	
+	<tr class="sub_tr">
+		<td>卡片内容行数</td>
+		<td>
+			<input type="text" id='content_num' name='content_num'  style='height:25px' value="{$list.content_num}"/>
+		</td>
+	</tr>	
+	<tr class="sub_tr" >
+		<td>更多按钮</td>
+		<td>
+			<input type="radio"  name="is_more" value="0" <?php if(isset($list['is_more']) && $list['is_more'] == 0) echo "checked"; ?> onclick="coop_switch(0);" />无
+			<input type="radio"  name="is_more" value="1" <?php if(!isset($list['is_more']) || $list['is_more'] == 1) echo "checked"; ?> onclick="coop_switch(1);" />有
+		</td>
+	</tr>	
+	<tr class="sub_tr">
+		<td>排序值</td>
+		<td>
+			<input type="tel" id='rank' name='rank'  style='height:25px' value="{$list.rank}"/>
+		</td>
+	</tr>	
+
+	<tr class="sub_tr coop_switch" >
+		<td>导向页面</td>
+		<td id='contact_site_td'>		
+			<select id="contact_site_id" name="contact_site_id"  Onchange="change_contact_type();"; >
+				<?php foreach($coop_site as $k => $v){ ?>
+				<option value="<?php echo $v['id']; ?>" <?php if($list['contact_site_id'] == $v['id']) echo 'selected="selected"'; ?> >
+					<?php echo $v['anzhi_name']; ?>
+				</option>
+				<?php } ?>
+			</select>				
+		</td>
+	</tr>	
+	<tr class="sub_tr coop_switch">
+		<td>&nbsp;</td>
+		<td id='contact_type_td' >
+		
+		</td>
+	</tr>
+	<tr class="sub_tr coop_switch" id="site_tr">
+		<td>&nbsp;</td>
+		<td>
+				
+		</td>
+	</tr>	
+	<tr class="sub_tr">
+		<td>关联内容</td>
+		<td id='content_site_td' >	
+		</td>
+	</tr>	
+	<tr class="sub_tr">
+		<td>&nbsp;</td>
+		<td>
+			<input type="radio"  name="content_rank" value="1" <?php if(isset($list['content_rank']) && $list['content_rank'] == 1) echo "checked"; ?> />最热
+			<input type="radio"  name="content_rank" value="2" <?php if(!isset($list['content_rank']) || $list['content_rank'] == 2) echo "checked"; ?> />最新
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>&nbsp;</td>
+		<td id="content_tag" >
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="channle_id" value="{$channle_id}"/>
+            <input type='hidden' name="site_id" value="{$site_id}"/>
+            <input type='hidden' name="id" value="{$list.id}"/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/>
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

@@ -1,0 +1,139 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/zhiyoo/common.js"></script>
+<style type="text/css">
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+
+#submid{height:31px;}
+#prefectureId{float:left;margin-left:10px;}
+#prefectureId a{float:left;margin-right:5px;}
+.mOn{color:red;}
+.clear{ clear:both; float:none;}
+</style>
+
+<body style="overflow-x: hidden; overflow-y: auto; ">
+<form method='post' action="__URL__/edit_prefecture" onsubmit="return clickConfirm('确定保存优先级更改吗？');">
+<if condition="$classid neq 0">
+<input type="hidden" name="action" value="prioitu_edit_class" />
+</if>
+<div style="margin-top:10px;">
+	<div id="prefectureId">
+		<a class="search_btn mOn" href="__URL__/prefecture_list?class=0">全部</a> 
+		<a class="search_btn" href="__URL__/prefecture_list?class=1">普通专区</a> 
+		<a class="search_btn" href="__URL__/prefecture_list?class=2">手机专区</a> 
+		<a class="search_btn" href="__URL__/prefecture_list?class=3">游戏专区</a> 
+	</div>
+	<div  style="float:right;margin-bottom:5px;">
+	<if condition="$classid neq 0">
+	<input class="search_btn" style="display:none;" type="submit" id="submid" value="保存优先级">
+	<a class="search_btn" style="display:inline-block;" href="javascript:priority('P_id');" id="priorityid">编辑优先级</a>
+	</if>
+	</div>
+</div>
+<div class="clear"></div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			
+			<!-- 
+			<th width="70">
+			<if condition="$classid eq 0">
+				<a href="__URL__/prefecture_list?class={$classid}&field=b_level&order={$order}">优先级↓↑</a>
+			<else />
+			<a href="__URL__/prefecture_list?class={$classid}&field=b_class&order={$order}">优先级↓↑</a>
+			</if>
+			</th> -->
+			
+			<if condition="$classid neq 0">
+			<th width="70">
+				<a href="__URL__/prefecture_list?class={$classid}&field=b_class&order={$order}">优先级↓↑</a>
+			
+			</th>
+			</if>
+			<th width="60">专区ID</th>
+			<th >分类</th>
+			<th >专区名称</th>
+			<th >显示名称</th>
+			<th >LOGO</th>
+			<th width="70"><a href="__URL__/prefecture_list?class={$classid}&field=area_num&order={$order}">版块数量↓↑</a></th>
+			<th width="70">版块列表</th>
+			<th width="60">操作</th>
+			<th width="70"><a href="__URL__/prefecture_list?class={$classid}&field=status&order={$order}">使用状态↓↑</a></th>
+		</tr>
+	</thead>
+	<volist name="prefecturelist" id="val">
+	<tr>
+		
+		<!-- 
+		<td id="P_id">
+		<if condition="$classid eq 0">
+			<a>{$val.b_level|default='0'}</a>
+			<input type="text" name="level[{$val.id}]" size="4" id="level" style="display:none;" value="{$val.b_level|default='0'}" /> 
+		<else /></if> </td> -->
+		
+		<if condition="$classid neq 0">
+		<td id="P_id">
+		<a>{$val.b_class|default=''}</a>
+			<input type="text" name="level[{$val.id}]" onkeyup="this.value=replaceNum(this.value);" size="4" id="level" style="display:none;" value="{$val.b_class|default=''}" /> 
+		
+		</td></if>
+		
+		<td>{$val.b_fid}</td>
+		<td>
+			<if condition="$val.class == 0">默认
+		    <elseif condition="$val.class == 1" /> 
+		    <if condition="$val.b_fid gt 10000">特殊专区<else />普通专区</if>
+		    <elseif condition="$val.class == 2" /> 手机专区
+		    <elseif condition="$val.class == 3" /> 游戏专区
+		 	</if>
+		</td>
+		<td>{$val.b_name|default='&nbsp;'}</td>
+		<td>{$val.name|default='&nbsp;'}</td>
+		<td>
+			<if condition="$val.icon !=''">
+			<img src="<?php echo IMGATT_HOST;?>{$val.icon}" width="50" onclick="showImg(this,'');" style="cursor:pointer;" />
+			<else />无</if>
+			<!-- <img src="<?php echo IMGATT_HOST;?>{$val.icon}" width="50" onclick="showImg(this,'');" style="cursor:pointer;" /> -->
+		</td>
+		<td>{$val.plat|default='无'}</td>
+		<td>
+			<if condition="$val.plat != '0'">
+			<a href="__URL__/area_list?fid={$val.b_fid}" style="color:blue;text-decoration:underline;">查看编辑</a>
+			<else />
+			<if condition="($val.b_fid eq 0) and ($val.b_name eq '手机专区')">
+				<a href="__URL__/prefecture_list?class=2" style="color:blue;text-decoration:underline;">查看编辑</a>
+			<elseif condition="($val.b_fid eq 0) and ($val.b_name eq '游戏专区')" />
+				<a href="__URL__/prefecture_list?class=3" style="color:blue;text-decoration:underline;">查看编辑</a>
+			<else />
+			查看编辑
+			</if>
+			</if>
+		</td>
+		<td>
+			<if condition="$val.b_fid neq '0'">
+			<a href="__URL__/edit_prefecture?fid={$val.b_fid}&action=edit" style="color:blue" class="thickbox">编辑</a>
+			</if>
+			<!-- |<a href="__URL__/del_prefecture?fid={$val.b_fid}&action=del" style="color:blue" onclick="return clickConfirm('确定要删除该专区数据吗？同时会删除该专区下的版块！');">删除</a> -->
+		</td>
+		<td><if condition="$val.status eq 1"> <a href="__URL__/edit_prefecture?fid={$val.b_fid}&status=0&action=status" title="点击切换状态为停用" style="color:blue" onclick="return clickConfirm('确定要更改状态吗？');">使用</a>
+		<elseif condition="$val.status eq 0"/><a href="__URL__/edit_prefecture?fid={$val.b_fid}&status=1&action=status" style="color:red" title="点击切换状态为使用" onclick="return clickConfirm('确定要更改状态吗？');">停用</a>
+		</if></td>
+	</tr>
+	</volist>
+</table>
+</form>
+<div class="navgition">
+	{$pageList|default='&nbsp;'}
+</div>
+<script type="text/javascript">
+$(function(){
+	$("#prefectureId a").eq({$classid}).addClass("mOn").siblings().removeClass("mOn");
+});
+</script>
+</body>
+</html>

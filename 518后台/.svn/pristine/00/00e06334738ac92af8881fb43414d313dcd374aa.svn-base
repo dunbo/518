@@ -1,0 +1,86 @@
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript">
+	function open_desc(id){
+		$("#ad_desc_"+id).zxxbox();
+	}
+	
+	function open_pack(id){
+		$("#ad_pack_"+id).zxxbox();
+	}
+	
+	function down_soft(id){
+		$.ajax({
+			type:"POST",
+			url:"__URL__/get_down_path",
+			data:"id="+id,
+			success: function(msg){
+				window.location.href = msg;
+		   }
+
+		});
+	}
+</script>
+<div class="main" >
+	<div class="content" >
+			<form action="" method="get">
+			<table cellspacing="0" cellpadding="0" width="99%" class="search_table" >
+				<tbody>
+					<tr>
+						<td width="40%">
+							时间：<input type="text" class="search_item_text Wdate" value="{$start_tm}" id="start_tm" name="start_tm"  onclick="WdatePicker({startDate:&quot;%y-%M-%d&quot;,dateFmt:&quot;yyyy-MM-dd&quot;})" style="width:140px"> ----
+									  <input type="text" class="search_item_text Wdate" value="{$end_tm}" id="end_tm" name="end_tm"  onclick="WdatePicker({startDate:&quot;%y-%M-%d&quot;,dateFmt:&quot;yyyy-MM-dd&quot;})" style="width:140px">
+						</td>
+						<td>
+							厂商类型：
+							<select name="provider" id="provider">
+							<option value="1" <if condition="$provider_type eq 1">selected = "selected"</if>>腾讯</option>
+							<option value="2" <if condition="$provider_type eq 2">selected = "selected"</if>>安全管家</option>
+							<option value="4" <if condition="$provider_type eq 4">selected = "selected"</if>>金山</option>
+							<option value="5" <if condition="$provider_type eq 5">selected = "selected"</if>>360</option>
+							</select>
+						</td>
+						<td>
+							<input type="submit" onclick="" value="搜索" style="float:left; height:30px;" class="search_btn">
+						</td>
+					</tr>		
+				</tbody></table>
+				<table cellspacing="0" cellpadding="0" width="99%" class="table_list">
+					<th>广告类型</th><th>广告名称</th><th width="5%">广告描述</th><th width="8%">厂商扫描数量</th><th>未扫描到此广告包</th>
+					<volist name="res" id="vo" key="k">
+					<tr>
+					<td>{$vo.type|default="未知"}</td><td><if condition="$provider_type neq 5">{$key}<else />未知</if></td>
+					<td>
+						<if condition ="$vo.desc neq ''">
+							<a href="javascript:void(0)" onclick="open_desc({$k})">查看</a>
+							<div id="ad_desc_{$k}" style="display:none;height:150px;width:200px">
+								{$vo.desc}
+							</div>
+						<else />/
+						</if>		
+					</td>
+					<td>{$vo.num}</td>
+					<td>
+					<a href="javascript:void(0)" onclick="open_pack({$k})">查看</a>
+					<div id="ad_pack_{$k}" style="display:none;width:230px;height:auto">
+					<volist name="vo.pack" id="v">
+						<div style="float:left;padding-top:4px;width:230px">
+						<a href="javascript:void(0)" onclick="down_soft({$v.file_id})">{$v.name}</a>
+						</div>
+						
+					</volist>
+					</div>
+					</td>
+					</tr>
+					</volist>
+				</table>
+			</form>
+	</div>
+</div>

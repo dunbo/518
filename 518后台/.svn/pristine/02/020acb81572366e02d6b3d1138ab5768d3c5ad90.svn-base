@@ -1,0 +1,407 @@
+<div width="100%" style="text-align:center">{$page}</div>
+<a id='show' class="thickbox" href=""></a>
+<script type="text/javascript">
+	$("form").submit(function(){
+		start_tm = $("#start_tm").val();
+		end_tm = $("#end_tm").val();
+		if ((start_tm != '') && (end_tm != '') && (strtotime(start_tm) > strtotime(end_tm)))
+		{
+			alert("开始时间不能大于结束时间");
+			return false;
+		}
+	});
+
+	function checkit(){
+		return confirm('确定要这么执行该操作么？')
+
+	}
+	function selectAll() {
+		if ($("#checkall").attr('checked')) {
+			$("[name='idlist[]']").attr("checked", "checked");
+		}
+		else {
+			$("[name='idlist[]']").removeAttr("checked");
+		}
+	}
+
+	function batch(action) {
+		if (!checkit())
+			return;
+		var idlist = [];
+		var location1='{$location1}';
+		var location2='{$location2}';
+		$("[name='idlist[]']").each(function(){
+			if ($(this).attr('checked'))
+				idlist.push($(this).val());
+		});
+		//alert(idlist);
+		if (idlist.length > 0){
+			$.post(
+				"/index.php/Sj/AdDetail/batch",
+				{location1:location1, location2:location2, idlist:idlist, action:action},
+				function(result){
+					alert(result.info);
+					if (action == 'delete'){
+						disableList(idlist);
+					}
+					else{
+						window.location.reload(true);
+					}
+				},
+				'json'
+			);
+		}
+		else{
+			alert('请选择操作对象');
+		}
+	}
+	function edit_time(biaoshi) {
+		if (!checkit()){
+			// window.location.reload();
+			return false;
+		}
+
+		var idlist = '';
+		var location1='{$location1}';
+		var location2='{$location2}';
+		$("[name='idlist[]']").each(function(){
+			if ($(this).attr('checked'))
+				// idlist.push($(this).val());
+			idlist +=$(this).val()+',';
+		});
+		// alert(idlist);
+		if (idlist.length > 0){
+			// $('#edit_all').attr('class','thickbox');
+			// $('#edit_all_'+biaoshi).attr('href','/index.php/Sj/AdDetail/edit_all/location1/'+location1+'/width/600/biaoshi/'+biaoshi+'/idlist/'+idlist+'/location2/'+location2);
+			$('#show').attr('href','/index.php/Sj/AdDetail/edit_all/location1/'+location1+'/width/600/biaoshi/'+biaoshi+'/idlist/'+idlist+'/location2/'+location2);
+			$('#show').click();
+			// $('#edit_all').onclick();
+			// edit_time();
+			// return true;
+			// $.post(
+			// 	"/index.php/Sj/AdDetail/batch",
+			// 	{location1:location1, location2:location2, idlist:idlist, action:action},
+			// 	function(result){
+			// 		alert(result.info);
+			// 		if (action == 'delete'){
+			// 			disableList(idlist);
+			// 		}
+			// 		else{
+			// 			window.location.reload(true);
+			// 		}
+			// 	},
+			// 	'json'
+			// );
+
+		}
+		else{
+			alert('请选择操作对象');
+			// window.location.reload();
+			return false;
+		}
+	}
+	function deleteOne(sid) {
+		if (!checkit())
+			return;
+		var idlist = [];
+		idlist.push(sid);
+		var location1='{$location1}';
+		var location2='{$location2}';
+		//alert(idlist);
+		if (idlist.length > 0){
+			$.post(
+				"/index.php/Sj/AdDetail/batch",
+				{location1:location1, location2:location2, idlist:idlist, action:'delete'},
+				function(result){
+					alert(result.info);
+					disableList([sid]);
+					//window.location.reload(true);
+				},
+				'json'
+			);
+		}
+	}
+
+	function disableList(idlist){
+		for (i in idlist){
+			sid = idlist[i]
+			$('#tr'+sid).find('input').attr('disabled', 'disabled');
+			$('#tr'+sid).find('a').removeAttr('href');
+			$('#tr'+sid).find('a').removeAttr('onclick');
+			$('#tr'+sid).find('a').unbind();
+			$('#tr'+sid).css("color", "#CFCFCF");
+		}
+	}
+	function editSoft(sid){
+		$('#soft_item_' + extent_id).load('/index.php/Sj/Extent/edit_soft/id/'+sid+'?modal=true', function(){
+			tb_init('#soft_item_' + extent_id + ' .thickbox');
+		});
+	}
+	var adpos = {$adpos|json_encode};
+	var listNow = [];
+	function changeLoc1(loc1) {
+		$('#p_accurate').css('display','none');
+		switch (loc1)
+		{
+			case 'EX':
+				hideLoc("location2");
+				showLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location3").empty();
+				$("#location3").append('<option value="-1">全部</option>');
+				for (i in adpos[loc1])
+				{
+					$("#location3").append('<option value="' + adpos[loc1][i]['id'] + '">' + adpos[loc1][i]['name'] + '</option>');
+				}
+				break;
+
+			case 'FE':
+				hideLoc("location2");
+				showLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location3").empty();
+				for (i in adpos[loc1])
+				{
+					$("#location3").append('<option value="' + adpos[loc1][i]['id'] + '">' + adpos[loc1][i]['name'] + '</option>');
+				}
+				break;
+
+			case 'AH':
+				hideLoc("location2");
+				showLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location3").empty();
+				$("#location3").append('<option value="top_1_hot">全部</option>');
+				for (i in adpos[loc1])
+				{
+					$("#location3").append('<option value="' + adpos[loc1][i]['id'] + '">' + adpos[loc1][i]['name'] + '</option>');
+				}
+				break;
+
+			case 'GH':
+				hideLoc("location2");
+				showLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location3").empty();
+				$("#location3").append('<option value="top_2_hot">全部</option>');
+				for (i in adpos[loc1])
+				{
+					$("#location3").append('<option value="' + adpos[loc1][i]['id'] + '">' + adpos[loc1][i]['name'] + '</option>');
+				}
+				break;
+
+			case 'CA':
+				showLoc("location2");
+				showLoc("location3");
+				listNow = adpos[loc1];
+				$("#page_type").css("display","inline-block");
+				var channel = $("#page_type").val();
+				$("#location2").empty();
+				changePageType(channel,loc1);
+				changeLoc2("top_hot");
+				break;
+
+			case 'TN':
+				hideLoc("location2");
+				showLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location3").empty();
+				$("#location3").append('<option value="top_new">全部</option>');
+				for (i in adpos[loc1])
+				{
+					$("#location3").append('<option value="' + adpos[loc1][i]['id'] + '">' + adpos[loc1][i]['name'] + '</option>');
+				}
+				break;
+
+			case 'SK':
+				showLoc("location2");
+				hideLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location2").empty();
+				$("#location2").append('<option value="keyword">搜索关键字列表</option>');
+				$("#location2").append('<option value="default">默认关键字管理V4</option>');
+				$("#location2").append('<option value="hotword">搜索热词管理V4</option>');
+				$("#location2").append('<option value="skeyword">搜索热词推荐</option>');
+				listNow = adpos[loc1];
+				changeLoc2("keyword");
+				break;
+
+			case 'NE':
+				hideLoc("location2");
+				showLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location3").empty();
+				$("#location3").append('<option value="-1">全部</option>');
+				for (i in adpos[loc1])
+				{
+					$("#location3").append('<option value="' + adpos[loc1][i]['id'] + '">' + adpos[loc1][i]['name'] + '</option>');
+				}
+				break;
+
+			case 'PR':
+				hideLoc("location2");
+				showLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location3").empty();
+				$("#location3").append('<option value="fixed_user_also_download">全部</option>');
+				for (i in adpos[loc1])
+				{
+					$("#location3").append('<option value="' + adpos[loc1][i]['id'] + '">' + adpos[loc1][i]['name'] + '</option>');
+				}
+				break;
+			case 'SA':
+				$("#page_type").css("display","none");
+			case 'SS':
+				hideLoc("location2");
+				hideLoc("location3");
+				$('#p_accurate').css('display','');
+				$("#page_type").css("display","none");
+				break;
+
+			case 'DR':
+				hideLoc("location2");
+				showLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location3").empty();
+				$("#location3").append('<option value="-1">全部</option>');
+				for (i in adpos[loc1])
+				{
+					$("#location3").append('<option value="' + adpos[loc1][i]['id'] + '">' + adpos[loc1][i]['name'] + '</option>');
+				}
+				break;
+
+			case 'LA':
+				hideLoc("location2");
+				showLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location3").empty();
+				$("#location3").append('<option value="-1">全部</option>');
+				for (i in adpos[loc1])
+				{
+					$("#location3").append('<option value="' + adpos[loc1][i]['id'] + '">' + adpos[loc1][i]['name'] + '</option>');
+				}
+				break;
+			case 'ST':
+				hideLoc("location2");
+				hideLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location3").empty();
+				$("#location3").append('<option value="tips">全部</option>');
+				for (i in adpos[loc1])
+				{
+					$("#location3").append('<option value="' + adpos[loc1][i]['id'] + '">' + adpos[loc1][i]['name'] + '</option>');
+				}
+				break;
+			case 'SR':
+				hideLoc("location2");
+				hideLoc("location3");
+				$("#page_type").css("display","none");
+				$("#location3").empty();
+				$("#location3").append('<option value="tips">全部</option>');
+				for (i in adpos[loc1])
+				{
+					$("#location3").append('<option value="' + adpos[loc1][i]['id'] + '">' + adpos[loc1][i]['name'] + '</option>');
+				}
+				break;
+		}
+	}
+	function changePageType(type,loc1)
+	{
+		document.getElementById("location2").options.length=0;
+		if(type == 5)
+		{
+			for (i in adpos[loc1]['category_type'])
+			{
+				if(i.indexOf("bdlist_") == 0 )
+				{
+					$("#location2").append('<option value="' + i + '">' + adpos[loc1]['category_type'][i] + '</option>');
+				}
+			}
+		}
+		else if(type ==3)
+		{
+			for (i in adpos[loc1]['category_type'])
+			{
+				if(i.indexOf("commontag_") == 0 )
+				{
+					$("#location2").append('<option value="' + i + '">' + adpos[loc1]['category_type'][i] + '</option>');
+				}
+			}
+		}
+		else if(type ==2)
+		{
+			for (i in adpos[loc1]['category_type'])
+			{
+				if(i.indexOf("tag_") == 0 )
+				{
+					$("#location2").append('<option value="' + i + '">' + adpos[loc1]['category_type'][i] + '</option>');
+				}
+			}
+		}
+		else
+		{
+			for (i in adpos[loc1]['category_type'])
+			{
+				if(i.indexOf("tag_") <0 && i.indexOf("commontag_") <0 &&i.indexOf("bdlist_") < 0)
+				{
+					$("#location2").append('<option value="' + i + '">' + adpos[loc1]['category_type'][i] + '</option>');
+				}
+			}
+		}
+	}
+	function changeLoc2(loc2) {
+		$('#p_accurate').css('display','none');
+		switch (loc2) {
+			case 'default':
+			case 'hotword':
+			case 'skeyword':
+				hideLoc("location3");
+				break;
+
+			default:
+				if(loc2=='keyword'){
+					$('#p_accurate').css('display','');
+					hideLoc("location3");
+				}else if(loc2=='SR'){
+					$('#p_accurate').css('display','');
+					hideLoc("location3");
+				}else if(loc2=='ST'){
+					$('#p_accurate').css('display','');
+					hideLoc("location3");
+				}else{
+					showLoc("location3");	
+				}
+				$("#location3").empty();
+				$("#location3").append('<option selected="selected" value="'+loc2+'">全部</option>');
+				for (i in listNow[loc2])
+				{
+					$("#location3").append('<option value="' + listNow[loc2][i]['id'] + '">' + listNow[loc2][i]['name'] + '</option>');
+				}
+				break;
+		}
+	}
+
+	function showLoc(sid) {
+		$("#" + sid).css("display", "inherit");
+		$("#" + sid).removeAttr("disabled");
+	}
+
+	function hideLoc(sid) {
+		$("#" + sid).css("display", "none");
+		//$("#" + sid).attr("disabled", "disabled");
+	}
+
+	changeLoc1($("#location1").val());
+	<if condition="$location1 neq ''">
+	$("#location1").find("option[value='{$location1}']").attr('selected', 'selected');
+	changeLoc1("{$location1}");
+	</if>
+	<if condition="$location2 neq ''">
+	$("#location2").find("option[value='{$location2}']").attr('selected', 'selected');
+	changeLoc2("{$location2}");
+	</if>
+	<if condition="$location3 neq ''">
+	$("#location3").find("option[value='{$location3}']").attr('selected', 'selected');
+	</if>
+</script>
+<include file="../Public/footer" />

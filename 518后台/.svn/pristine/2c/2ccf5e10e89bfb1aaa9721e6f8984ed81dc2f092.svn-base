@@ -1,0 +1,429 @@
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?2"></script>
+
+<!--使用灵活运营的推荐内容编辑必需添加此js-->
+<script type="text/javascript" src="/Public/js/edit_content_type.js?v3"></script>
+<style>
+.sub_tr {
+    height: 35px;
+    text-align: left;
+}
+</style>
+<script>
+$(function(){
+    // 推荐内容值
+    /*var content_arr = Array();
+    content_arr['content_type'] = "{$list.content_type}";
+    if (content_arr['content_type'] == 1) {
+        content_arr['package'] = "{$list.package}";
+        content_arr['uninstall_setting'] = "{$list.uninstall_setting}";
+        content_arr['install_setting'] = "{$list.install_setting}";
+        if (content_arr['install_setting'] == 4) {
+            content_arr['start_to_page'] = "{$list.start_to_page}";
+        }
+        content_arr['lowversion_setting'] = "{$list.lowversion_setting}";
+    } else if (content_arr['content_type'] == 2) {
+        content_arr['activity_id'] = "{$list.activity_id}";
+    } else if (content_arr['content_type'] == 3) {
+        content_arr['feature_id'] = "{$list.feature_id}";
+    } else if (content_arr['content_type'] == 4) {
+        content_arr['page_type'] = "{$list.page_type}";
+		content_arr['parameter_field'] = '{$list.parameter_field}';
+    } else if (content_arr['content_type'] == 5) {
+        content_arr['website'] = "{$list.website}";
+        content_arr['website_open_type'] = "{$list.website_open_type}";
+    } else if (content_arr['content_type'] == 6) {
+        content_arr['gift_id'] = "{$list.gift_id}";
+		content_arr['page_type'] = "{$custom_list.page_type}";
+    } else if (content_arr['content_type'] == 7) {
+        content_arr['strategy_id'] = "{$list.strategy_id}";
+		content_arr['page_type'] = "{$custom_list.page_type}";
+    }*/
+    var soft_arr = {:json_encode($list)};
+    var content_arr = edit_load(soft_arr);
+
+    // 生成推荐内容展示
+    generate_append_html("content_type_div", content_arr);
+    // 生成推荐链接
+    href = generate_content_type_href('content_type_div', "{$list.content_type}", content_arr);
+    $("#content_type_a").attr("href", href);
+    hidden_tr();
+});
+
+var package_status = false;
+var package_643_status = false;
+//var video_status = false;
+function checkLen(obj, maxChars) {
+    if (obj.value.length > maxChars){
+        obj.value = obj.value.substring(0,maxChars);
+    }
+};
+function package_check(content_type){
+    var resource_type = $('#resource_type').val();
+    var id = {$list.id};
+    var package_643 = $.trim($('#package_643').val());
+    var url = '__URL__/package_check/package_643/'+package_643+'/resource_type/'+resource_type+'/id/'+id;
+    if(content_type != ''){
+        url += '/content_type/'+content_type;
+    }
+    $.ajax({
+        url: url,
+        type: 'get',
+        async: false,
+        dataType: 'json',
+        success: function(data){
+            if(data.code == 1){
+                package_status = false;
+                package_643_status = false;
+                $('#package_check_tip').html('软件包名不存在');
+                $('#soft_name').val('');
+            }else if(data.code == 2){
+                package_status = true;
+                package_643_status = false;
+                $('#package_check_tip').html('');
+                $('#soft_name').val(data.msg);
+            }else if(data.code == 0){              
+                package_status = true;
+                package_643_status = true;
+                $('#package_check_tip').html('');
+                $('#soft_name').val(data.msg);
+            }
+        }
+    });
+}
+function checkPost(){
+    var resource_type = $('#resource_type').val();
+    var content_type = $.trim($('#content_type').val());
+    var package_643 = $.trim($('#package_643').val());
+    var title = $.trim($('#title').val());
+    var image_url = $.trim($('#image_url').val());
+    var high_image_url = $.trim($('#high_image_url').val());
+    var low_image_url = $.trim($('#low_image_url').val());
+    var gif_image_url = $.trim($('#gif_image_url').val());
+    var gif_image_url_62 = $.trim($('#gif_image_url_62').val());
+    if(resource_type==24 || resource_type==26 || resource_type==2){
+        if(!content_type){
+            alert('请选择推荐内容');
+            return false;
+        }
+    }
+    if(resource_type==24 || resource_type==26 || resource_type==29 || resource_type==2 || resource_type==28){
+        if(package_643 == ''){
+            alert('请填写包名');
+            $('#package_643')[0].focus();
+            return false;
+        }
+        package_check(content_type);
+        if (package_status == false) {
+            alert('软件包名不存在');
+            $('#package_643')[0].focus();
+            return false;
+        }
+        if(package_643_status == false){
+            alert('资源库已有该软件当前配置的内容类型');
+            $('#package_643')[0].focus();
+            return false;
+        }
+        if((resource_type!=29 || !$('#is_dev').attr('checked')) && resource_type!=28 ){
+            if(title==''){
+                alert('请填写标题');
+                $('#title')[0].focus();
+                return false;
+            }
+            if(title.length>25){
+                alert('标题最多25个字符');
+                $('#title')[0].focus();
+                return false;
+            }
+        }
+    }
+
+    if(resource_type==2){
+        if(title==''){
+            alert('请填写标题');
+            $('#title')[0].focus();
+            return false;
+        }
+        if(title.length>10){
+            alert('标题最多10个字符');
+            $('#title')[0].focus();
+            return false;
+        }
+    }
+    /*if(resource_type==3 && video_status==false){
+        alert('开发者无该包名相关视频');
+        return false;
+    }*/
+    if(!$('#is_dev').attr('checked')){
+        if(image_url != '' && !image_url.match(/.jpg|.png/i) ){
+            alert('图片格式无效！');
+            return false;
+        }
+        if(high_image_url != '' && !high_image_url.match(/.jpg|.png/i) ){
+            alert('图片2格式无效！');
+            return false;
+        }
+        if(low_image_url != '' && !low_image_url.match(/.jpg|.png/i) ){
+            alert('图片3格式无效！');
+            return false;
+        }
+    }
+
+    if( resource_type==2){
+        if(image_url != '' && !image_url.match(/.jpg|.png/i) ){
+            alert('图片格式无效！');
+            return false;
+        }
+        if(high_image_url != '' && !high_image_url.match(/.jpg|.png/i) ){
+            alert('图片2格式无效！');
+            return false;
+        }
+        if(low_image_url != '' && !low_image_url.match(/.jpg|.png/i) ){
+            alert('图片3格式无效！');
+            return false;
+        }
+        if(gif_image_url != '' && !gif_image_url.match(/.gif/i) ){
+            alert('GIF图片格式无效！');
+            return false;
+        }
+        if(gif_image_url_62 != '' && !gif_image_url_62.match(/.gif/i) ){
+            alert('GIF图片格式无效！');
+            return false;
+        }
+    }
+}
+//根据类型展示tr
+function hidden_tr(){
+    var resource_type = $('#resource_type').val();
+    if(resource_type == 24){
+        //单软件(列表单图)
+        $('#title').parent().next().html('限25字以内');
+        $('#image_url').parent().next().html('限制上传464*274的JPG/PNG图片');
+        $("tr[id=content_type_tr]").css('display','');
+        $("tr[id^=resource_]").css('display','none');
+        $("tr[id=resource_1]").css('display','');
+        $("tr[id=resource_2]").css('display','');
+        $("tr[id=resource_3]").css('display','');
+        $("tr[id=resource_4]").css('display','');
+        $("tr[id=resource_7]").css('display','none');
+        $("tr[id=resource_8]").css('display','none');
+        package_check('');
+    }else if(resource_type == 26){
+        //单软件(3图)
+        $('#title').parent().next().html('限25字以内');
+        $('#image_url').parent().next().html('限制上传160*160的JPG/PNG图片');
+        $('#high_image_url').parent().next().html('限制上传160*160的JPG/PNG图片');
+        $('#low_image_url').parent().next().html('限制上传160*160的JPG/PNG图片');
+        $("tr[id=content_type_tr]").css('display','');
+        $("tr[id^=resource_]").css('display','none');
+        $("tr[id=resource_1]").css('display','');
+        $("tr[id=resource_2]").css('display','');
+        $("tr[id=resource_3]").css('display','');
+        $("tr[id=resource_4]").css('display','');
+        $("tr[id=resource_7]").css('display','none');
+        $("tr[id=resource_8]").css('display','none');
+        package_check('');
+        $("#is_dev_4").css('display','none')
+        $("#is_dev_5").css('display','none')
+    }else if(resource_type == 29){
+        //单软件(视频)
+        $('#title').parent().next().html('限25字以内');
+        $("tr[id=content_type_tr]").css('display','none');
+        $("tr[id^=resource_]").css('display','none');
+        $("tr[id=resource_1]").css('display','');
+        $("tr[id=resource_2]").css('display','');
+        $("tr[id=resource_4]").css('display','');
+        $("tr[id=resource_7]").css('display','none');
+        $("tr[id=resource_8]").css('display','none');
+        package_check('');
+    }else if(resource_type == 2){
+        //单排
+        $('#title').parent().next().html('限10字以内');
+        $('#image_url').parent().next().html('限制上传466*140的JPG/PNG图片');
+        $('#high_image_url').parent().next().html('限制上传684*185的JPG/PNG图片');
+        $('#low_image_url').parent().next().html('限制上传444*120的JPG/PNG图片');
+        $('#gif_image_url').parent().next().html('限制上传444*120的GIF图片');
+        $('#gif_image_url_62').parent().next().html('限制上传684*185的GIF图片');
+        $("tr[id=content_type_tr]").css('display','');
+        $("tr[id^=resource_]").css('display','none');
+        $("tr[id=resource_1]").css('display','');
+        $("tr[id=resource_2]").css('display','');
+        $("tr[id=resource_3]").css('display','');
+        $("tr[id=resource_4]").css('display','none');
+        $("tr[id=resource_7]").css('display','none');
+        $("tr[id=resource_8]").css('display','');
+
+        $("tr[id=is_dev_4]").show();
+        $("tr[id=is_dev_5]").show();
+        package_check('');
+    }else if(resource_type == 28){
+        //单软件(列表单图)
+        $("tr[id=content_type_tr]").css('display','none');
+        $("tr[id^=resource_]").css('display','none');
+        $("tr[id=resource_1]").css('display','');
+        $("tr[id=resource_2]").css('display','');
+        $("tr[id=resource_3]").css('display','none');
+        $("tr[id=resource_4]").css('display','none');
+        $("tr[id=resource_7]").css('display','');
+        $("tr[id=resource_8]").css('display','none');
+        package_check('');
+    }
+    hidden_image();
+}
+//根据是否选择开发者展示tr
+function hidden_image(){
+    var resource_type = $('#resource_type').val();
+    if($('#is_dev').attr('checked') == 'checked'){
+        $("tr[id^=is_dev_]").css('display','none'); //隐藏上传图片按钮
+        if(resource_type==29){
+            $("tr[id=resource_3]").css('display','none');
+            $("tr[id=resource_5]").css('display','none');
+            $("tr[id=resource_6]").css('display','none');
+        }
+    }else{
+        $("tr[id^=is_dev_]").css('display','none');
+        if(resource_type==24){
+            $("tr[id=is_dev_1]").css('display','');
+        }else if(resource_type==26){
+            $("tr[id^=is_dev_]").css('display','');
+            $("#is_dev_4").css('display','none')
+            $("#is_dev_5").css('display','none')
+        }else if(resource_type==29){
+            $("tr[id=resource_3]").css('display','');
+            $("tr[id=resource_5]").css('display','none');
+            $("tr[id=resource_6]").css('display','');
+        }else if(resource_type==2){
+            $("tr[id^=is_dev_]").css('display','');
+            $("#is_dev_4").css('display','')
+            $("#is_dev_5").css('display','')
+        }else if(resource_type==28){
+            $("#is_dev_4").css('display','none')
+            $("#is_dev_5").css('display','none')
+        }
+    }
+}
+</script>
+<div>
+	<h3>修改</h3>
+	<form action="__URL__/edit_share_web" method="post" enctype="multipart/form-data" onsubmit="return checkPost()">
+	<table>
+        <tr class="sub_tr">
+            <td style='width:25%'>类型</td>
+            <input type='hidden' name='resource_type' value='{$list.resource_type}' />
+            <td style='width:40%'><select id="resource_type" disabled>
+                <option <if condition="$list['resource_type'] eq 24">selected="selected"</if> value='24'>单软件(列表单图)</option>
+                <option <if condition="$list['resource_type'] eq 26">selected="selected"</if> value='26'>单软件(3图)</option>
+                <option <if condition="$list['resource_type'] eq 29">selected="selected"</if> value='29'>单软件(视频)</option>
+                <option <if condition="$list['resource_type'] eq 2">selected="selected"</if> value='2'>单排</option>
+                <option <if condition="$list['resource_type'] eq 28">selected="selected"</if> value='28'>场景卡片</option>
+            </select></td>
+            <td></td>
+        </tr>
+        <tr class="sub_tr" id='resource_1'>
+            <td>软件包名:</td>
+            <td>
+                <input readonly name='package_643' id='package_643' type="text" value="{$list.package_643}" />
+            </td>
+            <td><span id="package_check_tip" >填写包名则作为资源库资源</span></td>
+        </tr>
+        <tr class="sub_tr" id='resource_2'>
+            <td>软件名称:</td>
+            <td>
+                <input readonly name='package_name' id='soft_name' value="{$list.package_name}" type="text" />
+            </td>
+            <td></td>
+        </tr>
+        <tr class="sub_tr" id='resource_3'>
+            <td>标题:</td>
+            <td>
+                <input name='title' id='title' type="text" value="{$list.title}" onKeyUp="checkLen(this, 25)" />
+            </td>
+            <td>限25字以内</td>
+        </tr>
+        <tr class="sub_tr" id='resource_4'>
+            <td>素材来源</td>
+            <td>
+                <input name='is_dev' type='hidden' value="{$list['is_dev']}" />
+                <input id='is_dev' type='checkbox' disabled value='1' <?php if($list['is_dev']==1) echo "checked" ?> />开发者
+            </td>
+            <td></td>
+        </tr>
+        <tr class="sub_tr" id="is_dev_1">
+            <td>图片:</td>
+            <td>
+                <input name='image_url' id='image_url' type="file" />
+            </td>
+            <td>限制上传464*274的JPG/PNG图片</td>
+        </tr>
+        <tr class="sub_tr" id="is_dev_2">
+            <td>图片2:</td>
+            <td>
+                <input name='high_image_url' id='high_image_url' type="file" />
+            </td>
+            <td>限制上传160*160的JPG/PNG图片</td>
+        </tr>
+        <tr class="sub_tr" id="is_dev_3">
+            <td>图片3:</td>
+            <td>
+                <input name='low_image_url' id='low_image_url' type="file" />
+            </td>
+            <td>限制上传160*160的JPG/PNG图片</td>
+        </tr>
+        <tr class="sub_tr" id="is_dev_4">
+            <td>GIF图片(6.2)</td>
+            <td><input name="gif_image_url" id="gif_image_url" type="file"></td>
+            <td>限制上传444*120的gif图片</td>
+        </tr>
+        <tr class="sub_tr" id="is_dev_5">
+            <td>GIF图片(6.2)</td>
+            <td><input name="gif_image_url_62" id="gif_image_url_62" type="file"></td>
+            <td>限制上传684*185的gif图片</td>
+        </tr>
+        <tr class="sub_tr" id='resource_5'>
+            <td>选择视频:</td>
+            <td><if condition="($list['resource_type'] eq 29) AND ($list['is_dev'] eq 0)" >
+                <select name='video_url' id='video_url'>
+                    <option value='{$list.video_url}'>{$list.title}</option>
+                </select>
+                </if>
+            </td>
+            <td style="color:gray"></td>
+        </tr>
+        <tr class="sub_tr" id='resource_6'>
+            <td>视频默认图:</td>
+            <td>
+                <img src='{$domain_url}{$list.video_pic}' id='video_img' width='200' height='100' />
+            </td>
+            <td style="color:gray"></td>
+        </tr>
+        <tr class="sub_tr" id="resource_7">
+            <td>一句话点评</td>
+            <td><input name="s_description" id="s_description" type="text" value="{$list.description}" onkeyup="checkLen(this, 40)"></td>
+            <td>该项目为非必填项，不填写则使用软件本身内容</td>
+        </tr>
+        <tr class="sub_tr" id="resource_8">
+            <td>图片底部文字描述</td>
+            <td>
+                <textarea name="pic_bottom_des" type="text" onkeyup="checkLen(this, 20)">{$list.pic_bottom_des}</textarea>
+            </td>
+            <td>
+                此项目为选填项目，限制文字为20                    
+            </td>
+        </tr>
+		<tr class="sub_tr" id='content_type_tr'>
+			<td>推荐内容:</td>
+			<td>
+				<!--下面a里的href的url会在ready函数里自动生成-->
+				<a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+				<!--下面的content_type_div是选择推荐内容后append的地方-->
+				<div id="content_type_div"/>
+				<input type="hidden" name="id" value="{$list.id}" />
+			</td>
+		</tr>
+	</table>
+    <div>
+		<input style="display:inline; margin:0 50px 10px 75px;" type="submit" class="search_btn" value="保存" />
+		<input style="display:inline;"type="button" class="search_btn" value="取消" onclick="tb_remove();" />
+		</div>
+	</form>
+</div>

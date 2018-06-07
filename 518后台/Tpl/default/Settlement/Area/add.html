@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>区间编辑</title>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<style type="text/css">
+table.gridtable {
+	font-family: verdana,arial,sans-serif;
+	font-size:11px;
+	border-width: 1px;
+	border-color: #666666;
+	border-collapse: collapse;
+}
+table.gridtable td {
+	width: 200px;
+	border-width: 1px;
+	padding: 5px 0;
+	border-style: solid;
+	border-color: #666666;
+	text-align:center;
+}
+</style>
+</head>
+
+<body>
+<form action="__URL__/add/rate/{$rate}" method="post">
+	<p>区间名：<input type="text" name="areaname" value="" id="input_area_name"/><span id="span_area_name"></span></p>
+	<p>排序值：<input type="text" name="areasort" value="" id="input_area_sort"/><span id="span_area_sort"></span></p>
+	<p>添加区间分割行：
+		<input type="radio" name="areasplit" value="1" checked="checked">是
+	    <input type="radio" name="areasplit" value="0">否
+	</p>
+	<p>广告位
+<ul id="tab" style="padding:0px; margin:0px;">
+	
+    <li>
+      <input type="text" size="10"  value="" name="sort[]" />
+      
+       <select name="adv_name[]">
+   <?php foreach ($advlists as $advlist) { ?>
+   		<option value="{$advlist.id}">
+        	{$advlist.advertising_name}
+        </option>
+ <?php  }?>
+
+      </select>
+	 <input type="text" size="10"  value="" name="softnum[]" />
+      <a href="javascript:void(0)" class="delRow">删除</a>
+    </li>
+  </ul> 
+		
+	</p>
+	 <p><input type="button" class="addRow" value="添加">  </p> 
+	
+<div style="clear:both"></div>
+<div style="text-align:center;padding:10px">
+	<button type="submit" name="submit">添加</button>
+	<button type="button" onClick="tb_remove()">取消</button>
+</div>
+</form>
+
+</body>
+</html>
+<script>
+$(function(){
+  $('.addRow').click(function(){
+    var li = $("#tab li").eq(0).clone();
+    var html = li.html();
+        li.html( html );
+        li.appendTo("#tab");
+  });
+  $('.delRow').live('click',function(){
+    $(this).parent().remove();
+  });
+
+    	// 查询区间名称是否存在
+	$('#input_area_name').blur(function(){
+		if($(this).val()=='')
+			return;
+		
+		$.getJSON('/index.php/Settlement/Area/ajax_exist_name/rate/{$rate}/areaname/'+$(this).val(), function(json){
+			if(json.result_no > 0){
+				$('#span_area_name').html('区间名不可重复，请重新输入');
+			}else{
+				$('#span_area_name').html('');
+			}
+		});
+	});
+
+	$('#input_area_sort').blur(function(){
+		if($(this).val()==''){
+			return;
+		}
+		var r = /^\+?[1-9][0-9]*$/;　　//正整数 
+		if(!r.test($(this).val())){
+			$('#span_area_sort').html('排序值须为正整数，请重新输入');
+		}else{
+			$('#span_area_sort').html('');
+		}
+		
+	});
+
+})
+</script> 

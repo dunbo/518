@@ -1,0 +1,1419 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+</head>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script>
+
+$(document).ready(function () {
+	//console.log($('#ap_type').html());
+	var obj = document.getElementById("ap_type");
+	back_top_hidden();
+	sel_type(obj);
+	save_change_switch();
+});
+
+//页面类型
+function sel_type(obj){
+	var ap_type = obj.value;
+	//alert(ap_type);
+	if(ap_type == 3){
+		$('#tab_hidden').css('display','none');
+		$('#tab_lottery').css('display','none');
+		$('.tab_soft').css('display','none');
+		$('#hd_bg').css('display','none');
+		$('#tab_end').css('display','');
+		hide_must_share();
+	}else{
+		$('#tab_end').css('display','none');
+		$('#tab_hidden').css('display','');	
+		lottery_hidden();
+	}
+}
+$("[name='change_switch']").live('click',function(){	
+	save_change_switch();
+})
+//换一换按钮开关
+function save_change_switch(){
+	var change_switch = 0;
+	$("[name='change_switch']").each(function(){
+		if($(this).is(':checked')) {
+			change_switch = $(this).val();
+		}
+	});	
+	if(change_switch == 1){
+		$('.change_switch').css('display','');
+	}else{
+		$('.change_switch').css('display','none');	
+	}
+}
+$("[name='back_top']").live('click',function(){	
+	back_top_hidden();
+})
+var back_top = 0;
+function  back_top_hidden(){
+	$("[name='back_top']").each(function(){
+		if($(this).is(':checked')) {
+			back_top = $(this).val();
+		}
+	});	
+	if(back_top == 1){
+		$('.back_top_tr').css('display','');
+	}else{
+		$('.back_top_tr').css('display','none');	
+	}	
+}
+$("[name='share_add'],[name='share_switch'],[name='must_share'],[name='continuity_switch']").live('click',function(){	
+	lottery_hidden();	
+})
+var share_add = 0;
+var share_switch = 0;
+var continuity_switch = 0;
+function lottery_hidden(){
+	$("[name='share_switch']").each(function(){
+		if($(this).is(':checked')) {
+			share_switch = $(this).val();
+		}
+	});			
+	if(share_switch == 1){
+		$('.tab_soft').css('display','');
+	}else{
+		$('.tab_soft').css('display','none');
+	}
+	$("[name='share_add']").each(function(){
+		if($(this).is(':checked')) {
+			share_add = $(this).val();
+		}
+	});	
+	if(share_add == 1){
+		$('#tab_lottery').css('display','');	
+		$("[name='continuity_switch']").each(function(){
+			if($(this).is(':checked')) {
+				continuity_switch = $(this).val();
+			}
+		});	
+		if(continuity_switch == 1){
+			$('.continuity').css('display','');
+		}else{
+			$('.continuity').css('display','none');
+		}			
+	}else{
+		$('#tab_lottery').css('display','none');
+	}
+	hide_must_share();
+}
+var must_share = 0;
+function hide_must_share(){
+	$("[name='must_share']").each(function(){
+		if($(this).is(':checked')) {
+			must_share = $(this).val();
+		}
+	});		
+	if(must_share == 1){
+		$('.must_share').css('display','');
+	}else{
+		$('.must_share').css('display','none');
+	}
+}
+//颜色
+$(function(){
+	$('.color').colorPicker();
+});
+//图片验证	
+function test(file_name)
+{
+	var result =/\.[^\.]+/.exec(file_name);
+	return result;
+}
+//判断照片大小
+function getPhotoSize(obj){
+  var fileSize = 0;
+  var isIE = /msie/i.test(navigator.userAgent) && !window.opera;      
+  if (isIE && !obj.files) {     
+     var filePath = obj.value;      
+     var fileSystem = new ActiveXObject("Scripting.FileSystemObject");  
+     var file = fileSystem.GetFile (filePath);        
+     fileSize = file.Size;     
+  }else { 
+     fileSize = obj.files[0].size;   
+  } 
+  fileSize=Math.round(fileSize/1024*100)/100; //单位为KB
+  if(fileSize>200){
+    return false;
+  }else{
+	return true;
+  }
+}
+function onUploadImgChange(sender,img,obj){  
+	if(!$("#"+img).val()){
+		return false;
+	}
+    if( $("#"+img).val() && !sender.value.match( /.jpg|.gif|.png|.bmp|.jpeg/i ) )
+	{        
+        alert('图片格式无效！');   
+		remove_file(img);	
+        return false;       
+    }   
+	var ap_id = $('#ap_id').val();//图片名称后缀必须为小写，大些报错
+	var b=test(sender.value);
+	if( $("#"+img).val() &&  b!=".jpg"&&b!=".gif"&&b!=".png"&&b!=".bmp"&&b!=".jpeg")
+	{
+		alert('后缀只支持小写格式！');
+		if(!ap_id)
+		{
+			remove_file(img);	
+		}
+		else
+		{
+			var file = $("#"+img);
+			file.after(file.clone().val(""));
+			file.remove();
+		}
+		return false;  
+	}
+	var pic_size = getPhotoSize(sender);
+	if(!pic_size){
+	    alert('图片大小请控制在200KB以内');
+		remove_file(img);	
+        return false;  
+	}
+	var imgSrc = check_img(sender);
+    var img_url = imgSrc;
+    var newimg = new Image();
+    newimg.src = img_url;
+
+    // 加载完成执行
+    newimg.onload = function () {
+		// 打印
+		var w = newimg.width;
+		var h = newimg.height;
+		var pic_arr = ['ap_imgurl','ap_imgurl_bg','desc_color','ap_rule','sudoku_color','bottom_color','prize_bg_pic','bg_img','lose_yes_img','last_lottery_img','rank_lottery_desc_pic','popup_bg_pic','soft_bg'];
+		if($.inArray(img,pic_arr) != -1){
+			if(w != 640){
+				alert('宽必须640');  
+				remove_file(img);			
+				return false;  
+			}
+		}
+		/*
+		if(img != 'prize_pic_up' && img != 'lottery_pic' && img != 'award_color'&&img != 'update_warning_pic'&&img != 'unclick_lottery_pic' && w != 640){
+			alert('宽必须640');  
+			remove_file(img);			
+			return false;    			
+		}
+		*/
+		if(img == 'update_warning_pic'  && (w != 70 || h != 70)){
+			alert('分享微信图请上传70*70的图片');  
+			remove_file(img);			
+			return false;   		
+		}		
+		if(img == 'prize_pic_up' && w != 577){
+			alert('奖品轮播图宽必须640');  
+			remove_file(img);			
+			return false;    
+		}
+		var objPreview = document.getElementById(obj); 
+		$('#'+img+'_del').remove();
+		str = '<button id="'+img+'_del" type="button" onclick="del_img(\''+img+'\');" >&nbsp;&nbsp;删&nbsp;&nbsp;除&nbsp;&nbsp;</button>';
+		$('#'+obj).closest('img').after(str);		
+		var imgs=document.getElementById(img);
+		if( sender.files &&  sender.files[0] ){ 
+			objPreview.style.display = 'block';        
+			objPreview.style.width = 'auto';        
+			objPreview.style.height = 'auto';
+			objPreview.src = window.URL.createObjectURL(imgs.files[0]);
+		}       
+	}	
+} 	
+function del_img(img){
+	if(confirm('是否确认删除？')) {
+		remove_file(img);
+	}
+}
+function remove_file(file){
+	$('#'+file+'_div').removeAttr('src').css('display','none');
+	$('#'+file+'_del').remove();	
+	var file = $("#"+file);
+	file.after(file.clone().val(""));
+	file.remove();	
+	return false;   	
+}
+function check_img(obj){
+   var imgSrc = '';
+    if (obj.files && obj.files[0]) {
+        if (getOs() == 'Chrome') {
+            imgSrc = window.webkitURL.createObjectURL(obj.files[0]);
+        } else {
+            imgSrc = window.URL.createObjectURL(obj.files[0]);
+        }
+    } else {
+        //IE下，使用滤镜
+        obj.select();
+        //解决IE9下document.selection拒绝访问的错误
+        if (navigator.appName == "Microsoft Internet Explorer" && navigator.appVersion.match(/9./i) == "9.") {
+            obj.blur();
+        }
+        var imgSrc = document.selection.createRange().text;
+        document.selection.empty();
+    }
+	return imgSrc;
+}
+function getOs() 
+{ 
+   var OsObject = ""; 
+   if(isIE = navigator.userAgent.indexOf("MSIE")!=-1) { 
+        return "MSIE"; 
+   }
+   if(isFirefox=navigator.userAgent.indexOf("Firefox")!=-1){ 
+        return "Firefox"; 
+   }
+   if(isChrome=navigator.userAgent.indexOf("Chrome")!=-1){ 
+        return "Chrome"; 
+   }
+   if(isSafari=navigator.userAgent.indexOf("Safari")!=-1) { 
+        return "Safari"; 
+   }
+   if(isOpera=navigator.userAgent.indexOf("Opera")!=-1){ 
+        return "Opera"; 
+   } 
+} 
+function checkinput(){
+	var ap_name = $.trim($('#ap_name').val());
+	if (!ap_name){
+		alert('活动名称不可为空');
+		return false;
+	}
+	var ap_id = $('#ap_id').val();
+	var ap_type = $('#ap_type').val();
+	if(!ap_id){
+		if (!$('#ap_imgurl').val()){
+			alert('请上传活动头图');
+			return false;
+		}	
+		if (!$('#desc_color').val()){
+			alert('请上传活动说明背景图');
+			return false;
+		}	
+		if (must_share == 1 && !$('#ranking_pic1').val()){
+			alert('请上传排行榜背景图');
+			return false;
+		}			
+	
+		if (ap_type==2){
+			if (!$('#sudoku_color').val()){
+				alert('请上传个人信息模块背景图');
+				return false;
+			}			
+			if (must_share == 1 && !$('#ranking_no_pic1').val()){
+				alert('请上传排行榜没信息时背景图');
+				return false;
+			}		
+			if (!$('#prize_bg_pic').val()){
+				alert('请上传我的奖品页面背景图');
+				return false;
+			}	
+			if (!$('#prize_text_color').val()){
+				alert('请填写抽大奖标题');
+				return false;
+			}
+			if(share_add == 1){	
+				if (!$('#my_prize_button').val() || $('#my_prize_button').val().length > 5){
+					alert('我的奖品按键不可为空并按键名称不超过5个');
+					return false;
+				}				
+				if (!$('#lottery_pic').val()){
+					alert('请上传可抽奖按键图');
+					return false;
+				}
+				if (!$('#award_color').val()){
+					alert('请上传不可抽奖按键图');
+					return false;
+				}	
+				if (!$('#lose_yes_img').val()){
+					alert('请上传抽奖背景图（上）');
+					return false;
+				}	
+				if (!$('#lose_yes_img').val()){
+					alert('请上传抽奖背景图（上）');
+					return false;
+				}	
+				if (!$('#last_lottery_img').val()){
+					alert('请上传抽奖背景图（下）');
+					return false;
+				}	
+				if (!$('#popup_bg_pic').val()){
+					alert('请上传弹出框背景图');
+					return false;
+				}	
+				if(share_switch == 1){					
+					if (!$('#soft_bg').val()){
+						alert('请上传推荐游戏背景图片');
+						return false;
+					}	
+				}
+			}
+			if (!$('#bg_img').val()){
+				alert('请上传个人信息页面背景图');
+				return false;
+			}	
+		}else if($_POST['ap_type'] == 3){
+			if (!$('#share_weixin_pic').val()){
+				alert('请上传页尾中奖背景图');
+				return false;
+			}		
+		}			
+	}
+	if(ap_type==2){
+		if (!$('#prize_text_color').val()){
+			alert('请填写抽大奖标题');
+			return false;
+		}	
+		if (must_share == 1 && !$('#yes_marquee').val()){
+			alert('有排行状态跑马灯不可为空');
+			return false;
+		}
+		if (must_share == 1 && !$('#no_marquee').val()){
+			alert('无排行状态跑马灯不可为空');
+			return false;
+		}
+
+		if(back_top == 1){
+			if (!$('#describe').val() || $('#describe').val().length > 5){
+				alert('查看详情按键不可为空并按键名称不超过5个');
+				return false;
+			}
+			var old_ap_rule = "<?php echo $list['ap_rule']; ?>";
+			if (!old_ap_rule && !$('#ap_rule').val()){
+				alert('请上传活动说明页面背景图');
+				return false;
+			}				
+		}
+		if (must_share == 1 && !$('#yes_marquee').val()){
+			alert('有排行状态跑马灯不可为空');
+			return false;
+		}
+		if (!$('#change_button').val() || $('#change_button').val().length > 5){
+			alert('修改按钮不可为空并按键名称不超过5个');
+			return false;
+		}	
+		if (must_share == 1 && (!$('#title').val() || $('#title').val().length > 5)){
+			alert('推荐游戏文字不可为空不超过5个');
+			return false;
+		}	
+		if (must_share == 1 && !$('#is_score').val()){
+			alert('排行榜显示数量不可为空');
+			return false;
+		}		
+		if (must_share == 1 &&  !$('#uppage').val() || $('#uppage').val().length > 5){
+			alert('排行榜上一页按钮不可为空并按键名称不超过5个');
+			return false;
+		}		
+		if (must_share == 1 && !$('#nextpage').val() || $('#nextpage').val().length > 5){
+			alert('排行榜下一页按钮不可为空并按键名称不超过5个');
+			return false;
+		}	
+		if (!$('#back_button').val() || $('#back_button').val().length > 5){
+			alert('活动说明页面返回按键不可为空并按键名称不超过5个');
+			return false;
+		}	
+		if (!$('#prize_back').val() || $('#prize_back').val().length > 5){
+			alert('我的奖品页面返回按键不可为空并按键名称不超过5个');
+			return false;
+		}
+		//是否开启连续抽奖
+		var continuity_switch = 0;
+		$("[name='continuity_switch']").each(function(){
+			if($(this).is(':checked')) {
+				continuity_switch = $(this).val();
+			}
+		});	
+		if(continuity_switch == 1){	
+			if ($('#continuity_sw_text').val().length > 5){
+				alert('连续抽奖实物奖品tab按键名称不超过5个');
+				return false;
+			}	
+			if ($('#continuity_xn_text').val().length > 5){
+				alert('连续抽奖虚拟奖品tab按键名称不超过5个');
+				return false;
+			}	
+		}		
+		var change_switch = 0;//是否开启换一换开关
+		$("[name='change_switch']").each(function(){
+			if($(this).is(':checked')) {
+				change_switch = $(this).val();
+			}
+		});			
+		if (change_switch == 1 && !$('#share_text').val()){
+			alert('换一换按键名称不可为空');
+			return false;
+		}
+		if (change_switch == 1 && $('#share_text').val().length > 5){
+			alert('换一换按键名称不超过5');
+			return false;
+		}	
+		if(share_add == 1){	
+			if (!$('#my_prize_button').val() || $('#my_prize_button').val().length > 5){
+				alert('我的奖品按键不可为空并按键名称不超过5个');
+				return false;
+			}			
+			if (!$('#draw_button_text').val() && $('#draw_button_text').val().length > 5){
+				alert('我要抽奖按钮不可为空按键名称不超过5');
+				return false;
+			}			
+			if (!$('#no_winning_marquee').val()){
+				alert('未有人中奖跑马灯不可为空');
+				return false;
+			}		
+			if (!$('#get_lottery_type').val()){
+				alert('获得抽奖次数条件不可为空');
+				return false;
+			}		
+			if (!$('#free_day_switch').val()){
+				alert('单日单用户最多获取抽奖次数不可为空');
+				return false;
+			}				
+			if (!$('#not_winning_tips').val() || $('#not_winning_tips').val().length > 40){
+				alert('未中奖弹窗提示语不可为空提示不超过40个');
+				return false;
+			}	
+			if (!$('#close_button').val() || $('#close_button').val().length > 5){
+				alert('弹窗内关闭按键不可为空并按键名称不超过5个');
+				return false;
+			}
+			if (!$('#again').val() || $('#again').val().length > 5){
+				alert('弹窗内再抽一次按键不可为空并按键名称不超过5个');
+				return false;
+			}	
+			if (!$('#submit_button').val() || $('#submit_button').val().length > 5){
+				alert('弹窗内提交按键不可为空并按键名称不超过5个');
+				return false;
+			}	
+		}
+	}else if(ap_type== 3){
+		var ap_award = $.trim($('#ap_award').val())
+		if(!ap_award){
+			alert('中奖奖品列表不可为空');
+			return false;		
+		}				
+	}
+}
+
+//奖品轮播图
+function ajaxFileUpload(){
+	$.ajaxFileUpload(
+	{
+		url:'__URL__/pub_prize_pic', //你处理上传文件的服务端
+		secureuri:false,
+		fileElementId:'prize_pic_up',
+		dataType: 'json',
+		success: function (data){
+			if(data.code == 1){
+				var old_path = $('#prize_pic').val();
+				var new_path = old_path+','+data.path;
+				$('#prize_pic').val(new_path);
+				var str = '<img id="'+data.name+'_div" src="'+data.img_path+'" width="100px" height="100px" alt="">&nbsp;<button  id="'+data.name+'_del" type="button" onclick="del_prize_pic(\''+data.path+'\',\''+data.name+'\');" >&nbsp;&nbsp;删&nbsp;&nbsp;除&nbsp;&nbsp;</button>';
+				$('#beford_id').closest('span').after(str);
+			}else{
+				alert(data.msg);
+				return false;
+			}
+			consloe.log(data);
+	   }
+	})
+	 return false;
+}
+//删除奖品轮播图
+function del_prize_pic(path,name){
+	$('#'+name+'_div').remove();
+	$('#'+name+'_del').remove();
+	var prize_pic = $('#prize_pic').val().replace(','+path, "");
+	$('#prize_pic').val(prize_pic);
+	var old_prize_path = $('#del_prize_pic_str').val();
+	$('#del_prize_pic_str').val(old_prize_path+','+path);
+}
+</script>
+<body>
+<form action="__URL__/<?php if($_GET['ap_id']){ echo 'ranking_activity_edit'; }else{ echo 'ranking_activity_add'; } ?>" method="post" onsubmit="return checkinput();" enctype="multipart/form-data">
+<input type='hidden' name='ap_id' id='ap_id' value="{$list['ap_id']}"/>
+<div style="margin:20px;">
+<a href="/index.php/Sendnum/CoActivity/ranking_activity" class="search_btn">返回</a>&nbsp;&nbsp;
+<h2><span class="my_activate">添加活动页面</span></h2>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr>
+		<td width="110" >活动名称</td>
+		<td  colspan='2'>
+		<input type="text" id="ap_name" name="ap_name" value="{$list['ap_name']}" /></td>
+	</tr>
+	<tr>
+		<td>活动类型</td>
+		<td colspan='2'>
+			<select name="share_add_all" id="share_add_all">
+				<option value="0" <?php if($list['share_add_all'] == 0) echo 'selected'; ?> >排行榜</option>
+				<option value="1" <?php if($list['share_add_all'] == 1) echo 'selected'; ?>>充值抽奖</option>
+			</select>
+		</td>
+	</tr>
+
+	<tr>
+		<td>消费方式</td>
+		<td colspan='2'>
+		<?php if(!$_GET['ap_id']){ ?>
+			<select name="download_config" id="download_config">
+				<option value="0" <?php if($list['download_config'] == 0) echo 'selected'; ?> >充值安智币+游戏消费RMB</option>
+				<option value="1" <?php if($list['download_config'] == 1) echo 'selected'; ?>>充值安智币</option>
+				<option value="2" <?php if($list['download_config'] == 2) echo 'selected'; ?>>游戏消费RMB</option>
+				<option value="3" <?php if($list['download_config'] == 3) echo 'selected'; ?> >安智币消费</option>
+			</select>
+		<?php 	}else{ ?>
+			<?php 
+				if($list['download_config'] == 1){
+					echo '充值安智币';
+				}else if($list['download_config'] == 2){
+					echo '游戏消费RMB';
+				}else if($list['download_config'] == 3){
+					echo '安智币消费';
+				}else if($list['download_config'] == 0){
+					echo '充值安智币+游戏消费RMB';
+				}
+			?>	
+			<input type="hidden" name="download_config" id="download_config" value="{$list['download_config']}" />
+		<?php } ?>				
+		</td>
+	</tr>
+
+
+
+	<tr>
+		<td>页面类型</td>
+		<td colspan='2'>
+			<select name="ap_type" id="ap_type" onchange='sel_type(this);' >
+				<option value="2" <?php if($list['ap_type'] == 2) echo 'selected'; ?> >活动页面</option>
+				<option value="3" <?php if($list['ap_type'] == 3) echo 'selected'; ?>>结束页面</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>活动头图</td>
+		<td width="105" >
+		<input type="file" name="ap_imgurl" id="ap_imgurl" onchange="onUploadImgChange(this,'ap_imgurl','ap_imgurl_div');" />
+		<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+        </td>
+		<td><img id="ap_imgurl_div" <?php if($list['ap_imgurl']){ ?>src="{$IMGATT_HOST}{$list['ap_imgurl']}" <?php } ?>/></td>
+	</tr>
+	<tr  >
+		<td>活动说明背景图</td>
+		<td>
+			<input type="file" name="desc_color" id="desc_color" onchange="onUploadImgChange(this,'desc_color','desc_color_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="desc_color_div" <?php if($list['desc_color']){ ?>src="{$IMGATT_HOST}{$list['desc_color']}" <?php } ?>/></td>
+	</tr>	
+	<tr id='hd_bg' class='back_top_tr' >
+		<td>活动说明页面背景图：</td>
+		<td>
+            <input type="file" name="ap_rule" id="ap_rule" onchange="onUploadImgChange(this,'ap_rule','ap_rule_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="ap_rule_div" <?php if($list['ap_rule']){ ?> src="{$IMGATT_HOST}{$list['ap_rule']}" <?php } ?>/></td>
+	</tr>	
+	<tr>
+		<td>是否开启排行榜：</td>
+		<td colspan='2'>
+            <input type="radio" name="must_share" value="1"  <?php if($list['must_share'] == 1) echo "checked"; ?>  /> 是&nbsp;
+			<input type="radio" name="must_share" value="0" <?php if($list['must_share'] == 0) echo "checked"; ?> /> 否
+		</td>
+	</tr>	
+	<tr class='must_share' >
+		<td width="110" >排行榜背景图：</td>
+		<td width="105"><input type="file" name="ranking_pic1" id="ranking_pic1" onchange="onUploadImgChange(this,'ranking_pic1','ranking_pic1_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="ranking_pic1_div" <?php if($list['ranking_pic1']){ ?>src="{$IMGATT_HOST}{$list['ranking_pic1']}" <?php } ?>/></td>
+	</tr>	
+	<tr class='must_share' >
+		<td>前三名文字颜色：</td>
+		<td colspan='2'>
+            <div class="label_txt">第一名：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="first_text_color" id="first_text_color" value="{$list['first_text_color']}" /></div>
+            <div class="label_txt">第二名：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="second_text_color" id="second_text_color" value="{$list['second_text_color']}" /></div>
+            <div class="label_txt">第三名：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="third_text_color" id="third_text_color" value="{$list['third_text_color']}" /></div>
+		</td>
+	</tr>	
+	<tr class='must_share' >
+		<td>排行榜显示数量：</td>
+		<td colspan='2'>
+			<input type="tel" name="is_score" id="is_score" value="{$list['is_score']}" />
+		</td>
+	</tr>	
+	<tr class='must_share' >
+		<td>排行榜上一页按钮</td>
+		<td colspan='2'>
+            <div class="label_txt">按键字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="uppage_color" id="uppage_color" value="{$list['uppage_color']}" /></div>
+			<div class="input_key">	
+			<input type="text" id="uppage" name="uppage" placeholder="请输入按键名称不超过5个" value="{$list['uppage']}"  /></div>
+		</td>
+	</tr>	
+	<tr class='must_share' >
+		<td>排行榜下一页按钮</td>
+		<td colspan='2'>
+            <div class="label_txt">按键字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' class='color' name="nextpage_color" id="nextpage_color" value="{$list['nextpage_color']}" /></div>
+			<div class="input_key">	
+			<input type="text" id="nextpage" name="nextpage" placeholder="请输入按键名称不超过5个" value="{$list['nextpage']}"  /></div>
+		</td>
+	</tr>		
+</table>	
+<table id='tab_hidden' border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr>
+		<td width="110" >包名：</td>
+		<td  colspan='2'>
+			<input type="text" size='50' id="ap_package" name="ap_package" value="{$list['ap_package']}" />
+			<p class="tips">多包名用【&】号分隔</p>
+		</td>
+	</tr>
+	<tr >
+		<td>排行榜跑马灯</td>
+		<td colspan='2'>
+            <div class="label_txt">背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="alert_color" id="alert_color" value="<?php echo $list['alert_color'] ? $list['alert_color'] : '#fdb926'?>" /></div>	
+			<div class="label_txt">文字颜色：</div>			
+            <div class="color_box">
+			<input type="text" class='color' name="prize_bg_color" id="prize_bg_color" value="<?php echo $list['prize_bg_color'] ? $list['prize_bg_color'] : '#b94708'?>" /></div>
+		</td>
+	</tr>
+	<tr class='must_share' >
+		<td>有排行状态跑马灯</td>
+		<td colspan='2' >
+		<textarea id='yes_marquee' name='yes_marquee' rows="3" cols="20" style="margin: 0px; width: 600px; height: 200px;" ><?php if($_GET['ap_id']){ echo $list['yes_marquee']; }else{ ?>恭喜用户user，累积充值money，厮杀至榜首；	
+恭喜用户user，累积充值money，高居排行榜第二；
+恭喜用户user，累积充值money，暂居第三；
+恭喜用户user，累积充值money，登至排行榜第四；
+恭喜用户user，累积充值money，杀进排行榜前五；
+恭喜用户user，累积充值money，冲入排行榜第六；
+恭喜用户user，累积充值money，拼杀至排行榜第七；
+恭喜用户user，累积充值money，奋战入排行榜第八；
+恭喜用户user，累积充值money，冲入排行榜第九；
+恭喜用户user，累积充值money，挤入排行榜第十；
+<?php } ?>
+		</textarea>
+        </td>
+	</tr>
+	<tr class='must_share' >
+		<td>无排行状态跑马灯</td>
+		<td colspan='2' >
+			<input type="text" name="no_marquee" id="no_marquee" value="{$list['no_marquee']}" />
+		</td>
+	</tr>
+<!-- 	<tr>
+		<td>活动说明</td>
+		<td colspan='2'>
+			<div class="color_box">
+			字体颜色
+			<input type="text" class='color' name="mean_text_color" id="mean_text_color" value="{$list['mean_text_color']}" />
+			</div>
+			<textarea id='ap_desc' name='ap_desc' rows="3" cols="20" style="margin: 0px; width: 600px; height: 200px;" >{$list['ap_desc']}</textarea>
+		</td>
+	</tr> -->
+	<tr >
+		<td>个人信息模块：</td>
+		<td colspan='2'>
+			<div class="label_txt">文字颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="info_color" id="info_color" value="<?php echo $list['info_color'] ? $list['info_color'] : '#b8470b'?>" /></div>		
+		</td>
+	</tr>
+	<tr>
+		<td>个人信息模块背景图：</td>
+		<td>
+            <input type="file" name="sudoku_color" id="sudoku_color" onchange="onUploadImgChange(this,'sudoku_color','sudoku_color_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+		</td>
+		<td>
+			<img id="sudoku_color_div" <?php if($list['sudoku_color']){ ?>src="{$IMGATT_HOST}{$list['sudoku_color']}" <?php } ?>/>
+		</td>
+	</tr>	
+	<tr >
+		<td>【个人信息页面/弹窗内】提交按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="submit_button_color" id="submit_button_color" value="<?php echo $list['submit_button_color'] ? $list['submit_button_color'] : '#39b1fd'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="submit_text_color" id="submit_text_color" value="<?php echo $list['submit_text_color'] ? $list['submit_text_color'] : '#ffffff'?>" /></div>
+			<div class="input_key">
+			按键文案：	
+			<input type="text" id="submit_button" name="submit_button" placeholder="请输入按键名称不超过5个" value="{$list['submit_button']}" /></div>
+		</td>
+	</tr>	
+	<tr>
+		<td>是否开启查看详情：</td>
+		<td colspan='2' >
+            <input type="radio" name="back_top" value="1" <?php if($list['back_top'] == 1) echo "checked"; ?> /> 是&nbsp;
+			<input type="radio" name="back_top" value="0" <?php if($list['back_top'] == 0) echo "checked"; ?> /> 否
+		</td>
+	</tr>	
+	<tr class='back_top_tr' >
+		<td>查看详情按钮</td>
+		<td colspan='2'>
+            <div class="label_txt">按键字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="rule_color" id="rule_color" value="{$list['rule_color']}" /></div>
+			<div class="input_key">
+			<input type="text" id="describe" name="describe" placeholder="请输入按键名称不超过5个" value="{$list['describe']}"  /></div>
+		</td>
+	</tr>	
+	<tr >
+		<td>登录按钮：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="button_color" id="button_color" value="<?php echo $list['button_color'] ? $list['button_color'] : '#fa6500'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="button_text_color" id="button_text_color" value="<?php echo $list['button_text_color'] ? $list['button_text_color'] : '#ffffff'?>" /></div>
+		</td>
+	</tr>
+	<tr>
+		<td>未登录时文字说明：</td>
+		<td colspan='2'>
+			<?php if($_GET['ap_id']){ ?>
+			<input type="text" name="button_pic" id="button_pic" value="{$list['button_pic']}"  />
+			<?php }else{ ?>
+			<input type="text" name="button_pic" id="button_pic" value="请登录，登录后可查看个人目前充值信息"  />
+			<?php } ?>
+		</td>
+	</tr>	
+	<tr >
+		<td>修改按钮</td>
+		<td colspan='2'>
+            <div class="label_txt">按键字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="change_button_color" id="change_button_color" value="<?php echo $list['change_button_color'] ? $list['change_button_color'] : '#ffffff'?>" /></div>
+			<div class="input_key">	
+			<input type="text" id="change_button" name="change_button" placeholder="请输入按键名称不超过5个" value="{$list['change_button']}"  /></div>
+		</td>
+	</tr>		
+	<tr class='must_share' >
+		<td width="110" >排行榜没信息时背景图：</td>
+		<td width="105"><input type="file" name="ranking_no_pic1" id="ranking_no_pic1" onchange="onUploadImgChange(this,'ranking_no_pic1','ranking_no_pic1_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="ranking_no_pic1_div" <?php if($list['ranking_no_pic1']){ ?>src="{$IMGATT_HOST}{$list['ranking_no_pic1']}" <?php } ?>/></td>
+	</tr>			
+	<tr class='must_share' >
+		<td>推荐游戏文字：</td>
+		<td colspan='2'>
+			<div class="color_box">
+			<input type="text" class='color' name="no_prize_pic" id="no_prize_pic" value="{$list['no_prize_pic']}" /></div>
+			<input type="text" name="title" id="title" value="{$list['title']}" />
+		</td>
+	</tr>	
+	<tr>
+		<td>奖品轮播背景图：</td>
+		<td>
+            <input type="file" name="bottom_color" id="bottom_color" onchange="onUploadImgChange(this,'bottom_color','bottom_color_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+		</td>
+		<td>
+			<img id="bottom_color_div" <?php if($list['bottom_color']){ ?>src="{$IMGATT_HOST}{$list['bottom_color']}" <?php } ?>/>
+		</td>
+	</tr>	
+	<tr>
+		<td>奖品轮播图：</td>
+		<td>
+            <input type="file" name="prize_pic_up" id="prize_pic_up" onchange="ajaxFileUpload();" />
+            <p class="tips">宽度577,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+		</td>
+		<td>
+		
+			<?php 
+				if($list['prize_pic']){
+					foreach(explode(',',$list['prize_pic']) as $v){
+						if(empty($v)) continue;
+						$path_info = pathinfo($v);
+						echo '&nbsp;<img id="'.$path_info['filename'].'_div" src="'.IMGATT_HOST.$v.'" width="100px" height="100px" alt="">&nbsp;<button  id="'.$path_info['filename'].'_del" type="button" onclick="del_prize_pic(\''.$v.'\',\''.$path_info['filename'].'\');" >&nbsp;&nbsp;删&nbsp;&nbsp;除&nbsp;&nbsp;</button>';
+					}
+				}
+			?>
+			<span id='beford_id' ><span>
+			<input type="hidden" name="prize_pic" id="prize_pic" value="{$list['prize_pic']}" />
+			<input type="hidden" name="del_prize_pic_str" id="del_prize_pic_str" value="" />
+		</td>
+	</tr>	
+	<tr >
+		<td>活动说明页面返回按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="back_button_color" id="back_button_color" value="<?php echo $list['back_button_color'] ? $list['back_button_color'] : '#fa6500'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="back_text_color" id="back_text_color" value="<?php echo $list['back_text_color'] ? $list['back_text_color'] : '#ffffff'?>" /></div>
+			<div class="input_key">
+			按键文案：	
+			<input type="text" id="back_button" name="back_button" placeholder="请输入按键名称不超过5个" value="{$list['back_button']}"  /></div>
+		</td>
+	</tr>
+	
+	<tr >
+		<td>我的奖品页面返回按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="prize_back_color" id="prize_back_color" value="<?php echo $list['prize_back_color'] ? $list['prize_back_color'] : '#fa6500'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="prize_back_text_color" id="prize_back_text_color" value="<?php echo $list['prize_back_text_color'] ? $list['prize_back_text_color'] : '#ffffff'?>" /></div>
+			<div class="input_key">
+			按键文案：	
+			<input type="text" id="prize_back" name="prize_back" placeholder="请输入按键名称不超过5个" value="{$list['prize_back']}" /></div>
+		</td>
+	</tr>
+	<tr>
+		<td>我的奖品页面背景图：</td>
+		<td>
+            <input type="file" name="prize_bg_pic" id="prize_bg_pic" onchange="onUploadImgChange(this,'prize_bg_pic','prize_bg_pic_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="prize_bg_pic_div" <?php if($list['prize_bg_pic']){ ?>src="{$IMGATT_HOST}{$list['prize_bg_pic']}" <?php } ?>/></td>
+	</tr>
+	<tr>
+		<td width="110" >个人信息页面背景图：</td>
+		<td width="105"><input type="file" name="bg_img" id="bg_img" onchange="onUploadImgChange(this,'bg_img','bg_img_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="bg_img_div" <?php if($list['bg_img']){ ?>src="{$IMGATT_HOST}{$list['bg_img']}" <?php } ?>/></td>
+	</tr>	
+	<tr>
+		<td>抽大奖标题：</td>
+		<td colspan='2'>
+			<input type="text" name="prize_text_color" id="prize_text_color" value="{$list['prize_text_color']}" />
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="text_color" id="text_color" value="<?php echo $list['text_color'] ? $list['text_color'] : '#fc0000'?>" /></div>			
+		</td>
+	</tr>	
+	<tr>
+		<td>是否开启抽奖：</td>
+		<td colspan='2'>
+            <input type="radio" name="share_add" value="1"  <?php if($list['share_add'] == 1) echo "checked"; ?>  /> 是&nbsp;
+			<input type="radio" name="share_add" value="0" <?php if($list['share_add'] == 0) echo "checked"; ?> /> 否
+		</td>
+	</tr>
+	<tr>
+		<td>是否开启换一换按键：</td>
+		<td colspan='2' >
+            <input type="radio" name="change_switch" value="1" <?php if($list['change_switch'] == 1) echo "checked"; ?> /> 是&nbsp;
+			<input type="radio" name="change_switch" value="0" <?php if($list['change_switch'] == 0) echo "checked"; ?> /> 否
+		</td>
+	</tr>		
+	<tr class='change_switch' >
+		<td>换一换按键：
+		</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="share_bgcolor" id="share_bgcolor" value="{$list['share_bgcolor']}" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="share_other_pic" id="share_other_pic" value="{$list['share_other_pic']}" /></div>
+            <div class="input_key">
+			换一换按键文案：
+			<input type="text" id="share_text" name="share_text" placeholder="请输入按键名称不超过5个" value="{$list['share_text']}"  /></div>
+		</td>
+	</tr>	
+	<tr>
+		<td >是否开启推荐软件：</td>
+		<td colspan='2' >
+            <input type="radio" name="share_switch" value="1" <?php if($list['share_switch'] == 1) echo "checked"; ?> /> 是 &nbsp;
+			<input type="radio" name="share_switch" value="0" <?php if($list['share_switch'] == 0) echo "checked"; ?> /> 否
+		</td>
+	</tr>	
+	<tr>
+		<td width="110" >弹出框背景图：</td>
+		<td width="105"><input type="file" name="popup_bg_pic" id="popup_bg_pic" onchange="onUploadImgChange(this,'popup_bg_pic','popup_bg_pic_div');" />
+			<p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="popup_bg_pic_div" <?php if($list['popup_bg_pic']){ ?>src="{$IMGATT_HOST}{$list['popup_bg_pic']}" <?php } ?>/></td>
+	</tr>		
+	<tr class='tab_soft' >
+		<td width="110" >推荐游戏背景图片</td>
+		<td width="105"><input type="file" name="soft_bg" id="soft_bg" onchange="onUploadImgChange(this,'soft_bg','soft_bg_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="soft_bg_div" <?php if($list['soft_bg']){ ?>src="{$IMGATT_HOST}{$list['soft_bg']}" <?php } ?>/></td>
+	</tr>
+	<tr class='tab_soft'>
+		<td>软件名称文字颜色</td>
+		<td colspan='2'><input type="text" class='color' name="ap_notice" id="ap_notice" value="{$list['ap_notice']}" /></td>
+	</tr>
+	<tr class='tab_soft' >
+		<td>下载、安装、打开按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="download_bgcolor" id="download_bgcolor" value="{$list['download_bgcolor']}" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="lost_no_desc" id="lost_no_desc" value="{$list['lost_no_desc']}" /></div>
+		</td>
+	</tr>	
+</table>
+
+<table id='tab_lottery' border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr >
+		<td>我的奖品按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="my_prize_button_color" id="my_prize_button_color" value="<?php echo $list['my_prize_button_color'] ? $list['my_prize_button_color'] : '#ffffff'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="my_prize_text_color" id="my_prize_text_color" value="<?php echo $list['my_prize_text_color'] ? $list['my_prize_text_color'] : '#cb4510'?>" /></div>
+			<div class="input_key">
+			按键文案：	
+			<input type="text" id="my_prize_button" name="my_prize_button" placeholder="请输入按键名称不超过5个" value="{$list['my_prize_button']}"  /></div>
+		</td>
+	</tr>	
+	<tr >
+		<td>我要抽奖按钮：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="draw_button_color" id="draw_button_color" value="<?php echo $list['draw_button_color'] ? $list['draw_button_color'] : '#f66200'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="draw_font_color" id="draw_font_color" value="<?php echo $list['draw_font_color'] ? $list['draw_font_color'] : '#ffffff'?>" /></div>
+			<div class="input_key">
+			我要抽奖按键文案：	
+			<input type="text" id="draw_button_text" name="draw_button_text" placeholder="请输入按键名称不超过5个" value="{$list['draw_button_text']}" /></div>
+		</td>
+	</tr>
+	<tr >
+		<td>抽奖页面跑马灯</td>
+		<td colspan='2'>
+            <div class="label_txt">背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="alert_button_color" id="alert_button_color" value="<?php echo $list['alert_button_color'] ? $list['alert_button_color'] : '#fdb926'?>" /></div>		
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="marquee_text_color" id="marquee_text_color" value="<?php echo $list['marquee_text_color'] ? $list['marquee_text_color'] : '#b94708'?>" /></div>
+		</td>
+	</tr>
+	<tr>
+		<td>未有人中奖跑马灯：</td>
+		<td colspan='2'>
+			<input type="text" name="no_winning_marquee" id="no_winning_marquee" value="{$list['no_winning_marquee']}" />
+		</td>
+	</tr>	
+	<tr>
+		<td width="110" >抽奖背景图（上）</td>
+		<td width="105"><input type="file" name="lose_yes_img" id="lose_yes_img" onchange="onUploadImgChange(this,'lose_yes_img','lose_yes_img_div');" />
+             <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="lose_yes_img_div" <?php if($list['lose_yes_img']){ ?>src="{$IMGATT_HOST}{$list['lose_yes_img']}" <?php } ?>/></td>
+	</tr>
+	<tr>
+		<td width="110" >抽奖背景图（下）</td>
+		<td width="105"><input type="file" name="last_lottery_img" id="last_lottery_img" onchange="onUploadImgChange(this,'last_lottery_img','last_lottery_img_div');" />
+             <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="last_lottery_img_div" <?php if($list['last_lottery_img']){ ?>src="{$IMGATT_HOST}{$list['last_lottery_img']}" <?php } ?>/></td>
+	</tr>	
+
+	<tr>
+		<td width="110" >抽奖说明背景图</td>
+		<td width="105"><input type="file" name="rank_lottery_desc_pic" id="rank_lottery_desc_pic" onchange="onUploadImgChange(this,'rank_lottery_desc_pic','rank_lottery_desc_pic_div');" />
+             <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="rank_lottery_desc_pic_div" <?php if($list['rank_lottery_desc_pic']){ ?>src="{$IMGATT_HOST}{$list['rank_lottery_desc_pic']}" <?php } ?>/></td>
+	</tr>	
+	<tr >
+		<td>抽奖说明背景颜色：</td>
+		<td colspan='2'>
+			<div class="label_txt"></div>
+            <div class="color_box">
+			<input type="text" class='color' name="rank_lottery_desc_color" id="rank_lottery_desc_color" value="<?php echo $list['rank_lottery_desc_color'] ? $list['rank_lottery_desc_color'] : '#fad23c'?>" /></div>		
+		</td>
+	</tr>
+	<tr>
+		<td>抽奖说明</td>
+		<td colspan='2'>
+		<textarea id='rank_lottery_desc_text' name='rank_lottery_desc_text' rows="3" cols="20" style="margin: 0px; width: 400px; height: 100px;" ><?php if($list['rank_lottery_desc_text']){ echo $list['rank_lottery_desc_text']; } ?></textarea>		
+		</td>
+	</tr>
+
+
+
+	<tr>
+		<td width="110" >抽奖模板</td>
+		<td colspan='2'>
+	<?php if(!$_GET['ap_id']  || $list['is_prize'] != 1 ){ ?>
+			<select name="lottery_style" id="lottery_style" >
+                <option value="1"  <?php if($list['lottery_style'] == 1) echo 'selected'; ?> >老虎机</option>
+				<option value="2" <?php if($list['lottery_style'] == 2) echo 'selected'; ?>>九宫格</option>
+				<option value="3" <?php if($list['lottery_style'] == 3) echo 'selected'; ?>>转盘</option>
+			</select>
+	<?php 	}else{ ?>
+		<?php 
+			if($list['lottery_style'] == 1){
+				echo '老虎机';
+			}else if($list['lottery_style'] == 2){
+				echo '九宫格';
+			}else if($list['lottery_style'] == 3){
+				echo '转盘';
+			}
+		?>	
+		<input type="hidden" name="lottery_style" id="lottery_style" value="{$list['lottery_style']}" />
+	<?php } ?>	
+		</td>
+	</tr>
+	<tr>
+		<td>获得抽奖次数条件：</td>
+		<td colspan='2'>
+			充值满
+			<?php if(!$_GET['ap_id'] || empty($list['start_tm']) || $list['start_tm'] > time()){ ?>
+			<input type="tel" name="get_lottery_type" id="get_lottery_type" value="{$list['get_lottery_type']}" />
+			<?php 	}else{ ?>
+			{$list['get_lottery_type']}
+			<input type="hidden" name="get_lottery_type" id="get_lottery_type" value="{$list['get_lottery_type']}" />
+			<?php 	} ?>
+			赠送一次
+		</td>
+	</tr>
+	<tr>
+		<td>单日单用户最多获取抽奖次数：</td>
+		<td colspan='2' >
+			<?php if(!$_GET['ap_id'] || empty($list['start_tm']) || $list['start_tm'] > time()){ ?>
+			<input type="tel" name="free_day_switch" id="free_day_switch"  value="{$list['free_day_switch']}"  />
+			<?php 	}else{ ?>
+			{$list['free_day_switch']}
+			<input type="hidden" name="free_day_switch" id="free_day_switch" value="{$list['free_day_switch']}" />
+			<?php 	} ?>
+		</td>
+	</tr>	
+	<tr >
+		<td>可抽奖按键图：</td>
+		<td width="105"><input type="file" name="lottery_pic" id="lottery_pic" onchange="onUploadImgChange(this,'lottery_pic','lottery_pic_div');" />
+		<p class="tips">老虎机241*65 九宫格156*156 转盘414*414</p>
+        </td>
+		<td><img id="lottery_pic_div" <?php if($list['lottery_pic']){ ?>src="{$IMGATT_HOST}{$list['lottery_pic']}" <?php } ?>/></td>
+	</tr>	
+	<tr >
+		<td>不可抽奖按键图：</td>
+		<td width="105"><input type="file" name="award_color" id="award_color" onchange="onUploadImgChange(this,'award_color','award_color_div');" />
+		<p class="tips">老虎机241*65 九宫格156*156 转盘414*414</p>
+        </td>
+		<td><img id="award_color_div" <?php if($list['award_color']){ ?>src="{$IMGATT_HOST}{$list['award_color']}" <?php } ?>/></td>
+	</tr>	
+		
+	<tr>
+		<td>未中奖弹窗提示语：</td>
+		<td colspan='2'>
+			 <div class="color_box">
+			<input type="text" class='color' name="no_prize_text" id="no_prize_text" value="<?php echo $list['no_prize_text'] ? $list['no_prize_text'] : '#a50900'?>" /></div>
+			<input type="text" name="not_winning_tips" id="not_winning_tips" value="{$list['not_winning_tips']}" />
+		</td>
+	</tr>	
+	<tr >
+		<td>弹窗内关闭按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="close_button_color" id="close_button_color" value="<?php echo $list['close_button_color'] ? $list['close_button_color'] : '#fa6500'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="close_text_color" id="close_text_color" value="<?php echo $list['close_text_color'] ? $list['close_text_color'] : '#ffffff'?>" /></div>
+			<div class="input_key">
+			按键文案：	
+			<input type="text" id="close_button" name="close_button" placeholder="请输入按键名称不超过5个" value="{$list['close_button']}"  /></div>
+		</td>
+	</tr>	
+	<tr >
+		<td>弹窗内再抽一次按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="again_color" id="again_color" value="<?php echo $list['again_color'] ? $list['again_color'] : '#d32e00'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="again_text_color" id="again_text_color" value="<?php echo $list['again_text_color'] ? $list['again_text_color'] : '#ffffff'?>" /></div>
+			<div class="input_key">
+			按键文案：	
+			<input type="text" id="again" name="again" placeholder="请输入按键名称不超过5个" value="{$list['again']}"  /></div>
+		</td>
+	</tr>
+	<tr>
+		<td>是否开启连续抽奖：</td>
+		<td colspan='2' >
+            <input type="radio" name="continuity_switch" value="1" <?php if($list['continuity_switch'] == 1) echo "checked"; ?> /> 是 &nbsp;
+			<input type="radio" name="continuity_switch" value="0" <?php if($list['continuity_switch'] == 0) echo "checked"; ?> /> 否
+			  <p class="tips">开启后，前端会出现十连抽、百连抽按扭。</p>
+		</td>
+	</tr>	
+	<tr class='continuity' >
+		<td>10连抽按键： <p class="tips">可点击时样式</p></td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_color_ten" id="continuity_color_ten" value="<?php echo $list['continuity_color_ten'] ? $list['continuity_color_ten'] : '#3bb4ff'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_text_color_ten" id="continuity_text_color_ten" value="<?php echo $list['continuity_text_color_ten'] ? $list['continuity_text_color_ten'] : '#ffffff'?>" /></div>
+		</td>
+	</tr>	
+	<tr class='continuity' >
+		<td width="110" >
+			10连抽按键背景图片
+			 <p class="tips">可点击时样式</p>
+		</td>
+		<td width="105"><input type="file" name="lose_yes_desc" id="lose_yes_desc" onchange="onUploadImgChange(this,'lose_yes_desc','lose_yes_desc_div');" />
+            <p class="tips">上传背景图后，将覆盖背景颜色及字体颜色；建议尺寸176*70，大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="lose_yes_desc_div" <?php if($list['lose_yes_desc']){ ?>src="{$IMGATT_HOST}{$list['lose_yes_desc']}" <?php } ?>/></td>
+	</tr>	
+	<tr class='continuity' >
+		<td>10连抽按键：
+		<p class="tips">不可点击时样式</p>
+		</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_color_disabled_ten" id="continuity_color_disabled_ten" value="<?php echo $list['continuity_color_disabled_ten'] ? $list['continuity_color_disabled_ten'] : '#3bb4ff'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_text_color_disabled_ten" id="continuity_text_color_disabled_ten" value="<?php echo $list['continuity_text_color_disabled_ten'] ? $list['continuity_text_color_disabled_ten'] : '#ffffff'?>" /></div>
+		</td>
+	</tr>	
+	<tr class='continuity'>
+		<td width="110" >10连抽按键背景图片<p class="tips">不可点击时样式</p></td>
+		<td width="105"><input type="file" name="lose_no_img" id="lose_no_img" onchange="onUploadImgChange(this,'lose_no_img','lose_no_img_div');" />
+            <p class="tips">上传背景图后，将覆盖背景颜色及字体颜色；建议尺寸176*70，大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="lose_no_img_div" <?php if($list['lose_no_img']){ ?>src="{$IMGATT_HOST}{$list['lose_no_img']}" <?php } ?>/></td>
+	</tr>	
+	<tr class='continuity' >
+		<td>100连抽按键：<p class="tips">可点击时样式</p></td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_color_hundred" id="continuity_color_hundred" value="<?php echo $list['continuity_color_hundred'] ? $list['continuity_color_hundred'] : '#fc6a00'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_text_color_hundred" id="continuity_text_color_hundred" value="<?php echo $list['continuity_text_color_hundred'] ? $list['continuity_text_color_hundred'] : '#ffffff'?>" /></div>
+		</td>
+	</tr>	
+	<tr class='continuity' >
+		<td width="110" >100连抽按键背景图片<p class="tips">可点击时样式</p></td>
+		<td width="105"><input type="file" name="last_lottery_desc" id="last_lottery_desc" onchange="onUploadImgChange(this,'last_lottery_desc','last_lottery_desc_div');" />
+            <p class="tips">上传背景图后，将覆盖背景颜色及字体颜色；建议尺寸176*70，大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="last_lottery_desc_div" <?php if($list['last_lottery_desc']){ ?>src="{$IMGATT_HOST}{$list['last_lottery_desc']}" <?php } ?>/></td>
+	</tr>	
+	<tr class='continuity' >
+		<td>100连抽按键：<p class="tips">不可点击时样式</p></td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_color_disabled_hundred" id="continuity_color_disabled_hundred" value="<?php echo $list['continuity_color_disabled_hundred'] ? $list['continuity_color_disabled_hundred'] : '#fc6a00'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_text_color_disabled_hundred" id="continuity_text_color_disabled_hundred" value="<?php echo $list['continuity_text_color_disabled_hundred'] ? $list['continuity_text_color_disabled_hundred'] : '#ffffff'?>" /></div>
+		</td>
+	</tr>	
+	<tr class='continuity'>
+		<td width="110" >100连抽按键背景图片<p class="tips">不可点击时样式</p></td>
+		<td width="105"><input type="file" name="warning_bgcolor" id="warning_bgcolor" onchange="onUploadImgChange(this,'warning_bgcolor','warning_bgcolor_div');" />
+            <p class="tips">上传背景图后，将覆盖背景颜色及字体颜色；建议尺寸176*70，大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="warning_bgcolor_div" <?php if($list['warning_bgcolor']){ ?>src="{$IMGATT_HOST}{$list['warning_bgcolor']}" <?php } ?>/></td>
+	</tr>	
+	<tr class='continuity' >
+		<td>连续抽奖弹窗背景色：</td>
+		<td colspan='2'>
+            <div class="label_txt">弹窗背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_popup_color" id="continuity_popup_color" value="<?php echo $list['continuity_popup_color'] ? $list['continuity_popup_color'] : '#fad23c'?>" /></div>
+            <div class="label_txt">中奖信息背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_draw_color" id="continuity_draw_color" value="<?php echo $list['continuity_draw_color'] ? $list['continuity_draw_color'] : '#fdb926'?>" /></div>
+		</td>
+	</tr>
+	<tr class='continuity'>
+		<td width="110" >连抽抽奖弹窗背景图片</td>
+		<td width="105"><input type="file" name="ap_imgurl_bg" id="ap_imgurl_bg" onchange="onUploadImgChange(this,'ap_imgurl_bg','ap_imgurl_bg_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="ap_imgurl_bg_div" <?php if($list['ap_imgurl_bg']){ ?>src="{$IMGATT_HOST}{$list['ap_imgurl_bg']}" <?php } ?>/></td>
+	</tr>		
+	<tr class='continuity' >
+		<td>奖品tab按键默认：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_tab_disab_color" id="continuity_tab_disab_color" value="<?php echo $list['continuity_tab_disab_color'] ? $list['continuity_tab_disab_color'] : '#e03501'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_tab_text_disab_color" id="continuity_tab_text_disab_color" value="<?php echo $list['continuity_tab_text_disab_color'] ? $list['continuity_tab_text_disab_color'] : '#ffffff'?>" /></div>
+		</td>
+	</tr>	
+	<tr class='continuity' >
+		<td>奖品tab按键点击后：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_tab_color" id="continuity_tab_color" value="<?php echo $list['continuity_tab_color'] ? $list['continuity_tab_color'] : '#651900'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_tab_text_color" id="continuity_tab_text_color" value="<?php echo $list['continuity_tab_text_color'] ? $list['continuity_tab_text_color'] : '#ffffff'?>" /></div>
+		</td>
+	</tr>	
+	<tr class='continuity' >
+		<td>按键文案：</td>
+		<td colspan='2'>
+			<div class="input_key">
+			实物按键文案：	
+			<input type="text" id="continuity_sw_text" name="continuity_sw_text" placeholder="请输入按键名称不超过5个" value="{$list['continuity_sw_text']}"  />			
+				虚拟按键文案：	
+				<input type="text" id="continuity_xn_text" name="continuity_xn_text" placeholder="请输入按键名称不超过5个" value="{$list['continuity_xn_text']}"  />
+			</div>
+		</td>
+	</tr>		
+	<tr class='continuity' >
+		<td>连续抽奖返回按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_back_color" id="continuity_back_color" value="<?php echo $list['continuity_back_color'] ? $list['continuity_back_color'] : '#fa6500'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_back_text_color" id="continuity_back_text_color" value="<?php echo $list['continuity_back_text_color'] ? $list['continuity_back_text_color'] : '#ffffff'?>" /></div>
+		</td>
+	</tr>	
+	<tr class='continuity' >
+		<td>连续抽奖我的奖品按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_my_prize_color" id="continuity_my_prize_color" value="<?php echo $list['continuity_my_prize_color'] ? $list['continuity_my_prize_color'] : '#da3300'?>" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" class='color' name="continuity_my_prize_text_color" id="continuity_my_prize_text_color" value="<?php echo $list['continuity_my_prize_text_color'] ? $list['continuity_my_prize_text_color'] : '#ffffff'?>" /></div>
+		</td>
+	</tr>				
+</table>	
+
+<table id='tab_end' border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr class='must_share' >
+		<td>中奖奖品列表：（用大写分号隔开）</td>
+		<td colspan='2'>
+		<textarea id='ap_award' name='ap_award' rows="3" cols="20" style="margin: 0px; width: 600px; height: 200px;" ><?php if($_GET['ap_id']){ echo $list['ap_award']; }else{ ?>Iphone6；
+IPAD air；
+小米4；
+500元充值卡；
+500元充值卡；
+500元充值卡；
+300元充值卡；
+300元充值卡；
+300元充值卡；
+300元充值卡；
+<?php } ?>
+		</textarea>		
+		</td>
+	</tr>
+	<tr>
+		<td width="110" >页尾中奖背景图：</td>
+		<td width="105"><input type="file" name="share_weixin_pic" id="share_weixin_pic" onchange="onUploadImgChange(this,'share_weixin_pic','share_weixin_pic_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+        </td>
+		<td><img id="share_weixin_pic_div" <?php if($list['share_weixin_pic']){ ?>src="{$IMGATT_HOST}{$list['share_weixin_pic']}" <?php } ?>/></td>
+	</tr>	
+</table>
+<table id='tab_lottery' border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+
+	<tr>
+		<td style="background-color: lightgrey" colspan="3">
+			<h3>分享模块</h3>
+		</td>
+	</tr>		
+	<tr>
+		<td>分享按钮开关:</td>
+		<td colspan='2'>
+            <input type="radio" name="dep_type" value="1"  <?php if($list['dep_type'] == 1) echo "checked"; ?>  /> 是&nbsp;
+			<input type="radio" name="dep_type" value="0" <?php if($list['dep_type'] == 0) echo "checked"; ?> /> 否
+		</td>
+	</tr>	
+        <!--
+	<tr>
+		<td>每日第一次分享是否给抽奖机会:</td>
+		<td colspan='2'>
+            <input type="radio" name="share_add_all" value="1"  <?php if($list['share_add_all'] == 1) echo "checked"; ?>  /> 是&nbsp;
+			<input type="radio" name="share_add_all" value="0" <?php if($list['share_add_all'] == 0) echo "checked"; ?> /> 否
+		</td>
+        </tr>-->	
+	<tr>
+		<td>分享微信图:</td>
+		<td>
+            <input type="file" name="update_warning_pic" id="update_warning_pic" onchange="onUploadImgChange(this,'update_warning_pic','update_warning_pic_div');" />
+            <p class="tips">尺寸：70*70。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="update_warning_pic_div" <?php if($list['update_warning_pic']){ ?> src="{$IMGATT_HOST}{$list['update_warning_pic']}" <?php } ?>/></td>
+	</tr>
+	<tr>
+		<td>其他分享图:</td>
+		<td>
+            <input type="file" name="unclick_lottery_pic" id="unclick_lottery_pic" onchange="onUploadImgChange(this,'unclick_lottery_pic','share_other_pic_div');" />
+            <p class="tips"></p>
+		</td>
+		<td><img id="share_other_pic_div" <?php if($list['unclick_lottery_pic']){ ?> src="{$IMGATT_HOST}{$list['unclick_lottery_pic']}" <?php } ?>/></td>
+	</tr>
+	<tr>
+		<td>分享文案</td>
+		<td colspan='2'>
+		<textarea id='rule_pic' name='rule_pic' rows="3" cols="20" style="margin: 0px; width: 400px; height: 100px;" ><?php if($list['rule_pic']){ echo $list['rule_pic']; } ?></textarea>		
+		</td>
+	</tr>
+
+</table>
+</div>
+<div style="margin-top:20px;margin-left:100px;">
+	<table>
+		<tr>
+			<td><input type="submit" class="search_btn" value="确定" /></td>
+			<td><a href="javascript:;" onclick="javascript:history.go(-1);" class="search_btn" >取消</a></td>
+		</tr>
+	</table>
+</div>
+</form>
+<script>
+	KindEditor.ready(function(K) {
+		window.editor = K.create('#rank_lottery_desc_text',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'forecolor'
+			]
+		});
+	});
+	KindEditor.options.cssData = 'body { font-size: 14px; }';
+</script>
+</body>
+</html>

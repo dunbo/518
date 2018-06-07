@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>首发软件审核中列表</title>
+<style type="text/css">
+body, td, th {font-size: 12px;height:35px;}
+ul li{list-style:none;margin:0px;}
+</style>
+<link rel="stylesheet" type="text/css" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="/Public/js/json2.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/zoom/zoom.css" />
+<script src="/Public/zoom/zoom.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src='/Public/js/default.js'></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+</head>
+<body>
+<div style="width:99%; margin-top:4px">
+<ul class="tab_title margin_top">
+			<li <?php if($tab_status==1) { ?>class="current"<?php } ?>><a href="__URL__/debut_check">首发审核</a></li>
+			<li <?php if($tab_status==2) { ?>class="current"<?php } ?>> <a href="__URL__/debut_through">通过列表</a></li>
+			<li <?php if($tab_status==3) { ?>class="current"<?php } ?>> <a href="__URL__/debut_reject">驳回列表</a></li>
+			<li <?php if($tab_status==4) { ?>class="current"<?php } ?>> <a href="__URL__/debut_cancel">取消列表</a></li>
+		</ul>
+		<form action="__URL__/debut_check" method="get">
+		<table width="99%" cellpadding="0" cellspacing="0" class="table_list" >
+			<tbody>
+			    <tr>
+				<td>
+				软件ID：
+				<input type="text" name="seach_id" id="seach_val" value="{$seach_id}" class="search_item_text" style="width:50px">
+				</td>
+				<td>
+				软件名称：<input type="text" name="seach_softname" id="seach_softname" value="{$seach_softname}" class="search_item_text" style="width:100px">
+				</td>
+				<td>
+				软件包名：<input type="text" name="seach_package" id="seach_package" value="{$seach_package}" class="search_item_text" style="width:100px">
+				</td>
+				<td>
+				开发者：<input type="text" name="seach_dev" id="seach_dev" value="{$seach_dev}" class="search_item_text" style="width:100px">
+				</td>
+				<td>
+				邮箱：<input type="text" name="seach_email" id="seach_email" value="{$seach_email}" class="search_item_text" style="width:100px">
+				</td>
+				<td rowspan="2">
+					<input type="submit" value="搜索" />
+				</td>
+				</tr>
+				<tr>
+				<td colspan="2">
+				首发日期：<span><input type='text' name='start_time' id='start_time' value='{$start_time}' style='cursor: hand; width: 150px;height:25px' class='Wdate' onClick='WdatePicker
+({startDate:"%y-%M-%d 00:00:00",el:"start_time",dateFmt:"yyyy-MM-dd HH:mm:ss"})' /></span>~<span><input type='text' name='end_time' id='end_time' value='{$end_time}' style='cursor: hand; width: 150px;height:25px' class='Wdate' onClick='WdatePicker
+({startDate:"%y-%M-%d 23:59:59",el:"end_time",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  />
+				</span>
+				</td>
+				<td colspan="3"></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+	<div style="margin:10px;">
+	<input type="button" style="cursor:pointer;" value="批量驳回" onclick="reject_all();" class="search_btn">{$count}条记录</div>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;width:100%" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="18%" bgcolor="#E3E2FE"><input type="checkbox" value="全选" style="cursor:pointer;" onclick="selectAlls();">软件信息<if condition="$url_field eq 'download' && $url_type eq 'asc'">
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/debut_check/order/download/order_type/desc" >↑</a>
+    <else />
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/debut_check/order/download/order_type/asc" >↓</a>
+    </if></th>
+				<th width="10%" bgcolor="#E3E2FE">开发者</th>
+				<th width="12%" bgcolor="#E3E2FE">首发版本</th>
+				<th width="8%"  bgcolor="#E3E2FE">首发日期
+<if condition="$url_field eq 'debut_time' && $url_type eq 'asc'">
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/debut_check/order/debut_time/order_type/desc" >↑</a>
+    <else />
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/debut_check/order/debut_time/order_type/asc" >↓</a>
+    </if>
+				</th>
+				<th width="10%" bgcolor="#E3E2FE">申请人</th>
+				<th width="8%" bgcolor="#E3E2FE">最近一次首发</th>
+				<th width="8%" bgcolor="#E3E2FE">给安智的资源</th>
+				<th width="8%" bgcolor="#E3E2FE">备注</th>
+				<th width="8%" bgcolor="#E3E2FE">提交时间</th>
+				<th width="10%" bgcolor="#E3E2FE">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+   <volist name="list" id="vo">
+	<tr id="tr{$vo.id}">
+	<td class="left"> 
+	<div style="float:left;width:65px;">
+		<input type="checkbox" value="{$vo.id}" name="id[]" style="cursor:pointer;" />{$vo.softid}<br />
+  		<a target='_blank' href='/index.php/Dev/Soft/softlist/package/{$vo.package}'>
+		<img src="<?php echo IMGATT_HOST;?>{$vo.iconurl}" width="48" height="48"/></a>
+	</div>
+	<div style="float:left;width:100px;margin-left:5px;">
+	<a target='_blank' href='http://www.anzhi.com/pkg/{$vo.package}'>{$vo.softname}</a>
+	<br />
+	{$vo.package}<br />
+	{$vo.category_name}<br />
+	版本名：{$vo.soft_version}<br />
+	下载量：{$vo.download}
+	</div>
+	</td>
+	<td class="left">
+	<a target='_blank' href='/index.php/Dev/User/userlists/dev_id/{$vo.dev_id}'>{$vo.dev_name|default=''}</a><br />
+	<if condition="$vo.dev_type eq 0 and $vo.dev_type neq ''">[公司]
+	<elseif condition="$vo.dev_type eq 1" />[个人]
+	<else>&nbsp;</if><br />
+	Email:
+	{$vo.dever_email|default=''}
+	</td>
+					<td class="left">{$vo.debut_version}<br />版本描述:{$vo.version_desc}</td>
+					<td class="center">{$vo.debut_time|date='Y-m-d',###|default='&nbsp;'}<br />
+<!-- {$vo.debut_length}小时 -->
+					</td>
+					<td class="left">{$vo.contact}<br />邮箱：{$vo.email}<br />QQ:{$vo.qq}</td>
+					<td class="left">平台：{$vo.last_platform}<br />{$vo.last_time|date='Y-m-d',###|default='&nbsp;'}</td>
+					<td class="center"><if condition="$vo.image and $vo.image_desc">
+					<a style="cursor:pointer;" target="_blank" href="__URL__/show_image/id/{$vo.id}" class="blue">查看</a>
+					<else/>
+					&nbsp&nbsp
+					</if></td>
+					<td class="left"><if condition="$vo.admin_remark and $vo.admin_remark neq ''">
+					<a href="javascript:show_remark({$vo.id},'{$vo.admin_remark}');">{$vo.admin_remark}</a>
+					<else/>
+					<a href="javascript:show_remark({$vo.id});">暂无</a>
+					</if></td>
+					<td class="center">{$vo.apply_time}</td>
+					<td align="center">
+					<input type="button" value="通过" onclick="pass('{$vo.id}','{$vo.package}','{$vo.softname}')"  />
+					<input type="button" style="margin-top:5px;" value="驳回" onclick="reject('{$vo.id}')" />
+					</td>
+				</tr>
+			</volist>
+		</tbody>
+	</table>
+</div>
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+<div id="open_showfile" style="padding:10px; width:500px; height:auto;   display:none;">
+		<h2>给安智的资源</h2>
+		<ul id="images">
+			
+
+		</ul>
+		<div style="clear:both"></div>
+		<input type='button'  value="关闭" onclick="closes()" style="width:100px;height:35px;margin-left:200px;float:left"/>
+		<div style="clear:both"></div>
+</div>
+<div id="open_pass" style="padding:10px; width:320px; height:250px;   display:none;">
+		<b>通过审核</b><br/>
+		<span id='soft_p_s' ></span><br/>
+		首发时长：<label style="cursor:pointer;"><input type="radio" value="24" name="debut_length" id='debut_length24' checked="checked">24小时</label> &nbsp&nbsp<label style="cursor:pointer;"><input type="radio" value="48" name="debut_length" > 48小时 </label>&nbsp&nbsp <label style="cursor:pointer;"><input type="radio" value="72" name="debut_length" > 72小时</label>
+		<div style="clear:both"></div>
+		<br />
+		首发资源：<textarea id="debut_resource" name="debut_resource" style="width: 304px; height: 90px;" ></textarea>
+		<br /><br />
+		<input type='button' value="通过" id="pass_sub" style="width:100px;height:35px;margin-left:35px;"/>
+		<input type='button'  value="取消" id="cancel_pass" style="width:100px;height:35px;"/>
+		<div style="clear:both"></div>
+</div>
+<div id="open_reject" style="padding:10px; width:300px; height:200px;   display:none;">
+		<span id="multi_span">已选择申请软件数量：<span id="reject_num"></span></span>
+        <br />
+        驳回意见:
+		<textarea id="reject_reason" name="reject_reason" style="width:100%;height:100px;">100字以内，内容不能为空</textarea>
+		<div style="clear:both"></div>
+		<br />
+		<input type='button' value="确定" id="reject_sub" style="width:100px;height:35px;margin-left:35px;"/>
+		<input type='button'  value="取消" id="cancel_reject" style="width:100px;height:35px;"/>
+		<div style="clear:both"></div>
+</div>
+<div id="open_remark" style="padding:10px; width:300px; height:200px;   display:none;">
+        <br />
+        备注:
+		<textarea id="remark_reason" style="width:100%;height:100px;">100字以内，内容不能为空</textarea>
+		<div style="clear:both"></div>
+		<br />
+		<input type="hidden" value="" id="remark_id" />
+		<input type='button' value="确定" id="remark_sub" style="width:100px;height:35px;margin-left:35px;"/>
+		<input type='button'  value="取消" id="cancel_remark" style="width:100px;height:35px;"/>
+		<div style="clear:both"></div>
+</div>
+<script type="text/javascript" src='/Public/js/debut_screen.js'></script>
+<script type="text/javascript">
+    remark_sub('__URL__/admin_remark');
+	function showFile(id){
+		var data = '&id='+id,str = '';
+		$.ajax({ 
+			url: '__URL__/show_image',
+			type: 'get',
+			data: data,
+			dataType: 'json',
+			success: function(data){
+				if(!!data && data.success){
+					$.each(data.rows,function(i,n){
+						var image = n.image;
+						var desc = n.desc;
+						str+='<li>位置说明：<span>'+desc+'</span>&nbsp&nbsp&nbsp&nbsp<span>截图：<a href="'+image+'" target="_blank"><img height="150" src="'+image+'" /></a></span></li>';
+					});
+					$('#open_showfile #images').html(str);
+					$("#open_showfile").zxxbox();
+				}else{
+					alert('对不起，无法获取信息！');
+				}
+			}
+		});
+	}
+	function pass(id,pkg,softname){
+		open_color(id);
+
+		//if(confirm('您确定要执行该操作吗？')) {
+			if(!id) {
+				alert('请选择要通过的对象！');
+				return false;
+			}
+			$('#soft_p_s').html(softname+'('+pkg+')');
+			$('#debut_length24').attr('checked',true);
+			$('#debut_resource').val('');
+			$("#open_pass").zxxbox();
+			$('#pass_sub').die();
+			$('#pass_sub').live('click',function(){
+				var buid = '#tr'+id+' td button';
+				$(buid).attr({disabled:'disabled', name:'disabled'});
+				var debut_length = $("input[name='debut_length']:checked").val();
+				var debut_resource = $("#debut_resource").val();
+				if(!debut_resource){
+					alert('请填写首发资源！');
+					return false;
+				}
+				$.ajax({
+					url: '__URL__/debut_oper/',
+					data: '&type=2&id='+id+'&debut_length='+debut_length+'&debut_resource='+debut_resource+'&pass_type=1',
+					type: 'POST',
+					dataType: 'json',
+					success: function(data) {
+						if(!!data && data.success){
+							gray_processing(data.id);
+							$.zxxbox.hide();
+						}else{
+							alert(data.msg);
+							location.reload();//加载页面 
+							return false;
+						}
+					}
+				});
+			});
+			$('#cancel_pass').click(function(){
+				remove_color(id);
+				$.zxxbox.hide();
+			});
+		//}else{
+			//remove_color(id);
+		//}
+	}
+	function reject(id){
+		open_color(id);
+
+		//if(confirm('您确定要执行该操作吗？')) {
+			if(!id) {
+				alert('请选择要驳回的对象！');
+				return false;
+			}
+			if (typeof(arguments[1]) != 'undefined') {
+				var check_len = id.split(",").length;
+				$('#reject_num').html(check_len);
+				$('#multi_span').show();
+			} else {
+				$('#multi_span').hide();
+			}
+			$("#open_reject").zxxbox();
+			$('#reject_sub').die();
+			$('#reject_sub').live('click',function(){
+				var buid = '#tr'+id+' td button';
+				$(buid).attr({disabled:'disabled', name:'disabled'});
+				var reject_reason = $("#reject_reason").val();
+				if(reject_reason=='' || reject_reason ==textarea){
+					alert('请填写正确的驳回信息！');
+					return false;
+				}
+				if(reject_reason.length>100){
+					alert('不能超过100个字！');
+					return false;
+				}
+				$.zxxbox.hide();
+				$.ajax({
+					url: '__URL__/debut_oper/',
+					data: '&type=3&id='+id+'&reject_reason='+reject_reason,
+					type: 'POST',
+					dataType: 'json',
+					success: function(data) {
+						if(!!data && data.success){
+							gray_processing(data.id);
+							
+						}else{
+							alert(data.msg);
+							location.reload();//加载页面 
+							return false;
+						}
+					}
+				});
+			});
+			$('#cancel_reject').click(function(){
+				remove_color(id);
+				$.zxxbox.hide();
+			});
+		//}else{
+			//remove_color(id);
+		//}
+	}
+	function reject_all(){
+		id_str = Selected_check();
+		if(id_str){
+			reject(id_str, true);
+		}
+	}
+//关闭弹出层
+function closes(){
+	$.zxxbox.hide();
+	//window.location.reload();
+}
+</script>
+</body>
+</html>

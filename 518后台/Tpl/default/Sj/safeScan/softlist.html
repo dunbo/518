@@ -1,0 +1,101 @@
+<include file="../Public/header" />
+<body>
+<style type="text/css">
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+</style>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script src="/Public/js/jquery.validate.min.js"></script>
+<link rel="stylesheet" type="text/css" media="all"
+	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="__PUBLIC__/js/calendar_bak.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-zh.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-setup.js"></script>
+<script>
+	function UTC(date) {
+		if (!date) {
+			return 0;	
+		}
+		var arrtime = new Array();
+		var arr = date.split("-");	
+		var len = arr.length;
+		for (var i = 0; i < len; i++ ) {
+			arrtime.push(parseInt(arr[i]));	
+		}
+		return Date.UTC.apply(null, arrtime);
+	}
+	$(function() {
+		$("#button").click(function() {
+			if (sub()) {
+				$("#searchform").submit();	
+			}	
+		});		
+	});
+	function sub() {
+		if (UTC($("#e_tm").val()) < UTC($("#s_tm").val())) {
+			alert("结束时间必须大于起始时间");	
+			return false;
+		} 
+		return true;
+	}
+</script>
+<center>
+	<form id="searchform" method="GET" >
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+			<tbody>
+				<tr>
+					<td colspan="6">
+						<label>安全厂商:<a href="__URL__/scanlist/ty/{$ty}/fromdate/{$from_value}/todate/{$to_value}"><?php echo $scanpartname; ?></a></label>&nbsp;|&nbsp;
+						<label>开始时间:{$from_value}</label>&nbsp;|&nbsp;
+						<label>结束时间:{$to_value}</label>
+					</td>
+					<td rowspan="3" align="center"><input type="button" value="搜索" name="button" id="button"/></td>
+				</tr>
+				<tr>
+					<td width="80px">起始时间</td>
+					<td width="180px"><input type="text" value="{$from_value}" id="s_tm" name="s_tm" ;/><img src="__PUBLIC__/js/calendar.gif" onclick="return showCalendar('s_tm', 'y-m-d');" style="border:1px solid #000;"/></td>
+					<td width="80px">结束时间</td>
+					<td width="180px"><input type="text" value="{$to_value}" id="e_tm" name="e_tm" />
+					<img src="__PUBLIC__/js/calendar.gif" onclick="return showCalendar('e_tm', 'y-m-d');" style="border:1px solid #000;"/>
+					</td>
+					<td colspan="2"></td>
+				</tr>
+				<tr>
+					<td width="80px">包名</td>
+					<td width="180px"><input value="{$package}" id="package" name="package" /></td>
+					<td width="80px">软件id</td>
+					<td width="180px"><input value="{$softid}" id="softid" name="softid" /></td>
+					<td width="80px">软件名称</td>
+					<td width="180px"><input value="{$softname}" id="softname" name="softname" /></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+		<br />
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">	
+			<tr>
+				<th>软件id</th>
+				<th>包名</th>
+				<th>软件名称</th>
+				<th>安全状态</th>
+				<th>返回信息</th>
+				<th>软件状态</th>
+				<th>发送时间</th>
+				<th>返回时间</th>
+			</tr>
+			<?php foreach($softlist as $info){ ?>
+			<tr>
+				<td><?php echo $info['softid'];?></td>
+				<td><?php echo $info['package'];?></td>
+				<td><?php echo $info['softname'];?></td>
+				<td><?php if($info['safe']==1) echo "安全";else if($info['safe']>1) echo "不安全"; else echo "未扫描";?></td>
+				<td><div style="width:250px; height:80px; overflow-x:scroll; overflow-y:auto"><?php echo $info['description'];?></div></td>
+				<td><?php echo $hide_arr[$info['hide']] ? $hide_arr[$info['hide']] : ($info['hide'] >= 1024 ? "渠道软件" : $info['hide']);?></td>
+				<td><?php echo date('Y-m-d H:i:s',$info['time_req']);?></td>
+				<td><?php echo $info['time_rep'] == 0 ? 0 : date('Y-m-d H:i:s',$info['time_rep']);?></td>
+			</tr>
+			<?php } ?>
+		</table>
+		{$page}
+</center>
+</body>

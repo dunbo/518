@@ -1,0 +1,353 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<title>启动界面管理</title>
+<link type="text/css" href="__PUBLIC__/school/css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/update/jquery.validate.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/update/jquery.json.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/update/swfobject.js"></script>
+<link type="text/css" href="__PUBLIC__/school/update/uploadify.css" rel="stylesheet" />
+<script type="text/javascript" src="__PUBLIC__/school/update/jquery.uploadify.v2.1.4.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+	$(document).ready(function(){
+	$( "#uploadify").uploadify({
+			'uploader'  : '__PUBLIC__/school/update/uploadify.swf',
+			'script'    : '__URL__/Start_interface_updatepic',
+			'cancelImg' : '__PUBLIC__/school/update/cancel.png',
+			'buttonText' : 'upload thumb',
+			'fileDataName' : 'pic',
+			'fileExt' : '*.png;*.jpg',
+			'fileDesc' : '*.png;*.jpg',
+			'sizeLimit' : 51200,
+			'auto'      : true,
+			'scriptData' : {'PHPSESSID':'<php>echo session_id();</php>'} ,
+			'onComplete' : function(event, ID, fileObj, response, data){
+				if (response != 1) {
+					alert("上传成功");
+					$("#textpic").attr("value",response);
+					$("#img1").attr("src",'<php>echo IMGATT_HOST;</php>'+response);
+				}
+			}
+		});
+		$( "#datepicker" ).datepicker();
+		$( "#datepicker1" ).datepicker();
+	});
+function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{	
+		$('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{	
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+</script>
+</head>
+<body>
+
+	<h4><a href="__URL__/Start_interface">界面管理列表</a>&nbsp;<a href="__URL__/Start_interface_old">黑名单管理</a></h4>
+<p></p>
+<h5>添加新启动界面</h5>
+<p></p>
+<form action="" method="post">
+<table width="100%" border="0" cellspacing="0" padding="0" class="tb" align= "center">
+	<tr>
+		<td>&nbsp;</td>
+		<td>界面名称</td>
+		<td><input type="text" name="name" value="{$ret.splash_name|default='&nbsp;'}"/></td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td>闪屏分类</td>
+		
+		<td>
+		<?php if(!$ret){ ?>
+			<select name="splash_category">
+				<?php foreach($splash_categorys as $key => $val){ ?>
+				<option value="{$val.pid}">{$val.pname}</option>
+				<?php } ?>
+			</select>
+		<?php }else{ ?>
+			<?php if($ret['splash_category'] == 1){ ?>安智市场<?php }elseif($ret['splash_category'] == 6){ ?>安卓游戏<?php }elseif($ret['splash_category'] == 7){ ?>安智市场HD<?php } ?>
+		<?php } ?>
+		</td>
+		
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td>上传启动图片</td>
+		<td><input name="file2" type="file"  id="uploadify"  /><input id="textpic" name="textpic" type="text" value="{$ret.splash_url}" style="display:none;"/></td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td>上传启动渠道</td>
+		<td>
+		<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox">选择指定渠道</a><br />
+		<div id="channel_div">
+		</div>
+		</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td><img src="{$ret.url|default='&nbsp;'}" width="120" height="240" id="img1" /></td><!--width="480" height="960"-->
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td>显示起始时间</td>
+		<td>
+			<input type="text" id="datepicker" name="time1" value="<if condition="$ret.time_started neq NULL">{$ret.time_started|date='m/d/Y',###}</if><if condition="$time neq NULL">{$time}</if>">日期
+			<select name="h1" >
+				<if condition="$ret.time_started neq NULL">
+					<option value="{$ret.time_started|date='H',###|default='&nbsp;'}">{$ret.time_started|date='H',###|default='&nbsp;'}点</option>
+				</if>
+				<option value="00">00点</option>
+				<option value="1">01点</option>
+				<option value="2">02点</option>
+				<option value="3">03点</option>
+				<option value="4">04点</option>
+				<option value="5">05点</option>
+				<option value="6">06点</option>
+				<option value="7">07点</option>
+				<option value="8">08点</option>
+				<option value="9">09点</option>
+				<option value="10">10点</option>
+				<option value="11">11点</option>
+				<option value="12">12点</option>
+				<option value="13">13点</option>
+				<option value="14">14点</option>
+				<option value="15">15点</option>
+				<option value="16">16点</option>
+				<option value="17">17点</option>
+				<option value="18">18点</option>
+				<option value="19">19点</option>
+				<option value="20">20点</option>
+				<option value="21">21点</option>
+				<option value="22">22点</option>
+				<option value="23">23点</option>
+				
+			</select>
+			<select name="m1" >
+				<if condition="$ret.time_started neq NULL">
+					<option value="{$ret.time_started|date='i',###|default='&nbsp;'}">{$ret.time_started|date='i',###|default='&nbsp;'}点</option>
+				</if>
+				<option value="00">00分</option>
+				<option value="01">01分</option>
+				<option value="02">02分</option>
+				<option value="03">03分</option>
+				<option value="04">04分</option>
+				<option value="05">05分</option>
+				<option value="06">06分</option>
+				<option value="07">07分</option>
+				<option value="08">08分</option>
+				<option value="09">09分</option>
+				<option value="10">10分</option>
+				<option value="11">11分</option>
+				<option value="12">12分</option>
+				<option value="13">13分</option>
+				<option value="14">14分</option>
+				<option value="15">15分</option>
+				<option value="16">16分</option>
+				<option value="17">17分</option>
+				<option value="18">18分</option>
+				<option value="19">19分</option>
+				<option value="20">20分</option>
+				<option value="21">21分</option>
+				<option value="22">22分</option>
+				<option value="23">23分</option>
+				<option value="24">24分</option>
+				<option value="25">25分</option>
+				<option value="26">26分</option>
+				<option value="27">27分</option>
+				<option value="28">28分</option>
+				<option value="29">29分</option>
+				<option value="30">30分</option>
+				<option value="31">31分</option>
+				<option value="32">32分</option>
+				<option value="33">33分</option>
+				<option value="34">34分</option>
+				<option value="35">35分</option>
+				<option value="36">36分</option>
+				<option value="37">37分</option>
+				<option value="38">38分</option>
+				<option value="39">39分</option>
+				<option value="40">40分</option>
+				<option value="41">41分</option>
+				<option value="42">42分</option>
+				<option value="43">43分</option>
+				<option value="44">44分</option>
+				<option value="45">45分</option>
+				<option value="46">46分</option>
+				<option value="47">47分</option>
+				<option value="48">48分</option>
+				<option value="49">49分</option>
+				<option value="50">50分</option>
+				<option value="51">51分</option>
+				<option value="52">52分</option>
+				<option value="53">53分</option>
+				<option value="54">54分</option>
+				<option value="55">55分</option>
+				<option value="56">56分</option>
+				<option value="57">57分</option>
+				<option value="58">58分</option>
+				<option value="59">59分</option>
+			</select>请设置起始时间
+		</td>
+		<td></td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+	<td>&nbsp;</td>
+		<td>终止起始时间</td>
+		<td>
+			<input type="text" id="datepicker1" name="time2" value="<if condition="$ret.time_duration neq NULL">{$ret.time_duration|date='m/d/Y',###|default=$time}</if><if condition="$time neq NULL">{$time}</if>" >日期
+			<select name="h2" >
+				<if condition="$ret.time_duration neq NULL">
+					<option value="{$ret.time_duration|date='H',###|default='&nbsp;'}">{$ret.time_duration|date='H',###|default='&nbsp;'}点</option>
+				</if>
+				<option value="00">00点</option>
+				<option value="01">01点</option>
+				<option value="02">02点</option>
+				<option value="03">03点</option>
+				<option value="04">04点</option>
+				<option value="05">05点</option>
+				<option value="06">06点</option>
+				<option value="07">07点</option>
+				<option value="08">08点</option>
+				<option value="09">09点</option>
+				<option value="10">10点</option>
+				<option value="11">11点</option>
+				<option value="12">12点</option>
+				<option value="13">13点</option>
+				<option value="14">14点</option>
+				<option value="15">15点</option>
+				<option value="16">16点</option>
+				<option value="17">17点</option>
+				<option value="18">18点</option>
+				<option value="19">19点</option>
+				<option value="20">20点</option>
+				<option value="21">21点</option>
+				<option value="22">22点</option>
+				<option value="23">23点</option>		
+			</select>
+			<select name="m2" >
+				<if condition="$ret.time_duration neq NULL">
+					<option value="{$ret.time_duration|date='i',###|default='&nbsp;'}">{$ret.time_duration|date='i',###|default='&nbsp;'}点</option>
+				</if>
+				<option value="00">00分</option>
+				<option value="01">01分</option>
+				<option value="02">02分</option>
+				<option value="03">03分</option>
+				<option value="04">04分</option>
+				<option value="05">05分</option>
+				<option value="06">06分</option>
+				<option value="07">07分</option>
+				<option value="08">08分</option>
+				<option value="09">09分</option>
+				<option value="10">10分</option>
+				<option value="11">11分</option>
+				<option value="12">12分</option>
+				<option value="13">13分</option>
+				<option value="14">14分</option>
+				<option value="15">15分</option>
+				<option value="16">16分</option>
+				<option value="17">17分</option>
+				<option value="18">18分</option>
+				<option value="19">19分</option>
+				<option value="20">20分</option>
+				<option value="21">21分</option>
+				<option value="22">22分</option>
+				<option value="23">23分</option>
+				<option value="24">24分</option>
+				<option value="25">25分</option>
+				<option value="26">26分</option>
+				<option value="27">27分</option>
+				<option value="28">28分</option>
+				<option value="29">29分</option>
+				<option value="30">30分</option>
+				<option value="31">31分</option>
+				<option value="32">32分</option>
+				<option value="33">33分</option>
+				<option value="34">34分</option>
+				<option value="35">35分</option>
+				<option value="36">36分</option>
+				<option value="37">37分</option>
+				<option value="38">38分</option>
+				<option value="39">39分</option>
+				<option value="40">40分</option>
+				<option value="41">41分</option>
+				<option value="42">42分</option>
+				<option value="43">43分</option>
+				<option value="44">44分</option>
+				<option value="45">45分</option>
+				<option value="46">46分</option>
+				<option value="47">47分</option>
+				<option value="48">48分</option>
+				<option value="49">49分</option>
+				<option value="50">50分</option>
+				<option value="51">51分</option>
+				<option value="52">52分</option>
+				<option value="53">53分</option>
+				<option value="54">54分</option>
+				<option value="55">55分</option>
+				<option value="56">56分</option>
+				<option value="57">57分</option>
+				<option value="58">58分</option>
+				<option value="59">59分</option>
+			</select>请设置终止时间
+		</td>
+		<td></td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td><input type="submit" value="提交" /><input type="reset" value="重置" /></td><!--width="480" height="960"-->
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+</table>
+	</form>
+	</body>

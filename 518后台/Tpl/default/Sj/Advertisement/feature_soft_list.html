@@ -1,0 +1,112 @@
+<include file="../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<style>
+<!--
+.tr{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tr th,.tr td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+-->
+</style>
+<div class="main" >
+<div class="content">
+<center>
+	<table width="95%" border="0" cellpadding="0" cellspacing="0" class="tb">
+		<tr>
+			<td colspan='2'><span style='float: left;'><strong>所属专题:&nbsp;{$featurename}</strong></span>
+			</td>
+			<td colspan="2">
+			<form action="__URL__/feature_soft_list" method="get" name="soft_time">
+			<input type="hidden" type="text" name="id" value="<?php echo $featureid; ?>">
+			<span>
+			当前显示：
+				<select name="select_time" onchange="javascript:soft_time.submit();">
+					<option value="1" <?php if($time == 1){ ?>selected<?php } ?> >全部</option>
+					<option value="2" <?php if($time == 2){ ?>selected<?php } ?> >正在推广</option>
+					<option value="3" <?php if($time == 3){ ?>selected<?php } ?> >未开始</option>
+					<option value="4" <?php if($time == 4){ ?>selected<?php } ?> >已下线</option>
+				</select>
+			</span>
+			</td>
+			<td colspan="6">
+			<span style='float: right'><a href="javascript:history.go(-1)">返回</a></button><a href="__URL__/feature_soft_add/featureid/{$featureid}/" class="thickbox">【添加软件】</a></span>
+			</td>
+		</tr>
+		<tr>
+			<?php if($time == 2){ ?>
+			<th width="2%">序号</th><?php } ?>
+			<th width="5%">所属段落</th>
+			<th width="8%">软件名称</th>
+			<th width="8%">包名</th>
+			<th width="14%">软件详细简介</th>
+			<th width="10%">开始时间</th>
+			<th width="10%">结束时间</th>
+			<th width="2%">排序位置</th>
+			<th width="5%">合作形式</th>
+			<th width="7%">推荐软件名称</th>
+			<th width="9%">推荐理由</th>
+			<th width="8%">推荐人群</th>
+			<th width="12%">操作</th>
+		</tr>
+		<volist name='feature_soft_list' key='k' id='fsl'>
+		<tr>
+			<?php if($time == 2){ ?>
+				<td><?php echo $k; ?></td>
+			<?php } ?>
+			<td>
+				<?php echo $fsl['feature_graphic'] ? $fsl['feature_graphic'] : ''; ?>
+			</td>
+			<td>{$fsl.softname|default='&nbsp;'}</td>
+			<td>{$fsl.package}</td>
+			<td>{$fsl.remark|default='&nbsp;'}</td>
+			<td>{$fsl.start_tm|date='Y-m-d H:i:s',###|default='&nbsp;'}</td>
+			<td>{$fsl.end_tm|date='Y-m-d H:i:s',###|default='&nbsp;'}</td>
+			<td><input name="rank{$fsl['id']}" style="width:80px;" id="rank{$fsl['id']}" onchange='changeL({$fsl["id"]}, {$featureid}, {$fsl["pos"]}, this.value, {$fsl["rank_b"]});'value="{$fsl['pos']}"/></td>
+			<TD><?php if ($fsl['type'] !=0) { echo $fsl['types'] ; }else{ echo "-";} ?></TD>
+			<td>{$fsl.recommend_soft_name}</td>
+			<td>{$fsl.recommend_reason}</td>
+			<td>{$fsl.recommend_person}</td>
+			<td><a href='__URL__/feature_soft_edit/feature_id/{$featureid}/id/{$fsl.id}' class="thickbox">【编辑】</a><a href="javascript:void(0);" onclick="del('__URL__/feature_soft_del/feature_id/{$featureid}/id/{$fsl.id}');">【删除】</a></td>
+		</tr>
+		</volist>
+	</table>
+	{$page}
+</center>
+</div>
+</div>
+<script>
+	function del(url){
+		if(confirm('确认删除!')){
+	 		$.getJSON(url, function(json){
+	 			alert(json.info);
+	 			window.location.reload();
+	 		});
+		}
+ 	}
+	function changeL(id, fid, oldrank, rank,rank_b){
+		$.ajax({
+			url:"__URL__/feature_soft_change_rank",
+			data: "id="+id+"&fid="+fid+"&oldrank="+oldrank+"&rank="+rank+"&rank_b="+rank_b,
+			type:'POST',
+			dataType: 'json',
+			success: function(json){
+				alert(json.info);
+				if(json.status == 1){
+					//window.location.reload();
+				    var t=parseInt(Math.random()*1000000,10);
+				    if(window.location.href.indexOf('?')>0){
+				        window.location.href=window.location.href+'&t='+t;
+				        window.location.reload(true);//一定要有true 强制刷新 这样才能保证页面整个重新载入
+				    } else {
+				        window.location.href=window.location.href+'?t='+t;
+				        window.location.reload(true);
+				    }					
+				}
+			}
+		});
+	}	
+</script>
+
+<include file="../Public/footer" />

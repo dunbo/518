@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport"/>
+<meta name="format-detection" content="telephone=no" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="../css/Slideshow.css" />
+<script src="../js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="../js/jquery.Xslider.js"></script>
+<script type="text/javascript" src="../js/huaping.js"></script>
+<script type="text/javascript">
+var url=window.location.href;
+var n=url.indexOf("?");//使用indexOf()函数进行检索?，返回的是字符串的下标
+	if(n>=0)
+	{
+		var url_sub=url.substr(n+1);//表示从n这个位置一直截取到最后   
+		var sp_arr=url_sub.split("&"); //对截取到的字符串进行分割
+		for(var i=0;i<sp_arr.length;i++)
+		{
+			var ver_arr=sp_arr[i].split("=");
+			if(ver_arr[0]=="verc")
+			{
+			   var version_code=ver_arr[1];
+			}
+			 if(ver_arr[0]=="resolution")
+			{
+			   var width=ver_arr[1].split("*")[0];
+			   var height=ver_arr[1].split("*")[1];
+			}
+		}
+    }
+$(document).ready(function(){
+   var evt = "onorientationchange" in window ? "orientationchange" : "resize";
+	window.addEventListener(evt, function() {
+	  setTimeout(function() {
+	   window.location.reload();
+		}, 100);  
+	 
+	}, false);
+	$.ajax({
+		url:'slide_new.php?verc='+version_code,
+		dataType:"json",
+		success:function(data){
+			read_pic(data);
+			if(document.getElementById("banner_ul_new")){
+			  var slide_01 = new ScrollPic();
+			  slide_01.scrollContId   = "banner_ul_new"; //内容容器ID
+			  slide_01.dotListId      = "";//点列表ID
+			  slide_01.dotOnClassName = "az_selected";
+			  slide_01.arrLeftId      = "sl_left"; //左箭头ID
+			  slide_01.arrRightId     = "sl_right";//右箭头ID
+			  slide_01.frameWidth     = document.documentElement.clientWidth;
+			  slide_01.pageWidth      = document.documentElement.clientWidth;
+			  slide_01.upright        = false;
+			  slide_01.speed          = 20;
+			  slide_01.space          = 50; 
+			  slide_01.initialize(); //初始化
+			}
+		}
+	});
+    document.getElementById("banner_small").style.height=document.documentElement.clientHeight+"px";
+});
+ function read_pic(data)
+ {
+
+	for(var i=0;i<data.length;i++)
+	{
+		if(data[i]!=null)
+		{
+		 var ul=document.getElementById("banner_ul_new");
+		 var newli = document.createElement("li");
+		 var newimg = document.createElement("img");
+		 newli.appendChild(newimg);
+		 newimg.style.width = document.documentElement.clientWidth+"px";
+		 ul.appendChild(newli);
+		 newimg.src=data[i];
+		}
+	}
+ }
+ </script>
+<title>新版介绍</title>
+</head>
+<body style="background:#fff;">
+	<div id="banner_focus_new">
+	  <div class="banner_small" id="banner_small">
+		 <ul id="banner_ul_new">
+		 </ul>
+	  </div>
+	</div>
+</body>
+</html>

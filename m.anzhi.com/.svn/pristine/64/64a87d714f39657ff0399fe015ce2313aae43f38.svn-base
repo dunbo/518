@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>超级英雄蛋生记</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/superman/css/common7.css?v1"/>
+<script type="text/javascript"  src="<!--{$out.static_url}-->/superman/js/jquery-1.10.2.min.js?v1"></script>
+<script type="text/javascript">
+	var sid='<!--{$out.sid}-->',aid='<!--{$out.aid}-->',static_url = '<!--{$out.static_url}-->';
+	var rand = 1;
+    $(function(){
+        $("#hammer").click(function(){
+            $("#egg_ac").addClass("active");
+			rand = Math.ceil(Math.random()*6);
+			$('#card').html('<img src="'+static_url+'/superman/images/hero'+rand+'.png" />');
+            setTimeout(function(){
+                $("#egg_ac").hide();
+                $("#share").show();
+				$('#footer').html('<img src="'+static_url+'/superman/images/ft_bg.jpg"/>');
+				if(rand == 1){
+					$('#notice').html("少年你好赞，一下就砸出一个英雄斗鸡眼，快去分享激活英雄，帮你拿大奖拯救世界！");
+				}else if(rand == 2){
+					$('#notice').html("少年你好赞，一下就砸出一个英雄托大锤，快去分享激活英雄，帮你拿大奖拯救世界！");
+				}else if(rand == 3){
+					$('#notice').html("少年你好赞，一下就砸出一个英雄腐国队长，快去分享激活英雄，帮你拿大奖拯救世界！");
+				}else if(rand == 4){
+					$('#notice').html("少年你好赞，一下就砸出一个英雄粉巨人，快去分享激活英雄，帮你拿大奖拯救世界！");
+				}else if(rand == 5){
+					$('#notice').html("少年你好赞，一下就砸出一个英雄废铁侠，快去分享激活英雄，帮你拿大奖拯救世界！");
+				}else if(rand == 6){
+					$('#notice').html("少年你好赞，一下就砸出一个英雄白寡妇，快去分享激活英雄，帮你拿大奖拯救世界！");
+				}
+            },1600)
+        })
+    })
+	
+	function go_update(){
+		var anzhi_softid = '<!--{$out.resultanzhi.ID}-->';
+		var anzhi_package = 'cn.goapk.market';
+		var anzhi_softname = '<!--{$out.resultanzhi.SOFT_NAME}-->';
+		var anzhi_versioncode = '<!--{$out.resultanzhi.SOFT_VERSION_CODE}-->';
+		var anzhi_size = '<!--{$out.resultanzhi.SOFT_SIZE}-->';
+		$.ajax({
+			url: '/lottery/superman_update.php',
+			data: 'aid='+aid+'&sid='+sid,
+			type: 'get',
+			success: function(data){
+				if(data){
+					window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(anzhi_softid),anzhi_package,anzhi_softname,parseInt(anzhi_versioncode),anzhi_size,1);
+				}
+			}
+		});
+	}
+	
+	function go_share(){
+		$.ajax({
+			url: '/lottery/superman_share_do.php',
+			data: 'sid='+sid+'&aid='+aid,
+			type: 'get',
+			async:false,
+			success:function(data){
+				if(data == 300){
+					setTimeout(function(){
+					$('#have_show').css('display','');
+					$('#no_show').css('display','none');},5000);
+				}
+			}
+		});
+		if(rand == 1){
+			hero = "斗鸡眼";
+		}else if(rand == 2){
+			hero = "托大锤";
+		}else if(rand == 3){
+			hero = "腐国队长";
+		}else if(rand == 4){
+			hero = "粉巨人";
+		}else if(rand == 5){
+			hero = "废铁侠";
+		}else if(rand == 6){
+			hero = "白寡妇";
+		}
+		var share_json = '{"TEXT":"超级英雄'+hero+'竟然藏在蛋里，砸蛋救英雄还有大奖拿！少年快来和我一起砸吧。","URL":"'+static_url+'/superman/images/share3.jpg","ACTIONURL":"http://118.26.203.23/lottery/superman_share.php","URLWEIXIN":"'+static_url+'/superman/images/share7.png"}';
+		window.AnzhiActivitys.getShareDialog(share_json);
+	}
+	
+	var port_arr = [12345, 23456, 34567, 45678, 56789, 612345];
+	var listen_failed_max = port_arr.length;
+	var listen_failed_count = 0;
+	var market_installed = false;
+	
+	function share_download() {
+		market_installed = false;
+		listen_failed_count = 0;
+		document.getElementById("az_spirit").innerHTML = "";
+		if (!port_arr) {
+			return;
+		}
+		var arr_len = port_arr.length;
+		for (var i = 0; i < arr_len; i++) {
+			add_async_download_listen_script(port_arr[i]);
+		}
+		return;
+	}
+	
+	function add_async_download_listen_script(port) {
+		var m = document.createElement("script");
+		m.type = 'text/javascript';
+		var url = 'http://127.0.0.1:' + port + '/query?type=action&id='+aid+'&callback=change_install_status&r=' + Math.floor(Math.random() * ( 1000000000 + 1));
+		m.src = url;
+		m.async = "async";
+		m.onload = function() {
+			listen_failed_count++;
+            if (listen_failed_count >= listen_failed_max) {
+                window.location.href= 'http://m.anzhi.com/info_2155229.html';
+            }
+		};
+		m.onerror = function() {
+			listen_failed_count++;
+			if (listen_failed_count >= listen_failed_max) {
+				 window.location.href= 'http://m.anzhi.com/info_2155229.html';
+			}
+		};
+		document.getElementById("az_spirit").appendChild(m);
+	}
+	
+	function change_install_status() {
+		market_installed = true;
+	}
+</script>
+</head>
+<body>
+<div style="display:none;" id="az_spirit"></div>
+<section>
+    <div class="banner" id="top">
+        <a href="javascript:;"><img src="<!--{$out.static_url}-->/superman/images/banner.jpg"/></a>
+    </div>
+    <div class="notice clear">
+        <div class="notice_icon"></div>
+        <div class="notice_list">
+            <marquee scrollamount="2" scrolldelay="90" direction="left">
+			<!--{if $out.all_award_count}-->
+			<!--{foreach from=$out.all_award_result item=v}-->
+			<span><!--{$v.telephone}--> &nbsp;获得<!--{$v.award}--><em><!--{$v.the_time}--></em></span>
+            <!--{/foreach}-->
+			<!--{else}-->
+			少年，快去砸蛋救英雄拿大奖！
+			<!--{/if}-->
+            </marquee>
+        </div>
+    </div>
+	<!--{if $out.imsi_status == 200}-->
+	<!--{if $out.channel_status == 100}-->
+	<div class="mod2 mtb">少年你的安智市场版本过低，快去升级再来拯救英雄抽大奖吧！
+	升级方式：在[管理-设置]中检查更新。</div>
+	<!--{elseif $out.channel_status == 300}-->
+	<div class="mod2 mtb">少年你的安智市场版本过低，快去升级再来拯救英雄抽大奖吧！</div>
+	<!--{elseif $out.channel_status == 200}-->
+	<div class="wrap">
+        <div class="mod2 mtb">少年你的安智市场版本过低，快去升级再来拯救英雄抽大奖吧！</div>
+        <div class="card"><img src="<!--{$out.static_url}-->/superman/images/card_cry.png"/></div>
+        <div class="btns"><a href="javascript:;" onclick="go_update();">马上升级</a> </div>
+        <div class="btn_rule pbtom"><a href="/lottery/superman_rule.php?actsid=<!--{$out.key}-->">【活动规则】</a></div>
+    </div>
+	<!--{else}-->
+    <div class="wrap">
+        <div class="hammer">
+            <div class="mod2" id="notice">世界即将经历最大危机，英雄被困蛋中，急需少年你的帮助！快变身超级英雄，砸蛋解救他们吧！</div>
+        </div>
+        <div class="mod2" id="egg_ac">
+            <div class="card">
+                <div class="egg"><img src="<!--{$out.static_url}-->/superman/images/egg.png"/></div>
+                <div class="crack1"><img src="<!--{$out.static_url}-->/superman/images/crack1.png"/></div>
+                <div class="crack2"><img src="<!--{$out.static_url}-->/superman/images/crack2.png"/></div>
+                <div class="crack3"><img src="<!--{$out.static_url}-->/superman/images/crack3.png"/></div>
+                <div class="light"><img src="<!--{$out.static_url}-->/superman/images/light.png"/></div>
+				<div class="text egg_l">连续砸我十五天</div>
+                <div class="text egg_r">抽奖机会翻几翻</div>
+            </div>
+            <div class="btns"><a href="javascript:;" id="hammer" class="btn_hammer">砸开它！</a> </div>
+        </div>
+        <div id="share" style="display: none;">
+            <div class="card" id="card"></div>
+            <div class="btns wth clear"><a href="javascript:;" class="fl" onclick="go_share();">先分享</a><span <!--{if $out.share_status != 1}-->style="display:none"<!--{/if}--> id="have_show"><a href="/lottery/superman_lottery.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->&actsid=<!--{$out.key}-->" class="fr">去抽奖</a></span> <span <!--{if $out.share_status != 2}-->style="display:none"<!--{/if}--> id="no_show"><a href="javascript:;" style="background-color:#999999;" class="fr">去抽奖</a></span> </div>
+        </div>
+        <div class="btn_rule"><a href="/lottery/superman_rule.php?actsid=<!--{$out.key}-->">【活动规则】</a></div>
+    </div>
+    <div class="footer" id="footer"><img src="<!--{$out.static_url}-->/superman/images/ft_bg1.jpg"/></div>
+	<!--{/if}-->
+	<!--{else}-->
+	<div class="wrap">
+        <div class="mod2 mtb">少年先插入SIM卡，重启安智市场参加此活动！</div>
+        <div class="card"><img src="<!--{$out.static_url}-->/superman/images/card_cry.png"/></div>
+        <div class="btn_rule pbtom"><a href="/lottery/superman_rule.php?actsid=<!--{$out.key}-->">【活动规则】</a></div>
+    </div>
+	<!--{/if}-->
+</section>
+
+</body>
+</html>

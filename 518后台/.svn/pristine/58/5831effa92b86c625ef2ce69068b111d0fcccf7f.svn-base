@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+
+<style type="text/css">
+<!--
+body,td,th {
+	font-size: 12px;
+	
+}
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666; table-layout:fixed;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666; word-wrap:break-word;}
+-->
+</style>
+
+<script type="text/javascript" src='__PUBLIC__/school/js/jquery-1.6.2.min.js'></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<link rel="stylesheet" href="__PUBLIC__/school/ss/common.css" type="text/css" />
+<script>
+	function opennewwin(str,num,package)
+	{
+    $.zxxbox('<div style="width:300px; height:100px" ><form action="__URL__/tcl_rank/coop_id/<?php echo $coop_id; ?>/id/'+str+'" method="post"><span>排序</span><br /><input name="num" type="text" value="'+num+'"><br /><input name="package" type="text" value="'+package+'" style="display:none;"><input name="" type="submit" value="提交" /><input name="" type="reset" value="取消" /></form></div>', {
+			title: "安智网",
+			bg: false
+		}); 
+	}	
+	function changeStatus(status)
+	{
+		var param = (status=='') ? '' : "/status/"+status;
+		location.href = "__URL__/soft_display/coop_id/<?php echo $coop_id ?>" + param
+	}
+</script>
+
+
+</head>
+<body>
+请选择软件状态<select onchange="changeStatus(this.options[this.selectedIndex].value)">
+<option value="">全部</option>
+<option value="1" <?php ($status===1) && print('selected');?>>正常</option>
+<option value="0" <?php ($status===0) && print('selected');?>>停用</option>
+</select>
+<table border="1">
+<tr>
+<td>&nbsp;</td>
+<td>软件名称</td>
+<td>包名</td>
+<td>版本</td>
+<td>状态,排位</td>
+<td>添加时间</td>
+<td>更新时间</td>
+<td>操作</td>
+</tr>
+<volist name="soft_list" id="soft_list_vo">
+<tr>
+<td><image src="<?php echo IMGATT_HOST;?>{$soft_list_vo.iconurl}" width="32" height="32" /></td>
+<td>{$soft_list_vo.softname}</td>
+<td>{$soft_list_vo.package}</td>
+<td>{$soft_list_vo.version}({$soft_list_vo.version_code})</td>
+<td>
+<if condition="$soft_list_vo.status eq 0">已停用（{$soft_list_vo.rank}）</if>
+<if condition="$soft_list_vo.status eq 1">使用中（{$soft_list_vo.rank}）</if>
+</td>
+<td>{$soft_list_vo.created_at}</td>
+<td>{$soft_list_vo.updated_at}</td>
+<td><a href="#" onclick="opennewwin('{$soft_list_vo.id}','{$soft_list_vo.rank}','2');">排序</a><?php if($soft_list_vo['status'] == 1){ ?><a href="__URL__/modifysoft/id/{$soft_list_vo.id}/status/2/coop_id/{$coop_id}"> 删除</a><?php }else{ ?><a href="__URL__/modifysoft/id/{$soft_list_vo.id}/status/1/coop_id/{$coop_id}">恢复</a><?php } ?></td>
+</tr>
+</volist>
+</table>
+
+<br>
+{$page}
+

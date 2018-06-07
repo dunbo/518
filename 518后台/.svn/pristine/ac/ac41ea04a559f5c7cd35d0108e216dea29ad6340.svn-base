@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<script language="JavaScript">
+<!--
+//指定当前组模块URL地址 
+var URL = '__URL__';
+var APP	 =	 '__APP__';
+var PUBLIC = '__PUBLIC__';
+
+function ResumeError() { 
+    return true; 
+} 
+window.onerror = ResumeError; 
+//-->
+</script>
+<load href="__PUBLIC__/js/Base.js" />
+<!-- <load href="__PUBLIC__/js/prototype.js" />
+<load href="__PUBLIC__/js/mootools.js" /> -->
+<load href="__PUBLIC__/js/Form/CheckForm.js" />
+<load href="__PUBLIC__/js/common.js" />
+<load href="__PUBLIC__/js/Util/ImageLoader.js" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='__PUBLIC__/js/default.js'></script>
+<script type="text/javascript" src='__PUBLIC__/js/rcalendar.js'></script>
+<script type="text/javascript" src='__PUBLIC__/js/Manager.js'></script>
+</head>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link type="text/css" href="__PUBLIC__/school/css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet" />	
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<link rel="stylesheet" href="__PUBLIC__/school/ss/common.css" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+		$(function() {
+		$('#datepicker').datepicker({ dateFormat: 'yy-mm-dd' });
+		var dateFormat = $('#datepicker').datepicker('option', 'dateFormat');
+		$('#datepicker').datepicker('option', 'dateFormat', 'yy-mm-dd'); 
+		$('#datepicker1').datepicker({ dateFormat: 'yy-mm-dd' });
+		var dateFormat = $('#datepicker1').datepicker('option', 'dateFormat');
+		$('#datepicker1').datepicker('option', 'dateFormat', 'yy-mm-dd'); 
+});
+	function postcheckit(str)
+	{
+		var group_id = $("#group_only").val();
+		content =  $("#div_"+str).text();
+			$.zxxbox('<div style="width:600px; height:300px;" ><form action="__URL__/exceptionList/id/'+str+'" method="post"><span>回复</span><br /><textarea name="content" cols="" rows="" style="width:580px; height:250px" >'+content+'</textarea><input type="hidden" name="group_id" value='+group_id+' /><br /><input name="" type="submit" value="提交" /><input name="" type="reset" value="取消" /></form></div>', {
+			title: "安智网",
+			bg: false		 
+		});
+	}
+function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+//主层动态变化数据
+function onclikChannel()
+	{	
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		$.cookie('cids', '', {path: '/'});
+	}
+//
+function check_arr()
+	{
+		$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+	}
+</script>
+<style type="text/css">
+<!--
+body,td,th {
+	font-size: 12px;
+}
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+-->
+
+</style>
+<div class="main" >
+<div class="content">
+<form method="get" action="__URL__/exceptionList/">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+	<tr>
+		<td>市场版本号<input type="text" name="market_version" value="{$market_version}"/></td>
+		<td>
+		<a href="__APP__/Public/showChannel?callback=submitChannel&type=radio&ready=check_arr&selected=onclikChannel" class="thickbox">选择指定渠道</a><br />
+		<div id="channel_div">
+			<?php if(!empty($cid_array)){ ?>
+			<label class="l_cid_{$cid_array.cid}"><input type="radio" name="cid" checked="checked" value="{$cid_array.cid}"/>{$chname}</label>
+			<?php } ?>
+		</div>
+		</td>
+		<td>固件版本号<input type="text" name="rom_firmware" value="{$rom_firmware}" /></td>
+		<td>机型<input type="text" name="dname" value="{$dname}" /></td>
+		<td>唯一化
+			<select name="group_only" id="group_only">
+			<option value="0" >否</option>
+			<option value="1" <if condition="$myget.group_only eq 1">selected="selected"</if> >是</option>
+			</select>
+		</td>
+	  <td>来源:
+		  <select name="pid" id="pid" style="width:80px;height:25px;font-size:12px;" onchange='checked_backtype(this);' >
+		  <?php foreach($product as $k => $v){ ?>
+		  <option value="<?php echo $k?>"<?php if( $k == $pid ) { echo "selected='selected'"; } ?>><?php echo $v['0']; ?></option>
+		  <?php } ?>
+		  </select>
+	  </td>  
+	</tr>
+	<tr>
+		<td>imei<input type="text" name="market_imei" value="{$market_imei}"/></td>
+		<td>开始时间<input type="text" name="time1" id="begintime" value="{$time1}" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"begintime",dateFmt:"yyyy-MM-dd HH:mm:ss"})' /></td>
+		<td>结束时间<input type="text" name="time2" id="endtime" value="{$time2}" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"endtime",dateFmt:"yyyy-MM-dd HH:mm:ss"})' /></td>
+		<td>是否解决
+			<select name="type" id="type">
+      <option value="0" <if condition="$myget.type eq 0">selected="selected"</if>>未解决</option>
+      <option value="1" <if condition="$myget.type eq 1">selected="selected"</if>>解决</option>
+      <option value="2" <if condition="$myget.type eq 2">selected="selected"</if>>全部</option>
+      </select>
+		</td>
+		<td><input type='submit'/></td>
+	</tr>
+</table>
+</form>
+<center>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <th>ID</th>
+    <th>IMEI</th>
+    <th>机型</th>
+    <th>渠道名</th>
+    <th>市场版本号</th>
+    <th>固件版本号</th>
+    <th>固件版本名</th>
+    <th>时间</th>
+    <th>内容</th>
+    <th>操作</th>
+  </tr>
+  <tr>
+  <volist name='exceptionList' id='exceptionVo'>
+    <tr>
+    <td>{$exceptionVo.id}</td>
+    <td>{$exceptionVo.imei|default='安智网友'}</td>
+    <td>{$exceptionVo.dname|default='未知'}</td>
+    <td>{$exceptionVo.chname|default='未知'}</td>
+    <td>{$exceptionVo.market_version|default='&nbsp;'}</td>
+    <td>{$exceptionVo.rom_firmware|default='&nbsp;'}</td>
+    <td>{$exceptionVo.rom_version|default='&nbsp;'}</td>
+    <td>{$exceptionVo.submit_day|date='Y-m-d H:i:s',###|default='&nbsp;'}</td>
+    <td><a href="__URL__/showException?id={$exceptionVo.id}" class="thickbox">{$exceptionVo.exception|substr=###,0,200|nl2br}<br>点击查看更多</a> </td>
+    <td>
+    	<a href='javascript:void(0)' onclick="postcheckit('{$exceptionVo.id}');" ><if condition="$exceptionVo.type eq 0">未解决</if><if condition="$exceptionVo.type eq 1">解决</if></a>
+    	<if condition="$exceptionVo.type eq 1"><div id="div_{$exceptionVo.id}" style="display:none;">{$exceptionVo.type_message}</div></if>
+    </td>
+  </tr>
+  </volist>
+  <!--
+  <tr>
+    <td colspan="17"><input type="button" id="selectAll" name="selectAll" value="全选"  onclick="SelectAll(this)" /> |<input type="button" id="delete" value="取消显示"  onClick="Delete2('__URL__/message_unshow')"  />
+</td>
+  </tr>
+  -->
+</table>
+{$page}
+</center>
+</div>
+</div>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+ 
+ 

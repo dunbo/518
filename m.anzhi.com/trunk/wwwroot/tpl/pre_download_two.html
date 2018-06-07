@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title><!--{$out.result['name']}--></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/predown/css/common2.css?v1"/>
+<script type="text/javascript"  src="<!--{$out.static_url}-->/predown/js/jquery-1.8.0.min.js?v1"></script>
+<script type="text/javascript"  src="http://img3.anzhi.com/static/public/js/TouchSlide.1.1.js"></script>
+</head>
+<style type="text/css">
+body{max-width:640px;min-width:320px; margin:0 auto;font-size:14px; font-family:Microsoft Yahei,"微软雅黑"; }
+</style>
+<script>
+	var aid = '<!--{$out.aid}-->',sid='<!--{$out.sid}-->',is_telephone = '<!--{$out.page_result['is_telephone']}-->';
+	function download_go(obj){
+		var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+		var cmd = 'var soft_list=' + json_data;
+		eval(cmd);
+		var soft_lists = soft_list.DATA;
+		var softid = soft_lists[0][0];
+		var pkgname = soft_lists[0][7];
+		var softname = soft_lists[0][2];
+		var versionCode = soft_lists[0][13];
+		var size = soft_lists[0][27];
+		if(is_telephone == 1){
+			var telephone = $('#telephone').val();
+			if(!telephone){
+				window.scrollTo(0,0);
+				$('#error').css('display','');
+				$('#error').html('请输入手机号');
+				$('#telephone').css('border','1px solid red');
+				return false;
+			}else{
+				$('#error').css('display','none');
+				$('#telephone').css('border','');
+			}
+			
+			$.ajax({
+				url: '/lottery/pre_download_telephone.php',
+				data: 'aid='+aid+'&sid='+sid+'&telephone='+telephone+'&download='+obj,
+				type: 'get',
+				success: function(data){
+					var data = eval(''+data+'');
+					if(data == 500){
+						window.scrollTo(0,0);
+						$('#error').css('display','');
+						$('#error').html('请输入正确手机号');
+						$('#telephone').css('border','1px solid red');
+					}else if(data == 200){
+						$('#error').css('display','none');
+						$('#telephone').css('border','');
+						window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,1);
+					}
+				}
+			});
+		}else{
+			$.ajax({
+				url: '/lottery/pre_download.php',
+				data: 'aid='+aid+'&sid='+sid+'&download='+obj,
+				type: 'get',
+				success: function(data){
+					window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,1);
+				}
+			});
+		}
+	}
+	
+	$(function(){
+        //轮播图
+        TouchSlide({
+            slideCell:"#slideBox1",
+            mainCell:".bd ul",
+            effect:"leftLoop",
+            autoPlay:true //自动播放
+        });
+		 TouchSlide({
+            slideCell:"#slideBox2",
+            mainCell:".bd ul",
+            effect:"leftLoop",
+            autoPlay:true //自动播放
+        });
+		 TouchSlide({
+            slideCell:"#slideBox3",
+            mainCell:".bd ul",
+            effect:"leftLoop",
+            autoPlay:true //自动播放
+        });
+    })
+</script>
+<body style="<!--{if $out.page_result['page_color']}-->background-color:rgba(<!--{$out.page_result['page_color']}-->,1)<!--{/if}--><!--{if $out.page_result['page_img']}-->background: url(<!--{$out.img_url}--><!--{$out.page_result['page_img']}-->) 0 0 no-repeat<!--{/if}--> ;  background-size:100% 100%">
+<section>
+    <div class="banner">
+        <img src="<!--{$out.img_url}--><!--{$out.page_result['banner_img']}-->"/>
+    </div>
+</section>
+<!--{if $out.page_result['first_type']}-->
+<div <!--{if $out.page_result['first_texts']}-->class="part_txt_wrap"<!--{elseif $out.page_result['first_img']}-->class="part"<!--{/if}-->>
+	<!--{if $out.page_result['first_type'] == 2}-->
+	<div class="part_txt" style="background-color:rgba(<!--{$out.page_result['first_bg_color']}-->,0.5)">
+	<!--{$out.page_result['first_texts']}-->
+	</div>
+	<!--{else if $out.page_result['first_type'] == 1}-->
+	<img src="<!--{$out.img_url}--><!--{$out.page_result['first_img']}-->" />
+	<!--{else if $out.page_result['first_type'] == 3}-->
+	<div class="slide_wrap">
+		<div id="slideBox1" class="slideBox" style="position:relative;padding:25px; background:url(<!--{if $out.page_result['first_focus_bg']}--><!--{$out.img_url}--><!--{$out.page_result['first_focus_bg']}--><!--{else}-->../images/slider_bg.jpg<!--{/if}-->) no-repeat; background-size:100% 100%;">
+			<div class="bd" <!--{if $out.page_result['first_focus_width']}-->style="width:<!--{$out.page_result['first_focus_width']}-->%"<!--{/if}-->>
+				<ul>
+					<!--{foreach from=$out.first_focus_pic_arr item=vo}-->
+					<li><a href="javascript:;"><img src="<!--{$out.img_url}--><!--{$vo}-->" /></a></li>
+					<!--{/foreach}-->
+				</ul>
+			</div>
+			<span class="prev"></span>
+			<span class="next"></span>
+		</div>
+	</div>
+	<!--{/if}-->
+</div>
+<!--{/if}-->
+<!--{if $out.page_result['download_one_btn'] || $out.page_result['download_one_img']}-->
+<!--{if $out.page_result['is_telephone']}-->
+<form class="input_box">
+	<!--{if $out.page_result['download_one_bg']}--><img src="<!--{$out.img_url}--><!--{$out.page_result['download_one_bg']}-->" /><!--{/if}-->
+	<div class="input_box_inner">
+		<p><input type="text" id="telephone" placeholder="<!--{if $out.page_result['telephone_text']}--><!--{$out.page_result['telephone_text']}--><!--{else}-->请输入手机号<!--{/if}-->" /></p>
+		<p style="color:red;display:none;margin:-10px 96px 0px 30px; padding-bottom:10px" id="error"></p>
+			<a href="javascript:;" class="form_btn" onclick="download_go(1);" style="background: url(<!--{if $out.page_result['download_one_img']}--><!--{$out.img_url}--><!--{$out.page_result['download_one_img']}--><!--{elseif $out.page_result['download_one_btn']}--><!--{$out.static_url}-->/predown/images/downloads<!--{$out.page_result['download_one_btn']}-->.png<!--{/if}-->) 0 0 no-repeat; background-size:86px 44px;"></a>
+	</div>
+</form>
+<!--{else}-->
+<div class="btns">
+<!--{if $out.page_result['download_one_bg']}--><img src="<!--{$out.img_url}--><!--{$out.page_result['download_one_bg']}-->" /><!--{/if}-->
+<a href="javascript:;" onclick="download_go(1);" style="background: url(<!--{if $out.page_result['download_one_img']}--><!--{$out.img_url}--><!--{$out.page_result['download_one_img']}--><!--{elseif $out.page_result['download_one_btn']}--><!--{$out.static_url}-->/predown/images/downloads<!--{$out.page_result['download_one_btn']}-->.png<!--{/if}-->) 0 0 no-repeat; background-size:100% 100%"></a></div>
+<!--{/if}-->
+<!--{/if}-->
+<!--{if $out.page_result['second_type']}-->
+<div <!--{if $out.page_result['second_texts']}-->class="part_txt_wrap"<!--{elseif $out.page_result['second_img']}-->class="part"<!--{/if}-->>
+	<!--{if $out.page_result['second_type'] == 2}-->
+	<div class="part_txt" style="background-color:rgba(<!--{$out.page_result['second_bg_color']}-->,0.5)">
+	<!--{$out.page_result['second_texts']}-->
+	</div>
+	<!--{else if $out.page_result['second_type'] == 1}-->
+	<img src="<!--{$out.img_url}--><!--{$out.page_result['second_img']}-->" />
+	<!--{else if $out.page_result['second_type'] == 3}-->
+	<div class="slide_wrap">
+		<div id="slideBox2" class="slideBox" style="position:relative;padding:25px; background:url(<!--{if $out.page_result['second_focus_bg']}--><!--{$out.img_url}--><!--{$out.page_result['second_focus_bg']}--><!--{else}-->../images/slider_bg.jpg<!--{/if}-->) no-repeat; background-size:100% 100%;">
+			<div class="bd" <!--{if $out.page_result['second_focus_width']}-->style="width:<!--{$out.page_result['second_focus_width']}-->%"<!--{/if}-->>
+				<ul>
+					<!--{foreach from=$out.second_focus_pic_arr item=vo}-->
+					<li><a href="javascript:;"><img src="<!--{$out.img_url}--><!--{$vo}-->" /></a></li>
+					<!--{/foreach}-->
+				</ul>
+			</div>
+			<span class="prev"></span>
+			<span class="next"></span>
+		</div>
+	</div>
+	<!--{/if}-->
+</div>
+<!--{/if}-->
+<!--{if $out.page_result['bbs_btn'] || $out.page_result['bbs_img']}-->
+<div class="btns">
+<!--{if $out.page_result['bbs_bg']}--><img src="<!--{$out.img_url}--><!--{$out.page_result['bbs_bg']}-->" /><!--{/if}-->
+<a href="<!--{$out.page_result['bbs_address']}-->" style="background: url(<!--{if $out.page_result['bbs_img']}--><!--{$out.img_url}--><!--{$out.page_result['bbs_img']}--><!--{elseif $out.page_result['bbs_btn']}--><!--{$out.static_url}-->/predown/images/bbs<!--{$out.page_result['bbs_btn']}-->.png<!--{/if}-->) 0 0 no-repeat; background-size:100% 100%"></a></div>
+<!--{/if}-->
+<!--{if $out.page_result['third_type']}-->
+<div <!--{if $out.page_result['third_texts']}-->class="part_txt_wrap"<!--{elseif $out.page_result['third_img']}-->class="part"<!--{/if}-->>
+	<!--{if $out.page_result['third_type'] == 2}-->
+	<div class="part_txt" style="background-color:rgba(<!--{$out.page_result['third_bg_color']}-->,0.5)">
+	<!--{$out.page_result['third_texts']}-->
+	</div>
+	<!--{else if $out.page_result['third_type'] == 1}-->
+	<img src="<!--{$out.img_url}--><!--{$out.page_result['third_img']}-->" />
+	<!--{else if $out.page_result['third_type'] == 3}-->
+	<div class="slide_wrap">
+		<div id="slideBox3" class="slideBox" style="position:relative;padding:25px; background:url(<!--{if $out.page_result['third_focus_bg']}--><!--{$out.img_url}--><!--{$out.page_result['third_focus_bg']}--><!--{else}-->../images/slider_bg.jpg<!--{/if}-->) no-repeat; background-size:100% 100%;">
+			<div class="bd" <!--{if $out.page_result['third_focus_width']}-->style="width:<!--{$out.page_result['third_focus_width']}-->%"<!--{/if}-->>
+				<ul>
+					<!--{foreach from=$out.third_focus_pic_arr item=vo}-->
+					<li><a href="javascript:;"><img src="<!--{$out.img_url}--><!--{$vo}-->" /></a></li>
+					<!--{/foreach}-->
+				</ul>
+			</div>
+			<span class="prev"></span>
+			<span class="next"></span>
+		</div>
+	</div>
+	<!--{/if}-->
+</div>
+<!--{/if}-->
+<!--{if $out.page_result['download_two_img'] || $out.page_result['download_two_btn']}-->
+<div class="btns">
+<!--{if $out.page_result['download_two_bg']}--><img src="<!--{$out.img_url}--><!--{$out.page_result['download_two_bg']}-->" /><!--{/if}-->
+<a href="javascript:;" onclick="download_go(2);" style="background: url(<!--{if $out.page_result['download_two_img']}--><!--{$out.img_url}--><!--{$out.page_result['download_two_img']}--><!--{elseif $out.page_result['download_two_btn']}--><!--{$out.static_url}-->/predown/images/download<!--{$out.page_result['download_two_btn']}-->.png<!--{/if}-->) 0 0 no-repeat; background-size:100% 100%"></a></div>
+<!--{/if}-->
+</body>
+</html>

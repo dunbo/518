@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title><!--{$out.activity_result['name']}--></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/setlike/css/common1.css?v1"/>
+<script type="text/javascript"  src="<!--{$out.static_url}-->/setlike/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="/js/anzhi-new.js?20150519"></script>
+<style type="text/css">
+.bg_01{background-color: <!--{$out.page_result['bottom_color']}-->; background-image:url(<!--{$out.imgurl}--><!--{$out.page_result['ap_imgurl_bg']}-->); background-repeat:no-repeat; background-size:100% auto; padding:20px 0 15px}
+.soft_like{background:<!--{$out.page_result['bg_color']}-->; background-image:url(<!--{$out.imgurl}--><!--{$out.page_result['bg_img']}-->);background-repeat:no-repeat; background-size:100% 100%; overflow:hidden; max-width:100%}
+.rules{margin:20px 10px 15px; padding:15px; background:<!--{$out.page_result['rule_color']}-->; color:#fff1b5; font-size:16px; line-height:24px; position:relative;}
+.bar_level_01 span{display:block;width:128px; height:110px; background:url(<!--{$out.static_url}-->/setlike/images/like_bg05s.png) no-repeat; background-size:128px 110px; clip:rect(0px, 128px, <!--{$out.my_heights}-->px, 0px); position:absolute; left:0;top:0; z-index:2}
+.like-plus{display:block; width:60px; height:40px; position:absolute; left:50%; top:<!--{$out.my_top}-->; margin-left:-7px; z-index:3}
+</style>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->',aid = '<!--{$out.aid}-->',start_tm = '<!--{$out.page_result['start_tm']}-->',end_tm = '<!--{$out.page_result['end_tm']}-->',param = 0,data=[],soft_icons='',img_url = '<!--{$out.img_url}-->',TEL = '',now = 0,activity_url='<!--{$out.activity_url}-->';
+var tel_warning = "<!--{$out.page_result['telephone_warning']}-->",describe="<!--{$out.page_result['describe']}-->",share_text="<!--{$out.page_result['share_text']}-->",static_url = '<!--{$out.static_url}-->',is_download = '<!--{$out.is_download}-->',channel_status='<!--{$out.channel_status}-->',version_code = '<!--{$out.version_code}-->';
+var flags={canMove:true};
+function showOpenBox(obj){
+	var ua = navigator.userAgent.toLowerCase();  
+	if(ua.match(/MicroMessenger/i)=="micromessenger" && obj == '#tip-box2') {
+		showOpenBox('#tip-box3');
+	}else{
+		var bg_h=$("#body-bg").height()+$(document).scrollTop(),
+				top_h= $(obj).height()/ 2-$(document).scrollTop(),
+				bg_h2=$("#body-bg").height()+$(document).scrollTop();
+		$(obj).css("margin-top",-top_h+"px").show();
+		if(obj == '#tip-box3'){
+			$(obj).css("margin-top",0);
+			$("#body-bg2").css("height",bg_h+"px").show();
+		}
+		else{
+			$("#body-bg").css("height",bg_h+"px").show();
+		}
+		flags.canMove=false;
+	}
+}
+function cloBox(obj){
+	$(obj).hide();
+	if(obj == '#tip-box3'){
+		$("#body-bg2").hide();
+	}
+	else{
+		$("#body-bg").hide();
+	}
+	flags.canMove=true;
+}
+
+$(function(){
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+})
+function get_soft(obj){
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	var data = soft_list.DATA;
+	var soft_icon = '';
+	var my_softs = '';
+	var donwload_text = '';
+	now = Math.round(new Date().getTime()/1000);
+	if(end_tm > now){
+		download_text = '抢先下载';
+	}else{
+		download_text = '下载领取';
+	}
+	
+	if(is_download == 1 || obj == 1){
+	for(i = 0; i < data.length; i++) {
+		if(data[i][2].length > 4){
+			var softname = data[i][2].substring(0,3)+'...';
+		}else{
+			var softname = data[i][2];
+		}
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(data[i][0]));
+		window.AnzhiActivitys.registerInstallObserver(data[i][7]);
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);
+		if(soft_status == 1){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="download">下载中</a>';
+		}else if(soft_status == 2){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="download">继续</a>';
+		}else if(soft_status == 3){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="download">继续</a>';
+		}else if(soft_status == 4){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk(parseInt('+aid+'),'+data[i][0]+',"'+data[i][7]+'","'+data[i][2]+'",parseInt('+data[i][13]+'),"'+data[i][27]+'",0,0,'+data[i][27]+');" class="download">下载</a>';
+		}else if(soft_status == 5){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="installApp(parseInt('+data[i][0]+'),\''+data[i][7]+'\');" class="download">安 装</a>';
+		}else if(soft_status == 6){
+			if(version_code >= 6000){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode btnAni" onclick="openApp('+data[i][0]+',\''+data[i][7]+'\');">打开</a>';
+			}else{
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+			}
+		}else if(soft_status == 8){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="download">继续</a>';
+		}else if(soft_status == 9){
+			var my_soft = '<a value="校验中" id="'+data[i][0]+'" class="download">校验中</a>';
+		}else if(soft_status == 10){
+			var my_soft = '<a id="'+data[i][0]+'" class="download">已下载</a>';
+		}else if(soft_status == -1){
+			var soft_other_status = window.AnzhiActivitys.isInstalledApp(data[i][7],parseInt(data[i][13]));
+			if(soft_other_status == -2){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="download">'+download_text+'('+data[i][9]+')</a>';
+			}else if(soft_other_status == -1){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="download">更新</a>';
+			}else if(soft_other_status == 0){
+				var my_soft = '<a id="'+data[i][0]+'" class="download" onclick="openApp(\''+data[i][7]+'\','+data[i][0]+');">打 开</a>';
+			}else if(soft_other_status == 1){
+				var my_soft = '<a id="'+data[i][0]+'" class="download">已下载</a>';
+			}
+		}
+		soft_icons = data[i][1];
+		soft_icon += '<img src="'+data[i][1]+'">';
+		my_softs += my_soft;
+	}
+	}else{
+		for(i = 0; i < data.length; i++) {
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(data[i][0]));
+			window.AnzhiActivitys.registerInstallObserver(data[i][7]);
+			var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+			var cmd = 'var soft_status=' + json_datas;
+			eval(cmd);
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="download">'+download_text+'('+data[i][9]+')</a>';
+			soft_icons = data[i][1];
+			soft_icon += '<img src="'+data[i][1]+'">';
+			my_softs += my_soft;
+		}	
+	}
+
+	$('#soft_icon').html(soft_icon);
+	$('#my_softs').html(my_softs);
+}
+
+//更新软件状态（正在下载）
+function onDownloadCreated(softid){
+	$('#'+softid+'').html("下载中");
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		$('#'+softid+'').html("下载中");
+	}else if(newState == 2){
+		$('#'+softid+'').html("继 续");
+	}else if(newState == 3){
+		$('#'+softid+'').html("继 续");
+	}else if(newState == 4){
+		$('#'+softid+'').html("重 试");
+	}else if(newState == 5){
+		$('#'+softid+'').html("安 装");
+		//$('#'+softid+'').unbind('onclick');
+		$('#'+softid+'').bind('click',function(){
+			installApp(parseInt(softid));
+		});
+	}else if(newState == 8){
+		$('#'+softid+'').html("继 续");
+	}else if(newState == 9){
+		$('#'+softid+'').html("检查中");
+	}
+}
+
+$(document).ready(function(){
+	if(channel_status == 100){
+		showOpenBox('#tip-box5');
+	}else if(channel_status == 200){
+		showOpenBox('#tip-box4');
+	}else if(channel_status == 300){
+		showOpenBox('#tip-box5');
+		$('#my_warning').html('很抱歉，您的安智市场版本过低，请升级后参与活动。');
+	}
+	countdown();
+	var proid_arr = getArgs();
+	var aztype = proid_arr.aztype;
+	var share = proid_arr.share;
+	var from = 4;
+	if(share == 1){
+		if (aztype == 'qr') {
+			from = 1;
+		}
+		var js_param = {type:'action', id:aid, from:from};
+		var php_param = {type:'action', aid:aid};
+		$('#download_btn').attr('href', '/fast.php?type=action&aid='+aid+'');
+		var ua = navigator.userAgent.toLowerCase();  
+		if(ua.match(/MicroMessenger/i)!="micromessenger") {
+			setTimeout(share_download(js_param, php_param), 2000);
+		}
+	}
+	var TELS = window.AnzhiActivitys.getTel();
+	TEL = TELS.substr(3,11);
+	get_soft();
+});
+
+function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag,noflux,firmware,status){
+	$.ajax({
+		url: '/lottery/setlike_download.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+			var is_telephone = data;
+			if(start_tm < now){
+				if(end_tm > now && is_telephone == 2 && !TEL){
+					setTimeout(function(){show_telephone()},1000);
+				}else if(end_tm > now && is_telephone == 2 && TEL){
+					get_telephone(TEL);
+				}
+			}
+		}
+	});
+}
+
+function show_telephone(){
+	$('#the_telephone').html('<div class="form_phone"><input type="text" id="telephone" /><br/><span id="warning">'+tel_warning+'</span></div>');
+	$('#my_softs').html('<a class="download" href="javascript:;" onclick="get_telephone();">提交</a>');
+}
+
+function get_telephone(TEL){
+	if(TEL){
+		var telephone = TEL;
+	}else{
+		var telephone = $('#telephone').val();
+	}
+	if(!telephone){
+		$('#warning').html('请输入手机号');
+		return false;
+	}
+	$.ajax({
+		url: '/lottery/setlike_get_telephone.php',
+		data: 'telephone='+telephone+'&sid='+sid+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			if(!TEL){
+				if(data == 200){
+					$('#warning').html('手机号提交成功');
+					setTimeout(function(){
+						get_soft(1);
+						$('#the_telephone').html('<em>'+describe+'</em>');
+					},2000);
+				}else{
+					$('#warning').html('手机号格式错误');
+				}
+			}
+		}
+	});
+}
+
+function installApp(softid){
+	window.AnzhiActivitys.installAppForActivity(softid);
+}
+
+function openApp(pkg,softid){
+	var the_soft = [softid];
+	$.ajax({
+		url: '/lottery/setlike_open.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkg+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+		}
+	});
+}
+
+function countdown(){
+	var timestamp = Date.parse(new Date());
+	var b=Math.round(new Date().getTime()/1000);
+	if(start_tm > b){
+		var time_show = 1;
+		var time = start_tm;
+	}else if(start_tm <= b && end_tm >= b){
+		var time_show = 2;
+		var time = end_tm;
+	}else if(end_tm < b){
+		var time_show = 2;
+		var time = end_tm;
+	}
+	
+    var djs = time;
+    var cc = djs-b;
+    var d = Math.floor(cc/(3600*24));
+    var h = Math.floor( (cc-d*3600*24)/3600 );
+    var m = Math.floor(((cc-d*3600*24-h*3600))/60);
+    var s = Math.floor(cc-d*3600*24-h*3600-m*60);
+	
+	if(time_show == 1){
+		if(d != 0){
+			var dd = '<span>'+d+'</span><em>天</em>';
+		}else{
+			var dd = '';
+		}
+		$('#my_time').html('<p>距离集赞开始：</p>'+dd+'<span>'+h+'</span><em>时</em><span>'+m+'</span><em>分</em><span>'+s+'</span><em>秒</em><div class="clear"></div>');
+	}else if(time_show == 2){
+		if(d != 0){
+			var dd = '<span>'+d+'</span><em>天</em>';
+		}else{
+			var dd = '';
+		}
+
+		if(d < 0){
+			$('#my_time').html('<p>距离集赞结束：</p><span>0</span><em>时</em><span>0</span><em>分</em><span>0</span><em>秒</em><div class="clear"></div>');
+			$('#my_button').attr('class','like_btn disabled');
+			$('#get_button').attr('onclick','');
+		}else{
+			$('#my_time').html('<p>距离集赞结束：</p>'+dd+'<span>'+h+'</span><em>时</em><span>'+m+'</span><em>分</em><span>'+s+'</span><em>秒</em><div class="clear"></div>');
+		}
+	}
+    setTimeout("countdown()",1000);
+}
+
+function get_like(){
+	$.ajax({
+		url: '/lottery/setlike_get.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			if(data == 200){
+				var clickCount = 0;
+				$('.like-plus span').addClass('bounceinup');
+				$('.like-plus em').addClass('zoomin');
+				$('.like-plus i').addClass('zoomin');
+				setTimeout(function(){
+					$('.like-plus span').removeClass('bounceinup');
+					$('.like-plus em').removeClass('zoomin');
+					$('.like-plus i').removeClass('zoomin');
+					clickCount++;
+				},1200);
+			}else{
+				showOpenBox('#tip-box');
+			}
+		}
+	});
+}
+
+function go_share(){
+	$.ajax({
+		url: '/lottery/setlike_share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+
+		}
+	});
+	share_img = img_url + soft_icons;
+	var actionurl = activity_url+"/lottery/setlike_lottery.php?aid="+aid+"&share=1";
+	var share_json = '{"TEXT":"'+share_text+'","URL":"'+share_img+'","ACTIONURL":"'+actionurl+'","URLWEIXIN":"'+share_img+'"}';
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+
+function is_weixn(){
+	var ua = navigator.userAgent.toLowerCase();  
+	if(ua.match(/MicroMessenger/i)=="micromessenger") {
+		showOpenBox('#tip-box3');
+	}
+}
+
+function download_go(){
+	var ua = navigator.userAgent.toLowerCase();  
+	if(ua.match(/MicroMessenger/i)=="micromessenger") {
+		showOpenBox('#tip-box3');
+	}else{
+		location.href= activity_url+"/lottery/setlike_lottery.php?aid="+aid+"&share=1";
+	}
+}
+
+function invite_callback()
+{
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if (flag == 1 && version<5500) {
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;
+		}
+	}
+}
+
+function getArgs() {
+    var args = {};
+    var query = location.search.substring(1);
+    var pairs = query.split("&");
+    for(var i = 0; i < pairs.length; i++) {
+        var pos = pairs[i].indexOf('=');
+        if (pos == -1) continue;
+        var argname = pairs[i].substring(0,pos);
+        var value = pairs[i].substring(pos+1);
+        value = decodeURIComponent(value);
+        args[argname] = value;
+    }
+    return args;
+}
+
+function go_update(){
+	var anzhi_softid = '<!--{$out.resultanzhi.ID}-->';
+	var anzhi_package = 'cn.goapk.market';
+	var anzhi_softname = '<!--{$out.resultanzhi.SOFT_NAME}-->';
+	var anzhi_versioncode = '<!--{$out.resultanzhi.SOFT_VERSION_CODE}-->';
+	var anzhi_size = '<!--{$out.resultanzhi.SOFT_SIZE}-->';
+	window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(anzhi_softid),anzhi_package,anzhi_softname,parseInt(anzhi_versioncode),anzhi_size,1);
+}
+</script>
+</head>
+<body>
+<div id="az_spirit"></div>
+<div class="banner" id="top">
+	<img src="<!--{$out.imgurl}--><!--{$out.page_result['ap_imgurl']}-->"/>
+</div>
+<div class="soft_like">
+	<!--{if $out.sid}-->
+	<div class="soft_list" style="background-color:<!--{$out.page_result['soft_bg']}-->">
+		<div class="soft_icon" id="soft_icon">
+		</div>
+		<div class="soft_info">
+			<h4><!--{$out.page_result['title']}--></h4>
+			<p id="the_telephone"><em><!--{$out.page_result['describe']}--></em></p>
+		</div>
+		<span id="my_softs"></span>
+	</div>
+	<!--{else}-->
+	<div class="soft_list" style="background-color:<!--{$out.page_result['soft_bg']}-->">
+		<div class="soft_icon" id="soft_icon">
+			<img src="<!--{$out.resultanzhi['SOFT_ICON_URL']}-->">
+		</div>
+		<div class="soft_info">
+			<h4>安智市场</h4>
+			<p><em><!--{$out.resultanzhi['SOFT_SIZES']}--></em></p>
+			<p>下载安智市场，参与活动</p>
+		</div>
+		<a class="download" onclick="download_go();">立即下载</a>
+	</div>
+	<!--{/if}-->
+	<div class="scale_wrap">
+		<div class="like_bar" id="like_bar<!--{$out.grade_count}-->">
+			<div class="like_mark"></div>
+			<div class="bar_hand"></div>
+			<div class="bar_level_01"><span></span></div>
+			<div class="like-plus">
+				<span>+1</span>
+				<em></em>
+				<i></i>
+			</div>
+			<!--{foreach from=$out.grade_result item=vo key = k}-->
+			<!--{if $out.is_max}-->
+				<div class="prize_box <!--{if $out.tops == $k}-->prize_current<!--{elseif $out.tops > $k}-->prize_over<!--{/if}-->" id="prize_box<!--{$vo.like_grade}-->">
+			<!--{else}-->
+				<div class="prize_box <!--{if ($out.all_num >= $vo.grade_values && $out.all_num < $out.grade_result[$k+1]['grade_values'] && $out.grade_result[$k+1]['grade_values']) || ($out.all_num >= $vo.grade_values && !$out.grade_result[$k+1]['grade_values'])}-->prize_current<!--{else if ($out.all_num >= $out.grade_result[$k+1]['grade_values'] && $out.grade_result[$k+1]['grade_values'])}-->prize_over<!--{/if}-->" id="prize_box<!--{$vo.like_grade}-->">
+			<!--{/if}-->
+				<span><!--{$vo.grade_value}-->万赞</span>
+				<span class="prize"><!--{$vo.grade_prize}--></span>
+			</div>
+			<!--{/foreach}-->
+		</div>
+	</div>
+	<div class="like_txt">
+		<p><!--{if $out.now > $out.page_result['end_tm'] && $out.now < $out.activity_result['end_tm']}-->集赞已结束，下载软件领取<!--{$out.my_prize}--><!--{elseif $out.now < $out.page_result['end_tm']}-->点赞越多，奖品越大哦~<!--{/if}--></p>
+	</div>
+	<!--{if $out.sid}-->
+	<div id="my_button" <!--{if $out.page_result['start_tm'] <= $out.now && $out.page_result['end_tm'] > $out.now}-->class="like_btn"<!--{else}-->class="like_btn disabled"<!--{/if}-->>
+		<a href="javascript:;" id="get_button" <!--{if $out.aid && $out.page_result['start_tm'] <= $out.now && $out.page_result['end_tm'] >= $out.now}-->onclick="get_like();"<!--{/if}-->>我来点赞</a>
+	</div>
+	<!--{else}-->
+	<div class="like_btn">
+		<a href="javascript:;" onclick="showOpenBox('#tip-box2')">我来点赞</a>
+	</div>
+	<!--{/if}-->
+	<div class="line"></div>
+	<!--{if $out.activity_result['end_tm'] > $out.now}-->
+	<div class="like_time">
+		<div class="like_time_inner" id="my_time">
+			<div class="clear"></div>
+		</div>
+	</div>
+	<!--{else}-->
+	<div class="like_end like_txt">
+	<p>活动已结束，恭喜本次集赞的小伙伴们获得<br/><span class="prize_list"><!--{$out.my_prize}--></span></p>
+	</div>
+	<!--{/if}-->
+	<div class="clear"></div>
+</div>
+<div class="bg_01">
+	<!--{if $out.sid}-->
+	<div class="share">
+		<img src="<!--{$out.static_url}-->/setlike/images/share_01.png"/>
+		<a class="share_btn" onclick="go_share();">分享给小伙伴</a>
+	</div>
+	<!--{/if}-->
+	<div class="rules">
+		<h3>活动规则</h3>
+		<p><!--{$out.page_result['ap_rule']}--></p>
+		<span class="rules_l"></span>
+		<span class="rules_r"></span>
+	</div>
+</div>
+<div class="tip-box" id="tip-box" style="display: none;">
+	<div class="tip-box-inner">
+		<div class="tip_hd">
+			<img src="<!--{$out.static_url}-->/setlike/images/tips_01.png"/>
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box')">关闭</a></div>
+		</div>
+		<div class="tip-mid">
+			<div class="tip-con">
+				<p>今天的点赞机会用完啦，明天再来哦~</p>
+				<a href="javascript:;" class="btns" onclick="go_share();">分享给小伙伴</a>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="tip-box" id="tip-box2"  style="display: none;">
+	<div class="tip-box-inner">
+		<div class="tip_hd">
+			<img src="<!--{$out.static_url}-->/setlike/images/tips_01.png"/>
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box2')">关闭</a></div>
+		</div>
+		<div class="tip-mid">
+			<div class="tip-con">
+				<p>下载安智市场可参与活动哦~(<!--{$out.resultanzhi['SOFT_SIZES']}-->)</p>
+				<a onclick="download_go();" class="btns">立即下载</a>
+			</div>
+		</div>
+	</div>
+</div>
+ <div class="tip-top" id="tip-box3" style="display: none;">
+	<p>点击右上角的<img src="<!--{$out.static_url}-->/setlike/images/tips_02.png" />按钮选择“在浏览器中打开”,就可以下载安智市场参与活动啦~<span></span></p>
+</div>
+<div class="tip-box" id="tip-box4" style="display: none;">
+	<div class="tip-box-inner">
+		<div class="tip_hd">
+			<img src="<!--{$out.static_url}-->/setlike/images/tips_01.png"/>
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box4')">关闭</a></div>
+		</div>
+		<div class="tip-mid">
+			<div class="tip-con">
+				<p style="margin:5px;">您的安智市场版本太低啦，马上升级参与活动吧~(<!--{$out.resultanzhi.SOFT_SIZES}-->)</p>
+				<a href="javascript:;" class="btns" onclick="go_update();">马上升级</a>
+			</div>
+			
+		</div>
+	</div>
+</div>
+<div class="tip-box" id="tip-box5" style="display: none;">
+	<div class="tip-box-inner">
+		<div class="tip_hd">
+			<img src="<!--{$out.static_url}-->/setlike/images/tips_01.png"/>
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box5')">关闭</a></div>
+		</div>
+		<div class="tip-mid">
+			<div class="tip-con">
+				<p id="my_warning" style="margin:5px;">很抱歉，您的安智市场版本过低，请升级后参与活动。<br />升级方式：在[管理-设置]中检查更新。</p>
+			</div>
+			
+		</div>
+	</div>
+</div>
+<div style="display: none;" id="body-bg"></div>
+<div style="display: none;" id="body-bg2"  onclick="cloBox('#tip-box3')"></div>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+<!--使用灵活运营的推荐内容编辑必需添加此js-->
+<script type="text/javascript" src="/Public/js/edit_content_type.js?v3"></script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+	jQuery(function(){
+        /*
+        ** generate_content_type_href 函数：生成推荐内容的链接
+        ** 第一个参数是要append到的div的id，必填
+        ** 第二个参数是可推荐的内容类型，非必填，默认为'1,2,3,4,5'
+        ** 第三个参数是数组类型，如果要自定义元素名称或者传编辑的值，需要用到此值
+        ** 返回：生成的链接
+        */
+        var common_jump_id={$common_jump_id};
+        if(common_jump_id){
+        	var soft_arr = {:json_encode($find)};
+        	console.log({$find});
+			var content_arr = edit_load(soft_arr);
+	        // 生成推荐内容展示
+	        generate_append_html("content_type_div", content_arr);
+	        // 生成推荐链接
+	        href = generate_content_type_href('content_type_div', "{$find.content_type}", content_arr,'content_cooperation');
+	        $("#content_type_a").attr("href", href);
+        }else{
+        	href = generate_content_type_href('content_type_div','2,4,5','','content_cooperation');
+        	$("#content_type_a").attr("href", href);
+        }
+    });
+	//渠道
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{
+		$('#channel_div').html($('.TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	function pubpro_type_select(value){
+		if(value==3){
+			$('#recommend_content').show();
+		}else{
+			$('#recommend_content').hide();
+		}
+	}
+</script>
+
+<form  method="POST" action="__URL__/<?php if($list['id']){ echo "save_channel";}else{ echo "add_channel"; }?>" >
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	
+	<tr class="sub_tr">
+		<td>频道名称</td>
+		<td>
+			<input placeholder="2~5个汉字" type="text" id='channel_name' name='channel_name'  style='height:25px' value="{$list.channel_name}"/>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>频道排序</td>
+		<td>
+			<input type="tel" id='rank' name='rank'  style='height:25px' value="{$list.rank}"/>
+			整数，数值越小越靠前。最小值为1.
+		</td>
+	</tr>
+	<tr class="sub_tr" id='recommend_content' <if condition="$type neq '3'">style="display:none;"</if>>
+        <td><font color="red"></font>推荐内容</td>
+        <td>
+            <!--下面a里的href的url会在ready函数里自动生成-->
+            <a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">添加推荐</font></a>
+            <!--下面的content_type_div是选择推荐内容后append的地方-->
+            <div id="content_type_div"/>
+        </td>
+        <td/>
+    </tr>
+	<tr class="sub_tr">
+		<td>频道状态</td>
+		<td>
+			<select id="status" name="status">
+				<option value="0"<if condition="$list.status eq '0'">selected="selected"</if>>停用</option>
+				<option value="1"<if condition="$list.status eq '1'">selected="selected"</if>>启用</option>
+			</select>
+			默认是停用，需要手动开启
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>精确投放</td>
+		<td align="left" width="300">
+		<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">查看</font></a><br />
+			<div id="channel_div">
+				<volist id="chl_list_vo" name="chl_list" >
+					&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+				</volist>
+			</div>
+		</td>
+	</tr>
+	<?php if($site_id_type==0 || $site_id_type==3 || $site_id_type==4 || $site_id_type==5) { ?>
+	<tr class="sub_tr">
+		<td>频道类型</td>
+		<td>
+			<select id="type" name="type" onchange="pubpro_type_select(this.value);">
+				<?php if($site_id_type==0 || $site_id_type==3 || $site_id_type==4 || $site_id_type==5) { ?>
+			    	<option value="3"<if condition="$list.type eq '3'">selected="selected"</if>>普通</option>
+			    <?php } ?>
+				<?php if($site_id_type==0) { ?>
+					<option value="1"<if condition="$list.type eq '1'">selected="selected"</if>>内容合作</option>
+					<option value="2"<if condition="$list.type eq '2'">selected="selected"</if>>红包助手</option>
+					<option value="4"<if condition="$list.type eq '4'">selected="selected"</if>>手机清理</option>
+				<?php } ?>
+			</select>
+		</td>
+	</tr>
+	<?php } ?>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="id" value="{$list.id}"/>
+            <input type='hidden' name="site_id" value="{$site_id}"/>			
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/>
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

@@ -1,0 +1,135 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+<link rel="stylesheet" type="text/css" href="/Public/img/common.css" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<style>
+<!--
+table.words td{width:150px;height:100%}
+-->
+</style>
+<div class="main" >
+<div class="content">
+<center>
+{$void}
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+<tr>
+<td id="loading">
+<input type="button" id="{$id}" value="{$type}"  {$style}/>
+</td>
+</tr>
+<tr style="background-color:#ccc;">
+    <td align='left' width="100%" height="35" style="background-color:#ccc;font-size:12px;">&nbsp&nbsp&nbsp&nbsp<b>有效记录： {$count}条&nbsp&nbsp</b></td>
+  </tr>
+ <tr>
+    <td align='left' style="vertical-align:top;">
+	<table class="words">
+	<tr>
+	<?php $i=1;?>
+	<volist name="list" id="data">
+	<td>{$data.word}</td>
+	<if condition="($i%5) eq 0" > 
+	</tr>
+	</if>
+	<?php $i++;?>
+	</volist>
+	</tr>
+	</table>
+	</td>
+</tr>
+</table>
+</center>
+</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function() {
+//弹出批量添加层
+$('#add').click(function(){
+	if(window.confirm('确定批量添加吗？')){
+		var url = "__URL__/oper_sensitive/type/{$types}";
+	    var str = $.trim($('table.words').text());
+	    //var word = str.replace(/\s+/g,'\n');
+	    var data = '&word='+encodeURIComponent(str);
+	    $.ajax({
+			url: url,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			beforeSend: function() {
+				$('#loading').html('数据处理中.....')
+				
+			},
+			success: function(data){
+					if(!!data && data.success){ 
+						alert(data.msg);
+						//window.location.href="/index.php/Dev/Sensitive/sensitive_list";
+						history.go(-1);
+						closes();
+						setTimeout(function(){
+							//window.location.reload();
+							
+						},800);
+					}else{
+						alert(data.msg);
+						//window.location.href="/index.php/Dev/Sensitive/sensitive_list";
+						history.go(-1);
+						closes();
+					}
+			},
+		    error: function(){
+		    	
+		    	      alert('对不起，服务器错误，请联系管理员！');
+		    	      //window.location.href="/index.php/Dev/Sensitive/sensitive_list";
+					  history.go(-1);
+		    }
+	     })
+	}
+});
+$('#del').click(function(){
+	if(window.confirm('确定批量删除吗？')){
+		
+	    var str = $.trim($('table.words').text());
+	    //var word = str.replace(/\s+/g,',');
+	   // var str = word.substring(0,word.length-1);
+	    var data = '&word='+encodeURIComponent(str);
+        var url = "__URL__/del_sensitive/type/{$types}";
+    $.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		beforeSend: function() {
+			$('#loading').html('数据处理中.....')
+			
+		},
+		success: function(data){
+				if(!!data && data.success){ 
+					alert(data.msg);
+					//window.location.href="/index.php/Dev/Sensitive/sensitive_list";
+					history.go(-1);
+					setTimeout(function(){
+						//window.location.reload();
+						
+					},800);
+				}else{
+					alert(data.msg);
+					//window.location.href="/index.php/Dev/Sensitive/sensitive_list";
+					history.go(-1);
+					setTimeout(function(){
+						//window.location.reload(); 　
+						
+					},800);
+				}
+		},
+	    error: function(){
+	    	
+	    	      alert('对不起，服务器错误，请联系管理员！');
+	    	     // window.location.href="/index.php/Dev/Sensitive/sensitive_list";
+				 history.go(-1);
+	    }
+     })
+	}
+})
+})
+</script>
+

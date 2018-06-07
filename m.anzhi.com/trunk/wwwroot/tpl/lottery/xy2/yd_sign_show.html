@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>新年福利第1弹</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/newyears/css/common.css?v1"/>
+<script type="text/javascript" src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public.js"></script>
+<script type="text/javascript">
+var sid='<!--{$out.sid}-->';
+var aid='<!--{$out.aid}-->';
+var fan_num='<!--{$out.fan_num}-->';
+var open_pkg_arr = [];
+$(document).ready(function(){
+        my_soft(aid,sid,8);
+	$('.front').click(function(){
+		$('.front').unbind("click");
+		$(this).addClass('front2');
+		$(this).siblings('.back').addClass('back2');
+                lottery(open_pkg_arr);
+	})
+        if(fan_num==0){
+            $('#fan1').attr('src','<!--{$out.static_url}-->/newyears/images/lottery1/front_07.png');
+            $('#fan2').attr('src','<!--{$out.static_url}-->/newyears/images/lottery1/front_08.png');
+            $('#fan3').attr('src','<!--{$out.static_url}-->/newyears/images/lottery1/front_09.png');
+            $('#fan4').attr('src','<!--{$out.static_url}-->/newyears/images/lottery1/front_10.png');
+            $('#fan5').attr('src','<!--{$out.static_url}-->/newyears/images/lottery1/front_11.png');
+            $('#fan6').attr('src','<!--{$out.static_url}-->/newyears/images/lottery1/front_12.png');
+	    $('.front').unbind("click");
+        }
+})
+
+
+function lottery(pkg_str){
+
+	$.ajax({
+		url: '/lottery/xy2/yd_lottery_egg.php',
+		data: 'type=2&sid='+sid+'&aid='+aid+'&pkg='+pkg_str,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+                    if(data.code==0){
+                        showOpenBox('#tip-box1');
+                    }else{
+                	//setTimeout(function(){
+                            if(data.pid==0){
+                                location.href="/lottery/xy2/yd_myprize.php?lfrom=2&pid=0&aid="+aid+"&sid="+sid+"&package="+data.package+"&softname="+data.softname+"&gift_num="+data.gift_num;
+                            }else{
+                                location.href="/lottery/xy2/yd_myprize.php?lfrom=2&aid="+aid+"&sid="+sid+"&pid="+data.pid+"&prizename="+data.prizename;
+                            }
+		        //},1500)
+                    }
+		}
+	});
+}
+
+function my_soft(aid,sid,limit) {
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	var soft_lists = soft_list.DATA;
+	var open_list = [];
+	var install_list = [];
+	var down_list = [];
+	for(j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var json_data =  window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(json_data == 0 || json_data == 1 ){
+			open_list.push(soft_lists[j]);
+			open_pkg_arr.push(soft_lists[j][7]);
+		}
+		if(json_data == -2 && soft_status_gos == 5){
+			install_list.push(soft_lists[j]);
+		}
+		if((json_data == -2 && soft_status_gos != 5 ) || json_data == -1){
+			down_list.push(soft_lists[j]);
+		}
+	}
+}
+</script>
+</head>
+<body>
+<section>
+	<div class="main2">
+		<div class="notice">
+			<div class="notice_list">
+				<marquee scrollamount="2" scrolldelay="90" direction="left">
+                                <span><!--{$out.lunbo}--></span>
+				</marquee>
+			</div>
+		</div>
+		<div class="wrap" id="login_wrap">
+				<div class="logined">
+					<div class="logined_l">
+						<p>您已登录账号为：<!--{$out['username']}--></p>
+						<div class="star_list clear">
+                    <span class="<!--{$out['star1']}-->">1</span>
+                    <em class="<!--{$out['spot1']}-->"></em>
+                    <span class="<!--{$out['star2']}-->">2</span>
+                    <em class="<!--{$out['spot2']}-->"></em>
+                    <span class="<!--{$out['star3']}-->">3</span>
+                    <em class="<!--{$out['spot3']}-->"></em>
+                    <span class="<!--{$out['star4']}-->">4</span>
+                    <em class="<!--{$out['spot4']}-->"></em>
+                    <span class="<!--{$out['star5']}-->">5</span>
+						</div>
+					</div>
+					<div class="logined_r">
+						<a href="/lottery/xy2/yd_userinfo.php?pfrom=2&aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->">个人信息</a>
+                                <!--{if $out['is_sign'] == 1}-->
+				    <a href="javascript:;"  class="mtop10 disabled" >已签到</a>
+                                <!--{/if}-->
+                                <!--{if $out['is_sign'] != 1}-->
+						<a href="javascript:;" onclick="sign()" class="mtop10 heart">签 到</a>
+                                <!--{/if}-->
+					</div>
+				</div>
+				<div class="login logined" style="display:none">
+					<div class="logined_l">
+						<p>完成新年任务前一定要先登录哦！</p>
+					</div>
+					<div class="logined_r">
+						<a href="#" class="login_btn">登 录</a>
+					</div>
+				</div>
+				<div class="coin_01"></div>
+				<div class="coin_02"></div>
+			</div>
+		<div class="main">
+			<div class="lottery1">
+				<h3 class="title2">第1弹【签到翻卡牌】</h3>
+				<div class="lottery_info">
+					<a class="btns" href="javascript:;" onclick="go_myprize()">我的奖品</a>
+                                        <p>您还有<span><!--{$out.fan_num}--></span>次翻卡牌机会！<br/><span>100%</span>中奖！</p>
+					<div class="clear"></div>
+				</div>
+				<ul class="lottery1_list clear">
+					<li>
+						<a href="javascript:void(0)">
+							<div class="front">
+								<img id="fan1" src="<!--{$out.static_url}-->/newyears/images/lottery1/front_01.png" />
+							</div>
+							<div class="back">
+								<img src="<!--{$out.static_url}-->/newyears/images/lottery1/back_01.png" />
+							</div>
+						</a>
+					</li>
+					<li>
+						<a href="javascript:void(0)">
+							<div class="front">
+								<img id="fan2" src="<!--{$out.static_url}-->/newyears/images/lottery1/front_02.png" />
+							</div>
+							<div class="back">
+								<img src="<!--{$out.static_url}-->/newyears/images/lottery1/back_02.png" />
+							</div>
+						</a>
+					</li>
+					<li>
+						<a href="javascript:void(0)">
+							<div class="front">
+								<img id="fan3" src="<!--{$out.static_url}-->/newyears/images/lottery1/front_03.png" />
+							</div>
+							<div class="back">
+								<img src="<!--{$out.static_url}-->/newyears/images/lottery1/back_03.png" />
+							</div>
+						</a>
+					</li>
+					<li>
+						<a href="javascript:void(0)">
+							<div class="front">
+								<img id="fan4" src="<!--{$out.static_url}-->/newyears/images/lottery1/front_04.png" />
+							</div>
+							<div class="back">
+								<img src="<!--{$out.static_url}-->/newyears/images/lottery1/back_04.png" />
+							</div>
+						</a>
+					</li>
+					<li>
+						<a href="javascript:void(0)">
+							<div class="front">
+								<img id="fan5" src="<!--{$out.static_url}-->/newyears/images/lottery1/front_05.png" />
+							</div>
+							<div class="back">
+								<img src="<!--{$out.static_url}-->/newyears/images/lottery1/back_05.png" />
+							</div>
+						</a>
+					</li>
+					<li>
+						<a href="javascript:void(0)">
+							<div class="front">
+								<img id="fan6" src="<!--{$out.static_url}-->/newyears/images/lottery1/front_06.png" />
+							</div>
+							<div class="back">
+								<img src="<!--{$out.static_url}-->/newyears/images/lottery1/back_06.png" />
+							</div>
+						</a>
+					</li>
+				</ul>
+			</div>
+			<div class="wrap">
+				<ul class="active_ctn">
+					<li>
+						<span>1.</span>
+						<p>活动期间，每天只要完成签到，就送1次翻卡牌机会！100%中奖，签到天数越多，中大奖概率越高！活动结束后，抽奖次数置零。</p>
+					</li>
+					<li>
+						<span>2.</span>
+						<p>活动期间，每日完成1次签到，连续签到5天，即可完成【签到翻卡牌】任务，即送10安智币奖励！</p>
+					</li>
+					<div class="clear"></div>
+				</ul>
+				<div class="btns2 clear">
+					<a class="fl" href="/lottery/xy2/yd_lottery_egg.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->">去第2弹砸金蛋</a>
+					<a class="fr" href="/lottery/xy2/yd_index.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->">返回三部曲主菜单</a>
+				</div>
+				<div class="coin_01"></div>
+				<div class="coin_02"></div>
+				<div class="coin_03"></div>
+			</div>
+		</div>
+	</div>
+</section>
+<section>
+	<div class="footer clear">
+		<p>活动最终解释权归安智所有</p>
+	</div>
+</section>
+
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box3"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con">
+				<div class="tip_title">
+					<h6>签到成功</h6>
+				</div>
+				<div class="clear"></div>
+                <p>恭喜签到成功！获得1次翻卡牌的机会！快去翻开它吧，祝您好运连连！</p>
+            </div>
+                    <!--<div class="btns1"><a class="btns" href="javascript:;" onclick="cloBox('#tip-box3')">返 回</a></div>-->
+			<div class="btns1"><a class="btns" href="javascript:;" onclick="location.reload()">返 回</a></div>
+        </div>
+		
+    </div>
+</section>
+
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box2"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con">
+				<div class="tip_title">
+					<h6>我的奖品</h6>
+				</div>
+				<div class="clear"></div>
+                <p>抱歉，您现在暂未获得奖品，快去抓紧时间砸蛋or翻卡吧！</p>
+            </div>
+			<div class="btns1"><a class="btns" href="javascript:;" onclick="cloBox('#tip-box2')">返 回</a></div>
+        </div>
+		
+    </div>
+</section>
+<script type="text/javascript">
+var sid='<!--{$out.sid}-->';
+var aid='<!--{$out.aid}-->';
+
+TouchSlide({ 
+	slideCell:"#focus_01",
+	titCell:".focus_dotted ul", //开启自动分页 autoPage:true ，此时设置 titCell 为导航元素包裹层
+	mainCell:"#focus_slide ul", 
+	autoPage:true, //自动分页
+	pnLoop:"false"
+});
+
+function sign(){
+	$.ajax({
+		url: '/lottery/xy2/yd_sign.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+                    if(data==-1){
+                        alert('活动已结束');
+                    }else if(data==2){
+                        alert('页面已失效,签到失败，请重新进入活动页面');
+                    }else if(data==1){
+                        showOpenBox('#tip-box3')
+                    }
+		}
+	});
+}
+
+function go_myprize(){
+	$.ajax({
+		url: '/lottery/xy2/yd_myprize_page.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+                    if(data==1){
+                        showOpenBox('#tip-box2')
+                    }else if(data==2){
+                        location.href="/lottery/xy2/yd_myprize_page.php?lfrom=2&aid="+aid+"&sid="+sid;
+                    }
+		}
+	});
+}
+
+</script>
+</body>
+</html>

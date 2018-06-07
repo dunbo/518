@@ -1,0 +1,113 @@
+
+<script>
+    function check_package(async) {
+        var package = $.trim($("#package").val());
+        if (package == '') {
+            return 0;
+        }
+        var param = {
+            package : package
+        }
+        var ret = 0;
+        var softname="";
+        $.ajax({
+            url:'__URL__/pub_check_package',
+            type:'POST',
+            async:async,
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data) {
+                ret = data.status;
+                if(ret){
+                    $("#softname").val(data.info);
+                }else{
+                    $("#softname").val('');
+                    alert("包名不存在，请重新填写！");
+                }
+            }
+        });
+        return ret;
+    }
+    
+    function form_action() {
+        var package = $.trim($("#package").val());
+        if (package == '') {
+            alert("包名不能为空！");
+            $("#package")[0].focus();
+            return false;
+        }
+        // 检查包名
+        var exists = check_package(false);
+        if (!exists) {
+            // alert("包名不存在，请重新填写！");
+            $("#package")[0].focus();
+            $('#softname').val('');
+            return false;
+        }
+        $("#form_action").submit();
+    }
+</script>
+
+<div>
+    <br/><h2>编辑</h2><br/>
+    <hr size="1" color="#ffffff" noshade><br/><br/>
+    <form method="post" action="__URL__/edit_package<?php echo $app_from == 2 ? '_operate' : ''; ?>" id="form_action">
+        <input type="hidden" value="{$record.id}" name='id'/>
+        <input type="hidden" value="{$edit_from}" name='edit_from'/>
+        <div>
+            <label><font color="red">* </font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;包名：</label>
+            <input type="text" id="package" name="package" onblur="check_package(true)" value="{$record.package}" style="width:200px" readonly/>
+        </div>
+        <br>
+        <div>
+            <label><font color="red">* </font>&nbsp;&nbsp;&nbsp;&nbsp;软件名称：</label>
+            <input type="text" id="softname" name="softname" onblur="check_package(true)" style="width:200px"  value="{$record.softname}" readonly/>
+        </div>
+        <br>
+        <div>
+            <label><font color="red">* </font>广告主名称：</label>
+            <input type="text" id="ad_client" name="ad_client" style="width:200px" value="{$record.ad_client}"/>
+        </div>
+        <br>
+        <div>
+            <label><font color="red">* </font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;负责人：</label>
+            <input type="text" id="principal" name="principal" style="width:200px" value="{$record.principal}"/>
+        </div>
+        <!-- <br>
+        <div>
+            <label><font color="red">* </font>&nbsp;&nbsp;&nbsp;&nbsp;软件类型：</label>
+           <SELECT name='app_type'>
+                    <option value="1" <?php if ($record["app_type"]==1) print ' selected';?>>应用</option>
+                    <option value="2" <?php if ($record["app_type"]==2) print ' selected';?>>游戏</option>
+            </SELECT>
+        </div> -->
+        <br>
+        <div>
+            <label><font color="red">* </font>&nbsp;&nbsp;&nbsp;&nbsp;合作形式：</label>
+            <SELECT name='type'>
+                <?php foreach($typelist as $key => $val): ?>
+                    <option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+                <?php endforeach; ?>                
+            </SELECT>
+        <br/><br/>
+        <div>
+            <label><font color="red">* </font>&nbsp;&nbsp;&nbsp;&nbsp;是否保护：</label>
+            <SELECT name='is_protect'>
+                <option value='0' <?php if ($record["is_protect"]==0) print ' selected';?>>否</option>           
+                <option value='1' <?php if ($record["is_protect"]==1) print ' selected';?>>是</option>          
+            </SELECT>
+        </div>
+        <div class="clear"></div>
+        <br/><br/>
+        <div class="form_btns_box">
+         <if condition="($edit_from eq 2)">
+            <a href="javascript:void(0)" onclick="form_action()">提交商业库</a>
+         <else/>
+            <a href="javascript:void(0)" onclick="form_action()">提交</a>
+         </if>
+            <a href="javascript:void(0)" onclick="tb_remove()">取消</a>
+        </div>
+        <div class="clear"></div>
+    </form>
+</div>

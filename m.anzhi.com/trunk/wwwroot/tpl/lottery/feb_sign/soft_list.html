@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>加油上上签 红包滚滚来</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/feb_sign/css/common.css"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/soft_list_v1.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+</head>
+<body>
+<section>
+	<div class="main2">
+		<div class="main2_inner">
+			<div class="main2_top"><img src="<!--{$out.static_url}-->/feb_sign/images/round_01.png"/></div>
+			<div class="my_prize">
+				<div class="soft">
+					<div class="title"><h3>活动指定下载游戏</h3></div>
+					<div class="soft_title"><a onclick="change_soft('<!--{$out.aid}-->','<!--{$out.sid}-->',8,2);" href="javascript:;" class="chang_btn">换一换</a></div>
+					<ul class="soft_list clear" id="soft-list">
+					</ul>	
+					<p style="color:#bb8300; padding-top:15px">活动期间，每天每位用户通过在本页面点击【下载】完成活动指定游戏，最多可获取的抽奖机会为1次。</p>	
+				</div>			
+				<div class="btns1"><a href="/lottery/feb_sign/index.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->" class="btns">返 回</a></div>
+			</div>
+			<div class="paper paper8"><img src="<!--{$out.static_url}-->/feb_sign/images/paper_08.png"/></div>
+		</div>
+	</div>
+		
+</section>
+</body>
+</html>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->',open_num=0;
+var aid = '<!--{$out.aid}-->',p=0;
+$(document).ready(function () {
+	setTimeout(function(){
+		//go_from 1排行榜（无软件名称、状态按钮） 2抽奖页面（有软件名称、和状态按钮）
+		var go_from =2;
+		my_soft(aid,sid,8,go_from);
+	}, 500);	
+});
+function go_softinfo_down(softid,my_package,softname,versioncode,size,aid,sid,details){
+	$.ajax({
+		url: '/lottery/year_feedback_download.php',  //supwater  点击详情 点击下载
+		data:"softid="+softid+"&sid="+sid+"&aid="+aid+"&pkgname="+my_package, 
+		type:"post",
+		success:function(data) {		
+			if(details == 1){
+				details =1;
+			}else{
+				details = 0
+			}
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),softid,my_package,softname,versioncode,size,details);
+			setTimeout(function(){
+				get_down_lottery_num(my_package,aid,sid);		
+			}, 5000);				
+		},
+	});
+}
+//下载软件获取抽奖次数
+//同一设备，同一款软件，只有在本页面首次点击下载按钮，并下载完成后，才赠送抽奖机会
+function get_down_lottery_num(pkg,aid,sid){
+	$.ajax({
+		url: '/lottery/feb_sign/get_lottery_num.php',  
+		data:"sid="+sid+"&aid="+aid+"&pkgname="+pkg+"&down=1", 
+		type:"post",
+		success:function(data) {				
+		},
+	});
+}
+</script>

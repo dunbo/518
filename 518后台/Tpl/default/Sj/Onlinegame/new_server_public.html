@@ -1,0 +1,117 @@
+
+<!--等待-->
+<div id="await" style="padding:10px; display:none;z-index:10011;">
+<table border="0" cellpadding="0" cellspacing="0" style="width:100%;height:100%;">
+<tr><td><img src="/Public/images/loading.gif" width="32" height="32" border="0" style="vertical-align:middle;text-align:center;" /></td></tr>
+</table>
+</div>
+<!--下架-->
+<div id="reject_div" style="position:absolute;top:0px;left:0px;width:500px; min-height:200px; _height:440px;border:1px solid #000;background:#fff;display:none;">
+<table border="0" cellpadding="0" cellspacing="0" style="width:100%;height:100%;">
+<span id="Advertisement"></span>
+	<tr height="30">
+		<td style="padding-left:10px;"><span style="font-weight:bold;text-align:center;">驳回原因：</span></td>
+	</tr>
+	<tr height="30">
+		<td style="padding-left:10px;"><textarea onblur="if(value==''){value='请输入原因：'}" cols="75" rows="5" style="color:#999999;width: 475px; height: 96px;" id="reject_reason"  name="reject_reason">请输入原因：</textarea></td>
+	</tr>
+<tr><td>&nbsp;</td></tr>
+	<tr>
+		<td style="text-align:left;padding-left:130px;"><button type="button" onclick="undercarriage_submit()" style="margin-right:10px;">确定</button><button type="button" onclick="popclose('reject_div')">取消</button></td>
+	</tr>
+</table>
+</div>
+<input type="hidden" name="tmp" id="tmp" />
+
+<div id="bgdiv" style="position:absolute;display:none; left:0px; top:0px; width:100%; height:100%; filter:alpha(opacity=40);opacity:0.4; background-color:#000000; z-index:1000;"></div>
+
+<script language="javascript">
+$('#reject_reason').click(function(){
+	if($(this).val()=='请输入原因：') {
+		$(this).val('');
+		$(this).css({'color':'#000'});
+	}
+});
+//驳回
+var last_id = null;
+function undercarriage(id) {
+	if (last_id != id) {
+		$("[name='reject[]']").each(function(){
+			$(this).attr('checked',false);
+		});
+		$("#reject_reason").val("请输入原因：");
+		$('#reject_reason').css({'color':'#000'});
+	}
+	popup('reject_div');
+	last_id = id;
+	$('#tmp').val(id);
+}
+//批量驳回
+function undercarriage_arr() {
+	id_str = Selected_check();
+	if(id_str) undercarriage(id_str);
+}
+//下架提交
+function undercarriage_submit() {
+	var rt = '';
+	if($('#reject_reason').val()!='请输入原因：') {
+		rt += $('#reject_reason').val();
+	}
+	if(!rt) {
+		alert('请选择或填写驳回原因！');
+		return false;
+	}
+	//开启加载层	
+	popup('await');
+	//关闭下架层
+	popclose('reject_div');
+	$.ajax({
+		url: '__URL__/reject_new_server/id/'+$('#tmp').val(),
+		data: 'msg='+rt,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				location.reload();//加载页面
+				return false;
+			} else if(ret['code']==1) {	//成功
+				//关闭加载层
+				popclose('await');
+				//变灰不可点击处理
+				gray_processing(ret['msg']);
+			}
+		}
+	});
+}	
+</script>
+
+<script language="javascript">
+function popup(id) {
+	var ids=['reg','login','bgdiv'];
+	for(var i in ids) {
+		popclose(ids[i]);
+	}
+
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	if($(document).scrollTop()<=0){
+		$("#"+id).css("top","20px");
+	}
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+}
+//点击灰色区域关闭层
+$('#bgdiv').click(function(){
+	popclose('reject_div');
+	var id_str = $('#tmp').val();
+	remove_color(id_str);
+});
+function popclose(id) {
+	$("#"+id).css({display:"none"});
+	$("#bgdiv").css({display:"none"});
+}
+</script>
+<!--下架结束-->

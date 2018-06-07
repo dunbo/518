@@ -1,0 +1,129 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+function del(id) {
+    if (confirm("删除不可恢复！确定要删除此条记录?")) {
+        var param = {
+            id: id
+        };
+        $.ajax({
+            url: '__URL__/del_keywords_shield',
+            type: 'POST',
+            data: param,
+            dataType: 'json',
+            success: function(data) {
+                if (data == 1)
+                {
+                    location.reload();
+                }
+            }
+        });
+    }
+}
+
+function save()
+{
+    id = $("#old_id").val();
+    pbword = $("#pbword").val();
+    begin_tm = $("#begin_tm").val();
+    end_tm = $("#end_tm").val();
+
+    if(pbword.trim().length==0)
+    {
+        alert('屏蔽热词不能为空');
+        return;
+    }
+
+    if(begin_tm.trim().length==0)
+    {
+        alert('屏蔽起始时间不能为空');
+        return;
+    }
+
+    if(end_tm.trim().length==0)
+    {
+        alert('屏蔽起始时间不能为空');
+        return;
+    }
+
+    if(begin_tm>end_tm)
+    {
+        alert('开始时间不能大于结束时间')
+        return;
+    }
+
+    var param = {
+        id : id,
+        pbword : pbword,
+        begin_tm: begin_tm,
+        end_tm : end_tm
+    };
+    $.ajax({
+        url:'__URL__/searchkeywords_list_shield',
+        type:'POST',
+        data:param,
+        secureuri:false,
+        dataType:'json',
+        success:function(obj){
+            if(obj==1)
+            {
+                //location.reload();
+                location.href = "/index.php/Search/Advertisement/searchkeywords_list_shield";
+            }else if(obj==2)
+            {
+                alert('修改成功');
+                location.href = "/index.php/Search/Advertisement/searchkeywords_list_shield";
+            }else if(obj==3)
+            {
+                alert('开始时间不能大于等于结束时间');
+            }
+            /*else if(obj==4)
+            {
+                alert('该屏蔽热词已存在');
+            }*/
+        }
+    });
+}
+</script>
+<br />
+<div style="padding:20px;">
+    <span>屏蔽热词：<input type="text" id="pbword" value="{$word}" ><font color="red">*</font></span><br /><br>
+    <span>屏蔽时间：<input id="begin_tm"  style="cursor: hand; width: 100px;"
+				 value="{$begin_tm}" size="10" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd'})" />---<input id="end_tm"  style="cursor: hand; width: 100px;"
+				 value="{$end_tm}" size="10" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd'})" /><font color="red">*</font></span><br />
+</div>
+<div style="padding:20px;">
+&nbsp;&nbsp;<a href="#" onclick="save()" class="search_btn" style="float:left; margin:0 10px 0 6px; display:inline"><if condition="($id gt 0)">修改</if><if condition="($id eq '')">新增</if></a><a class="search_btn" href="__URL__/searchkeywords_list_hot" style="float:left">返回</a>
+<div class="clear"></div>
+<form action="__URL__/update_searchkeywords" method="post">
+<table width="99%" cellpadding="0" cellspacing="0" border="1" class="table_list">
+	<thead>
+		<tr>
+			<!--<th>序号</th>-->
+			<th>屏蔽热词</th>
+			<th>开始时间</th>
+			<th>结束时间</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+                                            <volist name="list" id="list">
+                                                <tr>
+                                                    <input type="hidden" id ="old_id" value="{$id}">
+                                                    <!--<td height="20" align="center"> {$list.id}</td>-->
+                                                    <td height="20" align="center"> {$list.word}</td>
+                                                    <td height="20" align="center"> {$list.begin_tm|date="Y-m-d",###}</td>
+                                                    <td height="20" align="center"> {$list.end_tm|date="Y-m-d",###}</td>
+                                                    <td height="20" align="center"><a href="__URL__/searchkeywords_list_shield/id/{$list.id}" class="blue">编辑</a> | <a href="#{$list.id}" onclick="del({$list.id})" class="blue">删除</a></td>
+                                                </tr>
+                                            </volist>
+	</tbody>
+</table>
+</form>
+</div>
+</body>
+</html>

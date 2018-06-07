@@ -1,0 +1,140 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<body>
+    <div class="search_box">
+        <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+            <tr>
+                <td>
+                    <label>请选择要操作的产品：</label>
+                    <select name='pid' id="productlist" onChange="change_product(this)">
+                        <!-- <option value="0">选择产品</option> -->
+                        <volist name="product_list" id="product" key="k">
+                        <option value="{$product.pid}"  <if condition="($product.pid eq $pid)"> selected = "selected" </if> >{$product.pname}</option>
+                        </volist>
+                    </select>
+                </td>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td><a class="search_btn thickbox" href="__URL__/add_content?width=700&height=500&pid={$pid}">添加</a></td>
+                <td><a class="search_btn" href="__URL__/index?overdue=<if condition='$overdue eq 1'>-1<else/>1</if>&pid={$pid}"><if condition='$overdue eq 1'>未过期<else/>已过期</if></a></td>
+				<td style="position:relative;"> 
+				<img src="/Public/images/appfirst_btn_02.png" onMouseOver="appear_pic('pic_appear')" onMouseOut="disappear_pic('pic_appear')">
+				<div id="pic_appear" class="ad_pic">
+				 <img src="/Public/images/animate_ads.jpg">
+				 </div>
+				</td>
+            </tr>
+        </table>
+    </div>
+	<script type="text/javascript">
+ function appear_pic(id)
+ {
+   var pic=document.getElementById(id);
+    pic.style.display="block";
+ }
+ function disappear_pic(id)
+ {
+   var pic=document.getElementById(id);
+    pic.style.display="none";
+ }
+ function change_product(id){
+        var product_obj = document.getElementById('productlist');
+        var selectedindex = product_obj.selectedIndex;
+        var param_pid = product_obj.options[selectedindex].value ? 'pid='+product_obj.options[selectedindex].value : '';
+        var href = '__URL__/index?'+param_pid+'&overdue={$overdue}';
+        location.href=href;
+        
+ }
+</script>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <!--<th width="4%">ID</th>-->
+                    <th width="4%">样式</th>
+                    <th width="4%">广告名称</th>
+                    <th width="8%">展示位置</th>
+                    <th width="4%">类型</th>
+                    <th width="8%">图片</th>
+					<th width="8%">高分图片/图片6.4.5</th>
+                    <th width="8%">导向页面</th>
+					<th width="6%">精准投放</th>
+                    <th width="10%">开始时间</th>
+                    <th width="10%">结束时间</th>
+					<th width="8%">合作形式</th>
+                    <th width="10%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                   <!-- <td>{$list.id}</td>-->
+                    <td>
+                        <switch name="list.image_type">
+                            <case value="1">动画</case>
+                            <case value="2">图片</case>
+							<case value="3">居中弹窗</case>
+							<case value="4">手机清理</case>
+                            <case value="5">桌面ICON</case>
+                            <case value="6">外投专用</case>
+                        </switch>
+                    </td>
+                    <td>{$list.ad_name}</td>
+                    <td>
+                        <?php if($list['image_type']!=6){ ?>
+                        <a href="__URL__/show_all_content?id={$list.id}" class="thickbox blue">{$list.show_place_name}<a>
+                        <?php } ?>
+                    </td>
+                    <td>
+                        <switch name="list.content_type">
+                            <case value="1">软件</case>
+                            <case value="2">活动</case>
+                            <case value="3">专题</case>
+                            <case value="4">页面</case>
+                            <case value="5">网页</case>
+							<case value="6">礼包</case>
+							<case value="7">攻略</case>
+                        </switch>
+                    </td>
+                    <td>
+						<?php if($list['image_url']) { ?>
+                        <a href='{$apkurl}{$list.image_url|default='&nbsp;'}' target="_blank"><img height="60" width="110" src="{$apkurl}{$list.image_url|default='&nbsp;'}"/></a>
+						<?php } ?>
+                    </td>
+					<td>
+						<?php if($list['high_image_url']) { ?>
+                        <a href='{$apkurl}{$list.high_image_url|default='&nbsp;'}' target="_blank"><img height="60" width="110" src="{$apkurl}{$list.high_image_url|default='&nbsp;'}"/></a>
+						<?php } ?>
+                    </td>
+                    <td><if condition='$list.content_type eq 1'>{$list.package}<elseif condition='$list.content_type eq 2'/>{$list.activity_name}<elseif condition='$list.content_type eq 3'/>{$list.feature_name}<elseif condition='$list.content_type eq 4'/>{$list.page_name}<elseif condition='$list.content_type eq 5'/>{$list.website}
+					<elseif condition='$list.content_type eq 6'/>{$list.gift_id}
+					<elseif condition='$list.content_type eq 7'/>{$list.strategy_id}</if></td>
+                    <td>
+                        <a class="thickbox" href="__URL__/jztf_content_show?id={$list.id}">查看</a>
+                    </td>
+                    <td>{$list.start_at|date="Y-m-d H:i:s",###}</td>
+                    <td>{$list.end_at|date="Y-m-d H:i:s",###}</td>
+					<TD><?php if ($list['co_type'] !=0) { echo $list['co_types'] ; }else{ echo "-";} ?></TD>
+                    <td>
+                        <if condition='$overdue eq 1'><a href="__URL__/edit_content?id={$list.id}&width=700&height=500&life=1" class="thickbox search_btn">复制上线</a><!--过期数据不可以编辑和删除-->
+                        <else/>
+                            <a href="__URL__/edit_content?id={$list.id}&width=700&height=500" class="thickbox blue">编辑</a>
+                            <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                            <a href="__URL__/delete_content?id={$list.id}" class="blue" onClick="return confirm('确定要删除此记录吗？');">删除</a>
+                        </if>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>

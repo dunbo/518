@@ -1,0 +1,85 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script>
+
+function batch_edit(){
+
+	var start_time=$('#start_time').val();
+	var end_time=$('#end_time').val();
+	var idlist=$('#idlist').val();
+
+	$.post(
+		"__URL__/edit_content",
+		{idlist:idlist, batch_edit_do:1,start_time:start_time,end_time:end_time},
+		function(result){
+			
+			if (result.code == 1){
+				alert('操作成功');
+				window.location.reload(true);
+			}else{
+				
+				$('#success_num').html('成功修改软件:'+result.success_num+'个');
+				$('#error_num').html('修改失败软件:<font style="color:red;">'+result.error_num+'</font>个');
+
+				// $('#error_num').html('修改失败软件:'+result.success_num+'个');
+				// var error_str="失败包名："+ "<br>"+result.error;
+				var error_str=result.error;
+				
+				$('#error').html(error_str);
+				$('#tb').hide();
+				$('#error_show').show();
+			}
+		},
+		'json'
+	);
+}
+
+</script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+	<table id="tb" class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+		<tr class="sub_tr">
+			<input type="hidden" id='idlist' value="<?php echo $idlist;?>" />
+			<td style="width:100px;">共选择软件：</td>
+			<td>
+	            <span><?php echo $num;?></span>
+	        </td>
+		</tr>
+		<tr class="sub_tr">
+			<td style="width:100px;">开始时间：</td>
+			<td>
+	            <input id="start_time" name="start_time" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"/>
+	        </td>
+		</tr>
+		<tr class="sub_tr">
+			<td style="width:100px;">结束时间：</td>
+			<td>
+	            <input id="end_time" name="end_time" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})"/>
+	        </td>
+		</tr>
+		<tr class="sub_tr">
+			<td colspan="2"> 
+			<input type='button' value="提交" onclick="batch_edit()" />
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;"></td>
+		</tr>
+	</table>
+	<div id="error_show" style="display:none;border:1px solid #ccc;padding:15px 30px;width:400px;margin:60px;">
+		<h2 style="margin-left:180px;font-size:18px;">提示</h2>
+		<span id="success_num" ></span><br><br>
+		<span id="error_num"  ></span><br><br>
+		<span>失败包名：</span><br><br>
+		<span id="error" >
+			
+		</span>
+		<input type='button' value="确定" onclick="javascript:window.location.reload(true);" style="width:100px;display:block;margin-left:150px;margin-top:30px;"/>
+	</div>
+</FORM>	

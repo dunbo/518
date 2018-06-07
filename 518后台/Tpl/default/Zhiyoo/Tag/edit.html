@@ -1,0 +1,142 @@
+<style>
+table{
+    border: 0px;
+}
+td{
+    border: 0px solid #000;
+}
+</style>
+<body>
+编辑标签
+<form method='post' action="__URL__/doedit/action/tag"  enctype="multipart/form-data">
+<input type="hidden" name="tagid" id="tagid" value="{$ntag.tagid}" />
+
+<table width="80%" border="1" align="center">
+    <tr>
+      <td width="30%" height="25" align="right">重命名</td>
+      <td height="25" align="left"><label>
+        <input type="text" name="name" id="name" value="{$ntag.tagname}" />
+      </label></td>
+    </tr>
+    <!--tr>
+      <td width="30%" height="25" align="right">移动至</td>
+      <td height="25" align="left"><label>
+        <select name="group" id="group" >
+			<volist name="list" id="group">
+			<option value="{$group.groupid}" <?php if($ntag['group'] == $group['groupid']) echo 'selected="selected"'; ?>   >{$group.groupname}</option>
+			</volist>
+		</select>
+      </label></td>
+    </tr-->
+    <tr>
+      <td width="30%" height="25" align="right"><label for="target">移动该标签下全部内容至</label></td>
+	  <td height="25" align="left">
+	  <?php if ($ntag['parentid'] === '0' && empty($ischild)){ ?>
+        <select name="tag" id="tag" >
+			<option value="{$ntag.tagid}" selected="selected">不移动标签内容</option>
+			<volist name="nosectags" id="tags">
+			<?php if($ntag['tagid'] != $tags['tagid']) : ?><option value="{$tags.tagid}" >{$tags.tagname}</option><?php endif; ?>
+			</volist>
+		</select>
+	  <?php }elseif(empty($ischild)){ ?>
+        <select name="tag" id="tag" >
+			<option value="{$ntag.tagid}" selected="selected">不移动标签内容</option>
+			<volist name="ngroup" id="tags">
+			<?php if($ntag['tagid'] != $tags['tagid']) : ?><option value="{$tags.tagid}" >{$tags.tagname}</option><?php endif; ?>
+			</volist>
+		</select>
+	  <?php }else{ ?>
+			<span style="color:red">不符合规则，不能移动此标签下内容</span>
+	  <?php } ?>
+      </td>
+    </tr>
+	<tr>
+      <td align="right">图标：</td>
+      <td height="25" align="left"><img id="viewImg" src="{$ntag.img_path}" style="max-height:100px;max-width:100px;"/>
+      <?php if($ntag['img_path']): ?><a href="__URL__/doedit/action/delimg/tagid/{$ntag.tagid}/" onclick="return delimg({$ntag.tagid});">删除</a><?php else: ?><a href="javascript:;" onclick="cleanimg();">删除</a><?php endif; ?></td>
+    </tr>
+	<tr>
+      <td colspan="2" align="center">
+      	<?php if ($ntag['group'] == '1' && $ntag['parentid'] == '0' ){ ?>
+      	大小165*122(.png)
+      	<?php }elseif($ntag['group'] == '57' && $ntag['parentid'] == '0' ){ ?>
+      	 大小165*122(.png)
+      	<?php }elseif($ntag['group'] == '1' && $ntag['parentid'] != '0'){ ?>
+      	 大小64*124
+      	<?php }else{ ?>
+      	大小 25*25 
+      	<?php } ?>
+      	<input id="viewFiles" name="icon" type="file" onchange="show()"/></td>
+    </tr>
+	<tr>
+      <td colspan="2" align="center"><input type="submit" class="search_btn" style="display:inline-block;" name="submit" onclick="return check()" id="submit" value="提交" /> <input type="button" class="search_btn" style="display:inline-block;" onclick="tb_remove();" value="取消" /></td>
+    </tr>
+</table>
+</form>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('#group').click(function(){
+		if($('#group').val() == ''){
+			$('#tag').html('<option value="">请先选择标签分类</option>');
+		}
+		<volist name="list" id="group">
+			if($('#group').val() == '{$group.groupid}'){
+			$('#tag').html('<option value="">请选择标签</option><volist name="group.tag" id="tag">
+			<option value="{$tag.tagid}">{$tag.tagname}</option>
+			</volist>');
+			}
+		</volist>
+	});
+});
+function check(){
+var check =  document.getElementById("name").value;
+if($.trim(check) == ''){
+	alert('名称不能为空');
+	return false;
+}
+}
+function cleanimg(){
+    var viewFiles = document.getElementById("viewFiles");
+    var viewImg = document.getElementById("viewImg");
+    viewFiles.value = '';
+    viewImg.src = '';
+}
+function delimg(tagid){
+    if(!confirm('确实要删除图片吗?')) return false;
+    $.getJSON("__URL__/doedit/action/delimg/tagid/" + tagid + '/',function(e){
+        if(e.su){
+            var viewImg = document.getElementById("viewImg");
+            viewImg.src='';
+            alert('删除成功');
+        }else{
+            alert('删除失败');
+        }
+    })
+    return false;
+}
+</script>
+
+<!--[if lt IE 9]>
+<script type="text/javascript">
+function show(){
+	var viewFiles = document.getElementById('viewFiles').value;
+	document.getElementById('viewImg').src = viewFiles;
+}
+
+</script>
+<![endif]-->
+<!--[if !IE]><!-->
+<script type="text/javascript">
+    var viewFiles = document.getElementById("viewFiles");
+    var viewImg = document.getElementById("viewImg");
+    function show () {
+		var file = viewFiles.files[0];
+        var reader = new FileReader();
+        reader.onload = function( evt ){
+            viewImg.src = evt.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+
+</script>
+<!--<![endif]-->

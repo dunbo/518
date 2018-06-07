@@ -1,0 +1,145 @@
+<include file="../Public/header"  />
+
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+
+<center>
+	<table border="0"  cellpadding="0" cellspacing="0">
+		<form action="__URL__/addsoft_do" method="get">
+		软件包名<input type="test" name="soft_package">
+		添加至：
+		<select name="soft_type_add">
+				<option <?php if($soft_type_show == "") echo "selected"?> >请选择...</option>
+				<option value="top_new" <?php if($soft_type_show == "top_new") echo "selected";?> >最新</option>
+				<option value="top_hot" <?php if($soft_type_show == "top_hot") echo "selected";?> >最热</option>
+				<option value="top_1d" <?php if($soft_type_show == "top_1d") echo "selected";?> >日排行</option>
+				<option value="top_7d" <?php if($soft_type_show == "top_7d") echo "selected";?> >周排行</option>
+				<option value="top_30d" <?php if($soft_type_show == "top_30d") echo "selected";?> >月排行</option>
+			<volist name="soft_page_category" id="infoqe">
+				
+				<option value="top_{$infoqe.category_id}_new" <?php if($soft_type_add == "top_".$infoqe['category']."_new") echo "selected";?> >{$infoqe.name}-最新</option>
+				<option value="top_{$infoqe.category_id}_hot" <?php if($soft_type_hot == "top_".$infoqe['category']."_hot") echo "selected";?> >{$infoqe.name}-最热</option>
+			</volist>
+		 </select>
+		位置：<input type="text" name="pos" id="pos"/>
+			
+			<input type="hidden" name="package" value="{$package}">
+   开始时间(*)：<input id="begintime" name="begintime"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			onclick="return showCalendar('begintime', 'y-m-d');"
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px">
+    结束时间(*)：<input id="endtime" name="endtime"
+			style="border: 0px none black; width: 100px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			onclick="return showCalendar('endtime', 'y-m-d');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		<input type="submit" value="添加">
+        </td>
+		</form>
+	
+</tr>
+<tr>
+<td>搜索软件：</td>
+<td>
+		<form action="__URL__/searchsoft" method="get">
+		
+        软件ID：<input type="text" name="search_id" id="search_id" value="{$search_id}"/>
+        软件包名：<input type="text" name="search_pkg" id="search_pkg" value="{$search_pkg}"/>
+
+		<input type="submit" value="搜索" />
+		
+		</form>
+</td>
+</tr>
+		</table>
+	<form action="__URL__/softlist" method="get">
+		当前显示 <select name="soft_type_show" >
+							<option <?php  echo 'value = "all"';  if($soft_type_show == "" || $soft_type_show == "all"){ echo "selected"; } ?> >全部</option>
+							<option value="top_new" <?php if($soft_type_show == "top_new") echo "selected"; ?> >最新</option>
+							<option value="top_hot" <?php if($soft_type_show == "top_hot") echo "selected"; ?> >最热</option>
+							<option value="top_1d" <?php if($soft_type_show == "top_1d") echo "selected"; ?> >日排行</option>
+							<option value="top_7d" <?php if($soft_type_show == "top_7d") echo "selected"; ?> >周排行</option>
+							<option value="top_30d" <?php if($soft_type_show == "top_30d") echo "selected"; ?> >月排行</option>
+						<volist name="soft_page_category" id="infosb">
+							
+							<option value="top_{$infosb.category_id}_new" <?php if($soft_type_show == "top_".$infosb['category_id']."_new") echo "selected";?> >{$infosb.name}-最新</option>
+							<option value="top_{$infosb.category_id}_hot" <?php if($soft_type_show == "top_".$infosb['category_id']."_hot") echo "selected";?> >{$infosb.name}-最热</option>
+						</volist>
+				  </select>
+				  <select name="soft_time">
+					<option value="all" <?php if($soft_time == "") echo "selected"; ?> >全部</option>
+					<option value="online" <?php if($soft_time == "online") echo "selected"; ?> >正在推广</option>
+					<option value="outline" <?php if($soft_time == "outline") echo "selected"; ?> >已下线</option>
+					<option value="furline" <?php if($soft_time == "furline") echo "selected"; ?> >未开始</option>
+				  </select>
+				  <input type="submit" id="submit" name="sbumit" value="确定" />
+	</form>
+	
+		<a href="/index.php/Sj/Softpageplace/setlist/show_go/<?php echo $soft_type_show ; ?>?moadl=true" class="thickbox" <?php if($show_go != 1){ echo "style='display:none;'";}?>>榜单设置</a>
+	
+	
+		软件列表：
+		<table border="1"  cellpadding="0" cellspacing="0">
+			<tr>
+				<td>软件ID</td>
+				<td>软件名/软件包名</td>
+				<td>所属页面</td>
+				<td>开始时间</td>
+				<td>结束时间</td>
+				<td>状态</td>
+				<td>位置</td>
+				<td>操作</td>
+			</tr>
+			<tr>
+			
+				<volist name="soft_list" id="infovo">
+					<tr>
+						<td>{$infovo.id}</td>
+						<td>{$infovo.soft_name}({$infovo.package})</td>
+						<td>{$infovo.type_name}</td>
+						<td><?php echo date('Y-m-d',$infovo['start_tm']);?></td>
+						<td><?php echo date('Y-m-d',$infovo['stop_tm']);?></td>
+						<td>
+						<?php if(strtotime(date('Y-m-d',$infovo['start_tm'])) > strtotime(date('Y-m-d',time()))){ ?>
+						<span style="color:green;">
+						<h3>未开始</h3>
+						</span>
+						<?php }elseif(strtotime(date('Y-m-d',$infovo['stop_tm'])) < strtotime(date('Y-m-d',time()))){ ?>
+						<span style="color:red;">
+						<h3>已下线</h3>
+						</span>
+						<?php }elseif(strtotime(date('Y-m-d',$infovo['start_tm'])) <= strtotime(date('Y-m-d',time())) && strtotime(date('Y-m-d',$infovo['stop_tm'])) >= strtotime(date('Y-m-d',time()))){ ?>
+						<span>
+						<h3>在线</h3>						
+						</span>
+						<?php } ?>
+						
+						</td>
+						<td><form action="__URL__/alterpos" method="get">
+						<input type="text" id="pos" name="pos" value="{$infovo.pos}"  />
+						<input type="hidden" name="softid" id="softid" value="{$infovo.id}" />
+						<input type="hidden" name="curpos" id="curpos" value="{$infovo.pos}" />
+						<input type="hidden" name="start_tm" id="start_tm" value="{$infovo.start_tm}" />
+						<input type="hidden" name="stop_tm" id="stop_tm" value="{$infovo.stop_tm}" />
+						<input type="hidden" name="log" id="log" value="{$infovo.log}">
+						<input type="hidden" name="soft_type" id="soft_type" value="{$infovo.soft_type}" />
+						<input type="submit" value="修改" />
+						</form>
+						</td>
+						<td><a href="__URL__/deletesoft/id/{$infovo.id}/soft_type/{$infovo.soft_type}/pos/{$infovo.pos}" onclick="return checkit();">删除</a></td>
+					</tr>
+				</volist>
+			
+			</tr>
+		</table>
+		{$page}
+</center>

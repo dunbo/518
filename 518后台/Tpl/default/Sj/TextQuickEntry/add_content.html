@@ -1,0 +1,587 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload_anzhi.js?1"></script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+	var entrance_type = "{$entrance_type}";
+    $(function() {
+        // 生成推荐链接并赋值给a元素，第三个参数不配置，使用默认分配的名称
+		var  function_from="textquick";
+        href = generate_content_type_href('content_type_div', '2,3,4,5,6,7,10','',function_from);
+        pid = $("#pid").val();
+        $("#content_type_a").attr("href", href+'&pid='+pid);
+		//V6.2选择图文样式 展示文字说明和6.2图片 2016-1-21现在都显示
+		/*if(entrance_type==2)
+		{
+			$("#pic_62_tr").css("display","");
+			$("#words_des_tr").css("display","");
+		}*/
+    });
+    
+    function checkLen(obj, maxChars, hint_id) {
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+        $("#" + hint_id).html(obj.value.length + "/" + maxChars);
+    };
+    //计算公告按钮的字数的函数 不能超过8个汉字
+	function strlen(str){
+		var len = 0;
+		for (var i=0; i<str.length; i++) { 
+		 var c = str.charCodeAt(i); 
+		//单字节加1 
+		 if ((c >= 0x0001 && c <= 0x007e) || (0xff60<=c && c<=0xff9f)) { 
+		   len++; 
+		 } 
+		 else { 
+		  len+=2;
+		 } 
+		} 
+		return len;
+	}
+	
+    function checkPost() {
+        var title = $("#add_content_form #title").val();
+		var entrance_count = $("#add_content_form #pid").attr('en_count');
+        if (!title) {
+            alert("标题不能为空！");
+            return false;
+        }
+		if(entrance_type==1)
+		{
+			var image_url = $("#add_content_form #image_url").val();
+			if (!image_url) {
+				alert("图片不能为空！");
+				return false;
+			}
+		}
+		if(entrance_type==1||entrance_type==2)
+		{
+			var image_url_6 = $("#add_content_form #image_url_6").val();
+			if (!image_url_6) {
+				alert("6.0图片不能为空！");
+				return false;
+			}
+			if(entrance_type==2)
+			{
+				var image_url_62 = $("#add_content_form #image_url_62").val();
+				if (!image_url_62) {
+					alert("6.2图片不能为空！");
+					return false;
+				}
+				var words_des = $("#add_content_form #words_des").val();
+				if(words_des=="")
+				{
+					alert("文字说明必填");
+					return false;
+				}
+			}
+		}
+		if(entrance_type==3||entrance_type==4) //V6.4图片必填
+		{
+			var image_url_64 = $("#add_content_form #image_url_64").val();
+			if (!image_url_64) {
+				alert("6.4图片不能为空！");
+				return false;
+			}
+		}
+        var rank = $("#add_content_form #rank").val();
+        if (!rank) {
+            alert("排序不能为空！");
+            return false;
+        }
+        var start_at = $("#add_content_form #start_at").val();
+        if (!start_at) {
+            alert("开始时间不能为空！");
+            return false;
+        }
+        var end_at = $("#add_content_form #end_at").val();
+        if (!end_at) {
+            alert("结束时间不能为空！");
+            return false;
+        }
+        if (start_at > end_at) {
+            alert("开始时间不能大于结束时间！");
+            return false;
+        }
+		//图文样式下文字说明 在快捷入口是6个或者入口是7且排序为1、2、3的情况下都是必填项，其余是非必填
+		// 文字说明 最后修改为必填
+		/*if(entrance_type==2)
+		{
+			var image_url_62 = $("#add_content_form #image_url_62").val();
+			if (!image_url_62) {
+				alert("6.2图片不能为空！");
+				return false;
+			}
+			var words_des = $("#add_content_form #words_des").val();
+			if(words_des=="")
+			{
+				alert("文字说明必填");
+				return false;
+			}
+			/*if(entrance_count ==6)
+			{
+				if(words_des=="")
+				{
+					alert("文字说明必填");
+					return false;
+				}
+			}
+			else if(entrance_count ==7)
+			{
+				if(rank == 1 ||rank == 2||rank == 3)
+				{
+					if(words_des=="")
+					{
+						alert("文字说明必填");
+						return false;
+					}
+				}
+			}*/
+		//}	
+		//角标以及角标时间
+		var show_corner = $("#add_content_form input[name='show_corner']:checked").val();
+		var corner_start_tm = $("#add_content_form #corner_start_at").val();
+		var corner_end_tm = $("#add_content_form #corner_end_at").val()
+		if(show_corner ==1||show_corner==2)
+		{
+			if(!corner_start_tm)
+			{
+				alert("角标开始时间不能为空！");
+				return false;
+			}
+			if(!corner_end_tm)
+			{
+				alert("角标结束时间不能为空！");
+				return false;
+			}
+		}
+		var type = $("input[name='cover_user_type']:checked").val();
+		var a_start = $("#activation_date_start").val();
+		var a_end = $("#activation_date_end").val();
+		if(type==2&&!a_start&&!a_end){
+			alert('激活时间需要填写开始时间及结束时间');
+			return false;
+		}
+		if((a_start&&!a_end)||(!a_start&&a_end)){
+			alert('激活时间需要填写开始时间及结束时间');
+			return false;
+		}
+		//市场版本必填
+		var ver_type = $("#add_content_form input[name='type']:checked").val();
+		if(ver_type==1)
+		{
+			var ver = $("#add_content_form #ver_big_input").val();
+		}
+		else if(ver_type==2)
+		{
+			var ver = $("#add_content_form #ver_small_input").val();
+		}
+		else
+		{
+			var ver = $("#add_content_form #force_update_version").val();
+		}
+		/*if(!ver)
+		{
+			alert("市场版本不能为空!");
+			return false;
+		}*/
+		if(ver)
+		{
+			/*if(entrance_type==1)
+			{
+				if(ver_type==1)
+				{
+					alert("该版本不支持该快捷入口");
+					return false;
+				}
+				else if(ver_type==2)
+				{
+					if(ver>6110)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+				else
+				{
+					var ver_arr = ver.split(",");
+					var max_ver=Math.max.apply(null,ver_arr);
+					if(max_ver>6110)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+			}*/
+			if(entrance_type==2)
+			{
+				if(ver_type==1)
+				{
+					if(ver<6200)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+				else if(ver_type==2)
+				{
+					alert("该版本不支持该快捷入口");
+					return false;
+				}
+				else
+				{
+					if (ver.substr(0,1)==',')
+						ver=ver.substr(1);
+					if (ver.substr(-1,1)==',')
+						ver=ver.substr(0,ver.length-1);
+					var ver_arr = ver.split(",");
+					var min_ver=Math.min.apply(null,ver_arr);
+					if(min_ver<6200)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+			}
+			else if(entrance_type==3)
+			{
+				if(ver_type==1)
+				{
+					if(ver<6400)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+				else if(ver_type==2)
+				{
+					alert("该版本不支持该快捷入口");
+					return false;
+				}
+				else
+				{
+					if (ver.substr(0,1)==',')
+						ver=ver.substr(1);
+					if (ver.substr(-1,1)==',')
+						ver=ver.substr(0,ver.length-1);
+					var ver_arr = ver.split(",");
+					var min_ver=Math.min.apply(null,ver_arr);
+					if(min_ver<6400)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+			}
+		}
+		return checkRcontent("#add_content_form");
+    }
+	function show_corner_time(obj)
+	{
+		var val = $(obj).val();
+		if(val ==1 || val ==2)
+		{
+			$("#corner_show_tr").css("display","");
+		}
+		else
+		{
+			$("#corner_show_tr").css("display","none");
+		}
+	}
+	function show_red_point()
+	{
+		//角标显示红点，当时专题（专题详情页）和页面的部分页面（专题列表、发现专题、活动列表、首发列表、礼包列表、开测列表、新服列表、汉化列表、新锐游戏列表）显示红点角标 
+		var content_type =$("#content_type").val();
+		if(content_type==3)
+		{
+			var page_type = $("#feature_id").val();
+		}
+		else if(content_type==4)
+		{
+			var page_type =$("#page_type").val();
+		}
+		if((content_type==3)||(content_type==4&&(page_type=="fixed_open_test"||page_type=="otherfixed_gamegift_list"||page_type=="otherfixed_gamenewserver_list"||page_type=="otherfixed_new_game"||page_type=="otherfixed_activity_list"||page_type=="otherfixed_debut_list"||page_type=="fixed_discovery_chinesize"||page_type=="fixed_discovery_special"||page_type.indexOf("otherfixed_featurelist_")==0)))
+		{
+			$("#show_red").css("display","");
+		}	
+		else
+		{
+			$("#show_red").css("display","none");
+		}
+	}
+
+	function change_cover_user(){
+		var type = $("input[name='cover_user_type']:checked").val();
+		if(type == 2){
+			$('.direct_user').css('display','');
+		}else{
+			$('.direct_user').css('display','none');
+		}
+	}
+
+	function count(type) {
+		if(type=="fugai")
+		{
+			$.ajaxFileUpload({
+				url:'__URL__/pub_csv_count',
+				type:'POST',
+				fileElementId:'upload_file',
+				dataType: 'json',
+				secureuri:false,
+				success:function(data)
+				{
+					if(data.error1==-1)
+					{
+						alert("请选择导入的CSV文件!");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("dl_count").value="";
+						return false;
+					}
+					else if(data.error2==-2)
+					{
+						alert("请上传CSV格式文件！");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("dl_count").value="";
+						return false;
+					}
+					else if(data.error2==-3)
+					{
+						alert("CSV文件格式不正确,请您参考下载模板！");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("dl_count").value="";
+						return false;
+					}else if(data.error2==-4) {
+						alert("CSV文件数据不对,请您参考下载模板！");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("dl_count").value="";
+					}else{
+						document.getElementById("csv_url").value=data.csv_url;
+						document.getElementById("csv_count").value=data.out_count;
+						document.getElementById("dl_count").value="有效用户数"+data.out_count;
+					}
+				}
+			});
+		}
+	}
+</script>
+
+<form id="add_content_form" method="POST" action="__URL__/add_content" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr">
+        <td><font color="red">*</font>标题</td>
+        <td>
+            <input type="text" name="title" id="title" onBlur="checkLen(this, {$title_limit_length}, 'title_hint')" />
+            <input type="hidden" en_count="{$entrance_count}" id="pid" value="{.pid}">
+        </td>
+        <td><span id="title_hint">0/{$title_limit_length}</span></td>
+    </tr>
+	<?php if($entrance_type==1||$entrance_type==2) { ?>
+		<?php if($entrance_type==1) { ?>
+		<tr class="sub_tr">
+			<td><font color="red">*</font>图片</td>
+			<td>
+				<input type="file" name="image_url" id="image_url"/>
+			</td>
+			<td>限制上传{$image_width}*{$image_height}的JPG/PNG图片</td>
+		</tr>
+		<?php } ?>
+		<tr class="sub_tr">
+			<td><font color="red">*</font>6.0图片</td>
+			<td>
+				<input type="file" name="image_url_6" id="image_url_6"/>
+			</td>
+			<td>限制上传{$image_width_6}*{$image_height_6}的JPG/PNG图片</td>
+		</tr>
+		<tr class="sub_tr" id="gif_tr" >
+			<td>6.0样式GIF</td>
+			<td>
+				<input type="file" name="gif_image" id="gif_image"/>
+			</td>
+			<td>限制上传{$gif_width}*{$gif_height}的gif图片</td>
+		</tr>
+		<?php if($entrance_type==2) { ?>
+		<tr class="sub_tr" id="pic_62_tr" >
+        <td><font color="red">*</font>6.2图片</td>
+        <td>
+            <input type="file" name="image_url_62" id="image_url_62"/>
+        </td>
+        <td>限制上传{$image_width_62}*{$image_height_62}的JPG/PNG图片</td>
+		</tr>
+		<tr class="sub_tr" id="gif_tr_62" >
+			<td>6.2样式GIF</td>
+			<td>
+				<input type="file" name="gif_image_62" id="gif_image_62"/>
+			</td>
+			<td>限制上传{$gif_width_62}*{$gif_height_62}的gif图片</td>
+		</tr>
+		<?php } ?>
+	<?php } else if($entrance_type==3||$entrance_type==4) { ?>
+	<tr class="sub_tr" id="pic_64_tr" >
+        <td><font color="red">*</font><?php if($entrance_type==3){echo '6.4图片（圆）';}else{echo '6.4.8样式（圆滑动）';}?></td>
+        <td>
+            <input type="file" name="image_url_64" id="image_url_64"/>
+        </td>
+        <td>限制上传{$image_width_64}*{$image_height_64}的JPG/PNG图片</td>
+    </tr>
+	<tr class="sub_tr" id="gif_tr_64" >
+        <td><?php if($entrance_type==3){echo '6.4图片（圆）';}else{echo '6.4.8样式（圆滑动）';}?>GIF</td>
+        <td>
+            <input type="file" name="gif_image_64" id="gif_image_64"/>
+        </td>
+        <td>限制上传{$gif_width_64}*{$gif_height_64}的gif图片</td>
+    </tr>
+	<?php } ?>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>背景颜色：</td>
+		<td>
+			<select name="bg_color">
+				<?php
+					foreach($color as $k=>$v){
+					?>
+					<option value="{$k}">{$v}</option>
+					<?php
+					}
+				?>
+			</select>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="words_des_tr" >
+		<td>文字说明：</td>
+		<td><textarea onKeyUp="checkLen(this, {$words_des})" name="words_des" id="words_des"></textarea></td>
+		<td>字数限制{$words_des}</td>
+	</tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>推荐内容</td>
+        <td>
+            <!--下面a里的href的url会在ready函数里自动生成-->
+            <a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+            <!--下面的content_type_div是选择推荐内容后append的地方-->
+            <div id="content_type_div"/>
+        </td>
+        <td/>
+    </tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>排序</td>
+        <td>
+            <input type="text" name="rank" id="rank"/>
+        </td>
+        <td/>
+    </tr>
+    <tr class="sub_tr">
+		<td><font color="red">*</font>开始时间</td>
+		<td>
+            <input id="start_at" name="start_at" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>结束时间</td>
+		<td>
+            <input id="end_at" name="end_at" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td>显示角标</td>
+		<td>
+			<input type="radio" onclick="show_corner_time(this)" value="1" name="show_corner"/>火
+			<input type="radio" onclick="show_corner_time(this)" value="2" name="show_corner"/>热
+			<input type="radio" onclick="show_corner_time(this)" value="3" name="show_corner"/>new
+		</td>
+	</tr>
+	<tr class="sub_tr" id="corner_show_tr" style="display:none;">
+		<td><font color="red">*</font>角标显示时间</td>
+		<td>
+            <input id="corner_start_at" name="corner_start_at" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"/>~
+        </td>
+        <td>
+			<input id="corner_end_at" name="corner_end_at" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})"/>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="show_red" style="display:none;">
+		<td>是否显示红点</td>
+		<td>
+			<input type="radio"  value="1"  name="show_red_point"/>是(有新内容更新)
+		</td>
+		<td>
+			<input type="radio"  value="0"  name="show_red_point"  checked />否(有新内容更新)
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>市场版本：</td>
+		<td>
+			 <input id="ver_big" type='radio' name='type' value='1'>大于等于
+			 <input id="ver_big_input" type='text' name='version_code1' value=""/>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td></td>
+		<td>
+			 <input id="ver_small" type='radio' name='type' value='2'>小于等于
+			 <input id="ver_small_input" type='text' name='version_code2' value=""/>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td></td>
+		<td>
+			<input id="ver_eq" type='radio' name='type' value='3' checked="checked">等于
+			<a style="color:blue;" href="__APP__/Public/showVersion?append_id=selected_versions" class="thickbox">请选择安智市场版本</a>
+			<div id="selected_versions">
+			</div>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>覆盖用户类型：</td>
+		<td>
+            <label><input type="radio" name="cover_user_type" value="0"  checked onchange="change_cover_user()">全部</label>
+			<label><input type="radio" name="cover_user_type" value="1"  onchange="change_cover_user()">新用户</label>
+			<label><input type="radio" name="cover_user_type" value="2"  onchange="change_cover_user()">定向用户</label>
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr direct_user" style="display: none">
+		<td>激活时间：</td>
+		<td>
+			开始时间 <input id="activation_date_start" name="activation_date_start" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"/>
+			<br>
+			结束时间 <input id="activation_date_end" name="activation_date_end" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})"/>
+		</td>
+		<td>
+
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>覆盖用户：</td>
+		<td style="height:70px;">
+			<a href="__PUBLIC__/paichuyonghu.csv" class="blue" style="color:blue;text-decoration:none;font-size:14px;">下载csv模板</a><br>
+			<input type="file" id="upload_file" name="upload_file" style="background:none; border:none; width:170px;"/><input type="button" value="上传" onclick="count('fugai')"/><br>
+			<input type="text" id="dl_count" name="dl_count" style="border:none;background:none; color:red;" readonly value=""/>
+		</td>
+		<div id="error_show_div"></div>
+		<input type='hidden' name='csv_url' id='csv_url' value="">
+		<input type='hidden' name='csv_count' id='csv_count' value="">
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="extent_id" value='<?php echo $extent_id?>'/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

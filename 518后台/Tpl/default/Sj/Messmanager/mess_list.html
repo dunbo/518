@@ -1,0 +1,297 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<!-- <script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script> -->
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+<!-- {//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束} -->
+
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<table  width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+<tr height="35">
+	<td align="center" style=<?php if($passed ==1){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/mess_list/passed/1"><font style="color:#000; font-weight:bold">待审核</font></a>
+	</td>
+	<td align="center" style=<?php if($passed ==2){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/mess_list/passed/2"><font style="color:#000; font-weight:bold">已通过</font></a>
+	</td>
+	<td align="center" style=<?php if($passed ==3){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/mess_list/passed/3"><font style="color:#000; font-weight:bold">未通过</font></a>
+	</td>
+</tr>
+</table>
+<table style='float:left;' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+	<?php if($passed == 1){ ?>
+		<tr>
+			<td >
+				<input type="button" class="search_btn thickbox" value="全选" onclick='javascript:$("input[name=chk_list]").attr("checked",true); ' style="background:white">	
+			</td>
+			<td colspan='5'>
+			<input type="button" class="search_btn" value="反选" onclick='ag_select()' style="background:white">	
+			</td>
+			<td align='right'>
+			<input type="button" class="search_btn" value="批量通过" onclick="get_ids_two(2)" style="width:150px;background:white">	
+			</td>
+			<td align='right'>
+			<input type="button" class="search_btn" value="批量驳回" onclick="get_ids(3)" style="width:150px;background:white">	
+			</td>	
+		</tr>
+	<?php }else if($passed == 2){ ?>
+		<tr>
+			<td >
+				<input type="button" class="search_btn thickbox" value="全选" onclick='javascript:$("input[name=chk_list]").attr("checked",true); ' style="background:white">	
+			</td>
+			<td colspan='6'>
+			<input type="button" class="search_btn" value="反选" onclick='javascript:$("input[name=chk_list]").attr("checked",false);' style="background:white">	
+			</td>
+			<td align='right'>
+			<input type="button" class="search_btn" value="批量驳回" onclick="get_ids_two(1)" style="width:150px;background:white">	
+			</td>
+		</tr>
+	<?php }else if($passed == 3){ ?>
+		<tr>
+			<td >
+				<input type="button" class="search_btn thickbox" value="全选" onclick='javascript:$("input[name=chk_list]").attr("checked",true); ' style="background:white">	
+			</td>
+			<td colspan='6'>
+			<input type="button" class="search_btn" value="反选" onclick='javascript:$("input[name=chk_list]").attr("checked",false);' style="background:white">	
+			</td>
+			<td align='right'>
+			<input type="button" class="search_btn" value="批量驳回" onclick="get_ids(1)" style="width:150px;background:white">	
+			</td>
+		</tr>
+	<?php } ?>
+<!-- 		<tr><td colspan='8'>&nbsp;</td></tr>
+ -->		<tr>
+			<th width="5%" bgcolor="#e3e2fe">选择</th>
+			<th width="10%">ID</th>
+			<th width="15%">资讯标题</th>
+			<th width="20%">资讯默认图片</th>
+			<th width="12%">是否包含敏感词</th>
+			<th width="12%">来源</th>
+			<th width="15%">入库时间</th>
+			<th width="11%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='list' id='messlist'>
+		<tr>
+			<td align='left' id='{$messlist.id}'>
+				<input type="checkbox" name="chk_list" value="{$messlist.id}" />
+			</td>
+			<td align='left'>
+				{$messlist.id}
+			</td>
+			<td align='left'>
+				{$messlist.news_name}
+			</td>
+			<td><img src="{$messlist.news_pic|default='&nbsp;'}" width="48" height="48"/></td>
+			<td><if condition="$messlist.sensitive_status eq 1">是<elseif condition="$messlist.sensitive_status eq 2"/>否</if></td>
+			<td align='left'>
+				{$messlist.website_name}
+			</td>
+			<td align='left'>
+				{$messlist.create_tm}
+			</td>
+			<td align='center' id='hide_{$messlist.id}'>
+			<?php if($messlist['passed'] == 1){ ?>				
+				<a href="javascript:void(0);" class="blue"  onclick="news_release('{$messlist.id}',2)" style="text-decoration:none;">通过</a><br/>
+				<a href="javascript:void(0);" onclick="change_status('{$messlist.id}',3)" class="blue" style="text-decoration:none;">驳回</a><br/>
+			<?php }else if($messlist['passed'] == 2){ ?>
+				<a href="javascript:void(0);" class="blue"  onclick="news_release('{$messlist.id}',1)" style="text-decoration:none;">驳回</a><br/>
+			<?php }else if($messlist['passed'] == 3){ ?>
+				<a href="javascript:void(0);" class="blue"  onclick="change_status('{$messlist.id}',1)" style="text-decoration:none;">驳回</a><br/>
+			<?php } ?>	
+				<a href="__URL__/edit_mess?id={$messlist.id}&pg={$pg}"  class="blue" style="text-decoration:none;">编辑</a>					
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='10'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+</html>
+<script>
+function change_status(id,passed){
+	if(!confirm("你确认操作吗？"))
+	{
+		return true;
+	}
+	if(id){
+		// tb_show('取消','/index.php/Sj/Onlinegame/del_new_server?type=1&id='+id+'&height=300&width=400',false);
+		$.ajax({    
+                url:'/index.php/Sj/Messmanager/change_status/id/'+id+'/passed/'+passed,
+                type: 'get',
+                async:false,
+                success: function(data)
+                {   
+                    if(data==1){
+                    $('#'+id).parent().css('background','#ccc');
+                    $('#hide_'+id).html('');
+                    	alert('操作成功');
+                    }else{
+                    	alert('操作失败');
+                    }
+                }
+            });
+	}
+}
+function news_release(id,passed){
+	if(!confirm("你确认操作吗？"))
+	{
+		return true;
+	}
+	if(id){
+		$.ajax({    
+                url:'/index.php/Sj/Messmanager/news_release/id/'+id+'/passed/'+passed,
+                type: 'get',
+                async:false,
+                success: function(data)
+                {   
+                    if(data==1){
+                    $('#'+id).parent().css('background','#ccc');
+                    $('#hide_'+id).html('');
+                    	alert('操作成功');
+                    }else{
+                    	alert('操作失败');
+                    	// alert(data);
+                    }
+                }
+            });
+	}
+}
+function get_ids(passed){
+	if(!confirm("你确认操作吗？"))
+	{
+		return true;
+	}
+	var chks=$("input[name='chk_list']:checked");
+	var ids=new Array()
+	var i=0;
+    $(chks).each(function(){
+       ids[i]=this.value;
+       i++;
+       // window.alert(this.value);                        
+       // window.alert(i);                        
+    });
+    if(i==0){
+		alert('请选择要批量操作的资讯');
+		return;
+	}
+    $.ajax({    
+                url:'/index.php/Sj/Messmanager/change_status/ids/'+ids+'/passed/'+passed+'/biaoshi/1',
+                type: 'get',
+                async:false,
+                success: function(data)
+                {   
+                    if(data==1){
+                    	$(chks).each(function(){
+       						$('#'+this.value).parent().css('background','#ccc');
+       						$('#hide_'+this.value).html('');
+       						                    
+    					});
+                    	alert('操作成功');
+                    }else{
+                    	alert('操作失败');
+                    }
+                }
+            }); 
+}
+function get_ids_two(passed){
+	if(!confirm("你确认操作吗？"))
+	{
+		return true;
+	}
+	var chks=$("input[name='chk_list']:checked");
+	// var ids=new Array();
+	var ids="";
+	var i=0;
+    $(chks).each(function(){
+       // ids[i]=this.value;
+       ids+=','+this.value;
+       i++;                      
+    });
+    var biaoshi=0;
+    if(i==0){
+		alert('请选择要批量操作的资讯');
+		return;
+	}else if(i==1){
+		biaoshi=2;
+	}else{
+		biaoshi=1;
+	}
+    $.ajax({    
+                url:'/index.php/Sj/Messmanager/news_release/ids/'+ids+'/passed/'+passed+'/biaoshi/'+biaoshi,
+                type: 'get',
+                async:false,
+                success: function(data)
+                {   
+                    if(data==1){
+                    	$(chks).each(function(){
+       						$('#'+this.value).parent().css('background','#ccc');
+       						$('#hide_'+this.value).html('');                    
+    					});
+                    	alert('操作成功');
+                    }else if(data==2){
+                    	alert('全部都存在空的内容不能发布');
+                    }else if(data==3){
+                    	alert('存在空的内容，不能发布！');
+                    	// alert(data);
+                    }else if(data==4){
+                    	alert('操作错误');
+                    	// alert(data);
+                    }else{
+                    	data=data.split(',')
+                    	var str="";
+                    	$(chks).each(function(){
+	                    	if(data.indexOf(this.value)==-1){
+                    			$('#'+this.value).parent().css('background','#ccc');
+                    			$('#hide_'+this.value).html('');
+                    			str+=','+this.value;
+                    		}                
+    					});
+    					alert("id为【"+str+"】的操作成功");
+                    }
+                }
+            }); 
+}
+function ag_select(){
+	var chks=$("input[name='chk_list']");
+    $(chks).each(function(){
+       	if($(this).attr('checked')!='checked'){
+       		$(this).attr('checked','checked');
+       	}else{
+       		$(this).attr('checked',false);
+       	}
+    });
+}
+// //排序
+// $('.extent_rank').change(function(){
+// 	var url = '__URL__/new_server_sequence/id/'+$(this).attr('rel')+'/pos/'+$(this).val()+'/old_pos/'+$(this).attr('old_pos');
+// 	$.ajax({
+// 		type: "GET",
+// 		url : url,
+// 		success: function(response){
+// 			var url     = eval("("+response+")");
+// 			var jumpUrl = '__URL__/audit_new_server/status/1/p/<?php echo is_numeric($_GET['p']) ? $_GET['p'] : '1'; ?>/lr/<?php echo is_numeric($_GET['lr']) ? $_GET['lr'] : '10'; ?>';
+// 			window.location.href = jumpUrl;
+// 			if(window.ActiveXObject) window.event.returnValue = false;
+// 		}
+// 	});
+// });
+</script>

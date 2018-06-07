@@ -1,0 +1,78 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script>
+	function checkit(){
+		if(confirm("热词删除后不可恢复，并直接影响线上数据，是否确认删除？"))
+		{
+			return true;
+		}
+		return false;
+	}
+</script>
+<br />
+<div style="padding:20px;">
+<span>注意事项：</span><br />
+<span>1.每个热词不得超过10个汉字，并且只能为汉字，数字和英文的组合</span><br />
+<span style='color:red'>2.考虑到UI设计，关联应用（带icon）只会在前端展示4个，超过的省略，不足则不展示</span></br>
+<span>3.热词编辑后约10分钟才会在前端生效</span>
+</div>
+<div style="padding:20px;">
+<a  class="search_btn" href="__URL__/searchkeywords_list_hot" style="float:right; margin:0 10px 0 6px; display:inline">有效</a>
+<div class="clear"></div>
+<table width="99%" cellpadding="0" cellspacing="0" border="1" class="table_list">
+	<thead>
+		<tr>
+			<th width="5%">排序</th>
+			<th width="10%">搜索热词</th>
+			<th width="20%">关联应用(包名)</th>
+			<th width="10%">图片展示</th>
+			<th width="10%">趋势</th>
+			<th width="15%">开始时间</th>
+			<th width="15%">结束时间</th>
+			<th width="10%">合作形式</th>
+			<th width="10%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach($result as $key => $val){ ?>
+			<td><span class="normal">{$val.rank}</span></td>
+			<td><span class="normal">{$val.key_word}</span></td>
+			<td><?php if($val['package']){ ?>{$val.package}<?php }else{ ?>未关联<?php } ?></td>
+			<td>{$val.show_pic_type}</td>
+			<td>{$val.key_name}</td>
+			<td>
+			<?php if($val['start_tm']){ ?>{$val.start_tm}<?php } ?>
+			</td>
+			<td><?php if($val['end_tm']){ ?>{$val.end_tm}<?php } ?>
+			</td>
+			<TD><?php if ($val['type'] !=0) { echo $val['types'] ; }else{ echo "-";} ?></TD>
+			<td>
+			<a class="search_btn" href="__URL__/edit_searchkeywords_to_show/id/{$val.id}/life/1" style="float:left">复制上线</a>
+			<!--<a href="__URL__/delete_searchkeywords_to/id/{$val.id}" onclick="return checkit();">删除</a>--></td>
+		</tr>
+		<?php } ?>
+	</tbody>
+</table>
+</form>
+<center> {$page} </center>
+</div>
+
+</body>
+</html>
+<script>
+$('.extent_rank').change(function(){
+	var url = "__URL__/edit_rank_to/id/"+$(this).attr('rel')+"/rank/"+$(this).val()+"";
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+			var url     = eval("("+response+")");
+			var jumpUrl = "__URL__/stale_searchkeywords_out_show/";
+			//window.location.reload();
+			window.location.href = jumpUrl;
+		}
+	});
+});
+</script>

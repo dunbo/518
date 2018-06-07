@@ -1,0 +1,201 @@
+<script>
+function postFilter()
+{
+	if($('#_login_password2').val() == '' && $('#_login_password3').val() == '') {
+		alert("密码不能为空，请填写！");
+		return false;
+	}
+
+	$('input[name=submit_btn]').attr('value', '保存中...');	
+	$('#submit_btn').attr('disabled', true);
+		
+	$.post('/index.php/Admin/Filter/setFilter', $('#filterForm').serialize(), function(){
+		$('input[name=submit_btn]').attr('disabled', false);
+		$('input[name=submit_btn]').attr('value', '提交');		
+		tb_remove();
+	});
+}
+function selectAll()
+{
+	$('tr:visible input[name^=cid]').each(function(){
+		this.checked = !this.checked;
+	});
+}
+function toggleCategory(id)
+{
+	$('.c'+id+' input[name^=cid]').each(function(){
+		this.checked = $('#cinput' + id).attr('checked');
+	});
+}
+
+function updateToggle(id) {
+	var canChecked = true;
+	$('.c'+id+' input[name^=cid]').each(function(){
+		canChecked = this.checked && canChecked
+		$('#cinput' + id).attr('checked', canChecked);
+	});
+}
+function pubpro_type_select(value){
+	$("tr[atl*='platform_']").hide();
+	$("tr[id*='category_name_']").hide();
+	if(value==2){
+		$('#category_list_2').val(0);
+		$('#category_list_2').show();
+		$('#platform').hide();
+		$("tr[id*='cate_id_0']").show();
+	}else if(value==3){
+		$('#category_list_2').hide();
+		$('#platform').show();
+		$('#platform').val(1);
+		$("tr[atl*='platform_1']").show();
+	}else if(value==1){
+		$('#category_list_2').hide();
+		$('#platform').hide();
+		$("tr[atl*='platform_']").show();
+		$("tr[id*='category_name_']").show();
+	}
+}
+function pubpro_two_type_select(value,biaoshi){
+	//biaoshi 区别分类和平台
+	$("tr[atl*='platform_']").hide();
+	$("tr[id*='category_name_']").hide();
+	if(biaoshi==1){
+		$("tr[id*='cate_id_"+value+"']").show();
+	}else if(biaoshi==2){
+		$("tr[atl*='platform_"+value+"']").show();
+	}
+}
+</script>
+
+<form id="filterForm">
+<input type="hidden" value="{$admin_id}" name="admin_id" />
+
+<input type="hidden" value="<?php if($apk_go){ echo '1';}else{echo '2';}?>" name="_apk_show" />
+<input type="hidden" value="<?php if($channel_total_black){echo '0';}else{echo '1';}?>" name="_show_channel_total" />
+<input type="hidden" value="<?php if($channel_coefficient){echo '2';}else{echo '1';}?>" name="_show_channel_coefficient" />
+<input type="hidden" value="<?php if($channel_show){echo '2';}else{echo '1';}?>" name="_channel_show" />
+<input type="hidden" value="<?php if($channel_user){echo '1';}else{echo '2';}?>" name="_channel_user" />
+
+	<table border="0" cellpadding="0" cellspacing="0" class="tb">
+		<tr>
+		<td>软件编辑->APK模块可见性</td>
+		<tr>
+		<tr>
+			<td>
+				<label><input type="radio" name="apk_show" value="1" <if condition="$apk_go eq true">checked=true</if> />APK可见</label>
+				<label><input type="radio" name="apk_show" value="2" <if condition="$apk_go eq false">checked=true</if> / >APK不可见</label>
+			</td>
+		</tr>
+		<tr>
+		<td>渠道用户量统计->用户总数显示开关</td>
+		</tr>
+		<tr>
+			<td><label><input value="1" type="radio" name='show_channel_total'
+				<if condition="$channel_total_black eq false">checked=true</if>/>
+					显示渠道用户总数</label> <label><input value="0" type="radio" name='show_channel_total'
+				<if condition="$channel_total_black eq true">checked=true</if>/>
+					隐藏渠道用户总数</label>
+			</td>
+		</tr>
+		
+		<tr>
+		<td>渠道用户量统计-> 渠道系数显示开关</td>
+		</tr>
+		<tr>
+			<td><label><input value="2" type="radio" name='show_channel_coefficient'
+				<if condition="$channel_coefficient eq true">checked=true</if>/>
+					显示渠道系数统计</label> <label><input value="1" type="radio" name='show_channel_coefficient'
+				<if condition="$channel_coefficient eq false">checked=true</if>/>
+					隐藏渠道系数统计</label>
+			</td>
+		</tr>
+		
+		<tr>
+		<td>渠道号显示开关</td>
+		</tr>
+		<tr>
+			<td><label><input value="2" type="radio" name='channel_show'
+				<if condition="$channel_show eq true">checked=true</if>/>
+					显示渠道号</label> <label><input value="1" type="radio" name='channel_show'
+				<if condition="$channel_show eq false">checked=true</if>/>
+					隐藏渠道号</label>
+			</td>
+		</tr>
+		<tr>
+		<td>渠道设置显示开关</td>
+		</tr>
+		<tr>
+			<td><label><input value="2" type="radio" name='channel_user'
+				<if condition="$channel_user eq false">checked=true</if>/>
+					开启渠道过滤设置</label> <label><input value="1" type="radio" name='channel_user'
+				<if condition="$channel_user eq ture">checked=true</if>/>
+					关闭渠道过滤设置</label>
+			</td>
+		</tr>	
+
+		<tr>
+		<td><span style="font-weight:bold;color:red;">密码：</span><input type="password" name="_login_password2" id="_login_password2" value=""/><span style="color:red;margin-left:5px;">*必填。</span>请填写<span style="color:red;">{$Think.session.admin.admin_user_name}</span>的登录密码</td>
+		</tr>
+		<tr>
+		<td><input type="button" value="提交" name="submit_btn" onclick="postFilter()"/> <input type="button" value="取消" onclick='tb_remove()' /></td>
+		</tr>
+		
+		<tr>
+		<td>针对用户开启渠道设置       <!--<input type='checkbox' onclick="selectAll()"/>全选/反选 --></td>
+		</tr>
+		<!-- <tr>
+			<td>
+				&nbsp;
+			</td>
+		</tr> -->
+		<tr>
+			<td>
+				<select name="all_channel" onchange="pubpro_type_select(this.value);" id='all_channel'>
+	                <option value="1">全部</option>
+	                <option value="2">渠道类型</option>
+	                <option value="3">平台</option>
+	            </select>
+	            <select name="category_list_2" style="display:none;" id='category_list_2' onchange="pubpro_two_type_select(this.value,1);">
+					<?php foreach($category_list_2 as $key => $val):?>
+					<option value="<?php echo $key?>"><?php echo $val["name"]?></option>
+					<?php endforeach;?>
+				</select>
+	           <select name="platform" style="display:none;" id='platform' onchange="pubpro_two_type_select(this.value,2);">
+					<?php foreach($product_list as $key => $val):?>
+					<option value="<?php echo $key?>"><?php echo $val[0]?></option>
+					<?php endforeach;?>
+				</select>
+			</td>
+		</tr>
+		<!-- <tr>
+			<td>
+				&nbsp;
+			</td>
+		</tr> -->
+		<volist name='category_list' id='category' key='k'>
+		<tr style="background-color:#ccc;font-weight: bold;" id="category_name_{$category.category_id}">
+			<td><input type="checkbox" id="cinput{$k}" name="category_id[]" value="{$category.category_id}" <?php if(in_array($category['category_id'], $cid_arr)){echo 'checked="checked"';} ?>  onclick="toggleCategory({$k})" />{$category.name}<!--<a href="javascript:toggleCategory({$k})" ><span id="a{$k}" ref='1'>-</span>&nbsp;&nbsp;&nbsp;{$category.name}</a>--></td>
+		</tr>
+		<volist name='category.result' id='channel'>
+		<tr class="c{$k}" id="cate_id_{$channel.category_id}" atl="platform_{$channel.platform}">
+			<td><label><input value="{$channel.cid}" onclick='updateToggle({$k})'
+					type="checkbox" name='cid[]' <if condition="$channel.selected eq true">checked=true</if>/>{$channel.chl} -- {$channel.chname}<input type="hidden" name="cid_name[{$channel.cid}]" value="{$channel.chl} -- {$channel.chname}"/></label>
+			</td>
+		</tr>
+		</volist>
+		</volist>
+
+        <tr>
+		<td><span style="font-weight:bold;color:red;">密码：</span><input type="password" name="_login_password3" id="_login_password3" value=""/><span style="color:red;margin-left:5px;">*必填。</span>请填写<span style="color:red;">{$Think.session.admin.admin_user_name}</span>的登录密码</td>
+		</tr>
+		<tr>
+		<td><input type="button" value="提交" name="submit_btn" onclick="postFilter()"/> <input type="button" value="取消" onclick='tb_remove()' /></td>
+		</tr>
+	</table>
+</form>
+
+<volist name='category_list' id='category' key='k'>
+	<script>
+	//updateToggle({$k});
+	</script>
+</volist>

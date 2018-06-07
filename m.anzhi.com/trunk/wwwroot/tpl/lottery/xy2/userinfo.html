@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>玩大话西游送多重豪礼</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/xy2/css/common_v1.css?v1"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/TouchSlide.1.1.js"></script>
+</head>
+<body>
+<section>
+    <div class="mod">
+        <div class="mod_inner">
+            <div class="mod_con">
+                <div class="snag"><img src="<!--{$out.static_url}-->/xy2/images/snag.png"/></div>
+                <div class="mod_hd">
+				<!--{if $out.types eq 2 }-->
+					<h4>【恭喜中奖啦】</h4>
+                    <ul>
+                        <li>恭喜您获得<br/><font color='#ea7502'><!--{$out.prizename}--></font></li>
+                    </ul>
+				<!--{elseif $out.types eq 1}-->		
+					<h4>【 我的奖品 】</h4>				
+					<ul class="my_prize_list">
+						<!--{if $out.kind_award_arr}-->
+							<!--{foreach from=$out.kind_award_arr item='val' key='k'}-->
+							<li>恭喜您在<font color='#ea7502'><!--{$val.time}--></font>获得<br/><font color='#ea7502'><!--{$val.prizename}--></font></li>
+							<!--{/foreach}-->		
+						<!--{/if}-->
+						<!--{if $out.gift_prize_arr}-->
+							<!--{foreach from=$out.gift_prize_arr item='val' key='k'}-->
+							<li>恭喜您在<font color='#ea7502'><!--{$val.time}--></font>
+							获得<br/>礼包：<font color='#ea7502'><!--{$val.gift_number}--></font></li>
+							<!--{/foreach}-->
+						<!--{/if}-->
+					</ul>
+				<!--{/if}-->				
+                </div>
+				<!--{if ($out.types eq 1 and $out.kind_award_arr) || $out.types gt 1 }-->	
+				<div class="prompt1">请您填写如下信息，以便于我们将奖品邮寄给您!</div>
+				<ul class="form-items">
+					<li>
+						<label>联系人姓名：</label>
+						<span>
+							<input placeholder="请输入您的姓名" type="text" id="lxname" value="<!--{$out.contact_name}-->"/> 
+						</span>
+						<font color='red' id='name_err' ></font>
+					</li>
+					<li>
+						<label>联系人手机号码：</label>
+						<span><input placeholder="请输入您的手机号" maxlength='11' type="tel" id="mobile_phone" value="<!--{$out.phone}-->" /></span>
+						<font color='red' id='phone_err' ></font>
+					</li>
+					<li>
+						<label>邮寄地址：</label>
+						<span>
+							<input type="text" placeholder="请输入您的邮寄地址" id="address" value="<!--{$out.address}-->" />
+						</span>
+						<font color='red' id='address_err' ></font>
+					</li>
+				</ul>
+				<div class="btns"><a href="javascript:;" onclick="save()" class="btn_submit">提交</a></div>
+				<!--{/if}-->
+				<!--{if ($out.types eq 1 and $out.gift_prize_arr and !$out.kind_award_arr)}-->	
+				<div class="btns"><a href="/lottery/xy2/index.php?stop=<!--{$out.stop}-->&sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->" class="btn_back">返回</a></div>
+				<!--{/if}-->
+            </div>
+        </div>
+    </div>
+	<div id="body-bg" style="display: none;"></div>
+	<div class="tip-box" id="tip-box" style="display: none;">
+        <ul class="my_prize_list">
+            <li>提交成功！</li>
+        </ul>
+        <div class="btns mtop">
+            <a href="javascript:;" class="btn_back" onclick="cloBox('#tip-box')">返回</a>
+        </div>
+    </div>
+</section>
+</body>
+</html>
+<script>
+var sid='<!--{$out.sid}-->';
+var aid='<!--{$out.aid}-->';
+function viewHeight(){
+	return document.documentElement.clientHeight;
+}
+var flags={canMove:true};
+function showOpenBox(obj){
+    var bg_h=$(document).height();
+    $(obj).show();
+    $("#body-bg").css("height",bg_h+"px").show();
+    flags.canMove=false;
+}
+function cloBox(obj){
+	$(obj).hide();
+	$("#body-bg").hide();
+    flags.canMove=true;
+	var stop = "<!--{$out.stop}-->";
+	if(stop == 1){
+		location.href="/lottery/xy2/index.php?stop=1&sid="+sid+"&aid="+aid;
+	}else{
+		location.href="/lottery/xy2/index.php?sid="+sid+"&aid="+aid;
+	}
+}
+$(function(){
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+})
+function save(){
+	var lxname = $("#lxname").val();
+	if(lxname == "") {
+		$('#name_err').html('联系人姓名不能为空');
+		return false;
+	}
+	var name_len = lxname.length;
+	if(name_len > 10){
+		$('#name_err').html('联系人姓名不能超过10个字');
+		return false;	
+	}
+	$('#name_err').html('');
+	var mobile_phone = $("#mobile_phone").val();
+	if(mobile_phone == "") {
+		$('#phone_err').html('联系人手机号码不能为空');
+		return false;
+	 }
+	var  re = /^(13|14|15|17|18)\d{9}$/
+	if (!re.test(mobile_phone)){
+		$('#phone_err').html('请输入正确手机号');
+		return false;
+	}
+	$('#phone_err').html('');
+
+	var address = $("#address").val();
+	if(address == "") {
+		$('#address_err').html('邮寄地址不能为空');
+		return false;
+	 }
+	var address_len = address.length;
+	if(address_len > 30){
+		$('#address_err').html('邮寄地址不能超过30个字');
+		return false;	
+	}	 
+	$('#address_err').html('');
+	$.ajax({
+			url: '/lottery/xy2/userinfo.php',
+			data:"aid="+aid+"&sid="+sid+"&lxname="+lxname+"&mobile_phone="+mobile_phone+"&address="+address,
+			type:"post",
+			dataType: 'json',
+			success:function(data) {
+				if(data.code == 1){
+					showOpenBox('#tip-box');
+				}else if(data.code == 2){
+					location.href= data.url;
+				}else{
+					$('#address_err').html(data.msg);
+					return false;
+				}
+			},
+	});
+}
+</script>

@@ -1,0 +1,117 @@
+<!--	<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>-->
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+    <script type="text/javascript">
+        function upload(){
+
+            if($("#uploadFile0").val().length==0)
+            {
+                $("#s1").html('<font color="red">请上传评测报告<font>');
+                return;
+            }else{
+                $("#s1").html('');
+            }
+
+            var param = {
+                soft_id: $("#soft_id").val(),
+                dev_id: $("#dev_id").val(),
+                hh_softname: $("#hh_softname").val(),
+                reviewlevel: $("#reviewlevel").val()
+            };
+
+            //弹出加载中
+            var timenow = new Date().getTime();
+            suffix = timenow;
+            window_list.push(suffix);
+            var urls ="#TB_inline?height=100&width=200&inlineId=loading&modal=true";
+            tb_show('title',urls,"thickbox");
+
+            $.ajaxFileUpload({
+                url:'__URL__/tonguo2',
+                type:'POST',
+                data:param,
+                files:[$('#uploadFile0')],
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                   if(data==1)
+                   {
+                        location.href ="/index.php/Sendnum/Product/testlist";
+                   }else if(data==2)
+                   {
+                        alert('只允许上传doc,docx,xls,xlsx的格式');
+                        tb_remove();
+                   }else if(data==3)
+                   {
+                        alert('程序忙，上传失败，请重试');
+                        tb_remove();
+                   }else if(data==4)
+                   {
+                        alert('您已经上传过测试报告了');
+                        location.href ="/index.php/Sendnum/Product/testlist";
+                   }else if(data==5)
+                   {
+                        alert('评测通过失败');
+                        location.href ="/index.php/Sendnum/Product/testlist";
+                   }else if(data==6){
+						alert('同步接入账号到用户中心失败');
+						tb_remove();
+				   }
+                }
+            });
+        };
+    </script>
+</head>
+ 
+<body>
+
+<div style="width:45; margin-top:4px">
+	 <form id="form1" name="form1" method="post" action="__URL__/add/">
+  <table width="99%" height="63" border="0" align="center" cellpadding="4" cellspacing="1"  bgcolor="#333333" id="table1">
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">产品名称:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <span>{$rs.softname}</span>
+        </td>
+    </tr>    
+    
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">测评级别:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <select name="reviewlevel" id="reviewlevel">
+                 <option value="A" <if condition="($rs.reviewlevel eq 'A')"> selected=selected </if>>A</option>
+                 <option value="B" <if condition="($rs.reviewlevel eq 'B')"> selected=selected </if>>B</option>
+                 <option value="C" <if condition="($rs.reviewlevel eq 'C')"> selected=selected </if>>C</option>
+                 <option value="D" <if condition="($rs.reviewlevel eq 'D')"> selected=selected </if>>D</option>
+                 <option value="S" <if condition="($rs.reviewlevel eq 'S')"> selected=selected </if>>S</option>
+                 <option value="B-" <if condition="($list.reviewlevel eq 'B-')"> selected="selected"</if>>B-</option>
+                 <option value="B+" <if condition="($list.reviewlevel eq 'B+')"> selected="selected"</if>>B+</option>
+                 <option value="A+" <if condition="($list.reviewlevel eq 'A+')"> selected="selected"</if>>A+</option>
+                 <option value="A-" <if condition="($list.reviewlevel eq 'A-')"> selected="selected"</if>>A-</option>
+             </select><font color="red">*</font>
+        </td>
+             <input type="hidden" id="soft_id" value="{$rs.soft_id}">
+             <input type="hidden" id="hh_softname" value="{$rs.softname}">
+             <input type="hidden" id="dev_id" value="{$rs.dev_id}">
+    </tr>
+   
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">评测报告:</td>
+         <td align="left" bgcolor="#FFFFFF">
+           <input id="uploadFile0" type="file" name="upload[]" /><font color="red">*</font><span id="s1"><font color="red"></font></span>
+        </td>
+    </tr>
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF"></td>
+         <td align="left" bgcolor="#FFFFFF">
+只限上传.doc/.docx/.xls/.xlsx文件
+        </td>
+    </tr>        
+   <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="评测通过" onclick="upload()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onclick="tb_remove();"/></td>
+      </tr>
+</table>
+  
+  </form>
+</div>
+</body>
+</html>

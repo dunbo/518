@@ -1,0 +1,106 @@
+<include header="../Public/header"/>
+
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<body>
+    <div class="currentNav">
+        <div class="currentNav_l">
+        <!--导航栏-->
+        <a href="__URL__/index">自定义列表</a>><label>{$name}</label>
+        </div>
+        <!--end-->
+        <!--各种按钮-->
+        <div class="currentNav_r">
+            <a href="__URL__/add_content?name_id={$name_id}" class="recBtn_bg thickbox">添加</a>
+            <a href="__URL__/list_content?name_id={$name_id}&period=1" class="recBtn_bg <?php if($period==1)echo "currentSel"?>">过期</a>
+            <a href="__URL__/list_content?name_id={$name_id}&period=2" class="recBtn_bg <?php if($period==2)echo "currentSel"?>">当前</a>
+            <a href="__URL__/list_content?name_id={$name_id}&period=3" class="recBtn_bg <?php if($period==3)echo "currentSel"?>">未开始</a>
+        </div>
+        <!--end-->
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="4%"><input type="checkbox" id="checkall" onclick="selectAll();" /></th>
+                    <th width="8%">软件名称</th>
+                    <th width="8%">软件包名</th>
+                    <th width="8%">排序</th>
+                    <th width="8%">开始时间</th>
+                    <th width="8%">结束时间</th>
+                    <th width="8%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                    <td><input type="checkbox" name="idlist[]" id="check{$list.id}" value="{$list.id}" /></td>
+                    <td>{$list.softname}</td>
+                    <td>{$list.package}</td>
+                    <td>{$list.rank}</td>
+                    <td>{$list.start_time|date="Y-m-d H:i:s",###}</td>
+                    <td>{$list.end_time|date="Y-m-d H:i:s",###}</td>
+                    <td>
+                        <if condition='$period eq 1'><a href="__URL__/edit_content?id={$list.id}&life=1" class="search_btn thickbox" style="align:right">复制上线</a><!--过期数据不可以编辑和删除-->
+                        <else/>
+                            <a href="__URL__/edit_content?id={$list.id}" class="blue thickbox" style="align:right">编辑</a>
+                            ｜<a href="__URL__/delete_content?id={$list.id}" class="blue" onclick="return confirm('确认删除？')">删除</a>
+                        </if>
+                    </td>
+                </tr>
+                </volist>
+                <tr>
+                    <td colspan="7" style="text-align:left">
+                        
+                        <a href="javascript:void(0);" id='edit_all_1' onclick="edit_time(1)"  style="text-decoration:none;"><input type="button" value="批量修改时间" style="width:140px;"/></a>
+                        
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>
+
+<a id='show' class="thickbox" href="" title="批量修改时间"></a>
+<script type="text/javascript">
+    function selectAll() {
+        if ($("#checkall").attr('checked')) {
+            $("[name='idlist[]']").attr("checked", "checked");
+        }
+        else {
+            $("[name='idlist[]']").removeAttr("checked");
+        }
+    }
+    function edit_time() {
+        var idlist = '';
+
+        $("[name='idlist[]']").each(function(){
+            if ($(this).attr('checked'))
+            idlist +=$(this).val()+',';
+        });
+
+        if (idlist.length > 0){
+            $('#show').attr('href','__URL__/edit_content/edit_batch/1/width/600/idlist/'+idlist+'/1/1');
+            $('#show').click();
+        }else{
+            alert('请选择操作对象');
+            return false;
+        }
+    }
+
+
+
+
+
+
+
+</script>

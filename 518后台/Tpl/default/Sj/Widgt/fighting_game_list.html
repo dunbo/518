@@ -1,0 +1,104 @@
+<include file="../../Public/header"  />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script>
+function check_del()
+{
+	if(confirm("你确认删除该条数据吗？"))
+	{
+		return ture;
+	}
+	return false;
+}
+function check_off()
+{
+  if(confirm("你确定把该软件下线吗？"))
+	{
+		return ture;
+	}
+	return false;
+}
+function change_rank(id)
+{
+   var rank = $("#rank_"+id+"").val();
+   if(rank <= 0 || parseInt(rank)!=rank)
+	{
+	 alert("排序值错误");
+	 return false;
+	}
+  $.ajax({
+		url: '__URL__/change_rank',
+		data: 'id='+id+'&rank='+rank,
+		type: 'get',
+		success: function(data)
+		{
+			if(data == 2)
+			{
+				alert("修改失败");
+			}
+			else{
+				window.location.reload(true);
+			}
+		}
+	});
+}
+</script>
+<style>
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+	<body>
+		<div style="margin:10px;width:100px;">
+			 <a class="thickbox search_btn" href="__URL__/add_fighting_game?mm">添加游戏</a>	
+		</div>
+		<form>
+		<table class="table_list" border="0" cellpadding="0" cellspacing="0">
+			<thead>
+				<tr>
+				    <th width="5%">ID</th>
+					<th width="8%">软件包名</th>
+					<th width="8%">软件名称</th>
+					<th width="8%">游戏描述</th>
+					<th width="8%">添加时间</th>
+					<th width="8%">状态</th>
+					<th width="5%">排序</th>
+					<th width="8%">支持人数</th>
+					<th width="6%">支持联机模式</th>
+					<th width="8%">游戏广域网连接服务器的IP(域名)</th>
+					<th width="8%">游戏广域网连接服务器的端口号</th>
+					<th width="5%">是否推荐</th>
+					<th width="15%">管理</th>
+				</tr>
+			</thead>
+		   <tbody>
+			 <?php foreach($result as $key => $val){ ?>
+				<tr>
+				    <td>{$val.id}</td>
+					<td>{$val.package}</td>
+					<td>{$val.soft_name}</td>
+					<td>{$val.game_description}</td>
+					<td><?php echo date("Y-m-d H:i:s",$val['create_tm']);?></td>
+					<td><?php if($val['stat']==0) echo "未上线"; else echo "已上线" ?></td>
+					<td><input type="text" style="width:50px;" value="{$val.rank}" onblur="change_rank({$val.id});" name="rank[]" id="rank_{$val.id}" /><input type="hidden" name="id[]" value="{$val.id}" /></td>
+					<td>{$val.support_person}</td>
+					<td>{$val.online_type}</td>
+					<td>{$val.wanip}</td>
+					<td>{$val.wanport}</td>
+					<td><?php if($val['is_recommend']==0) echo "否"; else echo "是"; ?></td>
+					<td class="blue"><a class="thickbox blue" href="__URL__/modify_fighting_game/id/{$val.id}">修改</a>　|　<?php if($val['stat']==0) { ?><a class="blue" href="__URL__/change_stat/id/{$val.id}/stat/1/">上线</a><?php } else { ?><a class="blue" href="__URL__/change_stat/id/{$val.id}/stat/0/" onClick="return check_off();" >下线</a><?php }?>　|　<a class="blue" href="__URL__/delete_fighting_game/id/{$val.id}" onClick="return check_del();">删除</a></td>
+				</tr>
+			  <?php } ?>
+			 </tbody>
+		</table>
+		</form>
+		<div class="navgition">
+		{$page|default='&nbsp;'}
+		</div>
+	</body>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />
+</html>

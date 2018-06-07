@@ -1,0 +1,127 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<style>
+    .intb td {
+        border-right:none;
+        border-bottom: none;
+    }
+    .fixlong {
+        table-layout: fixed;
+    }
+    .fixlong td {
+        word-break: break-all;
+    }
+    .currentselected{font-weight:bold;}
+    .bt{width:70px}
+    .cl_bt{background-color:gray}
+</style>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+<link rel="stylesheet" type="text/css" href="/Public/img/common.css" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/tablelist.css" />
+<div style="padding:10px">
+    <input type="button" value="过期" class="bt <if condition='$type eq 1'>cl_bt</if>" onclick="toggle_sta(1,this)">
+    <input type="button" value="当前" class="bt <if condition='($type eq 2) or (!$type)'>cl_bt</if>" onclick="toggle_sta(2,this)">
+    <input type="button" value="未开始" class="bt <if condition='$type eq 3'>cl_bt</if>" onclick="toggle_sta(3,this)">
+</div>
+<div class="main" >
+    <div class="content">
+        <center>
+            <div style="float:left;border:1px solid gray;width:100%;height:50px">
+                <div style="float:left;padding-top: 15px"><font style="color:#000; font-weight:bold;">省流量更新白名单</font></div>
+                <div style="float:right;padding-top: 10px;padding-right: 10px">
+                    <div style="float:left;padding-right: 5px"><a class="thickbox search_btn" href="/index.php/Sj/Soft/add_update_soft?width=300&amp;height=140" title='添加软件'>添加软件</a></div>
+                    <div style="float:left;padding-right: 5px"><a class="search_btn" href="javascript:void(0)" onclick="del_all()">删除</a></div>
+                    <div style="float:left;padding-right: 5px"><a class="thickbox search_btn" href="/index.php/Sj/Soft/import_update_soft?width=380&amp;height=140" title='批量导入'>批量导入</a></div>
+                    <div style="float:left;padding-right: 5px"><a class=" search_btn" href="javascript:void(0)" onclick="importout_all()">批量导出</a></div>
+<!--                    <input type="button" value="删除">
+                    <input type="button" value="批量导入">
+                    <input type="button" value="批量导出">-->
+                </div>
+            </div>
+            <br>
+            <table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+                <tr>
+                    <td align='center' width="5%" bgcolor="#e3e2fe"><input type="checkbox" onclick="checkAll(this)"></td>
+                    <td align='center' width="25%" height="30" bgcolor="#e3e2fe" > <font style="color:#000; font-weight:bold">软件名称</font></td>
+                    <td align='center' width="15%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">软件包名</font></td>                   
+                    <td align='center' width="15%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">开始时间</font></td>
+                    <td align='center' width="13%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">结束时间</font></td>
+                    <td align='center' width="8%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">操作</font></td>
+                </tr>
+                <volist name='soft' id='vo'>
+                    <tr height='50px'>
+                        <td align='center'><input type='checkbox' name="id_{$vo.id}" value="{$vo.id}"></td>
+                        <td align='center'>{$vo.softname}</td>
+                        <td align='center'>{$vo.package}</td>
+                        <td align='center'>{$vo.start_tm|date='Y-m-d H:i:s',###}</td>
+                        <td align='center'>{$vo.end_tm|date='Y-m-d H:i:s',###}</td>
+                        <td align='center'>
+                            <a class="thickbox " href='__URL__/add_update_soft?package={$vo.package}&edit=1&width=300&amp;height=140' title='编辑软件'>编辑</a>
+                            <if condition='$vo.soft_type neq 1' >
+                            <br>
+                            <a href="javascript:void(0)" onclick ="del('{$vo.id}')">删除</a>
+                            </if>
+                        </td>
+                    </tr>
+                </volist>
+                
+            </table>
+            <div  align='left'>{$page}</div>
+        </center>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function importout_all(){
+        var str = '';
+        $('input[name^=id_]').each(function(){
+            if($(this).attr('checked')){
+                str += "'"+$(this).val() + "',";
+            }
+        })
+        window.location.href = '__URL__/update_whitelist?down=1&type={$type}&id='+str;
+    }
+    
+    function del(id){
+        if(!confirm('确认删除此条记录吗?')){
+            return false;
+        }
+        window.location.href = '__URL__/del_update_whitelist?id='+id+'&type=1';
+    }
+    
+    function checkAll(obj)
+    {
+            var flag = $(obj).attr('checked') == 'checked';
+            $('input[name^=id_]').attr('checked', flag);
+    }
+    
+    function del_all(){
+        
+        var str = '';
+        $('input[name^=id_]').each(function(){
+            if($(this).attr('checked')){
+                str += "'"+$(this).val() + "',";
+            }
+        })
+        if(str !=''){
+            if(!confirm('确认删除选中记录吗?')){
+                return false;
+            }
+        }else{
+            alert('未选中记录！');
+            return false;
+        }
+        window.location.href = '__URL__/del_update_whitelist?id='+str+'&type=2';
+    }
+    
+    function toggle_sta(type,id){
+        window.location.href='__URL__/update_whitelist?type='+type
+    }
+</script>
+

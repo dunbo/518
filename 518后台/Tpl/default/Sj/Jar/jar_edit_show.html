@@ -1,0 +1,107 @@
+<include header="../Public/header"/>
+
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+
+<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+
+<style type="text/css">
+    .widen {width:500px}
+</style>
+
+<script type="text/javascript">
+    
+    function search_softname(async) {
+        var apply_pkg = $.trim($("#apply_pkg").val());
+        if (apply_pkg == '') {
+            $("#softname").val("");
+            return 0;
+        }
+        var param = {
+            package : apply_pkg
+        }
+        var ret = 0;
+        $.ajax({
+            url:'__URL__/search_softname',
+            type:'POST',
+            async:async,
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data) {
+                if (data.status == 1) {
+                    var info = data.info;
+                    $("#softname").val(info['softname']);
+                } else {
+                    $("#softname").val("");
+                }
+                ret = data.status;
+            }
+        });
+        return ret;
+    }
+    
+    function jar_edit_submit() {
+        // 不为空的数据，key为id值，value为提示值
+        var nonempty = new Object();  
+        nonempty['jar_version'] = '版本号';
+        nonempty['jar_name'] = '版本名称';
+		if($("#jar_version").val().indexOf(".") > 0 )
+		{
+			alert('版本号只能为数字');
+            return false;
+		}
+		if(isNaN($("#jar_version").val())){
+			alert("版本号只能为数字");
+            return false;
+		}
+        for (key in nonempty) {
+            var str = "#" + key;
+            if ($.trim($(str).val()) == '') {
+                alert(nonempty[key]+'不能为空！');
+                $(str)[0].focus();
+                return false;
+            }
+        }
+        $("#jar_edit_submit").submit();
+    }
+    
+    function checkLen(obj) {
+        var maxChars = 40;//最多字符数
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+    };
+    
+</script>
+
+<body>
+当前位置>SDK管理>SDK更新>添加{$_GET['name']}版本
+    <form method="post" action="__URL__/jar_edit_do" id="jar_edit_submit" enctype="multipart/form-data">
+      <input type="hidden" name="id" value="{$_GET['id']}">
+      <div class="form_list_one">
+        <label><font color="red">*</font>SDK类型：</label>
+        <select name="sdk_type">
+            <?php foreach($sdk_types as $v): ?>
+            <option value="<?= $v['id']?>" <?= $jar['sdk_type'] == $v['id'] ? 'selected':'' ?> ><?= $v['name']?></option>
+            <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="form_list_one">
+        <label><font color="red">*</font>版本号：</label>
+        <input name="jar_version" type="text" id="jar_version" placeholder="请输入版本号" value="{$jar['jar_version']}" >
+      </div>
+	  <div class="form_list_one">
+        <label><font color="red">*</font>版本名称：</label>
+        <label for="jar_name"></label>
+        <input name="jar_name" type="text" id="jar_name" placeholder="请输入版本名称" value="{$jar['jar_name']}" >
+	  </div>
+        </div>
+        <div class="clear"></div>
+        <div class="form_btns_box_one">
+            <input type="submit" value="确定" onClick="return jar_edit_submit();" style="margin-left:155px" class="form_input_submit" />
+            <a href="/index.php/Sj/Jar/jar_index_list">取消</a>
+			<div class="clear"></div>
+        </div>
+</form>
+</body>

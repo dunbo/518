@@ -1,0 +1,151 @@
+<link type="text/css" href="css/checkout.css" rel="stylesheet" />	
+<link type="text/css" href="/Public/css/co_common.css" rel="stylesheet" />
+<script type="text/javascript" src="/Public/js/jquery.js"></script>
+<script type="text/javascript" src="/Public/js/co_public.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('.managers_title span').each(function(index){
+		$(this).bind('click',function(){
+			if($(this).parent().siblings().css('display')=='block')
+			{
+				$(this).parent().siblings().css('display','none');
+				$(this).addClass('hidesub');
+			}
+			else
+			{
+				$(this).parent().siblings().css('display','block');
+				$(this).removeClass('hidesub');
+			}
+			//$(this).removeClass('hidebg');
+		});
+		
+	});
+});
+
+
+function my_select(charge_id){
+	if($('#charge_'+charge_id+'').attr('checked') == 'checked'){
+		$('input[id^=account_'+charge_id+'_]').attr('checked','checked');
+	}
+	
+	if($('#charge_'+charge_id+'').attr('checked') != 'checked'){
+		$('input[id^=account_'+charge_id+'_]').attr('checked',false);
+	}
+}
+
+function no_all_select(charge_id,account_id){
+	if($('#account_'+charge_id+'_'+account_id).attr('checked') != 'checked'){
+		$('#charge_'+charge_id+'').attr('checked',false);
+	}
+}
+
+function search_all(){
+	var charge_id = $('#charge').val();
+	$(this).parent().siblings().css('display','none');
+	var user_name = $('#user_name').val();
+	$('td[class^=td_]').css("background",'white');
+	if(charge_id != 0 && user_name == '请输入账号名称'){
+		location.hash="li_"+charge_id;
+		$('#span_'+charge_id+'').removeClass('hidesub');
+		$('#div_content_'+charge_id+'').css('display','block');
+		$('#div_'+charge_id+'').css('display','block');
+	}else if(user_name != '请输入账号名称' && charge_id == 0){
+		$('.td_'+user_name+'').parent().parent().parent().parent().css('display','block');
+		location.hash="a_"+user_name+"";
+		$('.td_'+user_name+'').css("background","red");
+	}else if(user_name != '请输入账号名称' && charge_id != 0){
+		if($("#a_"+charge_id+"_"+user_name+"").val() == 1){
+			$('.td_'+user_name+'').parent().parent().parent().parent().css('display','block');
+			location.hash="a_"+user_name+"";
+			$('.td_'+user_name+'').css("background","red");
+		}
+	}
+	
+	
+	need_charge = $('td.td_'+user_name+'').prev().val();
+	$('#span_'+need_charge+'').removeClass('hidesub');
+}
+
+</script>
+	<div class="content">
+		<div class="nav_page">安智合作运营平台><a href="managers.html">管理员权限管理</a></div>
+		<div class="content_inner">
+			<div class="title_item">
+				<h2>编辑可查看账号范围：</h2>
+			</div>
+			<table cellpadding="0" cellspacing="0" class="search_table">
+				<tbody>
+					<tr>
+						<td width="29%">负责人：
+						<select name="charge" id="charge">
+							<option value="0">请选择...</option>
+							<?php foreach($charge_result as $key => $val){ ?>
+							<option value="{$val.id}" <?php if($charge == $val['id']){ ?>selected<?php } ?> >{$val.charge_name}</option>
+							<?php } ?>
+						</select>
+						</td>
+						<td width="29%">账号名称：<input type="text"  id="user_name" class="search_item_text" value="请输入账号名称" style="width:220px" onfocus="if(this.value=='请输入账号名称'){this.value=''}" onblur="if(value==''){value='请输入账号名称'}"/></td>
+						<td width="42%"><span onclick='search_all();' class="search_btn">搜  索</span></td>
+					</tr>
+				</tbody>
+			</table>
+			<form action="__URL__/editAdmin_submit" method="post" name="get_uid">
+			<input type="hidden" name="search" value="{$search}">
+			<div class="managers_wrap">
+				<ul>
+				<volist id='list' name='adminAccount'>
+					<li>
+						<a name="li_{$list.id}"></a>
+						<div id="div_{$list.id}" class="managers_title">
+							<?php if($list['count'] == 0){ ?>
+								<span class="no_hidesub" style="background:none;"></span>
+							<?php }else{ ?>
+								<span class="hidesub" id="span_{$list.id}"></span>
+							<?php } ?>
+							<input type="checkbox" id="charge_{$list.id}" name="charge_id[]" value="{$list.id}" onclick="my_select('{$list.id}');" <?php if(in_array($list['id'],$have_charge)){ ?>checked<?php } ?>  /> {$list.charge_name}
+							<input type="hidden" id="count" value="{$list.count}" />
+						</div>
+						<?php if($list['count'] != 0){ ?>
+						<div id="div_content_{$list.id}" class="managers_cnt" style="display:none;">
+							<table cellpadding="0" cellspacing="0" class="table_list">
+								<thead>
+									<tr>
+										<th width="4%"></th>
+										<th width="32%">账号名称</th>
+										<th width="32%">创建时间</th>
+										<th width="32%">状态</th>
+									</tr>
+								</thead>
+								<tbody>
+								<volist id='account' name="list['account']">
+									<tr>
+										<input type="hidden" value="{$list.id}" id="need_charge" />
+										<td class="td_{$account.user_name}"><a name="a_{$list.id}_{$account.user_name}" class="one_pice"></a><a name="a_{$account.user_name}" class="one_pice"></a><input type="checkbox" id="account_{$list.id}_{$account.uid}" name="uid[]" onclick="no_all_select('{$list.id}','{$account.uid}');" value="{$account.uid}" <?php if(in_array($account['uid'],$have_uid)){ ?>checked<?php } ?> /></td>
+										<td class="td_{$account.user_name}">{$account.user_name}<input type="hidden" id="a_{$list.id}_{$account.user_name}" value="1" ></td>
+										<td class="td_{$account.user_name}">{$account['create_time']}</td>
+										<td class="td_{$account.user_name}">{$account.status}</td>
+									</tr>
+								</volist>
+									<input type="hidden" name="aid" value="{$aid}" />
+								</tbody>
+							</table>
+						</div>
+						<?php } ?>
+					</li>
+				</volist>
+				</ul>
+			</div>
+			<div class="open_close_btn" style="padding-left:22%">
+				<a href="#" onclick="javascript:get_uid.submit();">确认</a>
+				<a href="javascript:;" onclick="javascript:history.go(-1);">取消</a>
+				<div class="clear"></div>
+			</div>
+			</form>
+		</div>
+		
+  </div>
+	<div class="clear"></div>
+</div>
+<!--content end-->
+</body>
+</html>

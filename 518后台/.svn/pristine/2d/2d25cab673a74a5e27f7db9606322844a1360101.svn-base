@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>盗版校验软件列表</title>
+<style type="text/css">
+	body, td, th {
+		font-size: 12px;
+	}
+</style>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="/Public/js/json2.js"></script>
+<script type="text/javascript">
+	
+	function deleteOne(pid)
+	{
+		if (!confirm("确定要删除该项么？"))
+			return false;
+		window.location="__URL__/DeletePiracy/id/%5b%22" + pid + "%22%5d";
+	}
+	
+	function selectAll()
+	{
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].disabled == false)
+				checkall[i].checked = true;
+		}
+	}
+	
+	function selectRev()
+	{
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox"  && checkall[i].disabled == false)
+				checkall[i].checked = !checkall[i].checked;
+		}
+	}
+	
+	function deleteAll()
+	{
+		if (!confirm("确定要删除选定项么？"))
+			return false;
+		var count = 0;
+		var id = new Array();
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+			{
+				id[count] = checkall[i].id;
+				count++;
+			}
+		}
+		url = encodeURI(JSON.stringify(id));
+		//alert(url);
+		url = "/index.php/Sj/SoftPiracyWarning/DeletePiracy/id/" + url;
+		window.location = url;
+	}
+	
+	function form_chk() {
+		if($('#add_softname').val()=='') {
+			alert("请填写软件名称！");
+			return false;
+		}
+		$('#_form_add').submit();
+	}
+	
+	function form_chk_edit() {
+		if($('#edit_softname').val()=='') {
+			alert("请填写软件名称！");
+			return false;
+		}
+		return true;
+	}
+	
+	function popup(id) {
+		$("#bgdiv").css("display","block");
+		$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+	
+		$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+		$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+		$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+	}
+	
+	function popclose(id) {
+		$("#"+id).css({display:"none"});
+		$("#bgdiv").css({display:"none"});
+	}
+	
+	function edit(rowid) {
+		$('#edit_softname').val($('#softname_'+rowid).html());
+		//$('#edit_softname').html($('#softname_'+rowid).html());
+		$('#edit_id').val(rowid);
+		popup('_edit_div');
+	}
+</script>
+</head>
+
+<body>
+<div style="width:99%; margin-top:4px">
+	<form action="__URL__/ShowPiracy" method="get">
+		<table width="99%" border="1" align="center" cellpadding="0" cellspacing="0">
+			<tbody align="middle">
+				<td width="10%">软件名称：</td>
+				<td width="85%" align="left"><input type="text" name="softname" id="softname" value="{$softname}" width="100%"></td>
+				<td width="5%"><input type="submit" value="搜索"></td>
+			</tbody>
+		</table>
+	</form>
+	<div align="right"><button style="cursor:pointer;font-weight:bold;" onclick="popup('_add_div')">添加软件</button></div>
+	<table width="99%" border="1" align="center" cellpadding="0" cellspacing="0" style="margin-top:10px">
+		<thead>
+			<tr align="center">
+				<th width="5%" height="26" bgcolor="#E3E2FE">选择</th>
+				<th width="8%" bgcolor="#E3E2FE">ID</th>
+				<th width="50%" bgcolor="#E3E2FE">软件名称</th>
+				<th width="25%" bgcolor="#E3E2FE">时间</th>
+				<th width="12%" bgcolor="#E3E2FE">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="piracyList" id="piracyList">
+				<tr>
+					<td align="center"><input type="checkbox" id="{$piracyList.id}"></td>
+					<td align="center"> {$piracyList.id}</td>
+					<td align="center" id="softname_{$piracyList.id}">{$piracyList.softname}</td>
+					<td align="center"> {$piracyList.update_at|date='Y-m-d H:i:s',###|default='&nbsp;'} </td>
+					<td align="center">
+						<a style="cursor:pointer;" href="javascript:void(0);" onclick="edit({$piracyList.id})">编辑</a>
+						<a href="javascript:void(0);" onclick="deleteOne({$piracyList.id})">删除</a>
+					</td>
+				</tr>
+			</volist>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="10">
+					<input type="button" value="全选" onclick="selectAll();">
+					<input type="button" value="反选" onclick="selectRev();">
+					<input type="button" value="批量删除" onclick="deleteAll();">
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+<div id="_add_div" style="position:absolute;top:150px;left:350px;display:none;background:#EEEEEE;width:330px;height:150px;border:1px solid #000;font-size:14px;">
+	<form name="form_add" method="get" action="__URL__/EditPiracy/action/add" id="_form_add" onsubmit="return form_chk()" style="width:100%;height:100%;">
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+		<tr>
+			<td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">添加盗版审核软件：</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">软件名称：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="softname" id="add_softname" /></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="text-align:center;"><button style="margin-right:15px;" type="submit">确定</button><button type="button" onclick="popclose('_add_div')">取消</button></td>
+		</tr>
+	</table>
+	</form>
+</div>
+<div id="_edit_div" style="position:absolute;top:150px;left:350px;display:none;background:#EEEEEE;width:330px;height:150px;border:1px solid #000;font-size:14px;">
+	<form name="form_add" method="get" action="__URL__/EditPiracy/action/edit" onsubmit="return form_chk_edit()" style="width:100%;height:100%;">
+	<input type="hidden" id="edit_id" name="edit_id" value=""/>
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+		<tr>
+			<td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">编辑盗版审核软件：</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">软件名称：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="softname" id="edit_softname" /></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="text-align:center;"><button style="margin-right:15px;" type="submit">确定</button><button type="button" onclick="popclose('_edit_div')">取消</button></td>
+		</tr>
+	</table>
+	</form>
+</div>
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>
+</html>

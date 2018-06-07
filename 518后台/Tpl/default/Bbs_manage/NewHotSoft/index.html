@@ -1,0 +1,123 @@
+<include file="../../Public/header"  />
+
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+
+<link rel="stylesheet" type="text/css" href="/Public/zoom/zoom.css" />
+<script src="/Public/zoom/zoom.js"></script> 
+
+<script type="text/javascript">
+    function edit_rank() {
+        $("label[id^=label_rank_]").each(function(){
+            $(this).css('display', 'none');
+        });
+        $("input[id^=rank_]").each(function(){
+            $(this).css('display', 'block');
+        });
+        $("#btn_edit_rank").css('display','none');
+        $("#btn_save_rank").css('display','block');
+        $("#btn_cancel_rank").css('display','block');
+    }
+    
+    function cancel_rank() {
+        $("label[id^=label_rank_]").each(function(){
+            $(this).css('display', 'block');
+        });
+        $("input[id^=rank_]").each(function(){
+            var id_name = $(this).attr('id');
+            var old_value = '';
+            id_name.replace(/rank_(\d+)/, function(a,b) {
+                var id = b;
+                old_value = $("#label_rank_"+id).text();
+            });
+            // 取消编辑，将值还原回去
+            $(this).val(old_value);
+            // 输入框设为不可见
+            $(this).css('display', 'none');
+        });
+        $("#btn_edit_rank").css('display','block');
+        $("#btn_save_rank").css('display','none');
+        $("#btn_cancel_rank").css('display','none');
+    }
+
+    function save_rank() {
+        var data = {};
+        // 获得排序input里的所有值
+        $("input[id^=rank_]").each(function(){
+            var i = $(this).attr("id");
+            var val = $(this).val();
+            data[i] = val;
+        });
+        // 检查排序是否有相同的数
+        for (i in data) {
+            for (j in data) {
+                if (data[i] == data[j] && i != j) {
+                    alert("排序不能相同");
+                    return false;
+                }
+            }
+        }
+        $.ajax({
+            url: "__URL__/batch_rank",
+            data: data,
+            type: 'post',
+            dataType: 'json',
+            success: function(data) {
+                alert(data.info);
+                if (data.status == 0) {
+                    $("#btn_edit_rank").css('display','block');
+                    $("#btn_save_rank").css('display','none');
+                    $("#btn_cancel_rank").css('display','none');
+                    location.href="__URL__/index";
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert("编辑失败");
+            }
+        });
+    }
+</script>
+
+<body>
+
+<ul class="tab_title margin_top">
+    <a href="__URL__/add?width=600&height=500&modal=true" class="thickbox blue search_btn" style="float:right;">添加</a>
+    <span style="float:right;">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <input id="btn_edit_rank" class="search_btn" type="button" value="编辑排序" onClick="edit_rank()" style="float:right;">
+    <span style="float:right;">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <input id="btn_cancel_rank" class="search_btn" type="button" value="取消排序" onClick="cancel_rank()" style="display:none;float:right;">
+    <span style="float:right;">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <input id="btn_save_rank" class="search_btn" type="button" value="保存排序" onClick="save_rank()" style="display:none;float:right;">
+    <div class="clear"></div>
+</ul>
+
+<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list" id="table_list">
+    <thead>
+        <tr align="center">
+            <th width="2%" height="26">排序</th>
+            <th width="4%">软件icon</th>
+            <th width="4%">软件名称</th>
+            <th width="5%">链接地址</th>
+            <th width="5%">编辑时间</th>
+            <th width="5%">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        <volist name="list" id="list">
+        <tr>
+            <td>
+                <label id="label_rank_{$list.id}">{$list.rank}</label>
+                <input id="rank_{$list.id}" type="text" value="{$list.rank}" style="display:none;"/>
+            </td>
+            <td><img src="{$img_host}{$list.icon_path}" zoomfile="{$img_host}{$list.icon_path}" file="{$img_host}{$list.icon_path}" class="zoom" width="120" height="80" inpost="1" onclick="_zoom(this, this.src)"/></td>
+            <td>{$list.softname}</td>
+            <td><a href="{$list.link_url}" target="blank">{$list.link_url}</a></td>
+            <td>{$list.update_tm|date="Y-m-d H:i:s", ###}</td>
+            <td><a href="__URL__/edit?id={$list.id}" class="thickbox blue">编辑</a> ｜ <a href="__URL__/del?id={$list.id}" class="blue" onclick="return confirm('你确定要删除该数据吗？');">删除</a></td>
+        </tr>
+        </volist>
+    </tbody>
+</table>
+<div id="append_parent"></div>
+</body>

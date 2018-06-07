@@ -1,0 +1,558 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+ <script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+<!--上传文件用到的js-->
+<script type="text/javascript" src="/Public/js/ajaxfileupload_anzhi.js?1"></script>   
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+    jQuery(function(){
+		var  function_from="textpage"; //选择页面 内容合作详情页的时候按照标题和标签，其他没有标签
+        // 生成推荐链接并赋值给a元素，第三个参数不配置，使用默认分配的名称
+        href = generate_content_type_href('content_type_div','1,2,3,4,5,6,7,9,10','',function_from);
+        $("#content_type_a").attr("href", href);
+		$(".type2").css('display','none');
+    });
+    
+    function checkLen(obj, maxChars, hint_id) {
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+        $("#" + hint_id).html(obj.value.length + "/" + maxChars);
+    };
+
+	function check_web_game(){
+		var rank = parseInt($.trim($("#rank").val()));
+		var i_title = $("#i_title").val();
+		var r=/^[1-9]\d*$/;
+		if(r.test(rank) == false)
+		{
+			alert("排序请填写正整数");
+		}
+		if(!rank||rank > 20){
+			alert("排序值20以内");
+			return false;
+		}
+		if (!i_title) {
+			alert("图标名称不能为空！");
+			return false;
+		}
+		var i_image_url = $("#i_image_url").val();
+		if(!i_image_url){
+			alert("图标素材未上传");
+			return false;
+		}
+		var init_val = parseInt($.trim($('#init_val').val()));
+		var random_start = parseInt($.trim($('#random_start').val()));
+		var random_end = parseInt($.trim($('#random_end').val()));
+
+		if(init_val)
+		{
+			if(r.test(init_val) == false)
+			{
+				alert("初始值请填写正整数");
+				return false;
+			}
+		}
+		else
+		{
+			alert("人气值初始值为必填");
+			return false;
+		}
+		if(random_start)
+		{
+			if(r.test(random_start) == false)
+			{
+				alert("随机值最小值请填写正整数");
+				return false;
+			}
+		}
+		else
+		{
+			alert("人气值随机值最小值为必填");
+			return false;
+		}
+		if(random_end)
+		{
+			if(r.test(random_end) == false)
+			{
+				alert("随机值最大值请填写正整数");
+				return false;
+			}
+		}
+		else
+		{
+			alert("人气值随机值最大值为必填");
+			return false;
+		}
+		if(random_start >= random_end)
+		{
+			alert("人气值随机值最小值不能大于最大值");
+			return false;
+		}
+		var s_description = $("#s_description").val();
+		if(!s_description){
+			alert('一句话简介不能为空');
+			return false;
+		}
+		var upload_search_keys = $("#search_keys_count").val();
+		if(!upload_search_keys){
+			alert('请上传指定搜索词');
+			return false;
+		}
+		return true;
+	}
+
+    function checkPost() {
+		var type = $("input[name='type']:checked").val();
+		if(type == 1){
+			var title = $("#add_content_form #title").val();
+			if (!title) {
+				alert("标题不能为空！");
+				return false;
+			}
+			var description = $("#add_content_form #description").val();
+			var is_auto_connect = $("input[name='auto_connect']").is(':checked');
+			if(!is_auto_connect)
+			{
+				if (!description) {
+					alert("描述不能为空！");
+					return false;
+				}
+			}
+			else
+			{
+				//选择了 推荐内容就必须是页面 - 内容合作 详情页
+				var content_type = $("#content_type").val();
+				var coop_detail_url = $("#coop_detail_url").val();
+				var coop_detail_pos = $("#coop_detail_pos").val();//选择标签是填写的位置和标签
+				var coop_detail_label_id = $("#coop_detail_label_id").val();
+				if(content_type!=4||(!coop_detail_url&&!coop_detail_pos))
+				{
+					alert("选择自动关联，推荐内容必须选择内容合作详情页！");
+					return false;
+				}
+			}
+			if(document.getElementById("single_soft").checked==true)
+			{
+				if(document.getElementById("single_pk").value=="")
+				{
+					alert("请填写一个包名!");
+					return false;
+				}
+			}
+		}
+
+
+
+        var show_place_elem = $("#add_content_form input[name='show_place[]']");
+        var show_place = 0;
+        show_place_elem.each(function() {
+            if ($(this).attr("checked") == "checked") {
+                show_place |= $(this).val();
+            }
+        });
+        if (!show_place) {
+            alert("页面位置不能为空！");
+            return false;
+        }
+		if(type==2){
+			if(!check_web_game()) return false;
+		}
+        var start_time = $("#add_content_form #start_time").val();
+        if (!start_time) {
+            alert("开始时间不能为空！");
+            return false;
+        }
+        var end_time = $("#add_content_form #end_time").val();
+        if (!end_time) {
+            alert("结束时间不能为空！");
+            return false;
+        }
+        if (start_time > end_time) {
+            alert("开始时间不能大于结束时间！");
+            return false;
+        }
+	  	var pkg = $("#package").val();
+  		var enable=true;
+	  	if(pkg&&type==1){
+	  		$.ajax({
+				url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+				type: 'get',
+				async:false,
+				success: function(data){
+					if(data){
+						if(!confirm(data)){
+							enable=false;
+						}
+					}
+				}
+			});
+			if(!enable){
+				return false;
+			}
+	  	}
+		return checkRcontent("#add_content_form");
+    }
+    
+	//软件包名验证
+	function get_softname()
+	{
+		var pkg=document.getElementById("single_pk").value;
+		$.ajax({
+			url:'/index.php/Sj/Onlinegame/get_softname/package/'+pkg,
+			type: 'get',
+			success: function(data)
+			{
+			    if(data != 2)
+				{
+					var obj = eval('(' + data + ')');
+					
+					//document.getElementById(id+"_name").value=obj.soft_name;
+					//$('#soft_name').val(obj.soft_name);
+					//$('#my_game').val(obj.category_name);
+				}
+				else
+				{
+				    document.getElementById("single_pk").value="";
+					//document.getElementById("error_info").value="该软件不存在";
+					alert("该软件不存在");
+					return false;
+				}
+			}
+		});
+	}
+	//检查单一包名
+	function check_single()
+	{
+	 if(document.getElementById("single_soft").checked==true)
+		{
+		  alert("选择单一详情页就不能选择详情页");
+		  document.getElementById("all_details").checked=false;
+		  return false;
+		}
+	}
+    function check()
+	{
+	    if(document.getElementById("all_details").checked==true)
+		{
+		  alert("选择详情页就不能选择单一软件详情页");
+		  document.getElementById("single_soft").checked=false;
+		  return false;
+		}
+		else
+		{
+			 if(document.getElementById("single_soft").checked==true)
+			{
+			  $("#single_package").css("display","block");
+			}
+			if(document.getElementById("single_soft").checked==false)
+			{
+			 $("#single_package").css("display","none");
+			}
+		}
+	}
+	function check_search_result()
+	{
+		if(document.getElementById("search_result_page").checked==true)
+		{
+			$("#result_page").css("display","block");
+		}
+		else
+		{
+			$("#result_page").css("display","none");
+		}
+	}
+	//精准投放
+	function choose_condition()
+	{
+		//V6.2搜索结果页面如果选中精准投放中会有批量上传搜索结果词
+		if(document.getElementById("search_result_page").checked==true)
+		{
+			$("#result_page").css("display","block");
+		}
+		var div_val=$("#choose_div_id").html();
+		if(div_val=="")
+		{
+			$.ajax({
+				url:'/index.php/Public/showContions',
+				type: 'POST',
+				dataType:'html',
+				success: function(data)
+				{
+					$("#choose_div_id").html(data);
+					$("#choose_div_id #think_page_trace").remove();
+					$("#choose_div_id #think_run_time").remove();
+					tb_init('#choose_div_id a.thickbox');//pass where to apply thickbox
+					imgLoader = new Image();// preload image
+					imgLoader.src = tb_pathToImage;
+				}
+			});
+		}
+		else
+		{
+			$("#choose_div_id").toggle();
+		}
+	}
+	//V6.2上传指定搜索词
+	function upload_file_search_keys() {
+        $.ajaxFileUpload({
+            url:'__APP__/Public/pub_csv_count',
+            type:'POST',
+			fileElementId:'upload_search_keys',
+			dataType: 'json',
+            secureuri:false,
+            dataType:'json',
+            success:function(data)
+			{
+			    if(data.error1==-1)
+				{
+					alert("请选择导入的CSV文件!");
+					document.getElementById("search_keys_url").value="";
+					document.getElementById("search_keys_count").value="";
+					document.getElementById("show_search_keys_count").value=""; 
+					return false;
+				}
+				else if(data.error2==-2)
+				{
+					alert("请上传CSV格式文件！");
+					document.getElementById("search_keys_url").value="";
+					document.getElementById("search_keys_count").value="";
+					document.getElementById("show_search_keys_count").value=""; 
+                    return false;					
+				}
+				else if(data.error2==-3)
+				{
+					alert("CSV文件格式不正确,请您参考下载模板！");
+					document.getElementById("search_keys_url").value="";
+					document.getElementById("search_keys_count").value="";
+					document.getElementById("show_search_keys_count").value=""; 
+                    return false;					
+				}
+				else
+				{
+					document.getElementById("search_keys_url").value=data.csv_url;
+					document.getElementById("search_keys_count").value=data.out_count;
+					document.getElementById("show_search_keys_count").value="有效搜索热词数"+data.out_count;
+                }				
+            }
+        });
+    }
+	function choose_auto()
+	{
+		var is_auto_connect = $("input[name='auto_connect']").is(':checked');
+		if(is_auto_connect)
+		{
+			var function_from="textpage";//添加个参数  区别来自文字链 并且选中 自动关联详情页的时候 推荐内容只有内容合作详情页
+			href = generate_content_type_href('content_type_div','4','',function_from);
+		}
+		else
+		{
+			href = generate_content_type_href('content_type_div','1,2,3,4,5,6,7,9,10','',function_from);
+		}
+		$("#content_type_a").attr("href", href);
+	}
+
+	function change_style(val){
+		$(".type"+val).css('display','');
+		var arr = ['1','2','4','64','512','65536'];
+		var href;
+		var function_from="textpage";
+		if(val==1){
+			$(".type2").css('display','none');
+			$("input[name='show_place[]'][value='1048576']").attr('checked',false);
+			href = generate_content_type_href('content_type_div','1,2,3,4,5,6,7,9,10','',function_from);
+			for(var i =0;i<arr.length;i++){
+				$("input[name='show_place[]'][value='"+arr[i]+"']").attr('checked',true);
+			}
+		}else{
+			$(".type1").css('display','none');
+			$("input[name='show_place[]'][value='1048576']").attr('checked',true);
+			href = generate_content_type_href('content_type_div','5','',function_from);
+			for(var i =0;i<arr.length;i++){
+				$("input[name='show_place[]'][value='"+arr[i]+"']").attr('checked',false);
+			}
+		}
+		$("#content_type_a").attr("href", href);
+		check_search_result();
+	}
+</script>
+
+<form id="add_content_form" method="POST" name="myform" action="__URL__/add_textpage" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td style="width: 15%"><font color="red">*</font>样式</td>
+		<td>
+			<input type="radio" name="type" value="1" checked onclick="change_style(1)"/>普通文字链
+			<input type="radio" name="type" value="2" onclick="change_style(2)"/>网页游戏-软件列表
+		</td>
+		<td></td>
+	</tr>
+    <tr class="sub_tr type1">
+        <td style="width:90px;"><font color="red">*</font>标题</td>
+        <td>
+            <input type="text" name="title" id="title" onBlur="checkLen(this,3,'title_hint')" onKeyUp="checkLen(this,3,'title_hint')"/>
+        </td>
+        <td><span id="title_hint">0/3</span></td>
+    </tr>
+    <tr class="sub_tr type1">
+        <td><font color="red">*</font>描述</td>
+        <td>
+            <textarea name="description" id="description" onBlur="checkLen(this,20,'description_hint')" onKeyUp="checkLen(this,20,'description_hint')"></textarea>
+			<input type="checkbox" name="auto_connect" id="auto_connect" onclick="choose_auto()" value="1"/><span>自动关联详情页标题</span>
+        </td>
+        <td><span id="description_hint">0/20</span></td>
+    </tr>
+    <tr class="sub_tr ">
+        <td><font color="red">*</font>页面位置</td>
+        <td>
+			<div class="type1">
+            <input type='checkbox' name='show_place[]' value='4' checked="checked">首页推荐</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' id="all_details" onclick="check_single()" value='1' checked="checked">详情页</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='2' checked="checked">可更新页</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <input type='checkbox' name='show_place[]' value='64' checked="checked">应用-最热</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='512' checked="checked">游戏-最热</input><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='65536' checked="checked">发现-推荐</input><span>&nbsp;&nbsp;&nbsp;</span><br/>
+			<input type='checkbox' name='show_place[]' value='131072'>发现-汉化</input><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='262144'>发现-专题</input><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='524288'>6.0应用排行</input><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='33554432'>金币列表</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            
+            <label style="color:red;">以下页面请慎用</label><br/>
+            <input type='checkbox' name='show_place[]' value='8'>飙升</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='16'>首页必备</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <!--<input type='checkbox' name='show_place[]' value='32'>首页尝鲜</input><span>&nbsp;&nbsp;&nbsp;</span>-->
+            <input type='checkbox' name='show_place[]' value='128'>应用分类Tab</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <input type='checkbox' name='show_place[]' value='256'>应用日排行</input><span>&nbsp;&nbsp;&nbsp;</span>
+            
+            <input type='checkbox' name='show_place[]' value='1024'>网游</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <input type='checkbox' name='show_place[]' value='2048'>单机</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='4096'>游戏分类Tab</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='8192'>管理</input><span>&nbsp;&nbsp;&nbsp;</span>
+			 <input type='checkbox' name='show_place[]' value='16384'>个人中心</input><span>&nbsp;&nbsp;&nbsp;</span>
+			 <br/>
+			 <input type='checkbox' name='show_place[]' onclick="check()" id="single_soft" value='32768'>单一软件详情页</input><br/>
+			 <div style="display:none" id="single_package">
+			 <input type="text"  id="single_pk"  name="single_pk" onblur="get_softname();"/>
+			 <input id="error_info" style="color:red; border:none;" readonly value=""/>
+			 </div>
+			</div>
+			 <input type='checkbox' id="search_result_page" name='show_place[]' onclick="check_search_result()" value='1048576'>搜索结果页</input><span>&nbsp;&nbsp;&nbsp;</span>
+			 <br/>
+        </td>
+        <td/>
+    </tr>
+	<tr class="sub_tr type2">
+		<td><font color="red">*</font>排序值</td>
+		<td>
+			<input type="text"  id="rank"  name="rank"/>
+		</td>
+		<td>20以内</td>
+	</tr>
+	<tr class="sub_tr type2">
+	<td ><font color="red">*</font>图标名称</td>
+	<td><input id="i_title" name='i_title' type='text' onKeyUp="checkLen(this, 20)"/></td>
+	<td>2~20个字符</td>
+	</tr>
+	<tr class="sub_tr type2">
+	<td><font color="red">*</font>图标素材</td>
+	<td><input name='i_image_url' id="i_image_url" type='file'/></td>
+	<td>限制上传60*60的JPG/PNG图片</td>
+	</tr>
+	<tr class="sub_tr type2">
+	<td>GIF图片</td>
+	<td><input name='gif_image_url'  type='file'/></td>
+	<td>限制上传60*60的gif图片</td>
+	</tr>
+	<tr class="sub_tr type2">
+	<td><font color="red">*</font>人气值</td>
+	<td>
+		<span>初始值</span><input id="init_val" name='init_val' type='text' onKeyUp="checkLen(this, 10)"/><br/>
+		<span>随机数 从</span><input id="random_start" name='random_start' type='text'/>到<input id="random_end" name='random_end' type='text'/><br/>
+		<span style="color:red; font-size:12px">人气值 = 初始值 + N1 + N2 + ...+Nn(N为每次的随机数)</span>
+	</td>
+	<td></td>
+	</tr>
+	<tr class="sub_tr type2">
+	<td><font color="red">*</font>一句话简介</td>
+	<td><input name='s_description' id='s_description' type='text' onKeyUp="checkLen(this, 40)"/></td>
+	<td>40字符</td>
+	</tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>推荐内容</td>
+        <td>
+            <!--下面a里的href的url会在ready函数里自动生成-->
+            <a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+            <!--下面的content_type_div是选择推荐内容后append的地方-->
+            <div id="content_type_div"/>
+        </td>
+        <td></td>
+    </tr>
+	<tr class="sub_tr">
+		<td>精准投放</td>
+		<td>
+		<a href="#" onclick="choose_condition()"><font color="blue">选择投放条件</font></a><br />
+		<table id="result_page" style="display:none;width:400px" border="none">
+			<tr>
+				<td style="width:136px;">指定搜索词：</td> 
+				<td style="width:300px;height:70px;">
+				<a href="__APP__/Public/down_moban" class="blue" style="text-decoration:none;font-size:14px; color:blue">下载csv模板</a><br>
+				<input type="file" id="upload_search_keys" name="upload_search_keys" style="background:none; border:none; width:170px;"/><input type="button" value="上传" onclick="upload_file_search_keys()"/><br>
+				<input type="text" id="show_search_keys_count" name="show_search_keys_count" style="border:none;background:none; color:red;" readonly value=""/>
+				<input type='hidden' name='search_keys_url' id='search_keys_url' value="">
+				<input type='hidden' name='search_keys_count' id='search_keys_count' value="">
+				</td>
+			</tr>
+		</table>
+		<div id="choose_div_id"></div>
+		</td>
+        <td></td>
+	</tr>
+    <tr class="sub_tr">
+		<td><font color="red">*</font>开始时间</td>
+		<td>
+            <input id="start_time" name="start_time" type="text" class="Wdate" style="float:left" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"/>
+        </td>
+        <td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>结束时间</td>
+		<td>
+            <input id="end_time" name="end_time" type="text" class="Wdate" style="float:left" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})"/>
+        </td>
+        <td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='co_type'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="pid" value='<?php echo $pid?>'/>
+            <input type='hidden' name="extent_id" value='<?php echo $extent_id?>'/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>排期表</title>
+<?php if(!$export){ ?>
+<script type="text/javascript" src="__PUBLIC__/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src='__PUBLIC__/js/thickbox-compressed.js' ></script>
+<link rel="stylesheet" href="__PUBLIC__/css/thickbox.css" type="text/css" media="screen" />
+<?php } ?>
+
+<style type="text/css">
+table.gridtable {
+	font-family: verdana,arial,sans-serif;
+	font-size:11px;
+	border-width: 1px;
+	border-color: #666666;
+	border-collapse: collapse;
+}
+table.gridtable td {
+	border-width: 1px;
+	padding: 5px 0;
+	border-style: solid;
+	border-color: #666666;
+	text-align:center;
+}
+</style>
+
+</head>
+
+<body>
+
+<?php if(!$export){ ?>
+<div style="padding:10px;">
+	<form action="">
+	客户编号：<input type="text" name="cmark" value="{$cmark}"/>
+	日期：<input type="text" name="start"  class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"   id="input_start" value="<?php echo date('Y-m-d',$start);?>"/>～<input type="text" name="end" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"   id="input_end" value="<?php echo date('Y-m-d', $end);?>"/>
+	<a href="/index.php/Settlement/Schedules/bd/bids/{$bids}/" class="thickbox" id="a_thickbox"><button type="button">选择商务</button></a>
+	|
+	<input type="hidden" name="bids" id="input_bids" value="{$bids}"/>
+	<button type="submit">搜索</button>
+	<a href="__URL__/index"><button type="button">清空</button></a>
+	</form>
+	<br/>
+	<a href="?export=1"><button type="button">导出</button></a>
+</div>
+<?php } ?>
+
+<br/>
+<table class="gridtable" style="width:<?php echo (floor(($end-$start)/86400)+1)*51+302;?>px;">
+	<tr>
+		<td bgcolor="#000000" style="color:#FFFFFF;" colspan="<?php echo floor(($end-$start)/86400)+3;?>"><?php echo date('Y/m/d',$start).' ～ '.date('Y/m/d', $end);?></td>
+	</tr>
+	<tr bgcolor="#FFCC00">
+		<td rowspan="2" style="width:150px;">刊例广告位</td>
+		<td rowspan="2" style="width:150px;">广告区间名</td>
+<?php
+	for($t = $start; $t<=$end; $t+=86400)
+	{
+		echo '<td style="width:50px;">'.$week[date('N',$t)].'</td>';
+	}
+?>
+	</tr>
+	<tr bgcolor="#FFCC00">
+<?php
+	for($t = $start; $t<=$end; $t+=86400)
+	{
+		echo '<td>'.date('j',$t).'</td>';
+	}
+?>
+	</tr>
+<?php
+	foreach($data as $index=>$item)
+	{
+		$par = explode(',', $index);
+		$max = max($stats[$index]);
+
+		for($i=1; $i<=$max; $i++)
+		{
+			echo "<tr>";
+			echo "<td>".$advert[$par[0]]."</td>";
+			echo "<td>".$advert_area[$par[1].','.$par[2]]."</td>";
+
+			$bgcolor = $color = '';
+			for($t = $start; $t<=$end; $t+=86400)
+			{
+				$d = date('Y-m-d', $t);
+				$app_id = array_shift($data[$index][$d]);
+
+				if($app_id && isset($app_mark[$app_id]))
+				{
+					if($app_mark[$app_id][discount]==0 && $app_mark[$app_id]['type']==1)
+					{
+						$color = '#000000';
+						$bgcolor = '#FFFFFF';
+					}
+					elseif($app_mark[$app_id]['bd_status']!=1)
+					{
+						$color = '#FF0000';
+						$bgcolor = '#FFFFFF';
+					}
+					else
+					{
+						$R = hexdec(substr($app_mark[$app_id]['color'],0,2));
+						$G = hexdec(substr($app_mark[$app_id]['color'],2,2));
+						$B = hexdec(substr($app_mark[$app_id]['color'],4,2));
+
+						$gray = $R * 0.299 + $G * 0.587 + $B * 0.114;
+						if ($gray >= 192)
+							$color = '#000000';
+						else
+							$color = '#FFFFFF';
+
+						$bgcolor = '#'.$app_mark[$app_id]['color'];
+					}
+
+					echo '<td style="color:'.$color.';background-color:'.$bgcolor.'";>'.$app_mark[$app_id][cmark].'</td>';
+				}
+				else
+					echo '<td style="color:#AAAAAA;">'.$app_id.'</td>';
+			}
+
+			echo "</tr>";
+		}
+	}
+?>
+</table>
+<br/><br/>
+
+</body>
+</html>

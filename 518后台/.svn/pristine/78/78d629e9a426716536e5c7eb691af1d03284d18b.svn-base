@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>开发者审核数据统计</title>
+<style type="text/css">
+body, td, th {font-size: 12px;height:35px;}
+ul li{list-style:none;margin:0px;}
+</style>
+<link rel="stylesheet" type="text/css" href="/Public/css/tablelist.css" />
+<link rel="stylesheet" type="text/css" href="/Public/zoom/zoom.css" />
+<link rel="stylesheet" type="text/css" media="all"	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="__PUBLIC__/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script>
+
+function checkBeformSubmit()
+{	
+	if($("#start_tm").val() == ""){
+		alert("开始时间必须填写！");
+		return false;
+	}
+	if($("#end_tm").val() == ""){
+		alert("结束时间必须填写！");
+		return false;
+	}
+	if(Date.parse(new Date($("#start_tm").val())) > Date.parse(new Date($("#end_tm").val())))
+	{
+		alert("结束时间必须大于开始时间！");
+		return false;
+	}
+	if(Date.parse(new Date($("#end_tm").val())) > Date.parse(new Date($("#currentdate").val())))
+	{
+		alert("结束时间不能晚于当前日期！");
+		return false;
+	}
+	return true;
+}
+</script>
+</head>
+<body>
+
+<div style="width:100%; margin-top:4px">
+		<form action="__URL__/data_count_list" >
+		<input type="hidden" id="currentdate"  value="{$currentdate}"/>
+		<table class="yahei">
+			<tr>
+				<td>起止时间：</td>
+				<td><input type="text" name="start_tm" class="Wdate" value="{$start_tm}" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd'})" id="start_tm"/ style="width:200px"></td>
+				<td>到 </td>
+				<td><input type="text" name="end_tm" class="Wdate"  value="{$end_tm}"  onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd'})" id="end_tm"/ style="width:200px"></td>
+				<td><button class="btn btn-sm btn-success" type="submit" style="padding-left:15px;padding-right:15px;margin-left:50px;" onClick="javascript:return checkBeformSubmit();"> 搜索 </button></td>
+				<td><a style="margin-left:400px;" href="/index.php/Dev/DataCount/datacount_export/start_tm/{$start_tm}/end_tm/{$end_tm}"><button class="btn btn-sm btn-success"  style="padding-left:15px;padding-right:15px;" type="button">导出</button></a></td>
+			</tr>
+		</table>
+	</form>
+   </div>
+   开发者审核<br />
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;width:50%;margin-left:0px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="10%" bgcolor="#E3E2FE">&nbsp;</th>
+				<th width="10%" bgcolor="#E3E2FE">当前总量</th>
+				<th width="10%" bgcolor="#E3E2FE">所选周期新增</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach($data_dev_list as $k => $v){ ?>
+			<tr>
+				<td bgcolor="#E3E2FE" ><?php echo $dev_type[$k]; ?></td>
+				<td><?php echo $v['add_data']; ?></td>
+				<td><?php echo $v['cycle_add']; ?></td>
+				
+			</tr>
+			<?php } ?>
+		</tbody>
+	</table>
+</div>
+<div style="width:100%; margin-top:4px">
+   APP审核<br />
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;width:100%" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="10%" bgcolor="#E3E2FE">&nbsp;</th>
+				<th width="7%" bgcolor="#E3E2FE">当前总量</th>
+				<th width="7%" bgcolor="#E3E2FE">游戏总量</th>
+				<th width="7%" bgcolor="#E3E2FE">应用总量</th>
+				<th width="7%" bgcolor="#E3E2FE">电子书总量</th>
+				<th width="10%" bgcolor="#E3E2FE">所选周期总新增</th>
+				<th width="10%" bgcolor="#E3E2FE">所选周期游戏新增</th>
+				<th width="10%" bgcolor="#E3E2FE">所选周期应用新增</th>
+				<th width="10%" bgcolor="#E3E2FE">所选周期电子书新增</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach($data_list as $k => $v){ ?>
+				<?php if($k > 4) continue; ?>
+			<tr>
+				<td bgcolor="#E3E2FE" ><?php echo $type[$k]; ?></td>
+				<td><?php echo $v['counts']; ?></td>
+				<td><?php echo $v['game_total']; ?></td>
+				<td><?php echo $v['app_total']; ?></td>
+				<td><?php echo $v['book_total']; ?></td>
+				<td><?php echo $v['last_add_week']; ?></td>
+				<td><?php echo $v['game_week']; ?></td>
+				<td><?php echo $v['app_week']; ?></td>
+				<td><?php echo $v['book_week']; ?></td>
+			</tr>
+			<?php } ?>
+	    </tbody>
+	</table>
+</div>
+<div style="width:100%; margin-top:4px">
+	前后台标识<br />
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;width:100%" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="10%" bgcolor="#E3E2FE">&nbsp;</th>
+				<th width="7%" bgcolor="#E3E2FE">当前总量</th>
+				<th width="7%" bgcolor="#E3E2FE">游戏总量</th>
+				<th width="7%" bgcolor="#E3E2FE">应用总量</th>
+				<th width="7%" bgcolor="#E3E2FE">电子书总量</th>
+				<th width="10%" bgcolor="#E3E2FE">所选周期总新增</th>
+				<th width="10%" bgcolor="#E3E2FE">所选周期游戏新增</th>
+				<th width="10%" bgcolor="#E3E2FE">所选周期应用新增</th>
+				<th width="10%" bgcolor="#E3E2FE">所选周期电子书新增</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach($data_list as $k => $v){ ?>
+				<?php if($k < 5) continue; ?>
+			<tr>
+				<td bgcolor="#E3E2FE" ><?php echo $type[$k]; ?></td>
+				<td><?php echo $v['counts']; ?></td>
+				<td><?php echo $v['game_total']; ?></td>
+				<td><?php echo $v['app_total']; ?></td>
+				<td><?php echo $v['book_total']; ?></td>
+				<td><?php echo $v['last_add_week']; ?></td>
+				<td><?php echo $v['game_week']; ?></td>
+				<td><?php echo $v['app_week']; ?></td>
+				<td><?php echo $v['book_week']; ?></td>
+			</tr>
+			<?php } ?>
+	    </tbody>
+	</table>
+</div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>安智购省钱 福利进校园</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/store/css/common.css?v1"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">
+var sid='<!--{$out.sid}-->';
+        function isMobel(value)  {  
+                //if((/^13\d{9}$/g.test(value))||(/^14\d{9}$/g.test(value))||(/^15\d{9}$/g.test(value))||(/^18\d{9}$/g.test(value))){
+                if(/^1[34578]\d{9}$/g.test(value)){
+                        return true;  
+                }else{
+                        return false;  
+                }
+        }
+
+function begin_save(){
+    $("#userinfo_phone2").css('display','block');
+    $("#userinfo_phone1").css('display','none');
+}
+
+function save(){
+        $("#tel_mess").html("");
+        var mobile = $("#mobile").val();
+        if($("#mobile").val().trim().length==0){
+            $("#userinfo_phone1").css('display','block');
+            $("#userinfo_phone2").css('display','none');
+                return;
+        }
+        if(!isMobel($("#mobile").val())){
+            $("#tel_mess").html("手机号格式不正确");
+            return;
+        }
+	$.ajax({
+		url: '/lottery/store/seller_info.php?sid='+sid,
+		data: 'mobile='+mobile,
+                type: 'post',
+                success:function(data){
+                    if(data==1){
+                        location.reload();
+                    }else if(data==2){
+                        $("#tel_mess").html("该手机号已存在");
+                        return;
+                    }
+                }
+	});
+}
+
+</script>
+</head>
+<body class="body2">
+<ul class="nav">
+	<li><a href="/lottery/store/seller_index.php?sid=<!--{$out.sid}-->">代金券验证</a></li>
+	<li><a href="/lottery/store/seller_balance.php?sid=<!--{$out.sid}-->">费用结算</a></li>
+	<li class="current"><a href="javascript:;">我的资料</a></li>
+</ul>
+<div class="main2">
+	<div class="userinfo_wrap">
+		<div class="title">
+			<h3>基本信息</h3>
+		</div>
+		<ul class="userinfo_list">
+                    <li>我的账号：<!--{$out.userinfo.username}--></li>
+			<li>城市：<!--{$out.userinfo.city}--></li>
+			<li>学校：<!--{$out.userinfo.school}--></li>
+			<li>店铺名称：<!--{$out.userinfo.store_name}--></li>
+			<li>店主姓名：<!--{$out.userinfo.shopkeeper}--></li>
+			<li class="userinfo_alert" id="userinfo_phone1">联系电话：<span><!--{$out.userinfo.tel}--></span><a href="javascript:;" onclick="begin_save()">修改</a> </li>
+			<li class="userinfo_alert" id="userinfo_phone2" style="display:none;">联系电话：<span><input id="mobile" type="text" size="15" value="<!--{$out.userinfo.tel}-->"/></span><a href="javascript:;" onclick="save()">保存</a> </li>
+                        <font color="red"><span id="tel_mess"></span></font>
+			<li class="userinfo_alert" id="userinfo_pwd">登录密码：<span>******</span><a href="/lottery/store/seller_change_password.php?sid=<!--{$out.sid}-->">修改</a></li>
+		</ul>
+		<div class="title">
+			<h3>收款账号信息</h3>
+		</div>
+		<ul class="userinfo_list">
+			<li>支付宝账户：<!--{$out.userinfo.alipay}--></li>
+			<li>支付宝账户姓名：<!--{$out.userinfo.alipay_name}--></li>
+			<li>身份证号码：<!--{$out.userinfo.id_number}--></li>
+			<li>修改账号信息请联系商务经理</li>
+		</ul>
+	</div>
+</div>
+<div class="footer">
+	<p>客服电话：010-58851836-8002</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<link rel="stylesheet" type="text/css" href="/Public/zoom/zoom.css" />
+ <script src="/Public/zoom/zoom.js"></script> 
+ 
+<script>
+function checkit(){
+	if(confirm("确定删除此数据?"))
+	{
+		return true;
+	}
+	return false;
+}
+
+function change_show()
+{
+  　$("input[name='rank']").attr("readonly",false);
+	$("#edit_rank").css('display','none');
+	$("#edit").css('display','inline-block');
+	$("#remove_edit").css('display','inline-block');
+}
+function cancel_show()
+{	
+	$("input[name='rank']").attr("readonly",true);
+	$("#edit_rank").css('display','inline-block');
+	$("#edit").css('display','none');
+	$("#remove_edit").css('display','none');
+	window.location.reload(true);
+}
+function change_rank()
+{
+	var rank="";
+	var id="";
+	$('input[name="rank"]').each(function(){   
+        rank=rank+ $(this).val()+",";   
+    });
+	$('input[name="id"]').each(function(){   
+        id=id+ $(this).val()+",";   
+    });	
+	$.ajax({
+			url: '__URL__/change_rank',
+			data: 'id='+id+'&rank='+rank,
+			type: 'get',
+			success: function(data){
+				if(data == 1)
+				{
+					alert("编辑排序成功");
+					window.location.reload(true);
+				}
+				else
+				{
+					alert("排序不可有重复数字，为大于1小于20的正整数");
+				}
+			}
+		});
+}
+
+</script>
+<style>
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display: inline;}
+.currentSel{ color:red;font-weight:bold;}
+</style>
+<body>
+<div style="margin:20px 10px 20px 6px;">
+<form action="__URL__/recommend_show_list/search/1/" method="get" class="table_list">
+<table>
+	<tr>
+		<td>宣传标题：<input type="text" name="pic_title" value="{$pic_title}" /></td>
+		<td>广告ID：<input type="text" name="ad_id" value="{$ad_id}" /></td>
+		<td>排期区间：<input id="start_tm" name="start_tm" value="{$start_tm}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px" />&nbsp;至&nbsp;<input id="end_tm" name="end_tm" value="{$end_tm}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"/></td>
+		<td>排序：
+			<select name="rank">
+				<option selected >全部</option>
+				<?php for($i=1;$i<=$num; $i++) { ?>
+					<option <?php if($i==$rank) echo selected; ?>><?php echo $i; ?></option>
+				<?php } ?>
+	        </select>
+		</td>
+		<td><input type="submit" value="搜索" class="search_btn" /></td>
+	</tr>
+</table>
+</form>
+</div>
+<div style="margin:20px 10px 20px 6px; float:left;">
+<a href="__URL__/recommend_show_list/my_time/1" style="display:inline-block;" class="search_btn <?php if ($my_time == 1){ ?> currentSel<?php } ?>">已过期</a>
+<a href="__URL__/recommend_show_list/my_time/2" style="display:inline-block;" class="search_btn <?php if ($my_time == 2){ ?> currentSel<?php } ?>">已上线</a>
+<a href="__URL__/recommend_show_list/my_time/3" style="display:inline-block;" class="search_btn <?php if ($my_time == 3){ ?> currentSel<?php } ?>">待上线</a>
+</div>
+<div style="margin:20px 10px 20px 6px;float:right;">
+<a href="__URL__/add_recommend_show?mm" style="display:inline-block;" class="search_btn thickbox">添加</a>
+</div>
+<div style="clear:both;"></div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="10%">广告ID</th>
+			<th width="10%">排序</th>
+			<th width="20%">图片/标题</th>
+			<th width="15%">链接地址</th>
+			<th width="10%">开始时间</th>
+			<th width="10%">结束时间</th>
+			<th width="10%">备注</th>
+			<th width="15%">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr <?php $left_tm=$val['end_time'] - time(); if ($left_tm>0&&$left_tm <= $time) echo 'bgcolor="#EEE9BF"'; ?>>
+		<td>{$val.ad_id}</td>
+		<td>{$val.rank}<input value="{$val.id}" name="id" type="hidden"/></td>
+		<td><img src="<?php echo IMGATT_HOST;?>{$val.pic_url}" zoomfile="<?php echo IMGATT_HOST;?>{$val.pic_url}" file="<?php echo IMGATT_HOST;?>{$val.pic_url}" class="zoom" width="120" height="80" inpost="1" onclick="_zoom(this, this.src)" /><br />{$val.recomment_title}</td>
+		<td><a href="{$val.link_address}" target="_blank">{$val.link_address}</a></td>
+		<td><?php echo date('Y-m-d H:i:s',$val['start_time']); ?></td>
+		<td><?php echo date('Y-m-d H:i:s',$val['end_time']); ?></td>
+		<td>{$val.note}</td>
+		<td><?php if(($my_time==2)||($val['start_time'] <= time() && $val['end_time'] >= time())) { ?><a href="__URL__/edit_recommend_show/id/{$val.id}/lr/{$lr}/p/{$p}/rank/{$val.rank}/my_time/{$my_time}/" class="thickbox">编辑</a>&nbsp;&nbsp;<a href="__URL__/recommend_show_over/id/{$val.id}/lr/{$lr}/p/{$p}/" class="thickbox" >结束</a>&nbsp;&nbsp;<a href="__URL__/recommend_show_list/id/{$val.id}/lr/{$lr}/p/{$p}/rank/{$val.rank}/schedule/1/my_time/3" >排期详情</a> <?php } else if($my_time==3||($val['start_time']>time())) { ?><a href="__URL__/edit_recommend_show/id/{$val.id}/lr/{$lr}/p/{$p}/rank/{$val.rank}/my_time/{$my_time}/" class="thickbox">编辑</a>&nbsp;&nbsp;<a href="__URL__/del_recommend_show/id/{$val.id}/lr/{$lr}/p/{$p}/my_time/{$my_time}/" onclick="return checkit();">删除</a><?php } else { ?><a href="__URL__/edit_recommend_show/id/{$val.id}/lr/{$lr}/p/{$p}/rank/{$val.rank}/life/1/my_time/{$my_time}/" class="thickbox">复制上线</a><?php } ?></td>
+	</tr>
+	<?php } ?>
+</table>
+<div class="yahei navgition">
+		{$page|default='&nbsp;'}
+</div>
+</body>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+ <div id="append_parent"></div>
+<include file="../../Public/footer" />

@@ -1,0 +1,67 @@
+<script type="text/javascript">
+	function check_soft()
+	{
+		var package_name = $('#pck_name').val();
+        if (!package_name) 
+		{
+            alert("软件包名不能为空");
+            return false;
+        }
+		else
+		{
+			$.ajax({
+				url: '__URL__/get_softname/package/'+package_name,
+				type: 'get',
+				success: function(data)
+				{
+					if(data != 2){
+						var obj = eval('(' + data + ')');
+						$('#soft_name').val(obj.soft_name);
+						$('#az_download').val(obj.az_downloaded);
+						$('#dev_name').val(obj.dev_name);
+					}
+					else
+					{
+						$('#soft_name').val('');
+						$('#az_download').val('');
+						$('#dev_name').val('');
+						alert("软件不在运营白名单中");
+						return false;
+					}
+				}
+			});
+		}
+	}
+</script>
+<style>
+table tr {height:30px;}
+table tr td{font-size:12px;}
+table tr td input{height:25px;}
+</style>
+<form action="__URL__/add_ignore" method="post">
+<table>
+    <tbody>
+        <tr>
+            <td>软件包名：</td>
+            <td>
+				<input style="width:200px;" id="pck_name" type="text"  name="package" onblur="check_soft()"/>
+				&nbsp&nbsp<span><font style="color:red;">*</font></span>
+			</td>
+        </tr>
+        <tr>
+            <td>软件名称：</td>
+            <td><input style="width:200px;" type="text" readonly id="soft_name" name="soft_name"/>&nbsp&nbsp<span><font style="color:red;">*</font></span></td>
+        </tr>
+		  <tr>
+            <td>忽略采集版本：</td>
+            <td><input style="width:200px;" name="ignore_version" value=""/></td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="提交" />
+			<input type="hidden" id="dev_name" name="dev_name" value=""/>
+			<input type="hidden" id="az_download" name="az_download" value="" /></td>
+            <td><input type="button" value="取消" onclick="tb_remove()"/></td>
+        </tr>
+    </tbody>
+</table>
+</form>

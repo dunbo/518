@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+<script type="text/javascript" src='/Public/js/jquery-1.9.1.js'></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+</head>
+<style type="text/css">
+.table_list h3{padding:0; margin:0;}
+</style>   
+<body>
+<ul class="tab_title margin_top">
+	<li class="current"><b>后台版本迭代记录</b></li>
+	<li class="current"><button onclick='window.location.href="__URL__/version_add_edit"' >添加新记录</button></li>
+</ul>
+<div class="search_box margin_top">
+	<table width="99%" cellspacing="0" cellpadding="0" class="search_table">
+		<tbody>
+		<form method='get' action="__URL__/version_record_list" >
+			<tr>
+				<td width="18%">内容：<input type="text" class="search_item_text" value="{$content}" id="content" name="content"></td>
+				<td width="35%" width="300" colspan='3' >起止时间：<span><input type="text" name="begintime" id="begintime" value="{$begintime}" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>~
+				<span><input id="endtime" name="endtime" style="cursor: hand; width: 150px;" value="{$endtime}" size="15" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span></td>
+				<td width="44%"><input type="submit" class="search_btn" value="搜索"></td>
+			</tr>
+		</form>	
+		 </tbody>
+	</table>
+</div>
+<div>{$total}条记录</div>
+<table cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="7%">&nbsp;</th>
+			<th width="57%">标题/内容</th>
+			<th width="12%">时间</th>
+			<th width="12%">负责人</th>
+			<th width="12%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<?php foreach($list as $k => $v): ?>
+		<tr>
+			<td valign="top">
+			<?php echo $v['pos']; ?>
+			</td>
+			<td valign="top"><?php echo "<h3>".$v['title']."</h3>"."<br/>".$v['content']; ?></td>
+			<td valign="top"><?php echo $v['add_tm'] ? date('Y-m-d',$v['add_tm']) : '' ; ?></td>
+			<td valign="top"><?php echo $v['project_leader']; ?></td>
+			<td valign="top">
+				<a href="__URL__/version_add_edit/editor_id/<?php echo $v['id']; ?>" class="blue">编辑</a>
+				<a href="javascript:void(0);"  onclick="version_record_del('__URL__/version_record_del/id/<?php echo $v['id']; ?>')" class="blue">删除</a>
+			</td>
+		</tr>
+	<?php endforeach;?>	
+	</tbody>
+</table>
+<div  align='left'>{$page}</div>
+</body>
+</html>
+<script>
+function version_record_del(url){
+	if(confirm('是否确认删除？')){
+		window.location.href = url
+	}
+}
+//排序
+$('.extent_rank').change(function(){
+	var url = '__URL__/pub_version_sequence/id/'+$(this).attr('rel')+'/pos/'+$(this).val();
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+			var url     = eval("("+response+")");
+			var jumpUrl = '__URL__/version_record_list/p/<?php echo is_numeric($_GET['p']) ? $_GET['p'] : '1'; ?>/lr/<?php echo is_numeric($_GET['lr']) ? $_GET['lr'] : '10'; ?>';
+			window.location.href = jumpUrl;
+			if(window.ActiveXObject) window.event.returnValue = false;
+		}
+	});
+});
+</script>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>少年你脱了吗？</title>
+<link type="text/css" rel="stylesheet" href="/css/aprilstrip/common.css?v1"/>
+<script type="text/javascript">
+window.onload = function(){
+	<!--{if $out.is_girl != 1}-->
+	add_event('boy', '/lottery/aprilstrip_strip_result.php?sid=' + '<!--{$out.sid}-->');
+	<!--{else}-->
+	add_event('girl', '/lottery/aprilstrip_strip_result.php?is_girl=1&sid=' + '<!--{$out.sid}-->');
+	<!--{/if}-->
+}
+
+function add_event(id, to_location) {
+	var isTouchMove, startTx, startTy;
+	var element = document.getElementById(id);
+	element.addEventListener( 'touchstart', function( e ){
+	  var touches = e.touches[0];
+
+	  startTx = touches.clientX;
+	  startTy = touches.clientY;
+	  isTouchMove = false;
+	}, false );
+
+	element.addEventListener( 'touchmove', function( e ){
+	  isTouchMove = true;
+	  e.preventDefault();
+	}, false );
+
+	element.addEventListener( 'touchend', function( e ){
+	  if( !isTouchMove ){
+		return;
+	  }
+
+	  var touches = e.changedTouches[0],
+		endTx = touches.clientX,
+		endTy = touches.clientY,
+		distanceX = startTx - endTx
+		distanceY = startTy - endTy,
+		isSwipe = false;
+
+	  if( Math.abs(distanceX) >= Math.abs(distanceY) ){
+		if( distanceX > 20 ){
+		 // alert( 'fire swipe left event' );
+		  isSwipe = true;
+		}
+		else if( distanceX < -20 ){
+		  //alert( 'fire swipe right event' );   
+		  isSwipe = true;
+		}
+	  }
+	  else{
+		if( distanceY > 20 ){
+		  //alert( 'fire swipe up event' );       
+		  isSwipe = true;
+		}
+		else if( distanceY < -20 ){
+		  window.location.href=to_location;      
+		  isSwipe = true;
+		}
+	  }
+	}, false );
+}
+
+</script>
+
+</head>
+<body>
+	<!--{if $out.is_girl != 1}-->
+	<div class="swipe_wrap">
+		<div id="boy">
+			<img src="/images/aprilstrip/person_03.png"/>
+			<div class="arrow"></div>
+			<a href="/lottery/aprilstrip_lottery_rules.php?sid=<!--{$out.sid}-->">【活动规则】</a>
+		</div>
+	</div>
+	<!--{else}-->
+	<div class="swipe_wrap">
+		<div id="girl">
+			<img src="/images/aprilstrip/person_06.png"/>
+			<div class="arrow"></div>
+		</div>
+		<a href="/lottery/aprilstrip_lottery_rules.php?sid=<!--{$out.sid}-->">【活动规则】</a>
+	</div>
+	<!--{/if}-->
+</body>
+</html>

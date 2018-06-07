@@ -1,0 +1,146 @@
+<include file="../../Public/header" />
+
+<link rel="stylesheet" type="text/css" media="all"
+	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="__PUBLIC__/js/calendar_bak.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-zh.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-setup.js"></script>
+<script>
+	function checkInput(){
+		var title = document.getElementById("title").value;
+		var picurl = document.getElementById("picurl").value;
+		var linkurl = document.getElementById("linkurl").value;
+		var channel_pic = document.getElementByName("channel_pic").value;
+	if(title.length == 0){
+		alert("标题不能为空！");
+		return false;
+	}else if(picurl.length == 0){
+		alert("推广图不能为空！");
+		return false;
+	}else if(linkurl.length == 0){
+		alert("图片链接不能为空！");
+		return false;
+	}else if(count(channel_pic) == 0){
+		alert("渠道至少有一个！");
+		return false;
+	}
+	
+	return true;
+}
+</script>
+
+<center>
+<form action="__URL__/editPicture" method="POST" enctype="multipart/form-data">
+<table border="1"  cellpadding="0"  cellspacing="0"  class="upload_picutre">
+<tr>
+<td align="right" width="20%">标题:</td>
+<td><input type="text" name="title"  id="title" size="40" value='{$title}'></td>
+<td><font color="red"><p>*请输入轮播图标题</p></font></td>
+</tr>
+<tr>
+<td align="right">上传图片:</td>
+<td><input type="file" name="picurl" id="picurl"></td>
+<td><font color="red"><p>*图片高宽度尺寸为695*210</p></font></td>
+</tr>
+<tr>
+<td align="right">关于图片的链接</td>
+<td><input type="text" name="linkurl" id="linkurl" size="30" value='{$link}'></td>
+<td colspan="3"><font color="red"><p>*填写链接时一定要将链接填写完整 例如(http://www.anzhi.com/soft_6775)</p></font></td>
+</tr>
+<tr>
+<td align="right">是否压缩图片尺寸</td>
+<td><input type="radio" name="ya"  id="ya_1" value="1" checked>压缩尺寸<input type="radio" name="ya" id="ya_2" value="2">不压缩尺寸</td>
+<td colspan="3"><font color="red">*腾讯渠道的图片上传请单独传递，并且请选择不压缩</font></td>
+</tr>
+<tr>
+<td align="right">是否弹窗</td>
+<td><input type="radio" name="type"  id="type_1" value="1" <?php if($check==1):?>checked<?php endif;?>>不弹窗<input type="radio" name="type" id="type_2" value="2"  <?php if($check==2):?>checked<?php endif;?> >弹窗</td>
+
+</tr>
+<tr>
+<td align="center">所属渠道</td>
+<td align="center">开始时间</td>
+<td align="center">结束时间</td>
+<td align="center">位置</td>
+</tr>
+<tr>
+<volist name='channel' id='channel_list' key='k'>
+<!-- <td align="right">所属渠道{$k}</td> -->
+<td>
+<input type="checkbox" name="channel_pic[]" id="channel_pic[]"  value="{$channel_list.id}" checked>{$channel_list.nickname}|{$channel_list.chname}
+<td><span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="fromdate_{$channel_list.id}" name="fromdate_{$channel_list.id}"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="<?php echo date('Y-m-d',$start_time);?>" size="15" type="text"><img
+			src="__PUBLIC__/js/calendar.gif"
+			onclick="return showCalendar('fromdate_{$channel_list.id}', 'y-m-d');"
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span></td>
+<td><span 
+			id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+		<input id="todate_{$channel_list.id}" name="todate_{$channel_list.id}"
+			style="border: 0px none black; width: 100px;" value="<?php echo date('Y-m-d',$end_time);?>"
+			size="15" type="text"><img src="__PUBLIC__/js/calendar.gif"
+			onclick="return showCalendar('todate_{$channel_list.id}', 'y-m-d');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span></td> 
+<td>
+<!-- <select name="rank_{$channel_list.id}" rel="<?php echo $id ?>" id="extent_rank">
+	<?php
+				for($i=1;$i<=$channel_list['num'];$i++){
+					echo "<option value=\"".$i."\"";
+					if($rank == $i) echo " selected='selected' ";
+					echo ">".$i."</option>";
+				}
+				?></option>
+
+</select> -->
+ <input type="text" name="rank" value="{$rank}" rel="<?php echo $id ?>" id="extent_rank"> 
+</td>
+</td>
+</tr>
+</volist>
+</tr>
+
+<tr>
+<td></td>
+<td><input type="submit" name="submit" value="提交" onclick="return checkInput()">
+<input type="hidden" name='chl_id' id='chl_id' value="{$chlid}">
+<input type="hidden" name='id' value="{$id}">
+
+
+<php> if($text==0){ </php>
+	<input type="button" onclick='location.href="/index.php/Webmarket/scrollPicture/scrollPicList_out/chl_id/{$chlid}"' value="取消">
+<php>}else{</php>
+	<input type="button" onclick='location.href="/index.php/Webmarket/scrollPicture/scrollPicList/chl_id/{$chlid}"' value="取消">
+<php>}</php>
+
+
+	
+</td>
+</tr>
+</table>
+</form>
+</center>
+<script>
+$('#extent_rank').blur(function(){
+	var chl_id = $('#chl_id').val();
+	var id = $('id').val();
+	var url = "__URL__/edit_rank_to/id/"+$(this).attr('rel')+"/rank/"+$(this).val()+"/chl_id/"+chl_id;
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+
+			var url     = eval("("+response+")");
+			var jumpUrl = "__URL__/uploadForm_edit/chl_id/"+chl_id+"/id/"+$id+"/text/1";
+			//window.location.reload();
+			window.location.href = jumpUrl;
+		}
+	});
+});
+</script>
+

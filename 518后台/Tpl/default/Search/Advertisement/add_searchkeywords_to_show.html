@@ -1,0 +1,214 @@
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<script charset="utf-8" src="/Public/js/jquery.colorPicker.js"></script>
+<style>
+	p.legend em { color: #C00; font-style: normal; }
+	div.form-container div.controlset {display: block; float:left; width: 100%; padding: 0.25em 0;}
+	div.form-container div.controlset label,
+	div.form-container div.controlset input,
+	div.form-container div.controlset div { display: inline; float: left; }
+	div.form-container div.controlset label { width: 200px;}
+</style>
+<script>
+	$(function() {
+		$('#color').colorPicker();
+		var keyword_type = '{$keyword_type}';
+		if(keyword_type == 2){
+			$("#show_pic").css('display','none');
+			$("#upload").css("display",'');
+		}else{
+			$("#show_pic").css('display','');
+			$("#upload").css("display",'none');
+		}
+	})
+//软件包名验证
+function get_softname(){
+	var pkg = $('#apply_pkg').val();
+	$.ajax({
+		url: '/index.php/Sj/Onlinegame/get_softname/package/'+pkg,
+		type: 'get',
+		success: function(data){
+			if(data != 2){
+				var obj = eval('(' + data + ')');
+				
+				$('#soft_name').val(obj.soft_name);
+				$('#my_game').val(obj.category_name);
+				$("#show_pic option[value='2']").remove();
+				$("#show_pic").append("<option value='2'>显示大图</option>");
+				//$("#show_pic").removeAttr("disabled");
+			}else{
+				$('#soft_name').val('');
+				$('#my_game').val('');
+				alert("该软件不存在");
+				return false;
+			}
+		}
+	});
+}
+function checkPost(){
+	var enable_two = true;
+	var pkg = $("#apply_pkg").val();
+	var icon_url = $.trim($("#icon_url").val());
+	var show_pic = $("#show_pic").val();
+	var keyword_type = $("#keyword_type").val();
+	if(keyword_type == 1&&!pkg&&show_pic==1&&!icon_url){
+		alert('未添加包名，请上传图标');
+		return false;
+	}
+	if(icon_url){
+		var len = icon_url.length;
+		var pic_type = icon_url.substring(len-4, len);
+		pic_type = pic_type.toLowerCase();
+		var pic_arr = new Array('.jpg','.png','.gif');
+		if($.inArray(pic_type,pic_arr)==-1){
+			alert('图标格式只支持JPG,PNG和GIF格式');
+			return false;
+		}
+	}
+	$.ajax({
+		url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+		type: 'get',
+		async:false,
+		success: function(data){
+			if(data){
+				if(!confirm(data)){
+					enable_two = false;
+				}
+			}
+		}
+	});
+	return enable_two;
+}
+	function change_style(target){
+		$("#show_pic option[value='2']").remove();
+	}
+
+	function change_show_type(target){
+		var type = $(target).val();
+		$("#upload").css("display",'none');
+		$("#change_rank").css("display",'none');
+		if(type == 1){
+			$("#upload").css("display",'');
+		}else if(type == 2){
+			$("#change_rank").css("display",'');
+		}
+	}
+
+	function change_keyword_type(target){
+		var type = $(target).val();
+		$("#change_rank").css("display",'none');
+		if(type == 2){
+			$("#show_pic").css('display','none');
+			$("#upload").css("display",'');
+			$(".is_personalize_c").css("display",'none');
+		}else{
+			$("#show_pic").css('display','');
+			$("#upload").css("display",'none');
+			$(".is_personalize_c").css("display",'');
+		}
+		$("#is_personalize").val(1);
+		change_personalize($("#is_personalize"),id);
+	}
+
+	function change_personalize(target){
+		var type = $(target).val();
+		if(type == 1){
+			$("input[name='keywords']").attr('disabled',false);
+			$("#color").attr('disabled',false);
+			$("input[name='package']").attr('disabled',false);
+			$("#show_pic").attr('disabled',false);
+			$("#type").attr('disabled',false);
+			$("input[name='type']").removeAttr("disabled");
+		}else{
+			$("input[name='keywords']").attr('disabled',true).val('');
+			$("#color").attr('disabled',true);
+			$('.colorPicker-picker').css('background-color','#545454');
+			$("input[name='package']").attr('disabled',true).val('');
+			$("#show_pic").attr('disabled',true).val(0);
+			$("#type").attr("disabled",true).val(0);
+			$("input[name='soft_name']").val('');
+			$("#upload").css("display",'none');
+		}
+	}
+</script>
+<div>
+	<form action="__URL__/add_searchkeywords_to" method="POST" onsubmit="return checkPost()" enctype="multipart/form-data">
+	<table width="99%" cellpadding="0" cellspacing="0" class="table_list">
+		<tr>
+			<td>排序</td>
+			<td>搜索热词</td>
+			<!--<td>展示热词</td>-->
+			<td>热词颜色</td>
+			<td>热词类型</td>
+			<td <?php if($keyword_type == 2){echo "style='display:none'";} ?>  class='is_personalize_c'>类型</td>
+			<td>关联应用（包名）</td>
+			<td>软件名称</td>
+			<td>图片显示</td>
+			<!-- <td>旧版排序</td> -->
+			<td>趋势</td>
+			<td>开始时间</td>
+			<td>结束时间</td>
+			<td>合作形式</td>
+		</tr>
+		<tr>
+			<td>
+				{$num}<input name="rank" value='{$num}' type="hidden"/>
+				<select name="change_rank" id="change_rank" style="display: none">
+					<option value="1">不更换位置</option>
+					<option value="2">更换位置</option>
+				</select>
+			</td>
+			<td><input type="text" name="keywords" /></td>
+			<!--<td><input type="text" name="show_keyword" /></td>-->
+			<td>
+					<div class="controlset"> <input id="color" type="text" name="color" value="#545454" /></div>
+			</td>
+			<td>
+				<select name="keyword_type" id="keyword_type" onchange="change_keyword_type(this)">
+					<option value="1" <?php if($keyword_type == 1){echo 'selected';}?>>热词</option>
+					<option value="2" <?php if($keyword_type == 2){echo 'selected';}?>>内容</option>
+				</select>
+			</td>
+			<td <?php if($keyword_type == 2){ echo "style='display:none'";} ?> class='is_personalize_c'>
+				<select name="is_personalize" id="is_personalize" onchange="change_personalize(this)">
+					<option value="1">普通热词</option>
+					<option value="2">个性化热词</option>
+				</select>
+			</td>
+			<td><input type="text" name="package" id="apply_pkg"  onblur="if(value==''){change_style(this);} else { get_softname();}" placeholder = "为空表示不关联"/></td>
+			<td>
+			<input type="text" name="soft_name" id="soft_name" readonly="readonly" />
+		   </td>
+		   <td>
+				<select name="show_pic" id="show_pic" onchange="change_show_type(this)">
+					<option value="0">-</option>
+					<option value=1>显示小图</option>
+					<!--<option value=2>显示大图</option>-->
+				</select>
+			   <input type="button" value="上传图标" id="upload" onclick="javascript:$('#icon_url').click();" style="display:none">
+			   <input id="icon_url" name="icon_url" style="display:none" type="file">
+		   </td>
+			<!-- <td><input type="text" name="location" /></td> -->
+			<td><select name='key_type'><option value='1'>上升</option><option value='2'>下降</option><option value='3' selected="selected">持平</option></select></td>
+			<td><span><input type='text' name='fromdate' id="fromdate" value='{$val.start_tm}' style='cursor: hand; width: 150px;' class='Wdate' onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" /></span></td>
+			<td><span><input type='text' name='todate' id="todate" value='{$val.end_tm}' style='cursor: hand; width: 150px;' class='Wdate' onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" /></span></td>
+			<td>
+				<SELECT name='type' id="type">
+					<?php foreach($typelist as $key => $val): ?>
+						<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+					<?php endforeach; ?>				
+				</SELECT>
+			</td>
+		</tr>
+	</table>
+	<span style='color:red'>搜索热词支持汉字，数字，英文和符号<br>
+		小图上传图片尺寸大小为{$icon_width}*{$icon_height}<br>
+		热搜内容图片尺寸大小为{$big_icon_width}*{$big_icon_height}
+	</span>
+	<div>
+		<input type="hidden" name="tab_type" value="{$keyword_type}">
+		<input type="hidden" name="product_id" value="{$select_pid}">
+		<input type="submit" value="确认" />
+		<input type="button" value="取消" onclick="tb_remove();" />
+	</div>
+	</form>
+</div>

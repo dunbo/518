@@ -1,0 +1,87 @@
+
+<script>
+	function check(){
+		var ad_price = $("#ad_price").val();
+		var max_down = $("#max_down").val();
+		var ad_cut_pre = $("#ad_cut_pre").val();
+		var r   = "^[0-9]*[0-9][0-9]*$";
+		var re   =   new   RegExp(r); 	
+		if(ad_price > 10 || ad_price < 0 || !ad_price || isNaN(ad_price) || ad_price.substring(ad_price.indexOf("."),ad_price.length).length>5){
+			$("#ad_price").css("border","#ff0000 1px solid");
+			price_not = 1;
+		}else{
+			price_not = 2;
+			$("#ad_price").css("border","");
+		}
+		if(max_down > 100 || max_down < 0 || max_down == '' || isNaN(max_down) || !max_down.match(re)){
+			$("#max_down").css("border","#ff0000 1px solid");
+			max_not = 1;
+		}else{
+			max_not = 2;
+			$("#max_down").css("border","");
+		}
+		if(ad_cut_pre > 100 || ad_cut_pre < 0 || !ad_cut_pre || isNaN(ad_cut_pre) || ad_cut_pre.substring(ad_cut_pre.indexOf("."),ad_cut_pre.length).length>3){
+			$("#ad_cut_pre").css("border","#ff0000 1px solid");
+			cut_not = 1;
+		}else{
+			$("#ad_cut_pre").css("border","");
+			cut_not = 2;
+		}
+		
+		if($("#ad_go").val() == 1 && $("#ad_switch").attr("checked") != "checked"){
+			return false;
+		}
+		
+		if(price_not == 1 || max_not == 1 || cut_not == 1){
+			return false;
+		}
+	}
+	
+	function ad_edit(){
+		if($("#ad_go").val() == 1 && $("#ad_switch").attr("checked") != "checked"){
+			$("#promit_ad").html("至少勾选一种分成类型");
+
+		}else{
+			$("#promit_ad").html("");
+		}
+	
+		if($("#ad_switch").attr("checked") == "checked"){
+			$("#ad_price").attr("readonly",false);
+			$("#max_down").attr("readonly",false);
+			$("#ad_cut_pre").attr("readonly",false);
+		}else{
+			$("#ad_price").attr("readonly",true);
+			$("#max_down").attr("readonly",true);
+			$("#ad_cut_pre").attr("readonly",true);
+		}
+	}
+</script>
+<body>
+	<h3>广告分成：</h3>
+	<form action="__URL__/ad_edit_do" method="get">
+	<table>
+		<tr>
+			<td>是否开启该种类分成：</td>
+			<td><input type="checkbox" name="ad_switch" value="1" id="ad_switch" <?php if($channel['ad_switch'] == 1){ ?>checked<?php } ?> onclick="ad_edit();" /><input type="hidden" id="ad_go" value="{$ad_go}" /></td>
+			<td><span id="promit_ad" style="color:red;"></span></td>
+		</tr>
+		<tr>
+			<td>单个软件下载单价：</td>
+			<td><input type="text" name="ad_price" value="{$channel['ad_price']}" id="ad_price" <?php if($channel['ad_switch'] != 1){ ?>readonly<?php } ?> />元&nbsp;&nbsp;<input type="hidden" name="cid" value="{$channel['cid']}"><span style="color:red;" id="promit1">请输入0-10的数字，保留四位小数</span></td>
+		</tr>
+		<tr>
+			<td>防刷量值：</td>
+			<td><input type="text" name="max_down" value="{$channel['max_down']}" id="max_down" <?php if($channel['ad_switch'] != 1){ ?>readonly<?php } ?> />个&nbsp;&nbsp;<span style="color:red;" id="promit2">请输入0-100的整数</span></td>
+		</tr>
+		<tr>
+			<td>广告分成扣量比例：</td>
+			<td><input type="text" name="ad_cut_pre" value="{$channel['ad_cut_pre']}" id="ad_cut_pre" <?php if($channel['ad_switch'] != 1){ ?>readonly<?php } ?> />%&nbsp;&nbsp;<span style="color:red;" id="promit3">百分比，保留两位小数</span></td>
+		</tr>
+		<tr><td colspan="2"><span style="color:red;">注：以上系数为必填项</span></td></tr>
+		<tr>
+			<td><input type="submit" value="保存" onclick="return check();" /></td><td><input type="button" value="放弃" onclick="tb_remove();" /></td>
+		</tr>
+	</table>
+	</form>
+</body>
+</html>

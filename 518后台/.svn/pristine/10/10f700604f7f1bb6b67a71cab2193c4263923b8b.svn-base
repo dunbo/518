@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>有标签软件管理</title>
+</head>
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript">
+$(function(){
+    document.onkeydown = function(e){
+        var ev = document.all ? window.event : e;
+        if(ev.keyCode==13) {
+            search();
+         }
+    }
+});
+
+function del(soft_id){
+    if(confirm("删除不可恢复！确定要删除此条记录?")){
+        var param = {
+        soft_id : soft_id
+        };
+
+        $.ajax({
+            url:'__URL__/deletepro',
+            type:'POST',
+            data:param,
+            dataType:'json',
+            success:function(data){
+                if(data==1)
+                {
+                    location.href ="/index.php/Sendnum/Product/index";
+                }else
+                {
+                    alert('对不起，权限不足');
+                    location.href ="/index.php/Sendnum/Product/index";
+                }
+            }
+        });
+    }
+};
+
+function search(){
+    $("#search").submit();
+};
+
+//选择类型
+function openw(){
+    $("#open").zxxbox();
+}
+function catid(){
+    refreshCatid();
+}
+function refreshCatid()
+{
+    var ids = '';
+    $("input[name='catid[]']").each(function(){
+            if (this.checked) {
+                    ids+= $(this).val() + ',';
+            }
+            $('#cateid').val(ids);
+
+    });
+}
+var choose_id = new Array();
+function get_choose_id(single){
+    var i = 0;
+    if(choose_id){
+        choose_id.splice(0,choose_id.length);//
+    }
+    $('input[name^=id_]').each(function(){
+        if($(this).attr('checked') == 'checked'){
+            choose_id.push($(this).val());
+            i++;
+        }
+    });
+
+    if(i>1&&single==1){
+        alert('最多选择一个软件');
+        return false;
+    }
+    return true;
+}
+
+
+function save_category(type,do_type,id){
+    var bo = true;
+    if(do_type=='edit'&&!id){
+        bo = get_choose_id(1);
+        id = choose_id;
+    }
+
+    if(bo){
+        $("#save_category").attr('href',"__URL__/save_category?width=320&height=200&type="+type+"&id="+id).click();
+    }
+}
+
+function del_tags(type,id){
+    if(confirm('确认删除吗？')){
+        if(id){
+            del_id = id;
+        }else{
+            get_choose_id();
+            if(choose_id==''){
+                alert('请选择要删除的分类');
+                return false;
+            }
+            del_id = choose_id;
+        }
+        window.location.href = "__URL__/del_tags?id="+del_id+"&type="+type;
+    }
+
+}
+function checkAll(obj)
+{
+    var flag = $(obj).attr('checked') == 'checked';
+    $('input[name^=id_]').attr('checked', flag);
+}
+</script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/styleV1.css?v4.4" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="/Public/school/js/jquery.zxxbox.3.0.js"></script>
+<body>
+<div style="float: left;width: 100%;margin-top:10px;margin-bottom: 10px">
+    <a href="javascript:void(0)" style="float:left;margin-left: 10px" class="search_btn" onclick="return del_tags(1)">删除</a>
+    <a href='javascript:void(0)' class="thickbox" id="del_tags">
+        <a href="javascript:void(0)" style="float:left;margin-left: 10px;width: 150px" class="search_btn" onclick="return save_category(1,'edit')">添加/编辑一级分类</a>
+        <a href='javascript:void(0)' class="thickbox" id="save_category">
+        <a href="javascript:void(0)" style="float:left;margin-left: 10px" class=" search_btn" onclick="return save_category(2,'add','')">添加二级分类</a><a href="__URL__/import_tags_relation?width=350&amp;height=140" style="float:left;width:200px;margin-left: 10px" class="thickbox search_btn">导入二级分类&标签</a>
+</div>
+<div style="clear: both"></div>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+                <th width="3%" bgcolor="#e3e2fe"><input type="checkbox" name="chk_all" onclick="checkAll(this)"></th>
+				<th width="4%" height="26">一级分类ID</th>
+				<th width="6%">一级分类名称</th>
+				<th width="7%">一级分类权重</th>
+				<th width="8%">二级分类名称</th>
+				<th width="7%">二级分类权重</th>
+                <th width="7%">已关联标签数量</th>
+                <th width="7%">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+            <?php
+                foreach($list['list'] as $k=>$v){
+             ?>
+            <tr>
+                <td align='left' rowspan="<?php if(count($list['son'][$v['id']])==0){echo '';}else{echo count($list['son'][$v['id']]);}?>">
+                    <input type="checkbox" name="id_{$v.id}" value="{$v.id}"  /><br/>
+                </td>
+                <td height="20" align="center" rowspan="<?php  if(count($list['son'][$v['id']])==0){echo '';}else{echo count($list['son'][$v['id']]);}?>"> {$v.id}</td>
+                <td height="20" align="center" rowspan="<?php  if(count($list['son'][$v['id']])==0){echo '';}else{echo count($list['son'][$v['id']]);}?>"> {$v.name}</td>
+                <td height="20" align="center" rowspan="<?php  if(count($list['son'][$v['id']])==0){echo '';}else{echo count($list['son'][$v['id']]);}?>"> {$v.weight}</td>
+                    <?php
+                        if($list['son'][$v['id']]){
+                        foreach($list['son'][$v['id']] as $s_k=>$s_v){
+                    ?>
+                    <td height="20" align="center"> {$s_v.name}</td>
+                    <td height="20" align="center"> {$s_v.weight}</td>
+                    <td height="20" align="center">
+                        <a href="/index.php/Dev/TagManage/cat_tag_list/c_id/{$s_v.c_id}"><?php echo $list['tag_num'][$s_v['c_id']]?$list['tag_num'][$s_v['c_id']]:0;?></a>
+                    </td>
+                    <td>
+                        <a class="thickbox" href="/index.php/Dev/TagManage/cat_tag_add/c_id/<?php echo $s_v['c_id'];?>/add/1/width/200px/height/100px/from/tag_category">关联标签
+                        </a> |
+                        <a href="javascript:void(0)"  onclick="return save_category(2,'edit','{$s_v.c_id}')">编辑</a> |
+                        <a href="javascript:void(0)"  onclick="return del_tags(2,'{$s_v.c_id}')">删除</a></td>
+                    </tr>
+                    <?php
+                        }}else{
+                        ?><td height="20" align="center"></td><td height="20" align="center"></td><td height="20" align="center"></td><td height="20" align="center"></td></tr>
+                        <?php
+                        }
+                    ?>
+
+            <?php
+                }
+            ?>
+
+		</tbody>
+                <input type="hidden" value="{$softids}" id="softids">
+	</table>
+	<div style="width:92%; padding-top:4px; text-align:right">{$list.page}</div>
+        <div style="display:none;" id="loading">
+    <p style="position:absolute;left:20%;top:40%;">正在提交中，请稍候......</p></div>
+</body>
+</html>
+<script type="text/javascript">
+    $(function(){
+            softids = $("#softids").val();
+            var param = {
+                softids : softids
+            };
+            $.ajax({
+            url:'__URL__/tags_softlist',
+            type:'POST',
+            data:param,
+            dataType:'json',
+            success:function(data){
+                for (var i = 0; i < data.data.length; i++) {
+                    key = data.data[i]['key'];
+                    $("#"+key+"").html(data.data[i]['value']);
+                }
+            }
+        });
+});
+
+</script>

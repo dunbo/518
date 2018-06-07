@@ -1,0 +1,403 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<style>
+.sub_tr {height: 35px;text-align: left;}
+.text_right{text-align:right;}
+.margin_b tr td{ text-align:right;}
+.margin_b tr td{ padding-bottom:10px;}
+.margin_b tr td input{ width:250px; height:30px; line-height:30px; border:1px solid #999;}
+</style>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<FORM method="POST" action="__URL__/<?php if($rows['id']){ echo 'edit_fl'; }else{ echo 'add_fl'; } ?>" enctype="multipart/form-data" onsubmit="return checksubmit()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<input type="hidden" name="id" id="id" value="{$rows['id']}" />
+	<thead >
+		<tr>
+			<th width="25%"></th>
+			<th width="75%"></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="sub_tr">
+			<td class="text_right">
+				<span style='color:red'>*</span>
+				福利名称：
+			</td>
+			<td>
+				<input type="text" name="name" value="{$rows['name']}" />建议30字以内
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right"><span style='color:red'>*</span>福利类型：</td>
+			<td>
+				<select name="typeid" id="typeid" >
+					<option value="0">请选择</option>
+					<?php foreach($wfr_type as $key => $val){ ?>
+						<option value="{$val['id']}" <?php echo  $val['id']==$typeid?'selected':'' ?> >{$val['name']}</option>
+					<?php } ?>
+				</select>
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">
+				<span style='color:red'>*</span>
+				软件包名：
+			</td>
+			<td>
+				<input type="text" name="package" id='package' value="{$rows['package']}" onchange="val_pkg(this)"/>
+				<span id="notice" style="color:red"></span>
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">软件名称：</td>
+			<td>
+				<input type="text" name="softname" id="softname" disabled="disabled" value="{$rows['softname']}" />
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">领取页面内地址：</td>
+			<td>
+				<input type="text" name="welfare_draw_url" value="{$rows['welfare_draw_url']}" />
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">
+				<span style='color:red'>*</span>
+				排序值：
+			</td>
+			<td>
+				<input type="text" name="pos" value="<?php echo $rows['pos']!=''?$rows['pos']:100 ?>" />
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">
+				<span style='color:red'>*</span>
+				福利开始时间：
+			</td>
+			<td>
+			<input id="start_tm" name="start_tm"
+				style="width: 130px;" value="<?php echo $rows['start_tm']?date('Y-m-d H:i:s', $rows['start_tm']):''; ?>"
+				size="15" type="text"><img src="/Public/js/calendar.gif"
+				class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+				style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">
+				<span style='color:red'>*</span>
+				福利结束时间：
+			</td>
+			<td>
+			<input id="end_tm" name="end_tm"
+				style="width: 130px;" value="<?php echo $rows['end_tm']?date('Y-m-d H:i:s', $rows['end_tm']):''; ?>"
+				size="15" type="text"><img src="/Public/js/calendar.gif"
+				class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+				style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">
+				<span style='color:red'>*</span>
+				已领人数初始值：
+			</td>
+			<td>
+				<input type="text" name="init_val" value="{$rows['init_val']}" />
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">
+			<span style='color:red'>*</span>
+			已领人数随机数：
+			</td>
+			<td>
+				从<input type="text" name="begin_val" value="{$rows['begin_val']}" />
+				到<input type="text" name="end_val" value="{$rows['end_val']}" />
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right"></td>
+			<td><span style="color:red">已领人数 = 初始值 + N1 + N2 + ...+Nn(N为每次的随机数)</span></td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">
+				<span style='color:red'>*</span>
+				列表页图片：
+			</td>
+			<td>
+				<input type="hidden" id='old_list_pic_type' name='old_list_pic_type' value="{$rows['list_pic_type']}" />
+				<input onchange='toggle_list_img()' type='radio' name='list_pic_type' <?php if($rows['list_pic_type']==1 || empty($rwos['list_pic_type'])){ ?>checked='checked'<?php } ?> value='1' />标题样式&nbsp;&nbsp;
+				<input onchange='toggle_list_img()' type='radio' name='list_pic_type' <?php if($rows['list_pic_type']==2){ ?>checked='checked'<?php } ?> value='2' />单图样式&nbsp;&nbsp;
+				<input onchange='toggle_list_img()' type='radio' name='list_pic_type' <?php if($rows['list_pic_type']==3){ ?>checked='checked'<?php } ?> value='3' />三图样式
+			</td>
+		</tr>
+		<tr class="sub_tr" id='img_tr_1'>
+			<td></td>
+			<td>
+				<?php if($rows['list_pic']['list_pic']){ ?><img src="<?php echo IMGATT_HOST; ?>{$rows['list_pic']['list_pic']}" height="50px;"><?php } ?>
+				<input type="file" name="list_pic" value="" /><span id='img_text_1'>272*152</span> 尺寸支持JPG/PNG/GIF图片
+			</td>
+		</tr>
+		<tr class="sub_tr" id='img_tr_2'>
+			<td></td>
+			<td>
+				<?php if($rows['list_pic']['list_pic2']){ ?><img src="<?php echo IMGATT_HOST; ?>{$rows['list_pic']['list_pic2']}" height="50px;"><?php } ?>			
+				<input type="file" name="list_pic2" value="" />160*160 尺寸支持JPG/PNG/GIF图片
+			</td>
+		</tr>
+		<tr class="sub_tr" id='img_tr_3'>
+			<td></td>
+			<td>
+				<?php if($rows['list_pic']['list_pic3']){ ?><img src="<?php echo IMGATT_HOST; ?>{$rows['list_pic']['list_pic3']}" height="50px;"><?php } ?>
+				<input type="file" name="list_pic3" value="" />160*160 尺寸支持JPG/PNG/GIF图片
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">
+				<span style='color:red'>*</span>
+				详情页图片：
+			</td>
+			<td>
+				<input type="hidden" id='old_detail_pic' name='old_detail_pic' value="{$rows['detail_pic']}" />
+				<input onchange='toggle_detail_img()' type='radio' name='detail_pic_status' <?php if($rows['detail_pic_status']==1 || !isset($rows['detail_pic_status'])){ ?>checked='checked'<?php } ?> value='1' />显示&nbsp;&nbsp;
+				<input onchange='toggle_detail_img()' type='radio' name='detail_pic_status' <?php if($rows['detail_pic_status']==0 && isset($rows['detail_pic_status'])){ ?>checked='checked'<?php } ?> value='0' />不显示
+			</td>
+		</tr>
+		<tr class="sub_tr" id='detail_img_tr_1'>
+			<td></td>
+			<td>
+				<?php if($rows['detail_pic']){ ?><img src="<?php echo IMGATT_HOST; ?>{$rows['detail_pic']}" width="100px;" height="50px;"><?php } ?>
+				<input type="file" name="detail_pic" value="" />640*290 尺寸支持JPG/PNG/GIF图片
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">
+				<span style='color:red'>*</span>
+				福利详情：
+			</td>
+			<td style="text-align:left;"><textarea id="content" name="content" style="height:300px;">{$rows['content']}</textarea></td>
+		</tr>
+		<tr class="sub_tr">
+			<td class="text_right">分享图：</td>
+			<td>
+				<input type="file" name="share_pic" value="" />尺寸200x200  支持JPG/PNG/GIF图片
+			</td>
+		</tr>
+	</tbody>
+	<tr class="sub_tr">
+		<td></td>
+		<td style="text-align: right;"> 
+			<input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/>&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+	</tr>
+</table>
+</FORM>	
+
+<script>
+$(function() {
+	window.editor = KindEditor.create('#content',{
+		allowImageRemote : false,
+		allowImageUpload : true,
+		resizeType : 1,
+		width: '100%',
+		height: '100%',
+		items : [
+			'bold','italic','underline','fontsize','forecolor','|','image','media','anchor','link','unlink','justifyleft','justifycenter','justifyright'
+		],
+		 cssData: 'body { font-size: 14px; }',
+	});
+	toggle_list_img();
+	toggle_detail_img();
+});
+
+function toggle_list_img(){
+	var num = $('input[name="list_pic_type"]:checked').val();
+	$('tr[id^=img_tr_]').css('display', 'none');
+	if(num==2){
+		$('#img_text_1').text('272*152');
+		$('tr[id=img_tr_1]').css('display', '');
+	}else if(num==3){
+		$('#img_text_1').text('160*160');
+		$('tr[id^=img_tr_]').css('display', '');
+	}
+}
+function toggle_detail_img(){
+	var num = $('input[name="detail_pic_status"]:checked').val();
+	if(num==1){
+		$('tr[id=detail_img_tr_1]').css('display', '');
+	}else if(num==0){
+		$('tr[id=detail_img_tr_1]').css('display', 'none');
+	}
+}
+
+function checksubmit() {
+	var id = $('#id').val()
+	var name = $("input[name='name']").val()
+	if(name == ''){
+		alert('福利名称不能为空');
+		return false;
+	}
+	var typeid = $('#typeid').val();
+	if(typeid == '' || typeid == 0) {
+		alert('请选择福利类型');
+		return false;
+	}
+	var package = $("input[name='package']").val()
+	if(package == '') {
+		alert('软件包名不能为空')
+		return false;
+	}
+	var pos = $("input[name='pos']").val()
+	if(pos == "") {
+		alert('排序值不能为空')
+		return false;
+	}
+	if(!/^[0-9]+$/.test(pos) ) {
+		alert('排序值必须为正整数');
+		return false;
+	}
+	var start_tm = $("input[name='start_tm']").val()
+	if(start_tm == '') {
+		alert('开始时间不能为空')
+		return false;
+	}
+	var end_tm = $("input[name='end_tm']").val()
+	if(end_tm == '') {
+		alert('结束时间不能为空')
+		return false;
+	}
+	var init_val = $("input[name='init_val']").val()
+	if(init_val == '' || init_val==0) {
+		alert('初始值必填，只能输入大于0的整数')
+		return false;
+	}
+	if(!/^[0-9]+$/.test(init_val) ) {
+		alert('初始值必须为正整数');
+		return false;
+	}
+	var begin_val = parseInt($("input[name='begin_val']").val())
+	if(begin_val == '' || begin_val==0) {
+		alert('随机数最小值必填，只能输入大于0的整数')
+		return false;
+	}
+	if(!/^[0-9]+$/.test(begin_val) ) {
+		alert('随机数最小值必须为正整数');
+		return false;
+	}
+	var end_val = parseInt($("input[name='end_val']").val())
+	if(end_val == '' || end_val==0) {
+		alert('随机数最大值必填，只能输入大于0的整数')
+		return false;
+	}
+	if(!/^[0-9]+$/.test(end_val) ) {
+		alert('随机数最大值必须为正整数');
+		return false;
+	}
+	if( end_val <= begin_val ) {
+		alert('随机数最大值必须大于随机数最小值')
+		return false;
+	}
+	var list_pic_type = $('input[name="list_pic_type"]:checked').val(); //列表页图片样式
+	var old_list_pic_type = $('#old_list_pic_type').val(); //旧列表页图片样式
+	var list_pic = $("input[name='list_pic']").val(); //列表页图片文件
+	var list_pic2 = $("input[name='list_pic2']").val(); //列表页图片文件
+	var list_pic3 = $("input[name='list_pic3']").val(); //列表页图片文件
+	if(!id || (id&&list_pic_type!=old_list_pic_type)){
+		//添加操作或编辑操作并且列表页图片样式改变，需重新上传图片并验证图片格式
+		if(list_pic_type==2){
+			if(list_pic==''){
+				alert('未添加列表页图片');
+				return false;
+			}
+			if(list_pic!='' && !/\.(png|gif|jpg)$/.test(list_pic)){
+				alert('列表页图片格式错误');
+				return false;
+			}
+		}
+		if(list_pic_type==3){
+			if(list_pic=='' && list_pic2=='' && list_pic3==''){
+				alert('未添加列表页图片');
+				return false;
+			}
+			if(list_pic!='' && !/\.(png|gif|jpg)$/.test(list_pic)){
+				alert('列表页图片格式错误');
+				return false;
+			}
+			if(list_pic2!='' && !/\.(png|gif|jpg)$/.test(list_pic2)){
+				alert('列表页图片2格式错误');
+				return false;
+			}
+			if(list_pic3!='' && !/\.(png|gif|jpg)$/.test(list_pic3)){
+				alert('列表页图片3格式错误');
+				return false;
+			}
+		}
+	}else if(id&&list_pic_type==old_list_pic_type){
+		//编辑操作并且列表页图片样式未改变，若上传图片验证图片格式
+		if(list_pic_type==2){
+			if(list_pic!='' && !/\.(png|gif|jpg)$/.test(list_pic)){
+				alert('列表页图片格式错误');
+				return false;
+			}
+		}
+		if(list_pic_type==3){
+			if(list_pic!='' && !/\.(png|gif|jpg)$/.test(list_pic)){
+				alert('列表页图片格式错误');
+				return false;
+			}
+			if(list_pic2!='' && !/\.(png|gif|jpg)$/.test(list_pic2)){
+				alert('列表页图片2格式错误');
+				return false;
+			}
+			if(list_pic3!='' && !/\.(png|gif|jpg)$/.test(list_pic3)){
+				alert('列表页图片3格式错误');
+				return false;
+			}
+		}
+	}
+	
+	var detail_pic_status = $('input[name="detail_pic_status"]:checked').val();
+	var detail_pic = $("input[name='detail_pic']").val(); //详情页图片文件
+	var old_detail_pic = $('#old_detail_pic').val(); //详情页图片旧值
+	if(detail_pic_status==1){
+		if(detail_pic=='' && old_detail_pic==''){
+			alert('未添加详情页图片');
+			return false;
+		}
+		if(detail_pic!='' && !/\.(png|gif|jpg)$/.test(detail_pic)){
+			alert('详情页图片格式错误');
+			return false;
+		}
+	}
+
+	var share_pic = $("input[name='share_pic']").val();
+	if(share_pic && !share_pic.match(/.jpg|.png|.jpeg|.gif/i)){
+     	alert("分享图片格式错误");
+	    return false;
+    }
+	
+}
+
+
+function val_pkg(obj)
+{
+	var package = $(obj).val();
+	 var url = "__URL__/pub_soft_val";
+    $.ajax({
+        type: "GET",
+        url: url,
+        dataType: 'json',
+        data:{package:package},
+        success: function(data) {
+            if(data['code']==1) {
+            	$('#softname').val(data['softname']);
+            	$("#notice").text('√');
+            }else {
+            	$('#softname').val('');
+            	$("#notice").text(data['msg']);
+            }
+        }
+    });
+}
+</script>
+

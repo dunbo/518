@@ -1,0 +1,246 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+
+<style>
+.sub_tr {height: 35px;text-align: left;}
+</style>
+<script type="text/javascript">
+$(function(){
+	options = {
+		serviceUrl:'__URL__/showchannel',
+		minChars:0,
+		width: '140px',
+		deferRequestBy: 0,
+		autoFill:true,
+		onSelect: function(value,data){
+			var str_arr = data.split('_');
+			$('#chl_cid').val(str_arr[1]);
+			$('#cid').val(str_arr[0]);
+		}
+	};
+	$('#channel_name').autocomplete(options);
+});
+
+
+
+function checkPost()
+{
+	var regex = /^[0-9]+(.[0-9]{1,2})?$/;
+	var regex_2  = /^[0-9a-zA-Z]*$/;
+	var regex_3  = /^[A-Za-z0-9_\u2E80-\u9FFF]+$/;
+	
+	if( !$("input[name='name']").val() ) {
+		alert('渠道名称不能为空');
+		return false;
+	}
+	if ( !regex_3.test($("input[name='name']").val()) ) {
+		alert('渠道名称只能输入中文数字下划线字母');
+		return false;
+	}
+	if( !$("input[name='username']").val() ) {
+		alert('账号不能为空');
+		return false;
+	}
+	if ( !regex_2.test($("input[name='username']").val()) ) {
+		alert('账号只能输数字和英文大小写的字符');
+		return false;
+	}
+	if( !$("input[name='password']").val() ) {
+		alert('密码不能为空');
+		return false;
+	}
+	if ( !regex_2.test($("input[name='password']").val()) ) {
+		alert('密码只能输数字和英文大小写的字符');
+		return false;
+	}
+	if( $("input[name='password']").val().length < 4 ) {
+		alert('密码设置不能少于4个字符');
+		return false;
+	}
+	if( !$("input[name='kou_set']").val() ) {
+		alert('扣量系数-渠道用不能为空');
+		return false;
+	}
+	if ( !regex.test($("input[name='kou_set']").val()) ) {
+		alert('扣量系数-渠道用只能为整数或小数二位');
+		return false;
+	}
+	if( $("input[name='kou_set']").val() > 100 ) {
+		alert('扣量系数-渠道用不能超过100');
+		return false;
+	}
+	if( !$("input[name='kou_set_in']").val() ) {
+		alert('扣量系数-内部用不能为空');
+		return false;
+	}
+	if ( !regex.test($("input[name='kou_set_in']").val()) ) {
+		alert('扣量系数-内部用只能为整数或小数二位');
+		return false;
+	}
+	if( $("input[name='kou_set_in']").val() > 100 ) {
+		alert('扣量系数-内部用不能超过100');
+		return false;
+	}
+	if( !$("input[name='ratio_a']").val() ) {
+		alert('安智分成比不能为空');
+		return false;
+	}
+	if ( !regex.test($("input[name='ratio_a']").val()) ) {
+		alert('安智分成比只能为整数或小数二位');
+		return false;
+	}
+	if( $("input[name='ratio_a']").val() > 100 ) {
+		alert('安智分成比不能超过100');
+		return false;
+	}
+	if( !$("input[name='ratio_b']").val() ) {
+		alert('渠道分成比不能为空');
+		return false;
+	}
+	if ( !regex.test($("input[name='ratio_b']").val()) ) {
+		alert('渠道分成比只能为整数或小数二位');
+		return false;
+	}
+	if( $("input[name='ratio_b']").val() > 100 ) {
+		alert('渠道分成比不能超过100');
+		return false;
+	}
+	if( !$("input[name='ef_date']").val() ) {
+		alert('生效日期不能为空');
+		return false;
+	}
+}
+
+function autoReckon(obj, n)
+{
+	var regex = /^[0-9]+(.[0-9]{1,2})?$/
+	var ratio_a = $("input[name='ratio_a']");
+	var ratio_b = $("input[name='ratio_b']");
+	var tax_rate = $("input[name='tax_rate']");
+	
+	var cur_val = $(obj).val();
+	var new_val = 0;
+	if ( !regex.test(cur_val) ) {
+		ratio_a.val('');
+		ratio_b.val('');
+		tax_rate.val('');
+		alert('只能为整数或小数二位');
+		return false;
+	}
+	if ( cur_val > 100) {
+		ratio_a.val('');
+		ratio_b.val('');
+		tax_rate.val('');
+		alert('不能超过100');
+		return false;
+	}
+	
+	new_val = parseFloat((100 - cur_val).toFixed(2));
+	if( n == 1 ) {	
+		ratio_b.val(new_val);
+	}else if(n == 2){
+		ratio_a.val(new_val);
+	}else if(n == 3) //增加税率  增加了一个参数3
+	{
+		tax_rate.val(cur_val);
+	}
+}
+</script>
+<FORM method="POST" action="__URL__/ch_add?" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<thead>
+		<tr>
+			<td width="14%"></td>
+			<td width="86%"></td>
+		</tr>
+	</thead>
+	<tbody>
+	<tr class="sub_tr">
+		<td>渠道名称：</td>
+		<td><input type="text" name="name" id="channel_name" value="" autocomplete="off" ><font color='red' style='margin-left:20px'>不可变更，请谨慎填写</font></td>
+		<td><input type="hidden" name="cid" id="cid" value=""  ></td>
+		<td><input type="hidden" name="chl_cid" id="chl_cid" value=""></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>用户名：</td>
+		<td><input name='username' type='text' value=""/><font color='red' style='margin-left:20px'>不可变更，请谨慎填写</font></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>密码：</td>
+		<td><input name='password' type='text' value=""/></td>
+	</tr>
+	<tr class='sub_tr'>
+		<td>合作类型：</td>
+		<td>
+			<select name="co_type">
+				<option value='1'>按下载请求计费</option>
+				<option value='2'>按下载完成计费</option>
+			</select>
+			<font color='red' style='margin-left:20px'>不可变更，请谨慎选择</font></td>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>扣量系数-渠道用：</td>
+		<td><input name='kou_set' type='text' value="" style="width:100px"/>%
+			<span style="color:#666666">下载量（扣量后）=下载量（扣量前）*扣量系数，结果向下取整</span>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>扣量系数-内部用：</td>
+		<td><input name='kou_set_in' type='text' value="" style="width:100px"/>%
+			<span style="color:#666666">下载量（扣量后）=下载量（扣量前）*扣量系数，结果向下取整</span>
+		</td>
+	</tr>
+	</tbody>
+</table>
+	
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+
+	<tbody>
+	<tr class="sub_tr">
+		<td>分成比例：</td>
+	<td>安智<input name='ratio_a' type='text' onchange="autoReckon(this,1)" value="" style="width:80px"/>%<span style="margin: 0px 5px 0 5px;">|</span>
+		渠道<input name='ratio_b' type='text' onchange="autoReckon(this,2)" value="" style="width:80px"/>%</td>
+		<td>生效日期</td>
+		<td><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 121px;">
+		<input id="start_at" name="ef_date"
+			onclick="WdatePicker({minDate: '%y-%M-#{%d}'})"
+			style="border: 0px none black; width: 100px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"start_at",dateFmt:"yyyy-MM-dd",minDate: "%y-%M-#{%d}"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span></td>
+	</tr>
+	
+	<tr class="sub_tr">
+		<td>税率：</td>
+		<td><input name='tax_rate' type='text' onchange="autoReckon(this,3)" value="" style="width:80px"/>%<span style="margin: 0px 5px 0 5px;"></td>
+		<td>生效日期</td>
+		<td>
+			<span id=""
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 121px;">
+			<input id="start_month" name="sl_date"
+			style="border: 0px none black; width: 100px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M",el:"start_month",dateFmt:"yyyy-MM",minDate: "%y-%M"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			</span>
+		</td>
+	</tr>
+	
+	<tr class="sub_tr">
+		<td colspan="2"> 
+			<input type='submit' value="&nbsp;&nbsp;提交&nbsp;&nbsp;"/>&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	</tbody>
+</table>
+</FORM>	

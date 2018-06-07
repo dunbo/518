@@ -1,0 +1,474 @@
+{// 加载头部公共文件 }
+<style type="text/css">
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+
+</style>
+<include file="../Public/header" />
+<script src="/Public/js/jquery.validate.min.js"></script>
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){  
+	$.validator.addMethod('checkTags', function(value, element, params){
+		if (params) {
+			var list = value.split(',');
+			if (list.length > params[0]) return false;
+			for(i in list){
+				if (list[i].length > params[1]) return false;
+			}
+		}
+		return true;
+	}, '关键字限制应为5个10汉字以内');
+	$('#softForm').validate({   
+		rules: {
+			softname: {
+				required: true
+			},
+			dev_name: {
+				required: true
+			},
+			intro: {
+				required: true/*,
+				maxlength: 500
+			},
+			note: {
+				maxlength: 500
+			},
+			tags: {
+				checkTags: [5, 10]*/
+			}
+		},
+
+		messages: {
+			softname: {
+				required: '请填写软件中文名称'
+			},
+			dev_name: {
+				required: '请填写开发者'
+			},
+			intro: {
+				required: '请填写软件描述'/*,
+				maxlength: '500字以内'
+			},
+			note: {
+				required: '请填写软件备注',
+				maxlength: '500字以内'
+			},
+			tags: {
+				checkTags: '关键字限制应为5个10汉字以内'*/
+			}
+		},
+		submitHandler: function(form){
+			var flag = true;
+			var delapk_total = $(':checkbox[name^=delapk]').length
+			var delapk_checked_total = $(':checkbox[name^=delapk]:checked').length
+			
+			if (delapk_total != 0 && delapk_total == delapk_checked_total) {
+				alert('请至少保留一个apk文件');
+				return ;
+			}
+			var param = {
+				softname : $('#softname').val(),
+				ename : $('#ename').val(),
+				update_content : $('#update_content').val(),
+				intro : $('#intro').val(),
+				tags: $('#tags').val(),
+				note: $('#note').val(),
+				dev_name: $('#dev_name').val(),
+				dev_enname: $('#dev_enname').val(),
+				dever_email: $('#dever_email').val(),
+				dever_page: $('#dever_page').val()
+			};
+			
+			$.ajax({
+				url: '/index.php/Public/filter_word/type/2',
+				type: 'post',
+				data: param,
+				dataType: 'json',
+				async: false,
+				success: function(data){
+					//
+					if (data.softname && data.softname[2] !== true) {
+						
+						if(confirm('软件名，含有提醒字符 ' + data.softname[3] + '，是否提交')){
+							flag = true;
+						}else{
+							flag = false;
+						} 
+					}
+					if (data.ename && data.ename[2] !== true) {
+						
+						if(confirm('软件英文名称，含有非法字符 ' + data.ename[3] + '，是否提交')){
+							flag = true;
+						}else{
+							flag = false;
+						} 
+					}
+					if (data.intro && data.intro[2] !== true) {
+						
+						if(confirm('软件描述，含有非法字符 ' + data.intro[3] + '，是否提交')){
+							flag = true;
+						}else{
+							flag = false;
+						} 
+					}
+					if (data.tags && data.tags[2] !== true) {
+						
+						if(confirm('软件关键字，含有非法字符 ' + data.tags[3] + '，是否提交')){
+							flag = true;
+						}else{
+							flag = false;
+						} 
+					}
+					if (data.note && data.note[2] !== true) {
+						
+						if(confirm('软件备注含有非法字符 ' + data.note[3] + '，是否提交')){
+							flag = true;
+						}else{
+							flag = false;
+						} 
+					}
+					if (data.dev_name && data.dev_name[2] !== true) {
+						
+						if(confirm('开发者姓名，含有非法字符 ' + data.dev_name[3] + '，是否提交')){
+							flag = true;
+						}else{
+							flag = false;
+						} 
+					}
+					if (data.dev_enname && data.dev_enname[2] !== true) {
+						
+						if(confirm('开发者英文名，含有非法字符 ' + data.dev_enname[3] + '，是否提交')){
+							flag = true;
+						}else{
+							flag = false;
+						} 
+					}
+					if (data.dever_email && data.dever_email[2] !== true) {
+						
+						if(confirm('开发者邮箱，含有非法字符 ' + data.dever_email[3] + '，是否提交')){
+							flag = true;
+						}else{
+							flag = false;
+						} 
+					}
+					if (data.dever_page && data.dever_page[2] !== true) {
+						
+						if(confirm('开发者主页，含有非法字符 ' + data.dever_page[3] + '，是否提交')){
+							flag = true;
+						}else{
+							flag = false;
+						} 
+					}
+					if (data.softname && data.softname[0] !== true) {
+						flag = false;
+						alert('软件名，含有非法字符 ' + data.softname[1] + '，请重新编辑后提交');  
+					}
+
+					if (data.ename && data.ename[0] !== true) {
+						flag = false;
+						alert('软件英文名称，含有非法字符 ' + data.ename[1] + '，请重新编辑后提交');
+					} 
+					if (data.update_content && data.update_content[0] !== true) {
+						flag = false;
+						alert('软件更新内容，含有非法字符 ' + data.update_content[1] + '，请重新编辑后提交'); 
+					} 
+					if (data.intro && data.intro[0] !== true) {
+						flag = false;
+						alert('软件描述，含有非法字符 ' + data.intro[1] + '，请重新编辑后提交'); 
+					} 
+					if (data.tags && data.tags[0] !== true) {
+						flag = false;
+						alert('软件关键字，含有非法字符 ' + data.tags[1] + '，请重新编辑后提交'); 
+					} 
+					if (data.note && data.note[0] !== true) {
+						flag = false;
+						alert('软件备注含有非法字符 ' + data.note[1] + '，请重新编辑后提交'); 
+					} 
+					
+					if (data.dev_name && data.dev_name[0] !== true) {
+						flag = false;
+						alert('开发者姓名，含有非法字符 ' + data.dev_name[1] + '，请重新编辑后提交');
+					} 
+					if (data.dev_enname && data.dev_enname[0] !== true) {
+						flag = false;
+						alert('开发者英文名，含有非法字符 ' + data.dev_enname[1] + '，请重新编辑后提交');
+					} 
+					if (data.dever_email && data.dever_email[0] !== true) {
+						flag = false;
+						alert('开发者邮箱，含有非法字符 ' + data.dever_email[1] + '，请重新编辑后提交');
+					} 
+					if (data.dever_page && data.dever_page[0] !== true) {
+						flag = false;
+						alert('开发者主页，含有非法字符 ' + data.dever_page[1] + '，请重新编辑后提交');
+					}	 
+				}
+			})
+			
+			
+			
+			var delimg_total = $(':checkbox[name^=delimg]').length
+			var delimg_checked_total = $(':checkbox[name^=delimg]:checked').length
+			
+			if (delimg_total != 0 && delimg_total == delimg_checked_total) {
+				alert('请至少保留一个截图');
+				return ;
+			}			
+			
+            if (flag) form.submit();
+        }
+	});	
+});
+function gbcount(message,total,used,remain)
+{
+	var max;
+	max = total.value;
+	if (message.value.length > max) {
+		message.value = message.value.substring(0,max);
+		used.value = max;
+		remain.value = 0;
+		alert("留言不能超过 200 个字!");
+	}
+	else {
+		used.value = message.value.length;
+		remain.value = max - used.value;
+	}
+}
+</script>
+<br/>
+<center>
+<form method='post' action="__URL__/soft_edit_upload" enctype="multipart/form-data" id="softForm">
+<table width="944" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td colspan="4" bgcolor="#6666FF">软件编辑页面</td>
+  </tr>
+  <tr>
+    <td width="20%">软件中文名称：</td>
+    <td width="40%"><input name="softname" size="50" id="softname" type="text" value="{$softlist.softname}" /><span style="color:red"> * </span><input type="hidden" name="softname_ori" id="softname_ori" value="{$softlist.softname}" /></td>
+	<td width="20%">{$softlist.softname_r|default='&nbsp;'}</td>
+    <td width="20%"><span id="user_name_span" style='color:red'>　</span></td>
+  </tr>
+
+  <tr>
+    <td width="239">软件英文名称</td>
+    <td width="382"><input type="text" size="50" name="ename" id="ename"  value="{$softlist.ename}"/></td>
+    <td>{$softlist.ename_r|default='&nbsp;'}</td>
+	<td>&nbsp;</td>
+  </tr>
+
+    <tr>
+    <td>软件分类：</td>
+    <td>{$conflist}</td>
+	<td>&nbsp;</td>
+    <td><span id="truename_span" style='color:#6666FF' >最少一项，最多三项</span></td>
+  </tr>  
+	<tr>
+		<td>更新内容：</td>
+		<td>
+			<fieldset><legend>请输入内容</legend>
+			<textarea id="update_content" name="update_content" rows="5" cols="40" wrap=PHYSICAL  onKeyDown="gbcount(this.form.update_content,this.form.total,this.form.used,this.form.remain);" onKeyUp="gbcount(this.form.update_content,this.form.total,this.form.used,this.form.remain);">{$softlist.update_content|default='&nbsp;'}</textarea>
+			<p>最多字数：
+			<input disabled maxLength="4" name="total" size="3" value="200" class="inputtext">
+			已用字数：
+			<input disabled maxLength="4" name="used" size="3" value="0" class="inputtext">
+			剩余字数：
+			<input disabled maxLength="4" name="remain" size="3" value="200" class="inputtext">
+			</p>
+			</fieldset>
+		</td>
+		<td colspan="2"><font color="red"><p>为了提高您软件的活跃度，更好的在市场中展现更新内容，请根据模版样式进行编辑，每条信息以分号隔开：</p>
+			<p>	1、更新内容xxxx；</p>
+			<p>	2、更新内容xxxx；</p>
+			<p>	3、...</p>
+			</font>
+		</td>
+	</tr>
+  <tr>
+    <td>软件描述：</td>
+    <td><textarea id="intro" name="intro" rows="6" cols="40">{$softlist.intro}</textarea><span style="color:red"> * </span></td>
+	<td width="10%">{$softlist.intro_r|default='&nbsp;'}</td>
+    <td><span id="truename_span" style='color:#6666FF' >软件描述,请用心填写</span></td>
+  </tr>
+  <tr>
+    <td>关键字：</td>
+    <td><input type="text" name="tags" id="tags" size="90" value="{$softlist.tags}" /></td>
+	<td>{$softlist.tags_r|default='&nbsp;'}</td>
+    <td><span id="truename_span" style='color:#6666FF' >最多5个，以英文空格隔开" "</span></td>
+  </tr>
+ 
+    <tr>
+    <td>运营商隐藏</td>
+    <td>
+      <volist name='operatinglist' id='operatingvo'>
+        <input type="checkbox"  name="operating[]" id="operating" value="{$operatingvo.oid}" <?php if(in_array($operatingvo["oid"], $operatorhide)) 
+        {
+            echo 'checked';
+        }
+        ?> />{$operatingvo.mname}
+      </volist>
+      </td>
+    <td>&nbsp;</td>
+	<td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>是否授权：</td>
+    <td ><input type="radio" name="auth" id="auth" value="1" <if condition="$softlist['auth'] eq 1 "> checked </if>  />已授权
+    <input type="radio" name="auth" id="auth" value="0"  <if condition="$softlist['auth'] eq 0 "> checked </if> />未授权</td>
+    <td>&nbsp;</td>
+	<td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="4">软件截图上传：</td>
+  </tr>
+    <tr>
+    <td >软件截图</td>
+    <td><input type="file" name="image[]" id="image" onchange="onUploadImgChange(this)" /></td> 
+	<td>&nbsp;</td>
+    <td><if condition="$thumblist[0]['url'] neq null " ><input type="checkbox" name="delimg[]" value="{$thumblist[0]['id']}" />删除<img src="<?php echo IMGATT_HOST;?>{$thumblist[0].url}" width="64" height="64" alt="{$thumblist.rank}" /></if>　</td>
+  </tr>
+    <tr>
+    <td >软件截图</td>
+    <td><input type="file" name="image[]" id="image" onchange="onUploadImgChange(this)" /></td> 
+	<td>&nbsp;</td>
+    <td><if condition="$thumblist[1]['url'] neq null " ><input type="checkbox" name="delimg[]" value="{$thumblist[1]['id']}" />删除<img src="<?php echo IMGATT_HOST;?>{$thumblist[1].url}" width="64" height="64" alt="{$thumblist.rank}" /></if>　</td>
+  </tr>
+    <tr>
+    <td >软件截图</td>
+    <td><input type="file" name="image[]" id="image" onchange="onUploadImgChange(this)" /></td> 
+	<td>&nbsp;</td>
+    <td><if condition="$thumblist[2]['url'] neq null " ><input type="checkbox" name="delimg[]" value="{$thumblist[2]['id']}" />删除<img src="<?php echo IMGATT_HOST;?>{$thumblist[2].url}" width="64" height="64" alt="{$thumblist.rank}" /></if>　</td>
+  </tr>
+    <tr>
+    <td >软件截图</td>
+    <td><input type="file" name="image[]" id="image" onchange="onUploadImgChange(this)" /></td> 
+	<td>&nbsp;</td>
+    <td><if condition="$thumblist[3]['url'] neq null " ><input type="checkbox" name="delimg[]" value="{$thumblist[3]['id']}" />删除<img src="<?php echo IMGATT_HOST;?>{$thumblist[3].url}" width="64" height="64" alt="{$thumblist.rank}" /></if>　</td>
+  </tr>
+    <tr>
+    <td >软件截图</td>
+    <td><input type="file" name="image[]" id="image" onchange="onUploadImgChange(this)" /></td> 
+	<td>&nbsp;</td>
+    <td><if condition="$thumblist[4]['url'] neq null " ><input type="checkbox" name="delimg[]" value="{$thumblist[4]['id']}" />删除<img src="<?php echo IMGATT_HOST;?>{$thumblist[4].url}" width="64" height="64" alt="{$thumblist.rank}" /></if>　</td>
+  </tr>
+  <?php if($apk_go == 1){ ?>
+  <tr>
+    <td colspan="4">APK上传：</td>
+  </tr>
+  <tr>
+    <td colspan="4"><input type="file" name="apk[0]" id="apk" onchange="onUploadAPK(this)" /><!--  分辨率:
+    <select name="resolution[0]" id="resolution"  >
+     <optgroup label="选择分辨率"> 
+      <volist name='resolutionlist' id='resolutionvo'>
+           <option value="{$resolutionvo.resolutionid}" <if condition="$resolutionvo['resolutionid'] eq $filelist[0]['resolutionid'] "> selected </if> >{$resolutionvo.note}</option> 
+
+      </volist>
+      </select> -->
+    最小固件:
+    <select name="minfirame[0]" id="minfirame" disabled >
+     <optgroup label="选择固件版本"> 
+           <option value="0" selected >请选择</option> 
+      <volist name='configlist' id='configvo'>
+           <option value="{$configvo.configname}"  <if condition="$configvo['configname'] eq $filelist[0]['min_firmware'] "> selected </if> >{$configvo.configcontent}</option> 
+      </volist>
+      </select>
+    </td>
+  </tr>
+
+  <?php } ?>
+  <tr>
+    <td>软件备注：</td>
+    <td><textarea id="note" name="note" rows="6" cols="40">{$softlist.note}</textarea></td>
+	<td>&nbsp;</td>
+    <td><span id="truename_span" style='color:red' >　</span></td>
+  </tr>
+  <tr>
+    <td colspan="4">开发者信息：</td>
+  </tr>
+  <tr>
+    <td>开发者姓名</td>
+    <td><input type="text" name="dev_name" id="dev_name" value="{$softlist.dev_name}" size='100' /><span style="color:red"> * </span></td>
+	<td>{$softlist.dev_name_r|default='&nbsp;'}</td>
+	<td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>开发者英文名</td>
+    <td><input type="text" name="dev_enname" id="dev_enname" value="{$softlist.dev_enname}"  size='100'/></td>
+    <td>{$softlist.dev_enname_r|default='&nbsp;'}</td>
+	<td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>开发者邮箱</td>
+    <td><input type="text" name="dever_email" id="dever_email"  value="{$softlist.dever_email}"  size='100'/></td>
+	<td>&nbsp;</td>
+    <td><input type="hidden" name="returnurl" id="returnurl"  value="{$returnurl}" />　</td>
+  </tr>
+  <tr>
+    <td>开发者主页</td>
+    <td><input type="text" name="dever_page" id="dever_page"  value="{$softlist.dever_page}" size='100' /></td>
+	<td>&nbsp;</td>
+    <td><input type="hidden" name="softid" id="softid"  value="{$softlist.softid}" />　</td>
+  </tr>
+  <tr>
+	<td width="300">软件状态</td>
+	<td align="left" width="300">
+		<input type="radio" name="type" value="0" <?php if($softlist['type']==0){ echo "checked";} ?>>普通
+		<volist name="list" id="list">
+		<input type="radio" name="type"  value="{$list.id}" <?php if($softlist['type']==$list['id']){ echo "checked";} ?>>{$list.name}
+		</volist>
+    
+	<td><input type="hidden" name="old_type" value="{$softlist['type']}">&nbsp;</td>
+	<td>&nbsp;</td>
+</tr>
+<tr>
+<td>是否官方认证</td>
+<td colspan="3"><input type='radio' name='isoffice' value='1' <?php if($softlist['icon_office']==1){ echo "checked='checked'";} ?> />是<input type='radio' name='isoffice' value='2' <?php if($softlist['icon_office']==2){ echo "checked='checked'";} ?> />否 <font color="red">注：官方认证若有时间限制，请设置具体时间，若无时间限制，按默认时间</font></td>
+	<tr class="sub_tr">
+		<td>认证开始时间</td>
+		<td><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+		<input id="start_at" name="start_at"
+			style="border: 0px none black; width: 100px;" value="{$start_at}"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>认证结束时间</td>
+		<td><span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="end_at" name="end_at"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="{$end_at}" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span></td>
+	</tr>
+</tr>
+<if condition="$bookright_result eq 0">
+<tr style="display:none">
+<else/>
+<tr>
+</if>
+<td>版权证明显示</td>
+<td colspan="3">身份证图片：<img src="<?php echo IMGATT_HOST;?>{$bookright_result[identity_pic]}" width="100px" height="100px">&nbsp;&nbsp;
+	&nbsp;版权图片:<img src="<?php echo IMGATT_HOST;?>{$bookright_result[right_pic]}" width="100px" height="100px">&nbsp;&nbsp;
+	&nbsp;执照图片:<img src="<?php echo IMGATT_HOST;?>{$bookright_result[business_pic]}" width="100px" height="100px">&nbsp;&nbsp;
+</td>
+</tr>
+  <tr>
+    <td colspan="4"><input type="submit" value='提交'/><input type="reset" /></td>
+ </tr>
+</table>
+</form>
+</center>
+{// 加载尾部公共文件 }
+<include file="../Public/footer" />

@@ -1,0 +1,91 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style>
+.sub_tr {
+	height: 35px;
+	text-align: left;
+}
+</style>
+<script type="text/javascript">
+function checkPost()
+{
+	var regex = /^[0-9]+(.[0-9]{1,2})?$/
+	if( !$("input[name='tax_rate']").val() ) {
+		alert('税率不能为空');
+		return false;
+	}
+	if ( !regex.test($("input[name='tax_rate']").val()) ) {
+		alert('税率只能为整数或小数二位');
+		return false;
+	}
+	if ( $("input[name='tax_rate']").val() > 100) {
+		alert('税率不能超过100');
+		return false;
+	}
+	if( !$("input[name='sl_date']").val() ) {
+		alert('生效日期不能为空');
+		return false;
+	}
+}
+function autoReckon(obj, n)
+{
+	var regex = /^[0-9]+(.[0-9]{1,2})?$/
+	var ratio_a = $("input[name='ratio_a']");
+	var ratio_b = $("input[name='ratio_b']");
+	var tax_rate = $("input[name='tax_rate']");
+	
+	var cur_val = $(obj).val();
+	var new_val = 0;
+	if ( !regex.test(cur_val) ) {
+		ratio_a.val('');
+		ratio_b.val('');
+		tax_rate.val('');
+		alert('只能为整数或小数二位');
+		return false;
+	}
+	if ( cur_val > 100) {
+		ratio_a.val('');
+		ratio_b.val('');
+		tax_rate.val('');
+		alert('不能超过100');
+		return false;
+	}
+	
+	new_val = parseFloat((100 - cur_val).toFixed(2));
+	if( n == 1 ) {	
+		ratio_b.val(new_val);
+	}else if(n == 2){
+		ratio_a.val(new_val);
+	}else if(n == 3) //增加税率  增加了一个参数3
+	{
+		tax_rate.val(cur_val);
+	}
+}
+</script>
+<FORM method="POST" action="__URL__/tax_rate_add?" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<input type="hidden" name="channel_id" value="<?php echo $channel_id ?>">
+	<tr class="sub_tr">
+		<td>税率：</td>
+		<td><input name='tax_rate' type='text' value="" onchange="autoReckon(this,3)" style="width:80px"/>%</td>
+		<td>生效日期</td>
+		<td><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 154px;">
+		<input id="start_at" name="sl_date"
+			style="border: 0px none black; width: 130px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M",el:"start_at",dateFmt:"yyyy-MM",minDate: "%y-%M"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span></td>
+	</tr>
+	
+	<tr class="sub_tr">
+		<td colspan="2"> 
+			<input type='submit' value="&nbsp;&nbsp;提交&nbsp;&nbsp;"/>&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+	</tr>
+</table>
+</FORM>	

@@ -1,0 +1,94 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<style>
+.selink,.selink:hover {
+	padding:5px;
+	margin:3px;
+	border:1px solid #dcdcdc;
+	background-color:white;
+	color:blue;
+}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+<div style="height:50px;margin:5px;">
+	<div style="position:absolute;left:10px;margin: 5px;"><form method="get" action="__URL__/brand_type_match_list"> 抓取品牌： <input type="text" name="brand" value="{$_GET['brand']}"/> 抓取机型： <input type="text" name="brand_type" value="{$_GET['brand_type']}"/> <input type="submit" name="submit" class="search_btn" style="display:inline-block;"/></form></div>
+</div>
+<div style="height:50px;margin:5px;">
+	<div style="position:absolute;left:10px;margin: 5px;"><a href="__URL__/brand_type_match_list?brand={$_GET['brand']}&brand_type={$_GET['brand_type']}" class="search_btn" style="display:inline-block;<?php if(isset($_GET['match'])) echo 'background:#fff;'?>">全部</a> <a href="__URL__/brand_type_match_list?match=1&brand={$_GET['brand']}&brand_type={$_GET['brand_type']}" class="search_btn" style="display:inline-block;<?php if(!$_GET['match']) echo 'background:#fff;'?>">已匹配</a> <a href="__URL__/brand_type_match_list?match=0&brand={$_GET['brand']}&brand_type={$_GET['brand_type']}" class="search_btn" style="display:inline-block;<?php if($_GET['match']||!isset($_GET['match'])) echo 'background:#fff;'?>">未匹配</a></div>
+	<div style="position:absolute;right:10px;margin: 5px;">
+		<span style="margin:10px;display:inline-block;" class="search_btn" onclick="del_se()">批量删除</span>
+		<span style="margin:10px;display:inline-block;" class="search_btn" onclick="edit_s()">批量编辑</span>
+	</div>
+</div>
+<div >
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th ><input type="checkbox"  onclick="SelectAll(this)"></th>
+			<th ><a href="__URL__/brand_type_match_list?ot=btm.id&order=<?php echo $order['btm.id'];?>&brand={$_GET['brand']}&brand_type={$_GET['brand_type']}">序号↓↑</a></th>
+			<th ><a href="__URL__/brand_type_match_list?ot=btm.upload_brand&order=<?php echo $order['btm.upload_brand'];?>&brand={$_GET['brand']}&brand_type={$_GET['brand_type']}">抓取品牌↓↑</a></th>
+			<th ><a href="__URL__/brand_type_match_list?ot=btm.upload_type&order=<?php echo $order['btm.upload_type'];?>&brand={$_GET['brand']}&brand_type={$_GET['brand_type']}">抓取机型↓↑</a></th>
+			<th ><a href="__URL__/brand_type_match_list?ot=b.brand_name&order=<?php echo $order['b.brand_name'];?>&brand={$_GET['brand']}&brand_type={$_GET['brand_type']}">机型库品牌↓↑</a></th>
+			<th ><a href="__URL__/brand_type_match_list?ot=bt.brand_type&order=<?php echo $order['bt.brand_type'];?>&brand={$_GET['brand']}&brand_type={$_GET['brand_type']}">机型库机型↓↑</a></th>
+			<th >操作</th>
+			<th >状态</th>
+		</tr>
+	</thead>
+	<volist name="result" id="list">
+	<tr>
+		<td><input type="checkbox" name="id[]" value="{$list.id}"></td>
+		<td>{$list.id|default=' '}</td>
+		<td>{$list.upload_brand|default=' '}</td>
+		<td>{$list.upload_type|default=' '}</td>
+		<td>{$list.brand_name|default=' '}</td>
+		<td>{$list.brand_type|default=' '}</td>
+		<td><a href="__URL__/edit?id={$list.id}&action=brand_type_match" style="color:blue">编辑</a><if condition="$tags.count eq 0">|<a href="__URL__/del?id={$list.id}&action=brand_type_match" onclick="return ok('确定要删除数据吗？');" style="color:blue">删除</a>
+		</if></td>
+		<td><if condition="$list.status eq 1"> <a href="__URL__/status?id={$list.id}&status=0&action=brand_type_match" onclick="return ok('确定要更改状态吗？');" title="点击切换状态为停用">使用</a>
+		<elseif condition="$list.status eq 0"/><a href="__URL__/status?id={$list.id}&status=1&action=brand_type_match" onclick="return ok('确定要更改状态吗？');" style="color:red" title="点击切换状态为使用">停用</a>
+		</if></td>
+	</tr>
+	</volist>
+</table></form>
+</div>
+<div class="navgition">
+{$show}
+</div>
+<script>
+function ok(data)
+  {
+   if(confirm(data))
+    return true;
+   else return false
+  }
+  
+function edit_s(){
+	j=getSelect();
+	if(j === false)return false;
+	window.location='/index.php/Zhiyoo/Brand/edit?action=brand_type_match&id='+j;
+}
+
+function del_se(){
+	j=getSelect();
+	if(j === false)return false;
+	if(ok('您确定要执行批量删除操作吗？'))window.location='__URL__/del?action=brand_type_match&id='+j;
+}
+
+function getSelect(){
+	var c = document.getElementsByName('id[]');
+	var length = c.length;
+	var j=new Array;
+	for(i=0;i<length;i++){
+		if(c[i].checked)j.push(c[i].value);
+	}
+	if(j.length==0){
+		alert('未选择任何一个选项！');
+		return false;
+	}
+	j=j.join(',');
+	return j;
+}
+</script>
+</body>
+</html>

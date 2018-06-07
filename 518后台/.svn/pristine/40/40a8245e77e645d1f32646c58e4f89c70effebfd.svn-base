@@ -1,0 +1,150 @@
+<include file="../Public/header" />
+<style type="text/css">
+	td.active {
+		background-color: #DFDFDF;
+	}
+	.tab td {
+		cursor: pointer;
+		text-align:center;
+		width: 80px;
+		height: 50px;
+	}
+	.searchtable form table{
+		margin-top: 10px;
+		position:relative;
+		right:0px;
+		border: 0px;
+		border-spacing: 5px;
+		text-align:center;
+	}
+	.content table{
+		text-align:center;
+	}
+</style>
+
+<body>
+	<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+	<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+	<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+        {//时间插件开始}
+        <script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+        {//时间插件结束}
+	<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+	<script src="/Public/js/Ebook/recommend.js" type="text/javascript"></script>
+	<div class="main" width="99%">
+		<div class="tab">
+			<table border=1 cellspacing=0 cellpadding=0 style="border: 1px solid black;border-collapse:collapse;">
+				<tr>
+					<td onclick="totag(0);">待审核</td>
+					<td onclick="totag(1);">有效</td>
+					<td onclick="totag(2);">无效</td>
+					<td class="active" onclick="totag(3);">审核记录</td>
+				</tr>
+			</table>
+		</div>
+		<div class="searchtable" align=right>
+			<form action="/index.php/Sj/EbookRecommendVerify/VerifyHistory" methon="get" onsubmit="checkval();">
+			<table width="90%">
+				<tr>
+					<td width="30%">
+						关键字：
+						<input type="text" name="search_key" id="search_key" value="{$search_key|default='请输入包名或软件名称'}" onblur="if(value==''){value='请输入包名或软件名称'}" onFocus="if(this.value=='请输入包名或软件名称'){this.value=''}" />
+					</td>
+					<td width="30%">
+						页面：
+						<select name="recommend_type" onchange="change_type(this.value);">
+							<option value="0">请选择页面</option>
+							<option value="1" <if condition="$recommend_type eq 1">selected="selected"</if>>推荐</option>
+							<option value="2" <if condition="$recommend_type eq 2">selected="selected"</if>>排行榜</option>
+							<option value="4" <if condition="$recommend_type eq 4">selected="selected"</if>>免费榜</option>
+							<option value="3" <if condition="$recommend_type eq 3">selected="selected"</if>>分类</option>
+						</select>
+					</td>
+					<td width="30%">
+						子页面：
+						<select name="key" id="sub_page" <if condition="$recommend_type neq 3">disabled="disabled"</if>>
+							<option value="0">请选择</option>
+							<volist name='category' id='category'>
+								<option value="top_{$category.category_id}_new" <?php if ($cache_key == 'top_' . $category['category_id'] . '_new'): echo 'selected="selected"'; endif; ?>>{$category.name}-最新</option>
+								<option value="top_{$category.category_id}_hot" <?php if ($cache_key == 'top_' . $category['category_id'] . '_hot'): echo 'selected="selected"'; endif; ?>>{$category.name}-最热</option>
+							</volist>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td width="30%">
+						开始日期：
+						<input type="text" name="start_time" id="start_time" value="{$start_time}" /><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_time",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;"/>
+					</td>
+					<td width="30%">
+						结束日期：
+						<input type="text" name="end_time" id="end_time" value="{$end_time}" /><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_time",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;"/>
+					</td>
+					<td width="30%"><input type="submit" value="搜索" style="margin-left:100px;"/></td>
+				</tr>
+			</table>
+			</form>
+		</div>
+		<div class="content">
+			<table width="100%">
+				<tr>
+					<th>位置</th>
+					<th>包名</th>
+					<th>应用名</th>
+					<th>页面</th>
+					<th>开始日期</th>
+					<th>结束日期</th>
+					<th>审核时间</th>
+					<th>审核说明</th>
+					<th>审核结果</th>
+					<th>拒绝原因</th>
+				</tr>
+				<volist name='list' id='list'>
+				<tr>
+					<td><?php if($list['rank'] == -1){echo '随机';}else{echo $list['rank'];}?></td>
+					<td>{$list.package}</td>
+					<td>{$list.softname}</td>
+					<td>{$list.page}</td>
+					<td>{$list.begintime}</td>
+					<td>{$list.endtime}</td>
+					<td>{$list.last_refresh}</td>
+					<td>
+						<switch name="list.operation">
+							<case value="1">新增加</case>
+							<case value="2">编辑</case>
+							<case value="3">删除</case>
+						</switch>
+					</td>
+					<td>
+						<switch name="list.verify_status">
+							<case value="0">待审核</case>
+							<case value="1">通过</case>
+							<case value="2">拒绝</case>
+						</switch>
+					</td>
+					<td>{$list.refuse_msg}</td>
+				</tr>
+				</volist>
+			</table>
+		</div>
+		<div align="right">{$page}</div>
+	</div>
+	<div id="refuse_div" style="position:absolute;top:0px;left:0px;display:none;background:#fff;width:430px;height:270px;border:1px solid #000;z-index:-1;">
+		<form action='/index.php/Sj/EbookRecommendVerify/UnverifiedList/action/refuse/' method='post'>
+			<input type="hidden" id="refuseid" name="id"/>
+			<table width="100%" height="100%" style="text-align:center;">
+				<caption>拒绝原因</caption>
+				<tr height="80%"><td><textarea name="refuse_msg" style="height:90%; width:90%;"></textarea></td></tr>
+				<tr height="20%">
+					<td>
+					<input type="submit" value="确定" />
+					&nbsp;
+					<input type="button" value="取消" onclick="popclose()" />
+					</td>
+				</tr>
+			</table>
+		</form>
+	</div>
+	<div id="bgdiv" style="position:absolute;display:none; left:0px; top:0px; width:100%; height:100%; filter:alpha(opacity=40);opacity:0.4; background-color:#000000; z-index:1;"></div>
+</body> 
+<!-- 主页面结束 -->

@@ -1,0 +1,111 @@
+<include file="../../Public/header"/>
+
+<link type="text/css" href="__PUBLIC__/school/css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet" />	
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script>
+
+<!-- 
+function checkinput(){
+  var k = $( "#k" ).val();
+  //var d = $( "#datepicker" ).val();
+  //var d1 = $( "#datepicker1" ).val();
+  if(!k){
+    alert("请输入关键词");
+    $('#k')[0].focus();
+    return false;
+  }/*else if(d == d1){
+    alert("请重新选择时间 结束 大于 开始");
+    return false;
+  }*/
+  var is_force_related = $('input[name=is_force_related]:checked').val();
+  var rank = $('#rank').val();
+  if(is_force_related==1){
+  	if(rank==''){
+  		alert('请输入优先级');
+  		$('#rank')[0].focus();
+  		return false;
+  	}
+  	if(!/^[1-9]+(\d)*$/.test(rank)){
+  		alert('优先级请填写正整数');
+  		$('#rank')[0].focus();
+  		return false;
+  	}
+  }
+}
+-->
+</script>
+<label>请选择要操作的产品：</label>
+<form action="__URL__/search_key_list" method="GET" name="showproductlist">
+<select name='product_id' id="productlist"  onchange="javascript:showproductlist.submit();">
+	<option value="0">选择产品</option>
+	<volist name="product_list" id="product" key="k">
+	<option value="{$product.pid}"  <if condition="($product.pid eq $product_id)"> selected = "selected" </if> >{$product.pname}</option>
+	</volist>
+</select>
+</form>				
+<center>
+<form action="__URL__/search_key_add" method="POST">
+	<table border=1>
+		<tr>
+			<td>关键词：
+				<input type="text" id="k" name="srh_key" value="" size='30' />
+			</td>	
+			<!--<td>开始时间：
+				<input type="text" id="datepicker" name="start_tm" value="{$start_tm}" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"datepicker",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  />
+			</td>
+			<td>结束时间：
+				<input type="text" id="datepicker1" name="stop_tm" value="{$stop_tm}" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"datepicker1",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  />
+			</td>-->
+		</tr>
+		<tr>
+			<td>
+				<input type="hidden" value="{$product_id}" name="pid" id='pid'>
+				是否强关联：<input type='radio' checked='checked' name='is_force_related' value='0' />否&nbsp;<input type='radio' name='is_force_related' value='1' />是,优先级为:<input type='text' name='rank' id='rank' size='3' />
+				<input type="submit" value="添加" onclick="return checkinput()"/>
+			</td>
+		</tr>
+	</table>
+	<font color='red'>*</font>强关联是指所有包含该关键词均使用该运营内容
+</form>
+<br>
+<form action="__URL__/search_key_list" method="GET">
+	<table border=1>
+		<tr>
+			<input type="hidden" value="{$product_id}" name="product_id" id='product_id'>
+			<td>关键词：<input type="text" id="sk" name="srh_key" value="{$srh_key}" /></td>
+			<td><input type="submit" value="搜索"/></td>
+		</tr>
+	</table>
+</form>
+<table border=1>
+	<tr>
+		<!--<th>ID</th>-->
+		<th>关键字</th>
+		<!--<th>创建日期</th>-->
+		<!--<th>开始时间</th>
+		<th>结束时间</th>-->
+		<th>操作</th>
+	</tr>
+	<?php foreach($key_list as $info){ ?>
+	<tr>
+		<!--<td><?php echo $info['id'];?></td>-->
+		<td>
+			<a href="__URL__/search_key_package_add/id/<?php echo $info['id'];?>" ><?php echo $info['srh_key'];?></a>
+		</td>
+		<!--<td><?php echo date("Y-m-d H:i:s",$info['create_tm']);?></td>-->
+		<!--<td><?php echo date("Y-m-d H:i:s",$info['start_tm']);?></td>
+		<td><?php echo date("Y-m-d H:i:s",$info['stop_tm']);?></td>-->
+		<td>
+			<a href="__URL__/search_key_update/id/<?php echo $info['id'];?>?height=255&width=400&{$param}">修改关键词</a>|
+			<a href="__URL__/search_key_package_add/id/<?php echo $info['id'];?>" >添加软件包</a>|
+			<a href="__URL__/search_key_delete/id/<?php echo $info['id'];?>" onclick="return checkit()">删除</a>
+		</td>
+	</tr>
+	<?php } ?>
+</table>
+<p>{$page}</p>
+</center>

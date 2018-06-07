@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>信息管理编辑</title>
+<style type="text/css">
+body, td, th {font-size: 12px;height:35px;}
+</style>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<script type="text/javascript" src="/Public/js/json2.js"></script>
+
+<div id="addremind_div" style="top:0px;left:0px;border:1px solid #000; padding:10px 20px; background:#fff;">
+
+<form id='form_id' action="__URL__/addremind" method="post" >
+<table>
+<tr><td width='25%'>软件反馈:</td><td colspan='3'>
+<textarea name='type_1' id='type_1' onblur="outtype('type_1')" onfocus="gettype('type_1')" cols=60>填写监测词语，如多个请用分号分隔。</textarea></td></tr>
+<tr><td width='25%'>软件举报:</td><td colspan='3'>
+<textarea name='type_2' id='type_2' onblur="outtype('type_2')" onfocus="gettype('type_2')" cols=60>填写监测词语，如多个请用分号分隔。</textarea></td></tr>
+<tr><td width='25%'>软件评论:</td><td colspan='3'>
+<textarea name='type_3' id='type_3' onblur="outtype('type_3')" onfocus="gettype('type_3')" cols=60>填写监测词语，如多个请用分号分隔。</textarea></td></tr>
+<tr><td width='25%'>每天发送频率:</td><td>
+<select name='mailnum'>
+<option value='1'>1</option>
+<option value='2'>2</option>
+<option value='3'>3</option>
+<option value='4'>4</option>
+<option value='5'>5</option>
+<option value='6'>6</option>
+<option value='7'>7</option>
+</select>次/天</td><td >　单个提醒词超量上限>=<td><input type='text' id='maxnum' name='maxnum' value=''>次</td></tr>
+<tr><td width='25%'>提醒内容：</td><td colspan='3'>您关注的提醒词，发出警报提醒，请注意检查！</td></tr>
+<tr>
+<table id='add_table'>
+<tr><td width='20%'>监测人员：</td><td width='20%'>
+<input type='text' id='user' name='user[]' mark='1' value=''></td>
+<td width='20%'>　邮件地址：</td><td width='20%'><input type='text' id='email' name='email[]' value=''></td>
+<td width='20%'><a href="javascript:;" onclick='add_table_tr2()' style="font-size:30px;text-decoration: none;color:#000" rel="">+</a></td>
+</tr></table>
+</tr>
+<tr><td colspan=2><button onclick="form_chk()"  type="button" > 确定</button></td>
+<td colspan=2><button type='button' onclick='adddiv_close()'  >取消 </button></td></tr>
+</table>
+
+</form>
+
+</div>
+
+
+ <script type='text/javascript' >
+ function gettype(id){
+	 if($("#"+id).val() == '填写监测词语，如多个请用分号分隔。'){
+		 $("#"+id).val('');
+	 }
+ }
+ function outtype(id){
+	 if(!$("#"+id).val()){
+		 $("#"+id).val('填写监测词语，如多个请用分号分隔。');
+	 }
+ }
+ function adddiv_close(){
+		tb_remove();
+	}
+function form_chk(){
+	var type_1 = true;
+	if(!$("#type_1").val() || $("#type_1").val() == '填写监测词语，如多个请用分号分隔。'){
+		var type_1 = false;		
+	}
+	var type_2 = true;
+	if(!$("#type_2").val() || $("#type_2").val() == '填写监测词语，如多个请用分号分隔。'){
+		var type_2 = false;		
+	}
+	var type_3 = true;
+	if(!$("#type_3").val() || $("#type_3").val() == '填写监测词语，如多个请用分号分隔。'){
+		var type_3 = false;		
+	}
+
+	if(!type_1 && !type_2 && !type_3){
+		alert('请填写提醒词');
+		return false;
+	}
+	if(!$("#maxnum").val()>0){
+		alert('请填写提醒词超量上限');
+		return false;
+	}
+	if(!$("#user").val()){
+		alert('请填写监控人员');
+		return false;
+	}
+	if(!$("#email").val()){
+		alert('请填写接收邮件');
+		return false;
+	}
+	$("input[name='user[]']").each(function(){
+		if($(this).attr('mark') == 0){
+			$(this).focus();
+			return false;
+		}
+	});
+	$('#form_id').submit();
+}
+function  add_table_tr2(){
+	if($("#add_table tr").length >=5){
+		alert('最多只能添加5个监测人员');
+		return false;
+	}else{
+		var str = "<tr><td>监测人员：</td><td><input type='text' make=1 name='user[]' value=''></td><td>邮件地址：</td><td><input type='text' name='email[]' value=''></td><td onClick='getDel(this)'><a href='#'>删除</a></td><tr>";
+		$("#add_table").append(str);
+		$("#add_table tr:last").remove();
+	}
+}
+function getDel(k){
+	$(k).parent().remove();    
+}
+$("input[name='user[]']").blur(function(){
+	var user = $(this).val();
+	var url = '__URL__/checkuser';
+	var data = '&user='+user;
+	var _this = $(this);
+	 $.ajax({
+			url: url,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function(ret){
+				if(ret == '0'){
+					alert('这个账号不属于开发后台账号！');
+					_this.val('');
+					_this.attr('mark','0');
+					
+				}else{
+					_this.attr('mark','1');
+				}
+			}
+		})
+
+});
+</script>

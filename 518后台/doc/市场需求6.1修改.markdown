@@ -1,0 +1,70 @@
+﻿# 市场需求6.1修改
+
+标签（空格分隔）： work
+
+---
+
+
+
+`礼包相关`
+
+- [x] 42 礼包列表返回淘号状态（vr 4） 9.21 ok
+- [x] 45 礼包详情（完整）添加返回淘号状态（vr 4）9.21 ok
+- [x] 46 礼包详情（列表进入）添加返回淘号状态（vr 4）9.21 ok
+- [x] 47 更多礼包添加返回淘号状态（vr 4） 9.21  ok
+- [x] 149 淘号协议（vr 1）9.21 ok
+
+****************
+
+- [x] 10 软件详情页面添加新服、封测信息和是否可关注（Vr 12）9.24
+- [ ] 54 游戏推送支持开测和关注软件动态（vr 3）9.24
+- [x] 125 评论和回复时返回手机名字信息（vr 2）9.24
+
+***************
+
+- [x] 145 关注和取消关注协议 （vr 1 ） 9.24
+- [x] 146 关注列表协议 （vr 17） 9.24
+- [x] 147 我的关注(数据同步)协议（vr 1）9.24
+- [ ] 148 新服列表协议 （vr 1） 9.22
+- [ ] 150 我的游戏列表（vr 1）
+- [x] 151 礼包中心列表（vr 1）
+***************
+
+>推送逻辑:
+>在添加活动，新服，新测，礼包时更新对应package的cache信息
+>查询时，cache为新，DB为历史，返回cache大于DB的数据，
+>更新cache信息到DB
+>活动`sj_actives_soft`、礼包 `sendNum.olgame_active`、新服 `sj_new_server`.server_type =1、测评 `sj_new_server`.server_type=2
+
+```flow
+st=>start: user request
+op=>condition: cache 
+cond=>operation: cache > db
+push=>operation: push
+up=>operation: update db
+
+db=>operation:select db
+update=>operation:update cache
+
+st->op->cond->push->up
+op->db->update->push
+
+op(yes)->cond
+op(no)->db-
+
+```
+
+```mysql
+ALTER TABLE `sj_new_server`
+ADD COLUMN `server_type`  tinyint(1) NOT NULL DEFAULT 1 COMMENT '新服类型（1新服 2内测服）' AFTER `da_order`,
+ADD COLUMN `del_type`  tinyint(1) NOT NULL DEFAULT 0 COMMENT '内测类型（1删档 2不删档）' AFTER `server_type`;
+
+
+```
+
+
+
+
+
+
+

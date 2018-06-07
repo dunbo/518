@@ -1,0 +1,175 @@
+<include file="../Public/header" />
+<script type="text/javascript" src='/Public/js/soft.js?v3'></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<link rel="stylesheet" href="/Public/css/jquery.autocomplete.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/js/jquery.autocomplete.js"></script>
+
+<table width="50%" border="0" cellpadding="0" cellspacing="0"  class="tb" >
+	<tr  bgcolor="" height='30'>
+		<td align='left' colspan='4'><b>提取礼包</b></td>
+	</tr>
+	<tr>
+		<td align='left'>礼包名称：</td>
+		<td  colspan='4'><?php echo $active_name?></td>
+	</tr>
+	<tr>
+		<td align='left'>剩于激活码：</td>
+		<td  colspan='4'><?php echo $surplus_num?>个</td>
+	</tr>	
+	<tr>
+		<td align='left'>激活码总量：</td>
+		<td  colspan='4'><?php echo $num?>个</td>
+	</tr>
+
+	<tr>
+		<td align='left'>礼包提取历史：</td>
+		<td>时间</td>
+		<td>提取数量</td>
+		<td>下载详情</td>
+	</tr>
+	<?php foreach($list as $k => $v){ ?>
+	<tr>
+		<td align='left'></td>
+		<td><?php echo date("Y-m-d H:i:s",$v['add_tm']); ?></td>
+		<td><?php echo $v['num']; ?></td>
+		<td>
+			<a href="javascript:;" onclick="down_file('<?php echo $v['id']; ?>','<?php echo $v['file_path']; ?>');">下载详情</a>
+		</td>
+	</tr>	
+	<?php } ?>
+	<tr>
+		<td align='left' colspan='4'><button onclick='gift_exp();' >提取礼包</button></td>
+	</tr>
+</table>
+<div id="gift_div" style="padding:0px; width:300px; height:300px;display:none;" >
+	<table width="100%" border="0" cellpadding="0" cellspacing="0"  class="tb" >
+		<tr>
+			<td align='left' colspan='2'><b>可提取激活码</b></td>
+		</tr>	
+		<tr><td colspan='2'>&nbsp;</td></tr>
+		<tr>
+			<td align='left'>剩于激活码：</td>
+			<td ><?php echo $surplus_num?>个</td>
+		</tr>			
+		<tr><td colspan='2'>&nbsp;</td></tr>
+	<?php if($bbs_res_num > 0){ ?>
+		<tr>
+			<td align='left'>论坛:<?php  echo $bbs_res_num; ?>个</td>
+			<td>提取：<input  type="number" min="1" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" name="bbs_num" id="bbs_num"  value="" />个</td>
+		</tr>	
+		<tr><td colspan='2'>&nbsp;</td></tr>	
+	<?php } ?>
+	<?php if($gm_res_num > 0){ ?>
+		<tr>
+			<td align='left'>安卓游戏:<?php  echo $gm_res_num; ?>个</td>
+			<td>提取：<input  type="number" min="1" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" name="gm_num" id="gm_num"  value="" />个</td>
+		</tr>	
+		<tr><td colspan='2'>&nbsp;</td></tr>
+	<?php } ?>
+	<?php if($az_res_num > 0){ ?>
+		<tr>
+			<td align='left'>安智市场:<?php  echo $az_res_num; ?>个</td>
+			<td>提取：<input  type="number" min="1" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" name="az_num" id="az_num"  value="" />个</td>
+		</tr>
+		<tr><td colspan='2'>&nbsp;</td></tr>
+	<?php } ?>
+	<?php if($sdk_res_num > 0){ ?>
+		<tr>
+			<td align='left' >SDK:<?php  echo $sdk_res_num; ?>个</td>
+			<td >提取：<input  type="number" min="1" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" name="sdk_num" id="sdk_num"  value="" />个</td>
+		</tr>
+		<tr><td colspan='2'>&nbsp;</td></tr>
+	<?php } ?>	
+	<?php if($weixin_res_num > 0){ ?>
+		<tr>
+			<td align='left' >微信:<?php  echo $weixin_res_num; ?>个</td>
+			<td >提取：<input  type="number" min="1" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" name="weixin_num" id="weixin_num"  value="" />个</td>
+		</tr>
+		<tr><td colspan='2'>&nbsp;</td></tr>
+	<?php } ?>	
+		<tr>
+			<td align='left' >
+				<button onclick="zxxbox_hide();" >取消</button>
+			</td>
+			<td>
+				<button onclick="gift_exp_do();" >确定</button>
+			</td>
+		</tr>
+	</table>	
+</div>	
+<script>
+	var surplus_num = <?php echo $surplus_num ? $surplus_num : 0; ?>;
+	function gift_exp(){
+		if(surplus_num <= 0){
+			alert("激活码已全部发放，无法提取");
+			return false;
+		}
+		$("#gift_div").zxxbox();
+	}
+
+	var active_id = <?php echo $_GET['id'] ?>;
+	function gift_exp_do(){		
+		var bbs_num = $("#bbs_num").val();	
+		var bbs_res_num = <?php echo $bbs_res_num ? $bbs_res_num : 0; ?>;
+		if(bbs_num > bbs_res_num){
+			alert("激活码超出提取数量【论坛】");
+			return false;
+		}
+		var gm_num = $("#gm_num").val();	
+		var gm_res_num = <?php echo $gm_res_num ? $gm_res_num : 0; ?>;
+		if(gm_num > gm_res_num){
+			alert("激活码超出提取数量【安卓游戏】");
+			return false;
+		}
+		var az_num = $("#az_num").val();	
+		var az_res_num = <?php echo $az_res_num ? $az_res_num : 0; ?>;
+		if(az_num > az_res_num){
+			alert("激活码超出提取数量【市场】");
+			return false;
+		}
+		var sdk_num = $("#sdk_num").val();	
+		var sdk_res_num = <?php echo $sdk_res_num ? $sdk_res_num : 0; ?>;
+		if(sdk_num > sdk_res_num){
+			alert("激活码超出提取数量【SDK】");
+			return false;
+		}	
+		var weixin_num = $("#weixin_num").val();	
+		var weixin_res_num = <?php echo $weixin_res_num ? $weixin_res_num : 0; ?>;
+		if(weixin_num > weixin_res_num){
+			alert("激活码超出提取数量【微信】");
+			return false;
+		}	
+		var num = parseInt(bbs_num)+parseInt(gm_num)+parseInt(az_num)+parseInt(sdk_num)+parseInt(weixin_num);
+		if(num > surplus_num){
+			alert(az_num+sdk_num)
+			alert("激活码超出提取数量【总量】");
+			return false;
+		}
+		if(!bbs_num && !gm_num && !az_num && !sdk_num && !weixin_num){
+			alert("请填写正确数量");
+			return false;		
+		}
+		$.ajax({
+			url: '__URL__/p_export_gift_do',
+			data: 'active_id='+active_id+'&bbs_num='+bbs_num+'&gm_num='+gm_num+'&az_num='+az_num+'&sdk_num='+sdk_num+'&weixin_num='+weixin_num,
+			type: 'post',
+			dataType: 'json',	
+			success:function(data){
+				if(data.code == 1){
+					alert('提取成功');
+				}else{
+					alert('提取失败');
+				}
+				location.href = '__URL__/p_export_gift_do?down_file=1&active_id='+active_id+"&id="+data.id+'&file_path='+data.file_path;
+				setTimeout(function(){
+					location.reload();//加载页面		
+				},2000);	
+					
+			}
+		});
+	}
+	
+	function down_file(id,file_path){
+		location.href = '__URL__/p_export_gift_do?down_file=1&active_id='+active_id+"&id="+id+'&file_path='+window.btoa(file_path);
+	}
+</script>

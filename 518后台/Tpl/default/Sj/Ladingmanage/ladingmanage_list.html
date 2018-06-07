@@ -1,0 +1,292 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script type="text/javascript" src='/Public/js/cn_area.js'></script>
+</head>
+<style>
+.btn{ width:50px; height:25px; border-radius:5px;}
+</style>
+<script>
+	function change_rank(rank,id,cid){
+		$.ajax({
+			url: '__URL__/change_rank/id/'+id+'/rank/'+rank+'/cid/'+cid,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){			
+				if(data == 1){
+					 location.reload('/index.php/Sj/Ladingmanage/ladingmanage_list/cids/'+cid);
+				}
+			}
+		});
+	
+	}
+	
+	function checkit(){
+		if(confirm("分类删除后，该分类下的所有软件也会同时被删除，并且直接影响线上数据，是否确认删除"))
+		{
+			return true;
+		}
+		return false;
+	}
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	
+	//主层动态变化数据
+	function onclikChannel()
+		{	
+			
+			$('#channel_div').html('');
+			$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+				var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+				item.find('input').attr('checked', 'true');
+				$('#channel_div').append(item);
+				$('#cids').val(this.value);
+				select_channels.submit();
+			})
+			//$.cookie('cids', '', {path: '/'});
+		}
+	
+	function check_arr()
+	{
+		$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+	}
+    function savestyle() {
+            akeystyle = $("input[name='akeystyle']:checked").val();
+            if(akeystyle==3){
+            	$('#page_number').show();
+            }else{
+            	$('#page_number').hide();
+            }
+            
+            var param = {
+                akeystyle : akeystyle
+            };
+            $.ajax({
+                url:'__URL__/ladingmanage_list',
+                type:'POST',
+                data:param,
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    //location.reload()
+                }
+            });
+        };
+    function save_page_soft_num(page_soft_num) {    
+    		if (!(/(^[1-9]\d*$)/.test(page_soft_num))) { 
+	　　　　　　alert('只可输入正整数'); 
+	　　　　　　return false; 
+	　　　　}       
+            var param = {
+                page_soft_num : page_soft_num
+            };
+            $.ajax({
+                url:'__URL__/ladingmanage_list',
+                type:'POST',
+                data:param,
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    //location.reload()
+                }
+            });
+        };
+	function change_days(val)
+	{
+		var action =val;
+		var days = $("#space_time").val();
+		var post_val = {
+			action : action,
+			days:days,
+		};
+		$.ajax({
+			url:'__URL__/change_days',
+			type:'POST',
+			data:post_val,
+			secureuri:false,
+			dataType:'json',
+			success:function(data)
+			{
+				if(data==1)
+				{
+					$("#edit").css({'display':'none'});
+					$("#space_time").attr("readonly",false);
+					$("#save").css({'display':''});
+					$("#cancel").css({'display':''});
+				}
+				if(data==-1)
+				{
+					alert("时间间隔必须是整数");
+				}
+				if(data==2||data==3)
+				{
+					if(data==3)
+					{
+						alert("前端弹出时间间隔编辑成功");
+					}
+					$("#edit").css({'display':''});
+					$("#space_time").attr("readonly",true);
+					$("#save").css({'display':'none'});
+					$("#cancel").css({'display':'none'});
+					window.location.reload(true);
+				}
+			}
+		});
+	}
+
+	//机型可见
+	function submitDevice()
+		{
+			var cids = '';
+			$('#device_div').empty();
+			$(".TB_ajaxContent #c_device_res input:checked").each(function(){
+				var item = $('<label>' + $('#c_device_res .l_did_' + this.value).html() + '</label>');
+				item.find('input').attr('checked', 'true');
+				item.find('input').click(function(){
+					$(this).parent().remove();
+				});
+				$('#device_div').append(item);
+			})
+			$.cookie('cids', '', {path: '/'});
+			tb_remove();
+		}
+		function addItem() {
+			var channel_select = $("#device_div");
+			channel_select.clone().appendTo("#device_td");
+		}
+		function delItem(obj) {
+			$(obj).parent().remove();
+		}
+		function check_arrs()
+		{
+			$('.TB_ajaxContent #c_device_res').html($('#device_div').html());
+
+			$('#device_div input:checked').each(function(){
+				$('.TB_ajaxContent .l_did_' + this.value).find('input').attr('checked', 'true');
+			});
+		}
+		function changePid(obj) {
+			window.location.href='__URL__/ladingmanage_list/pid/'+obj.value;
+			// body...
+		}
+
+</script>
+<body>
+
+<div style="padding:20px;">
+<span>注意事项：</span><br />
+<span>1.一句话推荐不得超过7个汉字</span><br />
+<span>2.编辑和删除针对软件，若需修改分类，请点击“编辑分类”按钮</span><br />
+</div>
+<div style="padding:0 20px;">
+<div style="margin:0 0px 20px;">
+<form action="__URL__/ladingmanage_list" method="get" name="select_channels" id="select_channels">
+前端显示样式:
+<div>
+<input type="radio" value="2" name="akeystyle" onchange="savestyle()" <if condition="($res eq 2)"> checked</if>>双排
+<input type="radio" value="1" name="akeystyle" onchange="savestyle()" <if condition="($res eq 1)"> checked</if>>单排
+<input type="radio" value="3" name="akeystyle" onchange="savestyle()" <if condition="($res eq 3)"> checked</if>>多页（支持646及以上版本，646以前版本默认双排样式）
+<br><br>
+</div>
+<!-- 6.4.6及以后前端样式:
+<div>
+<input type="radio" value="2" name="newakeystyle" onchange="newsavestyle()" <if condition="($new_res eq 2)"> checked</if>>双排
+<input type="radio" value="1" name="newakeystyle" onchange="newsavestyle()" <if condition="($new_res eq 1)"> checked</if>>单排
+<input type="radio" value="3" name="newakeystyle" onchange="newsavestyle()" <if condition="($new_res eq 3)"> checked</if>>多页
+<br><br> -->
+</div>
+
+<div id="page_number" style="display:<?php echo ($res!=3)?'none':'';?>">
+前端每页显示的软件数:<input type="text"  style="width:50px; height:25px; line-height:25px;" value="{$page_soft_num}"  onblur="save_page_soft_num($(this).val())" /> 
+<br><br>
+</div>
+前端弹出时间间隔:
+<div>
+<input type="text" id="space_time" style="width:50px; height:25px; line-height:25px;" readonly="true" value="{$days}" name="space_time" /> 天
+<input type="button" class="btn" style="" name="edit" id="edit" onclick="change_days(this.value)" value="编辑"/>
+<input type="button"  class="btn" style="display:none;" name="save" id="save" onclick="change_days(this.value)" value="保存"/>
+<input type="button"  class="btn" style="display:none" name="cancel" id="cancel" onclick="change_days(this.value)" value="取消"/>
+<br><br>
+</div>
+
+请选择要操作的产品：<select name="pid" id="pid" onchange="changePid(this)">
+    <?php foreach($product_list as $k => $v): ?>
+    <option value="<?php echo $k;?>"<?php if ($v[1] == true):?> selected="true"<?php endif; ?> ><?php echo $v[0] ?></option>
+    <?php endforeach; ?>
+</select><br><br>
+
+选择渠道：<a href="__APP__/Public/showChannel?callback=submitChannel&type=radio&ready=check_arr&selected=onclikChannel" class="thickbox" style="color:blue;">选择指定渠道</a>
+<div id="channel_div">
+	<?php if(!empty($cid_array)){ ?>
+	<label class="l_cid_{$cid_array.cid}"><input type="radio" name="cid" checked="checked" value="{$cid_array.cid}" />{$cid_array.chname}</label>
+	<?php }else{ ?>
+	<label class="l_cid_{$cid}"><input type="radio" name="cid" checked="checked" value="{$cid}" />{$chname}</label>
+	<?php } ?>
+</div>
+
+<input type="hidden" id="cids" name="cids" />
+</form>
+</div>
+<table>
+<tr><td><a href="__URL__/lading_official_config/cid/{$cid}?mm" class="thickbox search_btn">文案配置</a></td><td><a href="__URL__/add_category_show/cid/{$cid}/pid/{$pid}?mm" style="float:right;" class="search_btn thickbox">添加新分区</a></td><td><a href="__URL__/all_bei_soft/cid/{$cid}" class="search_btn">管理下载顺序</a></td><td><a href="__URL__/lading_check_soft_count/cid/{$cid}?mm" class="search_btn" style="width:150px;">检测该渠道下软件个数</a></td><td><a href="__URL__/import_lading/from/1/pid/{$pid}"  class="search_btn" style="margin-left:7px;">批量添加软件</a></td></tr>
+</table>
+
+<div class="main_r">
+	<h3 class="current_h3">一键装机分区列表</h3>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="table_list">
+		<thead>
+			<tr>
+				<th>分类名称</th>
+				<th>渠道名称</th>
+				<th>分类软件数</th>
+				<th>排序</th>
+				<th>顶部背景色</th>
+				<th>区域可见</th>
+				<th>机型可见</th>
+				<th>开始时间</th>
+				<th>结束时间</th>
+				<th>操作&nbsp;&nbsp;</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach($result as $key => $val){ ?>
+			<tr>
+				<td>{$val.category_name}</td>
+				<td>{$val.chname}</td>
+				<td>{$val.soft_num}</td>
+				<td><select onChange="change_rank(this.value,{$val.id},{$cid});"><?php foreach($rank as $k => $v){ ?><option value="{$v}" <?php if($val['rank'] == $v){ ?>selected<?php } ?>>{$v}</option><?php } ?></select></td>
+				<td style="width:60px;height:30px;"><div style="background-color:{$val.top_bg_color};width:60px;height:30px;">&nbsp;</div></td>
+				<td>{$val.push_area}</td>
+				<td>{$val.device_str}</td>
+				<td><?php echo $val['start_tm']?date('Y-m-d H:i:s',$val['start_tm']):'' ?></td>
+				<td><?php echo $val['start_tm']?date('Y-m-d H:i:s',$val['end_tm']):'' ?></td>
+				<td><a href="__URL__/add_soft_show/id/{$val.id}/category_id/{$val.id}?mm" class="thickbox blue">添加软件</a>&nbsp;&nbsp;<a href="__URL__/show_soft_list/id/{$val.id}" class="blue">查看软件</a>&nbsp;&nbsp;<a href="__URL__/edit_category_show/id/{$val.id}" class="thickbox blue">编辑</a>&nbsp;&nbsp;<a href="__URL__/delete_category/id/{$val.id}" onClick="return checkit();" class="blue">删除分类</a></td>
+			</tr>
+			<?php } ?>
+		</tbody>
+	</table>
+	<center>{$page}</center>
+</div>
+</div>
+</body>
+</html>
+

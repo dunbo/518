@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="/Public/css/style.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/jtextcount.js'></script>
+<script type="text/javascript" src='/Public/js/jquery.validate.min.js'></script>
+</head>
+<body>
+<div class="main" >
+<div class="content">
+<center>
+<form action="__URL__/activate_edit_do" method="post" name="activate_edit_form" id="activate_edit" enctype="multipart/form-data" onsubmit="return checkform()"> 
+<table width="90%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td colspan="3" align="center"><h2>编辑活动期</h2></td>
+  </tr>
+  <tr>
+	<td width="10%" align="center">活动期:</td>
+	<td width="50%" align="left" style="padding-left:20px;">
+	    <input type="text" name="new_id" value="{$activate_info.id}"  class="required" /><font color="red">*</font>
+	</td>
+	<td width="30%" align="center">声明：当前最后一个活动期是{$activate_id}，编辑框初始化时自动累加，可修改</td>
+  </tr>
+  <tr>
+	<td width="10%" align="center">主题：</td>
+	<td width="50%" align="left" style="padding-left:20px;">
+	    <input type="text" name="title"  class="required" value="{$activate_info.title}" />
+	</td>
+	<td width="30%" align="center"><font color="red">*</font></td>
+  </tr>
+  <tr>
+	<td width="10%" align="center">活动图(970px*275px)：</td>
+	<td width="50%" align="left" style="padding-left:20px;">
+	    <input type="file" name="a_image" />
+	</td>
+	<td width="30%" align="center">
+	    <img src="<?php echo IMGATT_HOST;?>{$activate_info.picture_url}" alt="图片" width="200px" height="200px" />
+	</td>
+  </tr>
+  <tr>
+	<td width="10%" align="center">活动简介：</td>
+	<td width="50%" align="left" style="padding-left:20px;">
+		<textarea id="jianjie" class="jTextCount-text" name="activate_descript" cols="40" rows="8">{$activate_info.activate_descript}</textarea>
+		<font color="red">*</font>
+    </td>
+	<td width="30%" align="center">
+	    <span id="jianjie_limit" style="color: green">允许输入200个字符</span>
+	</td>
+  </tr>
+  <tr>
+	<td width="10%" align="center">往期回顾：(212px*110px)</td>
+	<td width="50%" align="left" style="padding-left:20px;">
+	    <div id="list1">
+			<div id="form1"></div>
+			<div id="btn" style="float:right;margin-right:40px;margin-bottom:5px;cursor:pointer;color:green" title="点击添加往期回顾"><strong>添加</strong></div>
+	    </div>
+		<div style="display:none" id="template">
+			<div class="itemslist">
+				往期活动期
+				<select name="activate_history[]">
+				    <optgroup label="请选择活动期">
+						<?php foreach($activate_history as $ah):?>
+							<option value="<?php echo $ah['id'] ?>" ><?php echo $ah['id']?></option>
+						<?php endforeach;?>
+					</optgroup>
+				</select>
+				<input type="file" name="ah_image[]" />&nbsp;
+				<span class="delete" style="display:none;cursor:pointer;color:red;float:right;margin-right:44px" title="点击删除往期回顾">删除</span>
+			</div>
+		</div>
+	</td>
+	<td width="30%" align="center">
+	    <?php foreach($activate_history_list as $ah):?>
+			<p>往期活动期{$ah.history_id}图片：<img src="<?php echo IMGATT_HOST;?>{$ah.pic_url}" alt="图片" width="100px" height="100px" /></p>
+		<?php endforeach;?>
+	</td>
+  </tr>
+  <tr>
+	<td width="10%" align="center">备注：</td>
+	<td width="50%" align="center">
+	    <textarea rows="5" cols="30" id="beizhu" class="jTextCount-text" name="activate_note">{$activate_info.activate_note}</textarea>
+	</td>
+	<td width="30%" align="center">
+	    <span id="beizhu_limit" style="color: green">允许输入100个字符</span>
+	</td>
+  </tr>
+  <tr>
+	<td width="10%" align="center"><input type="submit" value="提交" /></td>
+	<td width="50%" align="center"><input type="reset" value="重置" /></td>
+	<td width="30%" align="center">带<font color="red">*</font>的选项为必填项</td>
+  </tr>
+</table>
+<input type="hidden" name="old_id" value="{$activate_info.id}" />
+</form>
+</center>
+</div>
+</div>
+<script>
+$(document).ready(function(){
+    $('#jianjie').inputlimitor({
+		limit: 200,
+		boxId: 'jianjie_limit',
+		boxAttach: false
+	});
+	$('#beizhu').inputlimitor({
+		limit: 100,
+		boxId: 'beizhu_limit',
+		boxAttach: false
+	});
+    var str = $("#template").html();
+    $("#form1").append(str);
+	$("#btn").bind("click",function(){
+	    if($('#form1 select[name^=activate_history]').length + 1 > {$activate_history_count}){
+		    return false;
+		}
+	    $("#template span.delete").show();
+	    str =$("#template").html();
+		$("#form1").append(str);
+		$(".delete").each(function(index){
+			$(this).unbind("click");
+			$(this).bind("click",function(){
+			    $(this).parent().remove();
+		    });
+	   });
+	 });
+	$("#").validate();
+});
+function checkform(){
+	if (document.activate_edit_form.title.value.length == 0) { 
+		alert("请输入主题!");
+		document.activate_edit_form.title.focus();
+		return false;
+	}
+	if (document.activate_edit_form.activate_descript.value.length == 0) { 
+		alert("请添加活动简介!");
+		document.activate_edit_form.activate_descript.focus();
+		return false;
+	}
+}
+</script>
+</body>
+</html>
+

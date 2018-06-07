@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style type="text/css">
+body,td,th {
+	font-size: 12px;
+}
+</style>
+	<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+	<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+	<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+	<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+        <script type="text/javascript">  
+        function edit(){
+            var endtime = $("#endtime3").val();
+            var h_id = $("#h_idd").val();
+            var d2 = $("#endtime3").val();
+            var d2 = new Date(d2.replace(/-/g, "/")); 
+            var myDate = new Date();
+            var y = myDate.getFullYear();
+            var m = myDate.getMonth()+1;
+            var d = myDate.getDate();
+            var thisday = y+'-'+m+'-'+d;
+            var thisday = new Date(thisday.replace(/-/g, "/")); 
+
+            if (Date.parse(d2) - Date.parse(thisday)  < 0) {
+                alert("启用失败，请检查截止时间是否不符合规则，请查看备注信息...");
+                return;
+            }
+            
+            
+            var param = {
+                endtime : endtime,
+                h_id : h_id
+	    };
+            $.ajax({
+                url:'__URL__/qiyong',
+                type:'POST',
+                data:param,
+                dataType:'json',
+                success:function(data){
+                    if(data==1)
+                    {
+                        alert('该活动启用成功');
+                        location.href ="/index.php/Sendnum/Market/wxindex";
+                    }else if(data==2)
+                    {
+                        alert('该活动已经被启用');
+                        location.href ="/index.php/Sendnum/Market/wxindex";
+                    }
+                }
+            });  
+        };
+    </script>
+</head>
+ 
+<body>
+<div style="width:45; margin-top:4px">
+	 <form id="form1" name="form1" method="post" action="__URL__/add/">
+  <table width="99%" height="63" border="0" align="center" cellpadding="4" cellspacing="1"  bgcolor="#333333">
+    <tr>
+        <td height="20" align="right" bgcolor="#FFFFFF">抽奖截止时间:</td>
+        <td bgcolor="#FFFFFF"><input id="endtime3" name="endtime3"
+				style="cursor: hand; width: 100px;"
+				value="{$endtime}" size="15" type="text"><img
+				src="/Public/js/calendar.gif"
+				onclick="return showCalendar('endtime3', 'y-m-d');" style="border:1px solid #000;"/></td>
+                        </tr>
+        <tr align="center">
+         <td width="20%" size="20" height="20" align="right" bgcolor="#FFFFFF"></td>
+         <td align="left" bgcolor="#FFFFFF">
+             <font color="red">说明：启用无效记录时，截止时间必须大于等于当前时间点才可以，否则请修改时间才能进行启用操作。</font>
+             <input type="hidden" value="{$id}" id="h_idd" name ="h_idd">
+        </td>
+    </tr>                        
+    <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="提交" onclick="edit()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onclick="tb_remove();"/></td>
+
+    </tr>
+</table>
+  
+  </form>
+</div>
+</body>
+</html>

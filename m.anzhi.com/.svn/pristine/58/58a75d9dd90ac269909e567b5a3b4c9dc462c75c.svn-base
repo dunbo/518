@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>有爱圣诞节亮了</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/christmas2015/css/common3.css?v2"/>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+</head>
+<body>
+<section>
+    <div class="banner"><img src="<!--{$out.new_static_url}-->/activity/christmas2015/images/banner.jpg"/></div>
+    <div class="main">
+		<div class="person1">
+			<p>和TA一起点亮圣诞树，唯有爱与分享不可辜负，和你爱的人过暖光四溢的圣诞节。</p>
+		</div>
+		<div class="tree_wrap">
+			<div class="tree">
+				<span></span>
+				<i></i>
+				<em></em>
+				<a href="javascript:;" onclick="go_love();"></a>
+			</div>
+			<p>用爱点亮一半，分享点亮另一半</p>
+		</div>
+		<div class="tree_btn clear">
+			<a href="javascript:;" onclick="go_share();">用分享点亮</a>
+			<a id="go_lottery" href="javascript:;" class="disabled">去拿礼物</a>
+		</div>
+		<div class="bom_btn">
+			<a href="/lottery/christmas2015_lottery_rules.php?sid=<!--{$out.sid}-->">【活动规则】</a>
+		</div>
+		
+    </div>
+</section>
+<section>
+	<div class="footer clear">
+		<p>活动最终解释权归安智所有</p>
+	</div>
+</section>
+<script type="text/javascript">
+var sid='<!--{$out.sid}-->';
+var aid='<!--{$out.aid}-->';
+var ignite_status = <!--{$out.ignite_status}-->;
+var promotion_share_url = '<!--{$out.promotion_share_url}-->';
+
+$(document).ready(function(){
+	// 点亮树的状态
+	ignite_tree(ignite_status);
+})
+
+function go_ignite(action) {
+	ignite_status |= action;
+	ignite_tree(ignite_status);
+	ignite_api(action);
+}
+
+function ignite_tree(status) {
+	if ((status&1) && (status&2)) {
+		if (!$('.tree em').hasClass('star_light')) {
+			$('.tree em').addClass('star_light')
+		}
+		if ($('.tree i').is(':hidden')) {
+			$('.tree span').hide();
+			$('.tree i').show();
+			// 设置去抽奖按钮可点击
+			if ($("#go_lottery").hasClass("disabled")) {
+				$("#go_lottery").removeClass("disabled");
+				$("#go_lottery").attr('href', '/lottery/christmas2015_lottery.php?sid='+sid);
+			}
+		}
+	} else if (status&1 || status&2) {
+		if (!$('.tree em').hasClass('star_light')) {
+			$('.tree em').addClass('star_light')
+		}
+		if ($('.tree span').is(':hidden')) {
+			$('.tree span').show();
+		}
+	}
+}
+
+function ignite_api(action) {
+	$.ajax({
+		url:'/lottery/christmas2015_ignite_api.php?sid='+sid,
+		data:{action:action},
+		type:'get',
+		success:function(data){
+		}
+	});
+}
+
+function go_love() {
+	go_ignite(1);
+}
+
+function go_share() {
+	var share_text = '用爱意与分享点亮@安智市场 的圣诞树，就有超多礼物拿哦~唯有爱与陪伴不可辜负，参加活动和你爱的TA过暖光四溢的圣诞节吧！';
+	var share_actionurl = '<!--{$out.promotion_share_url}-->';
+	var share_url = '<!--{$out.share_big_pic}-->';
+	var share_urlweixin = '<!--{$out.share_small_pic}-->';
+	var share_json = '{"TEXT":"' + share_text + '", "URL":"' + share_url + '","ACTIONURL":"' + share_actionurl + '","URLWEIXIN":"' + share_urlweixin + '"}';
+	window.AnzhiActivitys.getShareDialog(share_json);
+	setTimeout('go_ignite(2)',5000);
+}
+
+</script>
+</body>
+</html>

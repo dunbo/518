@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="Android,安卓,安卓网,安卓市场,安卓游戏,电子市场,安卓软件,Android游戏,安卓手机,游戏汉化,手机游戏,Android软件,软件下载,最新汉化软件,安卓游戏下载,游戏汉化" />
+<meta name="description" content="安智市场,Android,安卓,安卓网,安卓市场,电子市场,安卓游戏,应用商店-国内最专业的Android安卓电子市场，提供海量安卓软件、Android手机游戏、安卓最新汉化软件、汉化游戏资源及最新APK汉化、汉化破解APP、APK免费下载，致力于为用户打造最贴心的Android安卓手机应用商店" />
+<title>反馈</title>
+<script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="/js/underscore.js"></script>
+<script type="text/javascript" src="js/skin.js"></script>
+<script>
+var type_list = ['feedback', 'comment'];
+var proid_arr = getArgs();
+var namespace = 'AnzhiActivitys';
+
+if (typeof(proid_arr.pid) !='undefined') {
+	if (proid_arr.pid == '11') {
+		namespace = 'BBSActivitys';
+	}
+}
+var jsInterface = window[namespace];
+
+$(document).ready(function(){
+	var json_data =	jsInterface.getAllMessage();
+	var cmd = 'var data=' + json_data;
+	eval(cmd);
+
+	var comment_data = [];
+	var feedback_data = [];
+	var selectType = 'feedback';
+	if (typeof(data) != 'undefined') {
+		for(var i in data['DATA']){
+			var type = parseInt(data['DATA'][i][5]);
+			switch(type) {
+				case 1:
+					if(data['DATA'][i][3]){
+						selectType = 'comment';
+					}
+					comment_data.push(data['DATA'][i]);
+				break;
+				
+				case 2:
+					if(data['DATA'][i][3]){
+						selectType = 'feedback';
+					}
+					feedback_data.push(data['DATA'][i]);
+				break;
+			}
+		}
+		$('#feedback_list').html(_.template($('#feedback_tpl').html(),{data:feedback_data}));
+		$('#comment_list').html(_.template($('#comment_tpl').html(),{data:comment_data}));
+		setTab(selectType);
+	}
+});
+
+function maketotime(now){
+	return new Date(parseInt(now) * 1000).toLocaleString().replace(/年|月/g, "/").replace(/日/g, " ");
+}
+
+function go_detail(type,msgId){
+	jsInterface.inDetail(parseInt(type),parseInt(msgId));
+	$('#'+msgId+'').css('font-weight','');
+	$('#new_'+msgId+'').attr('class','reds');
+	$('#new_'+msgId+'').html('(0)');
+}
+
+function setTab(type)
+{
+	for(var i in type_list) {
+		$('#' + type_list[i] + '_p').hide();
+		$('#' + type_list[i] + '_tab').removeClass('current');
+	}
+	$('#' + type + '_p').show();
+	$('#' + type + '_tab').addClass('current');
+}
+</script>
+<script type="text/template" id="feedback_tpl">
+    <% for(var i = 0; i < data.length; i++) { %>
+        <% var item = data[i] %>
+		<li>
+		<span id="<%=item[0]%>" <% if(parseInt(item[3])>0){ %>style="font-weight:bold;"<% } %>><%=item[1]%></span>
+		<div class="feedback_tips">
+			<span class="feedback_tips_left">新的反馈回复<span id="new_<%=item[0]%>" <% if(item[3]){ %>class="red"<% } %>>(<%=item[3]%>)</span></span>
+			<em class="feedback_tips_date"><%=item[4]%></span></em>
+		</div>
+		<a href="javascript:;" ontouchend="go_detail(2,<%=item[0]%>);" class="clickarea"></a>
+		</li>
+    <% } %>
+</script>
+
+<script type="text/template" id="comment_tpl">
+    <% for(var i = 0; i < data.length; i++) { %>
+        <% var item = data[i] %>
+		<li>
+		<span id="<%=item[0]%>" <% if(parseInt(item[3])>0){ %>style="font-weight:bold;"<% } %>><%=item[1]%></span>
+		<div class="feedback_tips">
+			<span class="feedback_tips_left">新的评论回复<span id="new_<%=item[0]%>" <% if(item[3]){ %>class="red"<% } %>>(<%=item[3]%>)</span></span>
+			<em class="feedback_tips_date"><%=item[4]%></span></em>
+		</div>
+		<a href="javascript:;" ontouchend="go_detail(1,<%=item[0]%>);" class="clickarea"></a>
+		</li>
+    <% } %>
+</script>
+</head>
+<body>
+<div class="feedback_title">
+	<ul>
+		<li class="current" id="feedback_tab"><a href="javascript:void(0);" ontouchend="setTab('feedback')">市场反馈</a></li>
+		<li id="comment_tab"><a href="javascript:void(0);" ontouchend="setTab('comment')">评论回复</a></li>
+	</ul>
+</div>
+<div id="main">
+	<div class="feedback_wrap">
+		<div class="feedback_list" id="feedback_p" style="display:none">
+			<ul id="feedback_list"></ul>
+		</div>
+		<div class="feedback_list" id="comment_p" style="display:none">
+			<ul id="comment_list"></ul>
+		</div>
+	</div>
+</div>
+</body>
+</html>

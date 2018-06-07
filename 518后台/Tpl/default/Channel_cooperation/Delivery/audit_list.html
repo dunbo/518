@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>商务审核</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+</head>
+<body>
+<div class="main_r">
+	<form action="__URL__/audit_list" method="GET" id='search_forum' >
+	<table width="100%">
+		<tr>
+			<td>
+				渠道名称：
+				<select name="channel_id" id="channel_id" style="width:80px">
+					<?php 
+						$str .= "<option value='0'>全部</option>";
+						foreach($channel_list as $v) {
+						if( $v['id'] == $channel_id ) {
+							$checked = "selected";
+						}else {
+							$checked = "";
+						}
+						$str .= "<option ".$checked." value='".$v['id']."' >".$v['name']."</option>";
+						}
+						echo $str;
+					?>
+				</select>
+			</td>
+			<td>月份：<span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 154px;">
+			<input id="start_at2" name="start_time"
+				style="border: 0px none black; width: 130px;" value="<?php echo $start_time?$start_time:''?>"
+				size="15" type="text"><img src="/Public/js/calendar.gif"
+				class='Wdate' onClick='WdatePicker({startDate:"%y-%M",el:"start_at2",dateFmt:"yyyy-MM"})'
+				style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			</span> 
+				至 <span id="WebCalendar3"
+				style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 154px;">
+			<input id="end_at2" name="end_time"
+				style="border: 0px none black; width: 130px;" value="<?php echo $end_time?$end_time:''?>"
+				size="15" type="text"><img src="/Public/js/calendar.gif"
+				class='Wdate' onClick='WdatePicker({startDate:"%y-%M",el:"end_at2",dateFmt:"yyyy-MM"})'
+				style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			</span>
+			</td>
+			<td>
+				账单状态：
+				<select name="status" id="status" style="width:80px">
+					<option value="0">全部</option>
+					<option value="1" <?php echo $status==1 ? 'selected' : '' ?> >待审核</option>
+					<option value="2" <?php echo $status==2 ? 'selected' : '' ?> >待付款</option>
+					<option value="3" <?php echo $status==3 ? 'selected' : '' ?> >已付款</option>
+					<option value="4" <?php echo $status==4 ? 'selected' : '' ?> >已冻结</option>
+				</select>
+			</td>
+			<td>
+			<input type="submit"  value="搜索" style="width:100px;" />
+			</td>
+		</tr>
+	</table>
+	</form>
+	<table width="100%">
+		<tr>
+			<td style="width:10px">
+				<form action="__URL__/audit_export" method="GET" id='export_forum' >
+				<input type="button" onclick="do_export()" value="导出报表" style="width:80px;" />
+				</form>
+			</td>
+		</tr>
+	</table>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="softlist_tab">
+		<thead>
+			<tr>
+				<td width="3%"><input type="checkbox" name="soft_allSelect" onclick="$('input[name^=ids]').attr('checked', $(this).attr('checked')=='checked')"  /></td>
+				<td width="4%">月份</td>
+				<td width="10%">渠道名称</td>
+				<td width="5%">下载量<br/>（扣量前）</td>
+				<td width="5%">下载量<br/>（扣量后）</td>
+				<td width="5%">安智分成</td>
+				<td width="5%">渠道分成</td>
+				<td width="5%">补差</td>
+				<td width="5%">应付金额</td>
+				<td width="5%">付款金额</td>
+				<td width="5%">差额补齐</td>
+				<td width="5%">未付金额</td>
+				<td width="5%">发票金额</td>
+				<td width="5%">税率</td>
+				<td width="5%">备注</td>
+				<td width="5%">状态</td>
+				<td width="5%">操作</td>
+			</tr>
+		</thead>
+		<tbody>
+<?php foreach($list as $val) :?>
+	<tr>
+		<td><input name="ids[]" value="<?php echo $val['id'] ?>" type="checkbox" alt="del"/></td>
+		<td><?php echo $val['date'] ?></td>
+		<td><?php echo $val['channel_name'] ?></td>
+		<td><a href="__URL__/ch_count/channel_id/<?php echo $val['channel_id']?>/"><?php echo $val['downum_front'] ?></a></td>
+		<td><a href="__URL__/ch_count/channel_id/<?php echo $val['channel_id']?>/"><?php echo $val['downum_after'] ?></a></td>
+		<td><a href="__URL__/ch_count/channel_id/<?php echo $val['channel_id']?>/"><?php echo $val['anzhi_val']?></a></td>
+		<td><a href="__URL__/ch_count/channel_id/<?php echo $val['channel_id']?>/"><?php echo $val['other_val']?></a></td>
+		<td><a href="__URL__/audit_price/id/<?php echo $val['id']?>" class="thickbox" style="color:blue;"><?php echo $val['reserve_price'] ?></a></td>
+		<td><?php echo $val['amount_payable'] ?></td>
+		<td><?php echo $val['payment_amount'] ?></td>
+		<td><?php echo $val['diff_complete'] ?></td>
+		<td><?php echo $val['unpaid_amount'] ?></td>
+		<td><?php echo $val['invoice'] ?></td>
+		<td><?php echo $val['tax_rate'] ?></td>
+		<td><a href="__URL__/audit_remarks/id/<?php echo $val['id']?>/" class="thickbox" style="color:blue;">编辑</a></td>
+		<td><?php echo $st_data[$val['status']] ?></td>
+		<td>
+		<?php if($val['status']==1) :?>
+		<a href="__URL__/audit_operation/id/<?php echo $val['id']?>/option/tg" style="color:blue;" onclick="javascript:return checkit()">通过</a>
+		<?php endif;?>
+		</td>
+	</tr>
+<?php endforeach;?>
+		</tbody>
+	</table>
+{$page}
+</div>
+
+<script>
+function do_export()
+{
+	var chks=$("input[alt='del']:checked");
+	var ids="";
+	var i=0;
+	$(chks).each(function(){
+		ids+=','+this.value;
+		i++;
+	});
+	var b = "/batch_id/"+ids; 
+	var obj   = $("#export_forum");
+	var  url  = obj.attr('action');
+	var epUrl = url+b;
+	obj.attr('action', epUrl);
+	obj.submit();
+	obj.attr('action', url);
+}
+</script>
+</body>
+</html>

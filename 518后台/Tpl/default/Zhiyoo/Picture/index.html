@@ -1,0 +1,104 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/js/fancybox/jquery.fancybox-1.3.4.css" />
+<script type="text/javascript" src="/Public/js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+<style>
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+<body>
+
+<div style="margin:20px 10px 20px 6px;">
+<form action="__URL__/index/" method="get" class="table_list">
+<table>
+	<tr>
+		<td  colspan="3">上传时间：<input autocomplete="off" id="start_tm" name="start_tm" value="{$_GET['start_tm']}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px" />&nbsp;至&nbsp;<input autocomplete="off" id="end_tm" name="end_tm" value="{$_GET['end_tm']}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"/></td>
+		<td >分类：
+			<select name="typeid">
+				<option value=''>全部</option>
+				<option value='0' <?php if('0' === $_GET['typeid']) echo 'selected'; ?>>无</option>
+				<?php foreach($typelist as $key => $val): ?>
+				<option value='{$key}' <?php if($key == $_GET['typeid']) echo 'selected'; ?>>{$val}</option>
+				<?php endforeach;?>
+			</select>
+		</td>
+		<td >水印：
+			<select name="watermark">
+				<option value=''>全部</option>
+				<option value='0' <?php if('0' === $_GET['watermark']) echo 'selected'; ?>>无</option>
+				<option value='1' <?php if('1' === $_GET['watermark']) echo 'selected'; ?>>有</option>
+			</select>
+		</td>
+		<td><input type="submit" onclick="return checksearch()" value="搜索" class="search_btn" /></td>
+	</tr>
+</table>
+</form>
+</div>
+
+<div style="margin:20px 10px 20px 6px;"></div>
+<div style="margin:10px;">
+		<a href="__URL__/index/" class="search_btn" style="display:inline-block;<?php if(isset($_GET['istypeid'])) echo 'background:#fff;'?>">全部</a>
+		<a href="__URL__/index/istypeid/1/" class="search_btn" style="display:inline-block;<?php if($_GET['istypeid']!=='1') echo 'background:#fff;'?>">已分类</a>
+		<a href="__URL__/index/istypeid/0/" class="search_btn" style="display:inline-block;<?php if($_GET['istypeid']!=='0') echo 'background:#fff;'?>">未分类</a>
+		<div style="float:right;">
+			<a href="__URL__/upload/" class="search_btn" style="display:inline-block;width:135px;">上传图片</a>
+			<a href="__URL__/typeman/" class="search_btn" style="display:inline-block;width:135px;">分类管理</a>
+		</div>
+	  </div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th style="width: 100px;">上传时间</th>
+			<th>缩略预览</th>
+			<th style="width: 100px;">分类</th>
+			<th>地址</th>
+			<th>水印</th>
+			<th style="width: 220px;">备注</th>
+			<th style="width: 50px;">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr>
+		<td><?php echo date('Y/n/d',$val['addtime']).'<br>'.date('H:i:s',$val['addtime'])?></td>
+		<td><div style="width: 200px; max-height: 80px; overflow: hidden;"><a href="{$imghost}{$val.path}" class="zshowbox"><img width="200px" src="{$imghost}{$val.path}"/></div></td>
+		<td>{$typelist[$val[typeid]]|default='无'}<br>
+        <a href="__URL__/edittypebyid/picid/{$val.picid}/" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a></td>
+		<td><p>{$img_host_out}{$val.path}</p><button class="copylink" data-clipboard-text="{$img_host_out}{$val.path}" title="复制链接">复制链接</button></td>
+		<td><if condition="$val.watermark == 1" >有<else/>无</if></td>
+		<td>{$val.ext}<br>
+        <a href="__URL__/editext/picid/{$val.picid}/" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a></td>
+		<td><a href="__URL__/delpic/picid/{$val.picid}/" onclick="return confirm('确定要删除吗？')" style="text-decoration:underline;color:blue;">删除</a></td>
+		
+	</tr>
+	<?php } ?>
+</table>
+<div class="navgition">
+	{$page|default='&nbsp;'}
+</div>
+<script type="text/javascript" src="/Public/js/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+		$("a.zshowbox").fancybox();
+});
+function checksearch(){
+	sval = document.getElementById('start_tm').value;
+	eval = document.getElementById('end_tm').value;
+	if(sval > eval){
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+	return true;
+}
+var client = new ZeroClipboard($(".copylink"), {
+  moviePath: "/Public/js/zeroclipboard/ZeroClipboard.swf"
+} );
+client.on( 'complete', function ( client, args ) {
+  alert("复制成功！" + args.text );
+} );
+</script>
+</body>
+</html>

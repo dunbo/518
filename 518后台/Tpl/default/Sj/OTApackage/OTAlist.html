@@ -1,0 +1,134 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<div class="content">
+	<ul class="tab_title margin_top" style="padding:0">
+        <li <?php if($status == 1){ ?>class="current"<?php } ?>><a href="__URL__/OTAlist/status/1">生成列表</a></li>
+        <li <?php if($status != 1){ ?>class="current"<?php } ?>><a href="__URL__/OTAlist/status/0">未生成列表</a></li>
+    </ul>
+	<div class="search_box">
+	<form action="__URL__/OTAlist" method="get">
+	<table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+		<tr>
+			<td width="18%" style="padding-bottom:0">版本号：<input type="text" name="version_code" value="{$version_code}" /><input type="hidden" name="status" value="{$status}"></td>
+			<td width="20%" style="padding-bottom:0">版本名称：<input type="text" name="version_name" value="{$version_name}" /></td>
+			<td width="20%" style="padding-bottom:0">适配渠道：<input type="text" name="chname" value="{$chname}" /></td>
+			<td width="18%" style="padding-bottom:0">平台：<select name="platform">
+				<option value="0">请选择...</option>
+				<?php foreach($product_list as $key => $val){ ?>
+				<option value="{$key}" <?php if($platform == $key){ ?>selected<?php } ?>>{$val.0}</option>
+				<?php } ?>
+			</select></td>
+			<td width="24%" style="padding-bottom:0"><input type="submit" value="搜索" /></td>
+		</tr>
+	</table>
+	</form>
+	</div>
+    <div style="margin:5px;margin-left:10px"><a href="__URL__/manual_generate_otaPackage?width=600&height=400" class="thickbox blue">人工生成增量更新包</a></div>
+	<?php if($status == 1){ ?>
+	<div>
+		<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+			<thead>
+				<tr>
+					<th rowspan="2">平台</th>
+					<th rowspan="2">适配渠道</th>
+					<th colspan="4">新版本</th>
+					<th colspan="4">旧版本</th>
+					<th colspan="3">增量包</th>
+					<th rowspan="2">更新时间</th>
+					<th rowspan="2">状态</th>
+					<th rowspan="2">操作</th>
+				</tr>
+				<tr>
+					<th>ID</th>
+					<th>版本号</th>
+					<th>MD5</th>
+					<th>大小</th>
+					<th>ID</th>
+					<th>版本号</th>
+					<th>MD5</th>
+					<th>大小</th>
+					<th>ID</th>
+					<th>MD5</th>
+					<th>大小</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach($result as $key => $val){ ?>
+			
+			<tr>
+				<td>{$val.platform_name}</td>
+				<td>{$val.chname}</td>
+				<td>{$val.new_market_id}</td>
+				<td>{$val.new_version_code}</td>
+				<td>{$val.new_md5}</td>
+				<td>{$val.new_size}</td>
+				<td>{$val.old_market_id}</td>
+				<td>{$val.old_version_code}</td>
+				<td>{$val.old_md5}</td>
+				<td>{$val.old_size}</td>
+				<td>{$val.id}</td>
+				<td>{$val.md5}</td>
+				<td>{$val.filesize}</td>
+				<td><?php echo date('Y-m-d',$val['update_at']); ?><br /><?php echo date('H:i:s',$val['update_at']); ?></td>
+				<td>已发布</td>
+				<td><a href="__URL__/release_market/id/{$val.id}" class="blue">重新发布</a></td>
+			</tr>
+			<?php } ?>
+			</tbody>
+		</table>
+	</div>
+	<?php }else{ ?>
+	<div>
+		<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+			<thead>
+				<tr>
+					<th rowspan="2">平台</th>
+					<th rowspan="2">适配渠道</th>
+					<th colspan="4">新版本</th>
+					<th colspan="4">旧版本</th>
+					<th colspan="4" rowspan="2">未生成增量包原因</th>
+					<th rowspan="2">更新时间</th>
+					<th rowspan="2">状态</th>
+					<th rowspan="2">操作</th>
+				</tr>
+				<tr>
+					<th>ID</th>
+					<th>版本号</th>
+					<th>MD5</th>
+					<th>大小</th>
+					<th>ID</th>
+					<th>版本号</th>
+					<th>MD5</th>
+					<th>大小</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach($result as $key => $val){ ?>
+			<tr>
+				<td>{$val.platform_name}</td>
+				<td>{$val.chname}</td>
+				<td>{$val.new_market_id}</td>
+				<td>{$val.new_version_code}</td>
+				<td>{$val.new_md5}</td>
+				<td>{$val.new_size}</td>
+				<td>{$val.old_market_id}</td>
+				<td>{$val.old_version_code}</td>
+				<td>{$val.old_md5}</td>
+				<td>{$val.old_size}</td>
+				<td colspan="4">{$val.fail_reason}</td>
+				<td><?php echo date('Y-m-d',$val['update_at']); ?><br /><?php echo date('H:i:s',$val['update_at']); ?></td>
+				<td>未生成</td>
+				<td><a href="__URL__/release_market/id/{$val.id}" class="blue">重新生成</a></td>
+			</tr>
+			<?php } ?>
+			</tbody>
+		</table>
+	</div>
+	<?php } ?>
+	{$page}
+</div>
+
+</body>
+</html>

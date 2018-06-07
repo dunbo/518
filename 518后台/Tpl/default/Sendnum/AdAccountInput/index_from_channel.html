@@ -1,0 +1,84 @@
+<include file="../../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+
+<ul class="tab_title margin_top">
+    <li><a href="__URL__/index_from_contract">按合同</a></li>
+    <li class="current"><a href="#">按频道</a></li>
+</ul>
+
+<body>
+    <div class="search_box">
+        <form method="get" action="__URL__/index_from_channel" name="index_from_channel" id="index_from_channel">
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td>
+                        <label>频道：</label>
+                        <select name="search_channel" id="search_channel">
+                            <option value="选择栏目" selected>选择栏目</option>
+                            <volist name="channels" id="channel">
+                                <option value="{$channel}" <if condition="$search_channel eq $channel">selected</if>>{$channel}</option>
+                            </volist>
+                        </select>
+                    </td>
+                    <td width="20%">
+                        <label>月份：</label>
+                        <input id="search_start_month" name="search_start_month" value="{$search_start_month}" type="text" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM'})" style="width:140px; height:28px"/>到<input id="search_end_month" name="search_end_month" value="{$search_end_month}" type="text" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM'})" style="width:140px; height:28px"/>
+                    </td>
+                    <td width="10%"><input type="submit" value="搜索" class="search_btn"/></td>
+                </tr>
+                <tr>
+                    <td width="10%"><a href='__URL__/index_from_channel?down=1&{$url_param}' class="search_btn">导出报表</a></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="8%" rowspan="2">月份</th>
+                    <th width="8%" rowspan="2">频道</th>
+                    <th width="8%" rowspan="2">合作软件</th>
+                    <th width="21%" colspan="3">广告排期</th>
+                    <th width="5%" rowspan="2">折扣后总价</th>
+                </tr>
+                <tr>
+                    <th width="7%">已排期</th>
+                    <th width="7%">未到期未排</th>
+                    <th width="7%">已到期未排</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="group_list" id="record">
+                    <tr>
+                        <td>{$record.month}</td>
+                        <td>{$record.channel}</td>
+                        <td><a href="__URL__/ad_detail_perchannel?channel={$record.channel}&month={$record.month}" class="thickbox blue">{$record.soft_count}</a></td>
+                         <td><if condition="$record.scheduled neq 0"><a href="__URL__/schedule_detail_perchannel?channel={$record.channel}&month={$record.month}&schedule_type=1" class="thickbox blue">{$record.scheduled}</a><else/>{$record.scheduled}</if></td>
+                        <td><if condition="$record.unscheduled_feature neq 0"><a href="__URL__/schedule_detail_perchannel?channel={$record.channel}&month={$record.month}&schedule_type=2" class="thickbox blue">{$record.unscheduled_feature}</a><else/>{$record.unscheduled_feature}</if></td>
+                        <td><if condition="$record.unscheduled_past neq 0"><a href="__URL__/schedule_detail_perchannel?channel={$record.channel}&month={$record.month}&schedule_type=3" class="thickbox blue">{$record.unscheduled_past}</a><else/>{$record.unscheduled_past}</if></td>
+                        <td>{$record.expected_account}</td>
+                    </tr>
+                </volist>
+                    <tr>
+                        <td>-</td>
+                        <td>合计</td>
+                        <td>{$soft_count}</td>
+                        <td>{$scheduled}</td>
+                        <td>{$unscheduled_feature}</td>
+                        <td>{$unscheduled_past}</td>
+                        <td>{$expected_account}</td>
+                    </tr>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+    
+</body>
+

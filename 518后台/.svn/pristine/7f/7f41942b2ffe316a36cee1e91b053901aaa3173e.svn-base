@@ -1,0 +1,301 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<style type="text/css">
+<!--
+.client_search_div,.client_table_div
+{
+	width:100%;
+
+}
+.client_search_div table td
+{
+	padding:5px 10px;
+
+}
+.client_table_div th,td{text-align:center !important;vertical-align:middle !important;font-size:12px;}
+.client_search_div input{width:140px;height:24px !important;padding:1px;}
+.navgition form
+{
+	display:inline;
+}
+.navgition{text-align:right;padding-right:30px;padding-bottom:20px;}
+.navgition input{padding:0px 15px;}
+.table-body td{padding:8px 2px !important;}
+-->
+</style>
+
+<link rel="stylesheet" type="text/css" media="all"	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<link rel="stylesheet" href="__PUBLIC__/css/bootstrap.min.css">
+<script type="text/javascript" src="__PUBLIC__/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/bootstrap.min.js"></script>
+<script type="text/javascript" src='__PUBLIC__/js/thickbox-compressed.js' ></script>
+<script type="text/javascript" src='__PUBLIC__/js/modal.js' ></script>
+<link rel="stylesheet" href="__PUBLIC__/css/thickbox.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script>
+function datetime_to_unix(datetime){
+    var tmp_datetime = datetime.replace(/:/g,'-');
+    tmp_datetime = tmp_datetime.replace(/ /g,'-');
+    var arr = tmp_datetime.split("-");
+    var now = new Date(Date.UTC(arr[0],arr[1]-1,arr[2],arr[3]-8,arr[4],arr[5]));
+    return parseInt(now.getTime()/1000);
+}
+function check_all(){
+	var alt=$('#chk_all').attr('alt');
+	if(alt==1){
+		$("input[name=chk_list]").attr("checked",true); 
+		$('#chk_all').attr('alt',2);
+	}else{
+		$("input[name=chk_list]").attr("checked",false); 
+		$('#chk_all').attr('alt',1);
+	}
+}
+function select_box(obj){
+	var num=$('#chk_all').attr('num');
+		var chks=$("input[name='chk_list']:checked");
+		var i=0;
+	    $(chks).each(function(){
+	       i++;                   
+	    });
+	    if(i==num){
+	    	$("#chk_all").attr("checked",true); 
+	    	$('#chk_all').attr('alt',2);
+	    }else{
+	    	$("#chk_all").attr("checked",false); 
+	    	$('#chk_all').attr('alt',1);
+	    }
+}
+function export_csv(){
+	var chks=$("input[name='chk_list']:checked");
+	var ids=new Array();
+	var i=0;
+    $(chks).each(function(){
+       ids[i]=this.value;
+       i++;                   
+    });
+    if(i==0){
+		alert('请选择要批量导出的收款信息');
+		return false;
+	}
+	$('#export_csv').attr('href','?export=1&ids='+ids);
+	return true;
+}
+function batch_receipts_confirm(){
+	var chks=$("input[name='chk_list']:checked");
+	var ids=new Array();
+	var i=0;
+    $(chks).each(function(){
+       ids[i]=this.value;
+       i++;                   
+    });
+    if(i==0){
+		alert('请选择要批量录入收款的预存');
+		return false;
+	}
+	$('#batch_receipts').attr('href','__URL__/batch_receipts_confirm/?ids='+ids);
+	$('#batch_receipts').click();
+	return true;
+}
+</script>
+<div class="" style="margin-bottom:10px;">
+	<h4 class="yahei">应用推广&gt;&gt;合同管理 &gt;&gt;收款管理</h4>
+</div>
+ <div class="search_box" style="margin-top:10px;height:90px;width:150%;">
+            <form method="get" action="">
+                <table cellspacing="0" cellpadding="0" width="99%" class="search_table">
+                    <tbody>
+                    <tr>
+                        <td >产品名称
+                            <input type="text" style="width:140px" value="{$softname}" name="s_softname" id="s_softname" class="search_item_text">
+                        </td>
+                        <td >产品包名
+                            <input type="text" style="width:140px" value="{$package}" name="s_package" id="s_package" class="search_item_text">
+                        </td>
+						<td >
+                            开票<?php echo ($flexible_sys==1)?'日期':'月份';?>
+                            <if condition="($flexible_sys eq 1)"> 
+                            <input id="invoice_begintime" name="invoice_begintime" value="{$invoice_begintime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})" style="width:140px; height:28px">到：
+                            <input id="invoice_endtime" name="invoice_endtime" value="{$invoice_endtime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})" style="width:140px; height:28px">
+                            <else/>
+                            <input id="invoice_begintime" name="invoice_begintime" value="{$invoice_begintime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" style="width:140px; height:28px">到：
+                            <input id="invoice_endtime" name="invoice_endtime" value="{$invoice_endtime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" style="width:140px; height:28px">
+                            </if>
+                        </td>
+                        
+                        <td >
+                            预存<?php echo ($flexible_sys==1)?'日期':'月份';?>
+                            <if condition="($flexible_sys eq 1)"> 
+                            <input id="begintime" name="begintime" value="{$begintime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})" style="width:140px; height:28px">到：
+                            <input id="endtime" name="endtime" value="{$endtime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})" style="width:140px; height:28px">
+                            <else/>
+                            <input id="begintime" name="begintime" value="{$begintime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" style="width:140px; height:28px">到：
+                            <input id="endtime" name="endtime" value="{$endtime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" style="width:140px; height:28px">
+                             </if>
+                        </td>
+
+						<td></td>
+						
+                        <td rowspan='2'>
+                            <input type="submit" onclick="" value="搜索" style="float:left; height:30px;" class="search_btn">
+                        </td>
+                    </tr>
+                    <tr>
+                       <td >合同编号
+                            <input type="text" style="width:140px" value="{$contract_code}" name="s_contract_code" id="s_contract_code" class="search_item_text">
+                        </td>
+                        <td align="left">协议主体
+                            <select name="contact_config_id" id='contact_config_id' style="width:131px;">
+								<option value="0" <?php echo ($contact_config_id==0)?'selected':'';?>>请选择</option>
+								<volist name="contract_configs" id="li">
+								<option value="{$li.id}" <?php echo ($contact_config_id==$li['id'])?'selected':'';?>>{$li.c_name}</option>
+								</volist>
+							</select>
+                        </td>
+                        <td >
+                            收款<?php echo ($flexible_sys==1)?'日期':'月份';?>
+                            <if condition="($flexible_sys eq 1)">
+                            <input id="receipts_begintime" name="receipts_begintime" value="{$receipts_begintime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})" style="width:140px; height:28px">到：
+                            <input id="receipts_endtime" name="receipts_endtime" value="{$receipts_endtime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})" style="width:140px; height:28px">
+                            <else/>
+                            <input id="receipts_begintime" name="receipts_begintime" value="{$receipts_begintime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" style="width:140px; height:28px">到：
+                            <input id="receipts_endtime" name="receipts_endtime" value="{$receipts_endtime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" style="width:140px; height:28px">
+                            </if>
+                        </td>
+                        <td align="left">收款状态
+                            <select name="type" id='type' style="width:131px;">
+								<option value="0" <?php echo ($type==0)?'selected':'';?>>请选择</option>
+								<option value="4" <?php echo ($type==4)?'selected':'';?>>已收款</option>
+								<option value="5" <?php echo ($type==5)?'selected':'';?>>未收款</option>
+							</select>
+                        </td>
+                        <td></td>
+						<td></td>
+                    </tr>
+                    </tbody></table>
+              </form>
+ </div>
+<div style="width:100%;padding:10px 10px;margin-bottom:10px;">
+	<!-- <a href="__URL__/add_receive_show/from/receives_list/contract_id/{$contract_id}?" class="thickbox"><button class=" btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;">录入收款</button></a>&nbsp;&nbsp;&nbsp;&nbsp; -->
+	<a href="" class="thickbox" id='batch_receipts' type="hidden"></a><button class=" btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;" onclick="batch_receipts_confirm()">批量录入收款</button>&nbsp;&nbsp;&nbsp;&nbsp;
+	<a href="" target="_blank" class="" onclick="return export_csv();" id='export_csv'><button class="btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;margin-left:0px;">导出报表</button></a>
+	&nbsp;&nbsp;&nbsp;&nbsp;
+	<?php if ($flexible_sys==1): ?>
+	<a href="/index.php/Settlement/CpdContractDepositBatch/import_receipts?width=380&height=140" class="thickbox" title='批量导入'><button class=" btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;">导入收款</button></a>
+	<?php endif ?>
+</div>
+
+<div class="client_table_div" style="width:150%;">
+	<table class="table_list table table-striped table-bordered center middle yahei table-body">
+		<thead>
+			<tr>
+				<th><input type="checkbox" id="chk_all" onclick="check_all()" alt="1" num='{$receipts_num}'/></th>
+				<th>预存ID</th>
+				<th style="width:8%">合同编号</th>
+				<th style="width:8%">合同产品</th>
+				<th>客户名称</th>
+				<th style="width:8%">协议主体</th>
+				<th>充值金额</th>
+				<th>配送金额</th>
+				<th>预存<?php echo ($flexible_sys==1)?'日期':'月份';?></th>
+				<th>发票金额</th>
+				<th>发票<?php echo ($flexible_sys==1)?'时间':'月份';?></th>
+				<th>发票编号</th>
+				<th>收款金额</th>
+				<th>收款<?php echo ($flexible_sys==1)?'日期':'月份';?></th>
+				<th>发票状态</th>
+				<th style="width:10%">备注</th>
+				<th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="lists" id="li">
+				<tr>
+					<td>
+					<input type="checkbox" name="chk_list" value="{$li.id}" onclick="select_box(this)" />
+					</td>
+					<td>{$li.id}</td>
+					<td>{$li.contract_code}</td>
+					<td>{$li.softname}<br>{$li.package}<br>{$li.category_name}</td>
+					<td>{$li.client_name}</td>
+					<td>{$li.c_name}</td>
+					
+					<td><?php echo number_format($li['recharge_sum'],2,'.',',');?></td>
+					<td><?php echo number_format($li['delivery_sum'],2,'.',',');?></td>	
+					<td><?php echo $li['prestores_tm']?(($li['flexible_sys']==1)?date("Y-m-d",$li['prestores_tm']):date("Y-m",$li['prestores_tm'])):'';?></td>
+
+					<td><?php 
+					if($li['invoice_sum'] && $li['invoice_sum']!=0){
+						echo number_format($li['invoice_sum'],2,'.',',');
+					}else{
+						echo "无";
+					}
+					
+					?></td>
+					<td><?php echo $li['invoice_tm']?(($li['flexible_sys']==1)?date("Y-m-d",$li['invoice_tm']):date("Y-m",$li['invoice_tm'])):'';?></td>
+					<td>{$li.invoice_number}</td>
+
+					<td><?php 
+					if($li['receipts_sum'] && $li['receipts_sum']!=0){
+						echo number_format($li['receipts_sum'],2,'.',',');
+					}else{
+						echo "无";
+					}
+					
+					?></td>
+					<td><?php echo $li['receipts_tm']?(($li['flexible_sys']==1)?date("Y-m-d",$li['receipts_tm']):date("Y-m",$li['receipts_tm'])):'';?></td>
+					<td>
+						<?php 
+							if($li['invoice_status']){
+								echo '已开发票';
+							}else{
+								echo '未开发票';
+							}
+						?>
+					</td>
+					<td><if condition="($li['is_edite'] neq 1) "> 
+								<if condition="($li['receipts_status']) "> <a href="__URL__/edit_receive_show/id/{$li.id}/contract_id/{$li.contract_id}" class="thickbox yahei">编辑</a></if>
+						</if></td>
+					<td>
+					<if condition="(!$li['type']) "> 
+						<if condition="($li['is_edite'] neq 1) "> 
+								<if condition="!($li['receipts_status']) "> 
+									<a href="__URL__/edit_receive_show/id/{$li.id}/contract_id/{$li.contract_id}" class="thickbox yahei">确认</a>
+								</if>
+								<if condition="($li['receipts_status']) "> 
+									<a href="__URL__/delete_receive_show/contract_id/{$li.contract_id}/id/{$li.id}" class="yahei" onClick="javascript:return confirm('确认驳回该收款吗？');">驳回</a>
+								</if>
+						</if>
+					</if>
+					</td>
+
+				</tr>
+			</volist>
+			<tr>
+				<td></td>
+				<td></td>
+				<td>总计</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				
+				<td><?php echo number_format($recharge_sum_add,2,'.',',');?></td>
+				<td><?php echo number_format($delivery_sum_add,2,'.',',');?></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		</tbody>
+	</table>
+	<div class="yahei navgition">
+		{$page|default='&nbsp;'}
+	</div>
+</div>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />

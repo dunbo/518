@@ -1,0 +1,101 @@
+{// 加载头部公共文件 }
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/Public/js/public.js"></script>
+<link href="/Public/css/tablelist.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js?v3'></script>
+<style>
+.box{ border:1px solid #999; border-radius:10px 10px 0 0;}
+.table_img{border-collapse:collapse; border-top:1px solid #dbdbdb; border-right:1px solid #dbdbdb}
+.table_img tr{border-bottom:1px solid #dbdbdb}
+.table_img td{padding:5px 10px 0; border-left:1px solid #dbdbdb;}
+</style>
+<script>
+function nickname_upload()
+{
+	$.ajaxFileUpload({
+            url:'__URL__/nickname_add',
+            type:'POST',
+			fileElementId:'upload_file',
+            secureuri:false,
+            dataType:'json',
+            success:function(data)
+			{ 
+			    if(data.error1==-1)
+				{
+					alert("请选择导入的CSV文件!");
+					return false;
+				}
+				else if(data.error2==-2)
+				{
+					alert("请上传CSV格式文件！");
+                    return false;					
+				}
+				else if(data.success==1)
+				{
+					alert("上传成功");
+					location.reload(true);//加载页面	
+				}	
+				else
+				{
+					alert("上传的全部重复，请重新上传");
+					location.reload(true);
+					return false;
+				}
+            }
+        });
+}
+//删除昵称
+function del_comment_nickname(){
+	id_str = Selected_check();
+	if(id_str)
+	{
+		if (confirm('确定要删除指定昵称吗？'))
+		{
+			window.location.href="__URL__/del_comment_nickname/id/"+id_str;
+		}
+	}
+}
+</script>
+<table width="50%" border="0" cellpadding="0" cellspacing="0" style="margin:10px;">
+<tr height="35">
+	<td align="center" class="box">
+		<a href="/index.php/Dev/Message/comment_pictures"><font style="color:#000; font-weight:bold">头像</font></a>
+	</td>
+	<td align="center" style="background:#FFCC66;" class="box" >
+		<a href="__URL__/comment_nickname"><font style="color:#000; font-weight:bold">昵称</font></a>
+	</td>
+</tr>
+</table>
+<table width="90%" border="0" cellpadding="0" cellspacing="0" style="margin:10px">
+	<tr>
+		<td colspan='8'>
+			<input type="checkbox" id="id_all[]" name="id_all[]" onclick="selectAlls(this);">
+			<input id="del" name="del" type="text" class="search_btn" value="删除" onclick='del_comment_nickname();' style="display:inline-block;margin-right:100px;" >
+			<input  name="upload_file" id="upload_file" type="file" value="" style="display:inline-block;width:150px;" >
+			<input id="add" name="add" type="button" onclick="nickname_upload()" class="search_btn" value="批量添加" style="display:inline-block" >
+			<a href="/Public/nickname_sample.csv" color="blue">下载csv模板</a>
+		</td>
+	</tr>
+	<tr id="show_upload_info" style="display:inline-block;margin:10px;">
+		<td colspan='8'>
+			{$uplod_info}
+		</td>
+	</tr>
+</table>
+<table width="90%" border="0" cellpadding="0" cellspacing="0" class="table_img" style="margin:10px">
+	<tr>
+	<?php $i =0; foreach ($list as $k => $v): ?>
+	<td>
+		<input  type="checkbox" name="id[]" value="{$v.id}"  />
+		&nbsp;&nbsp;&nbsp;
+		<label><?php echo $v['nickname']; ?></label>
+	</td>
+		<?php  $i++; if ($i % 8 == 0 ){ ?>
+	</tr>
+	<tr>
+		<?php } ?>
+	<?php endforeach; ?>
+	</tr>	
+</table>
+<div align='left' style="margin:10px">{$page}</div>

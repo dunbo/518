@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="/Public/css/style.css" />
+<script type="text/javascript" src="/Public/js/Base.js"></script>
+<script type="text/javascript" src="/Public/js/Form/CheckForm.js"></script>
+<script type="text/javascript" src="/Public/js/common.js"></script>
+<script type="text/javascript" src="/Public/js/Util/ImageLoader.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/default.js'></script>
+<script type="text/javascript" src='/Public/js/rcalendar.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+</head>
+<body>
+	<form action="__URL__/search_comment" method="get">
+	<table>
+		<tr>
+			<td>
+				评论者:<input type="text" name="username" value="{$user_name}"/>
+				活动期:<select name="activate_times">
+					<option value="all">全部</option>
+					<volist name="times_category" id="vo">
+						<option value="{$vo.id}" <?php if($vo['id'] == $activate_times){ echo "selected"; } ?> >{$vo.id}</option>
+					</volist>
+				</select>
+				状态:<select name="activate_status">
+					<option value="all">全部</option>
+					<volist name="status_category" id="co">
+					<option value="{$co.value}" <?php if($co['value'] == $activate_status){ echo "selected"; } ?> >{$co.name}</option>
+					</volist>
+				</select>
+				<input type="submit" name="search" value="搜索" />
+			</td>
+		</tr>
+	</table>
+	<table border="1" cellpadding="0" cellspacing="0" width="80%">
+		<tr>
+			<td>编号</td>
+			<td>活动期</td>
+			<td>评论者</td>
+			<td>评论头像</td>
+			<td>评论内容</td>
+			<td>状态</td>
+			<td>评论时间</td>
+			<td>操作</td>
+		</tr>
+		<volist name="comment_list" id="info">
+		<tr>
+			<td>{$info.id}</td>
+			<td>{$info.activate_id}</td>
+			<td>{$info.username}</td>
+			<td><img src="http://bbs.anzhi.com/uc_server/avatar.php?uid={$info.user_id}&size=48x48" width="48" height="48" /></td>
+			<td>{$info.comment}</td>
+			<?php if($info['status'] == 1){ ?>
+			<td>正常</td>
+			<?php }else if($info['status'] == 2){ ?>
+			<td>屏蔽</td>
+			<?php } ?>
+			<td><?php echo date('Y年m月d日',$info['publish_tm']); ?></td>
+			<td><a href="__URL__/editor_comment/id/{$info.id}/status/<?php if($info['status'] == 1){echo "2"; }else if($info['status'] == 2){ echo "1"; } ?>" onclick="return checkit();"><?php if($info['status'] == 1){ echo "屏蔽"; }else if($info['status'] == 2){ echo "恢复"; } ?></a> | <a href="__URL__/editor_comment/id/{$info.id}/status/0"  onclick="return chicket();">删除</a></td>
+		</tr>
+		</volist>
+	</table>
+	{$page}
+</body>
+</html>

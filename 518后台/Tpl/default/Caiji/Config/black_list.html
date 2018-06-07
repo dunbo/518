@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+    <script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+    <script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+    <script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+    <include file="../../Public/showapp" />
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>『Goapk|安智网』管理平台</title>
+        <script type="text/javascript">
+            if (typeof (window.parent) != 'undefined' && (menuFrame = window.parent.document.getElementById('menu-frame').contentWindow)) {
+                try {
+                    menuFrame.selectMenu('__ACTION__');
+                } catch (e) {
+                }
+            }
+        </script>
+    </head>
+    
+    <script type="text/javascript">
+            $(function() {
+                document.onkeydown = function(e) {
+                    var ev = document.all ? window.event : e;
+                    if (ev.keyCode == 13) {
+                        search();
+                    }
+                }
+            });
+            function del(id) {
+                if (confirm("删除不可恢复！确定要删除此条记录?")) {
+                    var param = {
+                        id:id 
+                    };
+                    $.ajax({
+                        url: '__URL__/deleteblack',
+                        type: 'POST',
+                        data: param,
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data == 1)
+                            {
+                                location.reload();
+                            } else
+                            {
+                                alert('对不起，权限不足');
+                                location.reload();
+                            }
+                        }
+                    });
+                }
+            }
+            ;
+
+            function search() {
+                var begintime = $("#begintime").val();
+                var endtime = $("#endtime").val();
+                if (begintime.length > 0 && endtime.length > 0 && endtime < begintime)
+                {
+                    alert('结束时间不能小于开始时间');
+                } else
+                {
+                    $("#search").submit();
+                }
+            }
+
+
+            function unauthorized_tb_remove(obj) {
+                var reg = /^\{/;
+                //console.log(reg.test($(obj).html()));
+                if (reg.test($(obj).html())) {
+                    $("#TB_overlay").click(tb_remove);
+                }
+
+            }
+    </script>
+    
+    <body>
+        <form action="__URL__/black_list" method="get" id="search">
+            <div class="search_box">
+                <table cellpadding="0" cellspacing="0" class="tb2">
+                    <tr>
+                        <td width="60" align="right">软件名称:</td>
+                        <td><input type="text" name="ssoftname" id="ssoftname" value="{$get.ssoftname}" ></td>
+                        <td width="60" align="right">软件包名:</td>
+                        <td><input type="text" name="ppackage" id="ppackage" value="{$get.ppackage}" ></td>
+                        <td width="60" align="right">下载量:</td>
+                        <td><input type="text" style="width:120px;" name="down_str" value="{$get.down_str}" > - <input type="text" name="down_end" value="{$get.down_end}" style="width:120px;">万</td>
+                        <td width="60" align="right">类型:</td>
+                        <td><select name="zhuangtai" style="width:70px;">
+                                <option value="-1" <if condition="($zhuangtai eq -1)"> selected="selected" </if>>全部</option>
+                                <option value="1" <if condition="($zhuangtai eq 1)"> selected="selected" </if>>采集忽略</option>
+                                <option value="2" <if condition="($zhuangtai eq 2)"> selected="selected" </if>>人工添加</option>
+                            </select></td>
+                        <td><input class="search_btn" style="float:left; height:30px;" type="submit" value="搜索"></td>
+                    </tr>
+                    <tr>
+                    <td colspan="9"><a href="__URL__/save_black_dialog?width=300&height=140&modal=true" class="thickbox search_btn" style="float:left; margin-right:10px; display:inline">新增</a><a href="black_list?down=1" class="search_btn" style="float:left; margin:0px 10px 0px 5px; display:inline">批量导出</a><a href="__URL__/import_dialog?width=450&height=100&modal=true&post_load=unauthorized_tb_remove" class="thickbox search_btn" style="float:left; margin-right:10px; display:inline">批量导入</a></td>
+                    </tr>
+                </table>
+                </div>
+                                    </form>
+
+                                    <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+                                        <thead >
+                                            <tr align="center" >
+                                                <th width="5%" height="26">ID</th>
+                                                <th width="5%">软件名称</th>
+                                                <th width="10%">软件包名</th>
+                                                <th width="5%">下载量</th>
+                                                <th width="5%">类型</th>
+                                                <th width="5%">备注</th>
+                                                <th width="5%">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <volist name="list" id="list">
+                                                <tr>
+
+                                                    <td height="20" align="center"> {$list.id}</td>
+                                                    <td height="20" align="center"> {$list.softname}</td>
+                                                    <td height="20" align="center"> {$list.package}</td>
+                                                    <td height="20" align="center"> {$list.download_count}</td>
+                                                    <td height="20" align="center"><?php if($list['type']==1){echo '采集忽略';}else {echo '人工添加';} ?> </td>
+                                                    <td height="20" align="center"> {$list.desc}</td>
+
+                                                    <td height="20" align="center"><a href="__URL__/save_black_dialog?width=300&height=140&modal=true&id={$list.id}" class="thickbox blue">编辑</a> | <a href="#{$list.id}" onclick="del({$list.id})" class="blue">删除</a></td>
+                                                </tr>
+                                            </volist>
+                                        </tbody>
+                                    </table>
+                                    <div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+                                    </body>
+                                    </html>

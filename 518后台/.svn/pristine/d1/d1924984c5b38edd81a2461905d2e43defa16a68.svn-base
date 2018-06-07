@@ -1,0 +1,60 @@
+<table id="type_tab" width="100%"  border="0" cellpadding="0" cellspacing="0">
+	<tr><td align='left' colspan= '4'  ><h2>选择部门</td></h2></tr>
+	<?php foreach($department as $k => $v){ ?>
+		<?php if($k > 5) continue; ?>
+	<tr>
+		<td colspan= '4' align='left' style="padding:8px 0 0">	
+			<span style="float:left; margin-top:2px">
+			<input type="radio"  name="distribution" value="<?php echo $k; ?>"
+			<?php if($sectiontypeid !=0 && $sectiontypeid == $k){ echo "checked = true" ; } ?>/></span>
+			<span style="float:left; width:60px; margin-left:5px; display:inline"><?php echo $v; ?></span>
+			<span style="float:left"><?php echo $department_msg[$k]; ?></span>
+		</td>
+	</tr>
+	<?php } ?>
+	<tr><td>&nbsp;</td></tr>
+	<tr id='sub_tab'>
+		<td><button  onclick="type_add();" style="width:100px; height:28px;">提交</button>
+		<button  onclick="self.tb_remove()" style="width:100px; height:28px; margin-left:100px; display:inline">取消</button>
+		</td>
+
+	</tr>
+	<input type='hidden' name='id' id='id' value="{$id}"/>
+</table>
+<script>
+
+//提交
+function type_add() {
+	var sectiontypeid = '';
+	$("[name='distribution']").each(function(){
+		if($(this).is(':checked')) {
+			sectiontypeid = $(this).val();
+		}
+	});
+	if(sectiontypeid == ''){
+		alert('请选择部门');
+		return false;
+	}
+	id_str = $('#id').val();
+	$.ajax({
+		url: '/index.php/Dev/Message/processed_do',
+		type: 'post',
+		data: 'id='+id_str+'&sectiontypeid='+sectiontypeid,
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['status'] == 0){
+				alert(ret['info']);
+				return false;
+			}
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				return false;
+			} else if(ret['code']==1) {	//成功
+ 				//alert(ret['msg']);
+				location.reload();//加载页面
+			}
+		}
+	});
+}
+
+</script>

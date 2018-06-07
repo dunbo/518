@@ -1,0 +1,166 @@
+<include header="../Public/header"/>
+
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+
+<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+
+<style type="text/css">
+    .widen {width:500px}
+</style>
+
+<script type="text/javascript">
+    KindEditor.ready(function(K) {
+        window.editor = K.create('#editor_content',{
+            allowImageRemote : false,
+            allowImageUpload : true,
+            items : [
+                'bold','italic','underline','fontsize','forecolor','|','image','anchor','link','unlink','justifyleft','justifycenter','justifyright'
+            ]
+        });
+    });
+    KindEditor.options.cssData = 'body { font-size: 16px; }';
+    
+    function search_softname(async) {
+        var apply_pkg = $.trim($("#apply_pkg").val());
+        if (apply_pkg == '') {
+            $("#softname").val("");
+            return 0;
+        }
+        var param = {
+            package : apply_pkg
+        }
+        var ret = 0;
+        $.ajax({
+            url:'__URL__/search_softname',
+            type:'POST',
+            async:async,
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data) {
+                if (data.status == 1) {
+                    var info = data.info;
+                    $("#softname").val(info['softname']);
+                } else {
+                    $("#softname").val("");
+                }
+                ret = data.status;
+            }
+        });
+        return ret;
+    }
+    
+    function news_edit_submit() {
+        // 不为空的数据，key为id值，value为提示值
+        var nonempty = new Object();  
+        nonempty['news_name'] = '资讯标题';
+        nonempty['apply_pkg'] = '游戏包名';
+        nonempty['author'] = '作者';
+        nonempty['news_content'] = '资讯简介';
+        //nonempty['editor_content'] = '资讯内容';
+        for (key in nonempty) {
+            var str = "#" + key;
+            if ($.trim($(str).val()) == '') {
+                alert(nonempty[key]+'不能为空！');
+                $(str)[0].focus();
+                return false;
+            }
+        }
+        // 如果后台没有存储图片，则编辑的时候需上传图片
+        if ($.trim($("#news_pic_bak").val()) == '') {
+            if ($("#news_pic").val() == '') {
+                alert("资讯默认图片不能为空！");
+                $("#news_pic")[0].focus();
+                return false;
+            }
+        }
+        // 判断KindEditor内容是否为空
+        window.editor.sync();//同步一下
+        if ($.trim(window.editor.text()) == '') {
+            alert('资讯内容不能为空！');
+            return false;
+        }
+        var exists = search_softname(false);
+        if (!exists) {
+            alert("游戏包名不存在！");
+            $("#apply_pkg")[0].focus();
+            return false
+        }
+        $("#news_edit_submit").submit();
+    }
+    
+    function checkLen(obj) {
+        var maxChars = 40;//最多字符数
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+    };
+    
+</script>
+
+<body>
+    <center><h2>编辑资讯：</h2></center>
+    <form method="post" action="__URL__/news_edit_submit" id="news_edit_submit" enctype="multipart/form-data">
+        <div class="form_list_one">
+            <label><font color="red">*</font>资讯标题：</label>
+            <input type="text" class="input_text widen" name="news_name" id="news_name" value="{$result[0].news_name}"/>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label><font color="red">*</font>游戏包名：</label>
+            <input type="text" class="input_text" name="apply_pkg" id="apply_pkg" value="{$result[0].apply_pkg}" onBlur="search_softname(true)"/>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label><font color="red">*</font>游戏名称：</label>
+            <input type="text" class="input_text" name="softname" id="softname" value="{$result[0].softname}" readonly="readonly"/>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label><font color="red">*</font>资讯类型：</label>
+            <select style="width:200px" name="info_type" id="info_type">
+                <option value="1" <if condition="$result[0]['info_type'] eq 1">selected</if>>资讯</option>
+                <option value="2" <if condition="$result[0]['info_type'] eq 2">selected</if>>评测</option>
+                <option value="3" <if condition="$result[0]['info_type'] eq 3">selected</if>>攻略</option>
+            </select>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label><font color="red">*</font>作者：</label>
+            <input type="text" class="input_text" name="author" id="author" value="{$result[0].author}"/>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label><font color="red">*</font>资讯简介：</label>
+            <textarea style="width:500px" name="news_content" id="news_content" onKeyUp="checkLen(this)">{$result[0].news_content}</textarea>
+            <label>限40字以内</label>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label><font color="red">*</font>资讯默认图片：</label>
+            <input type="file" class="input_text" name="news_pic" id="news_pic"/>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>&nbsp;</label>
+            <img src="{$attachment_host}{$result[0].news_pic|default='&nbsp;'}"/>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label><font color="red">*</font>资讯内容：</label>
+            <textarea style="width:690px;height:300px;" name="editor_content" id="editor_content">{$result[0].module_content}</textarea>
+        </div>
+        <div class="clear"></div>
+        <input type="hidden" name="id" id="id" value="{$result[0].id}"/>
+        <input type="hidden" name="news_pic_bak" id="news_pic_bak" value="{$result[0].news_pic}"/>
+        <div class="form_btns_box_one">
+            <input type="hidden" name="from" id="from" value="{$function_name}"/>
+            <input type="hidden" name="url_param" id="url_param" value="{$url_param}"/>
+            <!-- KindEditor内容需用input提交，不能用a的提交，否则提交后KindEditor的textarea内容不变，很诡异-->
+            <input type="submit" value="确定" onClick="return news_edit_submit();" class="form_input_submit" style="margin-left:155px" />
+            <a href="__URL__/{$function_name}?{$url_param}">取消</a>
+			<div class="clear"></div>
+        </div>
+    </form>
+</body>

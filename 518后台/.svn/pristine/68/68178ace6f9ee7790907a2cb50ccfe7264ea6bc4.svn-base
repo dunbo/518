@@ -1,0 +1,126 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/contAtrribu.js'></script>
+<script type="text/javascript">
+	function ret_select(){
+		var _num = $('input[name="content_level"]:checked').val();
+		var _nature = $('input[name="content_nature"]:checked').val();
+		if(_num == 0 || _num == undefined){
+			alert('请选择内容质量');
+			return false;
+		}
+		if(_nature == 0 || _nature == undefined){
+			alert('请选择内容性质');
+			return false;
+		}
+		var _column = '';
+
+	    $("input[name^='cont_column']:checked").each(function(){
+	    	_column += this.value+',';
+	    });
+		// if(_column == ''){
+		// 	alert('请选择内容栏目');
+		// 	return false;
+		// }
+		$('#content_column').val(_column);
+		//内容标签
+		var _tag_check = cont_tags();
+		if(_tag_check == false) return false;
+		
+		var passed = $("#typeid").val();
+		var show_style = $("input[name='show_style']:checked").val();
+		$('#show_style').val(show_style);
+		if(passed==5){
+			//通过并同步操作
+			var package_643 = '{$pkg}';
+		    var url = '__APP__/Sj/Derivesoft/package_check/content_type/9/package_643/'+package_643+'/show_style/'+show_style;
+			$.ajax({
+				url: url,
+				type: 'get',
+		        async: false,
+				dataType: 'json',
+				success: function(data){
+					console.log(data);
+					if(data.code == 2){
+						if(!confirm('资源库已有该软件内容，更新后将替换原内容，原内容关联的所有运营位均将替换为新内容，确定通过审核并更新资源库吗？')){
+				            return false;
+				        }
+				        // window.location.href='__URL__/explicit_handle?cont_level='+cont_level+'&cont_nature='+cont_nature+'&id='+id+'&passed='+passed+'&url_source=1&1/1&show_style='+show_style+'&cont_column='+column+'&cont_src='+cont_src;
+					}else if(data.code == 0){				
+						if(!confirm('确定更新通过审核并更新资源库吗？')){
+				            return false;
+				        }
+				        //window.location.href='__URL__/explicit_handle?cont_level='+cont_level+'&cont_nature='+cont_nature+'&id='+id+'&passed='+passed+'&url_source=1&1/1&show_style='+show_style+'&cont_column='+column+'&cont_src='+cont_src;
+					}else if(data.code == 1){
+						alert('该软件不存在或者已下架,更新通过审核并更新资源库失败');
+						return false;
+					}
+					$("#form").submit();
+				}
+			});
+		}
+		if(passed == 2){
+			if(!confirm('是否确认通过审核？')){
+	            return false;
+	        }
+			// window.location.href='__URL__/explicit_handle?cont_level='+cont_level+'&cont_nature='+cont_nature+'&id='+id+'&passed='+passed+'&url_source=1&1/1&show_style='+show_style+'&cont_column='+column+'&cont_src='+cont_src;
+			$("#form").submit();
+		}
+	}
+
+	function checklist(obj){
+		var column_select = '';
+		$("input[name^='cont_column']:checked").each(function(){
+	    	column_select += this.title+',';
+	    });
+		$("#selectlist").text(column_select);
+	} 
+
+</script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+ul,li{list-style: none;}
+.table_list tbody td{text-align:left;}
+</style>
+<form id="form" action="__URL__/explicit_handle" method="post">
+<table class="table_list">
+	<tr><td colspan="2"><span style="font-size: 16px;">内容属性</span></td></tr>
+    <tr class="sub_tr tag">
+	    <td style="width: 15%">内容性质</td>
+	    <td><?php echo $content_xz ?></td>
+	</tr>
+	<tr class="sub_tr tag">
+	    <td style="width: 15%">内容质量</td>
+	    <td><?php echo $content_zl ?></td>
+	</tr>
+	<tr class="sub_tr tag">
+	    <td style="width: 15%">内容栏目</td>
+	    <td>{$content_lm}</td>
+	</tr>
+	<tr class="sub_tr tag">
+	    <td style="width: 15%">内容来源</td>
+	    <td><?php echo $con_source ?></td>
+	</tr>	
+	<tr class="sub_tr tag">
+	    <td style="width: 15%">用户倾向</td>
+	    <td><?php echo $user_tend ?></td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="2">{$content_tag}</td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="2">
+			<input type='hidden' id="content_tags" name="content_tags" value=''/>
+            <input type='hidden' id="content_column" name="content_column" value=''/>
+            <input type='hidden' id="show_style" name="show_style" value=''/>
+            <input type='hidden' id="id" name="id" value='<?php echo $id ?>'/>
+            <input type='hidden' id="typeid" name="passed" value='<?php echo $typeid ?>'/>
+            <input type='hidden' name="url_source" value='1'/>
+            <input type="button" onclick="ret_select()" value="&nbsp;&nbsp;确定&nbsp;&nbsp;">
+            <!-- <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/> -->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>	
+</form>

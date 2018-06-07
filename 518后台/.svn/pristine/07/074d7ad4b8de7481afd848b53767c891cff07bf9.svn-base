@@ -1,0 +1,74 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script>
+	function select_all(){
+		if($('#my_select').attr('checked') == 'checked'){
+			$("input[id^=channel_]").attr('checked','checked');
+		}else{
+			$("input[id^=channel_]").attr('checked',false);
+		}
+	}
+	
+	function no_select(cid){
+		if($('#channel_'+cid+'').attr('checked') != 'checked'){
+			$('#my_select').attr('checked',false);
+		}
+	}
+</script>
+<div>
+	<div style="margin:20px 20px 0;">
+		<form action="__URL__/add_channel_show" method="get">
+		<table>
+			<tr>
+				<td>客户名称：</td>
+				<td>{$client_result[0]['client_name']}</td>
+			</tr>
+			<tr>
+				<td>渠道名称：</td>
+				<td><input type="hidden" value="{$id}" name="id" /><input type="text" name="channel_name" value="{$channel_name}"/></td>
+				<td><input type="submit" value="搜索" /></td>
+			</tr>
+		</table>
+		</form>
+	</div>
+	<div>
+		<form action="__URL__/add_channel" method="post" enctype="multipart/form-data">
+		<table cellpadding="0" cellspacing="0" class="table_list" >
+			<thead>
+				<tr>
+					<td style="color:red; width:10%;">结算类型（必填）：</td>
+					<td colspan="5">
+						<input type="radio" name="settle_attr" value="1"/>付费（<font style="color:red">可生成结算账单</font>）&nbsp;&nbsp;
+						<input type="radio" name="settle_attr" value="2"/>换量（不生成结算账单）&nbsp;&nbsp;
+						<input type="radio" name="settle_attr" value="3"/>其他（不生成结算账单）&nbsp;&nbsp;
+						<font style="color:red">结算类型，只有选择付费渠道，才能按月生成账单</font>
+					</td>
+				</tr>
+				<tr>
+					<th width="10%"><input type="hidden" name="id" value="{$id}"><input type="checkbox" id="my_select" onclick="select_all();" /></th>
+					<th width="14%">渠道ID</th>
+					<th width="40%">渠道名称</th>
+					<th width="20%">创建时间</th>
+					<th width="16%">渠道状态</th>
+				</tr>
+			</thead>
+			<?php foreach($channel_result as $key => $val){ ?>
+			<tr>
+				<td><input type="checkbox" value="{$val.cid}" name="cid[]" id="channel_{$val.cid}" onclick="no_select({$val.cid});" /></td>
+				<td>{$val.cid}</td>
+				<td>{$val.chname}</td>
+				<td><?php if($val['submit_tm']){ echo date('Y-m-d H:i:s',$val['submit_tm']); } ?></td>
+				<td><?php if($val['co_status'] == 1){ ?>正常<?php }elseif($val['co_status'] == 2){ ?>暂停<?php }else{ ?>未添加<?php } ?></td>
+			</tr>
+			<?php } ?>
+		</table>
+		<table>
+		<tr>
+			<td><input type="submit" value="确定" class="search_btn" /></td>
+			<td><a href="__URL__/client_list" class="search_btn" style="float:left;">取消</a></td>
+		</tr>
+		</table>
+		</form>
+		{$page}
+	</div>
+</div>

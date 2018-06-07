@@ -1,0 +1,334 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>推送行为排期管理页面</title>
+<style type="text/css">
+	body, td, th {
+		font-size: 12px;
+	}
+</style>
+<script type="text/javascript" src="/Public/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/Public/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="/Public/js/json2.js"></script>
+
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+
+<script type="text/javascript">
+	function selectAll()
+	{
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].disabled == false)
+				checkall[i].checked = true;
+		}
+	}
+	
+	function selectRev()
+	{
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox"  && checkall[i].disabled == false)
+				checkall[i].checked = !checkall[i].checked;
+		}
+	}
+	
+	function passAll()
+	{
+		var count = 0;
+		var id = new Array();
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+			{
+				id[count] = checkall[i].id;
+				count++;
+			}
+		}
+		var ids = id.join(',');
+		
+		status(ids,1);
+	}
+	
+	function rejectAll()
+	{
+		var count = 0;
+		var id = new Array();
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+			{
+				id[count] = checkall[i].id;
+				count++;
+			}
+		}
+		var ids = id.join(',');
+		
+		status(ids,0);
+	}
+</script>
+</head>
+
+<body>
+<div style="width:95%; margin-top:4px">
+		<table width="99%" border="1" align="center" cellpadding="0" cellspacing="0">
+			<form action="/index.php/Sj/Products/pushwait" method="get">
+			<tr align="middle" style="height:30px;">
+				<td width="20%">排期ID：</td>
+				<td width="25%" style="text-align:left;padding-left:10px;"><input type="text" name="so_id" id="so_id" value="<?php if($_GET['so_id']){echo $_GET['so_id'];} ?>" style="width:130px;" /></td>
+				<td width="10%">行为ID：</td>
+				<td width="15%" style="text-align:left;padding-left:10px;"><input type="text" name="so_beid" id="so_beid" value="<?php if($_GET['so_beid']){echo $_GET['so_beid'];} ?>" style="width:130px;" /></td>
+				<td width="15%">包名：</td>
+				<td width="15%" style="text-align:left;padding-left:10px;"><input type="text" name="so_package" id="so_package" value="<?php if($_GET['so_package']){echo $_GET['so_package'];} ?>" style="width:370px;" /></td>
+			</tr>
+			<tr>
+				<td align="center">开始时间：</td>
+				<td style="text-align:left;padding-left:10px;"><input id="begintime" name="begintime"
+				style="cursor: hand; width: 100px;"
+				value="<?php if($_GET['begintime']){echo $_GET['begintime'];} ?>" size="15" type="text"><img
+				src="/Public/js/calendar.gif"
+				class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"begintime",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;"/></td>
+				<td align="center">结束时间：</td>
+				<td style="text-align:left;padding-left:10px;"><input id="endtime" name="endtime"
+				style="cursor: hand; width: 100px;"
+				value="<?php if($_GET['endtime']){echo $_GET['endtime'];} ?>" size="15" type="text"><img
+				src="/Public/js/calendar.gif"
+				class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"endtime",dateFmt:"yyyy-MM-dd HH:mm:ss"})' style="border:1px solid #000;"/></td>
+				<td align="center">状态：
+					<select name="so_status" id="so_status">
+						<option value="-1" <?php if($_GET['so_status']!=0 && $_GET['so_status']!=1){ ?>selected="selected"<?php } ?>>全部</option>
+						<option value="1" <?php if($_GET['so_status']==1){ ?>selected="selected"<?php } ?>>启用</option>
+						<option value="0" <?php if(isset($_GET['so_status']) && is_numeric($_GET['so_status']) && $_GET['so_status']==0){ ?>selected="selected"<?php } ?>>停用</option>
+					</select>
+				</td>
+				<td style="text-align:left;padding-left:10px;"><input type="submit" value="搜索"></td>
+			</tr>
+			</form>
+			<tbody>
+				<td colspan="8" style="text-align:left;padding-left:10px;height:30px;line-height:30px;"><button style="cursor:pointer;font-weight:bold;" onclick="popup('_add_div')">添加推送排期</button></td>
+			</tbody>
+		</table>
+	
+	<table width="99%" border="1" align="center" cellpadding="0" cellspacing="0" style="margin-top:10px">
+		<thead>
+			<tr align="center">
+				<th width="3%" height="26" bgcolor="#E3E2FE">&nbsp;</th>
+				<th width="9%" bgcolor="#E3E2FE">排题ID</th>
+				<th width="9%" bgcolor="#E3E2FE">行为ID</th>
+				<th width="" bgcolor="#E3E2FE">包名</th>
+				<th width="12%" bgcolor="#E3E2FE">开始时间</th>
+				<th width="12%" bgcolor="#E3E2FE">结束时间</th>
+				<th width="10%" bgcolor="#E3E2FE">状态</th>
+				<th width="10%" bgcolor="#E3E2FE">操作栏</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="vo">
+			<tr <?php if(strtotime(date('Ymd 23:59:59',strtotime($vo['end']))) < time()){ ?>style="color:#707070; background-color:red;height:27px;"<?php }else{ ?>style="color:#707070; background-color:#fff;height:27px;"<?php } ?> >
+				<td align="center"><input type="checkbox" id="{$vo.id}" /></td>
+				<td height="20" align="center" id="id_{$vo.id}">{$vo.id}</td>
+				<td align="center" id="beid_{$vo.id}">{$vo.beid}</td>
+				<td align="center" id="package_{$vo.id}">{$vo.package}</td>
+				<td align="center" id="start_{$vo.id}">{$vo.start}</td>
+				<td align="center" id="end_{$vo.id}">{$vo.end}</td>
+				<td align="center" id="status_{$vo.id}">{$vo.status}</td>
+				<td align="center"><if condition="$vo.status eq '停用'"><a style="margin-right:12px;cursor:pointer;" href="javascript:void(0);" onclick="status({$vo.id},1)">启用</a><else/><a style="margin-right:12px;cursor:pointer;"  href="javascript:void(0);" onclick="status({$vo.id},0)">停用</a></if><a style="cursor:pointer;"  href="javascript:void(0);" onclick="edit({$vo.id})">编辑</a></td>
+			</tr>
+			</volist>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="10">
+					<input type="button" value="全选" onclick="selectAll();">
+					<input type="button" value="反选" onclick="selectRev();">
+					<input type="button" value="批量启用" onclick="passAll();">
+					<input type="button" value="批量停用" onclick="rejectAll();">
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+
+<!-- 添加推送排期 -->
+<style type="text/css">
+.tb_add .td1 {height:30px;line-height:30px;font-size:14px;}
+.tb_add input {width:300px;height:22px;font-size:14px;}
+.tb_add .td2 {height:30px;line-height:30px;font-size:14px;}
+</style>
+<div id="_add_div" style="position:absolute;top:0px;left:0px;display:none;background:#fff;width:430px;height:270px;border:1px solid #000;z-index:-1;">
+	<form name="form_add" method="post" action="/index.php/Sj/Products/pushwait_add" onsubmit="return form_chk()">
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+		<tr>
+			<td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">添加推送排期：</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">行为ID：</td><td align="left" style="padding-left:10px;">
+			<select name="add_beid" id="add_beid" style="width:70px;">
+			<volist name="behavior" id="vo">
+			<option value="{$vo.beid}">{$vo.beid}</option>
+			</volist>
+			</select><!--<input type="text" value="" name="add_beid" id="add_beid" style="width:140px;" />--></td>
+		</tr>
+		<tr>
+			<td class="td2" align="right" valign="top">包名：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="add_package" id="add_package" /></td>
+		</tr>
+		<tr>
+			<td class="td2" align="right" valign="top">开始时间：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="add_start" id="add_start" style="width:140px;" /><img
+				src="/Public/js/calendar.gif"
+				onclick="return showCalendar('add_start', 'y-m-d');" style="border:1px solid #000;"/></td>
+		</tr>
+		<tr>
+			<td class="td2" align="right" valign="top">结束时间：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="add_end" id="add_end" style="width:140px;" /><img
+				src="/Public/js/calendar.gif"
+				onclick="return showCalendar('add_end', 'y-m-d');" style="border:1px solid #000;"/></td>
+		</tr>
+		<tr>
+			<td class="td2" align="right" valign="top">状态：</td><td align="left" style="padding-left:10px;"><select id="add_status" name="add_status" style="width:80px;"><option value="1">启用</option><option value="0">停用</option></select></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="text-align:center;height:40px;line-height:40px;"><button style="margin-right:15px;" type="submit">确定</button><button type="button" onclick="popclose('_add_div')">取消</button></td>
+		</tr>
+	</table>
+	</form>
+</div>
+
+<div id="_edit_div" style="position:absolute;top:0px;left:0px;display:none;background:#fff;width:430px;height:270px;border:1px solid #000;z-index:-1;">
+	<form name="form_add" method="post" action="/index.php/Sj/Products/pushwait_edit" onsubmit="return form_chk_edit()">
+	<input type="hidden" name="edit_id" id="edit_id" />
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+		<tr>
+			<td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">编辑推送排期：</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">行为ID：</td><td align="left" style="padding-left:10px;">
+			<select name="edit_beid" id="edit_beid" style="width:70px;">
+			<volist name="behavior" id="vo">
+			<option value="{$vo.beid}">{$vo.beid}</option>
+			</volist>
+			</select>
+			<!--<input type="text" value="" name="edit_beid" id="edit_beid" style="width:140px;" />--></td>
+		</tr>
+		<tr>
+			<td class="td2" align="right" valign="top">包名：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="edit_package" id="edit_package" /><input type="hidden" id="edit_p" name="edit_p" /></td>
+		</tr>
+		<tr>
+			<td class="td2" align="right" valign="top">开始时间：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="edit_start" id="edit_start" style="width:140px;" /><img
+				src="/Public/js/calendar.gif"
+				class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"edit_start",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;"/></td>
+		</tr>
+		<tr>
+			<td class="td2" align="right" valign="top">结束时间：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="edit_end" id="edit_end" style="width:140px;" /><img
+				src="/Public/js/calendar.gif"
+				class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"edit_end",dateFmt:"yyyy-MM-dd HH:mm:ss"})' style="border:1px solid #000;"/></td>
+		</tr>
+		<tr>
+			<td class="td2" align="right" valign="top">状态：</td><td align="left" style="padding-left:10px;"><select id="edit_status" name="edit_status" style="width:80px;"><option value="启用">启用</option><option value="停用">停用</option></select></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="text-align:center;height:40px;line-height:40px;"><button style="margin-right:15px;" type="submit">确定</button><button type="button" onclick="popclose('_edit_div')">取消</button></td>
+		</tr>
+	</table>
+	</form>
+</div>
+
+<form method="post" action="" id="tmp_form">
+<input type="hidden" id="id" name="id" />
+<input type="hidden" value="{$p}" name="p" id="p">
+<input type="hidden" id="sta" name="sta" />
+</form>
+<div id="bgdiv" style="position:absolute;display:none; left:0px; top:0px; width:100%; height:100%; filter:alpha(opacity=40);opacity:0.4; background-color:#000000; z-index:1;"></div>
+<script language="javascript">
+function edit(id) {
+	popup('_edit_div');
+	$('#edit_beid').val($('#beid_'+id).html());
+	$('#edit_package').val($('#package_'+id).html());
+	$('#edit_start').val($('#start_'+id).html());
+	$('#edit_end').val($('#end_'+id).html());
+	$('#edit_status').val($('#status_'+id).html());
+	$('#edit_id').val(id);
+	$('#edit_p').val($('#p').val());
+}
+function form_chk() {
+	if($('#add_beid').val()=='') {
+		alert("请填写行为ID！");
+		return false;
+	}
+	if(isNaN($('#add_beid').val())) {
+		alert("行为ID只能是数字，请重填！");
+		return false;
+	}
+	if($('#add_package').val()=='') {
+		alert("请填写包名！");
+		return false;
+	}
+	if($('#add_start').val()=='') {
+		alert("请填写开始时间！");
+		return false;
+	}
+	if($('#add_end').val()=='') {
+		alert("请填写结束时间！");
+		return false;
+	}
+
+	return true;
+}
+function form_chk_edit() {
+	if($('#edit_beid').val()=='') {
+		alert("请填写行为ID！");
+		return false;
+	}
+	if(isNaN($('#edit_beid').val())) {
+		alert("行为ID只能是数字，请重填！");
+		return false;
+	}
+	if($('#edit_package').val()=='') {
+		alert("请填写包名！");
+		return false;
+	}
+	if($('#edit_start').val()=='') {
+		alert("请填写开始时间！");
+		return false;
+	}
+	if($('#edit_end').val()=='') {
+		alert("请填写结束时间！");
+		return false;
+	}
+
+	return true;
+}
+function status(id,sta) {
+	if(confirm('你确认执行此操作！')) {
+		$('#tmp_form')[0].action = '/index.php/Sj/Products/pushwait_oper';
+		$('#id').val(id);
+		$('#sta').val(sta);
+		$('#tmp_form').submit();
+	}
+}
+function popup(id) {
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"2"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+}
+function popclose(id) {
+	$("#"+id).css({display:"none"});
+	$("#bgdiv").css({display:"none"});
+}
+</script>
+</body>
+</html>

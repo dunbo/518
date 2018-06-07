@@ -1,0 +1,166 @@
+<link type="text/css" href="/Public/css/co_common.css" rel="stylesheet" />
+<link type="text/css" href="/Public/css/account.css" rel="stylesheet" />
+<script type="text/javascript" src="/Public/js/jquery.js"></script>
+<script type="text/javascript" src="/Public/js/co_public.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('.managers_title span').each(function(index){
+		$(this).bind('click',function(){
+			if($(this).parent().siblings().css('display')=='block')
+			{
+				$(this).parent().siblings().css('display','none');
+				$(this).addClass('hidesub');
+			}
+			else
+			{
+				$(this).parent().siblings().css('display','block');
+				$(this).removeClass('hidesub');
+			}
+			//$(this).removeClass('hidebg');
+		});
+		
+	});
+});
+
+function checkall(obj,cName)
+{
+    var checkboxs = document.getElementsByName(cName);
+    for(var i=0;i<checkboxs.length;i++){checkboxs[i].checked = obj.checked;}
+}
+
+function my_select(category_id){
+	if($('#category_'+category_id+'').attr('checked') == 'checked'){
+		$('input[id^=cid_'+category_id+'_]').attr('checked','checked');
+	}else if($('#category_'+category_id+'').attr('checked') != 'checked'){
+		$('input[id^=cid_'+category_id+'_]').attr('checked',false);
+	}
+}
+
+function no_all_select(category_id,cid){
+	if($('#cid_'+category_id+'_'+cid+'').attr('checked') != 'checked'){
+		$('#category_'+category_id+'').attr('checked',false);
+	}
+}
+
+function search_channel(){
+	var chname = $('#chname').val();
+	$('.td_'+chname+'').parent().parent().parent().parent().css('display','block');
+	$('td[class^=td_]').css("background","white");
+	if(chname != ''){
+		location.hash="a_"+chname;
+		$('.td_'+chname+'').css("background","red");
+	}
+	
+	need_chname = $('td.td_'+chname+'').prev().val();
+	$('#span_'+need_chname+'').removeClass('hidesub');
+	if(!need_chname){
+		$('#warning').html("未找到该渠道信息");
+	}else{
+		$('#warning').html("");
+	}
+}
+
+function check_have(){
+	var username = $('#username').val();
+	$.ajax({
+		url:'/index.php/Cooperative/CoAccount/addChannel_do/username/'+username,
+		type:'get',
+		dataType:'json',
+		success:function(data){
+			if(data == 1){
+				add_channel.submit();
+			}else{
+				$('#username_no').html('该账号不存在');
+			}
+		}
+	});
+
+}
+</script>
+	<div class="content">
+		<div class="nav_page">安智合作运营平台>添加新渠道</div>
+		<div class="content_inner">
+			<div class="title">
+				<h2>添加渠道：</h2>
+			</div>
+			<form method="post" method='/index.php/Cooperative/CoAccount/addChannel/' name='search'>
+				<table cellpadding="0" cellspacing="0" class="search_table">
+					<tbody>
+						<tr>
+							<td width="22%"><input name='channelname' type="text" id="chname" class="search_item_text" value="请输入渠道名称" style="width:220px" onfocus="if(this.value=='请输入渠道名称'){this.value=''}" onblur="if(value==''){value='请输入渠道名称'}" />
+							
+							</td>
+							<td width="78%"><span class="search_btn" onclick="search_channel();">搜  索</span></td>
+							
+						</tr>
+					</tbody>
+				</table>
+			</form>
+			<div><td><span style="color:red;" id="warning"></span></td></div>
+			<div class="managers_wrap">
+				<form action="__URL__/addChannel_do" name='add_channel' method='post'>	
+				<ul>
+				<volist id='cc' name='categoryChannel'>
+					<li>
+						<div class="managers_title">
+							<?php if($cc['count'] == 0){ ?>
+							<span class="no_hidesub" style="background:none;"></span>
+							<?php }else{ ?>
+							<span class="hidesub" id="span_{$cc.category_id}"></span>
+							<?php } ?>
+							<input name="category_id[]" id="category_{$cc.category_id}" onclick="my_select({$cc.category_id});" type="checkbox" value="{$cc.category_id}" />{$cc.name}
+						</div>
+						<?php if($cc['count'] !=0 ){ ?>
+						<div class="managers_cnt" style="display:none;">
+					
+							<table cellpadding="0" cellspacing="0" class="table_list">
+								<thead>
+									<tr>
+										<th width="4%"></th>
+										<th width="15%">渠道名称</th>
+										<th width="13%">渠道用途</th>
+										<th width="13%">平台类型</th>
+										<th width="13%">渠道状态</th>
+										<th width="15%">账号名称</th>
+										<th width="13%">负责人</th>
+										<th width="15%">创建时间</th>
+									</tr>
+								</thead>
+								<tbody>
+								<volist id='ch' name="cc['channel']">
+									<tr>
+										<input type="hidden" value="{$cc.category_id}">
+										<td class="td_{$ch.chname}"><a name="a_{$ch.chname}"></a><?php if($ch['user_status'] == 2){ ?><input name='cid[]' onclick="no_all_select({$cc.category_id},{$ch.cid});" id="cid_{$cc.category_id}_{$ch.cid}" type="checkbox" value='{$ch.cid}' /><?php } ?></td>
+										<td class="td_{$ch.chname}">{$ch.chname}</td>
+										<td class="td_{$ch.chname}">{$ch.activation_type}</td>
+										<td class="td_{$ch.chname}">{$ch.platform}</td>
+										<td class="td_{$ch.chname}">{$ch.stat}</td>
+										<td class="td_{$ch.chname}"><?php if($ch['user_name']){ ?>{$ch.user_name}<?php }else{ ?>-<?php } ?></td>
+										<td class="td_{$ch.chname}"><?php if($ch['charge_name']){ ?>{$ch.charge_name}<?php }else{ ?>-<?php } ?></td>
+										<td class="td_{$ch.chname}"><?php echo date('Y-m-d',$ch['create_tm']); ?><br /><?php echo date('H:i:s',$ch['create_tm']); ?></td>
+									</tr>
+								</volist>
+								</tbody>
+							</table>
+						</div>
+						<?php } ?>
+					</li>
+				</volist>
+				</ul>
+			</div>
+			<table cellspacing="0" cellpadding="0" style="margin-top:20px; padding-left:0" class="search_table">
+				<tbody>
+					<tr>
+						<td>添加至账号名称：<input name='username' id="username" value="<?php if($username != ''){ ?>{$username}<?php }else{ ?>请输入账号名称<?php } ?>" style="width:220px" onfocus="if(this.value=='请输入账号名称'){this.value=''}" onblur="if(value==''){value='请输入账号名称'}" type="text" class="search_item_text"/>&nbsp;&nbsp;<span id="username_no" style="color:red"></span></td>
+					</tr>
+				</tbody>
+			</table>			
+			<div class="open_close_btn" style="padding-left:22%">
+				<a href="javascript:;" onclick="check_have();">确认</a>
+				<a href="/index.php/Cooperative/CoAccount/channelList/">取消</a>
+				<div class="clear"></div>
+			</div>
+			</form>
+		</div>
+  </div>
+	<div class="clear"></div>

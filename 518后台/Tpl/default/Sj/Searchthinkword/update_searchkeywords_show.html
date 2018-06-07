@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/school/js/jquery-1.6.2.min.js"></script>
+<link type="text/css" href="/Public/js/My97DatePicker/skin/WdatePicker.css" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<div id="_add_div" style="border:1px solid #000;font-size:15px;">
+	<form name="form_add" method="post" action="/index.php/Sj/Searchthinkword/update_thinkwords_to" id="_form_add"  style="width:100%;height:100%;" onsubmit="return checkPost()">
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+	
+	
+		<tr>
+			<td class="td1" align="right">软件包名：</td><td align="left" style="padding-left:10px;"><input type="text" value="{$list['package']}" name="package"/></td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">软件排序：</td><td align="left" style="padding-left:10px;"><SELECT name='soft_rank'>
+				<option value= '1' <?php if($list['soft_rank']=='1') { ?> selected<?php } ?>>1</option>
+				<option value= '2' <?php if($list['soft_rank']=='2') { ?> selected<?php } ?>>2</option>					
+			</SELECT></td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">搜索词：</td>
+			<td align="left" style="padding-left:10px;">
+			<textarea id="update_content" name="search_words" rows="2" cols="20">{$list['search_words']}</textarea>
+			</td>
+			</td>
+		</tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>多个词请以英文逗号“,”隔开</td>
+        </tr>
+        <tr>
+			<td class="td1" align="right">一句话描述：</td>
+			<td align="left" style="padding-left:10px;">
+			<input type="text" value="{$list['short_describe']}" name="short_describe"/>
+			</td>
+			</td>
+			<td>注:该项目为选填项目,不填写则展示软件本身一句话描述</td>
+		</tr>
+		<tr>
+			<td  align="right">开始时间：</td><td align="left" style="padding-left:10px;" id="softname">
+			<input type="text" name="start_time" class="ui_timepicker" value="{:date('Y-m-d H:i:s',$list[start_time])}" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" />
+			</td>
+			</td>
+		</tr>
+		<tr>
+			<td  align="right">结束时间：</td><td align="left" style="padding-left:10px;" id="softname">
+			<input type="text" name="end_time" class="ui_timepicker" value="{:date('Y-m-d H:i:s',$list[end_time])}" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" />
+			</td>
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td align="right">合作形式：</td>	
+			<td style="padding-left:10px;">		
+				<SELECT name='type'>		
+					<?php foreach($typelist as $key => $val): ?>	
+						<option value='<?php echo $key?>'
+					<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+					<?php endforeach; ?>				
+				</SELECT>
+			</td>
+		</tr>
+		<tr class="sub_str">
+			<td align="right">行为id：</td>
+			<td align="left" style="padding-left:10px;"><input type="text" name="beid" id="beid" value="<?php if($list['beid']) echo $list['beid'] ?>" /></td>
+		</tr>
+		<tr id="cut_add_input">
+			<td colspan="2" style="text-align:center;"><button style="margin:15px;" type="submit">确定</button><input name="sub_type" type="hidden" value="add" /><button type="button" onclick='tb_remove();'>取消</button></td>
+		</tr>
+		<input type="hidden" name="id" value="{$list.id}" />
+		<input type="hidden" name="life" value="<?php echo $_GET['life']; ?>"/>
+	</table>
+	<input type="hidden" name="__hash__" value="4a674d3b2b9cb54d6467a3ced6861674" />
+	</form>
+</div>
+
+<div style="width:92%; padding-top:4px; text-align:right"></div>
+<script>
+function checkPost(){
+	var enable_two = true;
+	var pkg=$('input[name=package]').val();
+	$.ajax({
+		url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+		type: 'get',
+		async:false,
+		success: function(data){
+			if(data){
+				if(!confirm(data)){
+					enable_two = false;
+				}
+			}
+		}
+	});
+	return enable_two;
+}
+</script>

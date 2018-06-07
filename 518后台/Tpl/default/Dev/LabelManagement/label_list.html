@@ -1,0 +1,115 @@
+<include file="../../Public/header"  />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script>
+function check_del()
+{
+	if(confirm("你确认删除该条数据吗？"))
+	{
+		return true;
+	}
+	return false;
+}
+</script>
+<style>
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+	<body>
+		<div style="margin:10px;width:100px;">
+			 <a class="search_btn thickbox" href="__URL__/add_label?mm">添加</a>	
+		</div>
+		<form>
+		<table class="table_list" border="0" cellpadding="0" cellspacing="0">
+			<thead>
+				<tr>
+				    <!--<th width="5%">ID</th>-->
+					<th width="8%">排序</th>
+					<th width="15%">标签名称</th>
+					<th width="10%">背景图片</th>
+					<th width="15%">标签图片（超高分辨率）</th>
+					<th width="15%">标签图片（高分辨率）</th>
+					<th width="15%">标签图片（中分辨率）</th>
+					<th width="15%">操作</th>
+				</tr>
+			</thead>
+		   <tbody>
+			 <?php foreach($list as $key => $val){ ?>
+				<tr>
+				    <!--<td>{$val.id}</td>-->
+					<td><input type="text" onchange="change_rank(this);" value="{$val.rank}" need-data="{$val.id},{$val.rank}"/></td>
+					<td>{$val.label_name}</td>
+					<td><img width="40px" height="40px"  src="<?php echo IMGATT_HOST;?>{$val.bg_pic}"></td>
+					<td><img width="40px" height="40px"  src="<?php echo IMGATT_HOST;?>{$val.img_url_xh}"></td>
+					<td><img width="40px" height="40px"  src="<?php echo IMGATT_HOST;?>{$val.img_url_h}"></td>
+					<td><img width="40px" height="40px"  src="<?php echo IMGATT_HOST;?>{$val.img_url_m}"></td>
+					<td class="blue"><a class="thickbox blue" href="__URL__/edit_label/id/{$val.id}/">编辑</a>　|　<a class="blue" href="__URL__/delete_label/id/{$val.id}/" onClick="return check_del();">删除</a></td>
+				</tr>
+			  <?php } ?>
+			 </tbody>
+		</table>
+		</form>
+		<div class="navgition">
+		{$page|default='&nbsp;'}
+		</div>
+	</body>
+	<script>
+	function change_rank(obj)
+	{
+		var rank = $(obj).val();
+		var need_data = $(obj).attr('need-data');
+		var strs= new Array(); 
+		strs=need_data.split(",");
+		if(rank)
+		{
+			var r=/^[0-9]*[1-9][0-9]*$/;
+			if(r.test(rank) == false)			
+			{			
+				alert("排序必须为正整数");	
+				$(obj).val(strs[1]);
+				return false;			
+			}
+			else
+			{
+				$.ajax({
+					url: '__URL__/change_rank',
+					data: 'need_data='+need_data+'&rank='+rank,
+					type: 'get',
+					success: function(data){
+						var data = eval("("+data+")"); 
+						if(data['value'] == 2)
+						{
+							alert("编辑失败");
+							$(obj).val(data['rank']);
+							return false;
+						}
+						else if(data['value'] ==3)
+						{
+							alert("排序值重复");
+							$(obj).val(data['rank']);
+							return false;
+						}
+						else
+						{
+							window.location.reload(true);
+						}
+					}
+				});
+			}
+			return false;
+		}
+		else
+		{
+			alert("排序不能为空");
+			$(obj).val(strs[1]);
+			return false;
+		}
+	}
+	</script>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />
+</html>

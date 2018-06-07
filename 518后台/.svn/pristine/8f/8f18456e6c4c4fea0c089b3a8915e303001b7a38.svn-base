@@ -1,0 +1,372 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+</head>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<script>
+
+$(document).ready(function () {
+	//console.log($('#ap_type').html());
+	var obj = document.getElementById("ap_type");
+	sel_type(obj);
+});
+
+//页面类型
+function sel_type(obj){
+	var ap_type = obj.value;
+	//alert(ap_type);
+	if(ap_type == 3){
+		$('#tab_hidden').css('display','none');
+	}else{
+		$('#tab_hidden').css('display','');
+	}
+}
+//颜色
+$(function(){
+	$('#ap_notice').colorPicker();
+	$('#warning_bgcolor').colorPicker();
+	$('#bg_color').colorPicker();
+	$('#download_bgcolor').colorPicker();
+	$('#share_bgcolor').colorPicker();
+	$('#share_other_pic').colorPicker();//换一换字体颜色
+	$('#lost_no_desc').colorPicker();//下载字体颜色
+	$('#lose_yes_desc').colorPicker();//安装字体颜色
+	$('#last_lottery_desc').colorPicker();//打开字体颜色
+});
+//图片验证	
+function test(file_name)
+{
+	var result =/\.[^\.]+/.exec(file_name);
+	return result;
+}	
+function onUploadImgChange(sender,img,obj){  
+    if( !sender.value.match( /.jpg|.gif|.png|.bmp|.jpeg/i ) )
+	{        
+        alert('图片格式无效！');   
+		remove_file(img);	
+        return false;       
+    }   
+	var ap_id = $('#ap_id').val();//图片名称后缀必须为小写，大些报错
+	var b=test(sender.value);
+	if(b!=".jpg"&&b!=".gif"&&b!=".png"&&b!=".bmp"&&b!=".jpeg")
+	{
+		alert('后缀只支持小写格式！');
+		if(!ap_id)
+		{
+			remove_file(img);	
+		}
+		else
+		{
+			var file = $("#"+img);
+			file.after(file.clone().val(""));
+			file.remove();
+		}
+		return false;  
+	}
+	
+	var imgSrc = check_img(sender);
+    var img_url = imgSrc;
+    var newimg = new Image();
+    newimg.src = img_url;
+    // 加载完成执行
+    newimg.onload = function () {
+		// 打印
+		var w = newimg.width;
+		var h = newimg.height;
+		if((img == 'ap_imgurl_bg' || img == 'ap_imgurl'|| img == 'ap_desc') && w != 640){
+			alert('宽必须640');  
+			remove_file(img);			
+			return false;    			
+		}
+		if(img == 'soft_bg' && (h != 530 || w != 640)){
+			alert('尺寸640*530');  
+			remove_file(img);			
+			return false;    
+		}
+		if(img == 'bottom_color' && (h != 425 || w != 640)){
+			alert('尺寸640*425');   
+			remove_file(img);			
+			return false;    
+		}
+		var objPreview = document.getElementById(obj); 
+		str = '<button id="'+img+'_del" type="button" onclick="del_img(\''+img+'\');" >&nbsp;&nbsp;删&nbsp;&nbsp;除&nbsp;&nbsp;</button>';
+		$('#'+obj).closest('img').after(str);		
+		var imgs=document.getElementById(img);
+		if( sender.files &&  sender.files[0] ){ 
+			objPreview.style.display = 'block';        
+			objPreview.style.width = 'auto';        
+			objPreview.style.height = 'auto';
+			objPreview.src = window.URL.createObjectURL(imgs.files[0]);
+		}       
+	}	
+} 	
+function del_img(img){
+	if(confirm('是否确认删除？')) {
+		remove_file(img);
+	}
+}
+function remove_file(file){
+	$('#'+file+'_div').removeAttr('src').css('display','none');
+	$('#'+file+'_del').remove();	
+	var file = $("#"+file);
+	file.after(file.clone().val(""));
+	file.remove();	
+	return false;   	
+}
+function check_img(obj){
+   var imgSrc = '';
+    if (obj.files && obj.files[0]) {
+        if (getOs() == 'Chrome') {
+            imgSrc = window.webkitURL.createObjectURL(obj.files[0]);
+        } else {
+            imgSrc = window.URL.createObjectURL(obj.files[0]);
+        }
+    } else {
+        //IE下，使用滤镜
+        obj.select();
+        //解决IE9下document.selection拒绝访问的错误
+        if (navigator.appName == "Microsoft Internet Explorer" && navigator.appVersion.match(/9./i) == "9.") {
+            obj.blur();
+        }
+        var imgSrc = document.selection.createRange().text;
+        document.selection.empty();
+    }
+	return imgSrc;
+}
+function getOs() 
+{ 
+   var OsObject = ""; 
+   if(isIE = navigator.userAgent.indexOf("MSIE")!=-1) { 
+        return "MSIE"; 
+   }
+   if(isFirefox=navigator.userAgent.indexOf("Firefox")!=-1){ 
+        return "Firefox"; 
+   }
+   if(isChrome=navigator.userAgent.indexOf("Chrome")!=-1){ 
+        return "Chrome"; 
+   }
+   if(isSafari=navigator.userAgent.indexOf("Safari")!=-1) { 
+        return "Safari"; 
+   }
+   if(isOpera=navigator.userAgent.indexOf("Opera")!=-1){ 
+        return "Opera"; 
+   } 
+} 
+function checkinput(){
+	var ap_name = $.trim($('#ap_name').val());
+	if (!ap_name){
+		alert('活动名称不可为空');
+		return false;
+	}
+	
+	var ap_id = $('#ap_id').val();
+	var ap_type = $('#ap_type').val();
+	if(!ap_id){
+		if (!$('#ap_imgurl').val()){
+			alert('请上传活动头图');
+			return false;
+		}	
+		if (!$('#ap_desc').val()){
+			alert('请上传活动说明图');
+			return false;
+		}	
+		if (ap_type==2 && !$('#soft_bg').val()){
+			alert('请上传推荐游戏背景图片');
+			return false;
+		}	
+		if (ap_type==2 && !$('#ap_imgurl_bg').val()){
+			alert('请上传返利说明图片');
+			return false;
+		}	
+		if (!$('#bottom_color').val()){
+			alert('请上传轮播背景图');
+			return false;
+		}		
+	}
+	if(ap_type==2){
+		if (!$('#winning_comment').val()){
+			alert('打开按键名称不可为空');
+			return false;
+		}
+		if ($('#winning_comment').val().length > 5){
+			alert('打开按键名称不超过5');
+			return false;
+		}
+		if (!$('#download_comment').val()){
+			alert('安装按键名称不可为空');
+			return false;
+		}
+		if ($('#download_comment').val().length > 5){
+			alert('安装按键名称不超过5');
+			return false;
+		}
+		if (!$('#button_comment').val()){
+			alert('下载按键名称不可为空');
+			return false;
+		}
+		if ($('#button_comment').val().length > 5){
+			alert('下载按键名称不超过5');
+			return false;
+		}
+		if (!$('#share_text').val()){
+			alert('换一换按键名称不可为空');
+			return false;
+		}
+		if ($('#share_text').val().length > 5){
+			alert('换一换按键名称不超过5');
+			return false;
+		}
+	}
+}
+</script>
+<body>
+<form action="__URL__/<?php if($_GET['ap_id']){ echo 'edit_routine_activity'; }else{ echo 'add_routine_activity'; } ?>" method="post" onsubmit="return checkinput();" enctype="multipart/form-data">
+<input type='hidden' name='ap_id' id='ap_id' value="{$list['ap_id']}"/>
+<div style="margin:20px;">
+<a href="/index.php/Sendnum/CoActivity/routine_activity" class="search_btn">返回</a>&nbsp;&nbsp;
+<h2><span class="my_activate">添加活动页面</span></h2>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr>
+		<td width="110" >活动名称</td>
+		<td  colspan='2'>
+			<input type="text" id="ap_name" name="ap_name" value="{$list['ap_name']}"  />
+		</td>
+	</tr>
+	<tr>
+		<td>页面类型</td>
+		<td colspan='2'>
+			<select name="ap_type" id="ap_type" onchange='sel_type(this);' >
+				<option value="2" <?php if($list['ap_type'] == 2) echo 'selected'; ?> >活动页面</option>
+				<option value="3" <?php if($list['ap_type'] == 3) echo 'selected'; ?>>结束页面</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>活动头图</td>
+		<td width="105" >
+		<input type="file" name="ap_imgurl" id="ap_imgurl" onchange="onUploadImgChange(this,'ap_imgurl','ap_imgurl_div');" />
+		<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+        </td>
+		<td><img id="ap_imgurl_div" <?php if($list['ap_imgurl']){ ?>src="{$list['ap_imgurl']}" <?php } ?>/></td>
+	</tr>
+	<tr>
+		<td>活动说明图</td>
+		<td>
+			<input type="file" name="ap_desc" id="ap_desc" onchange="onUploadImgChange(this,'ap_desc','ap_desc_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="ap_desc_div" <?php if($list['ap_desc']){ ?>src="{$list['ap_desc']}" <?php } ?>/></td>
+	</tr>
+</table>	
+<table id='tab_hidden' border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr>
+		<td width="110" >推荐游戏背景图片</td>
+		<td width="105"><input type="file" name="soft_bg" id="soft_bg" onchange="onUploadImgChange(this,'soft_bg','soft_bg_div');" />
+            <p class="tips">尺寸640*530，大小尽量控制在200KB以内</p>
+        </td>
+		<td><img id="soft_bg_div" <?php if($list['soft_bg']){ ?>src="{$list['soft_bg']}" <?php } ?>/></td>
+	</tr>
+	<tr>
+		<td>软件名称文字颜色</td>
+		<td colspan='2'><input type="text" name="ap_notice" id="ap_notice" value="{$list['ap_notice']}" /></td>
+	</tr>
+	<tr >
+		<td>打开按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" name="warning_bgcolor" id="warning_bgcolor" value="{$list['warning_bgcolor']}" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" name="last_lottery_desc" id="last_lottery_desc" value="{$list['last_lottery_desc']}" /></div>
+			<div class="input_key">
+			打开按键文案：	
+			<input type="text" id="winning_comment" name="winning_comment" placeholder="请输入按键名称不超过5个" value="{$list['winning_comment']}"  onkeyup="value=value.replace(/[^\w\u4E00-\u9FA5]/g,'')" onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\w\u4E00-\u9FA5]/g,''))"/></div>
+		</td>
+	</tr>
+	<tr >
+		<td>安装按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" name="bg_color" id="bg_color" value="{$list['bg_color']}" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" name="lose_yes_desc" id="lose_yes_desc" value="{$list['lose_yes_desc']}" /></div>
+            <div class="input_key">
+			安装按键文案：
+			<input type="text" id="download_comment" name="download_comment" placeholder="请输入按键名称不超过5个" value="{$list['download_comment']}"  onkeyup="value=value.replace(/[^\w\u4E00-\u9FA5]/g,'')" onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\w\u4E00-\u9FA5]/g,''))"/></div>
+		</td>
+	</tr>
+	<tr >
+		<td>下载按键：</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" name="download_bgcolor" id="download_bgcolor" value="{$list['download_bgcolor']}" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" name="lost_no_desc" id="lost_no_desc" value="{$list['lost_no_desc']}" /></div>
+            <div class="input_key">
+			下载按键文案：
+			<input type="text" id="button_comment" name="button_comment" placeholder="请输入按键名称不超过5个" value="{$list['button_comment']}"  onkeyup="value=value.replace(/[^\w\u4E00-\u9FA5]/g,'')" onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\w\u4E00-\u9FA5]/g,''))"/></div>
+		</td>
+	</tr>
+	<tr >
+		<td>换一换按键：
+		</td>
+		<td colspan='2'>
+            <div class="label_txt">按键背景颜色：</div>
+            <div class="color_box">
+			<input type="text" name="share_bgcolor" id="share_bgcolor" value="{$list['share_bgcolor']}" /></div>
+            <div class="label_txt">字体颜色：</div>
+            <div class="color_box">
+			<input type="text" name="share_other_pic" id="share_other_pic" value="{$list['share_other_pic']}" /></div>
+            <div class="input_key">
+			换一换按键文案：
+			<input type="text" id="share_text" name="share_text" placeholder="请输入按键名称不超过5个" value="{$list['share_text']}"  onkeyup="value=value.replace(/[^\w\u4E00-\u9FA5]/g,'')" onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\w\u4E00-\u9FA5]/g,''))"/></div>
+		</td>
+	</tr>
+	<tr>
+		<td>返利说明图片</td>
+		<td>
+            <input type="file" name="ap_imgurl_bg" id="ap_imgurl_bg" onchange="onUploadImgChange(this,'ap_imgurl_bg','ap_imgurl_bg_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="ap_imgurl_bg_div" <?php if($list['ap_imgurl_bg']){ ?>src="{$list['ap_imgurl_bg']}" <?php } ?>/></td>
+	</tr>	
+</table>	
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr>
+		<td width="110" >充值流程参考轮播图</td>
+		<td colspan='2'>
+			<select name="download_config" id="download_config" >
+				<option value="1" <?php if($list['download_config'] == 1) echo 'selected'; ?> >轮播图1</option>
+			</select>
+		</td>
+	</tr>	
+	<tr>
+		<td>轮播背景图</td>
+		<td width="105"><input type="file" name="bottom_color" id="bottom_color" onchange="onUploadImgChange(this,'bottom_color','bottom_color_div');" />
+		<p class="tips">尺寸640*425，大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="bottom_color_div" <?php if($list['bottom_color']){ ?>src="{$list['bottom_color']}" <?php } ?>/></td>
+	</tr>	
+</table>
+</div>
+<div style="margin-top:20px;margin-left:100px;">
+	<table>
+		<tr>
+			<td><input type="submit" class="search_btn" value="确定" /></td>
+			<td><a href="javascript:;" onclick="javascript:history.go(-1);" class="search_btn" >取消</a></td>
+		</tr>
+	</table>
+</div>
+</form>
+</body>
+</html>

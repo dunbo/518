@@ -1,0 +1,114 @@
+<link rel="stylesheet" type="text/css" href="/Public/zoom/zoom.css" />
+<script src="/Public/zoom/zoom.js"></script> 
+<script>
+function show_info()
+{
+	var replace_package=$("#replaced_package").val();
+	$.ajax({
+			url: '/index.php/Public/get_soft_info/soft_package/'+replace_package,
+			//data: 'soft_package='+replace_package,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){
+				if(data == 1)
+				{
+					alert("软件不存在");
+					return false;
+				}
+				else if(data == 2)
+				{
+					alert("该软件的url不存在");
+					return false;
+				}
+				else
+				{
+					var val = eval("("+data+")");
+					document.getElementById('replaced_soft_name').value=val.soft_name;
+					document.getElementById('replaced_soft_url').value=val.soft_url;
+				}
+			}
+		});
+}
+function checkPost() 
+{
+	var be_replaced_url=$("#be_replaced_url").val();
+	if(!be_replaced_url)
+	{
+		alert("待替换地址不能为空！");
+		return false;
+	}
+	var replaced_package = $("#replaced_package").val();
+	if(!replaced_package)
+	{
+		alert("替换后包名不能为空！");
+		return false;
+	}
+	var replaced_soft_name = $("#replaced_soft_name").val();
+	if(!replaced_soft_name)
+	{
+		alert("替换后软件名称不能为空！");
+		return false;
+	}
+	var replaced_soft_url = $("#replaced_soft_url").val();
+	if(!replaced_soft_url)
+	{
+		alert("替换后软件地址不能为空！");
+		return false;
+	}
+	var start_tm = $("#start_tm").val();
+	if (!start_tm) 
+	{
+		alert("开始时间不能为空！");
+		return false;
+	}
+	var end_tm = $("#end_tm").val();
+	if (!end_tm) 
+	{
+		alert("结束时间不能为空！");
+		return false;
+	}
+	 if (end_tm > end_tm) 
+	{
+		alert("开始时间不能大于结束时间！");
+		return false;
+	}
+}
+</script>
+<h2>编辑替换地址</h2>
+<div>
+<form action="__URL__/edit_chrome_replace" method="post" onsubmit="return checkPost()" >
+	<table>
+		<tr>
+			<td><font color="red">*</font>待替换地址：</td>
+			<td><input type="text" id="be_replaced_url" name="be_replaced_url" value="{$list.be_replaced_url}" style="width:200px;" /></td>
+		</tr>
+		<tr>
+			<td><font color="red">*</font>替换后包名：</td>
+			<td><input type="text" id="replaced_package" name="replaced_package" value="{$list.replaced_package}" style="width:200px;" onblur="show_info()" /></td>
+		</tr>
+		<tr>
+			<td><font color="red">*</font>替换后软件名称：</td>
+			<td><input type="text" id="replaced_soft_name" name="replaced_soft_name" value="{$list.soft_name}" style="width:200px;" readonly /></td>
+		</tr>
+		<tr>
+			<td><font color="red">*</font>替换后软件地址：</td>
+			<td><input type="text" id="replaced_soft_url" name="replaced_soft_url" value="{$list.soft_url}" style="width:200px;" readonly /></td>
+		</tr>
+		<tr>
+			<td><font color="red">*</font>生效日期：</td>
+			<td><input id="start_tm" name="start_tm" style="width:100px;" value="{$list.start_tm|date='Y-m-d',###}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd'})" />至<input id="end_tm" name="end_tm" style="width:100px;" value="{$list.end_tm|date='Y-m-d',###}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd'})" /></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td><font color="red">待替换地址不能为空！</font></td>
+		</tr>
+		<tr>
+			<td>
+			<input type="hidden" name="id" value="{$list.id}"/>
+			<input type="submit" value="确定" class="search_btn" />
+			</td>
+			<td><input type="button" value="取消" class="search_btn" onclick="tb_remove();" /></td>
+		</tr>
+	</table>
+</form>
+</div>

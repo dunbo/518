@@ -1,0 +1,84 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+function checkit(){
+	if(confirm("确定删除此推荐新闻?"))
+	{
+		return true;
+	}
+	return false;
+}
+
+function change_rank(id){
+	var rank = $("#rank_"+id+"").val();
+	if(rank <= 0){
+		alert("排序值错误");
+		return false;
+	}
+	$.ajax({
+			url: '__URL__/change_rank',
+			data: 'id='+id+'&rank='+rank,
+			type: 'get',
+			success: function(data){
+				if(data == 2){
+					alert("编辑失败");
+				}else{
+					window.location.reload(true);
+				}
+			}
+		});
+}
+</script>
+<style>
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display: inline;}
+</style>
+<body>
+<div style="margin:20px 10px 20px 6px;">
+<form action="__URL__/news_list" method="get" class="table_list">
+<table>
+	<tr>
+		<td>文章标题：<input type="text" name="news_title" value="{$news_title}" /></td>
+		<td>添加时间：<input id="start_tm" name="start_tm" value="{$start_tm}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px" />&nbsp;至&nbsp;<input id="end_tm" name="end_tm" value="{$end_tm}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"/></td></td>
+		<td><input type="submit" value="搜索" class="search_btn" /></td>
+	</tr>
+</table>
+</form>
+</div>
+<div style="margin:20px 10px 20px 6px;"><a href="__URL__/add_news_show?mm" class="search_btn thickbox">添加</a></div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="20%">文章标题</th>
+			<th width="30%">关联文章</th>
+			<th width="5%">排序</th>
+			<th width="20%">链接地址</th>
+			<th width="15%">添加时间</th>
+			<th width="10%">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr>
+		<td>{$val.news_title}</td>
+		<td>
+		<?php foreach($val['about_result'] as $k => $v){ ?>
+			<span>{$v.news_title}：{$v.news_link}</span><br />
+		<?php } ?>
+		</td>
+		<td><input type="text" value="{$val.rank}" id="rank_{$val.id}" onblur="change_rank({$val.id});" /></td>
+		<td>{$val.news_link}</td>
+		<td><?php echo date('Y-m-d H:i:s',$val['create_tm']); ?></td>
+		<td><a class="thickbox" href="__URL__/edit_news_show/id/{$val.id}/lr/{$lr}/p/{$p}/<?php if($news_title){ ?>news_title/{$news_title}/<?php } ?><?php if($start_tm && $end_tm){ ?>start_tm/{$start_tm}/end_tm/{$end_tm}<?php } ?>">修改</a>&nbsp;&nbsp;<a href="__URL__/del_news/id/{$val.id}/lr/{$lr}/p/{$p}/<?php if($news_title){ ?>news_title/{$news_title}/<?php } ?><?php if($start_tm && $end_tm){ ?>start_tm/{$start_tm}/end_tm/{$end_tm}<?php } ?>" onclick="return checkit();">删除</a></td>
+	</tr>
+	<?php } ?>
+</table>
+<div class="yahei navgition">
+		{$page|default='&nbsp;'}
+</div>
+</body>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />

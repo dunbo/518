@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/Public/zoom/zoom.css" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js?1'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script src="/Public/zoom/zoom.js"></script>
+
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+
+<script type="text/javascript">
+	function select_all(){
+		if($('#select_all').attr('checked') == 'checked'){
+			$("input[id^='userid_']").attr('checked','checked');
+		}else if($('#select_all').attr('checked') != 'checked'){
+			$("input[id^='userid_']").attr('checked',false); 
+		}
+	}
+	function my_select(userid){
+		if($('#userid_'+userid+'').attr('checked') != 'checked'){
+			$('#select_all').attr('checked',false);
+		}
+	}
+
+	function handle(){
+		id = arguments[0] ? arguments[0] : 0;
+		status = arguments[1] ? arguments[1] : 0;
+		if(status==1){
+			if(!confirm('确认审核通过此账号？')){
+				return false;
+			}
+			window.location.href='__URL__/batch_handle?id='+id+'&status='+status;
+		}else if(status==3){
+			tb_show('取消','__URL__/batch_handle?status='+status+'&id='+id+'&bs=1&height=300&width=400','thick_box');
+		}
+	}
+	function get_ids(){
+		var chks = $("input[name='userid[]']:checked");
+		var ids=new Array();
+	    $(chks).each(function(){
+	       ids.push(this.value);        
+	    });
+	    return ids;
+	}
+	function batch_handle(status){
+		ids = get_ids();
+	    if(ids.length == 0){
+			alert('请选择要操作的对象！');
+			return false;
+		}
+		handle(ids,status);
+	}
+
+</script>
+
+<style>.qh{float:left;width:98px;height:28px;line-height:28px;text-align:center;cursor:pointer;font-size:14px;font-family:微软雅黑;text-decoration:none;color:#444;padding:0;border-width:1px;border-style:solid;border-color:#bdbdbd;display:block}.search_table input[type=text]{height:30px;margin:13px 0 13px 10px}.search_table span{margin-left:5px}
+</style>
+</head>
+<body>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr>
+				<td style="font-size: 16px;font-weight: 700;">
+					<div style="margin-top:10px;margin-bottom:10px">账号审核</div>
+				</td>
+			</tr>
+			<tr>
+				<td style="border-bottom:solid 1px black">
+					<a href="__URL__/user_list" class="qh" <?php echo $list_type==2?"style='background: #D1D1D1;'":''?> >待审核</a>
+					<a href="__URL__/user_list?list_type=1" class="qh" <?php echo $list_type==1?"style='background: #D1D1D1;'":''?> >已通过</a>
+					<a href="__URL__/user_list?list_type=3" class="qh" <?php echo $list_type==3?"style='background: #D1D1D1;'":''?> >已驳回</a>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<form method="post" class="search_table" action="__URL__/user_list?">
+						<input type="hidden" value="{$list_type}" name="list_type" />
+						<span>账号名称：<input type="text" name="username" value="{$username}" /></span>
+						<span>申请时间：
+							<input id="start_at2" name="start_tm"
+							style="width: 130px;" value="{$start_tm}"
+							size="15" type="text" onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'><img src="/Public/js/calendar.gif"
+							class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+							style="margin: 1px;" width="16px" align="absmiddle" height="15px"> ~ 
+							<input id="end_at2" name="end_tm"
+							style="width: 130px;" value="{$end_tm}"
+							size="15" type="text" onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'><img src="/Public/js/calendar.gif"
+							class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+							style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+						</span>
+						<input type="submit" value="搜索" style="width:70px;height:30px;margin-left:30px" />
+					</form>
+				</td>
+			</tr>
+		</thead>
+	</table>
+
+   	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+        <thead >
+          <tr align="center" >
+			<th width="3%"><input type='checkbox' onclick="select_all();" id="select_all" /></th>
+			<th width="8%">申请时间</th>
+			<th width="8%">账号名称</th>
+			<th width="7%">账号属性</th>
+			<th width="8%">账号简介</th>
+			<th width="7%">头像</th>
+			<th width="7%">联系人</th>
+			<th width="7%">联系电话</th>
+			<th width="7%">邮箱</th>
+			<th width="8%">身份证号</th>
+			<th width="8%">证件扫描</th>
+			<th width="7%">所在地</th>
+		<?php if($list_type==2){ ?>
+			<th>操作</th>
+		<?php }elseif($list_type==1){ ?>
+			<th>结算方式</th>
+			<th>通过时间</th>
+		<?php }elseif($list_type==3){ ?>
+			<th width="7%">驳回理由</th>
+			<th width="8%">驳回时间</th>
+		<?php } ?>			
+          </tr>
+        </thead>
+        <tbody>
+			<?php foreach($list as $val) :?>
+				<tr>
+					<td><input type='checkbox' name='userid[]' id='userid_{$val.userid}' value='{$val.userid}' onclick="my_select({$val.userid});" /></td>
+					<td><?php echo date('Y-m-d H:i:s', $val['create_tm'])?></td>
+					<td>{$val['username']}</td>
+					<td><?php if($val['type']==1){ echo '个人账号'; }else{echo '-';} ?></td>
+					<td>{$val['info']}</td>
+					<td><img onclick="_zoom(this, this.src)"  src="<?php echo IMGATT_HOST; ?>{$val.userpic}" width="50" height="50"></td>
+					<td>{$val['truename']}</td>
+					<td>{$val['phone']}</td>
+					<td>{$val['mail']}</td>
+					<td>{$val['cardnumber']}</td>
+					<td><img onclick="_zoom(this, this.src)"  src="<?php echo IMGATT_HOST; ?>{$val.cardpic1}" width="50" height="50"><img onclick="_zoom(this, this.src)"  src="<?php echo IMGATT_HOST; ?>{$val.cardpic2}" width="50" height="50"><img onclick="_zoom(this, this.src)"  src="<?php echo IMGATT_HOST; ?>{$val.cardpic_hand}" width="50" height="50"></td>
+					<td>{$val['address_sf']}&nbsp;{$val['address_area']}</td>
+				<?php if($list_type==2){ ?>
+					<td><a href="javascript:void(0);" class="blue" onclick="handle({$val.userid},1)">通过</a> <a href="javascript:void(0);" class="blue" onclick="handle({$val.userid},3)">驳回</a> <a href="__URL__/user_edit?userid={$val.userid}" class="blue">修改</a></td>
+				<?php }elseif($list_type==1){ ?>
+					<td><?php echo $val['card']?$val['card']:''; ?></td>
+					<td><?php echo date('Y-m-d H:i:s', $val['update_tm'])?></td>
+				<?php }elseif($list_type==3){ ?>
+					<td>{$val['bh_explain']}</td>
+					<td><?php echo date('Y-m-d H:i:s', $val['update_tm'])?></td>
+				<?php } ?>
+				</tr>
+			<?php endforeach;?>
+       </tbody>
+    </table>
+<?php if($list_type==2){ ?>
+<input value='批量通过' type='button' onclick='batch_handle(1)' />
+<input value='批量驳回' type='button' onclick='batch_handle(3)' />
+<?php } ?>
+<div style="width:92%; padding-top:4px; text-align:right">
+	{$page}
+</div>
+<div id="append_parent"></div>
+</body>
+</html>

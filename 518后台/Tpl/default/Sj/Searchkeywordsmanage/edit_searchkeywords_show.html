@@ -1,0 +1,117 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+
+	
+	function no_update(){
+		loaction.href="__URL__/searchkeywords_list";
+	}
+	
+	function submit_check(){
+		if($('#check_all').val() == 2){
+			return false;
+		}
+	}
+	function checkit(){
+			if(confirm("热词删除后不可恢复，并直接影响线上数据，是否确认删除？"))
+			{
+				return true;
+			}
+			return false;
+	}
+	
+	 function strlen(str){  
+        var len = 0;  
+        for (var i=0; i<str.length; i++) {   
+         var c = str.charCodeAt(i);   
+        //单字节加1   
+         if ((c >= 0x0001 && c <= 0x007e) || (0xff60<=c && c<=0xff9f)) {   
+           len++;   
+         }   
+         else {   
+          len+=2;   
+         }   
+        }   
+        return len;  
+    }  
+	
+	function check_keywords(id){
+		var keywords = $('#keywords_'+id+'').val();
+		if(!(/^[\u4e00-\u9fa5a-zA-Z0-9]*$/.test(keywords)) || strlen(keywords) > 20 || strlen(keywords) < 1){
+			$('#keywords_'+id+'').css("border","#ff0000 1px solid");
+			$('#check_all').val(2);
+			$('#warning').css('display','block');
+		}else{
+			$('#keywords_'+id+'').css("border","");
+			$('#check_all').val(1);
+			$('#warning').css('display','none');
+		}
+	}
+	
+	function check_package(id){
+		var my_package = $('#package_'+id+'').val();
+		$.ajax({
+			url: '__URL__/check_package/package/'+my_package,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){			
+				if(data == 1){
+					$('#package_'+id+'').css("border","#ff0000 1px solid");
+					$('#check_all').val(2);
+					$('#warning_package').css('display','block');
+				}else{
+					$('#package_'+id+'').css("border","");
+					$('#check_all').val(1);
+					$('#warning_package').css('display','none');
+				}
+			}
+		});
+	}
+</script>
+<br />
+<div style="padding:20px;">
+<span>注意事项：</span><br />
+<span>1.每个热词不得超过10个汉字，并且只能为汉字，数字和英文的组合</span><br />
+<span>2.热词编辑后约10分钟才会在前端生效</span>
+</div>
+
+<div class="clear"></div>
+<form action="__URL__/update_searchkeywords" method="post">
+<table width="99%" cellpadding="0" cellspacing="0" border="1" class="table_list">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>搜索热词</th>
+			<th>关联应用(包名)</th>
+			<th>开始时间</th>
+			<th>结束时间</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach($result as $key => $val){ ?>
+		<tr>
+			<td>{$key+1}</td>
+			<td><input type="hidden" name="id[]" value="{$val.id}" /><input type="text" name="key_word[]" onblur="check_keywords({$val.id});" id="keywords_{$val.id}" value="{$val.key_word}" /></td>
+			<td><input type="text" name="package[]" onblur="check_package({$val.id})" id="package_{$val.id}" <?php if($val['package']){ ?>value="{$val.package}" <?php }else{ ?> onblur="if(value==''){value='为空表示不关联'}" onFocus="if(this.value=='为空表示不关联'){this.value=''}" value="为空表示不关联"<?php } ?> /></td>
+			<td><span><input type='text' name='fromdate[]' id="fromdate_{$val.id}" value='{$val.start_tm}' style='cursor: hand; width: 150px;' class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d ",dateFmt:"yyyy-MM-dd"})' /></span></td>
+			<td><span><input type='text' name='todate[]' id="todate_{$val.id}" value='{$val.end_tm}' style='cursor: hand; width: 150px;' class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d ",dateFmt:"yyyy-MM-dd"})' /></span></td>
+			<td><span style="color:#cccccc;">删除</span>&nbsp;<?php if($val['rank'] != 1){ ?><span style="color:#cccccc;">上移</span>&nbsp;<?php } ?><?php if($val['rank'] != $count){ ?><span style="color:#cccccc;">下移</span><?php } ?></td>
+		</tr>
+		<?php } ?>
+		<input type="hidden" id="check_all" value="1" />
+	</tbody>
+</table>
+	<span style="color:red;display:none;" id="warning">*关键字只能为10个汉字(含)以内的汉字 数字 英文</span>
+	<span style="color:red;display:none;" id="warning_package">*软件包名错误</span>
+	<input type="submit" class="search_btn" onclick="return submit_check();" style="float:left; margin-right:10px; display:inline" class="search_btn" value="确认" />
+	<a href="__URL__/searchkeywords_list" class="search_btn" style="float:left;">取消</a>
+	</div>
+</form>
+</div>
+</body>
+</html>

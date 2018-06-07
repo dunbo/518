@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="Android,安卓,安卓网,安卓市场,安卓游戏,电子市场,安卓软件,Android游戏,安卓手机,游戏汉化,手机游戏,Android软件,软件下载,最新汉化软件,安卓游戏下载,游戏汉化" />
+<meta name="description" content="安智市场,Android,安卓,安卓网,安卓市场,电子市场,安卓游戏,应用商店-国内最专业的Android安卓电子市场，提供海量安卓软件、Android手机游戏、安卓最新汉化软件、汉化游戏资源及最新APK汉化、汉化破解APP、APK免费下载，致力于为用户打造最贴心的Android安卓手机应用商店" />
+<title>安智市场-快乐闹元宵，大奖送不停！</title>
+<link type="text/css" rel="stylesheet" href="css/common.css"/>
+<script type="text/javascript" src="js/jquery-1.4.2.min.js" ></script>
+<script type="text/javascript">
+window.onload = function(){
+	var oDiv = document.getElementById('openbox1');
+	if(oDiv){
+		oDiv.style.top = (viewHeight() - oDiv.offsetHeight) + scrollY() + 'px';
+		oDiv.style.left = (viewWidth() - oDiv.offsetWidth)/2 + 'px';
+	}
+	window.onresize = window.onscroll = function(){
+		if(oDiv){
+			oDiv.style.top = (viewHeight() - oDiv.offsetHeight) + scrollY() + 'px';
+			oDiv.style.left = (viewWidth() - oDiv.offsetWidth)/2 + 'px';
+		}
+	}
+};
+function viewWidth(){
+	return document.documentElement.clientWidth;
+}
+function viewHeight(){
+	return document.documentElement.clientHeight;
+}
+function scrollY(){
+	return document.documentElement.scrollTop || document.body.scrollTop;
+}
+function documentHeight(){
+	return Math.max(document.documentElement.scrollHeight || document.body.scrollHeight,document.documentElement.clientHeight);
+}
+</script>
+<script>
+	$(document).ready(function(){
+			$("#down_times").html("下载记录：<span>0</span>个应用");
+			$("#chances").html("今日剩余机会：<span>10</span>次");
+			exchange();
+			$.ajax({
+				type: 'get',
+				url : 'http://m.anzhi.com/activity/lantern/data.php?action=phoneinfo',
+				dataType : 'json',
+				success  : function(data){
+					if(data == -99){
+						show_alert('<font size="4">不是在活动时间内！</font>');
+					}else if(data == -1){
+						show_alert('<font size="4">服务器忙，请稍后再试！</font>');
+					}else if(data == -2){
+						$("#wrong").html("手机号是唯一领奖凭证，请认真填写。");
+					}else{
+						$("#down_times").html("下载记录：<span>"+data.phone_download+"</span>个应用");
+						$("#chances").html("今日剩余机会：<span>"+data.phone_left+"</span>次");
+						$("#phone_num").val(""+data.phone_num+"");
+						$("#phone_num").attr("disabled", "disabled");
+						$("#submit_button").css("display","none");
+						$("#alert_button").css("display","block");
+					}
+				}
+			
+			});
+	});	
+	
+	function wa() {
+		$("#openbox1").css("display","none");
+	}
+	
+	function opendown(packname,softname){
+		$.ajax({
+			type: 'get',
+			url : 'http://m.anzhi.com/activity/lantern/data.php?action=download&package='+packname,
+			dataType: 'json',
+			success: function(data){
+				if(data == '-2'){
+					show_alert("<font size='4'>请输入手机号码！</font>");
+				}else if(data == '-1'){
+					show_alert("<font size='4'>服务器忙，请稍后再试！</font>");
+				}else if(data == '-3'){
+					show_alert('<font size="4">您已经用完了今天的抽奖机会。欢迎您继续关注本次活动，更多精彩大礼等您拿！</font>');
+				}else{
+					$("#down_times").html("下载记录：<span>"+data.phone_download+"</span>个应用");
+					$("#chances").html("今日剩余机会：<span>"+data.phone_left+"</span>次");
+					if(data.phone_download <= 10){
+						switch (data.phone_download) {
+							case 1:
+								disstr = '已经开始下载'+softname+'，大奖~我来啦~';
+								break;
+							case 2:
+								disstr = '已经开始下载'+softname+'，离大奖又近了一步！';
+								break;
+							case 3:
+								disstr = '已经开始下载'+softname+'，中奖概率大大增加啊！';
+								break;
+							case 4:
+								disstr = '已经开始下载'+softname+'，大奖近在眼前~';
+								break;
+							case 5:
+								disstr = '已经开始下载'+softname+'，您的中奖机率已经超过您周围13%的用户';
+								break;
+							default:
+								disstr = '已经开始下载'+softname+'，大奖非我莫属啊！';
+								break;
+						}
+					}
+					show_alert(disstr);
+					window.location="../../download.php?package="+packname;
+				}
+			}
+		});
+	}
+	
+	function show_alert(str){
+		$("#openbox1").html('<p>'+str+'</p>');
+		$("#openbox1").css("display","block");
+		var oDiv = document.getElementById('openbox1');
+		if(oDiv){
+			oDiv.style.top = (viewHeight() - oDiv.offsetHeight) + scrollY() + 'px';
+			oDiv.style.left = (viewWidth() - oDiv.offsetWidth)/2 + 'px';
+		}
+		setTimeout("wa()",10000);
+	}
+	
+	
+	function exchange(){
+		$.ajax({
+			type: 'get',
+			url : 'http://m.anzhi.com/activity/lantern/data.php?action=softlist',
+			dataType : 'json',
+			success  : function(data){
+				str = '';
+				for(i=0;i<data.length;i++){
+					str += "<li><a href='javascript:;' onclick='opendown(\""+data[i]['package']+"\",\""+data[i]['softname']+"\")'><img alt='安智市场' src="+data[i]['icon']+"><span>"+data[i]['softname']+"</span></a></li>"
+				}
+				str += "<div class='clear'></div>";
+				$("#all_soft").html(str);
+			}
+		});
+	}
+	
+	function  checking(){
+		var phone_num = document.getElementById('phone_num').value;
+		if(phone_num == ""){
+			$("#wrong").html("您填写的手机号不合法，请重新填写。");
+		}else{
+			$.ajax({
+				type : 'get',
+				url  : 'http://m.anzhi.com/activity/lantern/data.php?action=submitphone&phone='+phone_num,
+				dataType : 'json',
+				success  : function(data){
+					if(data == '-1'){
+						show_alert('<font size="4">服务器忙，请稍后再试！</font>');
+					}else if(data == '-3'){
+						$("#wrong").html("您填写的手机号不合法，请重新填写");
+					}else{
+						$("#down_times").html("下载记录：<span>"+data.phone_download+"</span>个应用");
+						$("#chances").html("今日剩余机会：<span>"+data.phone_left+"</span>次");
+						$("#phone_num").attr("disabled", "disabled");
+						$("#submit_button").css("display","none");
+						$("#alert_button").css("display","block");
+						$("#wrong").html("已成功提交，中奖后，我们将凭此手机号与您取得联系。");
+					}
+				}
+			});
+		}
+	}
+	
+	function alter(){
+		$("#phone_num").attr("disabled",false);
+		$("#submit_button").css("display","block");
+		$("#alert_button").css("display","none");
+	}
+</script>
+</head>
+<body>
+<div id="header">
+	<div class="header_01"></div>
+	<div class="header_02"></div>
+	<div class="header_03">我们精心挑选了多款优秀手机应用，点击即可下载，成功安装之后就有一次获奖机会。每台手机有10次参与机会，今年从这里开始你的幸运之旅!</div>
+</div>
+<div id="main">
+	<div id="infors">
+		<ul>
+			<li id="down_times"></li>
+			<li id="chances"></li>
+		</ul>
+			<p>
+				<label>中奖联系手机号：</label>
+				<input type="text" class="inputtext" id="phone_num" />
+				<input type="image" src="images/btn_02.jpg" class="inputbtn" onclick="checking()" id="submit_button" />
+				<input type="image" src="images/btn_03.jpg" class="inputbtn" onclick="alter()" id="alert_button" style="display:none;" />
+			</p>
+			<div class="clear"></div>
+			<span class="tips" id="wrong">手机号是唯一领奖凭证，请认真填写。</span>
+	</div>
+	<div class="list">
+		<ul id="all_soft">
+		</ul>
+	</div>
+	<div id="change_btn">
+		<a href="javascript:;" title="换一组" onclick="exchange()"></a>
+	</div>
+</div>
+<div class="action_txt">
+	<h4>活动说明：</h4>
+	<p>
+		1、活动时间：元宵节（2013年2月24日）全天。<br/>
+		2、奖品设置：<br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;一等奖&nbsp;ipad mini 1台<br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;二等奖&nbsp;1000元安卓手机&nbsp;1台<br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;三等奖 30元手机充值卡50张<br/>
+		3、抽奖结果会以电话方式通知中奖用户。<br/>
+		4、奖品在10个工作日以内发出。<br/>
+		5、实时关注抽奖活动，请关注安智市场官方微博。<br/>
+		6、本次活动最终解释权归安智所有。<br/>
+	</p>
+</div>
+<div id="openbox1">
+	<p>已经开始下载XXXX，这次没有中奖哦～您还有9次抽奖机会再试试吧</p>
+</div>
+</body>
+</html>

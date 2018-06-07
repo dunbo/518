@@ -1,0 +1,250 @@
+<script type="text/javascript">
+	function show_azb(){
+		var num = 0;
+		$('.ball_control_num').each(function(key,value){
+		     num = num+ parseInt($(value).html());
+		});
+		$('#show_azb').html(num*20+'安智币');
+	}
+    var flags={canMove:true};
+    function showOpenBox(obj){
+        var bg_h=$(window).height() + $(document).scrollTop(),
+            top_h= $(obj).height()/ 2 - $(document).scrollTop();
+        $(obj).css("margin-top",-top_h+"px").show();
+        $("#body-bg").css("height",bg_h+"px").show();
+        flags.canMove=false;
+		window.onresize = function(){
+			var bg_h=$(window).height() + $(document).scrollTop(),
+                top_h= $(obj).height()/ 2 - $(document).scrollTop();
+			$('#body-bg').css("height",bg_h+"px");
+			$(obj).css("margin-top",-top_h+"px");	
+		}
+		$("#body-bg").bind('click',function(){
+			$(obj).hide();
+			$("#body-bg").hide();
+		})
+    }
+    function cloBox(obj){
+        $(obj).hide();
+        $("#body-bg").hide();
+        flags.canMove=true;
+    }
+    $(function(){          
+		$("body").bind('touchmove', function (e) {
+            if(!flags.canMove){
+                e.preventDefault();	
+            }
+        });
+    })
+</script>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var prefix = "<!--{$out.prefix}-->";
+var iswoking=0;
+
+//投注
+function saveorder(){
+	cloBox('.tip-box2');
+	cloBox('.tip-box3');
+	if(iswoking==1){
+		return;
+	}
+	iswoking=1;
+
+	//var num = 0;
+	var nums = [];
+	var reds = [];
+	var blues = [];
+
+	$('.ball_control_num').each(function(key,value){
+	     nums[key] = $(value).html();
+	     //num = num+ parseInt($(value).html());
+	});
+
+	$('.select_ball_red li').each(function(key,value){
+	     reds[key] = $(value).html();
+	});
+
+	$('.select_ball_blue li').each(function(key,value){
+	     blues[key] = $(value).html();
+	});
+
+	var xf_pwd = $('#xf_pwd').val();
+
+	$.ajax({
+		url: '/lottery/'+prefix+'/buy.php',
+		data: 'type=1'+'&aid='+aid+'&sid='+sid+'&nums='+nums+'&reds='+reds+'&blues='+blues+'&xf_pwd='+xf_pwd,
+		type: 'post',
+		async:false,
+		dataType: 'json',
+		success:function(data){
+			
+			if(data.code=='41017')
+			{	
+				$("#cz_url").attr('href',data.jump_url);
+				iswoking=0;
+				showOpenBox('.tip-box1');
+			}else if(data.code=='FAILURE_SUBMIT_PAYPWD_WRONG'){
+				iswoking=0;
+				showOpenBox('.tip-box5');
+			}else if(data==1){
+				location.href="/lottery/"+prefix+"/myprize.php?sid="+sid+"&aid=<!--{$out.aid}-->";
+			}else {
+				iswoking=0;
+				toast('活动已结束');
+				cloBox('.tip-box5')
+			}
+		}
+	});
+}
+
+function confirmorder(){
+	var num = 0;
+	var has_no =0;
+	$('.ball_control_num').each(function(key,value){
+		if(parseInt($(value).html())==0){
+			has_no=1;
+		}
+	    num = num+ parseInt($(value).html());
+	});
+	if(num==0){
+		toast('暂无投注号码请重试');
+		return;
+	}
+	if(typeof($('.select_ball_red li').eq(0).html())=="undefined"){
+		toast('暂无完整投注号码请重试');
+		return;
+	}
+	if(typeof($('.select_ball_blue li').eq(0).html())=="undefined"){
+		toast('暂无完整投注号码请重试');
+		return;
+	}
+	
+	if(has_no==0){
+		$("#azb_kou").html(num*20);
+		showOpenBox('.tip-box2');	
+	}else{
+		showOpenBox('.tip-box4');	
+	}
+
+}
+</script>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box tip-box5" style="display: none;">
+    	<div class="wrap3">
+			<div class="wrap_inner">
+				<div class="wrap_inner2">
+					<span class="close_btn" onclick="cloBox('.tip-box4')"></span>
+					<div class="tip-mid">
+						<div class="tip-con">
+						    <p>支付密码错误，请重新输入</p>
+						</div>
+						<div class="btns4">
+							<a href="javascript:;" class="fl" onclick="cloBox('.tip-box5')">取消</a>
+							<a href="javascript:;" class="fr" onclick="showOpenBox('.tip-box3')">确定</a>
+							<div class="clear"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box tip-box4" style="display: none;">
+    	<div class="wrap3">
+			<div class="wrap_inner">
+				<div class="wrap_inner2">
+					<span class="close_btn" onclick="cloBox('.tip-box4')"></span>
+					<div class="tip-mid">
+						<div class="tip-con">
+						    <p>注数不能为0，请检查</p>
+						</div>
+						<div class="btns4">
+							<a href="javascript:;" class="fl" onclick="cloBox('.tip-box4')">取消</a>
+							<a href="javascript:;" class="fr" onclick="cloBox('.tip-box4')">确定</a>
+							<div class="clear"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box tip-box1" style="display: none;">
+    	<div class="wrap3">
+			<div class="wrap_inner">
+				<div class="wrap_inner2">
+					<span class="close_btn" onclick="cloBox('.tip-box1')"></span>
+					<div class="tip-mid">
+						<div class="tip-con">
+						    <p>您的安智币余额不足，是否充值？</p>
+						</div>
+						<div class="btns4">
+							<a href="javascript:;" class="fl" onclick="cloBox('.tip-box1')">取消</a>
+							<a href="www.baidu.com" class="fr" id='cz_url'>确定</a>
+							<div class="clear"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box tip-box2" style="display: none;">
+    	<div class="wrap3">
+			<div class="wrap_inner">
+				<div class="wrap_inner2">
+					<span class="close_btn" onclick="cloBox('.tip-box2')"></span>
+					<div class="tip-mid">
+						<div class="tip-con">
+						    <p>请确认是否扣除<span id="azb_kou"></span>安智币</p>
+						</div>
+						<div class="btns4">
+							<a href="javascript:;" class="fl" onclick="cloBox('.tip-box2')">取消</a>
+							    <!--{if $out['isHasPayPwd'] == 1}-->
+							<a href="javascript:;" class="fr" onclick="showOpenBox('.tip-box3')">确定</a>
+									<!--{else}-->
+							<a href="javascript:;" class="fr" onclick="saveorder()">确定</a>
+									<!--{/if}-->	
+							<div class="clear"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box tip-box3" style="display: none;">
+    	<div class="wrap3">
+			<div class="wrap_inner">
+				<div class="wrap_inner2">
+					<span class="close_btn" onclick="cloBox('.tip-box3')"></span>
+					<div class="tip-mid">
+						<div class="tip-con">
+						    <ul class="form-items">
+								<li>
+									<span><input type="password" id="xf_pwd" placeholder="请输入安智币支付密码"/></span>
+								</li>
+							</ul>
+						</div>
+						<div class="btns4">
+							<a href="javascript:;" class="fl" onclick="cloBox('.tip-box3');cloBox('.tip-box2')">取消</a>
+							<a href="javascript:;" class="fr" onclick="saveorder()">确定</a>
+							<div class="clear"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+</section>

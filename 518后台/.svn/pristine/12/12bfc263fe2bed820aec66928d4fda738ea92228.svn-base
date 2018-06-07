@@ -1,0 +1,613 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+.hide_tr{
+	display:none;
+}
+</style>
+<script>
+function submitChannel()
+{
+	var cids = '';
+	$('#channel_div').html('');
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		$('#channel_div').append(item);
+	})
+	//$.cookie('cids', '', {path: '/'});
+	tb_remove();
+}
+//主层动态变化数据
+function onclikChannel()
+{	
+	$('#channel_div').html('');
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		item.find('input').unbind("click");
+		item.find('input').attr("onclick", '');
+		$('#channel_div').append(item);
+	})
+	$.cookie('cids', '', {path: '/'});
+}
+
+function check_arr()
+{
+	$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+	$('#channel_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+}
+function checkPost()
+{
+	if ($.trim($('#extent_name').val()) == '') {
+		alert('区间名称不能为空');
+		$('#extent_name')[0].focus();
+		return false;
+	}
+    
+    // 如果选中的类型为多软件类型区间
+    if ($('#extent_type').val() == 4) {
+        if ($.trim($('#display_title').val()) == '') {
+            alert('标题不能为空');
+            $('#display_title')[0].focus();
+            return false;
+        } 
+        // 图片和列表介绍（描述）需至少填一个
+        var image_name = $.trim($("#display_image").val());
+        var display_description = $.trim($('#display_description').val());
+        
+        // 原来的图片
+        var image_name_old = $.trim($("#display_image_old").val());
+        
+        if (image_name == '' && display_description == '') {
+            // 如果原来没有图片
+            if (image_name_old == '') {
+                alert('图片和列表介绍需至少填一个');
+                $('#display_image')[0].focus();
+                return false;
+            }
+        } else {
+            if (image_name != '') {
+                var image_name_length = image_name.length;
+                if (image_name_length > 4)
+                    var image_type = image_name.substring(image_name_length-4, image_name_length);
+                if (image_name_length <=4 || (image_type != ".png" && image_type != ".jpg")) {
+                    alert('请选择上传png、jpg类型');
+                    $('#display_image')[0].focus();
+                    return false;
+                }
+            }
+            if (display_description != '') {
+                if (display_description.length < 30) {
+                    alert('列表介绍不得少于30个字');
+                    $('#display_description')[0].focus();
+                    return false;
+                }
+            }
+        }
+    }
+    /////////////////////////////////
+    
+    // 如果选中的类型为场景卡片类型区间
+    if ( $('#extent_type').val()==28 && $.trim($('#scene_card').val())=='' ) {
+        alert('场景卡片名称不能为空');
+        $('#scene_card')[0].focus();
+        return false;
+    }
+    <?php if($extent['belong_page_type'] != 'fixed_homepage_recommend' && $extent['belong_page_type'] != 'fixed_resource_channel'){ ?>
+        var from_pos = $.trim($('#from_pos').val());
+        var to_pos = $.trim($('#to_pos').val());
+        if (from_pos == '') {
+            alert('所在位置开始值不能为空');
+            $('#from_pos')[0].focus();
+            return false;
+        }
+        if (to_pos == '') {
+            alert('所在位置结束值不能为空');
+            $('#to_pos')[0].focus();
+            return false;
+        }
+        var reg = /^[1-9]?\d*$/;
+        // 所在位置值是否为数字
+        if (!reg.test(from_pos)) {
+            alert('请输入数字');
+            $('#from_pos')[0].focus();
+            return false;
+        }
+        if (!reg.test(to_pos)) {
+            alert('请输入数字');
+            $('#to_pos')[0].focus();
+            return false;
+        }
+        <?php if($general_page_type==9 || $extent['belong_page_type'] == 'exclusive'){ ?>
+        if(from_pos ==0||to_pos == 0){
+            alert('所在位置必须输入正整数');
+            return false;
+        }
+        if(parseInt(from_pos) >= parseInt(to_pos)){
+            alert('所在位置第一个输入框必须小于第二个输入框');
+            return false;
+        }
+        <?php }else{ ?>
+        if (to_pos - from_pos != 1) {
+            alert('所在位置结束与开始值差应为1');
+            $('#to_pos')[0].focus();
+            return false;
+        }
+        <?php } ?>
+     <?php } ?>   
+    if ( $('#extent_type').val()==34) {
+           if($.trim($('#native_ad_id').val()) == ''){
+                alert('请填写智盟广告ID');
+                return false;
+           }
+    }
+    <?php if($extent['belong_page_type'] == 'fixed_homepage_recommend'){ ?>
+    var extent_size = $("input[name='extent_size']").val();
+    var depot_limit = $("input[name='depot_limit']").val();
+	if(extent_size == "") {
+		alert('区间默认返回备选库数量不能为空');
+		return false;
+	}
+	if(!/^[0-9]+$/.test(extent_size) ) {
+		alert('区间默认返回备选库数量必须为正整数');
+		return false;
+	}
+	if(depot_limit== ""){
+	    alert('区间位置数不能为空');
+	    return false;
+	}
+	if(!/^[0-9]+$/.test(depot_limit) ) {
+		alert('区间位置数必须为正整数');
+		return false;
+	}
+	<?php } ?>
+	return true;
+}
+
+    function plus_pos(obj) {
+        if (obj.value == '')
+            return;
+        var reg = /^[1-9]?\d*$/;
+        if (!reg.test(obj.value)) {
+            alert("请输入数字！");
+            return;
+        }
+        var intvalue = parseInt(obj.value) + 1;
+        $("#to_pos").val(intvalue);
+    }
+    
+    function minus_pos(obj) {
+        if (obj.value == '')
+            return;
+        if (obj.value == 0) {
+            alert("请输入大于0的数字！");
+            return;
+        }
+        var reg = /^[1-9]?\d*$/;
+        if (!reg.test(obj.value)) {
+            alert("请输入数字！");
+            return;
+        }
+        var intvalue = parseInt(obj.value) - 1;
+        $("#from_pos").val(intvalue);
+    }
+
+    function checkpos(obj){
+        if (obj.value == '')
+            return;
+        if (obj.value == 0) {
+            alert("所在位置必须输入正整数");
+            return;
+        }
+        var reg = /^[1-9]?\d*$/;
+        if (!reg.test(obj.value)) {
+            alert("所在位置必须输入正整数");
+            return;
+        }
+    }
+    /*
+    function display_type_changed(value) {
+        if (value == 1) {
+            document.getElementById("tr_display_title").style.display="";
+            document.getElementById("tr_display_description").style.display="";
+            document.getElementById("tr_display_image").style.display="none";
+        } else {
+            document.getElementById("tr_display_title").style.display="";
+            document.getElementById("tr_display_description").style.display="none";
+            document.getElementById("tr_display_image").style.display="";
+        }
+    }
+    */
+    // 全局保存区间编辑前的内容类型
+    var content_type = '<?php echo $extent['display_type']?>';
+    /*
+    $(document).ready(function(){
+        if (content_type == 1) {
+            document.getElementById("tr_display_title").style.display="";
+            document.getElementById("tr_display_description").style.display="";
+            document.getElementById("tr_display_image").style.display="none";
+        } else {
+            document.getElementById("tr_display_title").style.display="";
+            document.getElementById("tr_display_description").style.display="none";
+            document.getElementById("tr_display_image").style.display="";
+        }
+    });
+    */
+    function checkLen(obj, maxChars) {
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+    }
+    
+    function select_res() {
+    	$extent_type = $("#extent_type").val();
+    	if($extent_type == 2 || $extent_type == 24 || $extent_type == 26 || $extent_type == 29) {
+    		if($('#is_resource').is(':checked')) {
+        		$(".cont_block").removeClass('hide_tr');
+        		if($extent_type == 2) {
+        			$(".cont_type_tr").removeClass('hide_tr');
+        			$(".soft_type_tr").removeClass('hide_tr');
+        		}else{
+        			$(".cont_type_tr").addClass('hide_tr');
+        			$(".soft_type_tr").addClass('hide_tr');
+        		}
+        	}else {
+        		$(".cont_block").addClass('hide_tr');
+        	}	
+    	}
+    }
+</script>
+<FORM method="POST" action="__URL__/edit_extent" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr">
+        <td>类型</td>
+        <td>
+            <select name='extent_type' id="extent_type" onchange="extent_type_select(this.value);" disabled="disabled">
+                <option value="1" <if condition="$extent.extent_type eq 1"> selected=selected</if>>运营</option>
+                <option value="2" <if condition="$extent.extent_type eq 2"> selected=selected</if>>单排</option>
+                <option value="3" <if condition="$extent.extent_type eq 3"> selected=selected</if>>双排</option>
+                <!--多排-软件区间类型不要了，自定义列表可替代之<option value="4" <if condition="$extent.extent_type eq 4"> selected=selected</if>>多排-软件</option>-->
+                <option value="5" <if condition="$extent.extent_type eq 5"> selected=selected</if>>多排-专题/页面</option>
+				<option value="16" <if condition="$extent.extent_type eq 16"> selected=selected</if>>软件-热搜</option>
+				<option value="17" <if condition="$extent.extent_type eq 17"> selected=selected</if>>软件-热门下载</option>
+				<option value="18" <if condition="$extent.extent_type eq 18"> selected=selected</if>>软件-预约</option>
+                <option value="19" <if condition="$extent.extent_type eq 19"> selected=selected</if>>网页游戏-图标(H5)</option>
+                <option value="20" <if condition="$extent.extent_type eq 20"> selected=selected</if>>网页游戏-软件列表(H5)</option>
+				<option value="21" <if condition="$extent.extent_type eq 21"> selected=selected</if>>双排-H5</option>
+                <option value="22" <if condition="$extent.extent_type eq 22"> selected=selected</if>>多软件（预约）</option>
+                <option value="23" <if condition="$extent.extent_type eq 23"> selected=selected</if>>多软件（预约+图）</option>
+                <option value="24" <if condition="$extent.extent_type eq 24"> selected=selected</if>>单软件（列表单图）</option>
+                <option value="25" <if condition="$extent.extent_type eq 25"> selected=selected</if>>单软件（图）</option>
+                <option value="26" <if condition="$extent.extent_type eq 26"> selected=selected</if>>单软件（3图）</option>
+                <option value="27" <if condition="$extent.extent_type eq 27"> selected=selected</if>>预约列表单图</option>
+                <option value="28" <if condition="$extent.extent_type eq 28"> selected=selected</if>>场景卡片</option>
+				<option value="29" <if condition="$extent.extent_type eq 29"> selected=selected</if>>单软件（视频）</option>
+                <option value="30" <if condition="$extent.extent_type eq 30"> selected=selected</if>>单排（含推荐人）</option>
+                <option value="1000" <if condition="$extent.extent_type eq 1000"> selected=selected</if>>无固定样式</option>
+                <option value="1001" <if condition="$extent.extent_type eq 1001"> selected=selected</if>>单软件（图文）</option>
+                <?php foreach($extent_type as $k=>$v){ ?>
+                <option value="{$k}" <if condition="$extent.extent_type eq $k"> selected=selected</if>>{$v[0]}</option>
+                <?php } ?>
+            </select>
+        </td>
+        <td></td>
+    </tr>
+    <if condition="$extent.extent_type eq 28">
+    <tr class="sub_tr">
+        <td>场景卡片名称</td>
+        <td><input <?php if($extent['belong_page_type'] == 'fixed_homepage_recommend'){echo 'readonly';} ?> name='scene_card' id="scene_card" type='text' value="{$extent.scene_card}" /></td>
+        <td>建议不超过10字</td>
+    </tr>
+    </if>
+	<tr class="sub_tr">
+		<td>区间名称</td>
+		<td><input name='extent_name' id="extent_name" type='text' value='<?php echo $extent['extent_name'] ?>' <?php if($extent['extent_type']==34){echo 'readonly';} ?>/></td>
+        <td>建议不超过10字</td>
+	</tr>
+    <if condition="$extent.extent_type eq 28">
+    <tr class="sub_tr extent_28" >
+        <td>是否显示更多按钮</td>
+        <td>
+            <select name="is_more">
+                <?php if($extent['belong_page_type'] == 'fixed_homepage_recommend'){ ?>
+                    <?php if($extent['is_more'] == 1){ ?>
+                    <option value="1">是</option>
+                    <?php }else{ ?>
+                    <option value="0">否</option>
+                    <?php } ?>
+                <?php }else{ ?>
+                    <option value="1" <if condition="$extent.is_more eq 1">selected</if>>是</option>
+                    <option value="0" <if condition="$extent.is_more eq 0">selected</if>>否</option>
+                <?php } ?>
+            </select>
+        </td>
+        <td></td>
+    </tr>
+    </if>
+
+    <?php if($extent['belong_page_type'] != 'fixed_resource_channel'){ ?>
+    <tr class="sub_tr">
+        <td>
+            <?php if($extent['belong_page_type'] == 'fixed_homepage_recommend'){ ?>
+                区间排序
+            <?php }else{ ?>
+                所在位置
+             <?php } ?>
+        </td>
+		<td>
+            <?php if($extent['belong_page_type'] == 'fixed_homepage_recommend'){ ?>
+                <select name="rank" <?php if($extent['extent_type']==34){echo 'disabled';} ?>>
+                <?php
+                for($i = 1;$i <= $count; $i++){
+                    if($extent['rank'] == $i) {echo "<option value='".$i."'>".$i."</option>";}
+                }
+                ?>
+                </select>
+            <?php }else{ ?>
+                <input name='from_pos' id="from_pos" type='text' style="width:40px" value="<?php if($general_page_type==9 || $extent['belong_page_type'] == 'exclusive'){echo $extent['rank'];}else{echo $extent['rank']-1;}?>" onKeyUp="<?php if($general_page_type==9 || $extent['belong_page_type'] == 'exclusive'){ ?>checkpos(this)<?php }else{ ?>plus_pos(this)<?php } ?>"/>&nbsp;&nbsp;至&nbsp;&nbsp;
+                <input name='to_pos' id="to_pos" type='text' style="width:40px" value="<?php if($general_page_type==9 || $extent['belong_page_type'] == 'exclusive'){echo $extent['rank']+$extent['extent_size']-1;}else{echo $extent['rank'];}?>" onKeyUp="<?php if($general_page_type==9 || $extent['belong_page_type'] == 'exclusive'){ ?>checkpos(this)<?php }else{ ?>minus_pos(this)<?php } ?>"/>
+            <?php } ?>
+        </td>
+        <td></td>
+    </tr>
+    <?php } ?>
+    <tr class ="sub_tr extent" name="extent_35" style='<if condition="$extent.extent_type neq 35">display:none</if>' >
+        <td>按钮</td>
+        <td>
+            <label><input type="radio" name="attention_button" value="1" <if condition="$extent.attention_button eq 1">checked</if>>关注</label>
+            <label><input type="radio" name="attention_button" value="2" <if condition="$extent.attention_button eq 2">checked</if>>下载</label>
+        </td>
+    </tr>
+    <tr class ="sub_tr extent" name="extent_38" style='<if condition="$extent.extent_type neq 38">display:none</if>' >
+        <td>排名显示</td>
+        <td>
+            <label><input type="radio" name="show_rank" value="1" <if condition="$extent.show_rank eq '1'">checked</if>>显示</label>
+            <label><input type="radio" name="show_rank" value="2"<if condition="$extent.show_rank eq '2'">checked</if>>不显示</label>
+        </td>
+    </tr>
+    <tr class="sub_tr" id="tr_display_title" <if condition="$extent.extent_type neq 4&&$extent.extent_type neq 32&&$extent.extent_type neq 35&&$extent.extent_type neq 36">style="display:none"</if>>
+        <td>标题</td>
+        <td><input name='display_title' id="display_title" type='text' value="{$extent.display_title}" onKeyUp="checkLen(this, 10)"/></td>
+        <td>限10字以内</td>
+    </tr>
+    <tbody id="tbody_mutiple" <if condition="$extent.extent_type neq 4">style="display:none"</if>>        
+
+        <tr class="sub_tr" id="tr_display_image">
+            <td>图片</td>
+            <td><input name='display_image' id="display_image" type='file'/><input name='display_image_old' id="display_image_old" type='hidden' value="{$extent.display_image}"/></td>
+            <td>限制上传466*112的JPG/PNG图片</td>
+        </tr>
+
+    </tbody>
+    <tr class="sub_tr" id="tr_display_description" <if condition="$extent.extent_type neq 35&&$extent.extent_type neq 36">style='display:none'</if>>
+        <td><if condition="$extent.extent_type eq 35||$extent.extent_type eq 36">运营位描述<else />列表介绍</if></td>
+        <td><textarea name='display_description' id="display_description" onKeyUp="checkLen(this, 100)">{$extent.display_description}</textarea></td>
+        <td>限100字以内</td>
+    </tr>
+	<tr class="sub_tr">
+		<td>运营商</td>
+		<td>
+			<SELECT name='oid' <?php if($extent['extent_type']==34){echo 'disabled';} ?>>
+			<?php if($extent['belong_page_type'] == 'fixed_homepage_recommend'){ ?>
+                <?php if($extent['oid']==0){ ?>
+                    <option value='0'>不限制</option>
+                <?php }else{ ?>
+                    <?php foreach($operatinglist as $val): ?>
+                        <?php if ($val['oid'] == $extent['oid']){ ?>
+                        <option value="<?php echo $val['oid'] ?>"><?php echo $val['mname'] ?></option>
+                        <?php } ?>
+                    <?php endforeach; ?>
+                <?php } ?>
+            <?php }else{ ?>
+                <option value='0'>不限制</option>
+				<?php foreach($operatinglist as $val): ?>
+					<option value='<?php echo $val['oid']?>'<?php if ($val['oid'] == $extent['oid']) print ' selected';?>><?php echo $val['mname']?></option>
+				<?php endforeach; ?>
+            <?php } ?>				
+			</SELECT>
+		</td>
+        <td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>渠道</td>
+		<td>
+            <?php if($extent['extent_type']==34): ?>
+            <a><font color="blue">选择指定渠道</font></a><br />
+            <div id="channel_div">
+                <volist id="chl_list_vo" name="chl_list" >
+                    &nbsp;<label class="l_cid_{$chl_list_vo.cid}">{$chl_list_vo.chname}</label>&nbsp;
+                </volist>
+            </div>
+            <?php else: ?>
+            <a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" <?php if($extent['belong_page_type'] == 'fixed_homepage_recommend'){ ?>onclick="return false"<?php }else{ ?>class="thickbox"<?php } ?> ><font color="blue">选择指定渠道</font></a><br />
+            <div id="channel_div">
+                <volist id="chl_list_vo" name="chl_list" >
+                    &nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}" <?php if($extent['belong_page_type'] == 'fixed_homepage_recommend'){ ?>onclick="return false"<?php } ?>/>{$chl_list_vo.chname}</label>&nbsp;
+                </volist>
+            </div>
+            <?php endif; ?>
+		</td>
+        <td></td>
+	</tr>
+    <?php if($extent['belong_page_type'] == 'fixed_homepage_recommend'){ ?>
+    <tr class="sub_tr" id="depot_limit_tr">
+        <td>区间位置数</td>
+
+        <td><input name='depot_limit' type='text' value="{$extent.depot_limit}"/></td>
+        <td><font color="red">注：该数值是指客户端展示几个软件数据</font></td>
+    </tr>
+    <tr class="sub_tr" id="extent_size_tr">
+        <td>区间默认返回备选库数量</td>
+        <td><input name='extent_size' type='text' value="{$extent.extent_size}"/></td>
+        <td><font color="red">注：该数值是服务端返还几个软件数据给客户端</font></td>
+    </tr>
+    <tr class="sub_tr" id="filter_installed_tr">
+        <td>是否过滤已安装软件</td>
+        <td>
+            <SELECT name='filter_installed'>
+                <option value='1' <if condition="$extent.filter_installed eq 1">selected</if>>是</option>
+                <option value='0' <if condition="$extent.filter_installed eq 0">selected</if>>否</option>
+            </SELECT>
+        </td>
+        <td></td>
+    </tr>
+    <tr class="sub_tr" id="filter_rule_tr">
+        <td>过滤重复规则</td>
+        <td>
+            <SELECT name='filter_rule'>
+                <option value='0' <if condition="$extent.filter_rule eq '0'">selected</if>>不过滤重复</option>
+                <option value='1' <if condition="$extent.filter_rule eq '1'">selected</if>>过滤重复，删除之前已出现过的数据</option>
+                <option value='2' <if condition="$extent.filter_rule eq '2'">selected</if>>过滤重复，删除将要出现的重复数据</option>
+            </SELECT>
+        </td>
+        <td></td>
+    </tr>
+    <?php } ?>
+	<?php if($extent['coop_site']!=0) { ?>
+    <?php if(!in_array($extent['extent_type'],array(1000,1001))) { ?>
+	<tr class="sub_tr">
+		<td>合作站点</td>
+		<td>
+			<SELECT name='coop_site'  <?php if($extent['extent_type']==34){echo 'disabled';} ?>>
+            <?php if($extent['belong_page_type'] == 'fixed_homepage_recommend'){ ?>
+                <?php foreach($coop_site as $val): ?>
+                    <?php if($val['id']==$extent['coop_site']){ ?><option value='<?php echo $val['id']?>'><?php echo $val['website_name']?></option>
+                    <?php } ?>
+                <?php endforeach; ?>
+            <?php }else{ ?>
+                <?php foreach($coop_site as $val): ?>
+                    <option value='<?php echo $val['id']?>' <?php if($val['id']==$extent['coop_site']) echo "selected" ?>><?php echo $val['website_name']?></option>
+                <?php endforeach; ?>
+            <?php } ?>
+								
+			</SELECT>
+		</td>
+		<td></td>
+	</tr>
+    <?php } ?>
+	<?php } ?>
+
+    <?php if($extent['belong_page_type'] == 'fixed_homepage_recommend' && in_array($extent['extent_type'], array(2,24,26,28,29,1000,1001)) ) { ?>
+    <tr class="sub_tr recommend_block">
+        <td>内容来源</td>
+        <td>
+            <input  id="is_resource" disabled onclick="select_res()" type="checkbox" <?php echo $extent['is_resource']==1?'checked':'' ?> <?php echo in_array($extent['extent_type'],array(1000,1001))?'disabled':'' ?> value="1" >
+            <input type="hidden" name="is_resource" value="<?php echo $extent['is_resource']==1?1:0 ?>">
+            资源库
+        </td>
+        <td></td>
+    </tr>
+   <if condition="$extent.is_resource eq 1">
+   <if condition="$extent.extent_type eq 2">
+   <tr class="sub_tr cont_block cont_type_tr">
+        <td>推荐内容类型</td>
+        <td>
+	    <select id="cont_type" name="cont_type">
+	    	<option value="0" >请选择推荐内容类型</option>
+	    	<option value="1" <?php echo $extent['cont_type']==1?"selected":'' ?> >软件</option>
+	    	<option value="2" <?php echo $extent['cont_type']==2?"selected":'' ?> >活动</option>
+	    	<option value="3" <?php echo $extent['cont_type']==3?"selected":'' ?> >专题</option>
+	    	<option value="4" <?php echo $extent['cont_type']==4?"selected":'' ?> >页面</option>
+	    	<option value="5" <?php echo $extent['cont_type']==5?"selected":'' ?> >网页</option>
+	    	<option value="6" <?php echo $extent['cont_type']==6?"selected":'' ?> >礼包</option>
+	    	<option value="7" <?php echo $extent['cont_type']==7?"selected":'' ?> >攻略</option>
+	    	<option value="8" <?php echo $extent['cont_type']==8?"selected":'' ?> >预约</option>
+	    </select>
+        </td>
+        <td></td>
+    </tr>
+    </if>
+    <tr class="sub_tr cont_block"  >
+        <td>内容质量</td>
+        <td>
+          <!-- <select id="cont_level" name="cont_level">
+          	<option value="0">请选择内容质量</option>
+          	<option value="1" <?php echo $extent['cont_level']==1?"selected":'' ?> >资讯内容-A 级内容</option>
+          	<option value="2" <?php echo $extent['cont_level']==2?"selected":'' ?> >专项评测-B 级内容</option>
+          	<option value="3" <?php echo $extent['cont_level']==3?"selected":'' ?> >体验攻略-C 级内容</option>
+          	<option value="4" <?php echo $extent['cont_level']==4?"selected":'' ?> >软件视频-D 级内容</option>
+          	<option value="5" <?php echo $extent['cont_level']==5?"selected":'' ?> >深度评论-E 级内容</option>
+          	<option value="6" <?php echo $extent['cont_level']==6?"selected":'' ?> >专题集合-F 级内容</option>
+          </select> -->
+            <input type="checkbox" name="cont_level[]" value="1" <?php echo in_array(1,$extent['cont_level'])?"checked":'' ?> />资讯内容-A 级内容
+            <input type="checkbox" name="cont_level[]" value="2" <?php echo in_array(2,$extent['cont_level'])?"checked":'' ?> />专项评测-B 级内容
+            <input type="checkbox" name="cont_level[]" value="3" <?php echo in_array(3,$extent['cont_level'])?"checked":'' ?> />体验攻略-C 级内容<br/>
+            <input type="checkbox" name="cont_level[]" value="4" <?php echo in_array(4,$extent['cont_level'])?"checked":'' ?> />软件视频-D 级内容
+            <input type="checkbox" name="cont_level[]" value="5" <?php echo in_array(5,$extent['cont_level'])?"checked":'' ?> />深度评论-E 级内容
+            <input type="checkbox" name="cont_level[]" value="6" <?php echo in_array(6,$extent['cont_level'])?"checked":'' ?> />专题集合-F 级内容
+        </td>
+        <td></td>
+    </tr>
+    <tr class="sub_tr cont_block ">
+        <td>内容性质</td>
+        <td>
+	    <select id="cont_quality" name="cont_quality">
+	    	<option value="0" >请选择内容性质</option>
+	    	<option value="1" <?php echo $extent['cont_quality']==1?"selected":'' ?>>商业化</option>
+	    	<option value="2" <?php echo $extent['cont_quality']==2?"selected":'' ?>>非商业化</option>
+	    </select>
+        </td>
+        <td></td>
+    </tr>
+    <tr class="sub_tr cont_block">
+        <td>内容来源</td>
+        <td>
+	    <select id="cont_src" name="cont_src">
+	    	<option value="0">请选择内容来源</option>
+	    	<option value="1" <?php echo $extent['cont_src']==1?"selected":'' ?> >原创</option>
+	    	<option value="2" <?php echo $extent['cont_src']==2?"selected":'' ?> >转载</option>
+	    </select>
+        </td>
+        <td></td>
+    </tr>
+    <tr class="sub_tr cont_block soft_type_tr">
+        <td>软件性质</td>
+        <td>
+	    <select id="soft_type" name="soft_type">
+	    	<option value="0">请选择软件性质</option>
+	    	<option value="1" <?php echo $extent['soft_type']==1?"selected":'' ?> >软件</option>
+	    	<option value="2" <?php echo $extent['soft_type']==2?"selected":'' ?> >游戏</option>
+	    </select>
+        </td>
+        <td></td>
+    </tr>
+    </if>
+     </if>
+    <if condition="$extent.extent_type eq 34">
+    <tr class="sub_tr native_ad">
+        <td>智盟广告ID</td>
+        <td><input type="text" name="native_ad_id" id="native_ad_id" value="<?php echo $extent['native_ad_id'];?>"></td>
+    </tr>
+    <tr class="sub_tr native_ad">
+        <td>请选智盟样式</td>
+        <td>
+            <select name="native_ad_type" id="native_ad_type">
+                <option value="1080*840" <?php if($extent['native_ad_type']=='1080*840'){echo 'selected';}?>>双图</option>
+                <option value="1080*740" <?php if($extent['native_ad_type']=='1080*740'){echo 'selected';}?>>纯图</option>
+                <option value="1080*300" <?php if($extent['native_ad_type']=='1080*300'){echo 'selected';}?>>左图右文</option>
+                <option value="1080*900" <?php if($extent['native_ad_type']=='1080*900'){echo 'selected';}?>>上图下文</option>
+            </select>
+        </td>
+    </tr>
+    </if>
+	<tr class="sub_tr">
+		<td colspan="3"> 
+            <input type='hidden' name="extent_ty" value='<?php echo $extent['extent_type']?>'/>
+			<input type='hidden' name="extent_id" value='<?php echo $extent['extent_id']?>'/>
+			<input type='hidden' name="parent_id" value='<?php echo $extent['parent_id']?>'/>
+			<input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/>
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+	</tr>
+</table>
+</FORM>	

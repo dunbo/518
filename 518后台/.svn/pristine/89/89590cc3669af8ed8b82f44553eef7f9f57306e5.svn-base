@@ -1,0 +1,149 @@
+<include file="../Public/header_chart" />
+<script type="text/javascript">
+var chart;
+$(document).ready(function() {
+	
+	var colors = Highcharts.getOptions().colors,
+		categories = {$phpcategories},
+		name = '下载统计表',
+		data = {$phpdata};
+	
+	function setChart(name, categories, data, color,ym) {
+		chart.xAxis[0].setCategories(categories);
+		chart.series[0].remove();
+		chart.addSeries({
+			name: name,
+			data: data,
+			color: color || 'white'
+		});
+		chart.yAxis[0].setExtremes(0,ym);
+	}
+	
+	chart = new Highcharts.Chart({
+		chart: {
+			renderTo: 'container', 
+			type: 'column'
+		},
+		title: {
+			text: '单包{$package}下载统计表'
+		},
+		subtitle: {
+			text: ''
+		},
+		xAxis: {
+			categories: categories							
+		},
+		yAxis: {
+			allowDecimals: false,
+			title: {
+				text: '下载次数'
+			},
+			max: {$max_values}
+		},
+		plotOptions: {
+			column: {
+				cursor: 'pointer',
+				point: {
+					events: {
+						click: function() {
+	                        var drilldown = this.drilldown;
+	                        if (drilldown) { // drill down
+	                            setChart(drilldown.name, drilldown.categories, drilldown.data, drilldown.color,{$max_values});
+	                        } else { // restore
+	                            setChart(name, categories, data);
+	                        }
+						}
+					}
+				},
+				dataLabels: {
+					enabled: true,
+					color: colors[0],
+					style: {
+						fontWeight: 'bold'
+					},
+					formatter: function() {
+						return this.y;
+					}
+				}					
+			}
+		},
+		tooltip: {
+			formatter: function() {
+				var point = this.point,
+					s = this.x +':<b>'+ this.y +' 次下载</b><br/>';
+				return s;
+			}
+		},
+		series: [{
+			name: name,
+			data: data,
+			color: 'white'
+		}],
+		exporting: {
+			enabled: false
+		}
+	});
+	
+	
+});
+	
+</script>
+<script>
+function check(){
+   var pkg =  document.getElementById("package").value;
+   if(pkg.length < 1){
+   alert("请输入包名");
+   return false;
+   }
+}
+</script>
+</head>
+<body>
+<link rel="stylesheet" type="text/css" media="all"
+	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="__PUBLIC__/js/calendar_bak.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-zh.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-setup.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/result.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/action.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/Util/swfobject.js"></script>
+<div id="titletable">
+<table>
+	<tr>
+		<td>
+		<form method="get" action="__URL__/pkgInstallStatic"><span>包名：<input name="package" id='package' value="{$package}"></span>选择查看日期(双击日期确定)： <span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="fromdate" name="fromdate"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="{$from_value}" size="15" type="text"><img
+			src="__PUBLIC__/js/calendar.gif"
+			onclick="return showCalendar('fromdate', 'y-m-d');"
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span> <span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+		<input id="todate" name="todate"
+			style="border: 0px none black; width: 100px;" value="{$to_value}"
+			size="15" type="text"><img src="__PUBLIC__/js/calendar.gif"
+			onclick="return showCalendar('todate', 'y-m-d');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span> <input type="submit" name="submit" onclick="return check()" value="确定"
+			style="height: 22px; vertical-align: middle;" /></form>
+		</td>
+	</tr>
+</table>
+</div>
+<br />
+<div id="container" style="padding: 0px; width: 800px; height: 400px; margin: 0 auto;"></div>
+
+<div id="footer" class="mainbody">
+<div class="footercont s_clear">
+
+<div id="rightinfo">
+<p class="smalltext">&#169; 2010 <a href="http://goapk.com/"
+	target="_blank">安智网</a></p>
+</div>
+</div>
+</div>
+<!--/右边框背景-->
+</body>

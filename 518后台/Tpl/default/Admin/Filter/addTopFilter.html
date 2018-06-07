@@ -1,0 +1,58 @@
+<script src="/Public/js/jquery.js"></script>
+<script src="/Public/js/jquery.validate.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){  
+	$('#addFilterForm').validate({   
+		rules: {
+			package: {
+				required: true,
+				remote: {
+					url: '/index.php/Public/checkTopFilterPackage',
+					type: 'GET',
+					data: {
+						package: function() { return $("#package").val(); }
+					}
+				}
+			}
+		},
+
+		messages: {
+			package: {
+				required: '请填写软件软件包名',
+				remote: '包名已经存在'
+			}
+		},
+		submitHandler:function(form){
+			$.ajax({
+				url: '__URL__/addTopFilter',
+				data: $('#addFilterForm').serialize(),
+				type: 'POST',
+				success: function(d){
+					if(d){
+						alert(d);
+					}
+					tb_remove();
+					location.reload();
+				}
+			});
+        }
+	});	
+});
+</script>
+
+
+<form id="addFilterForm" name="addFilterForm">
+	<table cellpadding="0" cellspacing="0" border="0" class="tb">
+		<tr><td>包名</td><td><input type="text" value="{$filter.package}" name="package" id="package"/></td></tr>
+		<tr>
+			<td>屏蔽模块</td>
+			<td>
+				<volist name="filter_area" id="area">
+				<label><input type="checkbox" value="{$key}" name="filter_area[]"/>{$area} </label><br>
+				</volist>
+			</td>
+		</tr>
+		<tr><td><input type="submit" id="addbtn" value="提交" name="addbtn"/></td></tr>
+	</table>
+</form>
+

@@ -1,0 +1,249 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<script>
+var checkflag = false;
+function checkall(){
+   var chkobj =  document.getElementsByName("softid[]");
+   var i = 0;
+   if(!checkflag){
+       for(i=0;i < chkobj.length;i++){
+         chkobj[i].checked = true;
+       }
+       checkflag = true;
+       return;
+   }
+   var j=0;
+   if(checkflag){
+       for(j=0;j < chkobj.length;j++){
+         chkobj[j].checked = false;
+       }
+       checkflag = false;
+       return;
+   }
+}
+function searchAll(){
+   var srch = $('#search_name').val();
+   var devid = $('#user_id').val();
+   if(srch == ''){
+	alert('请输入软件名!');
+	return false;
+   }
+   $("#srch_btn").attr('disabled',true);
+   $("#srch_btn").attr('value','正在搜索.....');
+	$.ajax({
+		url:"__URL__/denyuser_user_softid",
+		type:'POST',
+		data: {search:srch,dev_id:devid},
+		dataType:'html',
+		success:function(data){
+		//$('#tab_result').empty();
+		$("#srch_btn").attr('disabled',false);
+		$("#srch_btn").attr('value','搜索');
+		$('#tab_result').html(data);
+		}
+	})
+}
+</script>
+<center>
+<form action="__URL__/denyuser_do" method="POST" onsubmit="return chk()">
+<table width="60%" border="0" cellpadding="0" cellspacing="0" class="tb">
+<tr><td align='left' style="width:80px;"><span style="font-weight:bold;">账号：</span></td><td align='left'><input type="checkbox" name="dev_id" value="<?php echo $userinfo['userid'];?>" checked='checked'/><a href="__URL__/denyuser/uid/<?php echo $userinfo['userid'];?>"><?php echo $userinfo['user_name'];?></a><input type="hidden" id="user_id" name="userid"  value="<?php echo $userinfo['userid'];?>">(点击刷新页面)</td></tr>
+<tr><td align='left' ><span style="font-weight:bold;">屏蔽评论：</span></td><td align='left'><input type="checkbox" name="cmmt_userid" value="<?php echo $userinfo['userid'];?>"/>评论总数 <?php echo $comment_cnt;?></td></tr>
+<tr><td align='left' valign="top" colspan='2'><span style="font-weight:bold;">软件统计：</span>
+
+<label align='left' for="softall"><input type="checkbox" id="softall" name="softall" onclick="soft_all()">全选</label></td></tr>
+
+<?php
+$a = 7;
+$soft_type = array('1' => '已发布','3' => '已下架');
+foreach($soft_type as $key=>$title) {
+	$list = $softlist[$key];
+	$count = count($list) ? count($list) : 0;
+
+	$i = 0;
+	echo "<tr><td align='left' colspan='2'><span style='font-weight:bold;'>".$title."：".$count."</span></td></tr>";
+	if($count!=0) echo "<tr><td align='left' colspan='2'>";
+	foreach($list as $info){
+		if($i%$a==0) echo '</td></tr><tr><td align="left" colspan="2">';
+		echo '<label for="softid_'.$info['softid'].'" style="margin-right:8px;">';
+		if($key == 1) echo '<input type="checkbox" id="softid_'.$info['softid'].'" name="softid[]" value="'.$info['softid'].'">';
+		echo $info['iconurl'].$info['softname'].'</label>';
+		$i++;
+	}
+	if($count!=0) echo "</td></tr>";
+}
+?>
+
+<?php
+$a = 7;
+$soft_type_tmp = array('1' => '新软件审核','2' => '编辑修改','3' => '软件升级');
+foreach($soft_type_tmp as $key=>$title) {
+	$list = $soft_tmp[$key];
+	$count = count($list) ? count($list) : 0;
+
+	$i = 0;
+	echo "<tr><td align='left' colspan='2'><span style='font-weight:bold;'>".$title."：".$count."</span></td></tr>";
+	if($count!=0) echo "<tr><td align='left' colspan='2'>";
+	foreach($list as $info){
+		if($i%$a==0) echo '</td></tr><tr><td align="left" colspan="2">';
+		echo '<label for="tmp_'.$info['id'].'" style="margin-right:8px;"><input type="checkbox" id="tmp_'.$info['id'].'" name="softid[]" value="tmp_'.$info['id'].'">'.$info['iconurl'].$info['softname'].'</label>';
+		$i++;
+	}
+	if($count!=0) echo "</td></tr>";
+}
+?>
+
+<tr><td align='left' colspan='2'><span style="font-weight:bold;">原因：</span><label for="reasonall"><input type="checkbox" id="reasonall" name="reasonall" onclick="reason_all()">全选</label></td></tr>
+<volist name="reason_list"  id='reason_list' key='i'>
+<tr><td align='left' colspan="2">
+
+<input <if condition="($reason_list.content2 neq '')"> onclick=tip_show("div_{$reason_list.id}") type="hidden" <else /> type="checkbox" </if>  mark=0 name="reject[]" value="{$reason_list.content}"  />
+{$i}&nbsp;&nbsp;&nbsp; 
+<span id = "f_div_{$reason_list.id}" <notempty name="reason_list.content2"> onclick=tip_shows("div_{$reason_list.id}") style="color:#58c5c7;cursor:pointer" </notempty> >{$reason_list.content} </span></td>
+</tr>
+	<notempty name="reason_list.content2">
+		<tr id = "div_{$reason_list.id}" style="display:none" >
+		<td align='left' colspan='2' style="padding-left:30px;" >
+		<foreach  name='reason_list.content2' item='content2'>
+		<input type="checkbox" f_name="reason[{$reason_list.id}]"  name="reject[]" mark='1' value="{$content2}"><span>{$content2}</span>
+		</foreach >
+		</td></tr>		
+	</notempty>
+</volist>
+<tr><td align='left' colspan="2">其他原因：</td></tr>
+<tr><td align='left' colspan="2"><textarea cols="90" rows="5" name="reason2" id="reason2" style="color:#999999;">请输入其他屏蔽原因：</textarea></td></tr>
+
+<tr>
+<td></td><td align='left'>
+<input type="hidden" name="p" id="p" value="{$p}">
+<input type="hidden" name="shield_reason" id="shield_reason" value="">
+<input type="hidden" name="last_status" id="last_status" value="{$last_status}">
+<input type="submit" name="submit" value="提交" onclick="return checkinput()">
+<input type="button" name="Submit" onclick="javascript:history.back(-1);" value="取消">
+</td>
+</tr>
+</table>
+</form>
+</center>
+
+<script language="javascript">
+function soft_all() {
+	var bool = $('#softall').is(':checked');
+	$("[name='softid[]']").each(function(){
+		$(this).attr('checked',bool);
+	});
+}
+function reason_all() {
+	var bool = $('#reasonall').is(':checked');
+	$("[name='reason[]']").each(function(){
+		$(this).attr('checked',bool);
+	});
+	//全选父类
+	$("[mark='0']").each(function(){
+		$(this).attr('checked',bool);
+	});
+	//全先子类
+	$("[mark='1']").each(function(){
+		$(this).attr('checked',bool);
+	});
+}
+
+$('#reason2').click(function(){
+	if($(this).val()=='请输入其他屏蔽原因：') $(this).val('');
+}); 
+function tip_shows(id){
+
+	if($('#'+id).css('display') == 'none'){
+		$('#'+id).css('display','');
+	}else{
+		$('#'+id).css('display','none');
+	}	
+}
+function chk() {
+	/*
+	var rt = '';
+	var error = 0;
+	$("[mark='0']").each(function(){
+		if($(this).attr("checked")) {
+			rt += $(this).val();
+		}
+	});
+	$("[mark='1']").each(function(){
+		if($(this).attr("checked")) {
+			var f_name = $(this).attr("f_name");
+ 			if(!$("input:checkbox[name='"+f_name+"']").attr('checked')){				
+				error = 1;
+			} 
+		}
+	});
+	if(error == 1){
+		alert('选择子类原因时，必须选择主原因22');
+		return false;
+	}
+	*/
+	var rt = '';
+	var mark_type = false;
+	var start_choose = true;
+	var last;
+	var error = 0;
+	$('input:checkbox[name="reject[]"]').each(function(){
+		if($(this).attr('checked') == 'checked'){
+			if(!mark_type){
+				if( $(this).attr('mark') == 1){
+					var f_id = 'f_'+$(this).parent().parent().attr('id');
+					var f_content = $("#"+f_id).html();
+					//rt = rt.substring(0,rt.length-1);
+					if(start_choose){
+						rt += f_content+'('+$.trim($(this).val());
+						start_choose = false;
+					}else{
+						rt += ';<br />'+f_content+'('+$.trim($(this).val());
+					}
+					
+					mark_type = true;
+				}else{
+					if(start_choose){
+						rt +=  $(this).val()+';';
+						start_choose = false;
+					}else{
+						rt += ';<br />' + $(this).val();					
+					}				
+					mark_type = false;
+				}			
+			}else{
+				if( $(this).attr('mark') == 1){
+					var f_id_2 = 'f_'+$(this).parent().parent().attr('id');
+					var f_content_2 = $("#"+f_id_2).html();
+					if(f_id != f_id_2 && rt.indexOf(f_content_2)<0){						
+						rt += ');<br />'+ f_content_2 +'('+$.trim($(this).val());
+					}else{
+						rt += '，' + $.trim($(this).val());
+					}					
+					mark_type = true;
+				}else{				
+					rt += ');<br />'+ $(this).val();
+					mark_type = false;
+				}
+			}
+		}
+	});
+	if(rt){
+		if(mark_type){
+			if(rt) rt += ');<br />' ;
+		}else{
+			if(rt) rt += ';<br />' ;
+		}		
+	}
+	if($('#reason2').val()!='' && $('#reason2').val()!='请输入其他屏蔽原因：') {
+		rt += $('#reason2').val() + ';<br />';
+	}	
+	//console.info(rt); return false;
+	if(rt=='') {
+		alert('请选择或填写屏蔽原因');
+		return false;
+	}
+	$('#shield_reason').val(rt);
+	
+	return true;
+}
+</script>

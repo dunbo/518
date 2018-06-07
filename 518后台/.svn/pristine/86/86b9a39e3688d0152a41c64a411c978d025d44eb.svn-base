@@ -1,0 +1,121 @@
+<include file="../Public/header" />
+<script>
+function searchinfo(name){
+	var url_str = ''; 
+	if(name == 'cname'){
+		var cname = $('#cname').val();
+		if(cname==''){
+			alert('请输入要查找的渠道！');
+			return false;
+		}
+		//var query = cname ? 'cname='+cname : '';
+		var query = 'cname='+cname;
+		url_str = '__URL__/ajaxChlList'; 
+	}else{
+		var dname = $('#dname').val();
+		if(dname==''){
+			alert('请输入要查找的机型！');
+			return false;
+		}
+		//var query = dname ? 'dname='+dname : '';
+		 var query = 'dname='+dname;
+		 url_str = '__URL__/ajaxDeviceList'; 
+	}
+	$.ajax({
+		url:url_str,
+		type:'POST',
+		data:query,
+		success:function(data){
+			$('#'+name+'list').show();
+			$('#'+name+'list').html(data);
+		}
+	});
+}
+function checkdata(name){
+	var val_id = $('#'+name+'list').val();
+	var val_html = $('#'+name+'list').find('option:selected').text();
+	$('#'+name).val(val_html);
+	if(name == 'cname'){
+	$('#cid').val(val_id);
+	}else if(name == 'dname'){
+	$('#did').val(val_id);
+	}
+}
+function showtype(id){
+    var url_str = '__URL__/ajaxCategory';
+	var query = 'id='+id;
+	var name = 'cate';
+	$.ajax({
+		url:url_str,
+		type:'POST',
+		data:query,
+		success:function(data){
+			$('#'+name+'list').attr('disabled',false);
+			$('#'+name+'list').html(data);
+		}
+	});
+}
+</script>
+<center>
+<form action="__URL__/lists/search/1" method="GET">
+<table>
+<tr>
+<td>运营商:
+<select name="oid" id="oid">
+<option value="">请选择</option>
+<?php 
+foreach($op_list as $info){
+echo "<option value='".$info['oid']."'>".$info['mname']."</option>";
+}
+?>
+</select>
+</td>
+<td>渠道:<input type="text" name="cname" id='cname' value="" /><input type="button" id="srchcid" value="查找" onclick="searchinfo('cname')"/><input type="hidden" id="cid" name="cid" value=""/></td>
+<td>机型:<input type="text" name="dname" id='dname' value="" /><input type="button" id="srchdid" value="查找" onclick="searchinfo('dname')"/><input type="hidden" id="did" name="did" value=""/></td>
+<td>软件来源类别:
+<label><input type="radio" name="type" value="1" onclick="showtype(1)">:软件专题</label>
+<label><input type="radio" name="type" value="2" onclick="showtype(2)">:软件分类</label>
+</td>
+<td><select id="catelist" name="cateid" disabled='true'><option value="">请选择</option></select></td>
+<td><input type="submit" value="搜索"/></td>
+</tr>
+<tr>
+<td></td>
+<td><select id="cnamelist" name="cnamelist" style="display:none" onchange="checkdata('cname')"></select></td>
+<td><select id="dnamelist" name="dnamelist" style="display:none" onchange="checkdata('dname')"></select></td>
+</tr>
+</table>
+</form>
+</center>
+<center>
+<table border=1>
+<tr>
+<th>ID</th>
+<th>运营商</th>
+<th>渠道</th>
+<th>机型</th>
+<th>显示条数</th>
+<th>软件来源类别</th>
+<th>软件类别</th>
+<th>创建时间</th>
+<th>操作</th>
+</tr>
+<?php foreach($widgt_list as $info){ ?>
+<tr>
+  <td><?php echo $info['id'] ;?></td>
+  <td><?php echo $info['oname'] ? $info['oname'] : '无选择';?></td>
+  <td><?php echo $info['cname'] ? $info['cname'] : '无选择';?></td>
+  <td><?php echo $info['dname'] ? $info['dname'] : '无选择';?></td>
+  <td><?php echo $info['cnt'];?></td>
+  <td><?php echo ($info['type'] == 1) ? '专题' : '分类';?></td>
+  <td><a href="__URL__/categorysoftlist/id/<?php echo $info['cateid'];?>/type/<?php echo $info['type'];?>"><?php echo $info['typename'];?></a></td>
+  <td><?php echo date('Y-m-d H:i:s',$info['create_tm']);?></td>
+  <td><a href="__URL__/delwidgt/id/<?php echo $info['id'];?>" onclick="return checkit();">删除</a>|
+	<a href="__URL__/editwidgt/id/<?php echo $info['id'];?>">编辑</a>
+  </td>
+</tr>
+<?php } ?>
+
+</table>
+<p>{$page}</p>
+</center>

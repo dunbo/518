@@ -1,0 +1,179 @@
+
+<include file="../Public/header" /><body>
+
+<link rel="stylesheet" type="text/css" media="all"
+	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="__PUBLIC__/js/calendar_bak.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-zh.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-setup.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/result.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/action.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<style type="text/css">
+<!--
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+-->
+</style>
+<script type="text/javascript">
+function toggleCategory(id)
+{
+	var flag = $('#a' +id).attr('ref');
+
+	if (flag == 1) {
+		 $('#a' +id).attr('ref',0);
+		 $('#a' +id).html('+');
+		 $('.c' +id).hide();
+	} else {
+		 $('#a' +id).attr('ref',1);
+		 $('#a' +id).html('-');
+		 $('.c' +id).show();
+	}
+}
+function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{
+		$('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	function get_params(){
+		var cid=document.getElementById("zh_cid_str").value;
+		var url='__URL__/channel_hd';
+		if(cid){
+			url=url + "/cid/"+cid;
+		}
+		var fromdate=document.getElementById("start").value;
+		if(fromdate){
+			url=url + "/fromdate/"+fromdate;
+		}
+		var todate=document.getElementById("end").value;
+		if(todate){
+			url=url + "/todate/"+todate;
+		}
+		document.form1.action=url;
+		return true;
+}
+</script>
+<div id="titletable">
+<form method="post" action="__URL__/channel_hd">
+<table border="0" cellpadding="0" cellspacing="0" class="tb">
+	<tr>
+		<td colspan="2">
+
+		选择查看日期(双击日期确定)： <span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="fromdate" name="fromdate"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="{$from_value}" size="15" type="text"><img
+			src="__PUBLIC__/js/calendar.gif"
+			onclick="return showCalendar('fromdate', 'y-m-d');"
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span> <span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+		<input id="todate" name="todate"
+			style="border: 0px none black; width: 100px;" value="{$to_value}"
+			size="15" type="text"><img src="__PUBLIC__/js/calendar.gif"
+			onclick="return showCalendar('todate', 'y-m-d');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span>
+	</td>
+	<tr>
+	<td>
+		<input type="hidden" name="zh_cid_str" id="zh_cid_str" value="{$zh_cid_str}"/>
+		<input type="hidden" name="start" id="start" value="{$start}"/>
+		<input type="hidden" name="end" id="end" value="{$end}"/>
+		<input type="hidden" name="is_submit" value="1">
+		<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel&platform=4" class="thickbox">选择指定渠道</a><br />
+		<div id="channel_div">
+			<volist id="chl_list_vo" name="channel_selected" >
+			&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+			</volist>
+		</div>
+	</td>
+	<td>
+		<input type="submit" name="submit" value="确定"
+			style="height: 22px; vertical-align: middle;" />
+		</td>
+	</tr>
+</table>
+</form>
+<form action="__URL__/derive_data_hd" method="get">
+	<input type="hidden" name="channel_all" value="<?php echo $channel_str; ?>">
+	<input type="hidden" name="start_tm" value="<?php echo $start_tm; ?>">
+	<input type="hidden" name="end_tm" value="<?php echo $end_tm; ?>">
+	<!--<input type="submit" value="导出列表">-->
+</form>
+</div>
+<h1>渠道用户统计</h1>
+时间段(<if condition="$start eq ''" >全部时间段<else/>{$start} - {$end} </if>)
+<if condition="$showsum eq true" ><if condition="$sum neq false">用户总数:{$sum|default='0'}</if>总调整值:{$num}<br /></if>
+<table  height="80%" border="0" cellpadding="0" cellspacing="0" class="tb">
+	<tr>
+		<td>渠道名</td><td>个数</td><td>区别</td>
+		<if condition="$show_coefficient eq true" >
+		<td>系数</td><td>调整值</td>
+		</if>
+	</tr>
+
+<volist name="category_list" id="category" key='k'>
+	<tr>
+		<td style=""><a href="javascript:toggleCategory({$k})" ><span id="a{$k}" ref='1'>-</span>&nbsp;&nbsp;&nbsp;{$category.name}</a></td><td></td><td></td>
+		<if condition="$show_coefficient eq true" >
+		<td></td><td></td>
+		</if>
+	</tr>
+
+	<volist name="category.result" id="vo">
+	<tr class="c{$k}">
+		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="__APP__/Sj/Statistical/channelImage_hd/cid/{$vo.cid}/todate/{$to_value}/fromdate/{$from_value}">{$vo.chname}</a></td>
+		<td>&nbsp;&nbsp;{$vo.num|default='0'}</td>
+		<td>&nbsp;&nbsp;手机 </td>
+		<if condition="$show_coefficient eq true" >
+		<td>&nbsp;&nbsp;{$c_info[$vo['cid']]['coefficient']} </td>
+		<td>&nbsp;&nbsp;{$c_info[$vo['cid']]['num']} </td>
+		</if>
+	</tr>
+	</volist>
+</volist>
+</table>
+<br/>
+<tr>{$page}</tr>
+<div id="footer" class="mainbody">
+<div class="footercont s_clear">
+
+<div id="rightinfo">
+<p class="smalltext">&#169; 2010 <a href="http://goapk.com/"
+	target="_blank">安智网</a></p>
+</div>
+</div>
+</div>
+<!--/右边框背景-->
+</body>
+
+

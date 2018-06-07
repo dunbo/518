@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>清凉夏日 热辣返利</title>
+<link type="text/css" rel="stylesheet" href="/css/rebate_common.css"/>
+<script type="text/javascript"  src="/js/jquery-1.8.0.min.js?v1"></script>
+<script type="text/javascript" src="/js/TouchSlide.1.1.js"></script>
+<script type="text/javascript" src="/js/jQueryRotate.js"></script>
+<script type="text/javascript" src="/js/jquery.easing.min.js"></script>
+<script type="text/javascript" src="/js/zp_rebate_draw.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->',img_url = '<!--{$out.img_url}-->';
+var aid = <!--{$out.aid}-->,p=0,soft_lists = [],soft_lists_anzhuang = [],flags={canMove:true};
+var soft_lists_go = [],datas = [],my_package='',zp_status=false;
+$(document).ready(function () {
+	get_soft();
+});
+function get_soft(){
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	soft_lists = soft_list.DATA;
+/*	for(j=0;j<soft_lists.length;j++){
+			datas.push(soft_lists[j]);
+	}
+*/	
+	my_soft();
+}
+
+function my_soft() {
+	var strss = '';	
+	var data = soft_lists.slice(p*4,4*(p+1));
+	if(data.length == 0){
+		p = 0;
+		data = soft_lists.slice(p*4,4*(p+1));
+	}else{
+		p = p + 1;
+	}
+	
+	var strs = '';
+	
+	for(i = 0; i < data.length; i++) {
+		if(data[i][2].length > 4){
+			var softname = data[i][2].substring(0,3)+'...';
+		}else{
+			var softname = data[i][2];
+		}
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(data[i][0]));
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);
+		
+		if(soft_status == 1){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载中</a>';
+		}else if(soft_status == 2){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+		}else if(soft_status == 3){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+		}else if(soft_status == 4){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk(parseInt('+aid+'),'+data[i][0]+',"'+data[i][7]+'","'+data[i][2]+'",parseInt('+data[i][13]+'),"'+data[i][27]+'",0,0,'+data[i][27]+');" class="downlode">下载</a>';
+		}else if(soft_status == 5){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="installApp(parseInt('+data[i][0]+'),\''+data[i][7]+'\');" class="downlode">安装</a>';
+		}else if(soft_status == 6){
+			var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+		}else if(soft_status == 8){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+		}else if(soft_status == 9){
+			var my_soft = '<a value="校验中" id="'+data[i][0]+'" class="downlode">校验中</a>';
+		}else if(soft_status == 10){
+			var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+		}else if(soft_status == -1){
+			var soft_other_status = window.AnzhiActivitys.isInstalledApp(data[i][7],parseInt(data[i][13]));
+			if(soft_other_status == -2){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载</a>';
+			}else if(soft_other_status == -1){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">更新</a>';
+			}else if(soft_other_status == 0){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode" onclick="openApp(\''+data[i][7]+'\','+data[i][0]+');">打开</a>';
+			}else if(soft_other_status == 1){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+			}
+		}
+
+		strs += '<li><p class="soft-icon"><img src="'+data[i][1]+'"/></p><p class="soft-name"><a href="javascript:;">'+softname+'</a></p><p>'+my_soft+'</p></li>';
+	}
+	str = strss + strs;
+	$('#my_softs').html(str);
+}
+
+function change_soft(){
+	$('#my_softs').html('');
+	my_soft();
+}
+
+//下载软件
+function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag,noflux,firmware,status){
+	window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+	setTimeout(function(){download_go(softid,pkgname)},3000);		
+}
+
+function download_go(softid,pkgname){
+	$.ajax({
+		url: '/lottery/rebate_draw_download.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			alert(1);
+			if(data != 200){
+				$('#my_num').html(data);
+			}
+		}
+	});
+}
+
+function installApp(softid,pkgname){
+	if(!pkgname){
+		for(i=0;i < soft_lists.length;i++){
+			if(soft_lists[i][0] == softid){
+				pkgname = soft_lists[i][7];
+			}
+		}
+	}
+	$.ajax({
+		url: '/lottery/coactivity_install.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			window.AnzhiActivitys.installAppForActivity(softid);
+		}
+	});
+}
+
+//更新软件状态（正在下载）
+function onDownloadCreated(softid){
+	$('#'+softid+'').html("下载中");
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		$('#'+softid+'').html("下载中");
+	}else if(newState == 2){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 3){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 4){
+		$('#'+softid+'').html("重试");
+	}else if(newState == 5){
+		$('#'+softid+'').html("安装");
+		$('#'+softid+'').bind('click',function(){
+			installApp(parseInt(softid));
+		});
+	}else if(newState == 6){
+		$('#'+softid+'').html("打开");
+		if(soft_lists_go[i][0] == softid){
+			$('#'+softid+'').bind('click',function(){
+				openApp(soft_lists_go[i][7],softid);
+			});
+		}
+	}else if(newState == 8){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 9){
+		$('#'+softid+'').html("检查中");
+	}
+}
+
+function openApp(pkg,softid){
+	the_soft = [softid];
+	$.ajax({
+		url: '/lottery/coactivity_open.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkg+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+		}
+	});
+}
+</script>
+<section>
+    <div class="banner"><img src="/images/rebate_draw/banner.jpg"/></div>
+    <div class="main">
+        <div class="mod rule">
+            <dl>
+                <dt>活动时间：</dt>
+                <dd>2015年5月29日0:00-5月31日22:00</dd>
+            </dl>
+            <dl>
+                <dt>活动说明：</dt>
+                <dd>炎炎初夏，充值返利+抽奖双重活动震撼启动！活动期间凡在用户中心中单日充值满50元的用户即可获得不同额度的返利优惠，多充多返哟，同时每充值满100元还可以获得一次抽奖机会！</dd>
+                <dd class="blue">【本活动不与平台其他活动同时参与，梦幻西游用户不能参与返利活动，但可参加抽奖活动！】 </dd>
+            </dl>
+        </div>
+        <div class="mod">
+            <div class="mod_hd clear"><span>【活动推荐游戏】</span>
+            <a href="javascript:;" onclick="change_soft();" class="chang_btn" >换一换</a></div>
+            <ul class="soft-list clear" id="my_softs">                
+            </ul>
+        </div>
+        <div class="mod">
+		<!--{if $out['is_login'] != 1}-->
+            <div class="login">
+                <ul>
+                    <li>登录可查看个人抽奖次数,充值每满100元获得一次抽奖机会，单日最多可获取10次抽奖机会，未使用抽奖机会可以累计到下一日，活动结束后清零。</li>
+                </ul>
+                <div class="btn_log">                
+                <a href="http://i.anzhi.com/mweb/account/login?serviceId=014&serviceVersion=5410&serviceType=0&redirecturi=http://promotion.anzhi.com/lottery/rebate_draw.php?sid=<!--{$out.sid}-->">请登录</a>                
+                </div>
+            </div>
+			<!--{else}-->
+            <div class="login">
+				<ul>
+				<li>用户名：<!--{$out.username}--></li>
+				<li>充值每满100元获得一次抽奖机会，单日最多可获取10次抽奖机会，未使用抽奖机会可以累计到下一日，活动结束后清零。</li>
+				</ul>
+				<div class="btn_log info">
+				<a href="/lottery/rebate_draw_userinfo.php?&sid=<!--{$out.sid}-->">个人信息填写</a>
+				</div>
+            </div>
+			<!--{/if}-->
+        </div>
+        <div class="notice clear">
+            <div class="notice_icon"></div>
+            <div class="notice_list">
+                <marquee scrollamount="2" scrolldelay="90" direction="left">
+				<!--{if $out.prize != ''}-->                
+                 <!--{foreach from=$out.prize item=v key=k}-->
+                    <span>恭喜用户<!--{$v.username}-->，人品爆棚，获得<!--{$v.prizename}-->；</span>
+                 <!--{/foreach}-->
+				 <!--{else}-->
+				 <span>活动已开始，冲刺大奖吧！</span>
+				 <!--{/if}-->
+                </marquee>
+            </div>
+        </div>
+        <div class="mod">
+            <div class="col clear">
+                <div class="fl"><a href="javascript:;" class="btn_rotate">您还有<span id='now_num'><!--{$out.lottery_num}--></span>次抽奖机会</a></div>
+                <!--{if $out['is_login'] == 1}-->
+                <div class="fr"><a href="/lottery/rebate_draw_userinfo.php?sid=<!--{$out.sid}-->&action=2" class="btn_rotate">我的奖品</a></div>
+                <!--{else}-->
+                <div class="fr"><a href="http://i.anzhi.com/mweb/account/login?serviceId=014&serviceVersion=5410&serviceType=0&redirecturi=http://promotion.anzhi.com/lottery/rebate_draw_userinfo.php?sid=<!--{$out.sid}-->" class="btn_rotate">我的奖品</a></div>
+                <!--{/if}-->
+            </div>
+            <div class="rotate_con">
+                <img src="/images/rebate_draw/disk.png" width="100%"/>
+                <!--{if $out.lottery_num>0}-->
+                <div class="rotate_pointer" onclick="draw()"></div>
+                <!--{else}-->
+                <div class="rotate_pointer_gray"></div>
+                <!--{/if}-->
+            </div>
+            <div class="col clear wth">
+                <div class="fl"><p>本次刷新<!--{$out.now_time}--></p></div>
+                <div class="fr"><p>下次刷新<!--{$out.next_time}--></p></div>
+            </div>
+            <div class="col clear wth">
+                <div class="fl"><p>充值新增的抽奖次数每2小时刷新一次哦！<p></div>
+            </div>
+        </div>
+        <div class="mod">
+            <ul class="rebate">
+                <li><span>单日充值满50元</span><em>返还100安智币</em></li>
+                <li><span>单日充值满200元</span><em>返还600安智币</em></li>
+                <li><span>单日充值满500元</span><em>返还2000安智币</em></li>
+                <li><span>单日充值满1000元</span><em>返还5000安智币</em></li>
+                <li><span>单日充值满5000元</span><em>返还30000安智币</em></li>
+                <li><span>单日充值满10000元</span><em>返还70000安智币</em></li>
+            </ul>
+            <div class="split"><img src="/images/rebate_draw/split.png"/></div>
+            <div class="mod_hd cnt">【充值流程参考】</div>
+            <div id="slideBox" class="slideBox">
+                <div class="bd">
+                    <ul>
+                        <li>
+                            <a href="javascript:;"><img src="/images/flowchart/m1_s1.jpg" /></a>
+                        </li>
+                        <li>
+                            <a href="javascript:;"><img src="/images/flowchart/m1_s2.jpg"/></a>
+                        </li>
+                        <li>
+                            <a href="javascript:;"><img src="/images/flowchart/m1_s3.jpg"/></a>
+                        </li>
+                        <li>
+                            <a href="javascript:;"><img src="/images/flowchart/m1_s4.jpg"/></a>
+                        </li>
+                        <li>
+                            <a href="javascript:;"><img src="/images/flowchart/m1_s5.jpg"/></a>
+                        </li>
+                        <li>
+                            <a href="javascript:;"><img src="/images/flowchart/m2_s1.jpg"/></a>
+                        </li>
+                        <li>
+                            <a href="javascript:;"><img src="/images/flowchart/m2_s2.jpg"/></a>
+                        </li>
+                        <li>
+                            <a href="javascript:;"><img src="/images/flowchart/m2_s3.jpg"/></a>
+                        </li>
+                        <li>
+                            <a href="javascript:;"><img src="/images/flowchart/m2_s4.jpg"/></a>
+                        </li>
+                    </ul>
+                </div>
+                <span class="prev"></span>
+                <span class="next"></span>
+            </div>
+            <div class="copyright">*本活动最终解释权归安智所有。</div>
+        </div>
+    </div>
+    <div class="footer">
+        <img src="/images/rebate_draw/ft_bg.jpg"/>
+        <img src="/images/rebate_draw/ft_bg1.jpg"/>
+    </div>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box" style="display: none;">
+        <div class="mod">
+            <ul class="my_prize_list2">
+                <li> 恭喜你获得《<span id="gift_softname"></span>》尊贵礼包一份</li>
+                <li>礼包码：<span id="gift_number"></span></li>
+            </ul>
+            <div class="btn_submit">
+                <a href="javascript:;" onclick="cloBox('#tip-box')">返回</a>
+            </div>
+        </div>
+    </div>
+        <div class="tip-box" id="tip-box2" style="display: none;">
+        <div class="mod">
+	        <div class="prompt4">提示</div>
+	        <div class="tip-con">
+	            <p><span id="notice"></span></p>
+	        </div>
+	        <div class="btn_submit">
+	            <a href="javascript:;" onclick="cloBox('#tip-box2')">返回</a>
+	        </div>
+	    </div>
+    </div>  
+</section>
+<script type="text/javascript">
+    var flags={canMove:true};
+    var all_package = '';
+    function get_intall_package(){
+        for(i=0;i<soft_lists.length;i++){
+        	var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+        	if(soft_status_go != -2){
+        		all_package += soft_lists[j][7] + ',';
+        	}
+        	//return all_package;
+    	}
+    }
+    function showOpenBox(obj){
+        var bg_h=$(window).height()+$(document).scrollTop(),
+                top_h= $(obj).height()/ 2-$(document).scrollTop();
+        $(obj).css("margin-top",-top_h+"px").show();
+        $("#body-bg").css("height",bg_h+"px").show();
+        flags.canMove=false;
+    }
+    function cloBox(obj){
+        $(obj).hide();
+        $("#body-bg").hide();
+        flags.canMove=true;
+    }
+    $(function(){
+        //弹框
+        $("body").bind('touchmove', function (e) {
+            if(!flags.canMove){
+                e.preventDefault();
+            }
+        });
+        //轮播图
+        TouchSlide({
+            slideCell:"#slideBox",
+            mainCell:".bd ul",
+            interTime:"3000",
+            effect:"leftLoop",
+            autoPlay:true //自动播放
+        });
+
+	});
+        //转盘抽奖
+        
+        var user_game = '';
+        function draw(){				
+				if(!zp_status){zp_status = true;}
+				else return false;		
+				//get_intall_package();
+				all_package ='';
+				$.ajax({                			
+					url: '/lottery/rebate_draw_lottery.php',
+					data: 'type=draw&sid='+sid+'&aid='+aid+'&user_game='+all_package,
+					type: 'post',
+					dataType: "json",
+					success: function(data){
+						var award_level = '';
+						if(data==100){
+								$("#notice").html('网络忙，请稍候重试！');
+								showOpenBox('#tip-box2');
+						}else if(data==2001){
+								$("#notice").html('您登陆状态已退出，请登录后再来尝试，谢谢！');
+								showOpenBox('#tip-box2');
+						}else if(data==500){
+								$("#notice").html('您还没有获得抽奖机会哟，请充值后再来尝试，谢谢！');
+								$("#now_num").html('0');
+								showOpenBox('#tip-box2');
+						}else if(data.no_gift==1){
+								var a = runzp(7);
+								$(".rotate_pointer").rotate({
+									duration:2000,
+									angle: 0,
+									animateTo:1800+a.angle,
+									easing: $.easing.easeOutSine,
+									callback: function(){
+										$("#now_num").html('0');
+										$("#notice").html('很遗憾，您暂未获奖！');
+										showOpenBox('#tip-box2');	            					
+									}
+								});
+						}else if(data.lottery_type==1){ //实体									
+							var a = runzp(data.pid);
+							$(".rotate_pointer").rotate({
+								duration:2000,
+								angle: 0,
+								animateTo:1800+a.angle,
+								easing: $.easing.easeOutSine,
+								callback: function(){
+									$("#now_num").html(data.now_num);
+									var pid = data.pid;
+									var prizename = data.prizename;
+									var code = data.code;        								location.href="/lottery/rebate_draw_userinfo.php?pid="+pid+"&code="+code+"&sid="+sid+"&prizename="+prizename+"&action=3";
+								}
+							});									
+						}else{ //礼包									
+							var a = runzp(data.pid);
+							$(".rotate_pointer").rotate({
+								duration:2000,
+								angle: 0,
+								animateTo:1800+a.angle,
+								easing: $.easing.easeOutSine,
+								callback: function(){
+									$("#now_num").html(data.now_num);
+									$("#gift_softname").html(data.softname);
+									$("#gift_number").html(data.gift_number);
+									showOpenBox('#tip-box');             					
+								}
+							});
+						} 
+						zp_status = false;
+					}
+				});                
+         }
+            
+       
+
+
+</script>
+</body>
+</html>

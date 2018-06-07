@@ -1,0 +1,61 @@
+<script type="text/javascript">
+    function ignore_batch(){
+        if(confirm("是否批量忽略？"))
+        {
+            var chks=$("input[alt='del']:checked");
+            var packages="";
+            var i=0;
+            $(chks).each(function(){
+               packages+=','+this.value;
+               i++;                      
+            });
+            if(i==0){
+                alert('请选择要批量忽略的软件');
+                return;
+            }
+            var table_name=$('#table_name').val();
+            var file_name=$('#file_name').val();
+
+            // var jumpUrl=encodeURI($('#jumpUrl').val());
+            $('#tmp_form')[0].action = '/index.php/Sj/ExtentV1/pub_shield_new_ignore/table_name/'+table_name+'/file_name/'+file_name;
+            // $('#referer').val(location.href);
+            $('#packages').val(packages);
+            $('#tmp_form').submit();
+            if(window.ActiveXObject) window.event.returnValue = false;
+        }
+    }
+    function ignore_page_generate(div,data){
+        // 将每行错误输出到表格里
+        var hint = $("<p><font color='red'>"+data.info+"</font> <button onclick='ignore_batch()' style='width:100px;'>批量忽略</button></p>");
+        var table = $("<table cellpadding='0' cellspacing='0' style='margin-top:10px;' class='table_list'></table>");
+        div.append(hint);
+        div.append(table);
+        var error_msg = data.data;
+        table.append("<thead><tr><th width='10%'>行数</th><th width='70%'>描述</th><th width='10%'><input type='checkbox' onclick='select_all()' name='all' />忽略</th></tr></thead");
+        $('#file_name').val(error_msg['filename']);
+        var table_name=error_msg['table_name'];
+        $('#table_name').val(table_name);
+        for(var i in error_msg) {
+            if (!error_msg[i]['flag'] || (table_name=='sj_download_recommend_soft' && error_msg[i]['flag'])) {
+                var line = parseInt(i) + 1;
+                var msg = error_msg[i]['msg'].replace(/;/g, "<br/>");
+                var package=error_msg[i]['package'];
+                table.append("<tbody><tr><td>" + line + "</td><td class='left'>" + msg + "</td><td align='center'><input type='checkbox' alt='del' name='id[]' value='"+package+"'/></td></tr></tbody>");
+            }
+        }
+    }
+    function select_all(){
+        if($("input[name='all']").attr("checked")){
+            $("input[alt='del']").attr("checked",'checked');
+        }else{
+            $("input[alt='del']").attr("checked",'');
+        }
+        
+    }
+</script>
+
+<form method='post' action='' id='tmp_form'>
+    <input type='hidden' name='packages' id='packages' value='' />
+</form>
+<input type='hidden' name='file_name' id='file_name' value='' />
+<input type='hidden' name='table_name' id='table_name' value='' />

@@ -1,0 +1,386 @@
+<link type="text/css" href="/Public/css/account.css" rel="stylesheet" />	
+<link type="text/css" href="/Public/css/co_common.css" rel="stylesheet" />
+<script type="text/javascript" src="/Public/js/jquery.js"></script>
+<script type="text/javascript" src="/Public/js/co_public.js"></script>
+<script type="text/javascript">
+function showOrHide(obj){
+	$(obj).parent().parent().find('.config_list_tips').toggle();
+}
+
+function tiggerShow(v){
+	if(v==1){
+		$('#settlement_patterns_1').css('display','');
+		$('#settlement_patterns').css('display','none');
+		$('#settlement_patterns_2').css('display','none');
+	} else if(v==2){
+		$('#settlement_patterns_1').css('display','none');
+		$('#settlement_patterns').css('display','none');
+		$('#settlement_patterns_2').css('display','');
+	} else {
+		$('#settlement_patterns').css('display','');
+		$('#settlement_patterns_1').css('display','none');
+		$('#settlement_patterns_2').css('display','none');		
+	}
+
+	$('#settlement_1 option:first').attr('selected','selected');
+	$('#settlement_2 option:first').attr('selected','selected');
+	
+	selectType(0);
+}
+function selectType(v){
+	$("#settlement_value").val(v);
+	var val = 0;
+	$(".A").attr("checked", false);
+	$(".B").attr("checked", false);
+	$(".C").attr("checked", false);
+	$(".A").attr("disabled", false);
+	$(".B").attr("disabled", false);
+	$(".C").attr("disabled", false);
+	if(v==1){
+		$(".A").attr("checked", true);
+		$(".A").attr("disabled", true);
+	} else if(v==2){
+		$(".B").attr("checked", true);
+		$(".B").attr("disabled", true);
+	} else if(v==3){
+		$(".C").attr("checked", true);
+		$(".C").attr("disabled", true);
+	} else if(v==4 || v==8){
+		$(".A").attr("checked", true);
+		$(".B").attr("checked", true);
+		$(".A").attr("disabled", true);
+		$(".B").attr("disabled", true);
+	} else if(v==5 || v==9){
+		$(".A").attr("checked", true);
+		$(".C").attr("checked", true);
+		$(".A").attr("disabled", true);
+		$(".C").attr("disabled", true);
+	} else if(v==6 || v==10){
+		$(".B").attr("checked", true);
+		$(".C").attr("checked", true);
+		$(".B").attr("disabled", true);
+		$(".C").attr("disabled", true);
+	} else if(v==7 || v==11 || v==12 || v==13){
+		$(".A").attr("checked", true);
+		$(".B").attr("checked", true);
+		$(".C").attr("checked", true);
+		$(".A").attr("disabled", true);
+		$(".B").attr("disabled", true);
+		$(".C").attr("disabled", true);
+	}
+}
+
+function reset_pwd(){
+	$('#accountPassword').val('');
+	$('#re_accountPassword').val('');
+}
+</script>
+<div class="content_inner">
+<form enctype="multipart/form-data" action="/index.php/Cooperative/CoAccount/addAccount/" method="post" name='adduser' onsubmit="return checkSubmit();" >
+			<div class="add_acount_list">
+				<div class="title_item">
+					<h2>账号信息：</h2>
+				</div>
+				<div class="add_acount_item">
+					<label>账号名称：</label>
+					<input type="hidden" name="uid" id="uid" value="{$account.uid}">
+					<input id='user_name' name='user_name' type="text" class="inputtext" value='' onBlur="have_username();" />
+					<span class="add_acount_tips"><span class="red">*</span>（合作方简称）</span>
+					<div class="clear"></div>
+					<span class="add_acount_errors">不能与现有账号名称重复</span>				</div>
+				<div class="add_acount_item">
+					<label>登录名：</label>
+					<input type="text" class="inputtext" id='login_name' name='login_name' value='' onBlur="have_loginname();" />
+					<span class="add_acount_tips"><span class="red">*</span></span>
+					<div class="clear"></div>
+					<span class="add_acount_errors">不能与现有登录名称重复</span>				</div>
+				<div class="add_acount_item">
+					<label>账号状态：</label>
+					<input id='accountStatus' name='accountStatus' type='text' value='' readonly='readonly' disabled='disabled' class="inputtext" />
+				</div>
+				<div class="add_acount_item">
+					<label>密码：</label>
+					<input class="inputtext" id='accountPassword' name='accountPassword' type="password" value='' />
+					<span class="add_acount_tips"><span class="red">*</span></span>
+				</div>
+				<div class="add_acount_item">
+					<label>账号负责人：</label>
+					<select id='accountCharge' name='accountCharge'><option value='' selected='selected'>请选择负责人</option><volist name='charge' id='charges'><option value='{$charges.id}'>{$charges.charge_name}</option></volist></select>
+					<span class="add_acount_tips"><span class="red">*</span></span>
+				</div>
+				<div class="add_acount_item">
+					<label>重复登录密码：</label>
+					<input type="password" class="inputtext" id='re_accountPassword' name='re_accountPassword' value='' />
+					<span class="add_acount_tips"><span class="red">*</span></span>
+					<input type="button" value="重置" onclick="reset_pwd();"/>
+				</div>
+				<div class="clear"></div>
+			</div>
+			<div class="add_acount_list">
+				<div class="title_item">
+					<h2>结算模式与展示类型配置：</h2>
+					<span onclick="showOrHide(this)" class="title_tips"></span>				</div>
+				<div class="add_acount_item">
+					<label>结算模式：</label>
+					<select id="error_show" name="error_show" onchange="tiggerShow(this.value);"><option value=''>请选择结算模式</option><option value='1'>合计值</option><option value='2'>最大值</option></select>
+					<div id="settlement_patterns" style="float:left">
+						<select><option></option></select>
+					</div>
+					<div  id="settlement_patterns_1" style="float:left;display:none;">
+						<select id="settlement_1" name='settlement' onchange='selectType(this.value);'>
+							<option value=''>请选择</option>
+							<option value="1">A</option>
+							<option value="2">B</option>
+							<option value="3">C</option>
+							<option value="4">A+B</option>
+							<option value="5">A+C</option>
+							<option value="6">B+C</option>
+							<option value="7">A+B+C</option>
+						</select>
+						
+					</div>
+					
+					<div id="settlement_patterns_2" style="float:left;display:none;">
+						<select id="settlement_2" name='settlement' onchange='selectType(this.value);'>
+							<option value=''>请选择</option>
+							<option value="8">A与B</option>
+							<option value="9">A与C</option>
+							<option value="10">B与C</option>
+							<option value="11">A与B+C</option>
+							<option value="12">B与A+C</option>
+							<option value="13">C与A+B</option>
+						</select>
+					</div>	
+					<span class="add_acount_tips"><span class="red">*</span></span>					
+				</div>
+				<div class="clear"></div>
+				<div class="add_acount_item">
+					<label>前台展示类型：</label>
+					<input type='checkbox' class='A' name="r[]" value='1' />A:安智市场激活收入<input type='checkbox' class='B' name="r[]" value='2' />B:广告分成收入<input type='checkbox' class='C' name="r[]" value='4' />C:游戏分成收入</div><span class="add_acount_tips"><span class="red">*</span></span>
+				<div class="clear"></div>
+				<div class="add_acount_item">
+					<label>收入值展示类型：</label>
+					<input type='checkbox' class='A' name="i[]" value='1' onclick="i_checked(this.checked,this.value)"/>A:安智市场激活收入<input type='checkbox' class='B' name="i[]" value='2' onclick="i_checked(this.checked,this.value)"/>B:广告分成收入<input type='checkbox' class='C' name="i[]" value='4' onclick="i_checked(this.checked,this.value)"/>C:游戏分成收入</div><span class="add_acount_tips"><span class="red">*</span></span>
+				<div class="clear"></div>
+				<div style="top:-120px; left:130px" class="config_list_tips">
+					<p><strong>前台展示类型：</strong>可控制客户看到的收入类型，需大于等于结算模式及收入值展示类型的范围。勾选后不可去除，请慎重操作！<br><strong>收入值展示类型：</strong>可控制客户看到的收入类型是否有数据，需大于等于结算模式，小于等于前台展示类型。
+</p>
+					<span class="title_tips_arrow"></span>				</div>
+					
+			</div>
+			
+			<div class="add_acount_list">
+				<div class="title_item">
+					<h2>结算信息：</h2>
+				</div>
+				<div class="add_acount_item">
+					<label>账号属性：</label>
+					<select id='accountProperty' name='accountProperty'><option value=''>请选择账号属性</option><option value='1'>企业</option><option value='2'>个人</option></select>
+					<span class="add_acount_tips"><span class="red">*</span></span>
+					<div class="clear"></div>
+					<span class="add_acount_errors">选择账号属性，关联税率</span>				</div>
+				<div class="add_acount_item">
+					<label>账号类型：</label>
+					<select name='accountType'><option value=''>请选择账号 类型</option></select></select>
+					
+					<div class="clear"></div>
+				</div>
+				<div class="clear"></div>
+				<div class="add_acount_item">
+					<label>户名：</label>
+					<input type="text" class="inputtext" id='accountName' name='accountName' value='' />
+					<span class="add_acount_tips"><span class="red">*</span></span>
+				</div>
+				<div class="add_acount_item">
+					<label>所属银行：</label>
+					<input id='bankName' name='bankName' type='text' value='' class="inputtext" />
+					<span class="add_acount_tips"><span class="red">*</span></span>
+				</div>
+				<div class="add_acount_item">
+					<label>开户行：</label>
+					<input type="text" class="inputtext" id='bankAddr' name='bankAddr' value='' />
+					<span class="add_acount_tips"><span class="red">*</span></span>
+				</div>
+				<div class="add_acount_item">
+					<label>开户行所在地：</label>
+					<input id='bankLocation' name='bankLocation' type='text' value='' class="inputtext" />
+					<span class="add_acount_tips"><span class="red">*</span></span>
+				</div>
+				<div class="add_acount_item">
+					<label>银行账号：</label>
+					<input type="text" class="inputtext" id='bankAccount' name='bankAccount' value='' />
+					<span class="add_acount_tips"><span class="red">*</span></span>
+				</div>
+				<div style="position:relative" class="add_acount_item">
+					<label>银行卡扫描件：</label>
+					<input type="text" class="inputtext" id="bankFile" />
+					<div class="upload_btn">上传</div>
+					<input type="file" class="inputfile" name='bankFile' onchange="$('#bankFile').val($(this).val());" />
+				</div>				
+				<div class="add_acount_item">
+					<label>最低付款值：</label>
+					<input type="text" class="inputtext" name='minBalance' value='' />
+					<span class="add_acount_tips">元</span>				</div>
+				<div class="clear"></div>
+			</div>
+			<div class="table_infors">
+				<p class="red">
+					注：<br>1、带“*”内容为必填项
+				</p>
+			</div>
+			<div style="padding-left:22%" class="open_close_btn">
+				<input value='确认' type='submit' />
+				<a href="/index.php/Cooperative/CoAccount/AccountList">取消</a>
+				<div class="clear"></div>
+			</div>
+			<input type="hidden" id="settlement_value" name="settlement_value" value="0">
+			<input type="hidden" id="r_value" name="r_value" value="0">
+			<input type="hidden" id="i_value" name="i_value" value="0">
+</form>			
+		</div>
+<script type="text/javascript">
+function checkSubmit(){
+	var password = $.trim($('input[name=accountPassword]').val());
+
+	var re_accountPassword = $.trim($('input[name=re_accountPassword]').val());
+	var check_false = false;
+	var params = {
+		'user_name':['co_check_empty','co_check_name'],
+		'login_name':['co_check_empty','co_check_name'],
+		'accountCharge':['co_check_empty'],
+		'accountPassword':['co_check_empty'],
+		're_accountPassword':['co_check_empty'],
+		'accountProperty':['co_check_empty'],
+		'accountName':['co_check_empty'],
+		'bankName':['co_check_empty'],
+		'bankAddr':['co_check_empty'],
+		'bankLocation':['co_check_empty'],
+		//'minBalance':['co_check_empty'],
+		'bankAccount':['co_check_empty'],
+		'settlement_value':['co_check_empty']
+	};
+	for (column in params) {
+		var v = $.trim($('#'+column).val());
+		for (var i=0;i<params[column].length;i++) {
+			var f = params[column][i];
+			r = eval(f+"('"+v+"');");
+			if (!r) {
+				if (column != 'settlement_value') { 
+					$('#'+column).css("border-color","#f00");
+				} else {
+					$('#error_show').css("border-color","#f00");
+				}
+				check_false = true;
+			} else {
+				if (column != 'settlement_value') { 
+					$('#'+column).css("border-color","#DCDCDC");
+				} else {
+					$('#error_show').css("border-color","#DCDCDC");
+				}
+			}
+		}
+	}
+	if(password != re_accountPassword || password == ''){
+		$('input[name=accountPassword]').css("border-color","#f00");
+		$('input[name=re_accountPassword]').css("border-color","#f00");
+		check_false = true;
+	} else {
+		$('input[name=accountPassword]').css("border-color","#DCDCDC");
+		$('input[name=re_accountPassword]').css("border-color","#DCDCDC");
+	}
+	if (!co_check_IR('i[]','r[]')) {
+		alert("’前台展示类型’和‘收入值展示类型 选择有误’");
+		check_false = true;
+	}
+	if (check_false) {
+		return false;
+	}
+	var user_name = $('#user_name').val();
+	var login_name = $('#login_name').val();
+	
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/index.php/Cooperative/CoAccount/checkRule/rand/"+Math.random(),
+		data: "user_name="+user_name+"&login_name="+login_name,
+		dataType: 'JSON',
+		success: function(j){
+			if (j) {
+				if (j.login_name) {
+					$('#login_name').css("border-color","#f00");
+					check_false = true;
+ 				} else {
+ 					$('#login_name').css("border-color","#DCDCDC");
+ 	 			}
+				if (j.user_name) {
+					$('#user_name').css("border-color","#f00");
+					check_false = true;
+ 				} else {
+ 					$('#user_name').css("border-color","#DCDCDC");
+ 	 			}
+			}	
+		}
+	});
+
+	if (check_false) {
+		return false;
+	} else {
+		return true;
+	}
+	
+}
+
+function i_checked(checked, value) {
+	var v = $("#r_value").val();
+	if (value == 1) {
+		var c = 'A';
+	} else if (value == 2) {
+		var c = 'B'; 
+	} else {
+		var c = 'C';
+	}
+	
+	if (checked) {
+		$("."+c).attr("checked", true);
+	}
+}
+
+function have_username(){
+
+	var user_name = $('#user_name').val();
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/index.php/Cooperative/CoAccount/check_have/rand/"+Math.random(),
+		data: "username="+user_name,
+		dataType: 'JSON',
+		success: function(data){
+			console.log(data);
+			if(data.username == 1){
+				$('#user_name').css("border-color","#f00");
+				if (check_false) {
+					return false;
+				} 
+			}
+		}
+	});
+}
+function have_loginname(){
+	var login_name = $('#login_name').val();
+	$.ajax({
+		type: "POST",
+		async: false,
+		url: "/index.php/Cooperative/CoAccount/check_have/rand/"+Math.random(),
+		data: "loginname="+login_name,
+		dataType: 'JSON',
+		success: function(data){
+			if(data.loginname == 1){
+				$('#login_name').css("border-color","#f00");
+				if (check_false) {
+					return false;
+				} 
+			}
+		}
+	});
+}
+</script>				

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>往期精选</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.public_url}-->/css/common.css?v1"/>
+</head>
+<body>
+
+<div id="top_bar" class="top_bar" style="display:none;"><a href="javascript:history.back();">往期精选</a></div>
+<div id="top_bar_margin" class="mar_top59" style="display:none"></div>
+<div id="div_history" class="app">
+	<ul id="ul_history" class="app_list">
+		<!--{foreach from=$out.history.DATA item=v name=a}-->
+		<li class="part">
+			<div class="app_icon"><img src="<!--{imgurltrans}--><!--{$v.5}--><!--{/imgurltrans}-->" alt="<!--{$v.4}-->" /></div>
+			<div class="app_des">
+				<h2><!--{$v.1}--></h2>
+				<span><!--{$v.2|date_format:'%Y-%m-%d'}--></span>
+			</div>
+			<a href="<!--{url2static_url}-->perfect.php?id=<!--{$v.0}--><!--{/url2static_url}-->" class="clickarea"></a>
+		</li>
+		<!--{/foreach}-->
+	</ul>
+</div>
+
+<!--{if $out.history.has_more}-->
+<div id="div_history_more" class="load_more"><a id="a_history_more" href="<!--{url2static_url}-->perfect.php?method=history&ajax=1<!--{/url2static_url}-->">点击查看更多</a></div>
+<div id="div_history_load" class="load_more loading" style="display:none;"><a href="javascript:void(0);" class="loading">加载中</a></div>
+<div id="div_history_no_more" class="load_more load_end" style="display:none;"><a href="javascript:void(0);">没有更多内容啦~</a></div>
+<!--{else}-->
+<div id="div_history_no_more" class="load_more load_end"><a href="javascript:void(0);">没有更多内容啦~</a></div>
+<!--{/if}-->
+<div class="return_top"><a href="javascript:scroll(0,0);">返回顶部</a></div>
+
+<script type="text/javascript" src="<!--{$out.public_url}-->/js/zepto.min.js"></script>
+<script type="text/javascript" src="<!--{$out.public_url}-->/js/common.js"></script>
+<script type="text/javascript">
+
+var var_history_page = 1;
+var var_history_last = false; //是否已经到最后
+
+$(document).on('ajaxStart', function(e, xhr, options){
+	if(var_history_last){
+		$('#div_history_more').hide();
+		$('#div_history_load').hide();
+		$('#div_history_no_more').show();
+	}else{
+		$('#div_history_more').hide();
+		$('#div_history_load').show();
+		$('#div_history_no_more').hide();
+	}
+});
+
+$(document).on('ajaxStop', function(e, xhr, options){
+	if(var_history_last){
+		$('#div_history_more').hide();
+		$('#div_history_load').hide();
+		$('#div_history_no_more').show();
+	}else{
+		$('#div_history_more').show();
+		$('#div_history_load').hide();
+		$('#div_history_no_more').hide();
+	}
+});
+
+
+$(function(){
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		if(!_GET('sid', false)){
+			$('#top_bar').show();
+			$('#top_bar_margin').show();
+		}
+	}
+	
+	$('#a_history_more').click(function(){
+		//var var_request_url = $(this).attr('href')+'&page='+var_history_page;
+		var var_request_url = 'pfhisjson_'+var_history_page+'.html';
+		
+		$.getJSON(var_request_url, function(data){	
+			var_history_page++;
+			
+			var var_html = '';
+			$.each(data.DATA, function(key, value){
+			
+				var_html += '<li class="part">';
+				var_html += '<div class="app_icon"><img src="'+value[5]+'" alt="'+value[4]+'" /></div>';
+				var_html += '<div class="app_des">';
+				var_html += '<h2>'+value[1]+'</h2>';
+				var_html += '<span>'+value[2]+'</span>';
+				var_html += '</div>';
+				var_html += '<a href="'+value[102]+'" class="clickarea"></a>';
+				var_html += '</li>';
+			});
+			
+			$('#ul_history').append(var_html);
+			
+			if(data.has_more==false)
+				var_history_last = true;
+		});
+		
+		return false;
+	});
+});
+</script>
+
+<div style="display:none;">
+<script src="http://s16.cnzz.com/stat.php?id=3217453&web_id=3217453&show=pic1" language="JavaScript"></script>
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F230c63426e4fce3a604a2a9069e4d782' type='text/javascript'%3E%3C/script%3E"));
+</script>
+</div>
+</body>
+</html>

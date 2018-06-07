@@ -1,0 +1,50 @@
+
+<script>
+	function check(){
+		var game_cut_pre = $("#game_cut_pre").val();
+		if(game_cut_pre > 100 || game_cut_pre < 0 || !game_cut_pre || isNaN(game_cut_pre) || game_cut_pre.substring(game_cut_pre.indexOf("."),game_cut_pre.length).length>3){
+			$("#game_cut_pre").css("border","#ff0000 1px solid")
+			return false;
+		}
+		
+		if($("#game_go").val() == 1 && $("#game_switch").attr("checked") != "checked"){
+			return false;
+		}
+	}
+	
+	function game_edit(){
+		if($("#game_go").val() == 1 && $("#game_switch").attr("checked") != "checked"){
+			$("#promit_game").html("至少勾选一种分成类型");
+
+		}else{
+			$("#promit_active").html("");
+		}
+	
+		if($("#game_switch").attr("checked") == "checked"){
+			$("#game_cut_pre").attr("readonly",false);
+		}else{
+			$("#game_cut_pre").attr("readonly",true);
+		}
+	}
+</script>
+<body>
+	<h3>游戏分成：</h3>
+	<form action="__URL__/game_edit_do" method="get">
+	<table>
+		<tr>
+			<td>是否开启该种类分成：</td>
+			<td><input type="checkbox" name="game_switch" id="game_switch" value="1" <?php if($channel['game_switch'] == 1){ ?>checked<?php } ?> onclick="game_edit();" /><input type="hidden" id="game_go" value="{$game_go}" /></td>
+			<td><span id="promit_game" style="color:red;"></span></td>
+		</tr>
+		<tr>
+			<td>游戏分成扣量比例：</td>
+			<td><input type="text" name="game_cut_pre" value="{$channel['game_cut_pre']}" id="game_cut_pre" <?php if($channel['game_switch'] != 1){ ?>readonly<?php } ?> />%<input type="hidden" name="cid" value="{$channel['cid']}">&nbsp;&nbsp;<span style="color:red;" id="promit">百分比，保留两位小数</span></td>
+		</tr>
+		<tr><td colspan="2"><span style="color:red;">注：以上系数为必填项</span></td></tr>
+		<tr>
+			<td><input type="submit" value="保存" onclick="return check();" /></td><td><input type="button" value="放弃" onclick="tb_remove();" /></td>
+		</tr>
+	</table>
+	</form>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>无需下载，点开即玩礼包</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/common2.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v4"></script>
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+</head>
+<body>
+<div class="main">
+	<div class="part detail">
+		<div class="app"  style="min-height:8.7rem;">
+			<ul class="soft-list clear" style="margin:0 0.2rem">
+				<!--{foreach from=$out.list_gift item='val' key='k'}-->
+				<li>
+					<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images2/<!--{$val.desc}-->.png"/>
+					<h3><!--{$val.name}--></h3>
+					<p>剩余数量：<span id='num_<!--{$val.level}-->'><!--{$val.num}--></span></p>
+					<!--{if $val.num eq 0}-->
+					<a class='btns_end' href="javascript:;">已发完</a>
+					<!--{else}-->						
+						<!--{if $out.receive_status[$val.id]['is_receive'] eq 1}-->
+						<a class='btns_over' href="javascript:;">已领取</a>
+						<!--{else}-->	
+						<a class='btns' id='receive<!--{$val.level}-->' onclick="receive_post('<!--{$val.level}-->','<!--{$val.id}-->')"  >领取</a>
+						<!--{/if}-->
+					<!--{/if}-->
+					<div class="clear"></div>
+				</li>
+				<!--{/foreach}-->
+			</ul>		
+		</div>
+	</div>
+	<div class="footer"></div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var prefix = "<!--{$out.prefix}-->";
+var pkg = "<!--{$out.pkg}-->";
+
+
+	
+//领取
+function receive_post(level,pid){
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	$("#receive"+level).removeAttr("onclick").attr("class","btns_over").html("已领取");	
+	var num = parseInt($("#num_"+level).html())-1;	
+	$("#num_"+level).html(num);
+	$.ajax({
+		url: '/lottery/'+prefix+'/index2.php',
+		data : 'is_receive=1&level='+level+'&sid='+sid+'&aid='+aid+'&pid='+pid+'&pkg='+pkg,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret.code == 1){
+				//$("#receive").attr("class","btns_over");
+			}else{
+				alert(ret.msg);
+				return false;
+			}
+		}
+	});	
+}
+</script>

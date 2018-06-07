@@ -1,0 +1,67 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script>
+function checkit(){
+	if(confirm("确定删除此机型分类?"))
+	{
+		return true;
+	}
+	return false;
+}
+
+function change_rank(id){
+	var rank = $("#rank_"+id+"").val();
+	if(rank <= 0){
+		alert("排序值错误");
+		return false;
+	}
+	$.ajax({
+			url: '__URL__/change_rank_brand',
+			data: 'id='+id+'&rank='+rank,
+			type: 'get',
+			success: function(data){
+				if(data == 1){
+					window.location.reload(true);
+				}else{
+					alert("编辑失败");
+				}
+			}
+		});
+}
+</script>
+<style>
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+<body>
+<div style="margin:20px 10px 20px 6px;"><a href="__URL__/add_brand_show?mm" class="search_btn thickbox">添加</a></div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="20%">品牌名称</th>
+			<th width="20%">排序</th>
+			<th width="20%">品牌地址</th>
+			<th width="20%">添加时间</th>
+			<th width="20%">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr>
+		<td>{$val.brand_name}</td>
+		<td><input type="text" value="{$val.rank}" id="rank_{$val.id}" onblur="change_rank({$val.id});"  /></td>
+		<td>{$val.brand_link}</td>
+		<td><?php echo date('Y-m-d H:i:s',$val['create_tm']); ?></td>
+		<td><a href="__URL__/edit_brand_show/id/{$val.id}/lr/{$lr}/p/{$p}/" class="thickbox">修改</a>&nbsp;&nbsp;<a href="__URL__/del_brand/id/{$val.id}" onclick="return checkit();">删除</a></td>
+	</tr>
+	<?php } ?>
+</table>
+	<div class="navgition">
+		{$page|default='&nbsp;'}
+	</div>
+</body>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />
+</html>

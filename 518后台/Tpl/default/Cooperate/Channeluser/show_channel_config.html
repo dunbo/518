@@ -1,0 +1,112 @@
+
+<script>
+
+
+	function check(){
+		var active_price = $("#active_price").val();
+		var ad_price = $("#ad_price").val();
+		var max_down = $("#max_down").val();
+		var ad_cut_pre = $("#ad_cut_pre").val();
+		var game_cut_pre = $("#game_cut_pre").val();
+		var r   = "^[0-9]*[0-9][0-9]*$";
+		var re   =   new   RegExp(r); 
+		if(ad_price > 10 || ad_price < 0 || isNaN(ad_price) || !ad_price || ad_price.substring(ad_price.indexOf("."),ad_price.length).length>5){
+			$("#ad_price").css("border","#ff0000 1px solid");
+			ad_not = 1;
+		}else{
+			$("#ad_price").css("border","");
+			ad_not = 2;
+		}
+		if(max_down > 100 || max_down < 0 || isNaN(max_down) || !max_down || !max_down.match(re)){
+			$("#max_down").css("border","#ff0000 1px solid");
+			max_not = 1;
+		}else{
+			$("#max_down").css("border","");
+			max_not = 2;
+		}
+		if(ad_cut_pre > 100 || ad_cut_pre < 0 || isNaN(ad_cut_pre) || !ad_cut_pre || ad_cut_pre.substring(ad_cut_pre.indexOf("."),ad_cut_pre.length).length>3){
+			$("#ad_cut_pre").css("border","#ff0000 1px solid");
+			cut_not = 1;
+		}else{
+			$("#ad_cut_pre").css("border","");
+			cut_not = 2;
+		}
+		if(game_cut_pre > 100 ||game_cut_pre < 0 || isNaN(game_cut_pre) || !game_cut_pre || game_cut_pre.substring(game_cut_pre.indexOf("."),game_cut_pre.length).length>3){
+			$("#game_cut_pre").css("border","#ff0000 1px solid");
+			game_not = 1;
+		}else{
+			$("#game_cut_pre").css("border","");
+			game_not = 2;
+		}
+		if(active_price > 10 || active_price < 0 || isNaN(active_price) || !active_price || active_price.substring(active_price.indexOf("."),active_price.length).length>5){
+			$("#active_price").css("border","#ff0000 1px solid");
+			active_not = 1;
+		}else{
+			$("#active_price").css("border","");
+			active_not = 2;
+		}
+		
+		if(active_not == 1 || game_not == 1 ||cut_not == 1 || max_not == 1 || ad_not == 1){
+			return false;
+		}
+		
+		if($("#active_switch").attr("checked") != "checked" && $("#ad_switch").attr("checked") != "checked" && $("#game_switch").attr("checked") != "checked"){
+			$("#promit").html("至少勾选一种分成类型");
+			$("#promit_again").html("至少勾选一种分成类型");
+			return false;
+		}
+	
+	}
+
+</script>
+<body>
+<h3>渠道分成模式</h3>
+所属渠道:{$channel_name} &nbsp;&nbsp;&nbsp;&nbsp;<h3><span id="promit" style="color:red;"></span></h3>
+<form action="__URL__/edit_channel_config" method="get">
+<table border="1" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>收入类别</td>
+		<td>状态</td>
+		<td>系数1</td>
+		<td>系数2</td>
+		<td>系数3</td>
+	</tr>
+	<tr>
+		<td>安智市场激活分成<input type="hidden" name="cid" value="{$config_result['cid']}"></td>
+		<td><input type="checkbox" name="active_switch" id="active_switch" value="1" <?php if($config_result['active_switch'] == 1){ ?>checked<?php } ?> onclick="price_edit();" /></td>
+		<td>安智市场激活单价:<input type="text" name="active_price" value="{$config_result['active_price']}" id="active_price" />(元)&nbsp;&nbsp;<span style="color:red;" id="promit1"></span></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>广告分成</td>
+		<td><input type="checkbox" name="ad_switch" id="ad_switch" value="1" <?php if($config_result['ad_switch'] == 1){ ?>checked<?php } ?> /></td>
+		<td>单个软件下载单价：<input type="text" name="ad_price" value="{$config_result['ad_price']}" id="ad_price" />(元)&nbsp;&nbsp;<span style="color:red;" id="promit2"></span></td>
+		<td>防刷量值：<input type="text" name="max_down" value="{$config_result['max_down']}" id="max_down" />(个)&nbsp;&nbsp;<span style="color:red;" id="promit3"></span></td>
+		<td>广告分成扣量比例：<input type="text" name="ad_cut_pre" value="{$config_result['ad_cut_pre']}" id="ad_cut_pre" />(%)&nbsp;&nbsp;<span style="color:red;" id="promit4"></span></td>
+	</tr>
+	<tr>
+		<td>游戏分成</td>
+		<td><input type="checkbox" name="game_switch" id="game_switch" value="1" <?php if($config_result['game_switch'] == 1){ ?>checked<?php } ?> /></td>
+		<td>游戏分成扣量比例：<input type="text" name="game_cut_pre" value="{$config_result['game_cut_pre']}" id="game_cut_pre" />(%)&nbsp;&nbsp;<span style="color:red;" id="promit5"></span></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td colspan="5">
+		<span style="color:red;">输入数据范围（无需输入单位及“%”）：</span><br />
+		<span style="color:red;">1、安智市场激活单价：0-10之间数值，保留四位小数</span><br />
+		<span style="color:red;">2、单个软件下载单价：0-10之间数值，保留四位小数</span><br />
+		<span style="color:red;">3、防刷量值：0-100之间整数</span><br />
+		<span style="color:red;">4、广告分成扣量比例：百分比，保留两位小数</span><br />
+		<span style="color:red;">5、游戏分成扣量比例：百分比，保留两位小数</span><br />
+		<span style="color:red;">6、以上系数均为必填项（无论是否勾选该分成类型）</span><br />
+		</td>
+	</tr>
+</table>
+	<h3><span id="promit_again" style="color:red;"></span></h3>
+	<br />
+	<input type="submit" value="保存"  onclick="return check();	" />&nbsp;&nbsp;<input type="button" value="放弃" onclick="tb_remove();" />
+	</form>
+</body>
+</html>

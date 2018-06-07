@@ -1,0 +1,119 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css?1" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<style>
+    .future_class {
+        background-color:#CCCCCC
+    }
+</style>
+
+<body style="position:relative;">
+
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="4%">合作站点ID</th>
+                    <th width="5%">合作站点名称（安智）</th>
+                    <th width="8%">合作站点名称</th>
+					<th width="8%">站点类型</th>
+                    <th width="4%">标签</th>
+                    <th width="8%">下载提示弹窗文案</th>
+                    <th width="10%">渠道包</th>
+                    <th width="6%">合作站点客户端支持调起最低版本</th>
+                    <th width="4%">合作站点状态</th>
+					<th width="8%">刷量配置</th>
+					<th width="8%">合作站点wap详情页</th>
+					<th width="6%">返回弹窗</th>
+                    <th width="8%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                    <td>{$list.id}</td>
+                    <td>{$list.anzhi_name}</td>
+                    <td>{$list.website_name}</td>
+                    <td><?php echo $list['type'] == 1 ? "资讯" : "视频";	?></td>
+                    <td><a href="__URL__/site_tag_list?site_id={$list.id}" class="blue"><?php echo $count_arr[$list['id']]; ?></a></td>
+                    <td>{$list.down_tip}</td>
+                    <td>
+						<?php 
+						//var_dump($chl_soft_arr["com.tencent.news"],$list['package']);
+							if($chl_soft_arr[$list['package']]['version_code']){
+								echo "软件名称：<a href='".IMGATT_HOST . $chl_soft_arr[$list['package']]['url']."' >".$chl_soft_arr[$list['package']]['softname']."</a>";
+								echo "<br/>包名：".$chl_soft_arr[$list['package']]['package'];
+								echo "<br/>版本名：".$chl_soft_arr[$list['package']]['version'];
+							}else{
+								echo "软件名称：<a href='".IMGATT_HOST . $soft_arr[$list['package']]['url']."' >".$soft_arr[$list['package']]['softname']."</a>";
+								echo "<br/>包名：".$soft_arr[$list['package']]['package'];
+								
+								echo "<br/>版本名：<font style='color:red'>通用包</font>";
+							}
+							if($chl_soft_arr[$list['package']]['version_code'] && $chl_soft_arr[$list['package']]['version_code'] < $soft_arr[$list['package']]['version_code']){
+								echo "<font style='color:red'>(需更新)</font>";
+							}
+						?>
+					</td>
+                    <td>{$list.minimum_version}</td>
+                    <td><?php echo $list['status'] == 1 ? "启用" : "停用";	?></td>
+					<td>
+						<?php 
+							if($list['brush_config']==1)
+							{
+								echo "页面：".$list['brush_pages'];
+								echo "<br/>比例：".$list['brush_percent']."%";
+								echo "<br/>访问限额：".$list['daily_brush_max'];
+							}
+							else if($list['brush_config']==2)
+							{
+								echo "未开启";
+							}
+						?>
+					</td>
+					<td>{$list.is_chain_down}</td>
+					<td>{$list.show_frequency}</td>
+                    <td>
+						<if condition="$list.status eq 1 ">
+						<a href="__URL__/switch_site?id={$list.id}&status=0" class="blue" onClick="return confirm('确定要停用吗？');">停用</a>
+						<else/>
+						<a href="__URL__/switch_site?id={$list.id}&status=1" class="blue" onClick="return confirm('确定要启用吗？');">启用</a>
+						</if><br/>
+						<a title ="编辑站点" class="thickbox" href="__URL__/save_site?id={$list.id}" class="blue">编辑</a><br/>
+						<?php 							
+							if($chl_soft_arr[$list['package']]['version_code'] && $chl_soft_arr[$list['package']]['version_code'] < $soft_arr[$list['package']]['version_code']){
+								echo '<a title ="更新渠道包" class="thickbox" href="__URL__/save_chl_pkg?package='.$list['package'].'&softid='.$soft_arr[$list['package']]['softid'].'" class="blue">更新渠道包</a>';
+							}else if(!$chl_soft_arr[$list['package']]['version_code']){
+								echo '<a title ="添加渠道包" class="thickbox" href="__URL__/save_chl_pkg?package='.$list['package'].'&softid='.$soft_arr[$list['package']]['softid'].'" class="blue">添加渠道包</a>';
+							}
+						?>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>
+<script type="text/javascript">
+function change_name(){
+	var configcontent=$("#configcontent").val();
+	$.ajax({    
+		url:'/index.php/Cooperate/Contentcooperation/save_meun_name/configcontent/'+configcontent,
+		type: 'get',
+		dataType: 'json',		
+		async:false,
+		success: function(res){   
+			if(res.code == 1){
+				alert(res.msg);
+			}else{
+				alert(res.msg);
+			}
+		}
+	});
+}
+
+</script>

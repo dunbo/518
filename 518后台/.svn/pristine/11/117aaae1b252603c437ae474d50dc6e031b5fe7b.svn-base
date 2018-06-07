@@ -1,0 +1,150 @@
+<include file="../../Public/new_header" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<div class="main" >
+    <div class="content">
+        <div class="search_box" style="margin-top:10px;height: 37px">
+            <form method="get" action="__URL__/extend_list">
+                <table cellspacing="0" cellpadding="0" width="99%" class="search_table">
+                    <tbody>
+                    <tr>
+                        <td >游戏名称
+                            <input type="text" style="width:140px" value="{$softname}" name="softname" id="softname" class="search_item_text">
+                        </td>
+                        <td >游戏包名
+                            <input type="text" style="width:140px" name="package" id="package" value="{$package}" class="search_item_text">
+
+                        </td>
+                        <td >软件推广状态
+                            <select name="extend_sta" class="search_item_text">
+                                <option value="">全部</option>
+                                <option value="1" <if condition="$extend_sta eq '1'">selected ="selected"</if>>待推广</option>
+                                <option value="2" <if condition="$extend_sta eq '2'">selected ="selected"</if>>推广中</option>
+                                <option value="3" <if condition="$extend_sta eq '3'">selected ="selected"</if>>取消推广</option>
+                            </select>
+
+                        </td>
+                        <td >渠道最新版软件状态
+                            <select name="sdk_status" class="search_item_text">
+                                <option value="">全部</option>
+                                <option value="1" <if condition="$sdk_status eq '1'">selected ="selected"</if>>已通过</option>
+                                <option value="2" <if condition="$sdk_status eq '2'">selected ="selected"</if>>审核中</option>
+                                <option value="3" <if condition="$sdk_status eq '3'">selected ="selected"</if>>未通过</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="submit" onclick="" value="搜索" style="float:left; height:30px;" class="search_btn">
+                        </td>
+                    </tr>
+
+                    </tbody></table>
+                <input type="hidden" value="5580cb87fc83ace494fd9e28f5eecfa7" name="__hash__"></form>
+        </div>
+        <div style="float:left;margin-top:10px;margin-left:5px">
+            <a href='__URL__/related_game?p={$p}&lr={$lr}&width=800&from=extend' style="float:left;" title="添加产品" class="thickbox search_btn">添加产品</a>
+        </div>
+        <div style="margin-top:50px;width:auto;overflow:visible;">
+            <table class="table_list" >
+                <th>游戏名称</th><th>游戏包名</th><th>版本号/版本名/SDK版本</th><th width="6%">软件分类</th><th>游戏类型</th><th width="8%">上架时间</th><th width="4%">软件推广状态</th><th width="7%">渠道最新版本软件状态</th><th>市场最新版本软件状态</th><th>操作</th>
+                <?php
+				foreach($extend_game as $k=>$v){
+                ?>
+                <tr>
+                    <td><?php echo $v['softname'];?></td>
+                    <td><?php echo $v['package'];?></td>
+                    <td>
+                        <?php if($pass_info[$v['package']]){
+                            echo '<a href="__URL__/get_game_old_version?channel_id='.$pass_info[$v['package']]['channel_id'].'&package='.$v['package'].'&version_code_num='.$game_info[$v['package']]['version_code'].'&from=extend&width=400&amp;height=150" class="thickbox" title="历史版本" >'.$pass_info[$v['package']]['version_code'];?>/<?php echo $pass_info[$v['package']]['version'];?>/<?php echo $pass_info[$v['package']]['sdk_version'].'</a>';
+                         }?>
+                    </td>
+                    <td><?php echo $pass_info[$v['package']]['game_type'];?></td>
+                    <td><?php if($game_info[$v['package']]['record_type']=='1'){echo '新软件';}elseif($game_info[$v['package']]['record_type']=='3'){echo '升级';}?></td>
+                    <td>
+                        <?php
+                            if($pass_info[$v['package']]['review_tm']){
+                                echo date("Y-m-d H:i:s",$pass_info[$v['package']]['review_tm']);
+                            }
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                            if($v['extend_sta']==1){
+                                echo '待推广';
+                            }elseif($v['extend_sta']==2){
+                                echo '推广中';
+                            }elseif($v['extend_sta']==3){
+                                echo '取消推广';
+                             }
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                            if( $game_info[$v['package']]['sdk_status']==1){
+                                echo '通过';
+                            }elseif($game_info[$v['package']]['sdk_status']==2){
+                                echo '审核中';
+                            }elseif($game_info[$v['package']]['sdk_status']==3){
+                                echo '未通过';
+                             }elseif($game_info[$v['package']]['sdk_status']==4){
+                                echo '生成中';
+                             }
+                        ?>
+                        (<?php echo $game_info[$v['package']]['version_code_num'];?>)
+                    </td>
+                    <td>
+                        <?php
+                            if(in_array($market_info[$v['package']]['sdk_status'],array('2','3'))){
+                                echo 'QA测试';
+                            }else{
+                                if($market_info[$v['package']]['status']==1){
+                                    echo '已上架';
+                                }elseif($market_info[$v['package']]['status']==2){
+                                    echo '审核中';
+                                }elseif($market_info[$v['package']]['status']==3){
+                                    echo '未通过';
+                                }
+                            }
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                            if(in_array($game_info[$v['package']]['sdk_status'],array('2','3'))){
+                                echo "<a href='__URL__/re_apk_status?softid=".$game_info[$v['package']]['id']."&type=3'>通过<br>";
+                            }
+                            if($game_info[$v['package']]['sdk_status']==3){
+                                echo "<a href='__URL__/re_apk_status?softid=".$game_info[$v['package']]['softid']."&type=2'>重新测试</a><br>";
+                            }
+                            if($v['extend_sta']==2){
+                                echo "<a href='javascript:void(0)' onclick='cancel_extend(".$v['id'].")'>取消推广</a>";
+                             }
+                             if($v['extend_sta']==3){
+                                echo "<a href='javascript:void(0)' onclick='repeat_extend(".$v['id'].")'>重新推广</a>";
+                             }
+                        ?>
+                    </td>
+                </tr>
+                <?php
+				}
+			?>
+            </table>
+        </div>
+        <div>
+            {$page}
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function cancel_extend(id){
+        if(confirm("确认取消推广吗？")){
+            window.location.href = "__URL__/cancel_extend?id="+id;
+        }
+    }
+    function repeat_extend(id){
+        if(confirm("确认重新推广吗？")){
+            window.location.href = "__URL__/cancel_extend?type=1&id="+id;
+        }
+    }
+</script>

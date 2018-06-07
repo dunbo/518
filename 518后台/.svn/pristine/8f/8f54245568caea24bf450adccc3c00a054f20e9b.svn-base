@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>区间软件列表</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css?version1" />
+
+<link rel="stylesheet" href="/Public/css/tablelist.css?1" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript">
+ function getObj(id){
+    return document.getElementById(id);
+ }
+ function change_product(id){
+
+        var obj = getObj(id);
+        var product_obj = getObj('productlist');
+
+        var selectedindex = product_obj.selectedIndex;
+
+        var param_pid = product_obj.options[selectedindex].value ? 'product_id='+product_obj.options[selectedindex].value : '';
+
+        var href = '__URL__/adddefaultkeywords?width=500&'+param_pid;
+
+        obj.href=href;
+        
+
+ }
+</script>
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+<center>
+<h2>默认关键字管理</h2>
+
+<form action="__URL__/listdefaultkeywords" method="get" name="keyword_time">
+	<tr>
+		<td>当前显示：</td>
+		<td>
+            <label>请选择要操作的产品：</label>
+            <select name='product_id' id="productlist"  onchange="change_product('addsearch')">
+                <option disabled = 'disabled'>选择产品</option>
+                <volist name="product_list" id="product" key="k">
+                <option value="{$product.pid}"  <if condition="($product.pid eq $select_pid)"> selected = "selected" </if> >{$product.pname}</option>
+                </volist>
+            </select>
+		</td>
+		<td>
+			<select name="select_time" onchange="javascript:keyword_time.submit();">
+				<option value="1" <?php if($time == 1){ ?>selected<?php } ?> >全部</option>
+				<option value="2" <?php if($time == 2){ ?>selected<?php } ?> >正在推广</option>
+				<option value="3" <?php if($time == 3){ ?>selected<?php } ?> >未开始</option>
+				<option value="4" <?php if($time == 4){ ?>selected<?php } ?> >已下线</option>
+			</select>
+		</td>
+		<td><a href="javascript:keyword_time.submit();" class="search_btn" style="margin:0 10px 0 6px; display:inline;padding:0px 30px;">搜索</a>|<a href="__URL__/adddefaultkeywords?width=500&product_id={$select_pid}" id="addsearch" class="thickbox search_btn" style="margin:0 10px 0 6px; display:inline;padding:0px 30px;">添加</a></td>
+	</tr>
+</form>
+<br />
+<table width="90%" border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+	  <tr>
+	    <th>默认关键字</th>
+	    <th>展示搜索词</th>
+	    <!-- <th>推荐内容</th> -->
+	    <th>当前权重</th>
+		<th>开始时间</th>
+		<th>结束时间</th>
+	    <!--<th>添加时间</th>-->
+		<th>合作形式</th>
+	    <th>操作</th>
+	  </tr>
+ 	</thead>
+  <volist name='hotwordslist' id='hotwordsvo'>
+    <tr>
+    <td align="center">{$hotwordsvo.key_words}</td>
+    <td align="center">{$hotwordsvo.show_word}</td>
+    <!-- <td align="center">
+    		<font color="black" id='content_type_{$hotwordsvo.key_id}' >{$hotwordsvo.content_type}</font>
+			<script>
+				<?php if($hotwordsvo['content_type'] == 2){ ?>
+					var activity_name = convertActivityId2ActivityName({$hotwordsvo.activity_id});
+					$("#content_type_<?php echo $hotwordsvo['key_id']; ?>").html("活动-"+activity_name);	
+				<?php }else if($hotwordsvo['content_type'] == 3){ ?>
+					var feature_name = convertFeatureId2FeatureName({$hotwordsvo.feature_id});
+					$("#content_type_<?php echo $hotwordsvo['key_id']; ?>").html("专题-"+feature_name);	
+				<?php }else if($hotwordsvo['content_type'] == 4){ ?>
+					var page_name = convertPageType2PageName('{$hotwordsvo.page_type}');
+					$("#content_type_<?php echo $hotwordsvo['key_id']; ?>").html("页面-"+page_name);	
+				<?php }else if($hotwordsvo['content_type'] == 8 || $hotwordsvo['content_type'] == 10){ ?>
+					var order_name = convertOrderId2OrderName({$hotwordsvo.activity_id});
+					$("#content_type_<?php echo $hotwordsvo['key_id']; ?>").html("预约-"+order_name);	 
+				<?php } ?>
+			</script>
+    </td> -->
+    <td align="center">{$hotwordsvo.weight}</td>
+	<td align="center">{$hotwordsvo.start_time|date='Y-m-d H:i:s',###|default='&nbsp;'}</td>
+	<td align="center">{$hotwordsvo.end_time|date='Y-m-d H:i:s',###|default='&nbsp;'}</td>
+    <!--<td align="center">{$hotwordsvo.add_time|date='Y-m-d H:i:s',###|default='&nbsp;'}</td>-->
+	<TD align="center"><?php if ($hotwordsvo['type'] !=0) { echo $hotwordsvo['types'] ; }else{ echo "-";} ?></TD>
+    <td align="center"><a href="__URL__/adddefaultkeywords/key_id/{$hotwordsvo.key_id}/edit/1/" style="color:blue;" class="thickbox">编辑</a> | <a href="__URL__/deldefaultkeywords/key_id/{$hotwordsvo.key_id}/key_words/{$hotwordsvo.key_words}" onclick="return checkit()" style="color:blue;">删除</a></td>
+    </tr>
+  </volist>
+</table>
+{$page}
+</center>
+</div>
+</div>

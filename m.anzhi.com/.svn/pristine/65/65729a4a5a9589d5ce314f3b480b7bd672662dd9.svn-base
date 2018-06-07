@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>倚天屠龙记预约活动</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/heaven_dragon/css/common.css?v2"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="http://img4.anzhi.com/static/public/js/jquery.easing-1.3.min.js"></script>
+<script type="text/javascript" src="http://img4.anzhi.com/static/public/js/activity_public2.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+</head>
+
+<body>
+<div class="banner">
+	<img src="<!--{$out.static_url}-->/heaven_dragon/images/banner.png"/>
+</div>
+<div class="main">
+	<!--{if $out.is_stop == 1 }-->
+		<a href="javascript:;" id="reverse" class="btn_01 disabled">已结束</a>
+	<!--{else}-->
+		<!--{if $out.is_sing == 2 }-->
+		<a href="javascript:;" class="btn_01" onclick="sign_do();">立即预约</a>
+		<!--{else}--> 
+		<a href="javascript:;" id="reverse" class="btn_01 disabled">已预约</a>
+		<!--{/if}--> 
+	<!--{/if}-->
+	<div class="description">
+		<h6>预约活动说明</h6>
+		<p>1、<span style="display:inline-block; padding:2px 20px 2px 12px; border-radius:20px; background:#d94346; color:#fff">预约时间：5月13日-5月16日</span><br/>
+2、活动说明：<br/>
+a.预约成功即可获得安智独家高价值礼包，将在18日开服前发放到游戏内悬浮窗中；<br/>
+b.开服后前三天，首次登陆游戏即可领取10元礼券，次日登陆游戏可再领取10元礼券，任意充值即可使用！<br/>
+3、活动最终解释权归安智所有</p>
+	</div>
+	<div class="wrap">
+		<h6 style="text-align:left">【关于《倚天屠龙记》手游】</h6>
+		<p>
+刀剑生涯，无忌江湖！《倚天屠龙记》是一款由金庸正版授权的3D武侠MMORPG手游，其由完美世界与胜利游戏联合发行。游戏研发采用的是自主引擎，实时光影完美还原了那个刀光剑影的江湖，代入感十足。不仅战斗策略丰富多样，玩家还能与张无忌、小昭、赵敏、周芷若等原著角色一起闯荡江湖，演绎别样的侠骨柔情。更多奇遇惊喜，更多畅快打击，快意恩仇的江湖生活，风云变幻的武林世界，全新《倚天屠龙记》手游版，等你来战！       
+</p>
+	</div>
+	<div class="wrap">
+		<img src="<!--{$out.static_url}-->/heaven_dragon/images/img_01.jpg"/>
+		<h6>《倚天屠龙记》游戏介绍<br/><br/><span>高山流水  诗画江湖</span></h6>
+		<img src="<!--{$out.static_url}-->/heaven_dragon/images/img_02.jpg"/>
+		<h6><span>灵动轻功  驰骋江湖</span></h6>
+		<img src="<!--{$out.static_url}-->/heaven_dragon/images/img_03.jpg"/>
+	</div>
+	<a href="javascript:;"  onclick="go_share()" class="btn_02">分享</a>
+</div>
+</body>
+<script type="text/javascript">
+	var sid = '<!--{$out.sid}-->',open_num=0;
+	var aid = '<!--{$out.aid}-->';
+	var is_sing = "<!--{$out.is_sing}-->";
+	var is_login = "<!--{$out.is_login}-->";
+    var is_user_winning = "<!--{$out.is_user_winning}-->";
+	var share = '<!--{$out.share}-->';
+function sign_do()
+{
+	$.ajax({
+		url: '/lottery/heaven_dragon/sign.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+			if (data == 1) {
+				location.reload();
+			} else {
+				login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+			}
+		}
+	});
+}
+function go_share()
+{
+	var share_text='<!--{$out.share_text}-->';
+	//分享不管登录与否都可以分享
+	/*if(is_login==2){//未登录 不能刮
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return;
+	}*/
+	$.ajax({
+		url: '/lottery/heaven_dragon/share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+		}
+	});
+	var share_json = '{"TEXT":"'+share_text+'","URL":"<!--{$out.static_url}-->/heaven_dragon/images/heaven_dragon_icon.png","ACTIONURL":"<!--{$out.share_url}-->","URLWEIXIN":"<!--{$out.static_url}-->/heaven_dragon/images/heaven_dragon_icon.png"}';
+	
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+function onLoginComplete(sid,tip)//回调
+{
+	sid_str = sid.replace("PHPSESSID=", "");
+	if(tip=="登录成功")
+	{
+		location.href="/lottery/heaven_dragon/index.php?lgfrom=1&sid="+sid_str+"&aid=<!--{$out.aid}-->";
+	}
+	else if(tip=="注册成功")
+	{
+		location.href="/lottery/heaven_dragon/index.php?lgfrom=2&sid="+sid_str+"&aid=<!--{$out.aid}-->";
+	}
+}
+</script>
+</html>

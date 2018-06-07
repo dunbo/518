@@ -1,0 +1,154 @@
+<script>
+function editFilter(obj)
+{
+	$('#source_value').val(obj.source_value);
+	$('#source_type').val(obj.source_type);
+	$('#limit_time').val(obj.limit_time);
+	if (obj.limit_time == 1) {
+		$('#begintime').val(timetodate(obj.begintime));
+		$('#endtime').val(timetodate(obj.endtime));
+	} else {
+		$('#begintime').val('');
+		$('#endtime').val('');
+	}
+	$('#id').val(obj.id);
+	$('#add_td').hide();
+	$('#edit_td').show();
+}
+
+function backToAddMode()
+{
+	$('#edit_td').hide();
+	$('#add_td').show();
+	$('#addFilterForm')[0].reset();
+	$('#id').val(0);
+}
+function  timetodate(tim){
+	var d = new Date(parseInt(tim)*1000);
+	return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+} 
+
+function checkForm()
+{
+	if ($('#source_type_pop').val() == '') {
+		alert('请选择屏蔽类型');
+		return false;
+	}
+	if ($('#source_value_pop').val() == '') {
+		alert('请填写需要过滤的值');
+		return false;
+	}
+
+	if ($('input[name^=rid]:checked').length==0 && ($('#reason').val()=='请输入屏蔽原因：' || $('#reason').val()=='')) {
+		alert('请填写屏蔽原因');
+		return false;
+	} else if ($('#reason').val()=='请输入屏蔽原因：') {
+		$('#reason').val('');
+	}
+	if ($('#begintime_pop').val() == '') {
+		alert('请填写开始时间');
+		return false;
+	}
+	if ($('#endtime_pop').val() == '') {
+		alert('请填写结束时间');
+		return false;
+	}
+	
+	if (Date.parse($('#begintime_pop').val()) > Date.parse($('#endtime_pop').val()) ) {
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+	return true;
+
+}
+function getBlockValue(obj) {
+	var type = $(obj).val();
+	var tag = '';
+	switch (type) {
+		case '1': 
+			tag = 'ipmsg';
+		break;
+		case '2': 
+			tag = 'imei';
+		break;
+
+		case '3': 
+			tag = 'user';
+		break;
+	}
+	var tag_id = '#' + tag + '_' + '<?php echo $_GET['id']; ?>';
+	$('#source_value_pop').val($(tag_id).html());
+}
+
+function checkReason(obj)
+{
+	if(obj.value == '请输入屏蔽原因：') {
+		obj.value = '';
+	}
+}
+//关闭thick_box层
+function closeeds(){
+	tb_remove();
+}
+</script>
+<style type="text/css">
+.tb td{padding:5px;}
+</style>
+<form id="addFilterForm" name="addFilterForm" method="post" action="__URL__/addBadFilter" onsubmit="return checkForm();">
+<input type="hidden" id="id" value="0" name="id"/>
+<input type="hidden" id="limit_time" value="1" name="limit_time"/>
+<table cellpadding="0" cellspacing="0" border="0" class="tb" width="100%">
+<tr>
+	<td width="20%">类型</td>
+	<td width="80%">
+<!-- 		<select name="source_type" id="source_type_pop" onchange="getBlockValue(this)">
+			<option value="1">IP</option>
+			<option value="2">IMEI</option>
+			<option value="3">用户名</option>
+		</select> -->
+		<input type="checkbox" name="source_type[]" value="1"  onclick="document.all.ip_add.disabled=!this.checked" />IP
+		<input type="text" name="ip_add" value="{$ip}"  disabled /> <br/>
+		<input type="checkbox" name="source_type[]" value="2" onclick="document.all.imei_add.disabled=!this.checked" />IMEI
+		<input type="text" name="imei_add" value="{$imei}"  disabled /> <br/>
+		<input type="checkbox" name="source_type[]" value="3" onclick="document.all.user_add.disabled=!this.checked" />用户名
+		<input type="text" name="user_add" value="{$user}" disabled /> 
+	</td>
+</tr>
+<!-- <tr>
+	<td>值</td>
+	<td><input type="text" value="" name="source_value" id="source_value_pop"/></td>
+</tr> -->
+
+<tr>
+<td width="125">起始时间:</td>
+<td width="150">
+<input type="text" name="begintime_pop" id="begintime" value="<?php echo date('Y-m-d') ?>" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
+</td>
+</tr>
+<tr>
+<td width="125">结束时间：</td>
+<td width="150">
+<input type="text" name="endtime_pop" id="endtime" value="2023-01-01" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
+</td>
+</tr>
+<tr>
+	<td style="font-weight:bold">屏蔽原因</td>
+	<td>
+<?php foreach($reasons as $val): ?>
+<input type="checkbox" name="rid[]" value="<?php echo $val['id']?>" /> <?php echo $val['content']?><br/>
+<?php endforeach;?>
+</td>
+</tr>
+<tr>
+	<td style="font-weight:bold">其他原因</td>
+	<td><textarea name="reason" id="reason" onclick="checkReason(this)" style="width:60%">请输入屏蔽原因：</textarea></td>
+</tr>
+
+<tr id="add_td" align="center">
+<td colspan="2"><input type="submit" id="addbtn" value="添加" name="addbtn"/>&nbsp;&nbsp;<input type="button" value="取消" onclick='closeeds()' /></td>
+</tr>
+</table>
+</form>
+<script>
+getBlockValue(document.getElementById('source_type_pop'));
+</script>

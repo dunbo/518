@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>年轻爱新鲜 开学上上签</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/schoolseason/css/common1.css?v1"/>
+<script type="text/javascript"  src="<!--{$out.static_url}-->/schoolseason/js/jquery-1.10.2.min.js?v1"></script>
+<script type="text/javascript">
+    var flags={canMove:true},sid='<!--{$out.sid}-->',aid='<!--{$out.aid}-->';
+    function showOpenBox(obj){
+        var bg_h=$(document).height(),
+        top_h= $(obj).height()/ 2-$(document).scrollTop();
+        $(obj).css("margin-top",-top_h+"px").show();
+        $("#body-bg").css("height",bg_h+"px").show();
+        flags.canMove=false;
+    }
+    function cloBox(obj){
+        $(obj).hide();
+        $("#body-bg").hide();
+        flags.canMove=true;
+    }
+    $(function(){
+    //弹框
+    $("body").bind('touchmove', function (e) {
+        if(!flags.canMove){
+            e.preventDefault();
+        }
+    });
+    });
+	
+	function get_edit(id){
+		showOpenBox('#tip-box');
+		$('#id').val(id);
+	}
+	
+	function get_telephone(){
+		var telephone = $('#telephone').val();
+		var name = $('#name').val();
+		var id = $('#id').val();
+		if(!telephone || telephone == '手机号'){
+			$('#my_error').css('display','');
+			$('#my_error').html('请输入手机号');
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		if(!name){
+			$('#my_error').css('display','');
+			$('#my_error').html("请输入收货人");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		if(name.length > 10){
+			$('#my_error').css('display','');
+			$('#my_error').html("请输入10个字以内的收货人姓名");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		$.ajax({
+			url: '/lottery/schoolseason_info_edit.php',
+			data: 'telephone='+telephone+'&name='+name+'&id='+id+'&sid='+sid+'&aid='+aid,
+			type: 'get',
+			success: function(data){
+				if(data){
+					data = eval(''+data+'');
+					if(data == 500){
+						$('#my_error').css('display','');
+						$('#my_error').html('请输入正确的手机号');
+					}else if(data == 200){
+						$('#my_error').css('display','');
+						$('#my_error').html('提交成功');
+						setTimeout(function (){get_success();},3000);
+					}else if(data == 300){
+						$('#my_error').css('display','');
+						$('#my_error').html('参数错误');
+					}
+				}
+			}
+		});
+	}
+	
+	function get_success(){
+		cloBox('#tip-box');
+		location.reload();
+	}
+	
+	function go_download(){
+		var bm_softid = '<!--{$out.result_soft.ID}-->';
+		var bm_package = 'com.gumichina.wcat.anzhi';
+		var bm_softname = '<!--{$out.result_soft.SOFT_NAME}-->';
+		var bm_versioncode = '<!--{$out.result_soft.SOFT_VERSION_CODE}-->';
+		var bm_size = '<!--{$out.result_soft.SOFT_SIZE}-->';
+		window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(bm_softid),bm_package,bm_softname,parseInt(bm_versioncode),bm_size,1);
+	}
+</script>
+</head>
+<body>
+<section>
+    <div class="banner" id="top">
+        <p><img src="<!--{$out.static_url}-->/schoolseason/images/banner1.jpg"/></p>
+        <p><img src="<!--{$out.static_url}-->/schoolseason/images/banner2.png"/></p>
+    </div>
+    <div class="wrap">
+        <div class="prize_lot" style="z-index: 7"><img src="<!--{$out.static_url}-->/schoolseason/images/prize_lot.png"/></div>
+        <div class="mod_top" style="z-index: 6"><img src="<!--{$out.static_url}-->/schoolseason/images/mod_top.png"/></div>
+		<!--{if $out.result}-->
+		<!--{foreach from=$out.result item=vo}-->
+		<!--{if $vo.award_level <=4}-->
+        <div class="mod" style="z-index: 5">
+            <dl class="prize_list">
+                <dt><!--{$vo.level}--><span><!--{$vo.prize}--></span></dt>
+                <dd>姓名<span><!--{$vo.name}--></span></dd>
+                <dd>手机<span><!--{$vo.telephone}--></span></dd>
+            </dl>
+		</div>
+		<div class="mod_top" style="z-index: 4"><img src="<!--{$out.static_url}-->/schoolseason/images/mod_top.png"/></div>
+		<!--{else}-->
+		<div class="mod" style="z-index: 3">
+			<dl class="prize_list">
+				<dt><!--{$vo.level}--><span><!--{$vo.prize}--></span></dt>
+				<dd>白猫计划礼包码：<!--{$vo.gift_num}--></dd>
+				<dd>兑奖路径：下载打开游戏-游戏菜单-复制输入兑换码-领取成功</dd>
+			</dl>
+			<div class="btns clear mt10"><a href="javascript:;" class="fr" onclick="go_download();">下载去兑换</a> </div>
+		</div>
+		<div class="mod_top" style="z-index: 2"><img src="<!--{$out.static_url}-->/schoolseason/images/mod_top.png"/></div>
+		<!--{/if}-->
+		<!--{/foreach}-->
+		<!--{else}-->
+		<div class="mod" style="z-index: 5">
+            <div class="prize_no">少年，你木有奖品哦~</div>
+        </div>
+		<!--{/if}-->
+    </div>
+    <div class="footer">
+        <div class="btn_rule"><a href="/lottery/schoolseason_rule.php">活动规则</a></div>
+    </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>无标题文档</title>
+	<style type="text/css">
+		body, td, th {
+			font-size: 12px;
+		}
+	</style>
+    <script type="text/javascript">
+        function check_del()
+		{
+			if(confirm("是否删除该条配置？"))
+			{
+				return true;
+			}
+			return false;
+		}
+        function stop(h_id,status_v){
+            if(status_v==1)
+            {
+                mess = '启用';
+            }else if(status_v==0)
+            {
+                mess = '停用';
+            }
+            if(confirm("确定要"+mess+"此规则吗?")){
+                var param = {
+                    h_id : h_id,
+                    status_v: status_v
+                };
+                $.ajax({
+                    url:'__URL__/update_status',
+                    type:'POST',
+                    data:param,
+                    dataType:'json',
+                    success:function(data){
+                       alert('操作成功');
+                       location.reload();
+                    }
+                });
+            }
+            else return false;
+        };
+    </script>        
+</head>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<body>
+	<ul class="tab_title margin_top"><li>版本更新</li></ul>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="12%" bgcolor="#E3E2FE"><strong>采集项目名称</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>最近一次编辑时间</strong></th>
+				<th width="7%" bgcolor="#E3E2FE"><strong>操作人</strong></th>
+				<th width="13%" bgcolor="#E3E2FE"><strong>状态</strong></th>
+				<th width="10%" bgcolor="#E3E2FE"><strong>备注</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>操作</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="list">
+				<tr>
+                                        <td height="20" align="center"> <if condition="($list.id eq 1)">采集限制</if><if condition="($list.id eq 2)">快速审核</if></td>
+					<td height="20" align="center"> {$list.update_tm|date="Y-m-d H:i:s",###}</td>
+					<td height="20" align="center"> {$list.os_username}</td>
+					<td height="20" align="center"> <if condition="($list.status eq 1)">已启用</if><if condition="($list.status eq 0)">已停用</if></td>
+                                        <td height="20" align="center"> <a href="__URL__/edit_desc?width=600&height=300&id={$list.id}" class="thickbox blue"><if condition="($list.desc eq '')">编辑</if><if condition="($list.desc neq '')">{$list.desc}</if></a></td>
+                                        <td height="20" align="center"><a href="__URL__/edit_scan?width=600&height=570&modal=true&id={$list.id}" class="thickbox blue">修改</a> | <if condition="($list.status eq 1)"><a href="#" onclick="stop({$list.id},0)" class="blue">停用</a></if><if condition="($list.status eq 0)"><a href="#" onclick="stop({$list.id},1)" class="blue">启用</a></if></td>
+				</tr>
+			</volist>
+		</tbody>
+	</table>
+
+
+	<ul class="tab_title margin_top"><li>新增-第三方</li></ul>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="12%" bgcolor="#E3E2FE"><strong>采集项目名称</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>最近一次编辑时间</strong></th>
+				<th width="7%" bgcolor="#E3E2FE"><strong>操作人</strong></th>
+				<th width="13%" bgcolor="#E3E2FE"><strong>状态</strong></th>
+				<th width="10%" bgcolor="#E3E2FE"><strong>备注</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>操作</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+				<tr>
+                                        <td height="20" align="center">采集限制</td>
+					<td height="20" align="center"> {$new.update_tm|date="Y-m-d H:i:s",###}</td>
+					<td height="20" align="center"> {$new.os_username}</td>
+					<td height="20" align="center"> <if condition="($new.status eq 1)">已启用</if><if condition="($new.status eq 0)">已停用</if></td>
+                                        <td height="20" align="center"> <a href="__URL__/edit_desc?width=600&height=300&id={$new.id}" class="thickbox blue"><if condition="($new.desc eq '')">编辑</if><if condition="($new.desc neq '')">{$new.desc}</if></a></td>
+                                        <td height="20" align="center"><a href="__URL__/edit_scan_new?width=500&height=220&modal=true&id={$new.id}" class="thickbox blue">修改</a> | <if condition="($new.status eq 1)"><a href="#" onclick="stop({$new.id},0)" class="blue">停用</a></if><if condition="($new.status eq 0)"><a href="#" onclick="stop({$new.id},1)" class="blue">启用</a></if></td>
+				</tr>
+		</tbody>
+	</table>
+
+    <ul class="tab_title margin_top"><li>新增网站限制配置</li></ul>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="12%" bgcolor="#E3E2FE"><strong>序号</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>站点</strong></th>
+				<th width="10%" bgcolor="#E3E2FE"><strong>下载量（<万）</strong></th>
+				<th width="13%" bgcolor="#E3E2FE"><strong>分类（用英文逗号,分隔）</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>版本更新日期（下限）</strong></th>
+				<th width="10%" bgcolor="#E3E2FE"><strong>最近一次编辑时间</strong></th>
+                <th width="10%" bgcolor="#E3E2FE"><strong>操作人</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>操作</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+            <volist name="add_config_list" id="add_config_list">
+				<tr>
+                    <td height="20" align="center">{$add_config_list.id}</td>
+					<td height="20" align="center">{$add_config_list.website_name}</td>
+					<td height="20" align="center">{$add_config_list.download_limit}</td>
+                    <td height="20" align="center">{$add_config_list.category_limit}</td>
+					<td height="20" align="center">{$add_config_list.website_up_tm}</td>
+                    <td height="20" align="center"><if condition="$add_config_list.edit_limit_update_time neq 0">{$add_config_list.edit_limit_update_time|date="Y-m-d H:i:s",###}<else></if></td>
+                    <td height="20" align="center">{$add_config_list.edit_limit_os_name}</td>
+                    <td height="20" align="center"><a href="__URL__/edit_add_config?width=500&height=370&modal=true&id={$add_config_list.id}" class="thickbox blue">编辑</a>&nbsp&nbsp
+					</td>
+				</tr>
+            </volist>
+		</tbody>
+	</table>
+	
+	<ul class="tab_title margin_top">
+	<li>新增网站分类配置</li>
+	<li><a href="__URL__/add_category?width=500&height=370" class="blue thickbox">添加新分类</a></li>
+	</ul>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="12%" bgcolor="#E3E2FE"><strong>序号</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>站点</strong></th>
+				<th width="13%" bgcolor="#E3E2FE"><strong>分类（用英文逗号,分隔）</strong></th>
+				<th width="10%" bgcolor="#E3E2FE"><strong>下载量（<万）</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>版本更新日期（下限）</strong></th>
+				<th width="10%" bgcolor="#E3E2FE"><strong>最近一次编辑时间</strong></th>
+                <th width="10%" bgcolor="#E3E2FE"><strong>操作人</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>操作</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+            <volist name="add_category_config_list" id="add_category_config_list">
+				<tr>
+                    <td height="20" align="center">{$add_category_config_list.id}</td>
+					<td height="20" align="center">{$add_category_config_list.website_name}</td>
+					<td height="20" align="center">{$add_category_config_list.category_name}</td>
+                    <td height="20" align="center">{$add_category_config_list.download_limit}</td>
+					<td height="20" align="center">{$add_category_config_list.website_up_tm}</td>
+                    <td height="20" align="center"><if condition="$add_category_config_list.update_tm neq 0">{$add_category_config_list.update_tm|date="Y-m-d H:i:s",###}<else></if></td>
+                    <td height="20" align="center">{$add_category_config_list.edit_limit_os_name}</td>
+                    <td height="20" align="center"><a href="__URL__/edit_category?width=500&height=370&modal=true&id={$add_category_config_list.id}" class="thickbox blue">编辑</a>&nbsp&nbsp
+					<a href="__URL__/delete_category?id={$add_category_config_list.id}" onclick="return check_del();" class="blue">删除</a>&nbsp&nbsp
+					</td>
+				</tr>
+            </volist>
+		</tbody>
+	</table>
+   
+
+    <ul class="tab_title margin_top"><li>搜索失败新增限制配置</li></ul>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="12%" bgcolor="#E3E2FE"><strong>序号</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>站点</strong></th>
+				<th width="7%" bgcolor="#E3E2FE"><strong>下载量（<万）</strong></th>
+				<th width="13%" bgcolor="#E3E2FE"><strong>分类（用英文逗号,分隔）</strong></th>
+				<th width="10%" bgcolor="#E3E2FE"><strong>最近一次编辑时间</strong></th>
+                <th width="10%" bgcolor="#E3E2FE"><strong>操作人</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>操作</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+                <tr>
+                    <td height="20" align="center">1</td>
+					<td height="20" align="center">{$search_fail_add_config_list.config_name}</td>
+					<td height="20" align="center">{$search_fail_add_config_list.download_limit}</td>
+                    <td height="20" align="center">{$search_fail_add_config_list.category_limit}</td>
+                    <td height="20" align="center"><if condition="$search_fail_add_config_list.update_time neq 0">{$search_fail_add_config_list.update_time|date="Y-m-d H:i:s",###}<else></if></td>
+                    <td height="20" align="center">{$search_fail_add_config_list.os_name}</td>
+                    <td height="20" align="center"><a href="__URL__/edit_search_fail_add_config?width=500&height=370&modal=true" class="thickbox blue">编辑</a></td>
+				</tr>
+		</tbody>
+	</table>
+ 
+
+    <ul class="tab_title margin_top"><li>按包名尾缀限制</li></ul>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="7%" bgcolor="#E3E2FE"><strong>序号</strong></th>
+				<th width="13%" bgcolor="#E3E2FE"><strong>类型</strong></th>
+                <th width="13%" bgcolor="#E3E2FE"><strong>关键字（用英文逗号,分隔）</strong></th>
+				<th width="10%" bgcolor="#E3E2FE"><strong>最近一次编辑时间</strong></th>
+                <th width="10%" bgcolor="#E3E2FE"><strong>操作人</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>操作</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+            <!--包名尾缀限制-->
+            <tr>
+                <td height="20" align="center">1</td>
+                <td height="20" align="center">{$packagename_not_end_with_config_list.config_name}</td>
+                <td height="20" align="center">{$packagename_not_end_with_config_list.config_content}</td>
+                <td height="20" align="center"><if condition="$packagename_not_end_with_config_list.update_time neq 0">{$packagename_not_end_with_config_list.update_time|date="Y-m-d H:i:s",###}<else></if></td>
+                <td height="20" align="center">{$packagename_not_end_with_config_list.os_name}</td>
+                <td height="20" align="center"><a href="__URL__/edit_packagename_end_with_config?width=500&height=370&modal=true" class="thickbox blue">编辑</a></td>
+            </tr>
+		</tbody>
+	</table>
+    
+    <ul class="tab_title margin_top"><li>按包名包含限制</li></ul>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="7%" bgcolor="#E3E2FE"><strong>序号</strong></th>
+				<th width="13%" bgcolor="#E3E2FE"><strong>类型</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>操作</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+            <!--包名包含限制-->
+            <tr>
+                <td height="20" align="center">1</td>
+                <td height="20" align="center">包名包含限制</td>
+                <td height="20" align="center"><a href="__URL__/packagename_include_exclude_list" class="blue">查看</a></td>
+            </tr>
+		</tbody>
+	</table>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="/Public/css/jquery.autocomplete.css" type="text/css" media="screen" />
+<script type="text/javascript" src="/Public/js/jquery.autocomplete.js"></script>
+<style>
+td{padding:5px;}
+.red{color:red;}
+.box_input tr td{text-align:left !important; font-size:14px;}
+.box_input tr td input{ height:31px; width:250px; float:left;}
+.green{color:green;}
+.myradio{display:inline;height:auto !important;width:auto;}
+.justfy{width:124px;}
+<!-- CSS goes in the document HEAD or added to your external stylesheet -->
+table.gridtable {
+	font-family: verdana,arial,sans-serif;
+	font-size:5px;
+	color:#333333;
+	border-width: 1px;
+	border-color: #666666;
+	border-collapse: collapse;
+}
+table.gridtable th {
+	border-width: 1px;
+	/*padding: 4px;*/
+	border-style: solid;
+	border-color: #666666;
+	background-color: #dedede;
+}
+table.gridtable td {
+	border-width: 1px;
+	/*padding: 4px;*/
+	border-style: solid;
+	border-color: #666666;
+	background-color: #ffffff;
+}
+input:disabled{
+    border: 1px solid #DDD;
+    background-color: #F5F5F5;
+    /*color:#ACA899;*/
+}
+</style>
+
+</head>
+<body>
+
+
+<h5 class="yahei" style="padding-left:10px;">余额转移</h5>
+<form action="__URL__/transfer_prestore_show" method="post" class="uform">
+<input type="hidden" name="contract_id" value="{$data.id}" id="contract_id" />
+<input type="hidden" name="prestore_id" value="{$data.prestore_id}" />
+
+	<table id="addable_table" class="yahei">
+		<tbody id="invoice_main_0" border='1' class="box_input">
+			<tr>
+				<td class="justfy">来自：产品名称：</td>
+				<td>{$data.softname}-{$data.contract_code}
+				</td>
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red>*</font>剩余充值金额：</td>
+				<td><input value="{$data.recharge_sum}" type="text" name="recharge_sum" class="" id="recharge_sum" disabled="disabled"></td>
+
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red>*</font>剩余配送金额：</td>
+				<td><input value="<?php echo ($data['delivery_sum']&& $data['delivery_sum']!=0)?$data['delivery_sum']:'无';?>" type="text" name="delivery_sum" class="" id="delivery_sum" disabled="disabled" alt='{$data.delivery_sum}'></td>
+
+			</tr>
+		</tbody>
+	</table>
+	<table id="addable_table" class="yahei">
+		<tbody id="invoice_main_0" border='1' class="box_input">
+			<tr>
+				<td class="justfy"><font color=red>&nbsp;</font>转至：</td>
+				<td>	
+					<input type="radio" value='1' name='type' style="width:15px;margin-top:-4px;" onclick="product_is_select(1)"/><span style='margin-left:-130px;margin-right:30px;'>同客户转移</span>
+					<input type="radio" value='2' name='type' style="width:45px;margin-top:-4px;margin-left:100px;" onclick="product_is_select(2)"/><span style='margin-left:25px'>其他用途转出</span>
+				</td>
+			</tr>
+
+			<input type='hidden' id='sel_re_id' name='sel_re_id' value="0" />
+			<tr>
+				<td class="justfy"><font color=red>&nbsp;</font>产品：</td>
+				<td>
+					<select name="contract_id_zhuan" id='contract_id_zhuan'>
+						<option value="0">请选择</option>
+						<volist name="same_product" id="li">
+						<option value="{$li.id}">{$li.softname}-{$li.contract_code}</option>
+						</volist>
+					</select>
+				</td>
+				<td style="color:red;"></td>
+
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red>*</font>转移充值金额：</td>
+				<td><input type="text" name="recharge_sum_zhuan" class="" id="recharge_sum_zhuan" required></td>
+				<td style="color:red;"></td>
+
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red>*</font>转移配送金额：</td>
+				<td><input type="text" name="delivery_sum_zhuan" class="" id="delivery_sum_zhuan" ></td>
+				<td style="color:red;"></td>
+
+			</tr>
+		</tbody>
+	</table>
+	<table class="yahei box_input">
+		<tr>
+			<td class="justfy">&nbsp;备&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注：</td>
+			<td><textarea style="width:250px;height:100px;" name="remark" id="remark"></textarea></td>
+			<td style="color:red;"><div id='remark_error'></div></td>
+		</tr>
+
+	</table>
+	<div style="margin:10px auto;padding:0px 90px;">
+	<button class=" btn btn-sm btn-success yahei"  style="padding-left:30px;padding-right:30px;margin-left:40px;" type="submit" onclick="javascript:return checkBeforeSubmit();">保存</button>
+	<button class=" btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;margin-left:40px;" type="button" onClick="javascript:tb_remove();">取消</button>
+	</div>
+</form>
+<script>
+function product_is_select(type){
+	if(type==2){
+		$('#contract_id_zhuan').attr('disabled','disabled');
+		$('#contract_id_zhuan').val(0);
+		$('#delivery_sum_zhuan').removeAttr("disabled");
+		$('#delivery_sum_zhuan').attr('alt',1);
+	}else if(type==1){
+		$('#contract_id_zhuan').removeAttr("disabled");
+		$('#delivery_sum_zhuan').attr('disabled','disabled');
+		$('#delivery_sum_zhuan').val('');
+		$('#delivery_sum_zhuan').attr('alt',0);
+
+	}
+}
+function checkBeforeSubmit()
+{
+	var i= 1;
+	var alt=$('#delivery_sum_zhuan').attr('alt');
+	if($("#recharge_sum_zhuan").val().length == 0 || $("#recharge_sum_zhuan").val() == "")
+	{
+		$("#recharge_sum_zhuan").css("border","1px solid red").focus().parent().next().text("请先填写转移充值金额！");
+		var i = 0;
+	}else if(isNaN($("#recharge_sum_zhuan").val()))
+	{
+		$("#recharge_sum_zhuan").css("border","1px solid red").focus().parent().next().text("转移充值金额必须是数字！");
+		var i = 0;
+	}else if(Number($("#recharge_sum_zhuan").val()) <0){
+		$("#recharge_sum_zhuan").css("border","1px solid red").focus().parent().next().text("转移充值金额应大于等于0！");
+		var i = 0;
+	}else if(Number($("#recharge_sum_zhuan").val())>Number($("#recharge_sum").val())){
+		$("#recharge_sum_zhuan").css("border","1px solid red").focus().parent().next().text("转移充值金额不可大于剩余充值金额！");
+		var i = 0;
+	}
+	if(alt==1){
+		if(($("#delivery_sum_zhuan").val().length == 0 || $("#delivery_sum_zhuan").val() == "")&&$("#delivery_sum").attr('alt')>0)
+		{
+			$("#delivery_sum_zhuan").css("border","1px solid red").focus().parent().next().text("请先填写转移配送金额！");
+			var i = 0;
+		}else if(isNaN($("#delivery_sum_zhuan").val()))
+		{
+			$("#delivery_sum_zhuan").css("border","1px solid red").focus().parent().next().text("转移配送金额必须是数字！");
+			var i = 0;
+		}else if(Number($("#delivery_sum_zhuan").val()) <0){
+			$("#delivery_sum_zhuan").css("border","1px solid red").focus().parent().next().text("转移配送金额应大于等于0！");
+			var i = 0;
+		}else if(Number($("#delivery_sum_zhuan").val())>Number($("#delivery_sum").attr('alt'))){
+			$("#delivery_sum_zhuan").css("border","1px solid red").focus().parent().next().text("转移配送金额不可大于剩余配送金额！");
+			var i = 0;
+		}
+	}
+	if($("#remark").val().length >100)
+	{
+		$("#remark").css("border","1px solid red").focus().parent().next().text("100个字符以内");
+		var i = 0;
+	}
+	if(i == 0)
+	{
+		return false;
+	}else{
+		return true;
+	}
+}
+</script>
+
+<!-- 主页面结束 -->
+</body>
+</html>

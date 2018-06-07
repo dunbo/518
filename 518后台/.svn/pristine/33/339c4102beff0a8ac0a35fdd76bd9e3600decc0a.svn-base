@@ -1,0 +1,236 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<style type="text/css">
+<!--
+.client_search_div,.client_table_div
+{
+	width:100%;
+
+}
+.client_search_div table td
+{
+	padding:5px 6px;
+}
+.client_table_div th,td{text-align:center !important;vertical-align:middle !important;}
+.client_search_div input{width:200px;height:24px !important;padding:1px;}
+.navgition form
+{
+	display:inline;
+}
+.navgition{text-align:right;padding-right:30px;padding-bottom:20px;}
+.navgition input{padding:0px 15px;}
+-->
+</style>
+
+<link rel="stylesheet" type="text/css" media="all"	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<link rel="stylesheet" href="__PUBLIC__/css/bootstrap.min.css">
+<script type="text/javascript" src="__PUBLIC__/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/bootstrap.min.js"></script>
+<script type="text/javascript" src='__PUBLIC__/js/thickbox-compressed.js' ></script>
+<link rel="stylesheet" href="__PUBLIC__/css/thickbox.css" type="text/css" media="screen" />
+<script>
+
+function checkBeformSubmit()
+{
+	var start_tm=$("#update_tm_one").val();
+	var end_tm=$("#update_tm_two").val();
+	if(start_tm!= "" && end_tm != "")
+	{
+		if(get_unix_time(start_tm)>get_unix_time(end_tm)){
+			alert("结束时间必须大于开始时间！");
+			return false;
+		}
+	}
+	return true;
+}
+
+function get_unix_time(dateStr)
+{
+    var newstr = dateStr.replace(/-/g,'/'); 
+    var date =  new Date(newstr); 
+    var time_str = date.getTime().toString();
+    return time_str.substr(0, 10);
+}
+function check_all(){
+	var alt=$('#chk_all').attr('alt');
+	if(alt==1){
+		$("input[name=chk_list]").attr("checked",true); 
+		$('#chk_all').attr('alt',2);
+	}else{
+		$("input[name=chk_list]").attr("checked",false); 
+		$('#chk_all').attr('alt',1);
+	}
+}
+function select_box(obj){
+	var num=$('#chk_all').attr('num');
+		var chks=$("input[name='chk_list']:checked");
+		var i=0;
+	    $(chks).each(function(){
+	       i++;                   
+	    });
+	    if(i==num){
+	    	$("#chk_all").attr("checked",true); 
+	    	$('#chk_all').attr('alt',2);
+	    }else{
+	    	$("#chk_all").attr("checked",false); 
+	    	$('#chk_all').attr('alt',1);
+	    }
+}
+function export_csv(){
+	var chks=$("input[name='chk_list']:checked");
+	var ids=new Array();
+	var i=0;
+    $(chks).each(function(){
+       ids[i]=this.value;
+       i++;                   
+    });
+    if(i==0){
+		alert('请选择要批量导出的客户信息');
+		return false;
+	}
+	$('#export_csv').attr('href','?export=1&ids='+ids);
+	return true;
+}
+function category(){
+	var category_num=$('#category_type').val();
+	if(category_num!=0){
+		$.ajax({
+			url:"__URL__/show_category_name",
+			type:"get",
+			dateType:"json",
+			data:"category_num="+category_num,
+			success:function(json){
+				var json=eval('('+json+')');
+				if(json!=1){
+						str="<option value='0'>请选择二级行业</option>";
+						for(var i=0;i < json.length; ++i) {
+							str += "<option value='"+json[i]['content_category']+"'"+">"+json[i]['name']+"</option>";
+						}
+						$('#content_category').html(str);
+					}
+					
+				}
+		});
+
+	}else{
+		str="<option value='0'>请选择二级行业</option>";
+		$('#content_category').html(str);
+	}
+}
+function approved(id){
+	if(confirm('你确定要通过该广告主吗')){
+		$.ajax({
+			url:"__URL__/approved_client",
+			type:"get",
+			dateType:"json",
+			data:"id="+id+"&status=1",
+			success:function(json){
+				if(json==1){
+					alert('广告主通过成功');
+					location.reload();
+				}else{
+					alert('广告主通过失败')
+				}
+			}
+		});
+	}
+}
+</script>
+<div class="client_search_div">
+	<form action="__URL__/client_list" >
+		<input type="hidden" name="admin_search" value="1"/>
+		<table class="yahei">
+			<tr>
+				<td>客户名称：</td>
+				<td><input type="text" name="client_name" id="client_name" value="{$client_name}" style="width:130px;" /></td>
+				<td>广告主分类：</td>
+				<td>
+					<select name="category_type" id="category_type" style="width:130px" onchange="category()">
+							<option value='0'>请选择一级行业</option>
+							<volist name="categorys" id="v">
+								<option value='{$v.content_category}'<?php if($category_type==$v['content_category']){echo "selected=''selected";
+								}?>>{$v.name}</option>
+							</volist>
+					</select>
+					<select name="content_category" id="content_category" style="width:130px">
+							<option value='0'>请选择二级行业</option>
+							<volist name="categorys_new" id="v">
+								<option value='{$v.content_category}'<?php if($content_category==$v['content_category']){echo "selected=''selected";
+								}?>>{$v.name}</option>
+							</volist>
+					</select>
+				</td>
+				<td>更新时间：</td>
+				<td><input type="text" name="update_tm_one" class="Wdate" value="{$update_tm_one}" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})" id="update_tm_one"/ style="width:100px"></td>
+				<td>到 </td>
+				<td><input type="text" name="update_tm_two" class="Wdate"  value="{$update_tm_two}"  onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})" id="update_tm_two"/ style="width:100px"></td>
+				<td>状态：</td>
+				<td><select name="status" id="status" style="width:80px">
+							<option value='4'<?php if($status==4){echo "selected=''selected";
+								}?>>全部</option>
+							<option value='1'<?php if($status==1){echo "selected=''selected";
+								}?>>待审核</option>
+							<option value='2'<?php if($status==2){echo "selected=''selected";
+								}?>>通过</option>
+							<option value='3'<?php if($status==3){echo "selected=''selected";
+								}?>>未通过</option>
+					</select></td>
+				<td><button class="btn btn-sm btn-success" type="submit" style="padding-left:10px;padding-right:10px;" onClick="javascript:return checkBeformSubmit();"> 搜索 </button></td>
+			</tr>
+		</table>
+	</form>
+</div>
+<div style="width:100%;padding:10px 10px;margin-bottom:10px;">
+	<a href="" target="_blank" class="" id="export_csv" onclick="return export_csv()"><button class="btn btn-sm btn-default yahei"  style="padding-left:40px;padding-right:40px;margin-left:0px;">导出报表</button></a>
+</div>
+<div class="client_table_div">
+	<table class="table table-striped table-bordered center middle yahei">
+		<thead>
+			<tr>
+				<th style="width:4%;"><input type="checkbox" id="chk_all" onclick="check_all()" alt="1" num='{$client_count}'/></th>
+				<th  style="width:2%;">广告主ID</th>
+				<th  style="width:11%;">广告主名称</th>
+				<th style="width:10%;">广告主行业</th>
+				<th style="width:6%;">广告主网站URL</th>
+				<th style="width:8%;">广告创意</th>
+				<th style="width:10%;">备注信息</th>
+				<th style="width:10%;">上次审核结果</th>
+				<th style="width:10%;">更新时间</th>
+				<th style="width:10%;">状态</th>
+				<th style="width:12%;">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="client_lists" id="client">
+				<tr>
+					<td><input type="checkbox" name="chk_list" value="{$client.id}" onclick="select_box(this)" /></td>
+					<td><a href='javascript:void(0);alert("{$client.client_id}");'>{$client.client_id_two}</a></td>
+					<td>{$client.client_name}</td>
+					<td>{$client.business_name}</td>
+					<td>{$client.url}</td>
+					<td><a href="__URL__/creative_list/client_id/{$client.client_id}/num/1">{$client.count_advertis}</a></td>
+					<td>{$client.memo}</td>
+					<td><if condition="$client.status eq 3"><if condition="$client.before_status eq 1"> 待审核<elseif condition="$client.before_status eq 2"/>已通过<elseif condition="$client.before_status eq 3"/> 未通过</if></if></td>
+					<td><?php if($client['update_tm']){echo date("Y-m-d H:i:s",$client['update_tm']);}?></?php></td>
+					<td><if condition="$client.status eq 1"> 待审核<elseif condition="$client.status eq 2"/>已通过<elseif condition="$client.status eq 3"/> 未通过</if></td>
+					<td>
+					<if condition="$client.status eq 1"> 
+						<a href='javascript:void();' onclick='approved("{$client.id}")'>通过</a><br>
+						<a href="__URL__/reject_client/status/{$client.status}/id/{$client.id}/num/1" class="thickbox">驳回</a><br>
+					<elseif condition="$client.status eq 2"/>
+						<a href="__URL__/reject_client/status/{$client.status}/id/{$client.id}/num/1" class="thickbox">驳回</a><br>
+					</if>
+					<a href="__URL__/client_show/id/{$client.id}/url_suffix/{$url_suffix}" class="yahei" >查看详情</a>
+				</tr>
+			</volist>
+
+		</tbody>
+	</table>
+	<div class="yahei navgition">
+		{$page|default='&nbsp;'}
+	</div>
+</div>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />

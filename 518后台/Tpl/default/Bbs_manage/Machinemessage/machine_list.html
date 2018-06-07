@@ -1,0 +1,88 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script>
+function change_rank(id){
+	var rank = $("#rank_"+id+"").val();
+	if(rank <= 0){
+		alert("排序值错误");
+		return false;
+	}
+	$.ajax({
+		url: '__URL__/change_rank',
+		data: 'id='+id+'&rank='+rank,
+		type: 'get',
+		success: function(data){
+			if(data == 2){
+				alert("编辑失败");
+			}else{
+				window.location.reload(true);
+			}
+		}
+	});
+}
+</script>
+<style>
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+<body>
+<div style="margin:20px 10px 20px 6px;">
+<form action="__URL__/machine_list" method="get" class="table_list">
+<table>
+	<tr>
+		<td>品牌名称：<select name="extend_id">
+					       <option value="0">请选择...</option>
+						   <?php foreach($brand_result as $key => $val){ ?>
+						   <option value="{$val.id}" <?php if($val['id'] == $extend_id){ ?>selected<?php } ?>>{$val.brand_name}</option>
+						   <?php } ?>
+					   </select>
+		</td>
+		<td>机型名称：<input type="text" name="machine_name" value="{$machine_name}" /></td>
+		<td><input type="submit" value="搜索" class="search_btn" /></td>
+	</tr>
+</table>
+</form>
+</div>
+<div style="margin:20px 10px 20px 6px;"><a href="__URL__/add_machine_show/" class="search_btn thickbox">添加</a></div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="10%">品牌名称</th>
+			<th width="15%">机型名称及图片</th>
+			<th width="15%">机型地址</th>
+			<th width="8%">机型描述1</th>
+			<th width="8%">机型描述2</th>
+			<th width="10%">快捷入口</th>
+			<th width="5%">排序</th>
+			<th width="15%">添加时间</th>
+			<th width="8%">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+		<tr>
+			<td>{$val.brand_name}</td>
+			<td><img src="<?php echo IMGATT_HOST;?>{$val.machine_pic}" /><br />{$val.machine_name}</td>
+			<td>{$val.machine_link}</td>
+			<td>{$val.describe}</td>
+			<td>{$val.describe2}</td>
+			<td>
+			<?php foreach($val['entrance_result'] as $k => $v){ ?>
+			<?php if($v['entrance_name']){ ?><span>[{$v.entrance_name}]:{$v.entrance_link}</span><br /><?php } ?>
+			<?php } ?>
+			</td>
+			<td><input type="text" value="{$val.rank}" id="rank_{$val.id}" onblur="change_rank({$val.id});" /></td>
+			<td><?php echo date('Y-m-d H:i:s',$val['create_tm']); ?></td>
+			<td><a class="thickbox" href="__URL__/edit_machine_show/id/{$val.id}/lr/{$lr}/p/{$p}/<?php if($extend_id){ ?>extend_id/{$extend_id}/<?php } ?><?php if($machine_name){ ?>machine_name/{$machine_name}/<?php } ?>">修改</a>&nbsp;&nbsp;<a href="__URL__/del_machine/id/{$val.id}/lr/{$lr}/p/{$p}/<?php if($extend_id){ ?>extend_id/{$extend_id}/<?php } ?><?php if($machine_name){ ?>machine_name/{$machine_name}/<?php } ?>" onclick="return checkit();">删除</a></td>
+		</tr>
+	<?php } ?>
+</table>
+	<div class="navgition">
+		{$page|default='&nbsp;'}
+	</div>
+</body>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />
+</html>

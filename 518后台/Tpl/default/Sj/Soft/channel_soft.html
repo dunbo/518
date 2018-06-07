@@ -1,0 +1,83 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css?1" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<style>
+    .future_class {
+        background-color:#CCCCCC
+    }
+</style>
+
+<body style="position:relative;">
+
+<script type="text/javascript">
+    function del(id){
+        alert(id)
+        if(confirm('确认删除此渠道包吗')){
+            $.ajax({
+                url:'/index.php/Sj/Soft/del_channel_soft',
+                data:'id='+id,
+                type: 'post',
+                success: function(data)
+                {
+                    if(data == 0){
+                        alert('删除失败');
+                    }else{
+                        alert('删除成功');
+                        window.location.reload();
+                    }
+                }
+            });
+        }
+    }
+</script>
+<div style="float:left;margin-left:6px;margin-bottom: 10px">
+    <a href="/index.php/Sj/Soft/add_channel_soft?width=300&height=200" style="float:left;" title="添加" class="thickbox search_btn">添加</a>
+</div>
+
+    <div style="margin-top:10px;">
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>软件名称</th>
+                    <th>包名</th>
+					<th>版本</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="soft" id="list">
+                <tr>
+                    <td>{$list.softid}</td>
+                    <td>{$list.softname}</td>
+                    <td>{$list.package}</td>
+                    <td>
+                        <?php
+							if($chl_soft_arr[$list['package']]['version_code']){
+                        echo $chl_soft_arr[$list['package']]['version'];
+                        }else{
+                        echo "<font style='color:red'>通用包</font>";
+                        }
+                        if($chl_soft_arr[$list['package']]['version_code'] && $chl_soft_arr[$list['package']]['version_code'] < $soft_arr[$list['package']]['version_code']){
+                        echo "<font style='color:red'>(需更新)</font>";
+                        }
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+							if($chl_soft_arr[$list['package']]['version_code'] && $chl_soft_arr[$list['package']]['version_code'] < $soft_arr[$list['package']]['version_code']){
+								echo '<a title ="更新渠道包" class="thickbox" href="/index.php/Cooperate/Contentcooperation/save_chl_pkg?package='.$list['package'].'&softid='.$soft_arr[$list['package']]['softid'].'" class="blue">更新渠道包</a><br>';
+                        }
+                        ?>
+                        <a href="javascript:void(0)" onclick="del('{$list.softid}')">删除</a>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>

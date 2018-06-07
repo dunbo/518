@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style type="text/css">
+body,td,th {
+	font-size: 12px;
+}
+</style>
+</head>
+ 
+<body>
+ <div style="text-align:left; width:95%">忽略软件：</div>
+<div style="width:95%; margin-top:4px">
+	 <form id="form1" name="form1" method="post" action="__URL__/update_ignored">
+  <table width="99%" height="63" border="0" align="center" cellpadding="4" cellspacing="1"  bgcolor="#333333">
+    <tr align="center">
+         <td align="left" bgcolor="#FFFFFF" colspan='2'>
+			软件名称： 
+			{$softname}
+        </td>
+    </tr>
+    <tr align="center">
+         <td align="left" bgcolor="#FFFFFF" colspan='2'>
+			软件包名： 
+			{$package}
+        </td>
+    </tr>
+    <tr align="center">
+         <td align="left" bgcolor="#FFFFFF" colspan='2'>
+		 来源：全选<input type="checkbox" onclick="form_selectAll();" ><br/>
+		 <?php foreach($website_name as $v){ ?>
+			<input <?php if(in_array($v['website_name'],$appfrom)) echo "checked =true"; ?> type="checkbox" value="<?php echo $v['website_name']; ?>" name="app_from[]"/><?php echo $v['website_name']; ?>
+			&nbsp;
+		 <?php } ?>
+        </td>
+    </tr>    
+<volist name='reason_list' id='reason_list' key='i'>
+	<tr height="30">
+		<td style="padding-left:10px;" colspan='2'>
+		<input <if condition="($reason_list.content2 neq '')"> onclick=tip_show("div_{$reason_list.id}") type="hidden" <else /> type="checkbox" </if>    mark='0' name="reject[]" value="{$reason_list.content}" />{$i}&nbsp;&nbsp;&nbsp;
+		<span id = "f_div_{$reason_list.id}" <notempty name="reason_list.content2"> onclick=tip_show("div_{$reason_list.id}") style="color:#58c5c7;cursor:pointer" </notempty> >{$reason_list.content}</span></td>
+	</tr>
+	<notempty name="reason_list.content2">
+		<tr id = "div_{$reason_list.id}" style="display:none;padding-left:30px;" >
+		<td colspan='2'>
+		<foreach  name='reason_list.content2' item='content2'>
+		<input type="checkbox"  name="reject[]" mark='1' value="{$content2}">{$content2}
+		</foreach >
+		</td></tr>		
+	</notempty>
+	</volist>
+	<tr height="30">
+		<td style="padding-left:10px;" colspan='2'>其他原因：</td>
+	</tr>
+	<tr height="30">
+		<td style="padding-left:10px;" colspan='2'><textarea cols="75" rows="4" style="color:#999999;" id="reject_reason" name="reject_reason"></textarea></td>
+	</tr>
+        <if condition="($type eq 'add')">
+	<tr>
+		<td colspan="2">&nbsp;&nbsp;是否进入黑名单:<input type="radio" name="is_black" value="1" />是(不再采集该软件新增)<input type="radio" name="is_black" checked="true" value="0" />否(采集该软件更高版本)</td>
+	</tr>        
+        </if>
+	<tr>
+		<td style="text-align:left;padding-left:130px;" colspan='2'><button type="button" onclick="reject_submit()" style="margin-right:10px;">确定</button><button type="button" onclick="self.tb_remove()">取消</button></td>
+	</tr>
+</table>
+  <input type='hidden' name='tmp_id' id='tmp_id' value="{$tmp_id}"/>
+  <input type='hidden' name='type' id='type' value="{$type}"/>
+  </form>
+</div>
+</body>
+</html>
+<script language="javascript">
+
+//忽略提交
+function reject_submit() {
+        var is_black = $('input:radio[name=is_black]:checked').val();
+	var  rt = '';
+	rt = reject_check_public();
+	if(!rt){
+		alert('请选择或填写原因！');
+		return false;
+	}	
+
+	if ($('#reject_reason').val() != '' && ($('#reject_reason').val().length < 2 || $('#reject_reason').val().length > 150)) {
+		alert('其他原因：2~150个字符');
+		return false;
+	}
+	var from_arr = new Array();
+	var i = 0;
+	$("[name='app_from[]']").each(function(){
+		if($(this).is(':checked')) {
+			from_arr[i] = $(this).val();
+			i++;
+		}
+	});
+	var fromstr = from_arr.join(',');
+	tb_remove();
+	$.ajax({
+		url: '__URL__/update_ignored',
+		data: 'id='+$('#tmp_id').val()+'&msg='+rt+'&appfrom='+fromstr+'&type='+$('#type').val()+'&is_black='+is_black,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				gray_processing(ret['id']);
+			} else if(ret['code']==1 ) {	//成功
+				gray_processing(ret['msg']);
+			}
+		}
+	});
+}	
+//全选来源
+var flag = false;
+function form_selectAll() {	
+	if(!flag){
+		$("[name='app_from[]']").each(function(){
+			$(this).attr('checked',true);
+		});
+		flag = true;
+		return;
+	}
+	if(flag){
+		$("[name='app_from[]']").each(function(){
+			$(this).attr('checked',false);
+		});
+		flag = false;
+		return;
+	}	
+}
+</script>

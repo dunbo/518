@@ -1,0 +1,100 @@
+<include file="../Public/header"/>
+
+<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript">
+    function upload() {
+        var import_file = $.trim($("#upload_file").val());
+        if (import_file.length == 0) {
+            alert("请上传文件！");
+            return;
+        }
+        $.ajaxFileUpload({
+            url:'__URL__/import_softs',
+            type:'POST',
+            files:[$('#upload_file')],
+            secureuri:false,
+            dataType:'json',
+            success:function(data){
+                var div = $("#error_show_div");
+                div.empty();
+                switch(data.status) {
+                case 1: // 关键字中已添加页面、或者关键字已添加包，但批量导入中却想添加页面
+                case -1: // 上传文件错误
+                case -2: // 请上传CSV格式文件
+                case -3: // 文件打开错误，请检查文件是否损坏
+                case -4: // 文件数据内容不能为空
+                case 1:  // 已经有正在导入
+                    alert(data.info);
+                    break;
+                case 0:  // 导入成功
+                    alert(data.info);
+                    location.href = "/index.php/Sj/AdList/index";
+                    break;
+                case -5: // 您上传的CSV有如下问题，请修改后重新上传
+                    // 将每行错误输出到表格里
+                    var hint = $("<p><font color='red'>" + data.info + "</font></p>");
+                    var table = $("<table cellpadding='0' cellspacing='0' style='margin-top:10px;' class='table_list'></table>");
+                    div.append(hint);
+                    div.append(table);
+                    var error_msg = data.data;
+                    var show_rank = false;
+                    for(var j in error_msg) {
+                        if(error_msg[j]['rank'])  show_rank = true;
+                    }
+                    if(show_rank){
+                        table.append("<thead><tr><th width='10%'>行数</th><th width='80%'>描述</th><th width='10%'>推荐位置</th></tr></thead>");
+                    }else{
+                        table.append("<thead><tr><th width='10%'>行数</th><th width='80%'>描述</th></tr></thead>");
+                    }
+
+                    for(var i in error_msg) {
+                        if (error_msg[i]['flag']) {
+                            var line = parseInt(i) + 1;
+                            var msg = error_msg[i]['msg'].replace(/;/g, "<br/>");
+                            if(show_rank){
+                                if(error_msg[i]['rank']){
+                                    table.append("<tbody><tr><td>" + line + "</td><td class='left'>" + msg + "</td><td>" + error_msg[i]['rank'] + "</td></tr></tbody>");
+                                }else{
+                                    table.append("<tbody><tr><td>" + line + "</td><td class='left'>" + msg + "</td><td></td></tr></tbody>");
+                                }
+                            }else{
+                                table.append("<tbody><tr><td>" + line + "</td><td class='left'>" + msg + "</td></tr></tbody>");
+                            }
+                        }
+                    }
+                    break;
+                case -6: // 存在部分导入失败记录
+                    ignore_page_generate(div,data);
+                    break;
+                default:
+                    alert("导入失败！");
+                    break;
+                }
+            }
+        });
+    }
+    
+</script>
+
+<body>
+<div style="width:97%; margin:10px auto;">
+    <h2>批量投放广告</h2>
+    <p>您可以通过“CSV文件导入”的方式，批量投放广告</p>
+    <p>(1) 请下载示例CSV文件　(2) 填写信息　(3) 上传CSV并验证</p>
+    <p>目标广告位： 搜索关键字列表</p>
+    <div><a href="__URL__/import_softs?down_moban=1">下载示例csv</a><div>
+    <div style="margin:10px 0 15px;">
+    <input type="file" id="upload_file" name="upload_file" style="background:none; border:none;"/>
+    </div>
+</div>
+    <!-- error_show_div用来展示文件的错误信息 -->
+    <div id="error_show_div">
+    </div>
+    <input type="button" value="完成" onClick="upload()" class="search_btn" style="float:left; margin-right:15px; display:inline; height:30px;"/>
+    <a href="/index.php/Sj/AdList/index" class="search_btn" style="float:left;">返回</a>
+	<div class="clear"></div>
+    <include file="../../Public/import_ignore"/>
+</body>

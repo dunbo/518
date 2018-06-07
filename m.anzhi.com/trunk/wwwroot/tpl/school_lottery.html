@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>安智校园行，玩转幸运大转盘</title>
+<link type="text/css" rel="stylesheet" href="/css/school_lottery_common.css?v2"/>
+<script type="text/javascript"  src="/js/jquery-1.4.2.min.js?v1"></script>
+<link type="text/css" rel="stylesheet" href="/css/mi.base_140903a.css?v1.0"/>
+<script type="text/javascript"  src="/js/school_lottery_common.js?v2"></script>
+<script type="text/javascript">
+
+	var sid = '<!--{$out.sid}-->',img_url = '<!--{$out.img_url}-->',version_status='<!--{$out.version_status}-->';
+	var stopNum = '',proid_arr = getArgs(),aid = 167,skinvc=proid_arr.skinvc,index = 1,prevIndex = 0,Speed = 300,Time,arr = GetSide(3, 3),EndIndex = 0,cycle = 0,EndCycle = 0,flag = false,quick = 0,soft_lists_go = [],flags={canMove:true};
+
+	function getArgs() {
+		var args = {};
+		var query = location.search.substring(1);
+		var pairs = query.split("&");
+		for(var i = 0; i < pairs.length; i++) {
+			var pos = pairs[i].indexOf('=');
+			if (pos == -1) continue;
+			var argname = pairs[i].substring(0,pos);
+			var value = pairs[i].substring(pos+1);
+			value = decodeURIComponent(value);
+			args[argname] = value;
+		}
+		return args;
+	}
+
+	function GetSide(m, n) {
+		var arr = [];
+		for (var i = 0; i < m; i++) {
+			arr.push([]);
+			for (var j = 0; j < n; j++) {
+				arr[i][j] = i * n + j;
+			}
+		}
+
+		var resultArr = [];
+		var tempX = 0,tempY = 0,direction = "Along",count = 0;
+		while (tempX >= 0 && tempX < n && tempY >= 0 && tempY < m && count < m * n) {
+			count++;
+			resultArr.push([tempY, tempX]);
+			if (direction == "Along") {
+				if (tempX == n - 1)
+					tempY++;
+				else
+					tempX++;
+				if (tempX == n - 1 && tempY == m - 1)
+					direction = "Inverse"
+			}
+			else {
+				if (tempX == 0)
+					tempY--;
+				else
+					tempX--;
+				if (tempX == 0 && tempY == 0)
+					break;
+			}
+		}
+		return resultArr;
+	}
+
+	function getCookie(name)
+	{
+	 var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+	 if(arr=document.cookie.match(reg))
+	  return unescape(arr[2]);
+	 else
+	  return null;
+	} 
+
+
+	function my_notice(){
+		var notice_no = new Array();
+		notice_no = [['运气跑偏了，下次一定要中！'],['大奖擦肩而过，快抓住它~'],['奖品很淘气，又溜掉了~'],['说好的大奖呢，再来一次~'],['大奖就在附近，加油哦~'],['勤劳的孩子有糖吃，继续努力~'],['菩萨保佑，下次就中~'],['我就不信了，还能总不中？'],['上帝刚睡醒了，再给一次机会~'],['手指上有灰，吹吹再抽吧~'],['念段咒语，不信下次不中~'],['没中奖哦，换个姿势吧~']];
+		var i = Math.floor(1+Math.random()*11);
+		var the_notice = notice_no[i];
+		$("#active_text").html(''+the_notice+'');
+	}
+
+	function getArrayItems(arr, num) {
+		var temp_array = new Array();
+		for (var index in arr) {
+			temp_array.push(arr[index]);
+		}
+		var return_array = new Array();
+		for (var i = 0; i<num; i++) {
+			if (temp_array.length>0) {
+				var arrIndex = Math.floor(Math.random()*temp_array.length);
+				return_array[i] = temp_array[arrIndex];
+				temp_array.splice(arrIndex, 1);
+			} else {
+				break;
+			}
+		}
+		return return_array;
+	}
+
+
+	function my_soft() {
+		if (soft_lists_go.length ==0) {
+			var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+			var cmd = 'var soft_list=' + json_data;
+			eval(cmd);
+			var soft_lists = soft_list.DATA;
+			for(j=0;j<soft_lists.length;j++){
+				var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+				if(soft_status_go == -2){
+					soft_lists_go.push(soft_lists[j]);
+				}
+			}
+		}
+		
+		var data = getArrayItems(soft_lists_go,8);
+		var str = '';
+		for(i = 0; i < data.length; i++) {
+			if(data[i][2].length > 4){
+				var softname = data[i][2].substring(0,3)+'...';
+			}else{
+				var softname = data[i][2];
+			}
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(data[i][0]));
+			window.AnzhiActivitys.registerInstallObserver(data[i][7]);
+			var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+			var cmd = 'var soft_status=' + json_datas;
+			eval(cmd);
+			if(soft_status == 1){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载中</a>';
+			}else if(soft_status == 2){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status == 3){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status == 4){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk(parseInt('+aid+'),'+data[i][0]+',"'+data[i][7]+'","'+data[i][2]+'",parseInt('+data[i][13]+'),"'+data[i][27]+'",0,0,'+data[i][27]+');" class="downlode">下载</a>';
+			}else if(soft_status == 5){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="installApp(parseInt('+data[i][0]+'));" class="downlode">安装</a>';
+			}else if(soft_status == 6){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+			}else if(soft_status == 8){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status == 9){
+				var my_soft = '<a value="校验中" id="'+data[i][0]+'" class="downlode">校验中</a>';
+			}else if(soft_status == 10){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+			}else if(soft_status == -1){
+				var soft_other_status = window.AnzhiActivitys.isInstalledApp(data[i][7],parseInt(data[i][13]));
+				if(soft_other_status == -2){
+					var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载</a>';
+				}else if(soft_other_status == -1){
+					var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">更新</a>';
+				}
+			}
+			str += '<li><dl><dd><img src="'+data[i][1]+'" width="43" height="43" border="0"></dd><dd><p class="name">'+softname+'</p><p class="size">'+data[i][9]+'</p><p class="download_bg">'+my_soft+'</p></dd></dl></li>';
+		}
+		$('#my_softs').html(str);
+	}
+
+	function installApp(softid){
+		window.AnzhiActivitys.installAppForActivity(softid);
+	}
+
+	function onInstalled(pkg){
+		for(i=0;i<soft_lists_go.length;i++){
+			if(soft_lists_go[i][7] == pkg){
+				soft_lists_go.splice(i,1); 
+			}
+		}
+	}
+	
+	$(document).ready(function () {
+		location.href="http://promotion.anzhi.com/lottery/school_lottery_end.php";
+		
+		setTimeout(function(){
+			my_soft();
+		}, 100);
+		$('#gameBtn').click(function(){
+			click_lottery();
+		});
+		if(version_status == 200){
+			showOpenNew('view_deta_version');
+		}
+	});
+
+	function Star(my_notice) {
+		var gameTable = document.getElementById('gameTable');
+		gameTable.rows[arr[index][0]].cells[arr[index][1]].style.border = "";
+		gameTable.rows[arr[index][0]].cells[arr[index][1]].style.background = "url('/images/cj_light.png') no-repeat scroll";
+		gameTable.rows[arr[index][0]].cells[arr[index][1]].style.color = "yellow";	
+		if (index > 0) {
+			prevIndex = index - 1;
+		}
+		else {
+			prevIndex = arr.length - 1;
+		}
+		gameTable.rows[arr[prevIndex][0]].cells[arr[prevIndex][1]].style.border = "";
+		gameTable.rows[arr[index][0]].cells[arr[index][1]].style.color = "";
+		gameTable.rows[arr[prevIndex][0]].cells[arr[prevIndex][1]].style.background = "";		
+		index++;
+		quick++;
+		if (index >= arr.length) {
+			index = 0;
+			cycle++;
+		}
+		if (flag == false) {
+			if (quick == 5) {
+				clearInterval(Time);
+				Speed = 50;
+				Time = setInterval(function (){Star(my_notice)}, Speed);
+			}
+
+			if (cycle == EndCycle + 3 && index == EndIndex) {
+				clearInterval(Time);
+				Speed = 300;
+				flag = true;  
+				Time = setInterval(function (){Star(my_notice)}, Speed);
+			}
+		}
+		var stopNums = getCookie('stopNum');
+		if (flag == true && index == stopNums - 1) {
+			quick = 0;
+			clearInterval(Time);
+			if(my_notice == 300){
+				setTimeout(have_num_one,500);
+			}else if(my_notice == 400){
+				setTimeout(have_num,500);
+			}
+			$("#gameContent p").removeClass("waitGame");
+			$("#gameBtn").show();
+		}
+	}
+
+	function click_lottery(){
+		$.ajax({
+			url: '/lottery/school_get_award.php',
+			data:'sid='+sid+'&aid='+aid,
+			type: 'get',
+			success:function(data){
+				var data = eval(''+data+'');
+				if(data[0] == 1000){
+					showOpenNew('view_deta_no');
+					$('#have_no').css('display','');
+					$('#have_some').css('display','none');
+					return false;
+				}else if(data[0] == 300){
+					$('#my_button').css('display','none');
+					$('#have_no').css('display','');
+					$('#have_some').css('display','none');
+					var my_award = data[1];
+					var my_num = data[2];
+					$('#my_num').html(my_num);
+					var my_notice = 300;
+					cirle_go(my_notice,my_award,'','');
+				}else if(data[0] == 900){
+					$('#my_button').css('display','none');
+					$('#have_no').css('display','');
+					$('#have_some').css('display','none');
+					var my_award_level = data[1];
+					var my_prize = data[2];
+					var my_award = data[3];
+					var my_num = data[4];
+					var my_award_go = data[5];
+					var my_notice = 900;
+					$('#my_num').html(my_num);
+					cirle_go(my_notice,my_award,my_award_level,my_prize);		
+					setTimeout(_have_num_yes(my_award_level,my_prize,my_award,my_award_go),6000);
+				}else if(data[0] == 400){
+					$('#my_button').css('display','none');
+					$('#have_no').css('display','none');
+					$('#have_some').css('display','');
+					var my_award = data[1];
+					var my_num = data[2];
+					$('#my_num').html(my_num);
+					var my_notice = 400;
+					cirle_go(my_notice,my_award,'','');
+				}else if(data[0] == 800){
+					$('#my_button').css('display','none');
+					$('#have_no').css('display','none');
+					$('#have_some').css('display','');
+					var my_award_level = data[1];
+					var my_prize = data[2];
+					var my_award = data[3];
+					var my_num = data[4];
+					var my_award_go = data[5];
+					var my_notice = 800;
+					$('#my_num').html(my_num);
+					cirle_go(my_notice,my_award,my_award_level,my_prize);
+					setTimeout(_have_num_yes(my_award_level,my_prize,my_award,my_award_go),6000);				
+				}
+			}
+		});
+	}
+
+	function cirle_go(my_notice,my_award,my_award_level,my_prize){
+		var stopNum = my_award+1;//点击产生随机数，最后将停在次数上
+		document.cookie="stopNum="+stopNum;
+		//$(this).hide(); //开始后隐藏开始按钮
+		//$(this).parent().addClass("waitGame");
+		cycle = 0;
+		flag = false;
+		EndIndex = Math.floor(Math.random() * 8);
+		EndCycle = 1;
+		Time = setInterval(function (){Star(my_notice)}, Speed);
+	}
+
+	function have_num_one(){
+		showOpenNew('view_deta_one');
+		$('#my_button').css('display','');
+	}
+
+	function have_num(){
+		my_notice();
+		showOpenNew('view_deta');
+		$('#my_button').css('display','');
+	}
+
+	function have_num_yes(my_award_level,my_prize,my_award,my_award_go){
+		my_notice();
+		$('#gameContent').css('display','none');
+		if(my_award_go <= 3){
+			$('#award_two').show();
+			$('#award_two_level').html(my_award_level);
+			$('#award_two_prize').html(my_prize);
+		}else if(my_award_go >=4 && my_award_go <= 6){
+			$('#award_one').show();
+			$('#award_one_level').html(my_award_level);
+			$('#award_one_prize').html(my_prize);
+		}
+		$('#my_button').css('display','');
+	}
+
+	function _have_num_yes(my_award_level,my_prize,my_award,my_award_go){
+		return function (){
+			have_num_yes(my_award_level,my_prize,my_award,my_award_go);
+		}
+	}
+
+	function pageScroll(){
+		window.scrollBy(0,-1000);
+		scrolldelay = setTimeout('pageScroll()',1000);
+		var sTop=document.documentElement.scrollTop+document.body.scrollTop;
+		if(sTop==0) clearTimeout(scrolldelay);
+	}
+
+	function change_soft(){
+		$('#my_softs').html('');
+		my_soft();
+	}
+
+	//下载软件
+	function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag,noflux,firmware,status){
+
+		if(status != 1){
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(softid));
+		}
+		if(skinvc >= 5400){
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag,0,firmware);
+		}else{
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+		}
+	}
+
+	//更新软件状态（正在下载）
+	function onDownloadCreated(softid){
+		$('#'+softid+'').html("下载中");
+	}
+
+	function onDownloadStateChanged(softid,newState){
+		if(newState == 1){
+			$('#'+softid+'').html("下载中");
+		}else if(newState == 2){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 3){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 4){
+			$('#'+softid+'').html("重试");
+		}else if(newState == 5){
+			$('#'+softid+'').html("安装");
+			$('#'+softid+'').bind('click',function(){
+				installApp(parseInt(softid));
+			});
+			$.ajax({
+				url: '/lottery/school_download.php',
+				data: 'softid='+softid+'&sid='+sid,
+				type: 'get',
+				success: function(data){
+					if(data){
+						data = eval(''+data+'');
+						$('#have_no').css('display','none');
+						$('#have_some').css('display','');
+						$('#my_num').html(data[0]);
+					}
+				}
+			});
+		}else if(newState == 6){
+			$('#'+softid+'').html("打开");
+		}else if(newState == 8){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 9){
+			$('#'+softid+'').html("检查中");
+		}
+	}
+
+	function lottery_again(obj){
+		closeBtn(obj);
+		click_lottery();
+	}
+
+	function get_one_telphone(){
+		var telphone = $('#my_one_telphone').val();
+		if(!telphone || telphone == '手机号'){
+			$('#my_error').css('display','');
+			$('#the_telphone').html('请输入手机号');
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		$.ajax({
+			url: '/lottery/school_get_telphone.php',
+			data: 'telphone='+telphone+'&sid='+sid+'&aid='+aid,
+			type: 'get',
+			success: function(data){
+				if(data){
+					data = eval(''+data+'');
+					if(data == 500){
+						$('#my_error').css('display','');
+						$('#the_telphone').html('请输入正确的手机号');
+					}else if(data[0] == 200){
+						$('#success_one').css('display','');
+						setTimeout('hide_award_one()',1000);	
+					}
+				}
+			}
+		});
+	}
+	
+	function hide_award_one(){
+		$('#award_one').css('display','none');
+		$('#success_one').css('display','none');
+		$('#my_error').css('display','none');
+		$('#my_error').css('display','none');
+		$('#my_one_telphone').val('');
+		$('#gameContent').show();
+	}
+	
+	function get_two_telphone(){
+		var telphone = $('#my_two_telphone').val();
+		var name = $('#award_two_name').val();
+		var address = $('#award_two_address').val();
+		if(!telphone || telphone == '手机号'){
+			$('#my_two_error').css('display','');
+			$('#error_two_text').html('请输入手机号');
+			return false;
+		}else{
+			$('#my_two_error').css('display','none');
+		}
+
+		if(name.length > 10){
+			$('#my_two_error').css('display','');
+			$('#error_two_text').html("请输入10个字以内的收货人姓名");
+			return false;
+		}else{
+			$('#my_two_error').css('display','none');
+		}
+		if(!name){
+			$('#my_two_error').css('display','');
+			$('#error_two_text').html("请输入收货人");
+			return false;
+		}else{
+			$('#my_two_error').css('display','none');
+		}
+		if(address.length > 30){
+			$('#my_two_error').css('display','');
+			$('#error_two_text').html("请输入30个字以内的收货地址");
+			return false;
+		}else{
+			$('#my_two_error').css('display','none');
+		}
+		if(!address){
+			$('#my_two_error').css('display','');
+			$('#error_two_text').html("请输入收货地址");
+			return false;
+		}else{
+			$('#my_two_error').css('display','none');
+		}
+		
+		$.ajax({
+			url: '/lottery/school_get_telphone.php',
+			data: 'telphone='+telphone+'&name='+name+'&address='+address+'&sid='+sid+'&aid='+aid,
+			type: 'get',
+			success: function(data){
+				if(data){
+					data = eval(''+data+'');
+					if(data == 500){
+						$('#my_two_error').css('display','');
+						$('#error_two_text').html('请输入正确的手机号');
+					}else if(data[0] == 200){
+						$('#success_two').css('display','');
+						setTimeout(hide_award_two,1000);
+					}
+				}
+			}
+		});
+	}
+	
+	function hide_award_two(){
+		$('#award_two').css('display','none');
+		$('#my_two_error').css('display','none');
+		$('#success_two').css('display','none');
+		$('#my_two_telphone').val('');
+		$('#award_two_name').val('');
+		$('#award_two_address').val('');
+		$('#gameContent').show();
+	}
+	
+	function goon_award(){
+		$('#my_telphone').val('');
+		$('#act_part3_award').css('display','none');
+		$('#gameContent').css('display','');
+	}
+
+	function go_down(obj){
+		closeBtn(obj);
+		window.scrollTo(0,524);
+	}
+
+	function showOpenNew(obj){
+		var bg_h=$("#body-bg").height()+$(document).scrollTop();
+		var top_h= $('#'+obj).height()/ 2-$(document).scrollTop();
+		$('#'+obj).css("margin-top",-top_h+"px").show();
+		$("#body-bg").css("height",bg_h+"px").show();
+		$('#'+obj).show();
+        flags.canMove=false;
+    }
+	
+    function closeBtn(obj){
+        $('#'+obj).hide();
+        $("#body-bg").hide();
+        flags.canMove=true;
+    }
+	
+    $(function(){
+        conHideShow(".introduct",80,"up");
+        conHideShow(".college-list",80,"up");
+		$("body").bind('touchmove', function (e) {
+			if(!flags.canMove){
+				e.preventDefault();
+			}
+		});
+    })
+	
+	
+</script>
+</head>
+<body>
+<div id="body-bg" style="display: none;"></div>
+<section>
+    <div class="banner" id="top">
+        <img src="/images/m-banner-1.jpg"/>
+        <a href="/lottery/school_rules.php" class="rule">活动规则</a>
+    </div>
+    <div class="notice clear">
+        <div class="notice-icon"></div>
+		<div class="notice-list">
+			<marquee scrollamount="2" scrolldelay="90" direction="left">
+			<!--{if $out.all_award_count}-->
+			<!--{foreach from=$out.all_award_result item=v key=k}-->
+			<span><!--{$v.telphone}--> &nbsp;获得<!--{$v.award}--><em><!--{$v.the_time}--></em></span>
+			<!--{/foreach}-->
+			<!--{else}-->
+			<span>人品大比拼，头奖疯抢中~</span>
+			<!--{/if}-->
+			</marquee>
+		</div>
+    </div>
+	<div class="white-wrap">
+		<!--{if $out.status != 100}-->
+        <div class="prompt-col clear">
+            <span id="have_some" <!--{if !$out.my_num}-->style="display:none;"<!--{/if}-->>您还有<span id="my_num"><!--{$out.my_num}--></span>次抽奖机会</span>
+			<span id="have_no" <!--{if $out.my_num}-->style="display:none;"<!--{/if}--> >您没有抽奖机会了</span>
+            <a href="/lottery/school_award_info.php?sid=<!--{$out.sid}-->" class="my-prize">我的奖品</a>
+        </div>
+		<!--{/if}-->
+		<!--{if $out.status == 100}-->
+        <div class="prompt-mid"><div id="SIM">请先插入SIM卡，重启安智市场参与本活动</div></div>
+		<!--{/if}-->
+	   <div id="gameContent" <!--{if $out.status == 2000 || $out.status == 3000}-->style="display:none;"<!--{/if}--> >
+			<table id="gameTable" cellspacing="0" cellpadding="0">
+				<tr>
+					<td>10元<br/>充值卡</td>
+					<td>小米3<br/>手机</td>
+					<td>谢谢<br/>参与</td>
+				</tr>
+				<tr>
+					<td>索尼<br/>音乐播放器</td>
+					<td id="my_click"></td>
+					<td>小米<br/>移动电源</td></tr>
+				<tr>
+					<td>谢谢<br/>参与</td>
+					<td>50元<br/>充值卡</td>
+					<td>5元<br/>充值卡</td>
+				</tr>
+			</table>
+			 <!--{if $out.version_status != 200}-->
+			<p id="my_button"><a <!--{if $out.status != 100 && $out.channel_status != 100 && $out.channel_status != 200}-->id="gameBtn"<!--{/if}--> <!--{if $out.status == 100 ||  $out.channel_status == 100 || $out.channel_status == 200}-->class="gray-btn"<!--{/if}-->></a></p>
+			<!--{/if}-->
+		</div>
+    </div>
+	<div class="gray-wrap" id="award_one" <!--{if $out.status != 3000}-->style="display:none;"<!--{/if}-->>
+        <h4 class="prize-hd">恭喜您，获得<span id="award_one_level"><!--{$out.award_level}--></span></h4>
+        <div class="contact-info">
+            <p class="prompt-02"><span id="award_one_prize"><!--{$out.prize}--></span></p>
+            <p class="prompt-03">快输入手机号，领取奖品吧~</p>
+            <ul class="form-items">
+                <li><input type="text" id="my_one_telphone" placeholder="手机号"/></li>
+            </ul>
+			<br />
+			<p id="my_error" style="display:none;"><span id="the_telphone" style="color:red;"></span></p>
+            <p class="prompt-submit" id="success_one" style="display:none;">提交成功。</p>
+        </div>
+        <div class="btns mtop">
+            <a href="javascript:;" class="short-btn" onclick="get_one_telphone();">提交</a>
+        </div>
+    </div>
+	<div class="gray-wrap" id="award_two" <!--{if $out.status != 2000}-->style="display:none;"<!--{/if}-->>
+        <h4 class="prize-hd">恭喜您，获得<span id="award_two_level"><!--{$out.award_level}--></span></h4>
+        <div class="contact-info">
+            <p class="prompt-02"><span id="award_two_prize"><!--{$out.prize}--></span></p>
+            <p class="prompt-03">快输入收货信息，领取奖品吧~</p>
+            <ul class="form-items">
+                <li><input type="text" id="my_two_telphone" placeholder="手机号"/> </li>
+                <li><input type="text" id="award_two_name" placeholder="收货人"/></li>
+                <li><input type="text" id="award_two_address" placeholder="收货地址"/></li>
+            </ul>
+			<br />
+			<p id="my_two_error" style="display:none;"><span id="error_two_text" style="color:red;"></span></p>
+            <p class="prompt-submit" id="success_two" style="display:none;">提交成功。</p>
+        </div>
+        <div class="btns mtop">
+            <a href="javascript:;" class="short-btn" onclick="get_two_telphone();">提交</a>
+        </div>
+    </div>
+	<div class="prompt-mid">下载1款软件即可获得1次抽奖机会</div>
+    <div class="gray-wrap">
+		<!--{if $out.channel_status != 100 && $out.channel_status != 200}-->
+        <ul class="soft-list clear" id="my_softs">
+			
+        </ul>
+		<!--{/if}-->
+		<!--{if $out.channel_status == 100}-->
+		<ul class="soft-list clear">
+		<div class="version-low">
+		<p>很抱歉，您的安智市场版本过低，请升级后参与活动。</p>
+		</div>
+		</ul>
+		<!--{else if $out.channel_status == 200}-->
+		<ul class="soft-list clear">
+		<div class="version-low">
+			<p>很抱歉，您的安智市场版本过低，请升级后参与活动。</p>
+			<p>升级方式：在[管理-设置]中检查更新。</p>
+		</div>
+		</ul>
+		<!--{/if}-->
+		<!--{if $out.channel_status != 100 && $out.channel_status != 200}-->
+        <div class="btns bor-top ptop">
+            <a href="javascript:;" class="short-btn" onClick="change_soft();">换一换</a>
+        </div>
+		<!--{/if}-->
+    </div>
+    <div class="mod-title">安智校园行</div>
+    <div class="mod-con">
+        <div class="introduct">
+            <p>第六届“安智手机应用嘉年华”大学生最喜爱的手机应用巡展活动开始啦，只要你拥有一台安卓手机，就可以到各大校园免费参加活动，百分百中奖！台电PAD、移动电源、自行车等丰厚奖品来等你认领哦！拼人品的时候到了，快关注活动行程，来现场一试身手吧！<br />此活动为期二个半月，将席卷全国26个城市、180所高校。活动旨在让更多学生了解并且使用这些优秀的手机应用和游戏，提升软件的校园用户数量并打造校园品牌知名度！<br />安智市场作为当前备受欢迎的安卓软件下载平台，已成功举办五届“安智手机应用嘉年华”活动，之所以该活动每年都会如期而至，正是因为安智市场看重大学生市场的发展潜力，并在学生群体的市场竞争上信心十足！</p>
+        </div>
+        <div class="more-con clear"><span>更多</span></div>
+    </div>
+    <div class="mod-title">校园行程</div>
+    <div class="banner">
+		<img src="/images/lottery_banner0.jpg"/>
+	</div>
+    <div class="mod-con mtop">
+        <p class="regional">北京、上海、广州 、深圳、成都、石家庄、西安、昆明、南宁、沈阳、太原、济南、青岛、郑州、南京、苏州、无锡、杭州、重庆、合肥、福州、厦门、武汉、长沙、南昌、东莞等26个城市的180所高校，共举办360场。</p>
+    </div>
+    <div class="mod-title">历史足迹</div>
+    <div class="history-wrap"><img src="/images/lottery_history_img.jpg"/> </div>
+    <div class="mod-con ptb">抽奖盛况播报，有你的大学吗？</div>
+    <div class="banner"><a href="http://bbs.anzhi.com/thread-9203548-1-1.html"><img src="/images/lottery_banner1.jpg"/></a>
+	<a href="http://bbs.anzhi.com/thread-9203548-1-1.html" class="join">参与互动</a>
+	</div>
+    <div class="mod-con mtop">
+        <ul class="college-list">
+			<li>12月09日：南昌航空大学、重庆商务职业学院</li>
+			<li>12月08日：南昌航空大学、重庆商务职业学院</li>
+			<li>12月07日：南昌师范学院</li>
+			<li>12月06日：江南大学、南昌师范学院</li>
+			<li>12月05日：江南大学</li>
+			<li>12月04日：广东医学院东莞校区、重庆工业职业技术学院、电子科技大学清水河校区、江苏信息学院、华东理工大学、华侨大学厦门工学院、云南财经大学</li>
+			<li>12月03日：无锡职业技术学院、广东医学院东莞校区、重庆工业职业技术学院、电子科技大学清水河校区、江苏信息学院、华东理工大学、华侨大学厦门工学院、云南财经大学</li>
+			<li>12月02日：江西旅游商贸学院、集美大学水产学院、四川长江职业学院、重庆第二师范大学、东莞理工学院、云南师范大学商学院、无锡职业技术学院</li>
+			<li>12月01日：江西旅游商贸学院、集美大学水产学院、四川长江职业学院、重庆第二师范大学、东莞理工学院、云南师范大学商学院</li>
+			<li>11月30日：西南政法大学、广西民族大学、厦门理工学院</li>
+			<li>11月29日：江西财经大学、无锡商业职业技术学院、西南政法大学、广西民族大学、厦门理工学院</li>
+			<li>11月28日：昆明医科大学、重庆南方翻译学院、江西财经大学、无锡商业职业技术学院</li>
+			<li>11月27日：江西师范大学、西华大学、深圳技师学院、广西教育学院、河北工程技术学院、昆明医科大学、重庆南方翻译学院</li>
+			<li>11月26日：厦门城市职业学院、苏州园区职业技术学院、江西师范大学、西华大学、深圳技师学院、广西教育学院、河北工程技术学院</li>
+			<li>11月25日：江西科技学院、广西工商职业技术学院、西南大学、西南林业大学、成都信息工程学院银杏酒店管理学院、深圳信息职业技术学院、河北工业职业技术学院、厦门城市职业学院、苏州园区职业技术学院</li>
+			<li>11月24日：集美大学、江西科技学院、广西工商职业技术学院、西南大学、西南林业大学、成都信息工程学院银杏酒店管理学院、深圳信息职业技术学院、河北工业职业技术学院</li>
+			<li>11月23日：南昌工程学院、广西师范学院、集美大学</li>
+			<li>11月22日：南昌工程学院、广西师范学院</li>
+			<li>11月21日：苏州技师学院、集美大学诚毅学院、云南中医学院（呈贡校区）</li>
+			<li>11月20日：石家庄职业技术学院、南宁职业技术学院、中山大学新华学院、四川师范大学成都学院、苏州技师学院、集美大学诚毅学院、云南中医学院（呈贡校区）</li>
+			<li>11月19日：苏州经贸职业技术学院、云南大学呈贡校区、石家庄职业技术学院、南宁职业技术学院、中山大学新华学院、四川师范大学成都学院</li>
+			<li>11月18日：湖南电子科技学院、广西大学、广东科贸职业学院、成都传媒学院、石家庄理工职业学院、苏州经贸职业技术学院、云南大学呈贡校区</li>
+			<li>11月17日：湖南电子科技学院、广西大学、广东科贸职业学院、成都传媒学院、石家庄理工职业学院</li>
+			<li>11月16日：福州大学、安徽建筑大学、湖南涉外经济学院、仲恺农业工程学院、河北经贸大学</li>
+			<li>11月15日：苏州科技学院、郑州师范学院、福州大学、安徽建筑大学、湖南涉外经济学院、仲恺农业工程学院、河北经贸大学</li>
+			<li>11月14日：安徽财贸职业学院、苏州科技学院、郑州师范学院</li>
+			<li>11月13日：苏州大学文正学院、青岛科技大学四方校区、山西传媒学院、湖南商务职业技术学院、广东女子职业技术学院、河南教育学院、安徽财贸职业学院</li>
+			<li>11月12日：安徽经济职业学院、苏州大学文正学院、青岛科技大学四方校区、山西传媒学院、湖南商务职业技术学院、广东女子职业技术学院、河南教育学院</li>
+			<li>11月11日：苏州工艺美术职业技术学院、河北科技大学、福建闽江学院爱恩国际学院、山东外贸职业学院、长沙理工大学、太原大学、广东警官学院、黄河科技大学、安徽经济职业学院</li>
+			<li>11月10日：苏州工艺美术职业技术学院、河北科技大学、福建闽江学院爱恩国际学院、山东外贸职业学院、长沙理工大学、太原大学、广东警官学院、黄河科技大学</li>
+			<li>11月09日：福建师范大学、河南财经政法大学、中北大学、安徽三联学院</li>
+			<li>11月08日：湖南师范大学、福建师范大学、河南财经政法大学、中北大学、安徽三联学院</li>
+			<li>11月07日：广东机电职业技术学院、福建工程学院、西安外国语大学、湖南师范大学</li>
+			<li>11月06日：中国海洋大学崂山校区、北京化工大学、安徽医科大学、石家庄经济学院、广东机电职业技术学院、福建工程学院、西安外国语大学</li>
+			<li>11月05日：福建江夏学院、湖南商学院、河南农业大学、广东外语外贸大学南国商学院、中国海洋大学崂山校区、北京化工大学、安徽医科大学、石家庄经济学院</li>
+			<li>11月04日：河北化工医药职业技术学院、南京林业大学 、青岛酒店管理职业技术学院、山西工业学院、西安西京学院、安徽工业经济职业学院、北京农学院、福建江夏学院、湖南商学院、河南农业大学、广东外语外贸大学南国商学院</li>
+			<li>11月03日：河北化工医药职业技术学院、南京林业大学 、青岛酒店管理职业技术学院、山西工业学院、西安西京学院、安徽工业经济职业学院、北京农学院</li>
+			<li>11月02日：福建医科大学、郑州大学</li>
+			<li>11月01日：南京大学、福建医科大学、郑州大学</li>
+			<li>10月31日：石家庄信息工程职业学院、西安联合学院、南京大学</li>
+			<li>10月30日：福州闽江学院、广东金融学院、中国计量学院现代科技学院、青岛科技大学崂山校区、河海大学、山西财经大学、中国矿业大学、河南工程学院南校区</li>
+			<li>10月29日：石家庄学院、西安财经学院、福州闽江学院、广东金融学院、中国计量学院现代科技学院、青岛科技大学崂山校区、河海大学、山西财经大学、中国矿业大学、河南工程学院南校区</li>
+			<li>10月28日：金陵科技学院、浙江水利水电职业技术学院、广东工程职业技术学院、青岛大学东部校区、北京航空航天大学、福州软件职业技术学院、河南工程学院、湖北大学、山西中医学院</li>
+			<li>10月27日：金陵科技学院、浙江水利水电职业技术学院、广东工程职业技术学院、青岛大学东部校区、北京航空航天大学、福州软件职业技术学院、河南工程学院、湖北大学、山西中医学院</li>
+			<li>10月26日：山东中医药大学</li>
+			<li>10月25日：南京中医药大学 、北京信息科技大学、武汉工程大学、山东中医药大学</li>
+			<li>10月24日：西安电子科技大学、南京中医药大学、北京信息科技大学、武汉工程大学</li>
+			<li>10月23日：浙江长征职业技术学院、南京医科大学、武汉商学院、沈阳化工大学、山东交通学院、上海工程技术大学、中国石油大学、广州华南商贸职业学院、西安电子科技大学</li>
+			<li>10月22日：西安理工大学（曲江校区）、浙江长征职业技术学院、南京医科大学、武汉商学院、沈阳化工大学、山东交通学院、上海工程技术大学、中国石油大学、广州华南商贸职业学院</li>
+			<li>10月21日：杭州师范大学、广东交通职业技术学院、上海海事大学、沈阳城建学院、山东商业职业技术学院、北京理工大学、湖北工业大学、西安理工大学（曲江校区）</li>
+			<li>10月20日：杭州师范大学、广东交通职业技术学院、上海海事大学、沈阳城建学院、山东商业职业技术学院、北京理工大学、湖北工业大学</li>
+			<li>10月18日：南京理工大学、山东体育学院、广州大学</li>
+			<li>10月17日：湖北科技职业学院、上海海洋大学、南京理工大学、山东体育学院、广州大学</li>
+			<li>10月16日：南京工业大学、山东建筑大学、浙江育英职业技术学院、广州番禺职业技术学院、沈阳建筑大学、西安财经学院行知学院、湖北科技职业学院、上海海洋大学</li>
+			<li>10月15日：华东政法大学、江汉大学、南京工业大学、山东建筑大学、浙江育英职业技术学院、广州番禺职业技术学院、沈阳建筑大学、西安财经学院行知学院</li>
+			<li>10月14日：浙江经济职业技术学院、南京财经大学、广东中医药大学、沈阳工业大学、山东英才学院、西安建筑科技大学华清学院、北京交通大学、华东政法大学、江汉大学</li>
+			<li>10月13日：上海政法学院、浙江经济职业技术学院、南京财经大学、广东中医药大学、沈阳工业大学、山东英才学院、西安建筑科技大学华清学院、北京交通大学</li>
+			<li>10月12日：上海政法学院</li>
+			<li>10月11日：浙江金融职业技术学院、武汉船舶职业技术学院、辽宁金融职业学院、山东财经大学、西安欧亚学院</li>
+			<li>10月10日：浙江金融职业技术学院、武汉船舶职业技术学院、辽宁金融职业学院、山东财经大学、西安欧亚学院</li>
+			<li>10月09日：济南大学、浙江工商大学、沈阳师范大学、南京邮电大学、西安邮电大学、武汉城市建设职业技术学院、上海立信会计学院</li>
+			<li>10月08日：济南大学、浙江工商大学、沈阳师范大学、南京邮电大学、西安邮电大学、武汉城市建设职业技术学院、上海立信会计学院</li>
+        </ul>
+        <div class="more-con clear"><span>更多</span></div>
+    </div>
+    <div class="mod-title">媒体报道</div>
+	<div class="mod-con">
+		<ul class="report-list">
+			<li><em>中华网</em><a href="http://finance.china.com/fin/kj/201410/17/0187353.html">“安智手机应用嘉年华”2014再出发</a></li>
+			<li><em>中国网</em><a href="http://science.china.com.cn/2014-10/17/content_33795735.htm">“安智手机应用嘉年华”引爆26个城市</a></li>
+			<li><em>IT世界网</em><a href="http://www.it.com.cn/news1/2014101716/1152621.html">“安智手机应用嘉年华”沸腾180所高校</a></li>
+			<li><em>IT168</em><a href="http://software.it168.com/a2014/1017/1674/000001674356.shtml">“安智手机应用嘉年华”360场精彩绽放</a></li>
+		</ul>
+	</div>
+    <div class="btns ptb">
+        <a href="javascript:window.scrollTo(0,0);" class="short-btn">返回顶部</a>
+    </div>
+</section>
+<div class="tip-box" style="display:none;" id="view_deta_no">
+	<a class="clo" href="javascript:;" onClick="closeBtn('view_deta_no');">关闭</a>
+	<div class="tip-con">
+		<p><img src="/images/cry_icon.png"/></p>
+		<p>抽奖机会用完啦，下载喜爱的软件继续抽奖吧~</p>
+		<div class="btns mtop">
+			<a href="javascript:;" class="long-btn" onClick="go_down('view_deta_no');">去下载</a>
+		</div>
+	</div>
+</div>
+<div class="tip-box" style="display:none;" id="view_deta_one">
+	<a class="clo"  href="javascript:;" onClick="closeBtn('view_deta_one');">关闭</a>
+	<div class="tip-con">
+		<p><img src="/images/cry_icon.png"/></p>
+		<p>差一点就中了，下载喜爱的软件继续抽奖吧~</p>
+		<div class="btns mtop">
+			<a href="javascript:;" class="long-btn" onClick="go_down('view_deta_one');">去下载</a>
+		</div>
+	</div>
+</div>
+<div class="tip-box" style="display:none;" id="view_deta">
+	<a class="clo" href="javascript:;" onClick="closeBtn('view_deta');">关闭</a>
+	<div class="tip-con">
+		<p><img src="/images/cry_icon.png"/></p>
+		<p><span id="active_text"></span></p>
+		<div class="btns mtop">
+			<a href="javascript:;" class="long-btn" onClick="lottery_again('view_deta');">再抽一次</a>
+		</div>
+	</div>
+</div>
+<div class="tip-box" <!--{if $out.version_status != 200}-->style="display:none;"<!--{/if}--> id="view_deta_version">
+	<h4>活动提示</h4>
+    <div class="tip-con">
+		<p>您的安智市场版本太低啦，马上升级参与活动赢大奖吧~（<!--{$out.intro_result.soft_sizes}-->）</p>
+        <div class="btns mtop"><a href="javascript:;" class="long-btn"  onClick="download_apk('',<!--{$out.intro_result.softid}-->,'cn.goapk.market','<!--{$out.intro_result.softname}-->','<!--{$out.intro_result.version_code}-->','<!--{$out.intro_result.soft_size}-->',1,0,'0,0',1);">马上升级</a>
+		</div>
+    </div>
+</div>
+</div>
+</body>
+</html>

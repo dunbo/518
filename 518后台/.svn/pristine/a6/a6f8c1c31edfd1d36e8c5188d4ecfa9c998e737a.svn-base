@@ -1,0 +1,168 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox1.css" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script>
+    $(function() {
+        document.onkeydown = function(e) {
+            var ev = document.all ? window.event : e;
+            if(ev.keyCode==13) {
+                search();
+             }
+        }
+    });
+    function search() {
+        // var search_start_time = $.trim($("#search_start_time").val());
+        // var search_end_time = $.trim($("#search_end_time").val());
+        // if (search_start_time && search_end_time && search_start_time > search_end_time) {
+        //     alert('结束时间不能小于或等于开始时间');
+        //     return false;
+        // }
+        $("#index").submit();
+    }
+    /* 导出数据 */
+    function export_data(){
+
+        var items = [];
+        $("#list_box tr").each(function(){
+            
+            var tds = $(this).find("td");
+            items.push({
+                "id":$(tds[0]).text(),
+                "package":$(tds[1]).text(),
+                "softname":$(tds[2]).text(),
+                "ad_client":$(tds[3]).text(),
+                "principal":$(tds[4]).text(),
+                "type":$(tds[5]).text(),
+                "app_type":$(tds[6]).text(),
+                "app_from":$(tds[7]).text(),
+                "create_tm":$(tds[8]).text()
+            });
+        });
+
+        //console.log(items);
+        
+        
+        if(!items.length) {
+            alert("当前没有数据");
+            return false;
+        }
+        
+        $("#editbox_export_data").val(JSON.stringify(items));
+        $("#from4").submit();
+
+    }
+</script>
+
+<body>
+    <br/>
+    <div class="search_box">
+        <form method="get" action="__URL__/index<?php echo $app_from == 2 ? '_operate' : ''; ?>" name="index" id="index">
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="16%">
+                        <label>包名：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_package" id="search_package" value="{$search_package}"/>
+                    </td>
+                    <td width="16%">
+                        <label>软件名称：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_softname" id="search_softname" value="{$search_softname}"/>
+                    </td>
+                    <td width="16%">
+                        <label>广告主名称：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_ad_client" id="search_ad_client" value="{$search_ad_client}"/>
+                    </td>
+                    <td width="10%" rowspan=2><input type="button" value="搜索" onclick="search()" class="search_btn"/></td>
+                </tr>
+                <tr>
+                    <td width="16%">
+                        <label>合作形式：</label>
+                         <SELECT name='search_type' style='width:150px;'>
+                            <?php foreach($typelist as $key => $val): ?>
+                                <option value='<?php echo $key?>'<?php if ($search_type==$key) print ' selected';?>><?php echo $val[0]?></option>
+                            <?php endforeach; ?>                
+                        </SELECT>
+                    </td>
+                    <td width="16%" >
+                        <label>负责人：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_principal" id="search_principal" value="{$search_principal}"/>
+                    </td>					
+                </tr>
+            </table>
+			<input type='hidden' id='app_from' name='app_from' value="<?php echo $app_from; ?>" >
+        </form>
+    </div>
+    <div class="search_box" style="border:0px;">
+		<table width="99%" cellpadding="1" cellspacing="1">
+			<tr>
+				<td width="11%">
+					<a href="__URL__/add_package<?php echo $app_from == 2 ? '_operate' : ''; ?>?modal=true" class="search_btn thickbox">添加</a>
+				</td>				
+				<td width="11%">
+				<a href="__URL__/import_softs<?php echo $app_from == 2 ? '_operate' : ''; ?>" class="search_btn">批量导入</a>
+				</td>
+				<td width="15%">
+				<a href="__URL__/edit_more_ad<?php echo $app_from == 2 ? '_operate' : ''; ?>?height=100" class="thickbox search_btn" style="width:150px;">批量导入-删除列表</a>
+				</td>
+				 <td width="18%">
+					<a style="margin-left:10px" href="__PUBLIC__/sample8.csv">下载批量删除列表模板</a>
+				</td>
+				 <td width="55%"><button id="items_export" class="btn btn-sm btn-success" type="button" style="padding-left:30px;padding-right:30px;" onclick="export_data()"> 导出 </button></td>
+			</tr>
+		</table>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="5%">ID</th>
+                    <th width="10%">包名</th>
+                    <th width="10%">软件名称</th>
+                    <th width="10%">广告主名称</th>
+                    <th width="10%">负责人</th>
+                    <th width="10%">合作形式</th>
+                    <th width="8%">软件类型</th>
+                    <th width="8%">添加来源</th>
+                    <th width="12%">创建时间</th>
+                    <th width="10%">操作</th>
+                </tr>
+            </thead>
+            <tbody id="list_box">
+                <volist name="list" id="list">
+                <tr>
+                    <td>{$list.id}</td>
+                    <td>{$list.package}</td>
+                    <td>{$list.softname}</td>
+                    <td>{$list.ad_client}</td>
+                    <td>{$list.principal}</td>
+                    <td>{$list.ad_type}</td>
+                    <td>{$list.app_type}</td>
+                    <td><?php echo $list['app_from'] == 1 ? '商务' : '运营'; ?></td>
+                    <td>{$list.create_tm|date="Y-m-d H:i:s",###}</td>
+                    <td>
+                        <a href="__URL__/edit_package<?php echo $app_from == 2 ? '_operate' : ''; ?>?id={$list.id}" class="thickbox">编辑</a>
+                        <span>&nbsp;&nbsp;｜&nbsp;&nbsp;</span>
+                        <a href="__URL__/del_pkg<?php echo $app_from == 2 ? '_operate' : ''; ?>?id={$list.id}" onClick="if(!confirm('确定删除此记录吗?'))return false;">删除</a>
+                        <if condition="($list['app_from'] eq 2)">
+                            <br>
+                            <a href="__URL__/edit_package_new?id={$list.id}" class="thickbox">提交商业库</a>
+                        </if>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+    <!-- 导出数据 -->
+    <div id="dialog4" style="display:none;">
+        <form id="from4" method="post" action="__URL__/index<?php echo $app_from == 2 ? '_operate' : ''; ?>/act/export_data">
+            <input id="editbox_export_data" name="data" />
+        </form>
+    </div>
+</body>

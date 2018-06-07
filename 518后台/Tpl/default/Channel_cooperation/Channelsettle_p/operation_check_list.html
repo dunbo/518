@@ -1,0 +1,562 @@
+<include file="../../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/cooperation_common.css" />
+<script type="text/javascript" src='/Public/js/cooperation_public.js' ></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+	function select_all(){ //全选按钮
+		if($('#select_all').attr('checked') == 'checked'){
+			$("input[id^=client_]").attr('checked','checked');
+			$("input[id^=my_]").attr('checked','checked');
+			$("input[id^=cid_]").attr('checked','checked');
+		}else if($('#select_all').attr('checked') != 'checked'){
+			$("input[id^=client_]").attr('checked',false);
+			$("input[id^=my_]").attr('checked',false);
+			$("input[id^=cid_]").attr('checked',false);
+		}
+	}
+	
+	function select_client(client_id){ //客户名称按钮用来全选或全不选渠道
+		if($('#my_'+client_id+'').attr('checked') == 'checked'){
+			$("input[id^=cid_"+client_id+"_]").attr('checked','checked');
+		}else if($('#my_'+client_id+'').attr('checked') != 'checked'){
+			$("input[id^=cid_"+client_id+"_]").attr('checked',false);
+			$('#select_all').attr('checked',false);
+		}
+	}
+	
+	function my_select(client_id){
+		if($('#client_'+client_id+'').attr('checked') != 'checked'){
+			$('#select_all').attr('checked',false);
+		}
+	}
+	
+	function last_select(my_id,client_id){
+		if($('#cid_'+my_id+'').attr('checked') != 'checked'){
+			$('#my_'+client_id+'').attr('checked',false);
+			$('#select_all').attr('checked',false);
+		}
+	}
+	
+	function param_go(url,cid,month,settle_entity,client_id,status){
+		var chname = $('#chname').val();
+		var client_name = $('#client_name').val();
+		var start_tm = $('#start_tm').val();
+		var end_tm = $('#end_tm').val();
+		var p = $('#p').val();
+		var lr = $('#lr').val();
+		var my_go = "";
+		if(chname){
+			my_go = my_go+"/chname/"+chname;
+		}
+		if(client_name){
+			my_go = my_go+"/client_name/"+client_name;
+		}
+		if(start_tm){
+			my_go = my_go+"/start_tm/"+start_tm;
+		}
+		if(end_tm){
+			my_go = my_go+"/end_tm/"+end_tm;
+		}
+		if(p){
+			my_go = my_go+"/p/"+p;
+		}
+		if(lr){
+			my_go = my_go+"/lr/"+lr;
+		}
+		if(cid){
+			my_go = my_go+"/cid/"+cid;
+		}
+		if(month){
+			my_go = my_go+"/month/"+month;
+		}
+		if(settle_entity){
+			my_go = my_go+"/settle_entity/"+settle_entity;
+		}
+		if(client_id){
+			my_go = my_go+"/client_id/"+client_id;
+		}
+		if(status){
+			my_go = my_go+"/status/"+status;
+		}
+		
+		tb_show('',url+my_go+"?mm",false);
+	}
+	
+	function edit_salvation(cid,month,settle_entity){ //补差编辑接口
+		param_go("__URL__/edit_salvation_show",cid,month,settle_entity);
+	}
+	
+	function edit_comment(cid,month,settle_entity){ //备注编辑接口
+		param_go("__URL__/edit_comment_show",cid,month,settle_entity);
+	}
+	
+	function change_status(client_id,month,status){
+		var chname = $('#chname').val();
+		var client_name = $('#client_name').val();
+		var start_tm = $('#start_tm').val();
+		var end_tm = $('#end_tm').val();
+		var p = $('#p').val();
+		var lr = $('#lr').val();
+		var my_go = "";
+		if(chname){
+			my_go = my_go+"/chname/"+chname;
+		}
+		if(client_name){
+			my_go = my_go+"/client_name/"+client_name;
+		}
+		if(start_tm){
+			my_go = my_go+"/start_tm/"+start_tm;
+		}
+		if(end_tm){
+			my_go = my_go+"/end_tm/"+end_tm;
+		}
+		if(p){
+			my_go = my_go+"/p/"+p;
+		}
+		if(lr){
+			my_go = my_go+"/lr/"+lr;
+		}
+		if(month){
+			my_go = my_go+"/month/"+month;
+		}
+		if(client_id){
+			my_go = my_go+"/client_id/"+client_id;
+		}
+		if(status){
+			my_go = my_go+"/status/"+status;
+		}
+		
+		var cid_str = $("input[id^=cid_"+client_id+"_"+month+"_]");
+		var my_cid = '';
+		for(i=0;i<cid_str.length;i++){
+			if(cid_str[i].checked == true){
+				my_cid += cid_str[i].value+',';
+			}
+		}
+		if(my_cid){
+			my_go = my_go+"/my_cid/"+my_cid;
+		}else{
+			alert("请选择要结算的渠道");
+			return false;
+		}
+
+		if(confirm("确定通过审核吗"))
+		{
+			location.href="__URL__/change_status"+my_go;
+		}else{
+			return false;
+		}
+		
+	}
+	
+	// 导出报表
+	function drive_list(){
+		var chname = $('#chname').val();
+		var client_name = $('#client_name').val();
+		var start_tm = $('#start_tm').val();
+		var end_tm = $('#end_tm').val();
+		var p = $('#p').val();
+		var lr = $('#lr').val();
+		var my_go = "";
+		if(chname){
+			my_go = my_go+"/chname/"+chname;
+		}
+		if(client_name){
+			my_go = my_go+"/client_name/"+client_name;
+		}
+		if(start_tm){
+			my_go = my_go+"/start_tm/"+start_tm;
+		}
+		if(end_tm){
+			my_go = my_go+"/end_tm/"+end_tm;
+		}
+		if(p){
+			my_go = my_go+"/p/"+p;
+		}
+		if(lr){
+			my_go = my_go+"/lr/"+lr;
+		}
+		var client_str=document.getElementsByName("client_id[]");
+		var check_ids = '';
+		for(i=0;i<client_str.length;i++){
+			if(client_str[i].checked == true){
+				my_client = $("input[id^=check_"+client_str[i].value+"_]");
+				for(j=0;j<my_client.length;j++){
+					check_ids += my_client[j].value+',';
+				}
+			}
+		}
+		if(check_ids){
+			my_go = my_go + '/check_ids/'+check_ids;
+		}
+	    location.href='__URL__/operation_check_list/from/1'+my_go;
+	}
+	//导出申请表
+	function my_cheque(){
+		var chname = $('#chname').val();
+		var client_name = $('#client_name').val();
+		var start_tm = $('#start_tm').val();
+		var end_tm = $('#end_tm').val();
+		var p = $('#p').val();
+		var lr = $('#lr').val();
+		var my_go = "";
+		if(chname){
+			my_go = my_go+"/chname/"+chname;
+		}
+		if(client_name){
+			my_go = my_go+"/client_name/"+client_name;
+		}
+		if(start_tm){
+			my_go = my_go+"/start_tm/"+start_tm;
+		}
+		if(end_tm){
+			my_go = my_go+"/end_tm/"+end_tm;
+		}
+		if(p){
+			my_go = my_go+"/p/"+p;
+		}
+		if(lr){
+			my_go = my_go+"/lr/"+lr;
+		}
+		
+		var client_str=document.getElementsByName("client_id[]");
+		var my_client = '';
+		for(i=0;i<client_str.length;i++){
+			if(client_str[i].checked == true){
+				my_client += client_str[i].value+',';
+			}
+		}
+	
+		var cid_str=document.getElementsByName("cid[]");
+		var my_cid = '';
+		for(i=0;i<cid_str.length;i++){
+			if(cid_str[i].checked == true){
+				my_cid += cid_str[i].value+',';
+			}
+		}
+
+		if(my_client){
+			my_go = my_go + '/my_client/'+my_client;
+		}
+		if(my_cid){
+			my_go = my_go + '/my_cid/'+my_cid;
+		}
+		if(my_client && my_cid){
+			location.href='__URL__/drive_cheque'+'/from/1'+my_go+'?mm';
+		}else{
+			alert("请选择客户渠道");
+		}
+	
+	}
+	//导出对账单
+	function drive_settle(){
+		var chname = $('#chname').val();
+		var client_name = $('#client_name').val();
+		var start_tm = $('#start_tm').val();
+		var end_tm = $('#end_tm').val();
+		var p = $('#p').val();
+		var lr = $('#lr').val();
+		var my_go = "";
+		if(chname){
+			my_go = my_go+"/chname/"+chname;
+		}
+		if(client_name){
+			my_go = my_go+"/client_name/"+client_name;
+		}
+		if(start_tm){
+			my_go = my_go+"/start_tm/"+start_tm;
+		}
+		if(end_tm){
+			my_go = my_go+"/end_tm/"+end_tm;
+		}
+		if(p){
+			my_go = my_go+"/p/"+p;
+		}
+		if(lr){
+			my_go = my_go+"/lr/"+lr;
+		}
+		
+		var client_str=document.getElementsByName("client_id[]");
+		var my_client = '';
+		for(i=0;i<client_str.length;i++){
+			if(client_str[i].checked == true){
+				my_client += client_str[i].value+',';
+			}
+		}
+		
+		var cid_str=document.getElementsByName("cid[]");
+		var my_cid = '';
+		for(i=0;i<cid_str.length;i++){
+			if(cid_str[i].checked == true){
+				my_cid += cid_str[i].value+',';
+			}
+		}
+		if(my_cid){
+			my_go = my_go + '/my_cid/'+my_cid;
+		}
+	
+		if(my_client){
+			my_go = my_go + '/my_client/'+my_client;
+		}
+	
+		if(my_client && my_cid){
+			tb_show('','__URL__/drive_settle_show/'+my_go+'?mm',false);
+		}else{
+			alert("请选择客户渠道");
+		}
+	
+	}
+	
+	
+	function client_settle(client_id,month,settle_entity){
+		var cid_str = $('input[id^=cid_'+client_id+'_'+month+']');
+		var my_cid = '';
+		for(i=0;i<cid_str.length;i++){
+			if(cid_str[i].checked == true){
+				my_cid += cid_str[i].value+','; //客户id_cid_month
+			}
+		}
+		if(my_cid){ //客户id_cid_month,客户id_cid_month,客户id_cid_month,
+			if (settle_entity == '2') {
+				window.open("__URL__/client_settle2/client_id/"+client_id+"/month/"+month+"/my_cid/"+my_cid);
+			} else {
+				window.open("__URL__/client_settle/client_id/"+client_id+"/month/"+month+"/my_cid/"+my_cid);
+			}
+		}else{
+			alert("请选择渠道");
+			return false;
+		}
+	
+	}
+	
+	function client_cheque(client_id,month){
+		var cid_str = $('input[id^=cid_'+client_id+'_'+month+']');
+		var my_cid = '';
+		for(i=0;i<cid_str.length;i++){
+			if(cid_str[i].checked == true){
+				my_cid += cid_str[i].value+',';
+			}
+		}
+		if(my_cid){
+			window.open("__URL__/client_cheque/client_id/"+client_id+"/month/"+month+"/my_cid/"+my_cid); 
+		}else{
+			alert("请选择渠道");
+		}
+	}
+	
+	function  go_business(client_id,month){
+		var chname = $('#chname').val();
+		var client_name = $('#client_name').val();
+		var start_tm = $('#start_tm').val();
+		var end_tm = $('#end_tm').val();
+		var p = $('#p').val();
+		var lr = $('#lr').val();
+		var my_go = "";
+		if(chname){
+			my_go = my_go+"/chname/"+chname;
+		}
+		if(client_name){
+			my_go = my_go+"/client_name/"+client_name;
+		}
+		if(start_tm){
+			my_go = my_go+"/start_tm/"+start_tm;
+		}
+		if(end_tm){
+			my_go = my_go+"/end_tm/"+end_tm;
+		}
+		if(p){
+			my_go = my_go+"/p/"+p;
+		}
+		if(lr){
+			my_go = my_go+"/lr/"+lr;
+		}
+		if(month){
+			my_go = my_go+"/month/"+month;
+		}
+		if(client_id){
+			my_go = my_go+"/client_id/"+client_id;
+		}
+		if(status){
+			my_go = my_go+"/status/"+status;
+		}
+
+		var cid_str = $("input[id^=cid_"+client_id+"_"+month+"_]");
+		var my_cid = '';
+		for(i=0;i<cid_str.length;i++){
+			if(cid_str[i].checked == true){
+				my_cid += cid_str[i].value+',';
+			}
+		}
+		
+		if(my_cid){
+			my_go = my_go+"/my_cid/"+my_cid;
+		}else{
+			alert("请选择要结算的渠道");
+			return false;
+		}
+		
+		if(confirm("确定执行此操作吗"))
+		{
+			location.href="__URL__/go_business"+my_go;
+		}else{
+			return false;
+		}
+	}
+</script>
+<div>
+	<div>
+		<form action="__URL__/operation_check_list" method="get">
+		<table width="100%" cellpadding="0" cellspacing="0" class="search_table margin_top">
+			<tr>
+				<td width="19%">客户名称：<input type="text" name="client_name" id="client_name" value="{$client_name}" /></td>
+				<td width="19%">渠道名称：<input type="text" name="chname" id="chname" value="{$chname}" /></td>
+				<td width="32%">数据月份：<input id="start_tm" name="start_tm" value="{$start_tm}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M',dateFmt:'yyyy-MM'})">&nbsp;到&nbsp;<input id="end_tm" name="end_tm" value="{$end_tm}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M',dateFmt:'yyyy-MM'})"></td>
+				<td width="20%"><input type="submit" value="搜索" class="search_btn" /></td>
+			</tr>
+		</table>
+		</form>
+	</div>
+	<div style="margin:20px;"><input type="button" value="导出报表" onclick="drive_list();" /> &nbsp;&nbsp;<input type="button" value="导出对账单" onclick="drive_settle();" />&nbsp;&nbsp;<input type="button" value="导出申请单" onclick="my_cheque();" /><input type="hidden" name="p" value="{$p}" id="p" /><input type="hidden" name="lr" value="{$lr}" id="lr" /></div>
+	<div>
+		<table class="table_list" cellpadding="0" cellspacing="0">
+			<thead>
+				<tr>
+					<th width="1%"><input type="checkbox" onclick="select_all();" id="select_all" /></th>
+					<th width="5%">序号</th>
+					<th width="6%">月份</th>
+					<th width="8%">客户名称</th>
+					<th width="9%">渠道名称</th>
+					<th width="6%">激活量</th>
+					<th width="7%">激活量合计</th>
+					<th width="7%">日均激活量</th>
+					<th width="6%">单价</th>
+					<th width="7%">结算金额</th>
+					<th width="7%">补差</th>
+					<th width="7%">税率</th>
+					<th width="7%">应付金额</th>
+					<th width="7%">备注</th>
+					<th width="5%">对账单</th>
+					<th width="5%">操作</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach($result as $key => $val){ ?>
+			<tr>
+				<td rowspan="<?php echo count($val['cid_result']); ?>"><input type="checkbox"  name="client_id[]" value="{$val.client_id}_{$val.month}_{$val['cid_result'][0]['settle_entity']}" id="client_{$val.client_id}" onclick="my_select({$val.client_id});" /></td>
+				<td rowspan="<?php echo count($val['cid_result']); ?>">{$val.num}</td>
+				<td rowspan="<?php echo count($val['cid_result']); ?>"><?php echo date('Y-m',strtotime($val['month'].'01')); ?></td>
+				<td style="align:left;" rowspan="<?php echo count($val['cid_result']); ?>"><?php if(count($val['cid_result'])>1 || $val['cid_result'][0]['settle_entity'] == 2){ ?><input type="checkbox" name="my_client[]" value="{$val.client_id}_{$val.month}" id="my_{$val.client_id}_{$val.month}" onclick="select_client('{$val.client_id}_{$val.month}');" /><?php } ?>{$val.client_name}</td>
+				<td style="text-align:left;"><input type="checkbox" name="cid[]" <?php if($val['cid_result'][0]['settle_entity'] == 1){ ?>onclick="last_select('{$val.client_id}_{$val.month}_<?php echo $val['cid_result'][0]['cid']; ?>','{$val.client_id}_{$val.month}');"<?php }else{ ?>onclick="return false";<?php } ?> id="cid_{$val.client_id}_{$val.month}_<?php echo $val['cid_result'][0]['cid']; ?>" value="{$val.client_id}_<?php echo $val['cid_result'][0]['cid']; ?>_{$val.month}" /><?php echo $val['cid_result'][0]['chname']; ?>
+				<input type="hidden" id="check_{$val.client_id}_{$val.month}_{$val['cid_result'][0]['settle_entity']}_<?php echo $val['cid_result'][0]['cid']; ?>" value="<?php echo $val['cid_result'][0]['id']; ?>"></input>
+				</td>
+				<td><a href="__URL__/channel_activation/cid/<?php echo $val['cid_result'][0]['cid']; ?>/month/{$val.month}"><?php echo $val['cid_result'][0]['activation']; ?></td>
+				<?php if($val['cid_result'][0]['settle_entity'] == 2){ ?><td rowspan="<?php echo count($val['cid_result']); ?>"><?php echo $val['cid_result'][0]['activation_sum']; ?></td><?php } else { ?><td>-</td><?php } ?>
+				<?php if($val['cid_result'][0]['settle_entity'] == 2){ ?><td rowspan="<?php echo count($val['cid_result']); ?>"><?php echo $val['cid_result'][0]['average_sum']; ?></td><?php } else { ?><td><?php echo $val['cid_result'][0]['average']; ?></td><?php } ?>
+				<td <?php if($val['cid_result'][0]['settle_entity'] == 2){ ?>rowspan="<?php echo count($val['cid_result']); ?>"<?php } ?>><?php echo $val['cid_result'][0]['price']; ?>
+				<!--<?php if($val['cid_result'][0]['price_type'] == 1){ ?>
+				<div class="check_prev">
+				<div class="check_prev_shortbox"><span style="color:blue;"><?php echo $val['cid_result'][0]['price']; ?></span></div>
+				
+				<div style="display:none;" class="check_prev_newbox">
+				<table border="1" cellspacing="0" cellpadding="0">
+					<tr>
+						<td>方案名称</td>
+						<td>日均激活量</td>
+						<td>单价(元)</td>
+					</tr>
+					<tr>
+						<td rowspan="<?php echo count($val['cid_result'][0]['my_price']); ?>"><?php echo $val['cid_result'][0]['price_name']; ?></td>
+						<td><?php echo $val['cid_result'][0]['my_price'][0]['star_activations']; ?>-<?php if($val['cid_result'][0]['my_price'][0]['end_activations']){ echo $val['cid_result'][0]['my_price'][0]['end_activations'];} ?></td>
+						<td><?php echo $val['cid_result'][0]['my_price'][0]['price']; ?></td>
+					</tr>
+					<?php foreach(array_slice($val['cid_result'][0]['my_price'],1) as $k => $v){ ?>
+					<tr>
+						<td>{$v.star_activations}-<?php if($v['end_activations']){ ?>{$v.end_activations}<?php } ?></td>
+						<td>{$v.price}</td>
+					</tr>
+					<?php } ?>
+				</table>
+				</div>
+				
+				</div><?php }else{ ?>{$val['cid_result'][0]['price']}<?php } ?>!--></td>
+				<td <?php if($val['cid_result'][0]['settle_entity'] == 2){ ?>rowspan="<?php echo count($val['cid_result']); ?>"<?php } ?>><?php if($val['cid_result'][0]['warning'] == 1){ ?><span style="color:red;"><?php }else{ ?><span><?php } ?><?php echo $val['cid_result'][0]['settle_amount']; ?></span></td>
+				<td <?php if($val['cid_result'][0]['settle_entity'] == 2){ ?>rowspan="<?php echo count($val['cid_result']); ?>"<?php } ?>><a href="javascript:;" onclick="edit_salvation(<?php if($val['cid_result'][0]['settle_entity'] == 2){ echo $val['client_id']; }else{ echo $val['cid_result'][0]['cid']; } ?>,{$val.month},<?php echo $val['cid_result'][0]['settle_entity']; ?>);"><?php echo $val['cid_result'][0]['salvation']; ?></a></td>
+				<td <?php if($val['cid_result'][0]['settle_entity'] == 2){ ?>rowspan="<?php echo count($val['cid_result']); ?>"<?php } ?>><?php echo $val['cid_result'][0]['taxt']; ?>%</td>
+				<td <?php if($val['cid_result'][0]['settle_entity'] == 2){ ?>rowspan="<?php echo count($val['cid_result']); ?>"<?php } ?>><?php echo $val['cid_result'][0]['amount_pay']; ?></td>
+				<td <?php if($val['cid_result'][0]['settle_entity'] == 2){ ?>rowspan="<?php echo count($val['cid_result']); ?>"<?php } ?>><?php if(!$val['cid_result'][0]['comment']){ ?><a href="javascript:;" onclick="edit_comment(<?php if($val['cid_result'][0]['settle_entity'] == 2){ echo $val['client_id']; }else{ echo $val['cid_result'][0]['cid']; } ?>,{$val.month},<?php echo $val['cid_result'][0]['settle_entity']; ?>);" class="blue">编辑</a><?php }else{ ?><a href="javascript:;" onclick="edit_comment(<?php if($val['cid_result'][0]['settle_entity'] == 2){ echo $val['client_id']; }else{ echo $val['cid_result'][0]['cid']; } ?>,{$val.month},<?php echo $val['cid_result'][0]['settle_entity']; ?>);" class="blue"><?php echo $val['cid_result'][0]['comments'].'...'; ?></a><?php } ?></td>
+				<?php if($val['cid_result'][0]['settle_entity'] == 2){ ?>
+				<td rowspan="<?php echo count($val['cid_result']); ?>"><a href="javascript:;" class="blue" onclick="client_settle({$val.client_id},{$val.month},<?php echo $val['cid_result'][0]['settle_entity']; ?>);">
+				<?php }else{ ?>
+				<td><a href="__URL__/show_channel_settle/cid/<?php echo $val['cid_result'][0]['cid']; ?>/month/{$val.month}" target="_blank" class="blue" ><?php } ?>
+				查看</a></td>
+				<td rowspan="<?php echo count($val['cid_result']); ?>"><a href="javascript:;" onclick="go_business({$val.client_id},{$val.month});" class="blue">确认</td>
+				<!--<td rowspan="<?php echo count($val['cid_result']); ?>"><a href="javascript:;" onclick="change_status({$val.client_id},{$val.month});" class="blue">通过</a><br/><a href="javascript:;" class="blue" onclick="client_settle({$val.client_id},{$val.month});">对账单</a><br/><a href="javascript:;" class="blue" onclick="client_cheque({$val.client_id},{$val.month});">申请单</a></td>-->
+			</tr>
+			<?php foreach(array_slice($val['cid_result'],1) as $k => $v){ ?>
+				<tr>
+				<td style="text-align:left;"><input type="checkbox" name="cid[]" <?php if($v['settle_entity'] == 1){ ?>onclick="last_select('{$val.client_id}_{$val.month}_{$v.cid}','{$val.client_id}_{$val.month}');"<?php }else{ ?>onclick="return false";<?php } ?> id="cid_{$val.client_id}_{$val.month}_{$v.cid}" value="{$val.client_id}_{$v.cid}_{$val.month}" />{$v.chname}<input type="hidden" id="check_{$val.client_id}_{$val.month}_{$v.settle_entity}_{$v.cid}" value="{$v.id}"></input></td>
+				<td><a href="__URL__/channel_activation/cid/{$v.cid}/month/{$val.month}">{$v.activation}</a></td>
+				<?php if($v['settle_entity'] == 1){ ?>
+				<td>-</td>
+				<td>{$v.average}</td>
+				<td>{$v.price}
+				<!--<?php if($v['price_type'] == 1){ ?>
+				<div class="check_prev">
+				<div class="check_prev_shortbox"><span style="color:blue;">{$v.price}</span></div>
+				<div style="display:none;" class="check_prev_newbox">
+				<table border="1" cellspacing="0" cellpadding="0">
+					<tr>
+						<td>方案名称</td>
+						<td>日均激活量</td>
+						<td>单价(元)</td>
+					</tr>
+					<tr>
+						<td rowspan="<?php echo count($v['my_price']); ?>">{$v.price_name}</td>
+						<td><?php echo $v['my_price'][0]['star_activations']; ?>-<?php if($v['my_price'][0]['end_activations']){ echo $v['my_price'][0]['end_activations'];} ?></td>
+						<td><?php echo $v['my_price'][0]['price']; ?></td>
+					</tr>
+					<?php foreach(array_slice($v['my_price'],1) as $m => $n){ ?>
+					<tr>
+						<td>{$n.star_activations}-<?php if($n['end_activations']){ ?>{$n.end_activations}<?php } ?></td>
+						<td>{$n.price}</td>
+					</tr>
+					<?php } ?>
+				</table>
+				</div>
+				
+				</div><?php }else{ ?>{$v.price}<?php } ?>!--></td>
+				<td><?php if($v['warning'] == 1){ ?><span style="color:red;"><?php }else{ ?><span><?php } ?>{$v.settle_amount}</span></td>
+				<td><a href="javascript:;" onclick="edit_salvation({$v.cid},{$val.month},{$v.settle_entity});">{$v.salvation}</a></td>
+				<td>{$v.taxt}%</td>
+				<td>{$v.amount_pay}</td>
+				<td><?php if(!$v['comment']){ ?><a href="javascript:;" onclick="edit_comment({$v.cid},{$val.month},{$v.settle_entity});" class="blue">编辑</a><?php }else{ ?><a href="javascript:;" onclick="edit_comment({$v.cid},{$val.month},{$v.settle_entity});" class="blue">{$v.comments}...</a><?php } ?></td>
+				<td><a href="__URL__/show_channel_settle/cid/{$v.cid}/month/{$val.month}" target="_black" class="blue">查看</a></td><?php } ?>
+				</tr>
+				<?php } ?>
+			<?php } ?>
+				<tr>
+					<td></td>
+					<td>总计</td>
+					<td>-</td>
+					<td></td>
+					<td>-</td>
+					<td>{$all_activation}</td>
+					<td></td>
+					<td>-</td>
+					<td></td>
+					<td>{$all_settle_amount}</td>
+					<td>{$all_salvation}</td>
+					<td></td>
+					<td>{$all_amount_pay}</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+			</tbody>
+		</table>
+		{$page}
+	</div>
+</div>

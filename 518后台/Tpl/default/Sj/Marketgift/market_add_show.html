@@ -1,0 +1,309 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+
+ <script type="text/javascript" src="/Public/js/ajaxfileupload.js?{$rand}"></script>
+
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+KindEditor.ready(function(K) {
+		window.editor = K.create('#editor_content',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'bold','italic','underline','fontsize','forecolor','|','image','anchor','link','unlink','justifyleft','justifycenter','justifyright'
+			]
+		});
+});
+KindEditor.options.cssData = 'body { font-size: 14px; }';
+
+function check(){
+	var active_name = $('#active_name').val();
+	var usable = $('#usable').val();
+	var apply_pkg = $('#apply_pkg').val();
+	var cut_tm = $('#cut_tm').val();
+	var gift_type = $('#gift_type').val();
+
+	if(!active_name){
+		alert("标题不能为空");
+		return false;
+	}
+	if(gift_type==0){
+		alert("请选择礼包类型");
+		return false;
+	}
+	if($("#pt_market").attr("checked")=='checked'){
+		if(!isNaN($("#sc_num").val())){	
+			if($("#sc_num").val()=='' || $("#sc_num").val()==0){
+				alert("请填写礼包数量");
+				return false;
+				//var mark = 0;
+			}else{
+				var mark = parseInt($("#sc_num").val());
+			}
+		}
+	}else{
+		var mark = 0;
+
+	}
+
+	if($("#pt_game").attr("checked")=='checked'){
+		if(!isNaN($("#game_num").val())){	
+			if($("#game_num").val()=='' || $("#game_num").val()==0){
+				alert("请填写礼包数量");
+				return false;
+
+			}else{
+				var game = parseInt($("#game_num").val());
+			}
+		}
+	}else{
+		
+		var game = 0;
+
+	}
+
+	if($("#pt_sdk").attr("checked")=='checked'){
+		if(!isNaN($("#sdk_num").val())){
+			if($("#sdk_num").val()=='' || $("#sdk_num").val()==0){
+				alert("请填写礼包数量");
+				return false;
+				}else{
+					var sdk = parseInt($("#sdk_num").val());
+				}
+		}
+	}else{
+		
+		var sdk = 0;
+	}
+
+	var count_n = mark+game+sdk;
+	if(!$("#pt_market").attr("checked") && !$("#pt_game").attr("checked") && !$("#pt_sdk").attr("checked")){
+
+		if(count_n==0){
+			alert("请选择发布平台");
+			return false;
+		}
+	}
+	var compare = parseInt($('#out_count').val());
+	if(compare<count_n){
+		alert("当前发布的礼包数量大于总数，请重新填写");
+		return false;
+	}else if(compare>count_n){
+		alert("当前发布的礼包数量小于总数，请重新填写");
+		return false;
+	}
+	
+
+	var limit_num = parseInt($('#limit_num').val());
+	if(($("#pt_sdk").attr("checked")=='checked' && limit_num>sdk) ||($("#pt_game").attr("checked")=='checked' && limit_num>game) || ($("#pt_market").attr("checked")=='checked' && limit_num>mark)){
+		alert("每日限额大于某一平台的总数量，请重新输入");
+		return false;
+	}
+	
+
+	if(!usable){
+		alert("使用范围不能为空");
+		return false;
+	}
+	if(!apply_pkg){
+		alert("应用包名不能为空");
+		return false;
+	}
+	if(!cut_tm){
+		alert("截止时间不能为空");
+		return false;
+	}
+	
+
+}
+
+
+function c_num(){
+	if($("#pt_market").attr("checked")=='checked'){
+		if(!isNaN($("#sc_num").val())){	
+			if($("#sc_num").val()==''){
+				var mark = 0;
+				alert("请填写礼包数量");
+				return false;
+			}else{
+				var mark = parseInt($("#sc_num").val());
+			}
+		}else{
+			alert("安智市场礼包数量填写的不是数字");
+			return false;
+		}	
+	}else{
+		var mark = 0;
+	}
+
+	if($("#pt_game").attr("checked")=='checked'){
+		if(!isNaN($("#game_num").val())){	
+			if($("#game_num").val()==''){
+				var game =0;
+				alert("请填写礼包数量");
+				return false;
+			}else{
+				var game = parseInt($("#game_num").val());
+			}
+		}else{
+			alert("安卓游戏礼包数量填写的不是数字");
+			return false;
+		}
+	}else{
+		var game = 0;
+	}
+
+	if($("#pt_sdk").attr("checked")=='checked'){
+		if(!isNaN($("#sdk_num").val())){
+			if($("#sdk_num").val()==''){
+				var sdk = 0;
+				alert("请填写礼包数量");
+				return false;
+				}else{
+					var sdk = parseInt($("#sdk_num").val());
+				}
+		}else{
+			alert("SDK礼包数量填写的不是数字");
+			return false;
+		}
+	}else{
+		var sdk = 0;
+	}
+
+	
+}
+</script>
+<script>
+    function ajaxFileUpload()
+        {
+            $.ajaxFileUpload
+            (
+                {
+                    url:'__URL__/file_num', //你处理上传文件的服务端
+                    secureuri:false,
+                    fileElementId:'activation_code',
+                    dataType: 'json',
+                    success: function (data){
+	                    if(data.err==1){
+	                    	alert(data.error_con);
+	                    	return false;
+	                    }else{
+
+		                   	if(data.out_count>9999){
+		                    	$("#num_show_load").css('display','block');
+		                    	$("#out_count").val(data.out_count);
+		                    	$("#new_file").val(data.new_file);
+		                    	$("#new_file_name").val(data.new_file_name);
+		                    	alert("激活码数量限9999以内");
+		                    	return false;
+		                    }else{
+		                    	$("#num_show_load").css('display','block');
+		                    	$("#new_file").val(data.new_file);
+		                    	$("#new_file_name").val(data.new_file_name);
+		                      	  $("#out_count").val(data.out_count);
+		                    }
+	                    }
+                   }
+               }
+            )
+             return false;
+        }
+
+</script>
+<div  style="padding-left:50px">
+<div><h3>添加礼包</h3></div>
+<div>
+	<form action="__URL__/market_add_submit" method="post" enctype="multipart/form-data">
+	<table>
+		<tr>
+			<td>标题：</td>
+			<td><input type="text" name="active_name" id="active_name" /></td>
+		</tr>
+		<tr>
+			<td>礼包类型：</td>
+			<td><select name='gift_type' id='gift_type'>
+			<option value='0'>请选择</option>
+				<?php foreach($result as $key => $val){ ?>
+					<option value="{$val['id']}">{$val['gift_type']}</option>
+				<?php } ?>
+			</select></td>
+		</tr>
+		<tr>
+			<td>应用包名：</td>
+			<td><input type="text" name="apply_pkg" id="apply_pkg" /></td>
+		</tr>
+		<tr>
+			<td>开始时间</td>
+			<td><input id="start_tm" name="start_tm" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd 00:00:00'})" style='width:150px;'></td>
+		</tr>
+		<tr>
+			<td>结束时间</td>
+			<td><input id="cut_tm" name="cut_tm" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd 23:59:59'})" style='width:150px;'></td>
+		</tr>
+		<tr>
+
+			<td>上传激活码：</td>
+
+			 <td><input id="activation_code" type="file" size="45" name="activation_code" class="input"><a href="#" onclick="return ajaxFileUpload();" id = "buttonUpload">上传</a></td>
+			<td colspan="2"><span style="color:blue;">格式csv（文件名称可自定义；只读取第一列数据；每行一个号码;号码格式：1-25个字符，大小写英文、数字）,限9999以内;</span>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td id='num_show_load' >已上传<span id='show_num'><input id='out_count' type='text' value="" style="width:40px;"/>
+			</span>个</td>
+			
+		</tr>
+		<tr>
+			<td>分平台发布：</td>
+			<td><input type='checkbox' id='pt_market' name='pt_market' />安智市场<input type='text' name='sc_num' id='sc_num' style="width:40px;" /> &nbsp&nbsp<input type='checkbox' id='pt_game' name='pt_game'>安卓游戏<input type='text' name='game_num' id='game_num' style="width:40px;" /> &nbsp&nbsp<input type='checkbox' id='pt_sdk' name='pt_sdk'>SDK<input type='text' name='sdk_num' id='sdk_num' style="width:40px;"/> </td>
+		</tr>
+		<tr>
+			<td>每日发放限制：</td>
+			<td><input type="text" name="limit_num" id="limit_num" value=""/></td>
+			<td colspan="2"><span style="color:blue;">0代表不做限制</span></td>
+		</tr>
+		<tr>
+			<td>简介：</td>
+			<td  colspan="3"><textarea name="intro"></textarea></td>
+		</tr>
+		<tr>
+			<td colspan="4"></td>
+		</tr>
+		<tr>
+			<td>礼包详情：</td>
+			<td colspan="4"><textarea style="width:400px;height:130px;" name="detail"></textarea></td>
+		</tr>
+		<tr>
+			<td>兑换时间：</td>
+			<td  colspan="3"><input type="text" name="exchange_start"  class="Wdate" value="" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});" style='width:150px;'/>&nbsp&nbsp到&nbsp&nbsp<input type="text" name="exchange_end"  class="Wdate" value="" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});" style='width:150px;'/></td>
+		</tr>
+		<tr>	
+			<td>使用范围：</td>
+			<td><input type="text" name="usable" id="usable" /></td>
+		</tr>
+		<tr>
+			<td>使用方法：</td>
+			<td  colspan="3"><textarea name="usage"></textarea></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td><input type="submit" value="确定" onclick="return check();" /></td>
+			<input type='hidden' name='new_file' id="new_file" value="">
+			<input type='hidden' name='new_file_name' id='new_file_name' value="">
+			<td><input type="button" onclick="javascript:location.href='__URL__/market_gift_list'" value="取消" /></td>
+			<td></td>
+		</tr>
+		
+	</table>
+	</form>
+</div>
+</div>
+</body>
+</html>

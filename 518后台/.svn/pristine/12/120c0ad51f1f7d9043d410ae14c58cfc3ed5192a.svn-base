@@ -1,0 +1,319 @@
+<include file="../../Public/header"  />
+<style type="text/css">
+.title_item{height:33px; padding-bottom:5px;}
+.title_item h2{float:left; height:32px; border-bottom:1px solid #c4c4c4; font-size:16px; font-weight:bold;}
+</style>
+<div style="width:98%; margin:10px auto">
+	<div class="top">
+<p style="line-height:30px;  border-bottom:1px solid #999999">渠道合作>渠道结算>参数设置</p>
+</div>
+	<div class="add_acount_list">
+		<div class="title_item">
+			<h2>最低付款值：</h2>
+		</div>
+		<div class="add_acount_item" id="uu">
+			<label>最低付款金额：</label>
+			<input type="text" id="payment_amount" value="{$configcontent}" disabled  class="inputtext">&nbsp元&nbsp
+			<input type="button" id="eidt_status" value="编辑" onclick="writeq(this.value)">
+			<input type="hidden" id="hide_payment_amount" value="{$configcontent}" />
+		</div>
+		<div class="word" style="margin-top:10px; line-height:10px;">
+			<p>注：</p>
+			<p>1.运营审核列表，渠道结算金额小于最低付款额时，结算金额标红</p>
+			<p>2.可输入整数数值</p>
+		</div>
+	</div>
+	<div class="add_acount_list">
+		<div class="title_item">
+			<h2>税率设置：</h2>
+		</div>
+        <div class="inline" id="uu3" style="line-height:60px;">
+		个人（不扣税）：<input type="text" id="self_huilv_no" value="{$huilv_no}" disabled >&nbsp%&nbsp
+					 <input type="button" id="eidt_self_status_no" value="编辑" onclick="edit_self_huilv_no(this.value)">
+					 <input type="hidden" id="hide_self_huilv_no" value="{$huilv_no}" />
+		</div>
+		<br/>
+		<div class="inline" id="uu1" style="line-height:60px;">
+		个人（扣税）：<input type="text" id="self_huilv" value="{$huilv}" disabled >&nbsp%&nbsp
+					 <input type="button" id="eidt_self_status" value="编辑" onclick="edit_self_huilv(this.value)">
+					 <input type="hidden" id="hide_self_huilv" value="{$huilv}" />
+		</div>
+		<br/>
+		<div class="inline" id="uu4" style="line-height:60px;">
+		企业（不扣税）：<input type="text" id="save_business_no"value="{$business_no}" disabled >&nbsp%&nbsp
+					 <input type="button" id="edit_business_status_no" value="编辑" onclick="edit_save_business_no(this.value)">
+					 <input type="hidden" id="hide_self_business_no" value="{$business_no}" />
+		</div>
+		<br/>
+		<div class="inline" id="uu2" >
+            企业（扣税）：<input type="text" id="koushui" value="{$business}" disabled >&nbsp%&nbsp
+			<input type="button" id="edit_koushui_status" value="编辑" onclick="edit_koushui(this.value)">
+			<input type="hidden" id="hide_koushui" value="{$business}" />
+		</div>
+		<br/>
+		<div class="inline" id="uu5" style="line-height:60px;">
+		公司税率：<input type="text" id="company" value="{$company}" disabled >&nbsp%&nbsp
+					 <input type="button" id="edit_company_status" value="编辑" onclick="edit_company(this.value)">
+					 <input type="hidden" id="hide_company" value="{$company}" />
+		</div>
+		<br/>
+		<p>注：<br/>1.税率保留两位小数</p>
+		<p>			2.当月修改当月生效 </p>
+	</div>
+</div>
+                 
+<script type="text/javascript" src="/Public/js/jquery.js"></script>
+<script type="text/javascript">
+//取消*/
+	function resert(){
+		$("#uu").html('最低付款金额：<input type="text" id="payment_amount" value="{$configcontent}" disabled >&nbsp元&nbsp<input type="button" id="eidt_status" value="编辑" onclick="writeq(this.value)"><input type="hidden" id="hide_payment_amount" value="{$configcontent}" />');
+	}
+
+function writeq(obj){
+	if(obj == '编辑'){
+		$("#payment_amount").attr("disabled", false); //只读改为读写
+		$("#eidt_status").val("保存"); //按钮文本编辑改为保存
+		$("#eidt_status").after("<input type='button' id='reset_stauts' value='取消' onclick='resert()'/>");
+	}else if(obj == '保存'){
+		$("#payment_amount").attr("disabled", true);
+		$("#eidt_status").val("编辑");
+		$("#reset_stauts").remove();
+
+		var payment_amount = $("#payment_amount").val();// 获取文本框付款的值
+		var hide_payment_amount = $("#hide_payment_amount").val();//获取原来的付款值
+		if(payment_amount == hide_payment_amount) {
+			$("#payment_amount").attr('style','border-color:red');
+			alert("您未做任何修改");
+			return false;
+		}
+		//验证是不是数字
+		var param =/^\d+$/;
+		if(!param.test(payment_amount)){
+			alert("金额必须是正整数");			
+			window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			return false;
+		}
+		//ajax发送
+		$.post("{:U('AdSettings_p/savedata')}", { payment_amount: payment_amount },
+		   function(data){
+			 if(data.status == 1) {
+				alert('成功');
+				window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			 }else {
+				alert('失败！重新再试');
+				return false;
+			 }
+		},'json');
+	}
+}
+
+function reset_self_huilv_no(){
+	$("#uu3").html('个人（不扣税）：<input type="text" id="self_huilv_no" value="{$huilv_no}" disabled >&nbsp%&nbsp<input type="button" id="eidt_self_status_no" value="编辑" onclick="edit_self_huilv_no(this.value)"><input type="hidden" id="hide_self_huilv_no" value="{$huilv_no}" />');
+}
+
+function edit_self_huilv_no(obj){
+	if(obj == '编辑'){
+		$("#self_huilv_no").attr("disabled", false);
+		$("#eidt_self_status_no").val("保存");
+		$("#eidt_self_status_no").after("<input type='button' id='reset_self_status_no' value='取消' onclick='reset_self_huilv_no()'/>");
+	}else if(obj == '保存'){
+		$("#self_huilv_no").attr("disabled", true);
+		$("#eidt_self_status_no").val("编辑");
+		$("#reset_self_status_no").remove();
+
+		var self_huilv_no = $("#self_huilv_no").val();// 获取文本框付款的值
+		var hide_self_huilv_no = $("#hide_self_huilv_no").val();//获取原来的付款值
+		if(self_huilv_no == hide_self_huilv_no) {
+			$("#self_huilv_no").attr('style','border-color:red');
+			alert("您未做任何修改");
+			return false;
+		}
+		//验证是不是数字
+		var param =/^[0-9]+([.]{1}[0-9]{1,2})?$/;
+		if(!param.test(self_huilv_no)){
+			alert("个人税率请保留两位小数");
+			window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			return false;
+		}
+		//ajax发送
+		$.post("{:U('AdSettings_p/save_huilv_no')}", { self_huilv_no: self_huilv_no },
+		   function(data){
+			 if(data.status == 1) {
+				alert('成功');
+				window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			 }else {
+				alert('失败！重新再试');
+				return false;
+			 }
+		},'json');
+	}
+}
+
+function reset_self_huilv(){
+	$("#uu1").html('个人（扣税）：<input type="text" id="self_huilv" value="{$huilv}" disabled >&nbsp%&nbsp<input type="button" id="eidt_self_status" value="编辑" onclick="edit_self_huilv(this.value)"><input type="hidden" id="hide_self_huilv" value="{$huilv}" />');
+}
+
+function edit_self_huilv(obj){
+	if(obj == '编辑'){
+		$("#self_huilv").attr("disabled", false);
+		$("#eidt_self_status").val("保存");
+		$("#eidt_self_status").after("<input type='button' id='reset_self_status' value='取消' onclick='reset_self_huilv()'/>");
+	}else if(obj == '保存'){
+		$("#self_huilv").attr("disabled", true);
+		$("#eidt_self_status").val("编辑");
+		$("#reset_self_status").remove();
+
+		var self_huilv = $("#self_huilv").val();// 获取文本框付款的值
+		var hide_self_huilv = $("#hide_self_huilv").val();//获取原来的付款值
+		if(self_huilv == hide_self_huilv) {
+			$("#self_huilv").attr('style','border-color:red');
+			alert("您未做任何修改");
+			return false;
+		}
+		//验证是不是数字
+		var param =/^[0-9]+([.]{1}[0-9]{1,2})?$/;
+		if(!param.test(self_huilv)){
+			alert("个人税率请保留两位小数");
+			window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			return false;
+		}
+		//ajax发送
+		$.post("{:U('AdSettings_p/save_huilv')}", { self_huilv: self_huilv },
+		   function(data){
+			 if(data.status == 1) {
+				alert('成功');
+				window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			 }else {
+				alert('失败！重新再试');
+				return false;
+			 }
+		},'json');
+	}
+}
+
+function reset_business_no(){
+	$("#uu4").html('企业（不扣税）：<input type="text" id="save_business_no"value="{$business_no}" disabled >&nbsp%&nbsp<input type="button" id="edit_business_status_no" value="编辑" onclick="edit_save_business_no(this.value)"><input type="hidden" id="hide_self_business_no" value="{$business_no}" />');
+}
+function edit_save_business_no(obj){
+	if(obj == '编辑'){
+		$("#save_business_no").attr("disabled", false);
+		$("#edit_business_status_no").val("保存");
+		$("#edit_business_status_no").after("<input type='button' id='reset_stauts' value='取消' onclick='reset_business_no()'/>");
+	}else if(obj == '保存'){
+		$("#save_business_no").attr("disabled", true);
+		$("#edit_business_status_no").val("编辑");
+		$("#reset_stauts").remove();
+
+		var save_business_no = $("#save_business_no").val();// 获取文本框付款的值
+		var hide_self_business_no = $("#hide_self_business_no").val();//获取原来的付款值
+		if(save_business_no == hide_self_business_no) {
+			$("#save_business_no").attr('style','border-color:red');
+			alert("您未做任何修改");
+			return false;
+		}
+
+		//验证是不是数字
+		var param =/^[0-9]+([.]{1}[0-9]{1,2})?$/;
+		if(!param.test(save_business_no)){
+			alert("企业税率请保留两位小数");
+			window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			return false;
+		}
+		//ajax发送
+		$.post("{:U('AdSettings_p/savebusiness_no')}", { save_business_no: save_business_no },
+		   function(data){
+			 if(data.status == 1) {
+				alert('成功');
+				window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			 }else {
+				alert('失败！重新再试');
+				return false;
+			 }
+		},'json');
+	}
+}
+
+function reset_koushui(){
+	$("#uu2").html('企业（扣税）：<input type="text" id="koushui" value="{$business}" disabled >&nbsp%&nbsp<input type="button" id="edit_koushui_status" value="编辑" onclick="edit_koushui(this.value)"><input type="hidden" id="hide_koushui" value="{$business}" />');
+}
+function edit_koushui(obj){
+	if(obj == '编辑'){
+		$("#koushui").attr("disabled", false);
+		$("#edit_koushui_status").val("保存");
+		$("#edit_koushui_status").after("<input type='button' id='reset_koushui' value='取消' onclick='reset_koushui()'/>");
+	}else if(obj == '保存'){
+		$("#koushui").attr("disabled", true);
+		$("#edit_koushui_status").val("编辑");
+		$("#reset_koushui").remove();
+
+		var koushui = $("#koushui").val();// 获取文本框付款的值
+		var hide_koushui = $("#hide_koushui").val();//获取原来的付款值
+		if(koushui == hide_koushui) {
+			$("#koushui").attr('style','border-color:red');
+			alert("您未做任何修改");
+			return false;
+		}
+
+		//验证是不是数字
+		var param =/^[0-9]+([.]{1}[0-9]{1,2})?$/;
+		if(!param.test(koushui)){
+			alert("企业（扣税）请保留两位小数");
+			window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			return false;
+		}
+		//ajax发送
+		$.post("{:U('AdSettings_p/savebusiness')}", { save_koushui: koushui },
+		   function(data){
+			 if(data.status == 1) {
+				alert('成功');
+				window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			 }else {
+				alert('失败！重新再试');
+				return false;
+			 }
+		},'json');
+	}
+}
+
+function reset_company(){
+	$("#uu5").html('公司税率：<input type="text" id="company" value="{$company}" disabled >&nbsp%&nbsp<input type="button" id="edit_company_status" value="编辑" onclick="edit_company(this.value)"><input type="hidden" id="hide_company" value="{$company}" />');
+}
+function edit_company(obj){
+	if(obj == '编辑'){
+		$("#company").attr("disabled", false);
+		$("#edit_company_status").val("保存");
+		$("#edit_company_status").after("<input type='button' id='reset_company' value='取消' onclick='reset_company()'/>");
+	}else if(obj == '保存'){
+		$("#company").attr("disabled", true);
+		$("#edit_company_status").val("编辑");
+		$("#reset_company").remove();
+
+		var company = $("#company").val();// 获取文本框付款的值
+		var hide_company = $("#hide_company").val();//获取原来的付款值
+		if(company == hide_company) {
+			$("#company").attr('style','border-color:red');
+			alert("您未做任何修改");
+			return false;
+		}
+
+		//验证是不是数字
+		var param =/^[0-9]+([.]{1}[0-9]{1,2})?$/;
+		if(!param.test(company)){
+			alert("公司税率请保留两位小数");
+			window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			return false;
+		}
+		//ajax发送
+		$.post("{:U('AdSettings_p/savecompany')}", { save_company: company },
+		   function(data){
+			 if(data.status == 1) {
+				alert('成功');
+				window.location.href="/index.php/Channel_cooperation/AdSettings_p/index";
+			 }else {
+				alert('失败！重新再试');
+				return false;
+			 }
+		},'json');
+	}
+}
+</script>

@@ -1,0 +1,322 @@
+<!--添加新服-->
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js?{$rand}"></script>
+<script>
+function get_softname(){
+	var pkg = $('#apply_pkg').val();
+	if(pkg){
+		$.ajax({
+			url: '/index.php/Sj/Onlinegame/get_softname/package/'+pkg,
+			type: 'get',
+			success: function(data){
+				if(data != 2){
+					var obj = eval('(' + data + ')');
+					
+					$('#soft_name').val(obj.soft_name);
+					$('#my_game').val(obj.category_name);
+				}else{
+					$('#soft_name').val('');
+					$('#my_game').val('');
+					alert("该软件不存在");
+					return false;
+				}
+			}
+		});
+	}
+	
+}
+function ajaxFileUpload()
+{
+	$.ajaxFileUpload
+	(
+		{
+			//url:'__URL__/file_new_server_num', //处理上传文件的服务端
+			url:'__URL__/file_num', //处理上传文件的服务端
+			secureuri:false,
+			fileElementId:'activation_code',
+			dataType: 'json',
+			success: function (data){
+				if(data.err==1 || data.err==2 || data.err==3 || data.err==4){
+					alert(data.error_con);
+					return false;
+				}else{
+					if(data.out_count>9999||data.out_count<1){
+						$("#num_show_load").css('display','block');
+						$("#out_count").val(data.out_count);
+						$("#new_file").val(data.new_file);
+						$("#new_file_name").val(data.new_file_name);
+						alert("激活码数量限1~9999以内");
+						$(".activation").css('display','none');
+						return false;
+					}else{
+						$("#num_show_load").css('display','block');
+						$("#new_file").val(data.new_file);
+						$("#new_file_name").val(data.new_file_name);
+						$("#out_count").val(data.out_count);
+						$(".activation").css('display','');
+					}
+				}
+		   }
+	   }
+	)
+	 return false;
+}
+
+function check(){
+	var apply_pkg = $('#apply_pkg').val();
+	var soft_name = $('#soft_name').val();
+	var begin = $('#begin').val();
+	var end = $('#end').val();
+	var new_server_name = $('#new_server_name').val();
+	var server_type = $('[name="server_type"]:checked').val();
+	var use_method=$("#use_method").val();
+	var comment = $("#update_content").val();
+	
+	if(!apply_pkg){
+		alert("应用包名不能为空");
+		return false;
+	}
+	if(!soft_name){
+		alert("软件名称不能为空");
+		return false;
+	}
+	if(!begin){
+		alert("开始时间不能为空");
+		return false;
+	}
+	if(!new_server_name){
+		alert("服务器名称不能为空");
+		return false;
+	}
+	if(server_type==2)
+	{
+		var neice_type=$('[name="del_type"]:checked').val();
+		if(!neice_type)
+		{
+			alert("请选择内测类型");
+			return false;
+		}
+		if(use_method)
+		{
+			if(use_method.length>50||use_method<2)
+			{
+				alert("使用方法可输入2~50个字符");
+				return false;
+			}
+		}
+		else
+		{
+			alert("使用方法不能为空");
+			return false;
+		}
+		if(end)
+		{
+			if(begin>end)
+			{
+				alert("开始时间不能大于结束时间");
+				return false;
+			}
+		}
+		else
+		{
+			alert("结束时间不能为空");
+			return false;
+		}
+		var out_count =$("#out_count").val();
+		if(out_count)
+		{
+			var active_codes_release_begin = $('#active_codes_release_begin').val();
+			var active_codes_release_end = $('#active_codes_release_end').val();
+			var active_codes_effective_begin = $('#active_codes_effective_begin').val();
+			var active_codes_effective_end  = $('#active_codes_effective_end ').val();
+			if(out_count>9999||out_count<1)
+			{
+				alert("激活码数量限1~9999以内");
+				return false;
+			}
+			if(!active_codes_release_begin)
+			{
+				alert("激活码发放开始时间不能为空");
+				return false;
+			}
+			if(!active_codes_release_end)
+			{
+				alert("激活码发放结束时间不能为空");
+				return false;
+			}
+			if(active_codes_release_begin>active_codes_release_end)
+			{
+				alert("激活码发放开始时间不能大于激活码发放结束时间");
+				return false;
+			}
+			if(!active_codes_effective_begin)
+			{
+				alert("激活码有效开始时间不能为空");
+				return false;
+			}
+			if(!active_codes_effective_end)
+			{
+				alert("激活码有效结束时间不能为空");
+				return false;
+			}
+			if(active_codes_effective_begin>active_codes_effective_end)
+			{
+				alert("激活码有效开始时间不能大于激活码有效结束时间");
+				return false;
+			}
+			//当前时间<=发放开始<=内测开始<=有效开始   发放结束<=内测结束<=有效结束
+			if(active_codes_release_begin>begin)
+			{
+				alert("激活码发放开始时间不能大于内测服开始时间");
+				return false;
+			}
+			if(active_codes_release_begin>active_codes_effective_begin)
+			{
+				alert("激活码发放开始时间不能大于激活码有效开始时间");
+				return false;
+			}
+			if(begin>active_codes_effective_begin)
+			{
+				alert("内测服开始时间不能大于激活码有效开始时间");
+				return false;
+			}
+			if(active_codes_release_end>end)
+			{
+				alert("激活码发放结束时间不能大于内测服结束时间");
+				return false;
+			}
+			if(active_codes_release_end>active_codes_effective_end)
+			{
+				alert("激活码发放结束时间不能大于激活码有效结束时间");
+				return false;
+			}
+			if(end>active_codes_effective_end)
+			{
+				alert("内测服结束时间不能大于激活码有效结束时间");
+				return false;
+			}
+		}
+	}
+	$('#activation_code').attr('disabled','disabled');
+}
+ function checkLen(obj, maxChars, hint_id) 
+ {
+	if (obj.value.length > maxChars)
+		obj.value = obj.value.substring(0,maxChars);
+	//$("#" + hint_id).html(obj.value.length + "/" + maxChars);
+ }
+ function selectDatediff(obj)
+ {
+	var out_count =$("#out_count").val();
+	if(out_count)
+	{
+		var begin = $('#begin').val();
+		var active_codes_release_begin = $('#active_codes_release_begin').val();
+		var active_codes_release_end = $('#active_codes_release_end').val();
+		var active_codes_effective_begin = $('#active_codes_effective_begin').val();
+		var active_codes_effective_end  = $('#active_codes_effective_end ').val();
+		if(!active_codes_release_begin&&!active_codes_release_end&&!active_codes_effective_begin&&!active_codes_effective_end)
+		{
+			$('#active_codes_release_begin').val(begin);
+			$('#active_codes_release_end').val(obj);
+			$('#active_codes_effective_begin').val(begin);
+			$('#active_codes_effective_end ').val(obj);
+		}
+	}
+ }
+</script>
+	<form name="form_add" method="post" action="/index.php/Sj/Onlinegame/add_new_server"  style="width:100%;height:100%;" enctype="multipart/form-data" >
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+		<tr>
+			<td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">添加新服：</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">应用包名：</td>
+			<td align="left" style="padding-left:10px;"><input type="text" id="apply_pkg" onblur="get_softname();" value="" name="pack_name"/></td>
+		</tr>
+		<tr>
+			<td align="right">软件名称：</td>
+			<td align="left" style="padding-left:10px;"><input type="text" name="soft_name" id="soft_name" readonly /></td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">服务器名称：</td>
+			<td align="left" style="padding-left:10px;" id="softname">
+				<input type="text" value="" name="new_server_name" id='new_server_name' onBlur="gbname(form.new_server_name);" />
+			</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">服务器类型：</td>
+			<td align="left" style="padding-left:10px;" id="softname">
+				<input name="server_type" value="1" checked="" type="radio" onclick="javascript:$('.neiche').css('display','none');$('.activation').css('display','none');">新服
+				<input name="server_type" value="2" type="radio" onclick="javascript:$('.neiche').css('display','');var out_count = $('#out_count').val(); if(out_count){ $('.activation').css('display','');}">内测服
+			</td>
+		</tr>
+		<tr style="display:none" class="neiche">
+			<td class="td1" align="right">内测类型：</td>
+			<td align="left" style="padding-left:10px;" id="softname">
+				<input name="del_type" value="1" type="radio">删档内测
+				<input name="del_type" value="2" type="radio">不删档内测
+			</td>
+		</tr>
+		<tr style="display:none" class="neiche">
+			<td class="td1" align="right">上传激活码：</td>
+			<td align="left" style="padding-left:10px;">
+				<input id="activation_code" type="file" size="45" name="activation_code" class="input">
+				<a href="#" onclick="return ajaxFileUpload();" style="color:blue;" id = "buttonUpload">上传</a><br/>
+			</td>
+		</tr>
+		<tr style="display:none" class="neiche">
+			<td></td>
+			<td align="left" style="padding-left:10px; color:blue; display:inline-block;word-break:break-all;width:400px;">格式csv（文件名称可自定义；只读取第一列数据；每行一个号码;号码格式：1-25个字符，大小写英文、数字）,限9999以内;</td>
+		</tr>
+		<tr style="display:none" class="neiche">
+			<td></td>
+			<td id='num_show_load' align="left" style="padding-left:10px; display:none;" >已上传<span id='show_num'>
+				<input id='out_count' type='text' name="out_count" value="" style="width:40px;"/>
+			</span>个</td>
+		</tr>
+		<tr>
+			<td  align="right">开始时间：</td>
+			<td align="left" style="padding-left:10px;" id="softname">
+				<input type="text" name="begin" id="begin" class="ui_timepicker" value="" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" />~
+				<input style="display:none;" type="text" name="end" id="end" class="ui_timepicker neiche" value="" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',endDate:'%y-%M-%d 00:00:00',onpicking:function(dq){selectDatediff(dq.cal.getNewDateStr());}})" />
+			</td>
+		</tr>
+		<tr style="display:none" class="activation">
+			<td  align="right">激活码发放时间：</td>
+			<td align="left" style="padding-left:10px;" id="softname">
+				<input type="text" name="active_codes_release_begin" id="active_codes_release_begin" class="ui_timepicker" value="" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" />~
+				<input type="text" name="active_codes_release_end" id="active_codes_release_end" class="ui_timepicker" value="" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',endDate:'%y-%M-%d 00:00:00'})" />
+			</td>
+		</tr>
+		<tr style="display:none" class="activation">
+			<td  align="right">激活码有效时间：</td>
+			<td align="left" style="padding-left:10px;" id="softname">
+				<input type="text" name="active_codes_effective_begin" id="active_codes_effective_begin" class="ui_timepicker" value="" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" />~
+				<input type="text" name="active_codes_effective_end" id="active_codes_effective_end" class="ui_timepicker" value="" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',endDate:'%y-%M-%d 00:00:00'})" />
+			</td>
+		</tr>
+		<tr style="display:none" class="neiche">
+			<td class="td1" align="right">使用方法：</td>
+			<td align="left" style="padding-left:10px;"><textarea name="use_method" id="use_method"></textarea></td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">简介：</td>
+			<td align="left" style="padding-left:10px;">
+				<textarea id="update_content" name="comment" rows="4" cols="40"   onKeyDown="checkLen(this,50);" onKeyUp="checkLen(this,50);"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td class="td1" style="padding-left:10px;" align="left">简介限制在50字之内</td>
+		</tr>
+		<tr id="cut_add_input">
+			<td colspan="2" style="text-align:center;">
+			<input type="submit" onclick="return check();" value="&nbsp;确定&nbsp;"  />
+			<input type="button" onclick="tb_remove()" value="&nbsp;取消&nbsp;"  />
+			<input type='hidden' name='new_file' id="new_file" value="">
+			<input type='hidden' name='new_file_name' id='new_file_name' value="">
+		</tr>
+	</table>
+	<input type="hidden" name="__hash__" value="4a674d3b2b9cb54d6467a3ced6861674" />
+	<input type="hidden" name="xin_str" id="hidden_name_01" />
+	</form>

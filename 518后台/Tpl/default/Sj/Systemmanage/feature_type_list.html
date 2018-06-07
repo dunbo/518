@@ -1,0 +1,115 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script>
+    function delete_feature_type(id) {
+        if (!confirm("确定要删除该专题分类？")) {
+            return false;
+        }
+        // ajax请求判断此专题分类下有没有专题，有的话不可以删除
+        $.ajax({
+            url : '__URL__/delete_feature_type',
+            type : 'get',
+            data: {id:id},
+            dataType: "json",
+            success:function(data){
+                if (data.status == 0) {
+                    alert(data.info);
+                    window.location.reload();
+                } else {
+                    alert(data.info);
+                }
+            }
+        });
+        return true;
+    }
+    
+    function move_features(from_feature_type_id, from_feature_type_name, obj) {
+        var to_feature_type_id = obj.value;
+        var to_feature_type_name = obj.options[obj.selectedIndex].text;
+        if (to_feature_type_id == 0)
+            return;
+        if (!confirm("确定将【" + from_feature_type_name + "】分类下的专题移动至【" + to_feature_type_name + "】专题分类？")) {
+            obj.value = 0;
+            return;
+        }
+        // 移动专题
+        obj.value = 0;
+        // ajax请求判断此专题分类下有没有专题，有的话不可以删除
+        $.ajax({
+            url : '__URL__/move_features',
+            type : 'get',
+            data: {from_feature_type_id:from_feature_type_id, to_feature_type_id:to_feature_type_id},
+            dataType: "json",
+            success:function(data){
+                if (data.status == 0) {
+                    alert("移动成功！！");
+                    window.location.reload();
+                } else {
+                    alert("移动失败！");
+                }
+            }
+        });
+        
+    }
+</script>
+
+<body>
+    <div class="search_box">
+        <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+            <tr>
+                <td><a class="search_btn" href="__URL__/feature">返回</a></td>
+                <td><a class="search_btn thickbox" href="__URL__/add_feature_type?" class="thickbox">新增专题分类</a></td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="4%">专题分类ID</th>
+                    <th width="4%">专题分类名称</th>
+                    <th width="8%">分类下专题数</th>
+                    <th width="10%">更新时间</th>
+                    <th width="8%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="feature_type_list" id="list">
+                    <tr>
+                        <td height="50">{$list.id}</td>
+                        <td>{$list.feature_type_name}</td>
+                        <td>{$list.feature_count}</td>
+                        <td>{$list.update_time|date="Y-m-d H:i:s",###}</td>
+                        <td>
+                            <a href="__URL__/edit_feature_type?id={$list.id}" class="thickbox blue">编辑</a>
+                            <if condition="$list.id eq 1 or $list.id eq 2 or $list.id eq 3"><!--火热，活动，汉化专题是特殊的分类，不可以进行任何操作--><else/>
+                            <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                            <a href="javascript:void(0)" class="blue" onclick="return delete_feature_type({$list.id});">删除</a>
+                            <br/>
+                            专题全部移动至
+                            <select onchange="move_features('{$list.id}', '{$list.feature_type_name}', this)" <if condition="$list.feature_count eq 0">disabled="disabled"</if>>
+                                <option value="0">请选择</option>
+                                <volist name="feature_type_list" id="other_list">
+                                    <if condition="$other_list.id neq 2"><!--不可以移到活动专题分类-->
+                                        <neq name="other_list.id" value="$list.id"><!--不可以移给自己-->
+                                            <option value="{$other_list.id}">{$other_list.feature_type_name}</option>
+                                        </neq>
+                                    </if>
+                                </volist>
+                            </select>
+                            </if>
+                        </td>
+                    </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>

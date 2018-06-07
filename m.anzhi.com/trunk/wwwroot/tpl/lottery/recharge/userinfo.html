@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>消费安智币满就送 京东卡送不停</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+</head>
+<body>
+<div class="banner"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/banner3.png"/></div>
+<div class="infor_wrap">
+	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/bg7.png" />
+	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/bg8.png" />
+	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/bg9.png" />
+	<div class="infor_form">
+		<ul class="form-items">
+			<li>
+				<label>姓名：</label>
+				<span>
+					<input type="text" id="lxname" value="<!--{$out.contact_name}-->" placeholder="请输入姓名"/>
+				</span>
+				<div class="clear"></div>
+			</li>
+			<!-- <li style="margin-top:2px"><div class="prompt_02" id="name_err"></div></li> -->
+			<li>
+				<label>手机：</label>
+				<span><input type="text" id="mobile_phone" value="<!--{$out.phone}-->" placeholder="请输入手机号"/></span>
+				<div class="clear"></div>
+			</li>
+			<!-- <li><div class="prompt_02" id="phone_err"></div></li> -->
+			<li>
+				<label>地址：</label>
+				<span><textarea id="address" placeholder="请输入地址"><!--{$out.address}--></textarea></span>
+				<div class="clear"></div>
+			</li>
+			<!-- <li>
+				<label></label>
+				<span id="err"></span>
+			</li> -->
+		</ul>
+		<span style="color:red" id="err"></span>
+		<div class="prompt_01">
+			<p>温馨提示：请认真填写您的【个人信息】，活动结束后将无法进行填写及修改。未填写及填写不完整导致用户无法收到奖品，官方概不负责。</p>
+		</div>
+		<div class="btns_02">
+			<a href="javascript:history.go(-1);" class="l">返 回</a>
+			<a  href="javascript:;" onclick="save()" class="r">保存</a>
+			<div class="clear"></div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
+
+<script>
+var sid='<!--{$out.sid}-->';
+var aid='<!--{$out.aid}-->';
+function trim(str) { //删除左右两端的空格
+	return str.replace(/(^\s*)|(\s*$)/g, ""); //把空格替换为空
+}
+function save(){
+	var lxname = trim($("#lxname").val());
+	if(lxname == "") {
+		$('#err').html('联系人姓名不能为空');
+		return false;
+	}
+	var name_len = lxname.length;
+	if(name_len > 10){
+		$('#err').html('联系人姓名不能超过10个字');
+		return false;	
+	}
+	$('#err').html('');
+	var mobile_phone = $("#mobile_phone").val();
+	if(mobile_phone == "") {
+		$('#err').html('联系人手机号码不能为空');
+		return false;
+	 }
+	var  re = /^(13|14|15|17|18)\d{9}$/
+	if (!re.test(mobile_phone)){
+		$('#err').html('请输入正确手机号');
+		return false;
+	}
+	$('#err').html('');
+
+	var address = trim($("#address").val());
+	if(address == "") {
+		$('#err').html('邮寄地址不能为空');
+		return false;
+	 }
+	var address_len = address.length;
+	if(address_len > 30){
+		$('#err').html('邮寄地址不能超过30个字');
+		return false;	
+	}
+	$('#err').html('');
+	$.ajax({
+			url: '/lottery/<!--{$out.prefix}-->/userinfo.php',
+			data:"aid="+aid+"&sid="+sid+"&lxname="+lxname+"&mobile_phone="+mobile_phone+"&address="+address,
+			type:"post",
+			dataType: 'json',
+			success:function(data) {
+				if(data.code == 1){
+					$('#err').html(data.msg);
+					setTimeout(
+							function() {
+								location.href="/lottery/<!--{$out.prefix}-->/index.php?sid="+sid+"&aid="+aid;
+							},1500
+					);
+				}else if(data.code == 2){
+					location.href= data.url;
+				}else{
+					$('#err').html(data.msg);
+					return false;
+				}
+			},
+	});
+}
+</script>

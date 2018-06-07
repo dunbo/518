@@ -1,0 +1,161 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+$(function() {
+	options = {
+		serviceUrl:"/index.php/Sj/CustomList/pub_show_channel_name",
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+		}
+	};
+	$('#channel_name').autocomplete(options);
+});
+function checkPost() {
+    var name = $("#name").val();
+    if (!name) {
+        alert("自定义列表名称不能为空！");
+        return false;
+    }else{
+		var name_lgh = name.length;
+		if(name_lgh < 2 || name_lgh > 4) {
+			alert("自定义列表名称最多可输入2-4个汉字或字符");
+			return false;
+		}
+	}
+    var data_type = $("input[name=data_type]:checked").val();
+	if(!data_type){
+		alert("请选择数据类型");
+		return false;
+	}
+	if( data_type ==1 || data_type == 2 || data_type == 3 || data_type == 4 || data_type == 101 || data_type == 102 || data_type == 103 || data_type == 104 ){
+		var channel_name = $("#channel_name").val();
+		if (!channel_name) {
+	        alert("所属自定义频道不能为空！");
+	        return false;
+	    }else{
+			var channel_name_lgh = channel_name.length;
+			if(channel_name_lgh < 2 || channel_name_lgh > 10) {
+				alert("所属自定义频道最多可输入2-10个汉字或字符");
+				return false;
+			}
+		}
+		var rank = $("#rank").val();
+		
+	    if (!rank) {
+	        alert("请填写列表排序值");
+	        return false;
+	    }else{
+			var re = /^[0-9]+$/ ;
+			var rank_check = re.test(rank);
+			if(!rank_check){
+				alert("列表排序值为正整数");
+				return false;
+			}		
+		}
+	}
+	var _normal_type = $("input[name='normal_type']:checked").val();
+	if(_normal_type == 1){
+		document.getElementsByName("filter_installed_type")[0].checked="checked";
+	}
+    return true;
+}
+
+function checkLen(obj, maxChars) {
+    //if (obj.value.length > maxChars)
+        //obj.value = obj.value.substring(0,maxChars);
+};
+function change_show(data_type){
+	if(data_type==1||data_type==2||data_type==3||data_type==4 || data_type==101 || data_type==102 || data_type==103 || data_type==104){
+		$('#channel_name_tr').show();
+		$('#rank_tr').show();
+	}/*else if(data_type==2){
+		$('#channel_name_tr').hide();
+		$('#rank_tr').hide();
+	}*/
+}
+function filter_type(tab){
+	if(tab == 1){
+		$('#filter_tab').show();
+	}else if(tab == 2){
+		$('#filter_tab').hide();
+		document.getElementsByName("filter_installed_type")[0].checked="checked";
+	}
+}
+
+var data_type_old=<?php echo $list['data_type']?$list['data_type']:1?>;
+change_show(data_type_old);
+var normal_type = <?php echo $list['normal_type']?$list['normal_type']:0; ?>;
+if(normal_type == 0){
+	filter_type(1);
+}else if(normal_type == 1){
+	filter_type(2);
+}
+</script>
+
+<form method="POST" <if condition="$list.id eq ''"> action="__URL__/add_name" <else /> action="__URL__/edit_name"  </if> enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr">
+        <td><font color="red">*</font>自定义列表名称:</td>
+        <td>
+            <input type="text" width="100px" value="{$list.name}" name="name" id="name" onkeyup="checkLen(this, 4)" onblur="checkLen(this, 4)"/>
+        </td>
+        <td>可输入2-4个汉字或字符</td>
+    </tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>数据类型:</td>
+        <td colspan="2">
+            <?php foreach($data_type_map as $k => $v): ?>
+                <label>
+            <input type="radio" name="data_type" style="margin-bottom:10px" value="<?php echo $k?>" id="data_type<?php echo $k?>" <if condition="$list.data_type eq $k ">checked='true'</if> onclick="change_show(<?php echo $k?>)"/><?php echo $v?></label>
+            <?php endforeach;?>
+        </td>
+    </tr>
+    <tr class="sub_tr">
+		<td>通用列表样式字段</td>
+		<td>
+			<input type="radio" name="normal_type" value="0" <if condition="$list.normal_type eq 0"> checked='true'</if> onclick="filter_type(1)">不显示排名
+			<input type="radio" name="normal_type" value="1" <if condition="$list.normal_type eq 1"> checked='true'</if> onclick="filter_type(2)">显示排名
+		</td>
+		<td></td>
+    </tr>
+    <tr id="filter_tab">
+		<td>列表过滤已安装</td>
+		<td>
+			<input type="radio" name="filter_installed_type" value="0" <if condition="$list.filter_installed_type eq 0"> checked='true'</if> >不过滤
+			<input type="radio" name="filter_installed_type" value="1" <if condition="$list.filter_installed_type eq 1"> checked='true'</if> >过滤
+		</td>
+		<td></td>
+    </tr>
+    <!-- <?php if($selectpid == $whatplay){ ?>
+ 		
+    <?php } ?> -->
+	<tr class="sub_tr" id='channel_name_tr'>
+        <td><font color="red">*</font>所属自定义频道:</td>
+        <td>
+            <input type="text" width="100px" autocomplete="off" name="channel_name" id="channel_name" value="{$channel[$list['channel_id']]}" />
+        </td>
+        <td>10字以内</td>
+    </tr>
+    <tr class="sub_tr" id='rank_tr'>
+        <td><font color="red">*</font>列表排序值:</td>
+        <td>
+            <input type="text" width="100px" name="rank" id="rank" value="{$list.rank}" />
+        </td>
+        <td>正整数，数值越小越靠前，最小值为1</td>
+    </tr>
+    
+    <tr class="sub_tr">
+		<td colspan="3">
+			<input type='hidden' name="pid" value="{$selectpid}"/>
+			<input type='hidden' name="id" value="{$list.id}"/>
+			<input type='hidden' name="channel_id" value="{$list.channel_id}"/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/>
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

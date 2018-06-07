@@ -1,0 +1,132 @@
+<include file="../Public/header" />
+<load href="__PUBLIC__/js/Base.js" />
+<load href="__PUBLIC__/js/prototype.js" />
+<load href="__PUBLIC__/js/mootools.js" />
+<load href="__PUBLIC__/js/Ajax/ThinkAjax.js" />
+<script type="text/javascript">
+ var checkflag = "false";
+ var checkflag1= "false";
+     // 全选功能  
+     function selectAll(name){  
+         var field = document.getElementsByName(name);  
+         // 如果全选按钮状态是未选中  
+         if (checkflag == "false"){  
+             for (i = 0; i < field.length; i++){  
+                 field[i].checked = true;  
+            }  
+             // 更改全选按钮选中标志  
+             checkflag = "true";  
+         }else{  
+             for (i = 0; i < field.length; i++){  
+                 field[i].checked = false;   
+             }  
+             // 更改全选按钮选中标志  
+             checkflag = "false";  
+         }  
+     } 
+     function checkParam(){
+       checkflag1= true;
+     }
+    function submitall(stat){
+        if(stat == 1) {
+     	   tag = "通过"; 
+ 	   } else if (stat == 2) {
+ 		   tag = "不通过";
+           notestr = document.getElementById('note').value;
+           if(notestr.length == 0){
+               alert("请填写不通过理由");
+               return false;
+           }
+ 	   } else if (stat == 3) {
+ 		   tag = "未检查";
+ 	   }
+ 	   document.getElementById('_do').value = stat;
+ 	   var field = document.getElementsByName('adapter[]');
+       var n = 0;
+       for(i=0; i<field.length; i++){
+    	   if(field[i].checked == true){
+    		   n += 1;
+    	   }
+       }
+       if (n == 0){
+    	   alert('请选择项!');
+	       return false;
+       }
+    }
+    function cleanText(obj){
+        obj.value="";
+    }
+    function addText(obj){
+        if(obj.value == ""){
+          obj.value="软件名/包名";
+        }
+    }
+    function complete(){
+        
+    }
+</script>
+<body>
+<h2>软件适配列表</h2>
+<P>
+<P>
+<p>适配机型:{$device.dname}</p> 通过<a href="__APP__/Sj/Market/passSoftList/did/{$did}/stat/1"> <font size="5px">{$pass|default="0"} </font></a>个、不通过<a href="__APP__/Sj/Market/passSoftList/did/{$did}/stat/2"> <font size="5px">{$unpass|default="0"}</font></a>个和未检查{$uncheck|default="0"}个 
+<a href="__APP__/Sj/Market/adapterSoftList/did/{$did}">返回上一级</a>
+<center>
+<h2>机型适配通过、不通过列表</h2>
+<br/>
+<br/>
+<form method="post" action="__APP__/Sj/Market/adaptersoft" onsubmit='return submitall(stat);'>
+    
+<table border='1'>
+    <tr>
+    <th></th><th>图标</th><th>软件名称</th><th>软件包名</th><th>软件版本</th><th>软件版本号</th><th>软件类型</th><th>软件适配情况</th>
+    </tr>
+    <volist name="list" id="vo">
+    <tr>
+    <td><input type="checkbox" name="adapter[]" value="{$vo.package}" onclick="checkParam()"></td>
+    <td><img height="20" width="20" src="http://apk.goapk.com{$vo.iconurl}"/></td>
+    <td>
+    {$vo.softname|default='&nbsp;'}
+    </td>
+        <td>
+      {$vo.package|default='&nbsp;'}
+    </td>
+        <td>
+        {$vo.version|default='&nbsp;'}
+    </td>
+    <td>{$vo.version_code|default='&nbsp;'}</td>
+    <td>{$vo.category_name|default='&nbsp;'}</td>
+    <td>
+<switch name="vo.status">
+
+<case value="1">通过</case>
+
+<case value="2">不通过</case>
+
+<default />未检查
+</switch>
+    
+    </td>
+    </tr>
+    </volist>
+	<tr>
+	<td><input type="checkbox" id="checkall" name="all" onclick="selectAll('adapter[]')" />全选</td>
+	<td>不通过原因:<input name="note" id="note" value="" size="54"></td>
+    <td><input type="submit" id="do" name="do" value="通过" onclick='return stat=1;' /><input type="submit" id="dont" value="不通过" name="dont" onclick='return stat=2;' /><input type="submit" id="uncheck" value="未检查" name="uncheck" onclick='return stat=3;' /></input><input type="hidden" id="did" name="did" value="{$did}" /><input type="hidden" id="" name="searchkey" value="{$searchkey}"/><input type="hidden" id="p" name ="currpage" value="{$p}"></td></tr>
+</table>
+<input type="hidden" id="_do" name="_do" value=""/>
+</form>
+<br/>
+	<tr>{$page}</tr>
+<br/>
+</center>
+</body>
+<script type="text/javascript">
+<!--
+        var search = document.getElementById("searchkey").value
+    if(search =="" ){
+       document.getElementById("searchkey").value = "软件名/包名";
+    }
+//-->
+</script>
+

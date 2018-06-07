@@ -1,0 +1,136 @@
+<include file="../../Public/activate_header"/>
+	<div class="page_nav">
+	<a href="/index.php/Sendnum/SignFlow/addTpl/"/>添加活动页面</a>
+		<span style='color: red;margin-left: 40%;'>必须配置软件，不然活动显示不出来。</span>
+	</div>
+	<div>
+	<form id="verifyAction" action="__URL__/verifyAction" method="POST">
+	<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+		<thead>
+			<tr>
+				<th width="4%">页面ID</th>
+				<th width="8%">活动名称</th>
+				<!-- <th width="20%">活动图片</th> -->
+				<th width="20%">活动banner图片</th>
+				<th width="8%">页面类型</th>
+				<!-- <th width="14%">活动软件</th> -->
+				<th width="25%">活动链接</th>
+				<th width="9%">创建时间</th>
+				<th width="18%">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php $index = 0;?>
+		<volist name='produceList' id='producePage'>
+			<tr>
+				<td>{$producePage.ap_id}</td>
+				<td>{$producePage.ap_name}</td>
+				<td><img style="width:200px;height:100px;"  src="<?php echo IMGATT_HOST; ?>{$producePage.ap_imgurl}"></td>
+				<td>{$producePage.reset_ap_type}</td>
+				<!-- <td>{$producePage.softname}({$producePage.ap_package})</td> -->
+				<td id="link{$producePage.ap_id}"><?php if($producePage['ap_link']){ ?>{$my_host}{$producePage.ap_link}<?php }else{ ?>-<?php } ?></td>
+				<td><div style="width:70px">{$producePage.reset_ap_ctm}</div></td>
+				<td>
+				<!-- <a target="_blank" href="{$my_host}{$producePage.ap_id}">软件管理</a> --> 
+				<?php if($producePage['reset_ap_type']=='活动页面'){ ?>
+				<a href="__URL__/soft_category_list/id/{$producePage.ap_id}/lr/{$lr}">软件管理</a>
+				<?php } ?>
+				<a href="/index.php/Sendnum/SignFlow/editTpl/id/{$producePage.ap_id}/">编辑</a>
+				<!-- <a href="javascript:void();" onclick="produce({$producePage.ap_id});">生成</a> -->
+				<a href="javascript:void();" onclick="del({$producePage.ap_id});">删除</a>
+				</td>
+			</tr>
+			<?php $index++;?>
+		</volist>
+		</tbody>
+	</div>
+	</table>
+	</form>
+	<div style="margin:20px;">
+	{$page}
+	</div>
+	</body>
+	</html>
+<script>
+	function add() {
+		if (!$("#name").val()) {
+			$("#notice_name").text("请输入活动名称");
+			return;
+		} 
+		if (!$("#package").val()) {
+			$("#notice_package").text("请输入包名");
+			return;
+		} 
+		var type = $("#type").val();
+		if (type == 3 || type == 4) {
+			if (!$("#notice").val()) {
+				$("#notice_notice").text("请输入提示文字");
+				return;
+			} 
+		}
+		if (type == 1 || type == 3 || type == 4) {
+			if (!$("#rule").val()) {
+				$("#notice_rule").text("请输入活动规则");
+				return;
+			} 
+		}
+		if (type == 2) {
+			if (!$("#award").val()) {
+				$("#notice_award").text("请输入获奖名单");
+				return;
+			} 
+		}
+		$.get('/index.php/Sendnum/Activity/checkFormat/package/'+$("#package").val(), {}, function(data) {
+				if (data == 'false') {
+					$("#notice_package").text("包名不存在");	
+					return;
+				} else {
+					$("#add").submit();	
+				}
+		});
+	}
+	function info_len(type, len) {
+		var content, info, origdom = $('#' + type);
+		var tl = $('#' + type + '_len');
+		tl.remove();
+		origdom.after('<span id="' + type + '_len">' + origdom.val().length + '/'+len+'</span>');
+		info = $('#' + type + '_len');	
+		if (origdom.val().length > len) {
+			info.css("color", "red");
+		}
+		origdom.keyup(function() {
+			if ( $(this).val().length > len) {
+				info.css("color", "red");	
+			} else {
+				info.css("color", "black");	
+				info.next().text("");
+			}
+			content = $(this).val().length + '/'+len;	
+			info.text(content);
+		});	
+	}
+	function del(id) {
+		if (confirm('您确定要删除该页面?')) {
+			//location.href="/index.php/sendNum/Activity/activityDel/id/"+id;
+			location.href="/index.php/Sendnum/SignFlow/activitydel/id/"+id;
+						   
+		}	
+	}	
+	function produce(id) {
+		if (confirm('确定生成页面?')) {
+			$.ajax({
+				url:"/index.php/sendNum/Activity/activityProduce/id/"+id, 
+				success:function(data) {
+					if (data) {
+						$("#link"+id).text(data);
+						alert("页面已生成成功");
+					}
+				},
+				error:function() {
+					alert("页面生成失败");
+				}
+
+			});	
+		}	
+	}	
+</script>	

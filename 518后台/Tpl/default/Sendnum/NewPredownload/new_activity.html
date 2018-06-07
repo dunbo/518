@@ -1,0 +1,685 @@
+<load href='__PUBLIC__/css/style.css' />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<script>
+    window.onload = function(){
+        $('#back_color').parent().find("div").bind("click", function(){
+            var file = $("#mean_text_color") ;
+            file.after(file.clone().val(""));
+            file.remove();
+        });
+    };
+    $(document).ready(function(){
+        $('#ap_type').val(2);
+        $('#game_name').val($('#h_game_name').val());
+        options = {
+            serviceUrl:'__URL__/pub_get_softname',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+                relate_soft();
+            }
+        };
+        $('#game_name').autocomplete(options);
+        my_select();
+        my_select2();
+        slider_show('show_award');
+    });
+    function my_select(){
+        var ap_type = $('#ap_type').val();
+        if(ap_type == 2){
+            $("tr[id^=type_2]").css('display','');
+            $("tr[id^=type_3]").css('display','none');
+            if($('#lottery_style').val() == 2){
+                $('#type_2_33').css('display','');
+                $('#type_2_32').css('display','none');
+            }else{
+                $('#type_2_33').css('display','none');
+                $('#type_2_32').css('display','');
+            }
+            get_lottery_type();
+        }else if(ap_type == 3){
+            $("tr[id^=type_2]").css('display','none');
+            $("tr[id^=type_3]").css('display','');
+            //$("#type_2_1").css('display','');
+            //$("#ap_rule_label").html('品牌用下载活动中奖名单');
+        }else if(ap_type == 1){
+            $("tr[id^=type_2]").css('display','none');
+            $("tr[id^=type_3]").css('display','none');
+        }
+    }
+
+    function new_activity(){
+        var p = $("input[name='p']").val();
+        var lr = $("input[name='lr']").val();
+        var ap_type = $('#ap_type').val();
+        window.location.href = '__URL__/add_activity_show?p='+p+'&lr='+lr+'&ap_type='+ap_type;
+    }
+    function my_select2(){
+        var dep_type = $('#dep_type').val();
+        var ap_type = $('#ap_type').val();
+        if(ap_type==2){
+            if(dep_type== 2){
+                $("tr[id^=type_4]").css('display','none');
+                $("tr[id=type_2_24]").css('display','none');
+                $("tr[id=type_2_25]").css('display','none');
+                $("tr[id=type_2_44]").css('display','none');
+                $("tr[id=type_2_45]").css('display','none');
+                $("tr[id=type_2_46]").css('display','none');
+                $("tr[id=type_2_47]").css('display','none');
+                $("tr[id=type_4_28]").css('display','');
+                $("#version_code").val('1000');
+                $("#no_pic").html('未中奖提示图');
+                $("#no_desc").html('未中奖提示语');
+                $("#nonum_pic").html('无抽奖次数提示图');
+                $("#nonum_desc").html('无抽奖次数提示语');
+
+            }else if(dep_type == 1){
+                $("tr[id^=type_4]").css('display','');
+                $("tr[id=type_2_24]").css('display','');
+                $("tr[id=type_2_25]").css('display','');
+                $("tr[id=type_4_28]").css('display','none');
+                $("tr[id=type_2_44]").css('display','');
+                $("tr[id=type_2_45]").css('display','');
+                $("tr[id=type_2_46]").css('display','');
+                $("tr[id=type_2_47]").css('display','');
+                $("#version_code").val('');
+                $("#no_pic").html('未中奖无抽奖机会提示图');
+                $("#no_desc").html('未中奖无抽奖机会提示语');
+                $("#nonum_pic").html('未中奖有抽奖机会提示图');
+                $("#nonum_desc").html('未中奖有抽奖机会提示语(多条以英文逗号分隔)');
+
+            }
+        }
+    }
+    
+    $(function(){
+        $('#bg_color').colorPicker();
+        $('#button_color').colorPicker();
+        $('#button_text_color').colorPicker();
+        $('#award_color').colorPicker();
+        $('#sudoku_color').colorPicker();
+        $('#rule_text_color').colorPicker();
+        $('#desc_color').colorPicker();
+        $('#rule_color').colorPicker();
+        $('#second_text_color').colorPicker();
+        $('#yuyue_color').colorPicker();
+        $('#jieshao_color').colorPicker();
+        $('#geren_color').colorPicker();
+        $('#info_color').colorPicker();
+        $('#back_color').colorPicker();
+        $('#alert_color').colorPicker();
+        $('#alert_button_color').colorPicker();
+        $('#prize_text_color').colorPicker();
+        $('#popup_bg_pic').colorPicker();
+        $('#prize_bg_color').colorPicker();
+        //卷
+        $('#again_text_color').colorPicker();
+        $('#rank_lottery_desc_pic').colorPicker();
+        $('#text_color').colorPicker();
+        $('#rank_lottery_desc_text').colorPicker();
+        
+        var colorpick_arr = ['close_button_color','submit_text_color','second_text_color1','back_text_color','back_button_color','prize_back_text_color','prize_back_color','submit_button_color'];
+        for(var i = 0;i<colorpick_arr.length;i++){
+            $('#'+colorpick_arr[i]).colorPicker();
+        }
+    });
+
+    function get_lottery_type(obj){
+        if($("#my_prize_button_color").is(':checked')) {
+            if (!obj) {
+                var obj = $('#lottery_style').val();
+            }
+            if (obj == 2 || obj == 4) {
+                $('#type_2_33').css('display', '');
+                $('#type_2_39').css('display', 'none');
+            } else {
+                $('#type_2_33').css('display', 'none');
+                $('#type_2_39').css('display', '');
+            }
+        }
+    }
+    function  go_back(){
+        var p = $("input[name='p']").val();
+        var lr = $("input[name='lr']").val();
+        var url = '__URL__/activity_list?';
+        if(p){
+            url += 'p='+p;
+        }
+        if(lr){
+            url += '&lr='+lr;
+        }
+        window.location.href = url;
+    }
+    $(document).ready(function(){
+       var arr = ['my_prize_text_color','prize_bg_pic','no_winning_marquee','my_prize_button_color','draw_button_text'];
+        for(var i = 0;i<arr.length;i++){
+            slide_this(arr[i]);
+        }
+    })
+    function slide_this(id){
+        $('.ke-container').css('width','100%');
+        $('.ke-container').css('height','100%');
+        var _val = $("#"+id).is(':checked');
+
+        if(_val){
+            $("."+id).css("display",'');
+        }else{
+            $("."+id).css("display",'none');
+        }
+        var lottery_type = $("#lottery_style").val();
+        get_lottery_type(lottery_type);
+    }
+
+    function slider_show(id){
+            var _val = $("input[name='"+id+"']:checked").val();
+            if(_val!=1){
+                $("."+id).css("display",'');
+            }else{
+                $("."+id).css("display",'none');
+            }
+
+    }
+
+    function relate_soft(){
+        var game_name = $("#game_name").val();
+        if(game_name){
+            var str = '我在@安智市场 发现【'+game_name+'】正在火爆预约中，预约成功就有丰厚大礼哦~快来吧~';
+            $("#share_text").val(str);
+            $("#h_game_name").val(game_name);
+        }
+    }
+</script>
+<body>
+<div style="margin: 20px"><input type="button" value="返回" onclick="go_back()" style="width: 100px;height: 30px"></div>
+<form action="__URL__/add_activity_do" method="post" enctype="multipart/form-data">
+    <div style="margin:20px;">
+        <h2><span class="my_activate">添加预约页面</span></h2>
+        <input type="hidden" name="p" value="{.p}" /><input type="hidden" name="lr" value="{.lr}" />
+        <table border="1" cellpadding="10" cellspacing="0" style="margin-top:40px;margin-left:40px;">
+            <tr>
+                <td>活动名称</td>
+                <td><input type="text" id="ap_name" name="ap_name"/></td>
+            </tr>
+            <tr>
+                <td>活动类型</td>
+                <td>
+                    <select name="ap_type" id="ap_type" onChange="new_activity();my_select();">
+                        <option value="1" <?php if(!$ap_type||$ap_type==1){echo 'selected="selected"';}?>>预告页面</option>
+                        <option value="2" <?php if($ap_type==2){echo 'selected="selected"';}?>>活动页面</option>
+                        <option value="3" <?php if($ap_type==3){echo 'selected="selected"';}?>>结束页面</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>页面banner</td>
+                <td><input type="file" name="ap_pic" />&nbsp;&nbsp;640*290</td>
+            </tr>
+            <tr>
+                <td>运营位图片</td>
+                <td><input type="file" name="rule_pic" />&nbsp;&nbsp;308*182</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="background-color: lightgrey"><h2>页面样式配置</h2></td>
+            </tr>
+            <tr>
+                <td>是否使用预约通用样式</td>
+                <td>&nbsp;&nbsp;<input type="radio" value="1" name="show_award" checked onclick="slider_show('show_award')"/>&nbsp;是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="show_award" value="0"  onclick="slider_show('show_award')"/>&nbsp;否</td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td>页面通用字体颜色</td>
+                <td><input type="text" name="second_text_color" id="second_text_color" /></td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td>页面特殊字体颜色</td>
+                <td>
+                    <span style="float:left"><input type="text" name="second_text_color1" id="second_text_color1" /></span>
+                    <span style="float:left;margin-left: 10px"><input type="checkbox" name="" checked disabled> 上线时间</span>
+                    <span style="float:left;margin-left: 10px"><input type="checkbox" name="" checked disabled> 可参与抽奖次数</span>
+                </td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td>页面背景</td>
+                <td><input type="text" name="bg_color" id="bg_color" /></td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td>模块标题字体颜色</td>
+                <td><input type="text" name="button_text_color" id="button_text_color" /></td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td>模块标题背景颜色</td>
+                <td><input type="text" name="button_color" id="button_color" /></td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td>模块标题背景图片</td>
+                <td><input type="file" name="button_pic" /></td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td>模块背景颜色</td>
+                <td><input type="text" name="info_color" id="info_color" /></td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td>模块分割线图片</td>
+                <td><input type="file" name="popup_bg_pic" />&nbsp;13*6</td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td>通用按钮颜色</td>
+                <td><input type="text" name="submit_button_color" id="submit_button_color" /></td>
+            </tr>
+
+            <tr>
+                <td colspan="2" style="background-color: lightgrey"><h2>游戏基本信息</h2></td>
+            </tr>
+            <tr>
+                <td>游戏名称</td>
+                <td><input type="text" name="game_name"  id='game_name' onblur="relate_soft()"/>
+                <input type="hidden" id="h_game_name">
+                </td>
+            </tr>
+            <tr>
+                <td>游戏上线时间</td>
+                <td>
+                    <span style="float: left"><input type="text" name="end_tm" id="end_tm" ></span>
+                    <span style="float: left;margin-left: 10px"><img src="/Public/js/calendar.gif" class="Wdate" onclick="WdatePicker({startDate:&quot;%y-%M-%d 00:00:00&quot;,el:&quot;end_tm&quot;,dateFmt:&quot;yyyy-MM-dd HH:mm:ss&quot;})" style="border:1px solid #000;"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>游戏ICON</td>
+                <td><input type="file" name="game_icon" /></td>
+            </tr>
+            <tr>
+                <td>预约人数</td>
+                <td>
+                    <span>初始值&nbsp;<input type="text" name="marquee_text_color"  id="marquee_text_color"/></span><br><br>
+                    <span>
+                        随机数&nbsp;从<input type="text" name="no_prize_pic"  id="no_prize_pic" style="width:56px"/>到<input type="text" name="no_prize_text"  id="no_prize_text"  style="width:57px"/>&nbsp;
+                        <font color="red">预约人数=初始值+N1+N2+...+Nn（N为每次的随机数）</font>
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2" style="background-color: lightgrey"><h2>页面模块选择</h2></td>
+            </tr>
+            <tr>
+                <td>添加页面模块</td>
+                <td>
+                    <span><input type="checkbox" checked disabled name="prize_back" id="prize_back">预约游戏基本信息</span>
+                    <span><input type="checkbox"  name="prize_bg_pic" id="prize_bg_pic" onclick="slide_this('prize_bg_pic')">礼包</span>
+                    <span><input type="checkbox"  name="no_winning_marquee" id="no_winning_marquee" onclick="slide_this('no_winning_marquee')">活动介绍</span>
+                    <span><input type="checkbox"  name="is_telephone" id="is_telephone" onclick="slide_this('is_telephone')">礼券</span><br>
+                    <span><input type="checkbox"  name="my_prize_button_color" id="my_prize_button_color" onclick="slide_this('my_prize_button_color')">预约活动福利</span>
+                    <span><input type="checkbox"  name="my_prize_text_color" id="my_prize_text_color" onclick="slide_this('my_prize_text_color')">预约福利</span>
+                    <span><input type="checkbox" checked disabled name="my_prize_button" id="my_prize_button" onclick="slide_this('my_prize_button')">游戏简介</span>
+                    <span><input type="checkbox"  name="draw_button_text" id="draw_button_text" onclick="slide_this('draw_button_text')">资讯</span>
+                </td>
+            </tr>
+
+            <tr class="prize_bg_pic" style="display: none">
+                <td colspan="2" style="background-color: lightgrey"><h2>礼包</h2></td>
+            </tr>
+            <tr class="prize_bg_pic" style="display: none">
+                <td>礼包模块标题</td>
+                <td><input type="text" name="back_button" id="back_button" value="礼包"></td>
+            </tr>
+            <tr class="prize_bg_pic" style="display: none">
+                <td>领取按钮文字颜色</td>
+                <td><input type="text" name="close_button_color" id="close_button_color"></td>
+            </tr>
+            <tr class="prize_bg_pic" style="display: none">
+                <td>领取按钮背景颜色</td>
+                <td><input type="text" name="back_button_color"  id="back_button_color"></td>
+            </tr>
+            <tr class="prize_bg_pic" style="display: none">
+                <td>查看按钮文字颜色</td>
+                <td><input type="text" name="rule_color" id="rule_color"></td>
+            </tr>
+            <tr class="prize_bg_pic" style="display: none">
+                <td>查看按钮背景颜色</td>
+                <td><input type="text" name="prize_back_color" id="prize_back_color"></td>
+            </tr>
+
+            <tr  class="no_winning_marquee" style="display: none">
+                <td colspan="2" style="background-color: lightgrey"><h2>活动介绍</h2></td>
+            </tr>
+            <tr  class="no_winning_marquee" style="display: none">
+                <td>模块标题</td>
+                <td><input type="text" name="ap_notice" id="ap_notice" value="活动介绍"></td>
+            </tr>
+            <tr  class="no_winning_marquee" style="display: none">
+                <td>活动介绍</td>
+                <td><textarea rows="5" cols="40" name="ap_desc" id="ap_desc">
+                    活动时间：<br>
+                    活动规则：<br>
+                    1.<br>
+                    2.<br>
+                </textarea></td>
+            </tr>
+            
+            
+            <!-- rank_lottery_desc_color,rank_lottery_desc_text,rank_lottery_desc_pic,text_color,again_text_color -->
+            <tr  class="is_telephone" style="display: none">
+                <td colspan="2" style="background-color: lightgrey"><h2>礼券</h2></td>
+            </tr>
+            <tr  class="is_telephone" style="display: none">
+                <td>礼券标题</td>
+                <td><input type="text" name="rank_lottery_desc_color" id="rank_lottery_desc_color" value="礼券"></td>
+            </tr>
+             <tr class="is_telephone" style="display: none">
+                <td>领取按钮文字颜色</td>
+                <td><input type="text" name="rank_lottery_desc_text" id="rank_lottery_desc_text"/></td>
+            </tr>
+             <tr class="is_telephone" style="display: none">
+                <td>领取按钮背景颜色</td> 
+                <td><input type="text"  name="rank_lottery_desc_pic"  value='#ff5f5f' id="rank_lottery_desc_pic"/></td>
+            </tr>
+             <tr class="is_telephone" style="display: none">
+                <td>查看按钮文字颜色</td>
+                <td><input type="text" name="text_color" id="text_color"/></td>
+            </tr>
+             <tr class="is_telephone" style="display: none">
+                <td>查看按钮背景颜色</td>
+                <td><input type="text" name="again_text_color" value='#02b2ff' id="again_text_color"/></td>
+            </tr>
+
+       
+            
+            <tr class="my_prize_button_color" style="display: none">
+                <td colspan="2" style="background-color: lightgrey"><h2>预约活动福利</h2></td>
+            </tr>
+            <!--<tr  class="my_prize_button_color" style="display: none">-->
+                <!--<td>是否开启抽奖</td>-->
+                <!--<td>&nbsp;&nbsp;<input type="radio" value="1" name="change_switch" checked />&nbsp;是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="change_switch" value="0" />&nbsp;否</td>-->
+            <!--</tr>-->
+            <tr   id="type_2_2" class="my_prize_button_color" style="display: none">
+                <td>抽奖类型</td>
+                <td><select name="lottery_style" id="lottery_style" onchange="get_lottery_type(this.value);">
+                    <option value="1">老虎机</option>
+                    <option value="2">九宫格</option>
+                    <option value="3">转盘</option>
+                </select></td>
+            </tr>
+            <tr  id="type_2_33" class="my_prize_button_color" style="display: none">
+                <td>九宫格抽奖背景颜色</td>
+                <td><input type="text" name="sudoku_color" id="sudoku_color"/></td>
+            </tr>
+            <tr id="type_2_39" style="display:none;" class="my_prize_button_color">
+                <td>老虎机(大转盘)抽奖区背景图片</td>
+                <td><input type="file" name="lottery_pic"   /></td>
+            </tr>
+            <tr id="type_2_38" style="dislay:none;" class="my_prize_button_color">
+                <td>点击抽奖图</td>
+                <td><input type="file" name="click_lottery_pic" /></td>
+            </tr>
+            <tr id="type_2_40" style="dislay:none;" class="my_prize_button_color">
+                <td>点击抽奖图(禁止抽奖)</td>
+                <td><input type="file" name="unclick_lottery_pic" /></td>
+            </tr>
+            <!--<tr id="type_2_24" class="my_prize_button_color" style="dislay:none;">-->
+                <!--<td>限制参加活动版本号</td>-->
+                <!--<td><input type="text" value="" name="version_code" id="version_code"/></td>-->
+            <!--</tr>-->
+            <tr id="type_2_8"    class="my_prize_button_color" style="dislay:none;">
+                <td>是否每天给1个免费抽奖机会</td>
+                <td>&nbsp;&nbsp;<input type="radio" value="1" name="free_day_switch" checked />&nbsp;是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="free_day_switch" value="0" />&nbsp;否</td>
+            </tr>
+            <tr id="type_2_36"  class="my_prize_button_color" style="dislay:none;">
+                <td>是否限制用户不重复中同一款游戏的礼包</td>
+                <td><input type="radio" name="is_repeat" value="1" checked />是&nbsp;&nbsp;&nbsp;<input type="radio" name="is_repeat" value="0" />否</td>
+            </tr>
+            <tr id="type_2_48"  style="background-color: lightgrey;display: none"  class="my_prize_button_color">
+                <td colspan="2"><h2>抽奖提示配置</h2></td>
+            </tr>
+            <tr id="type_2_17" class="my_prize_button_color" style="display: none">
+                <td id="no_pic">未中奖无抽奖机会提示图</td>
+                <td><input type="file" name="lose_no_img" /></td>
+            </tr>
+            <tr id="type_2_18"  class="my_prize_button_color" style="display: none">
+                <td id="no_desc">未中奖无抽奖机会提示语</td>
+                <td><input type="text" name="lost_no_desc" /></td>
+            </tr>
+            <tr id="type_2_19"  class="my_prize_button_color" style="display: none">
+                <td id="nonum_pic">未中奖有抽奖机会提示图</td>
+                <td><input type="file" name="lose_yes_img" /></td>
+            </tr>
+            <tr id="type_2_20"  class="my_prize_button_color" style="display: none">
+                <td id="nonum_desc">未中奖有抽奖机会提示语(多条以英文逗号分隔)</td>
+                <td><textarea rows="3" cols="40" name="lose_yes_desc"></textarea></td>
+            </tr>
+            <tr id="type_2_30"  class="my_prize_button_color" style="display: none">
+                <td>无抽奖机会是否提示</td>
+                <td>&nbsp;&nbsp;<input type="radio" value="1" name="is_warning" checked />&nbsp;是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="is_warning" value="0" />&nbsp;否</td>
+            </tr>
+            <tr id="type_2_49"  class="my_prize_button_color" style="display: none">
+                <td>主页弹窗背景颜色</td>
+                <td><input type="text" name="alert_color" id="alert_color" /></td>
+            </tr>
+            <tr id="type_2_50"  class="my_prize_button_color" style="display: none">
+                <td>主页弹窗按钮背景颜色</td>
+                <td><input type="text" name="alert_button_color" id="alert_button_color" /></td>
+            </tr>
+            <tr   style="display:none;" class="my_prize_text_color">
+                <td colspan="2" style="background-color: lightgrey"><h2>预约福利</h2></td>
+            </tr>
+            <tr style="display:none;" class="my_prize_text_color">
+                <td>模块标题</td>
+                <td><input type="text" name="yes_marquee" id="yes_marquee" value="预约福利"></td>
+            </tr>
+            <tr style="display:none;" class="my_prize_text_color">
+                <td>内容</td>
+                <td><textarea rows="5" cols="40" name="no_marquee" id="no_marquee"></textarea></td>
+            </tr>
+
+            <tr>
+                <td colspan="2" style="background-color: lightgrey"><h2>游戏简介</h2></td>
+            </tr>
+            <tr>
+                <td>模块标题</td>
+                <td><input type="text" name="title" id="title" value="游戏简介"></td>
+            </tr>
+            <tr>
+                <td>游戏介绍</td>
+                <td><textarea rows="5" cols="40" name="soft_bg" id="soft_bg"></textarea></td>
+            </tr>
+            <tr>
+                <td rowspan="5">游戏图片</td>
+                <td><input type="file" name="cha1" />&nbsp;200*300</td>
+            </tr>
+            <tr>
+                <td><input type="file" name="cha2" />&nbsp;200*300</td>
+            </tr>
+            <tr>
+                <td><input type="file" name="cha3" />&nbsp;200*300</td>
+            </tr>
+            <tr>
+                <td><input type="file" name="cha6" />&nbsp;200*300</td>
+            </tr>
+            <tr>
+                <td><input type="file" name="cha7" />&nbsp;200*300</td>
+            </tr>
+            <tr>
+                <td>游戏视频</td>
+                <td><input type="file" name="cha5" /></td>
+            </tr>
+            <tr>
+                <td>游戏视频缩略图</td>
+                <td><input type="file" name="cha4" />&nbsp;&nbsp;截图需带有视频播放icon,200*300</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="background-color: lightgrey"><h2>分享</h2></td>
+            </tr>
+            <tr>
+                <td>每日第一次分享是否给抽奖机会</td>
+                <td>&nbsp;&nbsp;<input type="radio" value="1" name="share_add" checked />&nbsp;是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="share_add" value="0" />&nbsp;否</td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td >分享按钮文字颜色</td>
+                <td><input type="text" name="geren_color" id="geren_color" /></td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td>分享按钮背景颜色</td>
+                <td><input type="text" name="back_color" id="back_color" /></td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td>分享按钮图片</td>
+                <td><input type="file" name="mean_text_color"  id="mean_text_color"  onchange="javascript:$('#back_color').val('');$('#back_color').parent().find('div').css('background-color','');"/></td>
+            </tr>
+            <tr >
+                <td>分享文案</td>
+                <td><input type="text" name="share_text" id="share_text" value="我在@ 安智市场 发现【游戏名称】正在火爆预约中，预约成功就有丰厚大礼哦~快来吧~"/></td>
+            </tr>
+            <tr >
+                <td>分享微信图</td>
+                <td><input type="file" name="share_weixin_pic" />&nbsp;100*100</td>
+            </tr>
+            <tr  >
+                <td>其他分享图</td>
+                <td><input type="file" name="share_other_pic" />&nbsp;200*200</td>
+            </tr>
+            <tr style="display:none;" class="draw_button_text">
+                <td colspan="2" style="background-color: lightgrey"><h2>资讯</h2></td>
+            </tr>
+            <tr style="display:none;" class="draw_button_text">
+                <td>模块标题</td>
+                <td><input type="text" name="again" id="again" value="资讯"></td>
+            </tr>
+            <tr class="show_award" style="display: none">
+                <td colspan="2" style="background-color: lightgrey"><h2>预约按钮</h2></td>
+            </tr>
+            <tr  class="show_award" style="display: none">
+                <td>底栏背景颜色</td>
+                <td><input type="text" name="prize_bg_color" id="prize_bg_color" /></td>
+            </tr>
+            <tr  class="show_award" style="display: none">
+                <td>预约按钮字体颜色</td>
+                <td><input type="text" name="prize_text_color" id="prize_text_color"/></td>
+            </tr>
+            <tr  class="show_award" style="display: none">
+                <td>预约按钮颜色</td>
+                <td><input type="text" name="yuyue_color" id="yuyue_color" /></td>
+            </tr>
+            <tr  class="show_award" style="display: none">
+                <td>预约按扭图片</td>
+                <td><input type="file" name="yuyue_pic" />&nbsp;&nbsp;</td>
+            </tr>
+        </table>
+
+    </div>
+    <div style="margin-top:20px;margin-left:100px;">
+        <table>
+            <tr>
+                <td><input type="submit" class="search_btn" value="确定" onclick="return chk()"/></td>
+                <td><a href="javascript:;" onclick="window.location.href='__URL__/activity_list?p={.p}&lr={.lr}'" class="search_btn" >取消</a></td>
+            </tr>
+        </table>
+    </div>
+</form>
+<script>
+    function chk(){
+        var ap_name = $("#ap_name").val();
+        var back_button = $("#back_button").val();
+        var ap_notice = $("#ap_notice").val();
+        var yes_marquee = $("#yes_marquee").val();
+        var no_marquee = $("#no_marquee").val();
+        var title = $("#title").val();
+        var describe = $("#describe").val();
+        var again = $("#again").val();
+        var ap_desc = $("#ap_desc").val();
+        var rank_lottery_desc_color = $('#rank_lottery_desc_color').val();
+//        if($('#no_winning_marquee').is(':checked')){
+//            if(ap_desc==''){
+//                alert("活动介绍不能为空");return false;
+//            }
+//        }
+//        if($('#my_prize_text_color').is(':checked')){
+//            if(no_marquee==''){
+//                alert("预约福利内容不能为空11");return false;
+//            }
+//        }
+//
+//        if(describe==''){
+//            alert("游戏介绍不能为空");return false;
+//        }
+        if(GetCharLength(ap_name)<2||GetCharLength(ap_name)>50){
+            alert("活动名称请填写2-50个字符");return false;
+        }
+        if(back_button&&(GetCharLength(back_button)<4||GetCharLength(back_button)>20)){
+            alert("礼包标题必须为2-10个汉字");return false;
+        }
+        if(ap_notice&&(GetCharLength(ap_notice)<4||GetCharLength(ap_notice)>20)){
+            alert("活动介绍标题请输入2-10个汉字");return false;
+        }
+        if(yes_marquee&&(GetCharLength(yes_marquee)<4||GetCharLength(yes_marquee)>20)){
+            alert("预约福利标题请输入2-10个汉字");return false;
+        }
+
+        if(title&&(GetCharLength(title)<4||GetCharLength(title)>20)){
+            alert("游戏简介标题请输入2-10个汉字");return false;
+        }
+
+        if(again&&(GetCharLength(again)<4||GetCharLength(again)>20)){
+            alert("资讯标题请输入2-10个汉字");return false;
+        }
+        if(rank_lottery_desc_color&&(GetCharLength(rank_lottery_desc_color)<4||GetCharLength(rank_lottery_desc_color)>20)){
+            alert("礼券标题请输入2-10个汉字");return false;
+        }
+        
+    }
+    function GetCharLength(str) {
+        var iLength = 0;  //记录字符的字节数
+        for (var i = 0; i < str.length; i++)  //遍历字符串中的每个字符
+        {
+            if (str.charCodeAt(i) > 255)   //如果当前字符的编码大于255
+            {
+                iLength += 2;    //所占字节数加2
+            }
+            else {
+                iLength += 1;   //否则所占字节数加1
+            }
+        }
+        return iLength;   //返回字符所占字节数
+    }
+
+    KindEditor.ready(function(K) {
+        window.editor = K.create('#ap_desc',{
+            minWidth:500,
+            minHeight:100,
+            allowImageRemote : false,
+            allowImageUpload : true,
+            items : [
+                'forecolor'
+            ]
+        });
+        window.editor = K.create('#no_marquee',{
+            minWidth:500,
+            minHeight:100,
+            allowImageRemote : false,
+            allowImageUpload : true,
+            items : [
+                'forecolor','image'
+            ]
+        });
+
+        window.editor = K.create('#soft_bg',{
+            minWidth:500,
+            minHeight:100,
+            allowImageRemote : false,
+            allowImageUpload : true,
+            items : [
+                'forecolor'
+            ]
+        });
+    });
+
+    KindEditor.options.cssData = 'body { font-size: 14px; }';
+</script>
+</body>
+</html>

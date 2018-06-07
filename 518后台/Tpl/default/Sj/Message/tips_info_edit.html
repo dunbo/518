@@ -1,0 +1,46 @@
+<form onsubmit="submittips(); return false;">
+<center>
+<p><h1>{$title}贴士信息</h1></p>
+<table>
+<tr><td>贴士内容：</td><td><textarea id="tipsContent" rows="" cols="23" name='tipsContent'><empty name="tipsinfo.tipsContent">请在此处输入贴士信息，字数控制在15字以内<else />{$tipsinfo.tipsContent}</empty></textarea></td>
+</tr>
+<tr><td>显示概率：</td><td><input type='text' value="<empty name='tipsinfo.showProbability'><else />{$tipsinfo.showProbability}</empty>" name='showProbability' /></td>
+</tr>
+<tr><td>选择平台：</td><td><select name='pid' id='p_id'>
+<volist name="sel_list" id="sel" >
+	<option value ="{$sel.pid}" <php>if($p_id == $sel['pid']){ echo 'selected'; } </php>>{$sel.pname}</option>
+</volist>
+</select></td></tr>
+<input name='id' type="hidden" value="<empty name='tipsinfo.id'><else />{$tipsinfo.id}</empty>" name='id' />
+<tr><td></td><td><input type='submit' value='&nbsp;提交&nbsp;' />&nbsp;&nbsp;&nbsp;<input type='button' onclick='tb_remove();' value='&nbsp;&nbsp;取消&nbsp;&nbsp;' /></td></tr>
+</table>
+</center>
+</form>
+<script>
+$(document).ready(function(){
+	$("#tipsContent").live('click', function(){
+		var str = $(this).val();
+		if (str == '请在此处输入贴士信息，字数控制在15字以内') {
+		$(this).val("");
+		}
+	});	
+});
+function submittips(){
+	var tips = $(":input[name='tipsContent']").val();
+	var showProbability = $(":input[name='showProbability']").val();
+	var id = $(":input[name='id']").val();
+	var pid = $("#p_id").val();
+	$.ajax({
+		url:"__URL__/tips_info_edit",
+		data:"id="+id+"&showProbability="+showProbability+"&tipsContent="+tips+"&pid="+pid,
+		type:'POST',
+		dataType: 'json',
+		success: function(json){
+			alert(json.info);
+			if(json.status == 1){
+				window.location.reload();
+			}
+		}
+	});
+}
+</script>

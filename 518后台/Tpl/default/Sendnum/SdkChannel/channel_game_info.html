@@ -1,0 +1,216 @@
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/ZeroClipboard.js"></script>
+<div class="main">
+    <div class="content">
+		<div class="search_box" style="margin-top:5px;height: 37px">
+			<form name="fml" action="" method = "get">
+				<div style="float:left;margin-left:10px;font-size:12px">
+					游戏名称(渠道)<input type="text"  name="channel_softname" style="width:140px" id="channel_softname" value="{$channel_softname}" class="search_item_text">
+				</div>
+				<div style="float:left;margin-left:10px;font-size:12px">
+					游戏名称(线上)<input type="text"  name="name" id="name" value="{$name}" style="width:140px" class="search_item_text">
+				</div>	
+				<div style="float:left;margin-left:10px;font-size:12px">
+					游戏包名<input type="text"  name="package" id="package" value="{$package}" style="width:140px" class="search_item_text">
+				</div>
+				<div style="float:left;margin-left:10px;font-size:12px">
+					<input type="submit" value="搜索"  class="search_btn" >
+				</div>	
+			</form>
+		</div>
+		<div style="clear:both"></div>
+		<div style="float:left;margin-top:10px;margin-left:5px">
+            <a href='javascript:void(0)"' style="float:left;" title="创建渠道" class="search_btn" onclick="go_back()">返回</a>
+			<input type="hidden" id='p' value="{$p}">
+			<input type="hidden" id='lr' value="{$lr}">
+        </div>
+		<div style="float:left;margin-top:14px;margin-left:10px;font-size:14px">
+            {$channel_name}
+        </div>	
+		
+		<div style="float:right;margin-top:10px;margin-right:7px">
+			<?php if($channel_type != '1'){ ?>
+	
+			<?php }else{ ?>
+			<div style="float:right;margin-right:7px">
+			<a href='__URL__/import_game?channel_id={$channel_id}&channel_name={$channel_name}&channel_type={$channel_type}&p={$p}&lr={$lr}&width=380&height=140' style="float:left;width:105px" title="导入游戏" class="thickbox search_btn">导入游戏</a>
+			</div>
+			<div style="float:right;margin-right:7px">
+				<a href='__URL__/related_game?channel_id={$channel_id}&channel_name={$channel_name}&channel_type={$channel_type}&p={$p}&lr={$lr}&width=800' style="float:left;width:105px" title="添加游戏" class="thickbox search_btn">添加游戏</a>
+			</div>
+			<?php } ?>
+
+        </div>
+		
+		<div style="float:right;margin-top:10px;margin-right:7px">
+			<a href='javascript:void(0)' style="float:left;margin-right:5px;" onclick="batch_edit_status(-1,0);" class=" search_btn">无效</a>
+             <a href='__URL__/channel_game_info?channel_id={$channel_id}&channel_name={$channel_name}&channel_softname={$channel_softname}&name={$name}&package={$package}&channel_type={$channel_type}&import_out=1' style="float:left;"  class=" search_btn">导出</a>
+        </div>
+		<div style="margin-top:50px;width:auto;overflow:visible;">
+		<table class="table_list" >
+			<th><input type="checkbox" id="chk_all" onclick="check_all()" alt="1" num='{$count_games}'/></th><th width="14%">游戏名称(线上)</th><th width="14%">游戏名称(渠道)</th><th width="14%">包名</th><th width="10%">版本号/版本名</th><th width="10%">渠道包</th><th width="7%"><a href='__URL__/channel_game_info?{$param}'>创建时间<if condition="$o eq '1'">&uarr;&darr;<elseif condition="$_GET['order'] eq 'asc'" />&darr;<else/>&uarr;</if></a></th><th width="8%">状态</th><th width="8%">操作</th>
+			<?php
+				foreach($game_list as $k=>$v){
+					?>
+						<tr>
+							<td>
+							<input type="checkbox" name="chk_list" value="{$v.id}" onclick="select_box(this)" />
+							</td>
+							<td><?php echo $v['name']?></td>
+							<td><a href="__URL__/edit_channel_softname?id=<?php echo $v['id'];?>&channel_softname=<?php echo $v['channel_softname']?>&channel_type={$channel_type}&width=300&amp;height=100" class="thickbox" title="编辑渠道软件名称" ><?php echo $v['channel_softname']?></a></td>
+							<td><?php echo $v['package']?></td>
+							<td><a href="__URL__/get_game_old_version?channel_id=<?php echo $v['channel_id'];?>&package=<?php echo $v['package']?>&version_code_num=<?php echo $v['version_code_num'];?>&width=300&amp;height=100" class="thickbox" title="历史版本" ><?php echo $v['version_code_num']?>/<?php echo $v['version_code']?></a></td>
+							<td>
+								<?php 
+									if($v['status'] == 1){
+										if($v['sdk_status']==2||$v['sdk_status']==4){
+											if($v['need_test']==1||$v['need_test']==2){
+												if($v['sdk_send']==1){
+													echo 'Testin_测试中';
+												}else{
+													if($v['url']==''){
+														echo '生成中';
+													}else{
+														echo '待发送至testin';
+													}
+													
+												}
+												
+											}else{
+												if(empty($v['url'])){
+													echo '生成中<br><a href="__URL__/re_apk_status?id='.$v['id'].'&softid='.$v['softid'].'&type=2">重新测试</a>';
+												}else{
+													echo '<a href="'. IMGATT_HOST .$v['url'].'">下载</a><br><a href="__URL__/re_apk_status?id='.$v['id'].'&softid='.$v['softid'].'&type=2">重新测试</a><br><a href="javascript:void(0)" id="copy_'.$v['id'].'" data="'.$v['id'].'" class="clip_button" onclick="copy_url('.$v['id'].')">复制链接<input type="hidden" id="url_'.$v['id'].'" value="'.$server_name.$v['fixed_url'].'">';
+													echo '<br/><a target="_blank"  href="'. $server_name ."chlpkg_".$v['softid'].'_'.$v['id'].'.html">M站地址</a>';
+												}
+												
+											}
+										}else if($v['sdk_status']==3){
+											echo 'Testin_测试未通过<br><a href="__URL__/re_apk_status?id='.$v['id'].'&softid='.$v['softid'].'&type=2">重新测试</a><br><a href="__URL__/re_apk_status?softid='.$v['sdk_id'].'&type=3">直接通过</a>';
+										}else if($v['sdk_status']==1){
+											if($v['apk_status']==1){
+												echo '生成中';
+											}else if($v['apk_status']==2){
+												echo '失败<br><a href="__URL__/re_apk_status?id='.$v['id'].'&softid='.$v['softid'].'&type=1">点击重试</a>';
+											}else if($v['apk_status']==3){
+												echo '<a href="'.IMGATT_HOST .$v['url'].'">下载</a><br><a href="javascript:void(0)" id="copy_'.$v['id'].'" data="'.$v['id'].'" class="clip_button" onclick="copy_url('.$v['id'].')">复制链接<input type="hidden" id="url_'.$v['id'].'" value="'.$server_name.$v['fixed_url'].'">';
+												echo '<br/><a target="_blank"  href="'. $server_name ."chlpkg_".$v['softid'].'_'.$v['id'].'.html">M站地址</a>';
+											}else if($v['apk_status']==4){
+												echo '待打包';
+											}
+										}
+									}
+								?>
+							</td>
+							<td><?php  if(!empty($v['add_tm'])){echo date("Y-m-d H:i:s",$v['add_tm']);}?></td>
+							<td><?php if($v['status']=='1'){echo '有效';}else{echo '无效';}?></td>
+							<td><a href="javascript:void(0)" onclick="edit_status(<?php echo $v['id'];?>,<?php if($v['status']=='1'){echo '-1';}else{echo '1';}?>)"><?php if($v['status']=='1'){echo '无效';}else{echo '';}?></a>
+							<?php if($v['http_sta']!='1'&&$channel_type == '0'){echo '<a href="__URL__/re_http?id='.$v['id'].'&type=2">重新发送</a>';} ?>
+							</td>
+						</tr>
+					<?php
+				}
+			?>
+		</table>
+		</div>
+		<div>
+		{$page}
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(".clip_button").each(function(i){	
+        var id = $(this).attr('data');
+        var clip=null;
+        clip = new ZeroClipboard.Client();
+        ZeroClipboard.setMoviePath( '/Public/school/js/ZeroClipboard.swf' );  //和html不在同一目录需设置setMoviePath
+        clip.setHandCursor( true );		
+		var my_text = $("#url_"+id).val();
+        clip.setText(my_text);
+        clip.addEventListener('complete', function (client, text) {
+          alert( "复制成功" );
+        });
+
+        clip.glue( 'copy_'+id);
+  });
+
+
+function edit_status(id,status){
+	if(status==1){
+		sta_name = '有效';
+	}else{
+		sta_name = '无效';
+	}
+	var str = '你确定要将该渠道游戏置于'+sta_name+'吗';
+	var channel_type = '{$channel_type}';
+	if(confirm(str)){
+		window.location.href = '__URL__/edit_status?type=2&id='+id+'&status='+status+'&channel_type='+channel_type;
+	}
+}
+function go_back(){
+	var p = $("#p").val();
+	var lr = $("#lr").val();
+	window.location.href="__URL__/index?p="+p+"&lr="+lr;
+}
+function check_all(){
+	var alt=$('#chk_all').attr('alt');
+	var num=$('#chk_all').attr('num');
+	var chks=$("input[name='chk_list']:checked");
+	var i=0;
+    $(chks).each(function(){
+       i++;                   
+    });
+	if(alt==1 && i!=num){
+		$("input[name=chk_list]").attr("checked",true); 
+		$('#chk_all').attr("checked",true); 
+		$('#chk_all').attr('alt',2);
+	}else{
+		$("input[name=chk_list]").attr("checked",false); 
+		$('#chk_all').attr("checked",false); 
+		$('#chk_all').attr('alt',1);
+	}
+}
+
+function select_box(obj){
+	var num=$('#chk_all').attr('num');
+		var chks=$("input[name='chk_list']:checked");
+		var i=0;
+	    $(chks).each(function(){
+	       i++;                   
+	    });
+	    if(i==num){
+	    	$("#chk_all").attr("checked",true); 
+	    	$('#chk_all').attr('alt',2);
+	    }else{
+	    	$("#chk_all").attr("checked",false); 
+	    	$('#chk_all').attr('alt',1);
+	    }
+}
+function batch_edit_status(status,channel_type){
+	if(!confirm('是否将状态修改为失效？')){
+		return false;
+	}
+	var chks=$("input[name='chk_list']:checked");
+	var ids=new Array();
+	var i=0;
+    $(chks).each(function(){
+       ids[i]=this.value;
+       i++;                   
+    });
+    if(i==0){
+		alert('请选择要批量设置为无效的游戏');
+		return false;
+	}
+	window.location.href = '__URL__/edit_status?type=2&is_batch=1&ids='+ids+'&status='+status+'&channel_type='+channel_type;
+	return true;
+}
+ 
+</script>

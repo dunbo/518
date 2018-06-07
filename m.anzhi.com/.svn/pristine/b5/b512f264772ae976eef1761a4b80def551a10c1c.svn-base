@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>败家不够 礼物来凑</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/double11/css/common2.css?v1"/>
+<script type="text/javascript" src="<!--{$out.static_url}-->/double11/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">
+	var sid = '<!--{$out.sid}-->';
+	var aid = <!--{$out.aid}-->;
+	var soft_lists_go = [];
+	
+	var submit_info_clickable = false;
+	
+	var flags={canMove:true};
+	function showOpenBox(obj){
+		var bg_h=$("#body-bg").height()+$(document).scrollTop(),
+				top_h= $(obj).height()/ 2-$(document).scrollTop();
+		$(obj).css("margin-top",-top_h+"px").show();
+		$("#body-bg").css("height",bg_h+"px").show();
+		flags.canMove=false;
+	}
+	function cloBox(obj){
+		$(obj).hide();
+		$("#body-bg").hide();
+		flags.canMove=true;
+	}
+	$(function(){
+		$("body").bind('touchmove', function (e) {
+			if(!flags.canMove){
+				e.preventDefault();
+			}
+		});
+		
+		my_soft();
+	})
+	
+	function edit_info(award_id) {
+		var name = $("#name_"+award_id).text();
+		var telephone = $("#telephone_"+award_id).text();
+		$("#name").val(name);
+		$("#telephone").val(telephone);
+		$("#award_id").val(award_id);
+		$("#prompt").text('');//清错误提示
+		submit_info_clickable = true;
+		
+		showOpenBox("#tip-box4");
+	}
+	
+	function submit_info() {
+		if (!submit_info_clickable) {
+			return;
+		}
+		submit_info_clickable = false;
+		var name = $.trim($("#name").val());
+		var telephone = $.trim($("#telephone").val());
+		var award_id = $.trim($("#award_id").val());
+		if (name == '') {
+			submit_info_clickable = true;
+			$("#prompt").text('姓名不能为空');
+			return;
+		}
+		if (telephone == '') {
+			submit_info_clickable = true;
+			$("#prompt").text('电话不能为空');
+			return;
+		}
+		
+		$.ajax({
+			url:"/lottery/double11_edit_info.php?sid="+sid,
+			data:{name:name, telephone:telephone, award_id:award_id},
+			type:"post",
+			success:function(data){
+				if (data == -1) {
+					submit_info_clickable = true;
+					$("#prompt").text('请插入sim卡！');
+				} else if (data == 500) {
+					submit_info_clickable = true;
+					$("#prompt").text('姓名不能为空！');
+				} else if (data == 501) {
+					submit_info_clickable = true;
+					$("#prompt").text('电话不能为空！');
+				} else if (data == 502) {
+					submit_info_clickable = true;
+					$("#prompt").text('姓名太长！');
+				} else if (data == 503) {
+					submit_info_clickable = true;
+					$("#prompt").text('电话号码格式不对！');
+				} else if (data == 200) {
+					$("#prompt").text('编辑成功！');
+					setTimeout(function(){
+						submit_info_clickable = true;
+						cloBox('#tip-box4');
+						location.href="/lottery/double11_lottery_award.php?sid="+sid;
+					}, 3000);
+				} else {
+					submit_info_clickable = true;
+					$("#prompt").text('出错啦！');
+				}
+			}
+		});
+	}
+	
+	function my_soft() {
+		var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+		var soft_list = $.parseJSON(json_data);
+		var soft_lists = soft_list.DATA;
+		for(j=0;j<soft_lists.length;j++){
+            var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+            var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+            if((soft_status_go == -2 && json_datas_gos== -1) || json_datas_gos == 1 || json_datas_gos == 3){
+                soft_lists_go.push(soft_lists[j]);
+            }
+        }
+        
+        for(j=0;j<soft_lists.length;j++){
+            window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+            window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+            var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+            var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+            if(json_datas_gos == 5 && soft_status_gos == -2){
+                soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+            }
+        }
+        
+        for(j=0;j<soft_lists.length;j++){
+            window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][ 0]));
+            window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+            var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+            var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+            if(soft_status_gos != -2){
+                soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+            }
+        }
+		$(".go_convert").each(function(){
+			var my_package = $(this).attr('content');
+			var own_softs = soft_lists_go;
+			for(var i=0;i<own_softs.length;i++){
+				if(my_package == own_softs[i][7]){
+					var  soft_status_go = window.AnzhiActivitys.isInstalledApp(own_softs[i][7],parseInt(own_softs[i][13]));
+					var soft_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(own_softs[i][0]));
+					if((soft_status_go == -2 && soft_datas_gos== -1) || soft_datas_gos == 1 || soft_datas_gos == 3){
+						$(this).html('下载去兑换');
+						var pkgname = own_softs[i][7];
+						var softid = parseInt(own_softs[i][0]);
+						var softname = own_softs[i][2];
+						var versionCode = parseInt(own_softs[i][13]);
+						var size = own_softs[i][27];
+						$(this).bind('click', function() {
+							downloadApp(parseInt(aid),softid,pkgname,softname,versionCode,size,1);
+						});
+					}else if(soft_datas_gos == 5 && soft_status_go == -2){
+						$(this).html('去兑换');
+						var softid = parseInt(own_softs[i][0]);
+						$(this).bind('click', function() {
+							installApp(softid);
+						});
+					}else if(soft_status_go != -2){
+						$(this).html('去兑换');
+						var pkgname = own_softs[i][7];
+						var softid = parseInt(own_softs[i][0]);
+						$(this).bind('click', function() {
+							openApp(pkgname,softid);
+						});
+					}
+				}
+			}
+		});
+	}
+	
+	function downloadApp(aid, softid, pkgname, softname, versionCode, size, flag) {
+		window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,versionCode,size,flag);
+	}
+	
+	function installApp(softid) {
+		window.AnzhiActivitys.installAppForActivity(parseInt(softid));
+	}
+	
+	function openApp(pkgname, softid) {
+		window.AnzhiActivitys.openAppForActivity(pkgname,[softid]);
+	}
+	
+	function onDownloadStateChanged(softid,newState){
+		var gift_packagename = $('.go_convert').attr('content');
+        if(newState == 1){
+			for(i=0;i < soft_lists_go.length;i++){
+				if(soft_lists_go[i][0] == softid && soft_lists_go[i][7] == gift_packagename) {
+					$('.go_convert').html("下载去兑换");
+					break;
+                }
+			}
+        }else if(newState == 2){
+            for(i=0;i < soft_lists_go.length;i++){
+				if(soft_lists_go[i][0] == softid && soft_lists_go[i][7] == gift_packagename) {
+					$('.go_convert').html("下载去兑换");
+					break;
+                }
+			}
+        }else if(newState == 3){
+            for(i=0;i < soft_lists_go.length;i++){
+				if(soft_lists_go[i][0] == softid && soft_lists_go[i][7] == gift_packagename) {
+					$('.go_convert').html("下载去兑换");
+					break;
+                }
+			}
+        }else if(newState == 4){
+			for(i=0;i < soft_lists_go.length;i++){
+				if(soft_lists_go[i][0] == softid && soft_lists_go[i][7] == gift_packagename) {
+					$('.go_convert').html("重试");
+					break;
+                }
+			}
+        }else if(newState == 5){
+			for(i=0;i < soft_lists_go.length;i++){
+				if(soft_lists_go[i][0] == softid && soft_lists_go[i][7] == gift_packagename) {
+					$('.go_convert').html("去兑换");
+					$('.go_convert').removeAttr("onclick");
+					$('.go_convert').unbind('click');
+					$('.go_convert').bind('click',function(){
+						installApp(parseInt(softid));
+					});
+					break;
+                }
+			}
+        }else if(newState == 6){
+			for(i=0;i < soft_lists_go.length;i++){
+				if(soft_lists_go[i][0] == softid && soft_lists_go[i][7] == gift_packagename) {
+					$('.go_convert').html("去兑换");
+					$('.go_convert').removeAttr("onclick");
+					$('.go_convert').unbind('click');
+                    $('.go_convert').bind('click',function(){
+                        openApp(pkgname,parseInt(softid));
+                    });
+					break;
+                }
+			}
+        }else if(newState == 8){
+			for(i=0;i < soft_lists_go.length;i++){
+				if(soft_lists_go[i][0] == softid && soft_lists_go[i][7] == gift_packagename) {
+					$('.go_convert').html("继续");
+					break;
+                }
+			}
+        }else if(newState == 9){
+			for(i=0;i < soft_lists_go.length;i++){
+				if(soft_lists_go[i][0] == softid && soft_lists_go[i][7] == gift_packagename) {
+					$('.go_convert').html("检查中");
+					break;
+                }
+			}
+        }
+    }
+</script>
+</head>
+<body>
+<section>
+    <div class="banner" id="top">
+        <a href="#"><img src="<!--{$out.static_url}-->/double11/images/cam_banner.png"/></a>
+    </div>
+	<div class="main">
+		<!--{if $out.my_award_list}-->
+		<!--{foreach from=$out.my_award_list item=i key=k}-->
+			<div class="title_bg title_bg2"><h3><!--{if $k == 0}--><img src="<!--{$out.static_url}-->/double11/images/title_txt2.png"/></h3><!--{/if}--></div>
+			<!--{if $i.award_type neq 2}-->
+			<div class="detail_wrap clear">
+				<!--{if !$out.is_overdue}-->
+				<a href="javascript:;" class="prize_btns" onclick="edit_info(<!--{$i.award_id}-->)">编辑</a>
+				<!--{/if}-->
+				<p class="prize-title"><span><!--{$i.award_level_name}--> <!--{$i.award_name}--></span></p>
+				<p class="prize-text">姓名　<span id="name_<!--{$i.award_id}-->"><!--{$i.name}--></span><br/>手机　<span id="telephone_<!--{$i.award_id}-->"><!--{$i.telephone}--></span></p>
+			</div>
+			<!--{else}-->
+			<div class="detail_wrap clear">
+				<p class="prize-title"><span><!--{$i.award_level_name}--> <!--{$i.award_name}--></span></p>
+				<p class="prize-text">兑换路径:<!--{$i.gift_path}--></p>
+				<a content="<!--{$i.package}-->" href="javascript:;" class="prize_btns prize_btns2 go_convert"></a>
+			</div>
+			<!--{/if}-->
+		<!--{/foreach}-->
+		<!--{else}-->
+			<div class="tips_p prompt clear">
+				<p>少年，你木有奖品哦~</p>
+				<img src="<!--{$out.static_url}-->/double11/images/tip_hd_03.png">
+			</div>
+			<div class="prompt clear">
+				<a href="/lottery/double11_lottery_rules.php?notjump=1&sid=<!--{$out.sid}-->" class="marauto prompt_btn" style="width:94px;">
+					<i></i><span>活动规则</span><em></em>
+					<div class="clear"></div>
+				</a>
+			</div>
+		<!--{/if}-->
+	</div>
+    <div class="footer">
+		<p>*本次活动最终解释权归安智所有</p>
+	</div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+	<div class="tip-box" id="tip-box4"  style="background:#febd45; display: none;">
+		<form class="form1">
+			<div class="form_title"></div>
+			<div class="form-item clear">
+				<label for="name">姓名：</label>
+				<div class="textbox"><input type="text" id="name"/> </div>
+			</div>
+			<div class="form-item clear">
+				<label for="telephone">手机：</label>
+				<div class="textbox"><input type="text" id="telephone"/> </div>
+			</div>
+			<input type="text" id="award_id" style="display:none"/>
+			<div class="prompt2 redcolor" id="prompt"></div>
+		</form>
+		<div class="btns2">
+			<a class="btns btns_tip" href="javascript:;" onclick="submit_info()">提交</a>
+			<a class="btns btns_tip" href="javascript:;" onclick="cloBox('#tip-box4')">取消</a>
+		</div>
+	</div>
+</section>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<include file="../Public/header" />
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+KindEditor.ready(function(K) {
+		window.editor = K.create('#editor_content',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'bold','italic','underline','fontsize','forecolor','|','image','anchor','link','unlink','justifyleft','justifycenter','justifyright'
+			]
+		});
+});
+KindEditor.options.cssData = 'body { font-size: 14px; }';
+
+function check(){
+	var active_name = $('#active_name').val();
+	var usable = $('#usable').val();
+	var apply_pkg = $('#apply_pkg').val();
+	var cut_tm = $('#cut_tm').val();
+	var gift_type = $('#gift_type').val();
+
+	if(!active_name){
+		alert("标题不能为空");
+		return false;
+	}
+	if(gift_type==0){
+		alert("请选择礼包类型");
+		return false;
+	}
+
+	if(!usable){
+		alert("使用范围不能为空");
+		return false;
+	}
+	if(!apply_pkg){
+		alert("应用包名不能为空");
+		return false;
+	}
+	if(!cut_tm){
+		alert("截止时间不能为空");
+		return false;
+	}
+
+}
+window.onload=function(){
+	sel_checked();
+	
+}
+function sel_checked(){
+	var vals = "{$result[0]['active_type']}";
+	if(vals==14){
+		$("#pt_market").attr("checked",true);
+		$("#pt_game").attr("checked",true);
+		$("#pt_sdk").attr("checked",true);
+	}else if(vals==2){
+		$("#pt_game").attr("checked",true);
+	}else if(vals==4){
+		$("#pt_market").attr("checked",true);
+	}else if(vals==6){
+		$("#pt_market").attr("checked",true);
+		$("#pt_game").attr("checked",true);
+	}else if(vals==8){
+		$("#pt_sdk").attr("checked",true);
+	}else if(vals==10){
+		$("#pt_game").attr("checked",true);
+		$("#pt_sdk").attr("checked",true);
+	}else if(vals==12){
+		$("#pt_market").attr("checked",true);
+		$("#pt_sdk").attr("checked",true);
+	}
+	
+	
+}
+</script>
+<script type="text/javascript">
+function c_num(){
+	if($("#pt_market").attr("checked")=='checked'){
+		if(!isNaN($("#sc_num").val())){	
+			if($("#sc_num").val()==''){
+				var mark = 0;
+				alert("请填写礼包数量");
+				return false;
+			}else{
+				var mark = parseInt($("#sc_num").val());
+			}
+		}else{
+			alert("安智市场礼包数量填写的不是数字");
+			return false;
+		}	
+	}else{
+		var mark = 0;
+	}
+
+	if($("#pt_game").attr("checked")=='checked'){
+		if(!isNaN($("#game_num").val())){	
+			if($("#game_num").val()==''){
+				var game =0;
+				alert("请填写礼包数量");
+				return false;
+			}else{
+				var game = parseInt($("#game_num").val());
+			}
+		}else{
+			alert("安卓游戏礼包数量填写的不是数字");
+			return false;
+		}
+	}else{
+		var game = 0;
+	}
+
+	if($("#pt_sdk").attr("checked")=='checked'){
+		if(!isNaN($("#sdk_num").val())){
+			if($("#sdk_num").val()==''){
+				var sdk = 0;
+				alert("请填写礼包数量");
+				return false;
+				}else{
+					var sdk = parseInt($("#sdk_num").val());
+				}
+		}else{
+			alert("SDK礼包数量填写的不是数字");
+			return false;
+		}
+	}else{
+		var sdk = 0;
+	}
+
+	
+}
+</script>
+<div  style="padding-left:50px">
+<div><h3>编辑礼包</h3></div>
+<div>
+	<form action="__URL__/market_edit_submit" method="post" enctype="multipart/form-data">
+	<table>
+		<tr>
+			<td>标题：</td>
+			<td><input type="text" name="active_name" value="{$result[0]['active_name']}" id="active_name" /><input type="hidden" name="id" value="{$result[0]['active_id']}" /></td>
+		</tr>
+		<tr>
+			<td>礼包类型：</td>
+			<td><select name='gift_type' id='gift_type'>
+			<option value='0'>请选择</option>
+				<?php foreach($result_one as $key => $val){ ?>
+					<option value="{$val['id']}" <?php if($val['id']==$result[0]['sel_type']):?>selected <?php endif; ?> >{$val['gift_type']}</option>
+				<?php } ?>
+			</select></td>
+		</tr>
+		<tr>
+			<td>应用包名：</td>
+			<td><input type="text" name="apply_pkg" value="{$result[0]['apply_pkg']}" id="apply_pkg" /></td>
+		</tr>
+		<tr>
+			<td>开始时间</td>
+			<td><input id="start_tm" name="start_tm" value="<?php echo date('Y-m-d H:00:00',$result[0]['start_tm']); ?>" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'})" style='width:150px;'></td>
+		</tr>
+		<tr>
+			<td>截止时间</td>
+			<td><input id="cut_tm" name="cut_tm" value="<?php echo date('Y-m-d H:00:00',$result[0]['cut_tm']); ?>" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'})" style='width:150px;'></td>
+		</tr>
+		<tr>
+			<td>剩余激活码：</td>
+			<td>{$result[0]['surplus_num']}个</td>
+		</tr>
+		<tr>
+			<td>分平台发布：</td>
+			<td><input type='checkbox' id='pt_market' name='pt_market' disabled>安智市场<input type='text' name='sc_num' id='sc_num' value="{$result[0]['market_conf_cnt']}" style="width:40px;" readonly/> &nbsp&nbsp<input type='checkbox' id='pt_game' name='pt_game' disabled>安卓游戏<input type='text' name='game_num' id='game_num' value="{$result[0]['game_conf_cnt']}" style="width:40px;"readonly/> &nbsp&nbsp<input type='checkbox' id='pt_sdk' name='pt_sdk' disabled>SDK<input type='text' name='sdk_num' id='sdk_num' value="{$result[0]['sdk_conf_cnt']}" style="width:40px;" readonly/> </td>
+		</tr>
+		<tr>
+			<td>每日发放限制：</td>
+			<td>{$result[0]['limit_num']}</td>
+			
+		</tr>
+		<tr>
+			<td>简介：</td>
+			<td  colspan="3"><textarea name="intro">{$result[0]['intro']}</textarea></td>
+		</tr>
+		<tr>
+			<td colspan="4"></td>
+		</tr>
+		<tr>
+			<td>礼包详情：</td>
+			<td colspan="4"><textarea style="width:400px;height:130px;" name="detail">{$result[0]['detail']}</textarea></td>
+		</tr>
+		<tr>
+			<td>兑换时间：</td>
+			<td  colspan="3"><input type="text" name="exchange_start"  class="Wdate" value="<?php echo date('Y-m-d H:i:s',$result[0]['exchange_start']); ?>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});" style='width:150px;'/>&nbsp&nbsp到&nbsp&nbsp<input type="text" name="exchange_end"  class="Wdate" value="<?php echo date('Y-m-d H:i:s',$result[0]['exchange_end']); ?>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:00:00'});" style='width:150px;'/></td>
+		</tr>
+		<tr>	
+			<td>使用范围：</td>
+			<td><input type="text" name="usable" id="usable" value="{$result[0]['usable']}"/></td>
+		</tr>
+		<tr>
+			<td>使用方法：</td>
+			<td  colspan="3"><textarea name="usage">{$result[0]['usage']}</textarea></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td><input type="submit" value="确定" onclick="return check();" /></td>
+			<input type="hidden" name='sur_num' value="{$result[0]['surplus_num']}" />
+			<input type="hidden" name='lr' value="{$lr}" />
+			<input type="hidden" name='p' value="{$p}" />
+			<td><input type="button" onclick="javascript:location.href='__URL__/market_gift_list'" value="取消" /></td>
+			<td></td>
+		</tr>
+	</table>
+	</form>
+</div>
+</div>
+</body>
+</html>

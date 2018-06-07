@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title><!--{$out.list.acrivity_name}--></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/<!--{$out.prefix}-->/css/common.css"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/ask/js/activity_public.js?v3"></script>
+<style type="text/css">
+body{ background:<!--{if $out.list.bg_img}-->url(<!--{$out.img_url}--><!--{$out.list.bg_img}-->) no-repeat; <!--{else}--><!--{$out.list.bg_color}-->;<!--{/if}--> background-size:100% auto; }
+.main{padding-left:9px; padding-right:9px}
+.title3 h3{display:inline-block; width:102px; height:22px; padding-left:12px; background:<!--{if $out.list.ranking_no_pic1}-->url(<!--{$out.img_url}--><!--{$out.list.ranking_no_pic1}-->) no-repeat; <!--{/if}-->background-size:100% 100%; font-size:16px; color:<!--{$out.list.info_color}-->; line-height:22px;}	
+
+.btns2 a{float:left; width:137px; height:36px; margin:10px; background:<!--{if $out.list.ranking_pic1}-->url(<!--{$out.img_url}--><!--{$out.list.ranking_pic1}-->) no-repeat; <!--{else}--><!--{$out.list.uppage_color}-->;<!--{/if}--> text-align:center; line-height:36px; font-size:16px; border-radius:2px; color:#fff;background-size:100% 100%;}
+
+.btns2 a.gray{background:<!--{if $out.list.nextpage}-->url(<!--{$out.img_url}--><!--{$out.list.nextpage}-->) no-repeat; <!--{else}--><!--{$out.list.nextpage_color}-->;<!--{/if}-->  background-size:100% 100%}
+
+.tip-box{ position:absolute;width: 90%; left:50%;top:50%; border-radius:15px; margin-left:-45%; z-index: 99999; color:#818181;background:<!--{$out.list.alert_color}-->}
+.btns_close{display:block; height:28px; margin:0 0 15px; color:#19d5fd; line-height:28px; text-align:center; font-size:16px;background:<!--{$out.list.alert_button_color}-->; background-size:100% 100%}
+</style>
+</head>
+<body>
+<div class="main ptop10">
+	<div class="wrap">
+		<div class="title3">
+			<h3><!--{$out.list.title}--></h3>
+		</div>
+		<ul class="form-items">
+			<li>
+				<label>姓　　名：</label>
+				<span>
+					<input placeholder="请输入姓名" type="text" id="lxname" value="<!--{$out.contact_name}-->"  /> 
+				</span>
+				<font class="form_error" id='name_err' ></font>
+			</li>			
+			<li>
+				<label>手机号码：</label>
+				<span><input placeholder="请输入手机号" maxlength='11' type="tel" id="mobile_phone" value="<!--{$out.phone}-->"  /></span>
+				<font class="form_error" id='phone_err' ></font>
+			</li>
+			<li>
+				<label>邮寄地址：</label>
+				<span>
+					<input type="text" placeholder="请输入邮寄地址" id="address" value="<!--{$out.address}-->"  />
+				</span>
+				<font class="form_error" id='address_err' ></font>
+			</li>
+		</ul>
+		<div class="btns2">
+			<a href="javascript:;" onclick="save()" >确认</a>
+			<a href="javascript:;"  onclick="ask_back();"  class="gray">返回</a>
+			<div class="clear"></div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box"  style="display: none;">
+        <div class="tip-con">
+			<p>提交成功</p>
+		</div>
+		<a href="javascript:;" onclick="cloBox('#tip-box')" class="btns_close">关 闭</a>
+    </div>
+</section>
+<script>
+var sid='<!--{$out.sid}-->';
+var aid='<!--{$out.aid}-->';
+var prefix = "<!--{$out.prefix}-->";
+var stop = "<!--{$out.stop}-->";
+function viewHeight(){
+	return document.documentElement.clientHeight;
+}
+$(function(){
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+})
+var flags={canMove:true};
+function showOpenBox(obj){
+	$('.form-items input').blur();
+	setTimeout(function(){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+			top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$(obj).css("margin-top",-top_h+"px").show();;
+		$('#body-bg').css("height",bg_h+"px").show();
+		flags.canMove=false;
+		window.onresize = function(){
+			var bg_h=$(window).height() + $(document).scrollTop(),
+				top_h= $(obj).height()/ 2 - $(document).scrollTop();
+			$('#body-bg').css("height",bg_h+"px");
+			$(obj).css("margin-top",-top_h+"px");	
+		}	
+	},300)
+}
+function cloBox(obj){
+	$(obj).hide();
+	$("#body-bg").hide();
+    flags.canMove=true;
+	if(stop == 1){
+		location.href="/lottery/"+prefix+"/index.php?stop=1&sid="+sid+"&aid="+aid;
+	}else{
+		location.href="/lottery/"+prefix+"/index.php?sid="+sid+"&aid="+aid;
+	}
+}
+function trim(str) { //删除左右两端的空格
+	return str.replace(/(^\s*)|(\s*$)/g, ""); //把空格替换为空
+}
+function save(){
+	var lxname = trim($("#lxname").val());
+	if(lxname == "") {
+		$('#name_err').html('联系人姓名不能为空');
+		return false;
+	}
+	var name_len = lxname.length;
+	if(name_len > 10){
+		$('#name_err').html('联系人姓名不能超过10个字');
+		return false;	
+	}
+	$('#name_err').html('');
+	var mobile_phone = $("#mobile_phone").val();
+	if(mobile_phone == "") {
+		$('#phone_err').html('联系人手机号码不能为空');
+		return false;
+	 }
+	var  re = /^(13|14|15|17|18)\d{9}$/
+	if (!re.test(mobile_phone)){
+		$('#phone_err').html('请输入正确手机号');
+		return false;
+	}
+	$('#phone_err').html('');
+
+	var address = trim($("#address").val());
+	if(address == "") {
+		$('#address_err').html('邮寄地址不能为空');
+		return false;
+	 }
+	var address_len = address.length;
+	if(address_len > 30){
+		$('#address_err').html('邮寄地址不能超过30个字');
+		return false;	
+	}	 
+	$('#address_err').html('');
+	$.ajax({
+			url: "/lottery/"+prefix+"/userinfo.php",
+			data:"aid="+aid+"&sid="+sid+"&lxname="+lxname+"&mobile_phone="+mobile_phone+"&address="+address+"&stop="+stop,
+			type:"post",
+			dataType: 'json',
+			success:function(data) {
+				if(data.code == 1){
+					$('.tip-con').css('padding-top','85px');
+					showOpenBox('#tip-box');
+				}else if(data.code == 2){
+					location.href= data.url;
+				}else{
+					$('#address_err').html(data.msg);
+					return false;
+				}
+			},
+	});
+}
+
+function ask_back(){
+	history.go(-1);
+}
+</script>

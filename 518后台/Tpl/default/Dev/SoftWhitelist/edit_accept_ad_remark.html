@@ -1,0 +1,90 @@
+<script>
+    function edit() {
+        var package = "{$res.package}";
+        var accept_ad_remark = $.trim($("#accept_ad_remark").val());
+        var ad_type = $("#ad_type").val();
+        var start_tm = $("#start_tm").val();
+        var end_tm = $("#end_tm").val();
+        var is_promotion_time = $("input[name='is_promotion_time']:checked").val();
+        var is_accept_ad = $('input[name="is_accept_ad"]:checked').val();
+
+        var param = {
+            package : package,
+            accept_ad_remark : accept_ad_remark,
+            ad_type:ad_type,
+            start_tm:start_tm,
+            end_tm:end_tm,
+            is_promotion_time:is_promotion_time,
+            is_accept_ad:is_accept_ad
+        }
+
+        $.ajax({
+            url:'__URL__/edit_accept_ad_remark',
+            type:'POST',
+            async:true,
+            data:param,
+            secureuri:false,
+            // dataType:'json',
+            success:function(data) {
+                if(data==1){
+                    alert('操作成功');
+                    window.location.reload();
+                }else if(data==2){
+                    alert('操作失败');
+                }else{
+                    alert(data);
+                }
+            }
+        });
+    }
+    function change_sta(bs){
+        if(bs==1){
+            $('#start_tm').attr('disabled',false);
+            $('#end_tm').attr('disabled',false);
+            $("input[name='is_promotion_time']").attr('disabled',false);
+        }else{
+            $('#start_tm').attr('disabled','disabled');
+            $('#end_tm').attr('disabled','disabled');
+            $("input[name='is_promotion_time']").attr('disabled','disabled');
+        }
+    }
+</script>
+<div style="font-weight: bold;font-size: 14px;margin-top: 2px">游戏广告库</div>
+<div style="margin-top: 10px">
+    游戏广告库：
+    <label><input name="is_accept_ad" type="radio" <if condition="$res.is_accept_ad eq '1'"> checked =true</if> value='1'/ onclick='change_sta(1)'>是</label>
+    <label><input name="is_accept_ad" type="radio" <if condition="$res.is_accept_ad neq '1'"> checked = true</if> value='0' onclick='change_sta(0)'/>否</label>
+</div>
+<div style="margin-top: 10px">
+    <label style="margin-left: 12px">合作形式：</label>
+    <SELECT name='ad_type' style='width:150px;' id="ad_type">
+        <?php foreach($typelist as $key => $val): ?>
+        <option value='<?php echo $key?>' <if condition="$res.ad_type eq $key"> selected="selected"</if>><?php echo $val[0]?></option>
+        <?php endforeach; ?>
+    </SELECT>
+</div>
+<div style="margin-top: 10px">
+     <label style="margin-left: 12px">推广周期：</label>
+    <label><input name="is_promotion_time" type="radio" <if condition="$res.is_promotion_time eq '0'"> checked =true</if> value='0'  <if condition="$res.is_accept_ad neq '1'"> disabled='disabled'</if>/>默认上线15天</label>
+    <br>
+    <label style="margin-left: 75px"></label>
+    <label><input name="is_promotion_time" type="radio" <if condition="$res.is_promotion_time eq '1'"> checked = true</if> value='1' <if condition="$res.is_accept_ad neq '1'"> disabled='disabled'</if>/>配置时间</label>
+    <input id="start_tm" name="start_tm" type="text" class="Wdate" style="width:150px" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" <if condition="$res.start_tm neq 0">value="{$res.start_tm|date='Y-m-d H:i:s',###}"</if> <if condition="$res.is_accept_ad neq '1'"> disabled='disabled'</if>/>至
+    <input id="end_tm" name="end_tm" type="text" class="Wdate" style="width:150px" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" <if condition="($res.is_promotion_time neq 2) and ($res.end_tm neq 0)">value="{$res.end_tm|date='Y-m-d H:i:s',###}"</if><if condition="$res.is_accept_ad neq '1'"> disabled='disabled'</if>/>
+    <br>
+    <label style="margin-left: 75px"></label>
+    <label><input name="is_promotion_time" type="radio" <if condition="$res.is_promotion_time eq '2'"> checked = true</if> value='2' <if condition="$res.is_accept_ad neq '1'"> disabled='disabled'</if>/>不设置</label>
+</div>
+<div style="margin-top: 10px">
+    <label style="margin-left: 36px;">备注：</label>
+    <textarea name="accept_ad_remark" id="accept_ad_remark" rows="5" style="width:350px">{$res.accept_ad_remark}</textarea>
+</div>
+<div style="margin-top: 10px">
+
+        <div class="clear"></div>
+        <div class="form_btns_box">
+            <a href="javascript:void(0)" onclick="edit()" style="margin-left:-120px;">提交</a>
+            <a href="javascript:void(0)" onclick="tb_remove()">取消</a>
+        </div>
+        <div class="clear"></div>
+</div>

@@ -1,0 +1,260 @@
+<include file="../../Public/header"  />
+<link type="text/css" href="/Public/css/account.css" rel="stylesheet" />	
+<link type="text/css" href="/Public/css/co_common.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="/Public/css/uploadify.css">
+<script src="/Public/js/jquery.uploadify.min.js" type="text/javascript"></script>
+<script>
+	function reset_pwd(){
+		$('#spassword').css('display','none');
+		$('#rspassword').css('display','none');
+		$('#rpassword').css('display','block');
+		$('#password').css('display','block');
+	
+	}
+	var check = 1;
+	function check_pwd(){
+		var pwd = $('#password').val();
+		var rpwd = $('#rpassword').val();
+		if(pwd != rpwd){
+			
+			$('#rpassword').css("borderColor", "#f00");
+			$('#pwd_error').html("两次填写的密码不一致");
+			check = 2;
+		}else{
+			
+			$('#rpassword').css("borderColor", "");
+			$('#pwd_error').html("");
+			check = 1;
+		}
+	}
+	
+	function check_all(){
+		var company_name = $('#company_name').val();
+		if(!company_name){
+			$('#company_name').css("borderColor", "#f00");
+			check = 2;
+		}else{
+			$('#company_name').css("borderColor", "");
+			check = 1;
+		}
+		if(check == 2){
+			return false;
+		}
+	}
+	
+	function submit_go(){
+		$('#go').val(2);
+		var company_name = $('#company_name').val();
+		if(!company_name){
+			$('#company_name').css("borderColor", "#f00");
+			check = 2;
+		}else{
+			$('#company_name').css("borderColor", "");
+			check = 1;
+		}
+		if(check == 2){
+			return false;
+		}else{
+			my_client.submit();
+		}
+	}
+
+</script>
+<div class="content_inner">
+<form action="__URL__/edit_client_do" enctype="multipart/form-data" method="post" name="my_client">
+	<div class="add_acount_list">
+		<div class="title_item">
+			<h2>账号信息：<input type="hidden" name="id" id="id" value="{$result[0]['id']}" /><input type="hidden" name="my_hash" id="my_hash" value="{$my_hash}" /></h2>
+		</div>
+		<div class="add_acount_item">
+			<label>客户名称：</label>
+			<span>{$result[0]['client_name']}</span>	
+		</div>
+		<div class="add_acount_item">
+			<label>登录名：</label>
+			<span>{$result[0]['login_name']}</span>
+		</div>
+		<div class="add_acount_item">
+			<label>密码：</label>
+			<input class="inputtext" name='spassword' id="spassword" type="test" value="{$result[0]['spassword']}" disabled />
+			<input class="inputtext" name='passwords' id="password" type="text" value="" style="display:none;"/>
+			<span class="add_acount_tips"><span class="red">*</span></span>
+			<input type="button" value="重置" onclick="reset_pwd();" />
+		</div>
+		<div class="add_acount_item">
+			<label>重复登录密码：</label>
+			<input type="test" class="inputtext" id="rspassword" name='rspassword' value="{$result[0]['spassword']}" disabled />
+			<input class="inputtext" name='rpassword' id="rpassword" type="text" value="" style="display:none;" onblur="check_pwd();" /><span id="pwd_error" style="color:red;"></span>
+			<span class="add_acount_tips"><span class="red">*</span></span>
+		</div>
+		<div class="add_acount_item">
+			<label>客户负责人：</label>
+			<select name='charge_id'><option>{$charge_result[0]['charge_name']}</option></select>
+			<span class="add_acount_tips"><span class="red">*</span></span>
+		</div>
+		<div class="clear"></div>
+	</div>
+	<div class="add_acount_list">
+		<div class="title_item">
+			<h2>结算信息：</h2>
+		</div>
+		<div class="add_acount_item">
+			<label>账号属性：</label>
+			<select name="account_attr">
+				<option value="0">请选择账号属性</option>
+				<option value="1" <?php if($result[0]['account_attr'] == 1){ ?>selected<?php } ?>>企业不扣税({$business_no}%)</option>
+				<option value="2" <?php if($result[0]['account_attr'] == 2){ ?>selected<?php } ?>>个人扣税({$huilv}%)</option>
+                <option value="3" <?php if($result[0]['account_attr'] == 3){ ?>selected<?php } ?>>个人不扣税({$huilv_no}%)</option>
+                <option value="4" <?php if($result[0]['account_attr'] == 4){ ?>selected<?php } ?>>论坛</option>
+                <option value="5" <?php if($result[0]['account_attr'] == 5){ ?>selected<?php } ?>>企业扣税({$business}%)</option>
+                <option value="6" <?php if($result[0]['account_attr'] == 6){ ?>selected<?php } ?>>公司税率({$company}%)</option>
+			</select>
+			<span class="add_acount_tips"><span class="red">*</span></span>
+			<div class="clear"></div>
+			<span class="add_acount_errors">选择账号属性，关联税率</span>
+			</div>
+		<div class="add_acount_item">
+			<label>收款账户：</label>
+			<input type="text" class="inputtext" name='account_gathering' value="{$result[0]['account_gathering']}" />
+		</div>
+		<div class="add_acount_item">
+			<label>开户银行：</label>
+			<input class="inputtext"  name='opening_bank' type="text" value="{$result[0]['opening_bank']}" />
+		</div>
+		<div class="add_acount_item">
+			<label>银行账号：</label>
+			<input type="text" class="inputtext" name='bank_account' value="{$result[0]['bank_account']}" />
+		</div>
+		<div class="add_acount_item">
+			<label>合同编号：</label>
+			<input type="text" class="inputtext" name='contract_num' value="{$result[0]['contract_num']}" />
+		</div>
+		<div style="position:relative" class="add_acount_item">
+			<label>上传附件：</label>
+			<div class="upload_apk" style="margin-left:100px;margin-top:10px;">
+			<div class="upload_apk_div">
+					<div class="upload_apk_btn" style="margin-left:5px;"><input type="file" id="affix" name="affix" /></div>
+			</div>
+			</div>
+			<div id="error"></div>
+			<span class="add_acount_errors" style="color:red;">格式要求：word、excel、pdf、jpg、png、zip、rar</span>
+		</div>
+		<div class="add_acount_item">
+			<label>附件：</label>
+			<div id="my_file"><?php foreach($affix_result as $key => $val){ ?><span><a href="__URL__/upload_file/id/{$val.id}/from/2" style='color:blue;'>{$val.affix_name}</a>&nbsp;<a href="javascript:;" onclick="del_file({$val.id},'',2);"><img src='/Public/images/del_file.jpg' /></a></span><?php } ?></div>
+		</div>
+		<div class="clear"></div>
+	</div>
+	<div class="add_acount_list">
+		<div class="title_item">
+			<h2>联系人信息：</h2>
+		</div>
+		<div class="add_acount_item">
+			<label>公司名称：</label>
+			<input type="text" name="company_name" id="company_name" class="inputtext" value="{$result[0]['company_name']}" />		
+		</div>
+		<div class="add_acount_item">
+			<label>地址：</label>
+			<input type="text" class="inputtext" name='company_addr' value="{$result[0]['company_addr']}" />
+		</div>
+		<div class="add_acount_item">
+			<label>姓名：</label>
+			<input class="inputtext"  name='linkman' type="text" value="{$result[0]['linkman']}" />
+		</div>
+		<div class="add_acount_item">
+			<label>职位：</label>
+			<input type="text" class="inputtext" name='linkman_pos' value="{$result[0]['linkman_pos']}" />
+		</div>
+		<div class="add_acount_item">
+			<label>电话：</label>
+			<input type="text" class="inputtext" name='linkman_phone' <?php if($result[0]['linkman_phone']){ ?>value="{$result[0]['linkman_phone']}"<?php } ?> />
+		</div>
+		<div class="add_acount_item">
+			<label>邮箱：</label>
+			<input type="text" class="inputtext" name='linkman_email' value="{$result[0]['linkman_email']}" />
+		</div>
+		<div class="add_acount_item">
+			<label>备注：</label>
+			<textarea rows="2" cols="50" name="comment">{$result[0]['comment']}</textarea>
+		</div>
+		<div class="clear"></div>
+		<input type="hidden" name="go" id="go" value="1" />
+	</div>
+	<div style="padding-left:22%" class="open_close_btn">
+		<input value='保存' type='submit' onclick="return check_all();" />
+		<a href="javascript:;" onclick="submit_go();">保存并添加渠道</a>
+		<a href="__URL__/client_list">取消</a>
+		<div class="clear"></div>
+	</div>
+</form>
+</div>
+<script>
+$(function() {
+	var hash = $("input[name='my_hash']").val();
+	var my_file = $('#my_file').html();
+	var id = $('#id').val();
+    $("#affix").uploadify({
+        'height' : 20,
+		'width'  : 100,
+        'swf' : '/Public/images/uploadify.swf',
+		'fileObjName' : 'affix',
+        'uploader' : '/index.php/Channel_cooperation/Clientlist/ajax_upload_file/id/'+id+'/hash/'+hash+'/sessid/<?php echo session_id(); ?>',
+        'onUploadSuccess' : function(file, res, bool) {
+			var res = eval('('+res+')');
+			var str = '';
+			if(res['code'] != 1){
+				$('#error').html('<span style="color:red;">'+res['msg']+'</span>');
+			}else{
+				$('#error').html('');
+				my_arr = res['msg'];
+				for(i=0;i<my_arr.length;i++){
+					if(my_arr[i]['client_id']){
+						from = 2;
+					}else{
+						from = 1;
+					}
+					str += "<span id='"+my_arr[i]['id']+"'>&nbsp;&nbsp;<a href='__URL__/upload_file/id/"+my_arr[i]['id']+"/from/"+from+"' style='color:blue;'>"+my_arr[i]['affix_name']+"</a>&nbsp;<a href='javascript:;' onclick=\"del_file("+my_arr[i]['id']+",'"+hash+"',"+from+");\"><img src='/Public/images/del_file.jpg' /></a></span>";
+				}
+				$('#my_file').html(str);
+			}
+		}
+    });
+});
+
+	function del_file(id,hash,from){
+		if(!confirm("是否执行此操作！"))
+		{
+			return false;
+		}
+		if(!hash){
+			var hash = $("input[name='my_hash']").val();
+		}
+		var client_id = $('#id').val();
+		$.ajax({
+			url:"/index.php/Channel_cooperation/Clientlist/del_file/id/"+id+"/hash/"+hash+"/from/"+from+"/client_id/"+client_id,
+			dataType:"json",
+			type:"get",
+			success:function(data) {
+				var str = '';
+				if(data){
+
+					for(i=0;i<data.length;i++){
+						if(data[i]['client_id']){
+							from = 2;
+						}else{
+							from = 1;
+						}
+						
+						str += '<span>&nbsp;&nbsp;<a href="__URL__/upload_file/id/'+data[i]['id']+'" style="color:blue;" >'+data[i]['affix_name']+'</a>&nbsp;<a href="javascript::void()" onclick="del_file('+data[i]['id']+',\''+hash+'\','+from+')" ><img src=\'/Public/images/del_file.jpg\' /></a></span>';
+					}
+				
+					$('#my_file').html(str);
+				}else{
+					$('#my_file').html('');
+				}
+			}
+		
+		});
+	
+	}
+</script>

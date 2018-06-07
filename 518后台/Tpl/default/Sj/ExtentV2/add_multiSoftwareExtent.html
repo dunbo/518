@@ -1,0 +1,194 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+
+<style>
+    .sub_tr {
+        height: 35px;
+        text-align: left;
+    }
+    
+    #sub_extent_td select{
+        margin-left: 15px;
+        margin-right: 5px;
+    }
+
+    #sub_extent a{
+        color: red;
+    }
+</style>
+
+<script>
+    function submitChannel() {
+        var cids = '';
+        $('#channel_div').html('');
+        $(".TB_ajaxContent #channel_selected input:checked").each(function(){
+            var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+            item.find('input').attr('checked', 'true');
+            $('#channel_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+        tb_remove();
+    }
+    
+    function check_arr() {
+        $('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+    }
+    
+    //主层动态变化数据
+    function onclikChannel() {
+        $('#channel_div').html('');
+        $(".TB_ajaxContent #channel_selected input:checked").each(function(){
+            var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+            item.find('input').attr('checked', 'true');
+            $('#channel_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+    }
+    
+    function display_type_changed(value) {
+        if (value == 1) {
+            document.getElementById("tr_display_title").style.display="";
+            document.getElementById("tr_display_description").style.display="";
+            document.getElementById("tr_display_image").style.display="none";
+        } else {
+            document.getElementById("tr_display_title").style.display="";
+            document.getElementById("tr_display_description").style.display="none";
+            document.getElementById("tr_display_image").style.display="";
+        }
+    }
+    
+    function checkForm() {            
+        if ($('#extent_name').val() == '') {
+            alert('区间名称不能为空');
+            $('#extent_name')[0].focus();
+            return false;
+        }
+        
+        if ($('#display_title').val() == '') {
+            alert('标题不能为空');
+            $('#display_title')[0].focus();
+            return false;
+        }
+        
+        var display_type = document.getElementsByName("display_type");
+        for(var i=0;i<display_type.length;i++){
+            if(display_type[i].checked) {
+                if (display_type[i].value == 1) {
+                    var display_description = $.trim($('#display_description').val());
+                    if (display_description.length < 30) {
+                        alert('描述不得少于30个字');
+                        $('#display_description')[0].focus();
+                        return false;
+                    }
+                } else {
+                    if ($('#display_image').val() == '') {
+                        alert('图片不能为空');
+                        $('#display_image')[0].focus();
+                        return false;
+                    } else {
+                        var image_name = $.trim($("#display_image").val());
+                        var image_name_length = image_name.length;
+                        if (image_name_length > 4)
+                            var image_type = image_name.substring(image_name_length-4, image_name_length);
+                        if (image_name_length <=4 || (image_type != ".png" && image_type != ".jpg")) {
+                            alert('请选择上传png、jpg类型');
+                            $('#display_image')[0].focus();
+                            return false;
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        
+        return true;
+    }
+    
+    function checkLen(obj) {
+        var maxChars = 10;//最多字符数
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+    };
+    
+</script>
+
+<FORM method="POST" action="/index.php/Sj/ExtentV2/add_multiSoftwareExtent" enctype='multipart/form-data' onsubmit="return checkForm()">
+    <table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+        <tr class="sub_tr">
+            <td width="30%">&nbsp;&nbsp;</td>
+            <td>&nbsp;&nbsp;</td>
+            <td/>
+        </tr>
+        <tr class="sub_tr">
+            <td>区间名称</td>
+            <td><input name='extent_name' id='extent_name' type='text'/></td>
+            <td/>
+        </tr>
+        <tr class="sub_tr">
+            <td>展示方式</td>
+            <td>
+                <input type='radio' name='display_type' value='1' onclick="display_type_changed(1)" checked>文字描述</input>
+                <input type='radio' name='display_type' value='2' onclick="display_type_changed(2)">图片</input>
+            </td>
+            <td/>
+        </tr>
+        <tr class="sub_tr" id="tr_display_title">
+            <td>标题</td>
+            <td><input name='display_title' id="display_title" type='text' onKeyUp="checkLen(this)"/></td>
+            <td>限制10字以内</td>
+        </tr>
+        <tr class="sub_tr" id="tr_display_description">
+            <td>描述</td>
+            <td><textarea name='display_description' id="display_description"/></td>
+            <td>建议100字以内</td>
+        </tr>
+        <tr class="sub_tr" id="tr_display_image" style="display:none">
+            <td>图片</td>
+            <td><input name='display_image' id="display_image" type='file'/></td>
+            <td>限制上传466*112的JPG/PNG图片</td>
+        </tr>
+        <tr class="sub_tr">
+            <td>运营商</td>
+            <td>
+                <SELECT name='oid'>
+                    <option value='0'>不限制</option>
+                    <?php foreach($operatinglist as $val): ?>
+                        <option value='<?php echo $val['oid']?>'><?php echo $val['mname']?></option>
+                    <?php endforeach; ?>
+                </SELECT>
+            </td>
+            <td/>
+        </tr>
+        <tr class="sub_tr">
+            <td>渠道</td>
+            <td>
+                <a href="__APP__/Public/showChannel?callback=submitChannel&type=radio&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br/>
+                <div id="channel_div"></div>
+            </td>
+            <td/>
+        </tr>
+        <tr class="sub_tr" id="filter_installed_tr">
+            <td>是否过滤已安装软件</td>
+            <td>
+                <SELECT name='filter_installed'>
+                    <option value='1' >是</option>
+                    <option value='0' >否</option>
+                </SELECT>
+            </td>
+            <td/>
+        </tr>
+        <tr class="sub_tr" id="depot_limit_tr">
+            <td>区间默认返回备选库数量</td>
+            <td><input name='depot_limit' type='text'/></td>
+            <td/>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <input type='hidden' name="pid" value='<?php echo $pid?>' />
+                <input type='submit' value="&nbsp;&nbsp;提交&nbsp;&nbsp;"/>
+                <input type="button" onclick="tb_remove();" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+            </td>
+        </tr>
+    </table>
+</FORm>

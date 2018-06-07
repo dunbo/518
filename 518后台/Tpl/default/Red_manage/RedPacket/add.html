@@ -1,0 +1,567 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<style>
+table .tright{
+text-align:right;
+width:30%;
+}
+
+table .caltright{
+text-align:right;
+width:30%;
+}
+table .calleft{
+width:40%;
+}
+.shortp{width:20%;}
+.Wdate{width:170px;}
+table td{height:40px}
+.tips {color:red;}
+</style>
+<div>
+	<h3>添加红包</h3>
+	<form id="pacf" <if condition="$readonly neq 1">action="__URL__/add/" method="post"</if>>
+	<table id="addform" style="border-spacing:10px 20px;" class="table_list">
+		<tr>
+			<td class="tright">红包名称</td>
+			<td style="width:30%;"><input type="text" name="pname" value="{$pack.pname}"/></td>
+            <if condition="(ACTION_NAME eq 'edit') and ($copy eq 0)">
+                <input type="hidden" name="id" id="packid" value="{$pack.id}">
+                <input type="hidden" name="href" id="packhref" value="__URL__/calredpack/oldmon/{$pack.oldmon}/coef/{$pack.coef}/cashmin/{$pack.cashmin}/totalnum/{$pack.confignum}/">
+            </if>
+            <input type="hidden" name="pact" value="{$Think.ACTION_NAME}">
+			<input type="hidden" name="addsubmit" value="1">
+            <input type="hidden" name="filename" value="{$filename}" >
+            <input type="hidden" name="numpri" value="0"/>
+			
+		</tr>
+		<tr>
+            <td class="tright">红包类型</td>
+            <td>
+            <select id="packtype" name="tasktype" <if condition="$readonly eq 1">disabled</if>>
+            <volist id="types" name="packtypes">
+            <option value="{$types.id}" <if condition="$pack.tasktype  eq $types['id']">selected</if>>{$types.ptypename}</option>
+
+            </volist>
+            </select>
+            </td>
+		</tr>
+        <tr>
+            <td class="tright">每日最高可领金额</td><td><input style="background: #d4d4d4;" type="text" name="maxcash" id="maxcash" value="{$userlimt.maxcash|default=0}" disabled/></td>
+		</tr>
+        <tr>
+            <td class="tright">红包总额</td><td><input onkeyup="this.value=format_int(this.value);" on type="text" name="oldmon" id="oldmon" value="{$pack.oldmon|number_format}"/><br/> <span id="oldmon_tip" class="tips"></span></td>
+		</tr>
+        <tr>
+            <td class="tright">红包总数</td>
+            <td><input id="totalnum" onkeyup="this.value=format_int(this.value);" type="text" name="totalnum"  placeholder="请输入大于3的整数" value="{$pack.confignum|number_format}"/> <br><span class="tips" id="totalnum_tip"></span>
+            </td>
+		</tr>
+        <tr>
+		<td class="tright">红包最低金额</td>
+        <td><input id="cashmin" type="text" name="cashmin" value="{$pack.cashmin|default=0.01}"/> <br><span class="tips" id="cashmin_tip"></span></td>
+		</tr>
+        <tr>
+            <td class="tright" >红包最高金额系数</td>
+            <td style="width:100px;">
+                <input type="text" name="coef" id="coef" value="{$pack.coef|default=2.0}"/>
+                <br><span class="tips" id="coef_tip"></span> 
+            </td>
+            <td style="width:20%;">
+                只能输入[1.0~2.8]，精确到小数点后一位,该系数越高，用户所获金额的波动区间越大。
+            </td>
+		</tr>
+        
+        <tr id="awardtxt">
+		<td class="tright">任务奖励说明</td><td>
+        <input class="shortp" type="text" name="awardtxt1" id="awardtxt1" value="{$pack.awardtxt1}"/>
+        <input class="shortp" type="text" name="awardtxt2" id="awardtxt2" value="{$pack.awardtxt2}"/> ~ 
+        <input class="shortp" type="text" name="awardtxt3" id="awardtxt3" value="{$pack.awardtxt3}"/> 元
+        </td>
+        
+		</tr>
+        
+        <tr>
+		<td class="tright">红包发放类型</td>
+        <td>
+        <select id="ttype" name="givetype" onchange="addtime()" <if condition="$readonly eq 1">disabled</if>>
+        <option value="1" <if condition="$pack.givetype eq 1">selected</if>>一次性发放</option>
+        <option value="2" <if condition="$pack.givetype eq 2">selected</if>>整点发放</option>
+        <option value="3" <if condition="$pack.givetype eq 3">selected</if>>自定义</option>
+        </select>
+        
+        </td>
+		</tr>
+
+        <if condition="$pack.givetype eq 2">
+        <volist name="packtime" id="conf">
+            <tr class="addtr">
+            <td class="tright"><if condition="$i eq 1">发放时间</if></td>
+            <td id="timeshow">
+                <input type="text" onblur="checktime(this)" name="starttime[]" value="{$conf.starttime}" class="Wdate" onclick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:00:00',minDate:'%y-%M-%d {%H+1}:00:00'})">
+                至
+                <input type="text" onblur="checktime(this)" name="endtime[]" class="Wdate" value="{$conf.endtime}" onclick="WdatePicker({startDate:'%y-%M-%d 00:59:59',dateFmt:'yyyy-MM-dd HH:59:59',minDate:'%y-%M-%d {%H+1}:00:00'})"><br>
+                <a class="addbutton" href="javascript:;" onclick="addnew({$pack.givetype})" <if condition="$i neq count($packtime)">style="display:none"</if>>+增加时段</a>
+            </td>
+            </tr>
+        </volist>
+        <tr class="addtr"><td class="tright">每个时段发放数量</td><td><input class="pnum shortp" type="text" name="pnum" value="{$conf.pnum}" disabled > 红包总数 <input class="totalpnum shortp" type="text" name="totalpnum" value="{$totalpnum}" disabled><br><span class="tips" id="time_tip"></span></td></tr>
+        </if>
+        <if condition="$pack.givetype eq 3">
+        <volist name="packtime" id="conf">
+            <tr class="addtr">
+            <td class="tright"><if condition="$i eq 1">发放时间</if></td>
+            <td id="timeshow">
+                <input type="text" onblur="checktime(this)" name="starttime[]" value="{$conf.starttime}" class="Wdate" onclick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d {%H}:00:00'})">
+                至
+                <input type="text" onblur="checktime(this)" name="endtime[]" class="Wdate" value="{$conf.endtime}" onclick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d {%H}:00:00'})"><br>
+            </td>
+            
+            </tr>
+            <tr class="addtr"><td class="tright">红包数量</td><td><input type="text" onkeyup="this.value=replaceNum(this.value)" class="pnum" name="pnum[]" value="{$conf.pnum}"><br><a class="addbutton" href="javascript:;" onclick="addnew({$pack.givetype})" <if condition="$i neq count($packtime)">style="display:none"</if>>+增加时段</a></td></tr>
+            
+        </volist>
+        </if>
+        
+        <if condition="$readonly eq 0">        
+            <tr id="lasttr">
+                <td colspan="2"><a href="javascript:;" style="margin:auto;" class="search_btn" onclick="validata(0)">预览</a></td>
+            </tr>
+        </if>
+	</table>	
+	</form>
+    
+    
+    
+    
+</div>
+<script type="text/javascript">
+
+
+function format_int(str){
+    str = str.replace(/\D/g,'');
+    var re=/(?=(?!(\b))(\d{3})+$)/g;
+    str=str.replace(re,",");
+    return str;
+}
+
+function deformat_int(str){
+    return parseInt(str.replace(/,/g,""));
+}
+
+
+$(document).ready(function(){
+
+    $("#oldmon").blur(function(){
+        var totalnum = deformat_int($("#totalnum").val());
+        var oldmon = deformat_int($("#oldmon").val());
+        if(totalnum>0){
+            if( oldmon / totalnum < 0.01){
+                $("#oldmon_tip").text('单个红包金额不可低于0.01元');
+            }else if( oldmon /totalnum > $("#maxcash").val() ){
+                $("#oldmon_tip").text('红包平均金额不可高于日单用户最高可领金额');
+            }else{
+                 $("#oldmon_tip").text('');
+            }
+        }
+    });
+    $("#totalnum").blur(function(){
+        var totalnum = deformat_int($("#totalnum").val());
+        var oldmon = deformat_int($("#oldmon").val());
+        if( totalnum < 4 ){
+            $("#totalnum_tip").text('红包总数不能少于3个');
+        }else{
+            $("#totalnum_tip").text('');
+            if(oldmon/totalnum < 0.01){
+                $("#oldmon_tip").text('单个红包金额不可低于0.01元');
+            }else if(oldmon/totalnum > $("#maxcash").val() ){
+                $("#oldmon_tip").text('红包平均金额不可高于日单用户最高可领金额');
+            }else{
+                $("#oldmon_tip").text('');
+               
+            }
+        }
+        
+        
+    });
+    $("#cashmin").blur(function(){
+       
+        var totalnum = deformat_int($("#totalnum").val());
+        var oldmon = deformat_int($("#oldmon").val());
+        var average = Math.floor(oldmon*100/totalnum)/100;
+         if(isNaN(this.value) ||this.value <0.01){
+             $("#cashmin_tip").text('请输入合法数字');
+        }else if(average == this.value){
+            $("#cashmin_tip").text('每份红包金额均为'+this.value+'元');
+        }else if(this.value > average){
+            $("#cashmin_tip").text('最低金额不可大于平均红包金额');
+        }else{
+            $("#cashmin_tip").text('√');
+        }
+    });
+    
+    $("#coef").blur(function(){
+        if(isNaN(this.value)){
+             $("#coef_tip").text('请输入合法数字');
+             return;
+        }
+        if(this.value<1 || this.value >2.8 ){
+            $("#coef_tip").text('红包系数只能在1-2.8之间');
+            return;
+        }
+        var totalnum = deformat_int($("#totalnum").val());
+        var oldmon = deformat_int($("#oldmon").val());
+        var average = Math.floor(oldmon*100/totalnum)/100;
+        if(average * this.value > $("#maxcash").val()){
+            $("#coef_tip").text('首个红包最高可获金额不可大于日单用户最多可领金额');
+        }else{
+            $("#coef_tip").text('');
+        }
+        
+    });
+    
+    
+    
+    /*$("#packtype").change(function(){
+        if($(this).val() == 6){
+            $("#awardtxt").remove();
+        }else{
+            if($("#awardtxt").length == 0){            
+                var awardtxt = '<tr id="awardtxt"><td class="tright">任务奖励说明</td><td><input class="shortp" type="text" name="awardtxt1" value=""/> ~ <input class="shortp" type="text" name="awardtxt2" value=""/> <input class="shortp" type="text" name="awardtxt3" value=""/> 元 </td><td><input  type="checkbox" name="listshow" value="1" checked/> 列表页显示</td></tr>';
+                $("#addform tr:eq(6)").before(awardtxt);
+            }
+        
+        }
+    
+    })*/
+    
+})
+    
+    
+   
+        
+
+function validata(mode){
+    if(mode == 1){
+        var r=confirm("确定要重新随机一组红包吗？刷新后现有红包结果不会保留哦~");
+        if (r==false)
+        {
+            return false;
+        }
+       
+        
+    }
+    //mode=1是需要强制刷新
+    var theform = document.getElementById('pacf');
+    var namelen = theform.pname.value.length;
+    var oldmon = deformat_int($("#oldmon").val());
+    var totalnum = deformat_int($("#totalnum").val());
+    var average = Math.floor(oldmon*100/totalnum)/100;
+    if(namelen<1||namelen>30){
+        alert('红包名称请输入1-30个汉字');
+        return false;
+    }
+    if(oldmon<1){
+        alert('红包总额请输入大于0的整数');
+        return false;
+    }
+   
+    if(totalnum<4){
+        alert('红包总数请输入大于3的整数');
+        return false;
+    }
+    
+    if(oldmon/totalnum <0.01){
+        alert('单个红包金额不可低于0.01元');
+        return false;
+    }
+    if(theform.cashmin.value<0.01){
+        alert('红包最小金额需输入大于等于0.01');
+        return false;
+    }
+    if(isNaN(theform.coef.value)){
+            alert('红包最高金额系数请输入合法数字');
+            return false;
+    }
+    if(isNaN(theform.cashmin.value) ||theform.cashmin.value <0.01){
+            alert('红包最低金额请输入合法数字');
+            return false;
+    }
+    if(theform.cashmin.value > average){
+       alert('最低金额不可大于平均红包金额,请修改红包最低金额或者红包总金额');
+        return false;
+    }
+    
+    if(theform.coef.value < 1 || theform.coef.value > 2.8 ){
+        alert('红包系数可输入大于等于1.0小于等于2.8');
+        return false;
+    }
+    
+    if(average * theform.coef.value > $("#maxcash").val()){
+        alert('首个红包最高可获金额不可大于日单用户最多可领金额');
+        return false;
+    }
+    
+    
+    if($("#awardtxt1").length>0){
+        var txt1 = $("#awardtxt1").val();
+        var txt2 = $("#awardtxt2").val();
+        var txt3 = $("#awardtxt3").val();
+        if(txt1 == '' || txt1.length != 2 ){
+            alert('任务奖励说明1输入框只可填写2个字符');
+            return false;
+        }
+     
+        if(isNaN(txt2) || txt2 <0.01){
+            alert('任务奖励说明2输入框只可填写大于0.01的数字');
+            return false;
+        }
+    }
+    var packtype = $('#packtype').children('option:selected').val();
+    var packtypename = $('#packtype').children('option:selected').text();
+    var type = $('#ttype :selected').val();
+    if(packtype>1 && type> 1 ){
+        alert(packtypename+'只能设置一次性发放类型');
+        return false;
+    }
+    if(type >1){ 
+        var re = true,needtime =false;
+        $("input[name^='starttime']").each(function(index){
+            if($(this).val()==''&& $(this).siblings("[name^='endtime']").val()!='' ){
+                re =  false;
+                return;
+            }
+            if($(this).val()!=''&& $(this).siblings("[name^='endtime']").val()==''){
+                re =  false;
+                return;
+            }
+            if($(this).val()!=''&& $(this).siblings("[name^='endtime']").val()!=''){
+                needtime = true;
+            }
+                
+                
+        })
+        
+        if(!re){
+            alert('请配置正确的时间');
+            return false;
+        }
+        if(!needtime){
+            alert('请至少配置一段时间');
+            return false;
+        }
+        if(type == 2) {
+            check_give_type(2);
+        }
+    }
+    
+    
+    if(type==3){
+        var allnum = 0,ckpum=true;
+        $("input[name^='pnum']").each(function(){
+            if($(this).val()==0){
+               ckpum=false;
+            }
+            allnum = parseInt(allnum) + parseInt($(this).val());
+        
+        });
+        if(allnum >totalnum){
+            alert('每个时间段配置的红包数量超过了总数');
+            return false;
+        }
+        if(!ckpum){
+            alert('每个时段发放数量不能为0,请配置正确的时间');
+            return false;
+        }
+    }
+    if(type == 2){
+        if($("input[name^='pnum']").val()==0){
+            alert('平均每个时段发放数量不能为0,请配置正确的时间');
+            return false;
+        }
+    
+    }
+    
+    var coef = theform.coef.value;
+    var cashmin = theform.cashmin.value;
+    var previewurl = '__URL__/calredpack/oldmon/'+oldmon+'/coef/'+coef+'/cashmin/'+cashmin+'/totalnum/'+totalnum+'/';
+    if(mode == 0){    
+        if($("#packid").val() >0 && $("#packhref").val().length >0){
+            //如果是编辑红包，需要判断红包的四个配置参数有没有改变
+            var editurl =  $("#packhref").val();
+            //如果没有改变，编辑的预览不重新生红包明细
+            if(previewurl == editurl){
+                previewurl = '__URL__/preview/packid/'+$("#packid").val()+'/';
+            }else{
+                alert("红包配置参数已经改变，会重新生成红包队列");
+               
+            }
+        }
+    }
+    if($("#packid").val() >0){
+        previewurl = previewurl + 'id/' + $("#packid").val() +'/';
+    }
+    if(type>1){    
+        var adduri = '&';
+        $("input[name^='starttime']").each(function(index){
+        if($(this).attr('value')!= ''){
+            adduri = adduri+$(this).attr('name')+'='+$(this).attr('value') +'&';
+            var endparam = $("input[name^='endtime']").eq(index);
+            adduri = adduri+endparam.attr('name')+'='+endparam.attr('value') +'&';
+            if(type==3){
+                var pnumparam = $("input[name^='pnum']").eq(index);
+                adduri = adduri+pnumparam.attr('name')+'='+pnumparam.attr('value') +'&';
+            }        
+        }
+        })
+        if(type==2){
+            var pnumparam = $("input[name='pnum']");
+            adduri = adduri+pnumparam.attr('name')+'='+pnumparam.attr('value') +'&';
+            var totalparam = $("input[name='totalpnum']");
+            adduri = adduri+totalparam.attr('name')+'='+totalparam.attr('value') +'&';
+        }
+        adduri = adduri + 'givetype=' + type +'&';
+        adduri=  encodeURI(adduri);
+        previewurl = previewurl + adduri;
+        console.log(previewurl);
+    }
+    
+    
+    tb_show('',previewurl,false);
+    //theform.totalnum.value = totalnum;
+    //theform.submit();
+    
+    
+}
+
+
+function replaceNum(Val){
+	return Val.replace(/\D/g,'');
+}
+
+function addtime(){
+    //alert($('#ttype').children('option:selected').val()); 
+    var type = $('#ttype').children('option:selected').val();
+    var packtype = $('#packtype').children('option:selected').val();
+    var packtypename = $('#packtype').children('option:selected').text();
+    if(packtype>1 && type> 1 ){
+        alert(packtypename+'只能设置一次性发放类型');
+        $('#ttype').children("[value='1']").attr('selected','selected');
+        return false;
+    }
+    
+    
+    $(".addtr").remove();
+    var tformat = "{startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d {%H}:00:00'}";
+    if(type == 1){
+        /*$("#timeshow").html('<input type="text" name="starttime[]" value="" class="Wdate" onClick="WdatePicker('+tformat+')" />');*/
+    }
+    if(type == 2){
+       var tformat1 = "{startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:00:00',minDate:'%y-%M-%d {%H+1}:00:00'}";
+       var tformat2 = "{startDate:'%y-%M-%d 00:59:59',dateFmt:'yyyy-MM-dd HH:59:59',minDate:'%y-%M-%d {%H+1}:59:59'}";
+      
+        $("#lasttr").before('<tr class="addtr"><td class="tright">发放时间</td><td id="timeshow"></td></tr>');
+        $("#timeshow").html('<input onblur="checktime(this)" type="text" name="starttime[]" value="" class="Wdate" onClick="WdatePicker('+tformat1+')" /> 至 <input onblur="checktime(this)" type="text" name="endtime[]" class="Wdate" value="" class="Wdate" onClick="WdatePicker('+tformat2+')" /><br><a class="addbutton" href="javascript:;" onclick="addnew(2)">+增加时段</a>');
+         $("#lasttr").before('<tr class="addtr"><td class="tright">每个时段发放数量</td><td><input type="text" name="pnum" value="" class="pnum shortp" disabled/> 红包总数 <input type="text" name="totalpnum" value="" class="totalpnum shortp" disabled/><br><span class="tips" id="time_tip"></span></td></tr>');
+    }
+    if(type == 3){
+        $("#lasttr").before('<tr class="addtr"><td class="tright">发放时间</td><td id="timeshow"></td></tr>');
+        $("#timeshow").html('<input onblur="checktime(this)" type="text" name="starttime[]" value="" class="Wdate" onClick="WdatePicker('+tformat+')" /> 至 <input onblur="checktime(this)" type="text" name="endtime[]" value="" class="Wdate" onClick="WdatePicker('+tformat+')" />');
+        $("#lasttr").before('<tr class="addtr"><td class="tright">红包数量</td><td><input type="text" class="pnum" name="pnum[]" value="" onkeyup="this.value=replaceNum(this.value)" /><br><a class="addbutton" href="javascript:;" onclick="addnew(3)">+增加时段</a></tr>');
+    
+    }
+}
+
+
+function addnew(type){
+     var tformat = "{startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d {%H}:00:00'}";
+    if(type == 2){
+      var tformat1 = "{startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:00:00',minDate:'%y-%M-%d {%H+1}:00:00'}";
+       var tformat2 = "{startDate:'%y-%M-%d 00:59:59',dateFmt:'yyyy-MM-dd HH:59:59',minDate:'%y-%M-%d {%H+1}:59:59'}";
+     $(".addtr:last").before('<tr class="addtr"><td class="tright"></td><td><input onblur="checktime(this)" type="text" name="starttime[]" value="" class="Wdate" onClick="WdatePicker('+tformat1+')" /> 至 <input onblur="checktime(this)" type="text" name="endtime[]" value="" class="Wdate" onClick="WdatePicker('+tformat2+')" /><br><a class="addbutton" href="javascript:;" onclick="addnew(2)">+增加时段</a></td></tr>');
+     
+     //$("#lasttr").before('<tr class="addtr"><td class="tright">每个时段发放数量</td><td><input type="text" name="pnum" value=""/> 红包总数 <input type="text" name="pnum" value=""/></td></tr>');
+    
+    }
+    if(type == 3){
+        $("#lasttr").before('<tr class="addtr"><td class="tright"></td><td><input onblur="checktime(this)" type="text" name="starttime[]" value="" class="Wdate" onClick="WdatePicker('+tformat+')" /> 至 <input onblur="checktime(this)" type="text" name="endtime[]" value="" class="Wdate" onClick="WdatePicker('+tformat+')" /><br><a class="addbutton" href="javascript:;" onclick="addnew(2)">+增加时段</a></td></tr>');
+        
+        $("#lasttr").before('<tr class="addtr"><td class="tright">红包数量</td><td><input type="text" name="pnum[]" class="pnum" value="" onkeyup="this.value=replaceNum(this.value)"/><br><a class="addbutton" href="javascript:;" onclick="addnew(3)">+增加时段</a></tr>');
+    
+    }
+    $(".addbutton").not(":last").hide();
+
+}
+
+function checktime(obj){
+    var type = $('#ttype :selected').val();
+    if($(obj).val() != ''){
+        var seq = 0;
+        var allseq = 0;
+        var checkstart = 1;
+        if($(obj).attr("name").indexOf('endtime')!=-1){
+            checkstart = 0;
+        }
+        if(type>=2){
+            $("input[name^='starttime']").each(function(index){
+                var starttime = new Date($(this).val());
+                var endtime = new Date($(this).siblings().val());
+                if(!checkstart){
+                    if(type == 2){        
+                        seq = ((endtime - starttime + 1000)/3600000);
+                        allseq = allseq +seq;
+                    }
+                }
+            })
+             var totalnum = deformat_int($("#totalnum").val());
+            if(type == 2&& allseq){   
+                pnum = Math.floor(totalnum/allseq);
+                if(pnum == 0){
+                    $("#time_tip").text('平均每个时段发放数量不能小于0,请配置正确的时间');
+                }
+                $(".pnum:first").val(pnum);
+                $(".totalpnum:first").val(pnum*allseq);
+            }
+            
+            
+        }
+        
+    }
+    
+}
+
+function check_give_type(type){
+    var allseq = pnum = 0;
+    if(type == 2){
+        $("input[name^='starttime']").each(function(index){
+            var starttime_str = $(this).val();
+            var endtime_str = $(this).siblings().val();
+            if(starttime_str != '' || endtime_str != ''){                
+                var starttime = new Date(starttime_str);
+                var endtime = new Date(endtime_str);
+                if(starttime_str > endtime_str ) {
+                    $("#time_tip").text('开始时间不能大于结束时间，请检查时间端配置');
+                }      
+                seq = ((endtime - starttime + 1000)/3600000);
+                allseq = allseq +seq;
+            }
+        })
+        if(allseq > 0){
+            var totalnum = deformat_int($("#totalnum").val());
+            pnum = Math.floor(totalnum/allseq);
+        }
+        $(".pnum:first").val(pnum);
+        $(".totalpnum:first").val(pnum*allseq);
+        if(pnum == 0){
+            $("#time_tip").text('平均每个时段发放数量不能小于0,请配置正确的时间,或者修改总红包数');
+            return false;
+        }
+    }
+
+}
+
+</script>

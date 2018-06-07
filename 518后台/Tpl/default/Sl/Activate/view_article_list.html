@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="/Public/css/style.css" />
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+</head>
+<body>
+<div class="main" >
+<div class="content">
+<center>
+<table width="80%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td colspan="8" align="center"><h2>文章列表</h2></td>
+  </tr>
+  <tr>
+	<td colspan="4" align="center"><strong>{$channel_info.channel_name}文章列表</strong></td>
+	<td  align="center">活动期：</td>
+	<td  align="center">
+	    <form name="view_article_list_form" method="get" action="__URL__/view_article_list/channel_id/{$channel_id}">
+			<select name="activate_id" onchange="javascript:view_article_list_form.submit()">
+				<?php foreach($activate_list as $activate_ids):?>
+					<?php if($activate_ids['id'] == $new_activate_id):?>
+								<option value="<?php echo $activate_ids['id'] ?>" selected ="selected"><?php echo $activate_ids['id']?></option>
+					<?php else:?>
+						<option value="<?php echo $activate_ids['id'] ?>" ><?php echo $activate_ids['id']?></option>
+					<?php endif;?>
+				<?php endforeach;?>
+			</select>
+	    </form>
+	</td>
+	<td colspan="2" align="center"><a href="javascript:history.go(-1)">返回</a></td>
+  </tr>
+  <tr>
+	<td width="7%" align="center">编号</td>
+	<td width="8%" align="center">活动期</td>
+	<td width="10%" align="center">频道</td>
+	<td width="10%" align="center">标题</td>
+	<td width="27%" align="center">正文</td>
+	<td width="10%" align="center">焦点图</td>
+	<td width="20%" align="center">焦点图描述</td>
+	<td width="8%" align="center">排序</td>
+  </tr>
+  <?php if(isset($article_list)):?>
+  <volist name="article_list" id="vo">
+  <tr>
+	<td width="7%" align="center">{$vo.id}</td>
+	<td width="8%" align="center">{$vo.activate_id}</td>
+	<td width="10%" align="center">{$vo.channel_name}</td>
+	<td width="10%" align="center">{$vo.title}</td>
+	<td width="27%" align="center">
+		<div style="width:300px; height:220px; overflow-x:auto; overflow-y:auto">
+			{$vo.context}
+		</div>
+	</td>
+	<td width="10%" align="center">
+	    <img src="<?php echo IMGATT_HOST;?>{$vo.pic_url}" width="100" height="100" alt="图标" />
+	</td>
+	<td width="20%" align="center">{$vo.descript}</td>
+	<td width="8%" align="center">
+	    <select name="rank" rel="{$vo.id}" class="rank_select">
+		<?php
+			for($i = 1;$i <= $count; $i++){
+				echo "<option value=\"".$i."\"";
+				if($vo['rank'] == $i) echo " selected=\"selected\" ";
+				echo ">".$i."</option>";
+			}
+		?>
+		</select>
+	</td>
+  </tr>
+  </volist>
+  <?php else:?>
+  <tr>
+    <td align="center" colspan="8">暂无记录</td>
+  </tr>
+  <?php endif; ?>
+</table>
+{$page}
+</center>
+</div>
+</div>
+<script>
+	$('.rank_select').change(function(){
+		var url   = "__URL__/article_update_rank/id/"+$(this).attr('rel')+"/rank/" + $(this).val()+"/p/{$p}/lr/{$lr}/channel_id/{$channel_id}/activate_id/{$new_activate_id}";
+		$.ajax({
+			type: "GET",
+			url : url,
+			dataType:"json",
+			success: function(json){
+				if(json.p == 0)  json.p  = 1;
+				if(json.lr < 10) json.lr = 10;
+				var jumpUrl = "__URL__/view_article_list/channel_id/{$channel_id}/activate_id/{$new_activate_id}/p/"+json.p+"/lr/"+json.lr;
+				//window.location.reload();
+				//alert(jumpUrl);
+				window.location.href = jumpUrl;
+			}
+		});
+	});
+</script>
+</body>
+</html>
+

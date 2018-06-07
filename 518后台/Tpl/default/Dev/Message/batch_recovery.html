@@ -1,0 +1,151 @@
+<script type="text/javascript" src='/Public/js/default.js'></script>
+<form >
+<table border="0" cellpadding="0" cellspacing="0" style='font-size:12px;'>	
+	<volist name='reason_list' id='reason_list'  key='i'>
+		<tr height="30">
+		<td style="padding-left:10px;">
+		<input type="checkbox" mark='0' name="reject[]" id='{$reason_list.id}' value="{$reason_list.content}" <notempty name="reason_list.content2"> onclick=tip_show("div_{$reason_list.id}")   </notempty> />{$i}&nbsp;&nbsp;&nbsp;
+		<span <notempty name="reason_list.content2"> onclick=tip_show("div_{$reason_list.id}") style="color:#58c5c7;cursor:pointer"  </notempty> > {$reason_list.content}</span></td>
+		</tr>
+		<notempty name="reason_list.content2">
+		<tr id = "div_{$reason_list.id}" style="display:none;padding-left:30px;" ><td>
+		<foreach  name='reason_list.content2' item='content2'>
+		<input type="checkbox" name="reject[]" mark='1' value="{$content2}" onclick='refreshCatid();' >{$content2}<br/>
+		</foreach >
+		</td></tr>
+		</notempty>
+	</volist>	
+	<tr>
+		<td>最多字数：
+		<input disabled maxLength="4" name="total1" size="3" value="200" class="inputtext">
+		已用字数：
+		<input disabled maxLength="4" name="used1" size="3" value="0" class="inputtext">
+		剩余字数：
+		<input disabled maxLength="4" name="remain1" size="3" value="200" class="inputtext">
+		</td>
+	</tr>	
+	<tr><td>其他：
+		<textarea style="width: 461px; height: 103px;" name="other" id='other' wrap=PHYSICAL  onKeyDown="gbcount1(this.form.other,this.form.total1,this.form.used1,this.form.remain1);" onKeyUp="gbcount1(this.form.other,this.form.total1,this.form.used1,this.form.remain1);"></textarea>
+	</td></tr>	
+	<tr><td>&nbsp;</td></tr>	
+	<tr>
+		<td>
+			<button type="button" onclick="undercarriage_submit()" style="margin-right:10px;">确定</button>
+			<button type="button"  onclick="self.tb_remove()" style="margin-right:10px;">取消</button>
+		</td>
+	</tr>
+	<input type='hidden' name='tmp_id' id='tmp_id' value="{$id}"/>
+</table>
+</form>	
+
+<script language="javascript">
+function gbcount1(message,total,used,remain)
+{
+  var max1;
+  max1 = total.value;
+  if (message.value.length > max1) {
+  message.value = message.value.substring(0,max1);
+  used.value = max1;
+  remain.value = 0;
+	alert("不能超过"+total.value+"个字!");
+  }
+  else {
+  used.value = message.value.length;
+  remain.value = max1 - used.value;
+  }
+}
+function showOrHide(index,obj)
+{
+	var status_img = $('#feedback_img'+index).css('display');
+	$('#feedback_img'+index).toggle(function(){
+		if(status_img == 'none')
+		{
+			obj.innerHTML = '收起附件';
+		}
+		else{
+			obj.innerHTML = '展开附件';
+		}
+	});
+}
+//回复提交
+function undercarriage_submit() {
+	var rt = '';
+	var mark_type = false;
+	var start_choose = true;
+	var last;
+	var error = 0;
+	$('input:checkbox[name="reject[]"]').each(function(){
+ 		if($(this).attr('mark') == 0){
+ 			if($(this).attr('checked') != 'checked')	last = 1;
+			else	last = 0;
+		}
+ 		if($(this).attr('checked') == 'checked'){
+		if(!mark_type){
+			if( $(this).attr('mark') == 1){
+				if(last == 1){
+					error = 1;					
+				}
+				rt = rt.substring(0,rt.length-1);
+				rt += '('+$.trim($(this).val());
+				mark_type = true;
+			}else{
+				if(start_choose){
+					rt +=  $(this).val()+'；';
+					start_choose = false;
+				}else{
+					rt += '\n' + $(this).val()+'；';					
+				}				
+				mark_type = false;
+			}			
+		}else{
+			if( $(this).attr('mark') == 1){
+				if(last == 1){
+					error = 1;					
+				}
+				rt += '，' + $.trim($(this).val());
+				mark_type = true;
+			}else{				
+				rt += ')；\n'+ $(this).val() + '；';
+				mark_type = false;
+			}
+		}
+ 	 }
+	});
+	if(mark_type){
+		if(rt) rt += ')；' ;
+	}//else{
+		//if(rt) rt += '\n' ;
+	//}
+	if(error == 1){
+		alert('选择子类原因时，必须选择主原因');
+		return false;
+	}
+	if($('#other').val()!='') {
+		if(rt){
+			rt += '\n';
+		}
+		rt += $('#other').val() + '；';
+	}
+	if(!rt) {
+		alert('请选择或填写回复内容！');
+		return false;
+	}
+	var tmp_id = $('#tmp_id').val();
+	$.ajax({
+		url: "__URL__/feedback_reback_all",
+		data: 'content='+rt+'&id='+tmp_id,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				location.reload();//加载页面
+				return false;
+			} else if(ret['code']==1) {	//成功
+				alert(ret['msg']);
+				window.location.href='__URL__/feedback_list/processed/<?php echo $processed; ?>';
+			}
+		}
+	});
+}	
+</script>

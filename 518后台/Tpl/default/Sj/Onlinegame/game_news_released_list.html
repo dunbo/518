@@ -1,0 +1,237 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+
+<script>
+    $(function(){
+        document.onkeydown = function(e){
+            var ev = document.all ? window.event : e;
+            if(ev.keyCode==13) {
+                $('#game_news_released_list').submit();
+             }
+        }
+    });
+</script>
+<script>
+	$(function(){
+		document.onkeydown = function(e){
+			var ev = document.all ? window.event : e;
+			if(ev.keyCode==13) {
+				$('#game_news_unreleased_list').submit();
+			 }
+		}
+	});
+	function select_all()
+	{
+		$("input[name='nid[]']").attr("checked",true);
+	}
+	function select_again()
+	{	
+		$("input[name='nid[]']").each(function () {  
+			$(this).attr("checked", !$(this).attr("checked"));  
+		});       
+	}
+	function release()
+	{
+		if(!confirm("确定要这么执行该操作吗？"))
+		{
+			return false;
+		}
+		var nid = $("input[name='nid[]']");
+		var id = "";
+		var is_select = false;
+		for ( i = 0 ; i < nid.length ; i++ ) 
+		{
+			if ( nid[i].checked == true ) 
+			{
+				id += "," + nid[i].value;
+				is_select = true;
+			}
+		}
+		if (is_select) 
+		{
+			window.location = "__URL__/game_news_recommend/id/"+id;
+		}
+		else
+		{
+			alert( "请至少选择一个条目，才能进行操作" );
+			return false;
+		}
+	}
+	function delete_go()
+	{
+		if(!confirm("确定要这么执行该操作吗？"))
+		{
+			return false;
+		}
+		var nid = document.getElementsByName("nid[]");
+		var id = "";
+		var is_select = false;
+		for ( i = 0 ; i < nid.length ; i++ ) 
+		{
+			if ( nid[i].checked == true ) 
+			{
+				id += "," + nid[i].value;
+				is_select = true;
+			}
+		}
+		if (is_select) 
+		{
+			window.location = "__URL__/game_news_recommend_remove/id/"+id;
+		}
+		else
+		{
+			alert( "请至少选择一个条目，才能进行操作" );
+			return false;
+		}
+	}
+</script>
+<ul class="tab_title margin_top">
+    <li><a href="__URL__/game_news_unreleased_list">未发布</a></li>
+    <li class="current"><a href="#">已发布</a></li>
+</ul>
+
+<body>
+    <div class="search_box">
+        <form method="get" action="__URL__/game_news_released_list" name="game_news_released_list" id="game_news_released_list">
+			<if condition='$_GET[recommend] eq 1'><input type='hidden' value='1' name="recommend"></if>
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="19%">
+                        <label>游戏名称：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_softname" id="search_softname" value="{$search_softname}"/>
+                    </td>
+                    <td width="19%">
+                        <label>资讯标题：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_news_name" id="search_news_name" value="{$search_news_name}"/>
+                    </td>
+                    <td width="18%">
+                        <label>资讯类型：</label>
+                        <select name="search_info_type" id="search_info_type">
+                            <option value="-1" selected>全部</option>
+                            <option value="1" <if condition="$search_info_type eq 1">selected</if>>资讯</option>
+                            <option value="2" <if condition="$search_info_type eq 2">selected</if>>评测</option>
+                            <option value="3" <if condition="$search_info_type eq 3">selected</if>>攻略</option>
+                        </select>
+                    </td>
+                    <td width="10%"><input type="submit" value="搜索" class="search_btn"/></td>
+                    <if condition='$_GET[recommend] eq 0'><td width="10%"><a href='__URL__/news_add_show?from={$function_name}&{$url_param}' class="search_btn">添加资讯</a></td></if>
+					<if condition='$_GET[recommend] eq 0'>
+						<td width="10%"><a href='/index.php/Sj/Onlinegame/game_news_released_list?recommend=1' class="search_btn">推荐列表</a></td>
+					<else/>
+						<td width="10%"><a href='/index.php/Sj/Onlinegame/game_news_released_list' class="search_btn">全部列表</a></td>
+					</if>
+                </tr>
+				<tr>
+					<td width="19%">
+                        <label>游戏包名：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_pckname" id="search_pckname" value="{$search_pckname}"/>
+                    </td>
+					<td width="19%">
+                        <label>采集站点：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_website" id="search_website" value="{$search_website}"/>
+                    </td>
+				</tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+					<th width="3%">选择</th>
+                    <th width="5%">ID</th>
+                    <th width="12%">资讯标题</th>
+                    <th width="13%">资讯默认图片</th>
+                    <th width="8%">游戏名称</th>
+					<th width="8%">游戏包名</th>
+                    <th width="5%">采集站点</th>
+                    <th width="5%">作者</th>
+                    <th width="5%">资讯类型</th>
+                    <th width="8%">抓取时间</th>
+                    <th width="8%">发布时间</th>
+                    <th width="4%">
+                        <if condition='$_GET[recommend] eq 1'>推荐排序<else/>排序</if>
+                    </th>
+                    <th width="19%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+					<td><input type="checkbox" name="nid[]" value="{$list.id}"/></td>
+                    <td>{$list.id}</td>
+                    <td>{$list.news_name}</td>
+                    <td><if condition='$list.news_pic eq null'>-<else/><a href='{$apkurl}{$list.news_pic|default='&nbsp;'}' target="_blank"><img height="80" width="130" src="{$apkurl}{$list.news_pic|default='&nbsp;'}"/></a></if></td>
+                    <td>{$list.softname}</td>
+					<td>{$list.apply_pkg}</td>
+                    <td>{$list.website_name}</td>
+                    <td>{$list.author}</td>
+                    <td>
+                        <switch name="list.info_type">
+                            <case value="1">资讯</case>
+                            <case value="2">评测</case>
+                            <case value="3">攻略</case>
+                        </switch>
+                    </td>
+                    <td><if condition="$list.catch_tm eq 0"><else/>{$list.catch_tm|date="Y-m-d H:i:s",###}</if></td>
+                    <td><if condition="$list.release_tm eq 0"><else/>{$list.release_tm|date="Y-m-d H:i:s",###}</if></td>
+					<if condition='$_GET[recommend] eq 1'>
+						<td><a href="__URL__/recommend_change_rank?id={$list.id}&recommend=1" class="thickbox blue">{$list.recommend_rank}</a></td>
+					<else/>
+						<td><a href="__URL__/change_rank?id={$list.id}" class="thickbox blue">{$list.rank}</a></td>
+					</if>
+                    <?php
+						if($_GET['recommend'] != 1){
+					?>
+                    <td>
+                        <a href="__URL__/news_profile?id={$list.id}&width=480" class="thickbox">预览</a>
+                        <span>&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;</span>
+                        <a href="__URL__/news_release?id={$list.id}&cancel=1" onClick="return confirm('确定要取消发布此记录吗？');">取消发布</a>
+                        <gt name="list.update_tm" value="$list.release_tm"><span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span><a href="__URL__/news_release?id={$list.id}" onClick="return confirm('确定要重新发布此记录吗？');">重新发布</a></gt>
+                        <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                        <a href="__URL__/news_edit_show?from={$function_name}&id={$list.id}&{$url_param}">编辑</a><br/>
+                        <a href="__URL__/game_news_del?id={$list.id}" onClick="return confirm('确定要删除此记录吗？');">删除</a>
+						<span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+						<if condition='$list.recommend_status eq 1'>
+							<a href="__URL__/game_news_recommend_remove?id={$list.id}" onClick="return confirm('确定要取消推荐此记录吗？');">取消推荐</a>
+						<else/>
+							<a href="__URL__/game_news_recommend?id={$list.id}" onClick="return confirm('确定要推荐此记录吗？');">推荐</a>
+						</if>
+                    </td>
+					<?php 
+						}else{
+					?>
+					<td>
+						<a href="__URL__/game_news_recommend_remove?id={$list.id}" onClick="return confirm('确定要取消推荐此记录吗？');">取消推荐</a>
+					</td>
+					<?php
+						}
+					?>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+		<div style="margin:10px;">
+			<input type="button" value="全选" onClick="select_all()"/>&nbsp;
+			<input type="button" value="反选" onClick="select_again()"/>&nbsp;&nbsp;&nbsp;
+			批量操作：
+			<?php
+				if($_GET['recommend'] != 1){
+			?>
+			<input type="button" value="推荐" onClick="return release()" />
+			<?php 
+				}else{
+			?>
+			<input type="button" value="批量取消" onClick="return delete_go()" />
+			<?php
+				}
+			?>
+		<div>
+        <center>{$page}</center>
+    </div>
+</body>

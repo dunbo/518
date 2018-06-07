@@ -1,0 +1,91 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox1.css" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script>
+    $(function() {
+        document.onkeydown = function(e) {
+            var ev = document.all ? window.event : e;
+            if(ev.keyCode==13) {
+                search();
+             }
+        }
+    });
+    function search() {
+        var search_start_time = $.trim($("#search_start_time").val());
+        var search_end_time = $.trim($("#search_end_time").val());
+        if (search_start_time && search_end_time && search_start_time > search_end_time) {
+            alert('结束时间不能小于或等于开始时间');
+            return false;
+        }
+        $("#index").submit();
+    }
+</script>
+
+<body>
+    <br/>
+    <div class="search_box">
+        <form method="get" action="__URL__/index" name="index" id="index">
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="13%">
+                        <label>包名：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_package" id="search_package" value="{$search_package}"/>
+                    </td>
+                    <td width="13%">
+                        <label>搜索词：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="name" id="name" value="{$name}"/>
+                    </td>
+                    <td width="13%">
+                        <label>开始时间：</label>
+                        <input id="search_start_time" name="search_start_time" type="text" class="search_item_text Wdate" style="width:150px" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})" <if condition="$search_start_time neq 0">value="{$search_start_time|date='Y-m-d',###}"</if>/>
+                    </td>
+                    <td width="13%">
+                        <label>结束时间：</label>
+                        <input id="search_end_time" name="search_end_time" type="text" class="search_item_text Wdate" style="width:150px" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})" <if condition="$search_end_time neq 0">value="{$search_end_time|date='Y-m-d',###}"</if>/>
+                    </td>
+                    <td width="5%" align="right"><input type="button" value="搜索" onclick="search()" class="search_btn"/></td>
+                    <td width="5%" align="right"><a href="__URL__/add_package?modal=true" class="search_btn thickbox">添加包名</a></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="5%">ID</th>
+                    <th width="20%">包名</th>
+                    <!-- <th width="15%">软件名称</th> -->
+                    <th width="15%">搜索词</th>
+                    <th width="15%">开始时间</th>
+                    <th width="15%">结束时间</th>
+                    <th width="20%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                    <td>{$list.id}</td>
+                    <td>{$list.package}</td>
+                    <!-- <td><?php echo $softname_data[$list['package']];?></td> -->
+                    <td>{$list.name}</td>
+                    <td>{$list.start_time|date="Y-m-d H:i:s",###}</td>
+                    <td>{$list.end_time|date="Y-m-d H:i:s",###}</td>
+                    <td>
+                        <a href="__URL__/edit_package?id={$list.id}" class="thickbox">编辑</a>
+                        <span>&nbsp;&nbsp;｜&nbsp;&nbsp;</span>
+                        <a href="__URL__/del?id={$list.id}" onClick="if(!confirm('确定删除此记录吗?'))return false;">删除</a>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>

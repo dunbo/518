@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+{//时间插件结束}
+
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<table  width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+<tr height="35">
+	<td align="center" style=<?php if($tab ==1): ?>"background:#FFCC66"; <?php endif; ?> >
+		<a href="__URL__/settle_param/tab/1"><font style="color:#000; font-weight:bold">结算系数</font></a>
+	</td>
+	<td align="center" style=<?php if($tab ==2): ?>"background:#FFCC66"; <?php endif; ?> >
+		<a href="__URL__/manage_settle_param/tab/2"><font style="color:#000; font-weight:bold">系数管理</font></a>
+	</td>
+</tr>
+</table>
+<div style="clear: both"></div>
+<table style='float:left;width:100%' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th>月份</th>
+			<th>基础价值</th>
+			<th>手动加权-{$name}</th>
+			<th>灵活系数</th>
+			<th>额外奖励</th>
+			<th>管理</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='list' id='vo'>
+		<tr>
+			<td>{$vo.month}</td>
+			<td style="text-align:left">
+				<?php foreach($vo['value'][1] as $k=>$v): ?>
+					{$v['name']}
+					<?php if($v['value']): ?>
+					= {$v['value']}
+					<?php endif; ?>
+					<br>
+				<?php endforeach; ?>
+			</td>
+			<td style="text-align:left">
+				<?php foreach($vo['value'][2] as $k=>$v): ?>
+				{$v['name']}
+				<?php if($v['value']): ?>
+				: {$v['value']}
+				<?php endif; ?>
+				<br>
+				<?php endforeach; ?>
+			</td>
+			<td style="text-align:left">
+				<?php foreach($vo['value'][3] as $k=>$v): ?>
+				{$v['name']}
+				<?php if($v['value']): ?>
+				: 每 {$v['value1']} 统计量 ={$v['value2']},封顶值：{$v['value3']}
+				<?php endif; ?>
+				<br>
+				<?php endforeach; ?>
+			</td>
+			<td  style="text-align:left">
+				<?php foreach($vo['value'][4] as $k=>$v): ?>
+				{$v['name']}
+				<?php if($v['value']): ?>
+				: {$v['value']}
+				<?php endif; ?>
+				<br>
+				<?php endforeach; ?>
+			</td>
+			<td>
+				<if condition="$vo.status eq 2">
+					<if condition="$vo.month eq $next_month">
+						<a href="__URL__/edit_param?id={$vo.id}">编辑</a>
+						<else />
+						<a href="__URL__/edit_param?id={$vo.id}">系数确认</a>
+					</if>
+				<elseif condition="$vo.status eq 0" />
+					<a href="__URL__/manage_settle_param/tab/2">系数缺失</a>
+				<elseif condition="$vo.status eq 1"/>
+					--
+				</if>
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='12'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+</html>
+<script>
+	function pass(id){
+		if(confirm("确认通过审核？")){
+			$.ajax({
+				url: '__URL__/compensation',
+				type: 'post',
+				data: {id:id,type:2},
+				dataType: 'json',
+				success: function(ret) {
+					if(ret.code == 200){
+						alert('通过成功');
+						window.location.reload();
+					}else{
+						alert('通过失败');
+					}
+				}
+			});
+		}
+	}
+</script>

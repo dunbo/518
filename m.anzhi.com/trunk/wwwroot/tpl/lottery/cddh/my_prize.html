@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>答题进行时</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+<script type="text/javascript">
+	function tabs(obj,id,classname){
+		$('.'+classname).css('display','none');
+		$('#'+classname+id).css('display','block');
+	    $(obj).siblings("li").removeClass("current");
+	    $(obj).addClass("current");
+	}
+</script>
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/banner.jpg" />
+</div>
+<div class="main">
+	<ul class="tab_title">
+		<li class="current" onclick="tabs(this,1,'tab_cnt')"><span>礼券</span></li>
+		<li onclick="tabs(this,2,'tab_cnt')"><span>流量</span></li>
+	</ul>	
+	<div class="tab_cnt" id="tab_cnt1" style="display: block;">	
+		<!--{if $out.my_prize2 }-->
+		<div class="wrap">
+			<div class="wrap_inner">
+				<div class="wrap_inner2">
+					<div class="wrap_inner3">
+						<div class="wrap_inner4">
+						<!--{foreach from=$out.my_prize2 key='k' item=v}-->				
+							<p class="tab_date"><!--{$v.date}--></p>
+							<table cellpadding="0" cellspacing="0" class="tab_table">
+								<!--{foreach from=$v key='kk' item=vv}-->
+								<!--{if $kk eq 'date' }--><!--{continue}--><!--{/if}-->
+								<tr>
+									<td width="20%"><!--{$vv.time_slot}--></td>
+									<td width="47%"><!--{$vv.price}--></td>
+									<td width="30%"><a href="javascript:;" onclick="go_softinfo_down(<!--{$out.soft_info[$vv.pkg]['softid']}-->,'<!--{$out.soft_info[$vv.pkg]['package']}-->','<!--{$out.soft_info[$vv.pkg]['softname']}-->',<!--{$out.soft_info[$vv.pkg]['version_code']}-->,<!--{$out.soft_info[$vv.pkg]['filesize']}-->)">去使用</a></td>
+								</tr>
+								<!--{/foreach}-->								
+							</table>
+						<!--{/foreach}-->		
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--{else}-->	
+		<div class="tips" style="margin-top:0.35rem">
+			<img style="width:80%;margin:0 auto;" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tips_01.png" />
+		</div>	
+		<!--{/if}-->			
+	</div>
+	<div class="tab_cnt" id="tab_cnt2">
+		<p class="flow_p">流量奖励将于发放日期起2个工作日内充值到账</p>
+		<!--{if $out.my_prize }-->				
+		<div class="wrap" style="margin-top:0.2rem">
+			<div class="wrap_inner">
+				<div class="wrap_inner2">
+					<div class="wrap_inner3">
+						<div class="wrap_inner4">
+						<!--{foreach from=$out.my_prize key='k' item=v}-->
+							<p class="tab_date"><!--{$v.date}--></p>
+							<table cellpadding="0" cellspacing="0" class="tab_table">
+								<!--{foreach from=$v key='kk' item=vv}-->
+								<!--{if $kk eq 'date' }--><!--{continue}--><!--{/if}-->
+								<tr>
+									<td width="20%"><!--{$vv.time_slot}--></td>
+									<td width="47%">&nbsp;</td>
+									<td width="30%"><!--{$vv.price}--></td>
+								</tr>
+								<!--{/foreach}-->	
+							</table>
+						<!--{/foreach}-->								
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--{else}-->	
+		<div class="tips" style="margin-top:0.35rem;">
+			<img style="width:80%;margin:0 auto;" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tips_01.png" />
+		</div>	
+		<!--{/if}-->			
+	</div>
+	<div class="btns3">
+		<a href="javascript;" onclick="go_index();" class="return_btn">返回</a>
+	</div>
+</div>
+</body>
+</html>
+<script>
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var prefix = '<!--{$out.prefix}-->';
+function go_softinfo_down(softid,my_package,softname,versioncode,size){
+	$.ajax({
+		url: "/lottery/"+prefix+"/index.php",
+		data:"use_log=1&softid="+softid+"&sid="+sid+"&aid="+aid+"&pkg="+my_package, 
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),softid,my_package,softname,versioncode,size,1);
+		},
+	});			
+}
+
+//首页
+function go_index(){
+	window.location.href="/lottery/"+prefix+"/index.php?aid="+aid+"&sid="+sid;
+}
+</script>

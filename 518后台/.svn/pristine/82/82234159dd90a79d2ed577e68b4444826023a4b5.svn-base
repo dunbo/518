@@ -1,0 +1,225 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?v4"></script>
+<!--使用灵活运营的推荐内容编辑必需添加此js-->
+<script type="text/javascript" src="/Public/js/edit_content_type.js?v5"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+<script>
+	function my_update(){
+		$('.normal').css('display','none');
+		$('.update').css('display','block');
+		$('.update_show').css('display','block');
+	}
+	
+	function no_update(){
+		$('.normal').css('display','block');
+		$('.update').css('display','none');
+		$('.update_show').css('display','none');
+	}
+	
+	function checkit(){
+		if(confirm("热词删除后不可恢复，并直接影响线上数据，是否确认删除？"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+function get_contnettype(id){
+	$('#id').val(id);
+	$("#content_type_div").html('');
+	var url = "__URL__/pub_add_content/id/"+id;
+	$.ajax({
+		type: "GET",
+		url : url,
+		async:false,
+		dataType: 'json',	
+		success: function(data){
+			var soft_arr = {:data};
+			var content_arr = edit_load(soft_arr);
+			// 生成推荐内容展示
+			generate_append_html("content_type_div", content_arr);
+			// 生成推荐链接
+			var function_from="searchkeywords";
+			href = generate_content_type_href('content_type_div', "1,2,3,4,5,6,7,8,9,10", content_arr,function_from);
+			tb_show('title',href,"thickbox");
+		}
+	});
+}
+
+function post_content(){
+	//alert($("#content_type_div").html());
+	$("#submit").click();	
+}	
+</script>
+<style type="text/css">
+	.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+	.margin_top{ float:left;}
+</style>	
+<span>
+    <form action="__URL__/searchkeywords_list_hot" method="get" name="showproductlist">
+    <label>请选择要操作的产品：</label>
+	    <select name='product_id' id="productlist"  onchange="javascript:showproductlist.submit();">
+	        <option value="0">选择产品</option>
+	        <volist name="product_list" id="product" key="k">
+	        <option value="{$product.pid}"  <if condition="($product.pid eq $select_pid)"> selected = "selected" </if> >{$product.pname}</option>
+	        </volist>
+	    </select>
+	</form>
+</span>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+	<tr height="35">
+		<td align="center" style=<?php if($keyword_type == 1){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/searchkeywords_list_hot/keyword_type/1/product_id/{$select_pid}"><font style="color:#000; font-weight:bold">热词</font></a>
+		</td>
+		<td align="center" style=<?php if($keyword_type == 2){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/searchkeywords_list_hot/keyword_type/2/product_id/{$select_pid}"><font style="color:#000; font-weight:bold">内容</font></a>
+		</td>
+	</tr>
+</table>
+<div style="padding:20px;">
+<span>注意事项：</span><br />
+<span>1.每个热词不得超过10个汉字，并且只能为汉字，数字和英文的组合</span><br />
+<span style='color:red'>2.考虑到UI设计，关联应用（带icon）只会在前端展示4个，超过的省略，不足则不展示</span></br>
+<span>3.热词编辑后约10分钟才会在前端生效</span>
+</div>
+<div style="padding:20px;">
+&nbsp;&nbsp;
+	<a href="__URL__/add_searchkeywords_to_show/keyword_type/{$keyword_type}/product_id/{$select_pid}?width=1100" class="thickbox search_btn" style="float:left; margin:0 10px 0 6px; display:inline">新增</a>
+	<a class="search_btn" href="__URL__/edit_searchkeywords_to_show/keyword_type/{$keyword_type}/product_id/{$select_pid}" style="float:left">编辑</a><a  class="search_btn" href="__URL__/stale_searchkeywords_out_show/product_id/{$select_pid}" style="float:right; margin:0 10px 0 6px; display:inline">已过期</a><a  class="search_btn" href="__URL__/searchkeywords_list_shield/product_id/{$select_pid}" style="float:right; margin:0 10px 0 6px; display:inline">已屏蔽</a><a class="search_btn" href="__URL__/list_recommend/product_id/{$select_pid}" style="float:left;margin:0 10px 0 6px; display:inline">榜单推荐</a>
+<div class="clear"></div>
+<FORM method="POST" action="__URL__/update_searchkeywords_to" enctype="multipart/form-data">
+	<table style="display:none" >
+		<tr class="sub_tr">
+			<!--下面的content_type_div是选择推荐内容后append的地方-->		
+			<div id="content_type_div" style="display:none" />
+			<td colspan="3">
+				<input type='hidden' name="is_contenttye" value='1'/>
+				<input type='hidden' name="id" id='id' value=''/>
+				<input type='hidden' name="product_id" id='product_id' value='{$select_pid}'/>				
+				<input type='submit' id='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/>
+				<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+			</td>
+		</tr>
+	</table>	
+</FORM>	
+<form action="__URL__/update_searchkeywords" method="post">
+<table width="99%" cellpadding="0" cellspacing="0" border="1" class="table_list">
+	<thead>
+		<tr>
+			<th>排序</th>
+			<th>搜索热词</th>
+			<!--<th>展示热词</th>-->
+			<th>热词颜色</th>
+			<th>热词分类</th>
+			<th>热词类型</th>
+			<th>推荐内容</th>
+			<th>关联应用(包名)</th>
+			<!-- <th>旧版排序</th> -->
+			<th>图片展示</th>
+			<th>趋势</th>
+			<th>开始时间</th>
+			<th>结束时间</th>
+			<th>合作形式</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach($result as $key => $val){ ?>
+		<tr <?php if($val['starts_tm'] > time()){ ?>style="background-color:#ccc;"<?php } ?>>
+			<td>
+				<!-- <select name="rank" rel="<?php echo $val['id'] ?>" class="extent_rank">
+						<?php
+						for($i = 1;$i <= $count; $i++){
+							echo "<option value=\"".$i."\"";
+							if($val['rank'] == $i) echo " selected=\"selected\" ";
+							echo ">".$i."</option>";
+						}
+						?>
+				</select> -->
+				<span>{$val['rank']}</span>
+			</td>
+			<td><span class="normal">{$val.key_word}</span></td>
+			<!--<td><span class="normal">{$val.show_keyword}</span></td>-->
+			<td align="center">
+				<div style='border:1px solid gray;width:20px;height:20px;background-color: {$val.color|default="black"}'>
+
+
+				</div>
+			</td>
+			<td><?php if($val['keyword_type']==1){echo '热词';}else{echo '内容';}?></td>
+			<td><?php if($val['keyword_type']==1){if($val['is_personalize']==2){echo '个性化热词';}else{echo '普通热词';}}?></td>
+			<td>
+				<?php if($val['is_personalize']==1){ ?>
+					<!--下面a里的href的url会在ready函数里自动生成-->
+					<a id="content_type_a" href="javascript:void(0)" onclick="get_contnettype({$val.id});" >
+						<font color="blue" id='content_type_{$val.id}' >{$val.content_type}</font>
+					</a>
+					<script>
+						<?php if($val['content_type'] == 1){ ?>
+							$("#content_type_<?php echo $val['id']; ?>").html("软件");
+						<?php }else if($val['content_type'] == 2){ ?>
+							var activity_name = convertActivityId2ActivityName({$val.activity_id});
+							$("#content_type_<?php echo $val['id']; ?>").html("活动-"+activity_name);
+						<?php }else if($val['content_type'] == 3){ ?>
+							var feature_name = convertFeatureId2FeatureName({$val.feature_id});
+							$("#content_type_<?php echo $val['id']; ?>").html("专题-"+feature_name);
+						<?php }else if($val['content_type'] == 4){ ?>
+							var page_name = convertPageType2PageName('{$val.page_type}');
+							var re_keyword = '{$val.re_keyword}';
+							var str = "页面-"+page_name;
+							if(re_keyword!=''){
+								str += '-'+re_keyword;
+							}
+							$("#content_type_<?php echo $val['id']; ?>").html(str);
+						<?php }else if($val['content_type'] == 8 || $val['content_type'] == 10){ ?>
+							var order_name = convertOrderId2OrderName({$val.activity_id});
+							$("#content_type_<?php echo $val['id']; ?>").html("预约-"+order_name);
+						<?php } ?>
+					</script>
+				<?php } ?>
+			</td>
+			<td><?php if($val['package']){ ?>{$val.package}<?php }else{ ?>未关联<?php } ?></td>
+			<!-- <td>{$val.location}</td> -->
+			<td>{$val.show_pic_type}</td>
+			<td>{$val.key_name}</td>
+			<td>
+			<?php if($val['start_tm']){ ?>{$val.start_tm}<?php } ?>
+			</td>
+			<td><?php if($val['end_tm']){ ?>{$val.end_tm}<?php } ?>
+			</td>
+			<TD><?php if ($val['type'] !=0) { echo $val['types'] ; }else{ echo "-";} ?></TD>
+			<td><a href="__URL__/delete_searchkeywords_to/id/{$val.id}/hot_id/list/product_id/{$select_pid}" onclick="return checkit();">删除</a></td>
+		</tr>
+		<?php } ?>
+	</tbody>
+</table>
+
+<div class="update_show" style="display:none;">
+	<input type="submit" value="确认" />　
+	<input type="reset" value="取消" onclick="no_update();" />
+</div>
+</form>
+</div>
+</body>
+</html>
+<script>
+$('.extent_rank').change(function(){
+	var url = "__URL__/edit_rank_to/id/"+$(this).attr('rel')+"/rank/"+$(this).val()+"";
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+
+			var url     = eval("("+response+")");
+			var jumpUrl = "__URL__/searchkeywords_list_hot/";
+			//window.location.reload();
+			window.location.href = jumpUrl;	
+		}
+	});
+});
+</script>

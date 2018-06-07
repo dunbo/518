@@ -1,0 +1,91 @@
+<script>
+    function generate() {
+        var high_id = $.trim($("#high_id").val());
+        var low_ids = $.trim($("#low_ids").val());
+        if (high_id == "") {
+            $("#s1").html('<font color="red">请填写高版本ID</font>');
+            return;
+        } else {
+            $("#s1").html('<font color="red" style="font-weight:bold;font-size:14px;">*</font>');
+        }
+        var re = /^\s*\d+\s*$/;
+        if (!re.test(high_id)) {
+            $("#s1").html('<font color="red">请填写数字</font>');
+            return;
+        } else {
+            $("#s1").html('<font color="red" style="font-weight:bold;font-size:14px;">*</font>');
+        }
+        if (low_ids == "") {
+            $("#s2").html('<font color="red">请填写低版本ID</font>');
+            return;
+        } else {
+            $("#s2").html('<font color="red" style="font-weight:bold;font-size:14px;">*</font>');
+        }
+        re = /^\s*(\d+\s*,)*\d+\s*$/;
+        if (!re.test(low_ids)) {
+            $("#s2").html('<font color="red">请填写数字，数字间用英文“,”分隔</font>');
+            return;
+        } else {
+            $("#s2").html('<font color="red" style="font-weight:bold;font-size:14px;">*</font>');
+        }
+        var param = {
+            'high_id' : high_id,
+            'low_ids' : low_ids
+        };
+        // 检查id是否存在
+        $.ajax({
+            url : '__URL__/manual_generate_otaPackage',
+            data : param,
+            dataType : 'json',
+            type : 'POST',
+            success: function (data) {
+                if (data.status != 0) {
+                    if (data.status & 1) {
+                        $("#s1").html('<font color="red">' + data.data[0] + '</font>');
+                    } else {
+                        $("#s1").html('<font color="red" style="font-weight:bold;font-size:14px;">*</font>');
+                    }
+                    if (data.status & 2) {
+                        $("#s2").html('<font color="red">' + data.data[1] + '</font>');
+                    } else {
+                        $("#s2").html('<font color="red" style="font-weight:bold;font-size:14px;">*</font>');
+                    }
+                } else {
+                    alert("生成请求已发送后台进程，数据可能有延迟，请稍后刷新查看！");
+                    location.href = "/index.php/Sj/OTApackage/OTAlist";
+                }
+            }
+        });
+    }
+</script>
+<br/>
+<label><font color="red" style="font-weight:bold;font-size:14px;">提示：右侧标红*为必填项</font></label>
+<br/>
+<form action="__URL__/manual_generate_otaPackage" method="POST" id="submit">
+<div style="width:45; margin-top:4px">
+    <table  width="100%" border="0" cellspacing="0" padding="0" class="tb" align= "center">
+        <tr>
+            <td width="20%"><label>高版本ID:</label></td>
+            <td width="40%"><input id="high_id" name="high_id" value=""/></td>
+            <td width="40%"><span id="s1"><font color="red" style="font-weight:bold;font-size:14px;">*</font></span></td>
+        </tr>
+        <tr>
+            <td align="left" valign="top"><label>低版本ID：</label><br/><label><font color="red">(用英文“,”分隔)</font></label></td>
+            <td align="left" bgcolor="#FFFFFF"> 
+                <textarea name="low_ids" id="low_ids" cols="60" rows="8"></textarea>
+            </td>
+            <td><span id="s2"><font color="red" style="font-weight:bold;font-size:14px;">*</font></span></td>
+        </tr>
+    </table>
+    <div align="center">
+    <input type="button" onclick="generate()" value="生成"/><span>&nbsp;&nbsp;&nbsp;&nbsp;</span><input type="button" onclick="tb_remove()" value="取消"/>
+    </div>
+</div>
+</form>
+</body>
+
+<?php if (!empty($ready)) :?>
+<script>
+<?php echo $ready;?>();
+</script>
+<?php endif;?>

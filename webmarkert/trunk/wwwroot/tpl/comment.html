@@ -1,0 +1,62 @@
+<div class="app_detail_list_comment" id="comment_box" >
+	<div class="app_detail_title" style="position:relative;"><a href="<!--{$out.check_html}-->">评论(<!--{if $out.count == ''}-->0<!--{else}--><!--{$out.count}--><!--{/if}-->)</a>
+<script>
+	function report_action(apk_url, apk_name, apk_type) {
+		$.get('/report_app.php', {'packageurl' : apk_url, 'packagename' : apk_name, 'packagetype' : apk_type, 'orig' : '', 'appchannel' : '', 'descr' : ''}, 
+		function(data) {
+		    if(data)
+			{
+				document.getElementById("recommend").style.display="block";
+				setTimeout(function(){
+					document.getElementById("recommend").style.display="none";
+                },2000)
+			}
+		});
+	}
+</script>
+<style>
+.recommend{display:none; background-color:#fef8de; border:1px solid #edd984; font-size:12px; height:22px; left:55.5%;overflow:hidden; position:absolute; top:-1px; width:264px; z-index:99999; line-height:22px; color:#666;padding:0 10px; text-align:center;}
+</style>
+     <div id="recommend" class="recommend">
+		你所举报的信息将被发送至工信部12321举报平台
+	 </div>
+	<span onclick='report_action("<!--{$out['softid']}-->", "<!--{$out['packagename']}-->", 1);'>一键举报</span>
+	</div>
+	<ul id="comment_list">
+		<!--{section name=vo loop=$out.comment}-->
+		<li>
+			<img class="avatr" src="<!--{$smarty.const.UC_SERVER}-->avatar.php?uid=<!--{$out.comment[vo].6}-->&size=48x48" alt="<!--{$out.comment[vo].2}-->" />
+			<div class="comment_list">
+				<div class="comment_list_top">
+					<span><!--{$out.comment[vo].2}--></span>
+					<span  class="stars center"  style="background-position:0 <!--{-12*$out.comment[vo].1}-->px;" ></span>
+					<em><!--{$out.comment[vo].3}--></em>
+				</div>
+				<p><!--{$out.comment[vo].4}--></p>
+			</div>
+		</li>
+		<!--{/section}-->
+		<div class="clear"></div>
+	</ul>
+</div>
+<div class="more_comment">
+    <a href="<!--{url2static_url}-->detail.php?id=<!--{$out.newanzhi['ID']}--><!--{/url2static_url}-->"  target="_blank">下载 安智市场客户端</a>
+    <span>查看更多评论和吐槽~~</span>
+</div>
+<script>
+function SetCookie(name, value, time) 
+{ 
+    var exp = new Date();       
+    exp.setTime(exp.getTime() + time); 
+    document.cookie = name+"= "+escape(value)+";expires= "+exp.toGMTString(); 
+} 
+
+function go_comment_page(url, softid)
+{
+    var cookie_name = "comment_page_url_"+softid;
+    SetCookie(cookie_name, url, 2000);
+    //window.location.reload();
+	//$('#comment_div').html('加载评论中...');
+	$('#comment_div').loadAPK(url + "&rand="+Math.random());
+}
+</script>

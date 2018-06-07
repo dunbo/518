@@ -1,0 +1,636 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>dev test</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<style>
+*,body{margin:0;padding:0;font-size: 14px; font-family:"微软雅黑"}
+a {	font-size: 12px; text-decoration: none;}
+ul,li{list-style:none;}
+.head{width:98%; margin:5px auto; padding:5px;}
+.head table{width:100%; margin:0 auto; background:#dee7f6; border:1px solid #8cc6de; border-right:none; border-bottom:none;}
+.head table td{height:26px; padding:4px 8px; border-right:1px solid #8cc6de; border-bottom:1px solid #8cc6de;}
+.left {float:left;width:43%; margin-left:2%;overflow: auto; overflow-y:hidden; display:inline}
+#output {float:right; width:50%; height:400px; overflow-y:auto; font-size:12px; margin-right:1%;}
+.clear{clear:both;}
+#menu{height:32px; line-height:32px; background: #146bb7;}
+#menu li{float:left; height:32px; line-height:32px;}
+#menu li a{font-size:13px; color:#fff}
+#searchbox{margin:10px 0;}
+#main_div{border-top:1px solid #d2d2d2; padding-top:8px;}
+.tab
+{
+	width:100%;
+	display: block;
+	font-size:14px;
+	
+}
+.tab li
+{
+	list-style: none;
+	padding-left:14px;
+	float:left
+}
+
+.list li
+{
+	list-style: none;
+	padding-left:10px;
+}
+
+</style>
+<script src="Public/js/jquery.js"></script>
+<script>
+var vr_config = {
+	3999: 0,
+	4002: 1,
+	4100: 2,
+	4200: 3
+}
+var pre_stack = [];
+var next_stack = [];
+var curr_act = {};
+
+var tpl_config = {
+	COMMON: {
+		wrap: '<table>$line</table>',
+		datakey: 'DATA',
+		tpl: '<tr><td>$order</td><td>$id</td><td> <img src="$iconurl" width="25" height="25"></td><td><a href="javascript:request({KEY:\'SOFT_DETAIL\', ID:$id})">$softname</a> </td><td>$package</td><td></tr>',
+		param:[
+			[/\$id/g, 0],
+			[/\$iconurl/g, 1],
+			[/\$softname/g, 2],
+			[/\$package/g, 7]
+		]
+	},
+	GET_ALL_PREFERENCES: {
+		wrap: '<table>$line</table>',
+		datakey: 'DATA_N',
+		tpl: '<tr><td>$order</td><td>$id</td><td> <img src="$iconurl" width="25" height="25"></td><td><a href="javascript:request({KEY:\'SOFT_DETAIL\', ID:$id})">$softname</a> </td></tr>',
+		param:[
+			[/\$id/g, 0],
+			[/\$iconurl/g, 4],
+			[/\$softname/g, 1]
+		]
+	},
+	
+	TOP_ALL_CATEGORY:{
+		wrap: '<table>$line</table>',
+		datakey: 'DATA',
+		tpl: '<tr><td>$order</td><td><img src="$iconurl" width="25" height="25"></td><td><a href="javascript:request({KEY:\'TOP_SUB_CATEGORY\', ID:$id, LIST_INDEX_START:0,LIST_INDEX_SIZE:20})">$softname</a></td></tr>',
+		param:[
+			[/\$id/g, 1],
+			[/\$iconurl/g, 0],
+			[/\$softname/g, 2]
+		]
+	},
+	SOFT_SUBJECT: {
+		wrap: '<table>$line</table>',
+		datakey: 'DATA',
+		tpl: '<tr><td>$order</td><td><img src="$iconurl" width="25" height="25"></td><td><a href="javascript:request({KEY:\'SOFT_SUBJECT_ALL_LIST\', ID:$id, LIST_INDEX_START:0,LIST_INDEX_SIZE:20})">$feature_name</a></td></tr>',
+		param:[
+			[/\$id/g, 1],
+			[/\$iconurl/g, 0],
+			[/\$feature_name/g, 2]
+		]
+	},
+	SOFT_SUB_CATEGORY: {
+		wrap: '<table>$line</table>',
+		datakey: 'DATA',
+		tpl: '<tr><td>$order</td><td><img src="$iconurl" width="25" height="25"></td><td><a href="javascript:request({KEY:\'SOFT_CATEGORY_ALL_LIST\', ID:$id, LIST_INDEX_START:0,LIST_INDEX_SIZE:20,ORDER:0})">$category_name</a></td></tr>',
+		param:[
+			[/\$id/g, 4],
+			[/\$iconurl/g, 0],
+			[/\$category_name/g, 5]
+		]
+	},
+	MAYBE_LIKE: {
+		wrap: '<table><tr>$line</tr></table>',
+		datakey: 'DATA_LIKE',
+		tpl: '<td><a href="javascript:request({KEY:\'SOFT_DETAIL_PKGNAME\', PACKAGE_NAME:\'$package\'})"><img src="$iconurl" width="25" height="25"></a></td>',
+		param:[
+			[/\$package/g, 0],
+			[/\$iconurl/g, 1],
+			[/\$soft_name/g, 2]
+		]
+	}
+
+};
+var default_vr = 0;
+var checkcode = '';
+function login()
+{
+	if (parseInt($('#version').val()) > 3400) default_vr = 1;
+	$('#loading').show();
+	$('#_msg').html('');
+	$.ajax({
+		type: 'post',
+		data: {imei: $('#imei').val(), imsi:$('#imsi').val(), firmware: $('#firmware').val(), abi: $('#abi').val(), chl:$('#chl').val(), ip:$('#ip').val(), device:$('#device').val(), version:$('#version').val(), username:$('#username').val(), password:$('#password').val(), pid:$('#pid').val()},
+		url: 'dev.php?act=login',
+		success: function(data){
+			$('#loading').hide();
+			checkcode = data;
+			if (checkcode == '') {
+				$('#_msg').html('登录失败');
+			}
+		}
+	});
+}
+function do_pre()
+{
+	if (pre_stack.length == 0) return;
+	var act = pre_stack.pop();
+	next_stack.push(curr_act);
+	request(act,{is_new:false});
+}
+
+function do_next()
+{
+	if (next_stack.length == 0) return;
+	var act = next_stack.pop();
+	pre_stack.push(curr_act);
+	request(act,{is_new:false});
+}
+
+function do_refresh()
+{
+	request(curr_act,{is_new:false});
+}
+
+function addFavourite()
+{
+	request({KEY:'MAYBE_LIKE',PACKAGE_NAME:pkg}, {loading:false, _div:'suggest_div'});
+}
+
+function request(reqData)
+{
+	if (checkcode == '') {
+		alert('请先登录')
+		return;
+	}
+	if (typeof(reqData['KEY']) == 'undefined') {
+		return;
+	}
+	
+	var config = {};
+	if (typeof(arguments[1]) != 'undefined') {
+		config = arguments[1];
+	}
+	
+	var show_loading = (typeof(config['loading']) != 'undefined') ? config['loading'] : true;
+	var _div = (typeof(config['_div']) != 'undefined') ? '#' + config['_div'] : '#main_div';
+	var is_new = (typeof(config['is_new']) != 'undefined') ? config['is_new'] : true;;
+	
+	if (show_loading) {
+		if (is_new && typeof(curr_act['KEY']) != 'undefined') {
+			pre_stack.push(curr_act);
+			next_stack = [];
+		}
+		$('#loading').show();
+		curr_act = reqData;
+	}
+	$('#suggest_div').empty();
+	
+	$(_div).empty();
+	var key = reqData.KEY;
+	var ver = parseInt($('#version').val());
+	var vr = 0;
+	var max_ver = 0;
+	for(var v in vr_config) {
+		if (v >= max_ver && ver >= v) {
+			vr = vr_config[v];
+			max_ver = v;
+		}
+	}
+	reqData.VR = vr;
+	var debug = $('input[name=debug]:checked').val();
+	$.ajax({
+		type: 'post',
+		data: reqData,
+		dataType: 'json',
+		url: 'dev.php?act=req&checkcode=' + checkcode + '&debug=' + debug,
+		success: function(data){
+			if (data.code == '000') {
+				if (show_loading) $('#loading').hide();
+				alert('请先登录');
+				return;
+			} 
+			var html = '';
+			switch(reqData.KEY) {
+				case 'SOFT_DETAIL':
+				case 'SOFT_DETAIL_PKGNAME':
+					html += showDetail(data.data);
+					var pkg = typeof(data.data.PACKAGENAME) !='undefined' ? data.data.PACKAGENAME :reqData.PACKAGE_NAME;
+					request({KEY:'MAYBE_LIKE',PACKAGE_NAME:pkg}, {loading:false, _div:'suggest_div'});
+				break;
+				
+				case 'NECESSARYSOFT':
+					html += showNecessary(data.data);
+				break;
+
+				case 'HOME_EXTENT_AD':
+					html += showExtentAd(data.data);
+				break;
+
+				case 'MULTIPART_DOWNLOAD_URL_REQ':
+					html += showDownload(data.data);
+				break;
+				
+				case 'SOFT_CATEGORY_LIST':
+					html += showNewCategory(data.data);
+				break;
+				
+				case 'GET_RECOMMEND':
+				case 'GET_RECOMMEND_NEW':
+				case 'TCL_GET_RECOMMEND_NEW':
+					html += showRecommend(data.data);
+				break;
+				
+
+				
+				case 'SOFT_CATEGORY_ALL_LIST':
+					html += '<div><ul class="tab">';
+					var order = reqData.ORDER;
+					reqData.ORDER = 0;
+					html += '<li><a href="javascript:request('+json2str(reqData)+')">最新</a></li>';
+					reqData.ORDER = 1;
+					html += '<li><a href="javascript:request('+json2str(reqData)+')">最热</a></li>';
+					reqData.ORDER = order;
+					html += '</ul>';
+					html += '<div class="clear"></div>';
+					
+				default:
+					html += showList(data.data);
+				break;
+			}
+			if (typeof(reqData.LIST_INDEX_START) != 'undefined') {
+				html += '<div><ul class="tab">';
+				
+				if (reqData.LIST_INDEX_START >= 20) {
+					reqData.LIST_INDEX_START = parseInt(reqData.LIST_INDEX_START) - 20;
+					html += '<li><a href="javascript:request('+json2str(reqData)+')">上一页</a></li>';
+					reqData.LIST_INDEX_START = parseInt(reqData.LIST_INDEX_START) + 20;
+				}
+				if (typeof(data.data.DATA) != 'undefined' && data.data.DATA.length == 20) {
+					reqData.LIST_INDEX_START = parseInt(reqData.LIST_INDEX_START) + 20;
+					html += '<li><a href="javascript:request('+json2str(reqData)+')">下一页</a></li>';
+					reqData.LIST_INDEX_START = parseInt(reqData.LIST_INDEX_START) - 20;
+				}
+				html += '</ul>';
+				html += '<div class="clear"></div>';
+			}
+			$(_div).html(html);
+			if (show_loading) {
+				var output = '<div>code:' + data.code + '</div>';
+				output += '<p>' + data.raw + '</p>';
+				$('#output').html(output);
+				$('#loading').hide();
+			}
+		}
+	})
+}
+
+
+function showList(data)
+{
+	var key = data.KEY;
+	var key_config = {};
+	if (typeof(tpl_config[key]) != 'undefined') {
+		key_config = tpl_config[key];
+	} else {
+		key_config = tpl_config['COMMON'];
+	}
+	
+	var item = data[key_config.datakey];
+	var html = key_config.wrap;
+	var tpl = key_config.tpl;
+	var tmp = '';
+	var line = '';
+	for(var i in item){
+		tmp = tpl;
+		tmp = tmp.replace(/\$order/g, parseInt(i) + 1);
+		for(var j in key_config.param) {
+			tmp = tmp.replace(key_config.param[j][0], item[i][key_config.param[j][1]]);
+		}
+		line += tmp;
+	}
+	html = html.replace(/\$line/, line);
+	return html;
+}
+
+function showRecommend(data)
+{
+	var soft_list = data.DATA;
+	var html = '<ul class="tab">';
+	var tpl = '<li><a href="$action"><img src="$iconurl" width="125" /></a></li>';
+	var tmp = '';
+	for(var i in soft_list){
+		tmp = tpl.replace(/\$iconurl/, soft_list[i][2]);
+		var n = parseInt(soft_list[i][0]);
+		switch (n) {
+			case 1:
+				tmp = tmp.replace(/\$action/, 'javascript:request({KEY:\'SOFT_DETAIL_PKGNAME\', PACKAGE_NAME:\''+soft_list[i][1]+'\'})');
+			break;
+			
+			case 2:
+				tmp = tmp.replace(/\$action/, 'javascript:request({KEY:\'SOFT_SUBJECT_ALL_LIST\', ID:'+soft_list[i][1]+', LIST_INDEX_START:0,LIST_INDEX_SIZE:20})');
+			break;
+			
+			case 3:
+				tmp = tmp.replace(/\$action/, soft_list[i][1]);
+			break;
+		}
+		
+		html += tmp;
+	}
+	html += '</ul>';
+	return html;
+}
+
+function showDetail(data)
+{
+	var info = data;
+	var tmp = '';
+	var html = '';
+	var html = info.SOFT_DESCRIBE;
+	var html = '<div>发布：$time    版本：$version  大小：$size 下载量:$download</div>';
+	html += '<div><a href="javascript:request({ID:$id,KEY:\'MULTIPART_DOWNLOAD_URL_REQ\',PACKAGE_NAME:\'$package\',TYPE:0})">下载</a> <a href="javascript:request({KEY:\'SEARCH_EXACT\',SEARCH_QUERY:\'$dev_name\',TYPE:0, LIST_INDEX_START:0, LIST_INDEX_SIZE:20, QUERY_CONDITION:3})">相同作者</a></div>';
+	html += '<div>$desc</div>';
+	
+	html = html.replace(/\$id/, info.ID);
+	html = html.replace(/\$package/, info.PACKAGENAME);
+	html = html.replace(/\$time/, info.SOFT_PROMULGATE_TIME);
+	html = html.replace(/\$version/, info.SOFT_VERSION);
+	html = html.replace(/\$size/, info.SOFT_SIZE);
+	html = html.replace(/\$desc/, info.SOFT_DESCRIBE);
+	html = html.replace(/\$dev_name/, info.DEVELOPER);
+	html = html.replace(/\$download/, info.SOFT_DOWNLOAD_REGION);
+	var thumb = info.SOFT_SCREENSHOT_THUMBNAIL_URL;
+	html += '<div>';
+	var tpl = '<img src="$thumburl" width="75" height="125">';
+	for(var i in thumb) {
+		tmp = tpl.replace(/\$thumburl/, thumb[i]);
+		html += tmp;
+	}
+	html += '</div>';
+	return html;
+}
+
+function showNecessary(data)
+{
+	var list = data.DATA;
+	var p_tpl = '<tr><td>$name</td></tr>';
+	var c_tpl = '<tr><td><img src="$iconurl" width="25" height="25"><a href="javascript:request({KEY:\'SOFT_DETAIL\', ID:$id})">$softname</a></td></tr>';
+	var tmp = '';
+	var html = '<table>';
+	for(var i in list) {
+		html += p_tpl.replace(/\$name/, list[i]['PARENT_GROUP']);
+		for(var j in list[i]['CHILD_GROUP']){
+			tmp = c_tpl.replace(/\$id/, list[i]['CHILD_GROUP'][j][0]);
+			tmp = tmp.replace(/\$iconurl/, list[i]['CHILD_GROUP'][j][1]);
+			tmp = tmp.replace(/\$softname/, list[i]['CHILD_GROUP'][j][2]);
+			html += tmp;
+		}
+	}
+	html += '</table>';
+	return html;
+}
+
+function showExtentAd(data)
+{
+	var list = data.DATA;
+	var p_tpl = '<tr style="background:#ccc"><td>区间 $extent_id</td></tr>';
+	var c_tpl = '<tr><td><img src="$iconurl" width="25" height="25"><a href="javascript:request({KEY:\'SOFT_DETAIL\', ID:$id})">$softname</a></td></tr>';
+	var tmp = '';
+	var html = '<table>';
+	for(var i in list) {
+		html += p_tpl.replace(/\$extent_id/, list[i]['ID']);
+		for(var j in list[i]['DATA']){
+			tmp = c_tpl.replace(/\$id/, list[i]['DATA'][j][0]);
+			tmp = tmp.replace(/\$iconurl/, list[i]['DATA'][j][1]);
+			tmp = tmp.replace(/\$softname/, list[i]['DATA'][j][2]);
+			html += tmp;
+		}
+	}
+	html += '</table>';
+	return html;
+}
+
+function showNewCategory(data)
+{
+	var list = data.DATA;
+	var p_tpl = '<tr><td>$name</td></tr>';
+	var c_tpl = '<tr><td><img src="$iconurl" width="25" height="25"><a href="javascript:request({KEY:\'SOFT_CATEGORY_ALL_LIST\', ID:$id, LIST_INDEX_START:0,LIST_INDEX_SIZE:20,ORDER:0})">$category_name</a> $app_name</td></tr>';
+	var tmp = '';
+	var html = '<table>';
+	for(var i in list) {
+		html += p_tpl.replace(/\$name/, list[i]['PARENT_CATEGORY_GROUP']);
+		for(var j in list[i]['CHILD_CATEGORY_GROUP']){
+			tmp = c_tpl.replace(/\$id/, list[i]['CHILD_CATEGORY_GROUP'][j][0]);
+			tmp = tmp.replace(/\$iconurl/, list[i]['CHILD_CATEGORY_GROUP'][j][3]);
+			tmp = tmp.replace(/\$category_name/, list[i]['CHILD_CATEGORY_GROUP'][j][1]);
+			tmp = tmp.replace(/\$app_name/, list[i]['CHILD_CATEGORY_GROUP'][j][2]);
+			html += tmp;
+		}
+	}
+	html += '</table>';
+	return html;
+}
+
+function showDownload(data)
+{
+	var info = data;
+	var html = '<table><tr><td>$url</td></tr></table>';
+	html = html.replace(/\$url/, info.INTEGRATE_URL);
+	return html;
+}
+
+function json2str(o) {
+	var arr = [];
+	var fmt = function(s) {
+		if (typeof s == 'object' && s != null) return json2str(s);
+		return /^(string|number)$/.test(typeof s) ? "'" + s + "'" : s;
+	}
+	for (var i in o) arr.push("'" + i + "':" + fmt(o[i]));
+	return '{' + arr.join(',') + '}';
+}
+
+</script>
+</head>
+<body>
+<div class='head'>
+	<table cellpadding="0" cellspacing="0">
+		<tr>
+			<td>服务器IP：<select name="ip" id="ip">
+					<option value="118.26.224.3">兆维3</option>
+					<option value="118.26.224.24">兆维24</option>
+					<option value="118.26.224.12">兆维12</option>
+					<option value="118.26.224.13">兆维13</option>
+					<option value="118.26.224.17">兆维17</option>
+					<option value="118.26.203.18">兆维ha</option>
+					<option value="118.26.235.12">看丹桥12</option>
+					<option value="118.26.235.5">看丹桥5</option>
+					<option value="118.26.235.7">看丹桥7</option>
+					<option value="118.26.235.24">游戏客户端</option>
+					<option value="118.26.203.21">新过滤1</option>
+					<option value="118.26.203.20">新过滤2</option>
+					<option value="118.26.203.23">测试</option>
+					<option value="118.26.235.27">看丹备-27</option>
+					<option value="118.26.235.22">看丹备-22</option>
+					<option value="118.26.235.8">看丹备-8</option>
+					<option value="118.26.235.25">看丹备-25</option>
+					<option value="118.26.235.15">看丹备-15</option>
+					<option value="118.26.235.26">看丹备-26</option>
+				</select></td>
+			<td>
+				系统固件：
+				<select name="firmware" id="firmware">
+					<option value="7">2.1</option>
+					<option value="8">2.2.x</option>
+					<option value="9">2.3 - 2.3.2</option>
+					<option value="10">2.3.3 - 2.3.7</option>
+					<option value="11">3.0</option>
+					<option value="12">3.1</option>
+					<option value="13">3.2.x</option>
+					<option value="14">4.0.1 - 4.0.2</option>
+					<option value="15">4.0.3 - 4.0.4</option>
+					<option value="16">4.1.x</option>
+				</select>
+			</td>
+			<td>
+				abi：
+				<select name="abi" id="abi">
+					<option>3</option>
+					<option>1</option>
+					<option>2</option>
+					<option>8</option>
+				</select>
+				产品类型:
+				<select name="pid" id="pid">
+					<option value="1">安智市场</option>
+					<option value="5">游戏客户端</option>
+				</select>
+			</td>
+			<td>
+				运营商：
+				<select name="imsi" id="imsi">
+					<option value="4600100000000">联通</option>
+					<option value="4600200000000">移动</option>
+					<option value="4600300000000">电信</option>
+				</select>
+			</td>
+			<td>
+				渠道：
+				<select name="chl" id="chl">
+					<option value='19cb289fba199fc07b95dc27d770c9b1a38838b2'>debug</option>
+					<option value='e66a30af64a0eec9d8203b9988a72f642189d988'> 天语v8</option>
+					<option value='a625c8feb0f1f7a0e4e11409f2d53fcc2dc50f51'> tcl s806</option>
+					<option value='1827e13c098e9ec5e53d6fe0424689344e40a36e'>samsung I659</option>
+					<option value='92278a6ab9c387af5a70425083503f21bd3b92d2'>TCL_A506</option>
+					<option value='18ef01a0d6dd1c7372dafb35dceef3ff5e8a7a82'>acer c8</option>
+					<option value='c8d1ca3f51e2e268e5d87d27644bc9c104f2b5d0'>快易典</option>
+					<option value='76e48fb211552611bbbd30ad50ae64377d9df8de'>acer tv</option>
+					<option value='0e83bac507b46386491b2dd031219b67cfb39bf5'> acer C8N Acer Zone</option>
+					<option value='ad0690adad4a71574d4494070db745de54de8128'>ACER C10</option>
+					<option value='21e287178b7acfebfbc41c9fc97970cc578e8ebd'>tcl hvga</option>
+					<option value='754ec454d0c66616c21fbb7bfa4e5c1c8aa7c7c2'>百度全系列</option>
+					<option value='843340a44196f2be00fad8575603232f6d79ed30'>讯歌</option>
+					<option value='31a9d38781bfc4f0c7f7db033dc77260e61f764b'>联想</option>
+					<option value='f256c9efeae119147e81b252ca1b39aba327daed'>飞利浦w732</option>
+					<option value='4582cb980778339876c8f4ee3eb4a537666f52cf'>优美</option>
+					<option value='fa6e4709f6cf704cf2e284ed8fcf8ace6eb70dae'>锐合x3</option>
+					<option value='ba8db1023ad9eee2df8b14c4e15a675633fc7195'>小辣椒</option>
+					<option value='393eb1b6f4d12c40042e2b0408993b55ea5d5799'>yuhong_rom</option>
+					<option value='1bea99ce80c3b42cee8767349ea763c47e44262'>宇龙酷派5832</option>
+					<option value='ed78157f946d80d8cabdae2da7fabb232dbaa7ac'>宇龙酷派7728</option>
+					<option value='d0e0d6eabae3f141b7f448df3f9f02928dd47cbb'>宇龙酷派7019</option>
+					<option value='6d82e6e32e45bed3facc937a6278c3edb2f52fe0'>宇龙酷派T卡</option>
+					<option value='39094a7618a9642942b699264aa34134a634e0b6'>宇龙酷派D530</option>
+					<option value='6f72f26003709508b2e0cc1e369d8b9f6eeecb1f'>宇龙酷派D5800(电信校园)</option>
+					<option value='5b2c3d38b72a0963469d9491475715b4696c4c58'>宇龙酷派E239(电信校园)</option>
+					<option value='565fe0bd091123ba559760e94f5c90097cc22ffe'>宇龙酷派 N930_2.2</option>
+					<option value='072f707c2725ea0b4ecb780a03a76c8e31562849'>宇龙酷派</option>
+					<option value='1eb231ac5c073ba76a2d0ba6df5d634c9750449c'>360手机助手</option>
+					<option value='79d92747f7d9758b4f05c21bab8ec173166792ac'>QQ浏览器</option>
+					<option value='db1d13343fcb011f62e5f392b0feef124e008419'>台电定制</option>
+					<option value='053f8ffca4bd46c8b9fa013d8ce45dec03467b39'>天语</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				机型：
+				<select name="device" id="device">
+					<option value='SCH-i559'>SCH-i559</option>
+					<option value='C8500'> C8500</option>
+					<option value='HTC G3 Hero'> HTC G3 Hero</option>
+					<option value='XT800'>XT800</option>
+					<option value='U8800'>U8800</option>
+					<option value='SCH-I829'>SCH-I829</option>
+				</select>
+			</td>
+			<td>
+				市场版本：
+				<select name="version" id="version">
+					<option value='4200'>V4.2</option>
+					<option value='4100'>V4.1</option>
+					<option value='4002'>V4.0</option>
+					<option value='3400'>V3.4</option>
+					<option value='3300'>V3.3</option>
+					<option value='3200'>V3.2</option>
+					<option value='3003'>3.1</option>
+					<option value='96'>2.1.5</option>
+				</select>
+			</td>
+			<td>IMEI：<input type="text" name="imei" id="imei" value="anzhitest123456" disabled /></td>
+			<td>用户名:<input type="text" name="username" id="username" value="GOAPKGFUSER_@#!" /></td>
+			<td>密码:<input type="password" name="password" id="password" value="123456" /></td>
+		</tr>
+		<tr>
+			<td><input type="button" value="登陆" onclick="login()"/><input type="button" onclick="do_refresh()" value="刷新"/>
+			<input type="button" onclick="do_pre()" value="后退"/>
+			<input type="button" onclick="do_next()" value="前进"/></td>
+			<td>DEBUG<input type="radio" name="debug" value="0"/>否<input type="radio" name="debug" value="1"/>是</td>
+			<td><input name="keyword" id="keyword" style="margin:0 5px;"/><input type="button" onclick="request({KEY:'SEARCH_FUZZY_QUERY', SEARCH_QUERY:$('#keyword').val(), LIST_INDEX_START:0,LIST_INDEX_SIZE:20,QUERY_CONDITION:1234})" value="搜索"/></td>
+			<td><img src="/Public/images/loadingAnimation.gif" id="loading" style="display:none"/></td>
+			<td id="_msg" style="color:red"></td>
+		</tr>
+	</table>
+</div>
+<div id="main">
+	<div class='left' id="left">
+		<div style="width:100%">
+			<ul class="tab" id="menu">
+				<li><a href="javascript:request({KEY:'GET_RECOMMEND_NEW'})">轮播图</a></li>
+				<li><a href="javascript:request({KEY:'HOME_FEATURES',LIST_INDEX_START:0,LIST_INDEX_SIZE:20})">推荐</a></li>
+				<li><a href="javascript:request({KEY:'HOME_EXTENT_AD'})">推荐区间</a></li>
+				<li><a href="javascript:request({KEY:'HOME_NEW', LIST_INDEX_START:0,LIST_INDEX_SIZE:20})">最新</a></li>
+				<li><a href="javascript:request({KEY:'HOME_HOT', LIST_INDEX_START:0,LIST_INDEX_SIZE:20})">最热</a></li>
+				<li><a href="javascript:request({KEY:'NECESSARYSOFT', LIST_INDEX_START:0,LIST_INDEX_SIZE:20})">必备</a></li>
+				<li><a href="javascript:request({KEY:'SOFT_SUBJECT', LIST_INDEX_START:0,LIST_INDEX_SIZE:20})">专题</a></li>
+				<li><a href="javascript:request({KEY:'SOFT_SUB_CATEGORY', ID:2, LIST_INDEX_START:0,LIST_INDEX_SIZE:20})">游戏</a></li>
+				<li><a href="javascript:request({KEY:'SOFT_SUB_CATEGORY', ID:1, LIST_INDEX_START:0,LIST_INDEX_SIZE:20})">应用</a></li>
+				<li><a href="javascript:request({KEY:'TOP_ALL_CATEGORY'})">排行</a></li>
+				<li><a href="javascript:request({KEY:'GET_ALL_PREFERENCES', DATA:[]})">我的收藏</a></li>
+			</ul>
+			<div class="clear"></div>
+			<ul class="tab" id="menu">
+				<li><a href="javascript:request({KEY:'GET_RECOMMEND'})">轮播图2.x</a></li>
+				<li><a href="javascript:request({KEY:'TCL_GET_RECOMMEND_NEW'})">TCL/讯歌轮播图</a></li>
+				<li><a href="javascript:request({KEY:'TCL_HOME_FEATURES',LIST_INDEX_START:0,LIST_INDEX_SIZE:20})">TCL推荐</a></li>
+				<li><a href="javascript:request({KEY:'XUNGE_HOME_FEATURES',LIST_INDEX_START:0,LIST_INDEX_SIZE:20})">讯歌推荐</a></li>
+				<li><a href="javascript:request({KEY:'SOFT_CATEGORY_LIST', TYPE:0})">4.0应用</a></li>
+				<li><a href="javascript:request({KEY:'SOFT_CATEGORY_LIST', TYPE:1})">4.0游戏</a></li>
+				<li><a href="javascript:request({KEY:'SOFT_CATEGORY_ALL_LIST',ID:1,LIST_INDEX_START:0,LIST_INDEX_SIZE:20,ORDER:0})">应用列表</a></li>
+				<li><a href="javascript:request({KEY:'SOFT_CATEGORY_ALL_LIST',ID:2,LIST_INDEX_START:0,LIST_INDEX_SIZE:20,ORDER:0})">游戏列表</a></li>
+			</ul>
+			<div class="clear"></div>		
+		</div>
+		<div id="main_div"></div>
+		<div id="suggest_div"></div>
+	</div>
+	<div class='right' id="output"></div>
+</div>
+
+</body>
+</html>

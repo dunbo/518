@@ -1,0 +1,173 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+.is_show{ display:none;}
+</style>
+
+<script>
+var brush_config = "{$list.brush_config}";
+$(function(){
+	show_brush(brush_config);
+});
+function show_brush(val)
+{
+	if(val==1)
+	{
+		$(".is_show").css('display','table-row');
+	}
+	else if(val==2)
+	{
+		$(".is_show").css('display','none');
+	}
+}
+function check_post()
+{
+	var brush_config = $("input[name='brush_config']:checked").val();
+	if(brush_config==1)
+	{
+		var str='';
+		$("input[name='brush_page[]']:checked").each(function(){
+			str+=$(this).val();
+		})
+		if(str=='')
+		{
+			alert("请选择刷量页面！");					
+			return false;	
+		}
+		var brush_percent = $("input[name='brush_percent']").val();
+		var daily_brush_max = $("input[name='daily_brush_max']").val();
+		var r=/^[1-9][0-9]*$/;
+		if(brush_percent)
+		{
+			if(r.test(brush_percent) == false)			
+			{			
+				alert("指定比例请填写正整数");					
+				return false;		
+			}
+			else
+			{
+				if(brush_percent>100)
+				{
+					alert("指定比例不能超过100%");					
+					return false;
+				}
+			}
+		}
+		else
+		{
+			alert("请填写指定比例");					
+			return false;
+		}
+		if(daily_brush_max)
+		{
+			if(r.test(daily_brush_max) == false)			
+			{			
+				alert("每日刷量限额请填写正整数");					
+				return false;		
+			}
+		}
+		else
+		{
+			alert("请填写每日刷量限额");					
+			return false;
+		}
+	}
+}
+</script>
+
+<form  method="POST" action="__URL__/save_site"  onsubmit="return check_post()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+
+	<tr class="sub_tr">
+		<td>合作站点名称（安智）</td>
+		<td>
+			<input type="text" id='anzhi_name' name='anzhi_name'  style='height:25px' value="{$list.anzhi_name}"/>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>下载弹窗提示文案</td>
+		<td>
+			<textarea placeholder="2~40字符" id="down_tip" name="down_tip">{$list.down_tip}</textarea>
+		</td>
+	</tr>
+	<tr class="sub_tr"  >
+		<td>合作站点客户端支持调起最低版本</td>
+		<td>
+			<input placeholder="version code" type="text" id='minimum_version' name='minimum_version'  style='height:25px' value="{$list.minimum_version}"/>
+		</td>
+	</tr>	
+	<tr class="sub_tr"  >
+		<td>
+			合作站点wap内容详情页
+		</td>
+		<td>
+			<input type="radio"  name="is_chain_down" value="1" <if condition="$list.is_chain_down eq '1'"> checked = true</if> />支持外链下载
+			<br/>
+			<input type="radio"  name="is_chain_down" value="2" <if condition="$list.is_chain_down eq '2'"> checked = true </if> />屏蔽外链下载（且展示下载推广banner）
+		</td>
+	</tr>	
+	<tr class="sub_tr">
+		<td>
+			展示频率
+		</td>
+		<td>
+			<select name="show_frequency">
+				<option value="1" <if condition="$list.show_frequency eq '1'"> selected</if>>只展示1次</option>
+				<option value="2" <if condition="$list.show_frequency eq '2'"> selected</if>>展示2次</option>
+				<option value="3" <if condition="$list.show_frequency eq '3'"> selected</if>>展示3次</option>
+			</select>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>
+			刷量配置
+		</td>
+		<td>
+			<input type="radio"  name="brush_config" value="1" <if condition="$list.brush_config eq '1'"> checked = true</if>  onclick="show_brush(this.value)"/>开启
+			<input type="radio"  name="brush_config" value="2" <if condition="$list.brush_config eq '2'"> checked = true</if> onclick="show_brush(this.value)" />禁用
+		</td>
+	</tr>	
+	<tr class="sub_tr is_show">
+		<td>
+			刷量页面
+		</td>
+		<td>
+			<input type="checkbox"  name="brush_page[]" value="2" <?php if($list['brush_page']&2) { ?> checked=true <?php } ?> />首页
+			<input type="checkbox"  name="brush_page[]" value="4" <?php if($list['brush_page']&4) { ?> checked=true <?php } ?> />应用
+			<input type="checkbox"  name="brush_page[]" value="8" <?php if($list['brush_page']&8) { ?> checked=true <?php } ?> />游戏
+			<input type="checkbox"  name="brush_page[]" value="16" <?php if($list['brush_page']&16) { ?> checked=true <?php } ?> />管理
+			<input type="checkbox"  name="brush_page[]" value="32" <?php if($list['brush_page']&32) { ?> checked=true <?php } ?> />搜索
+		</td>
+	</tr>	
+	<tr class="sub_tr is_show">
+		<td>
+			刷量比例配置
+		</td>
+		<td>
+			<input type="text"  name="brush_percent" value="{$list.brush_percent}" placeholder="整数" />%<br/>
+			<span style="color:gray;">用于配置市场用户中，多少用户会刷量</span>
+		</td>
+	</tr>
+	<tr class="sub_tr is_show">
+		<td>
+			每日刷量限额
+		</td>
+		<td>
+			<input type="text"  name="daily_brush_max" value="{$list.daily_brush_max}" placeholder="整数" /><br/>
+			<span style="color:gray;">用于配置市场用户中，每日最多刷量用户</span>
+		</td>
+	</tr>		
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="id" value="{$list.id}"/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/>
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

@@ -1,0 +1,200 @@
+<div id="x86_div" style="padding:10px; width:250px; height:150px;   display:none;" >
+	<table>
+	<?php if($form_type == "softupgrade"){ ?>
+	<tr><td align='center'><font color='red'>是否通过审核？</font></td></tr>
+	<?php } ?>
+	<tr><td >&nbsp;</td></tr>	
+	<tr>
+		<td>X86机型适配：
+			<input type="radio" name='x86' value='' checked='checked'/>无
+			<input type="radio" id='x86_1' name='x86' value='1' onclick='$("#subx86").focus();'/>支持
+			<input type="radio" id='x86_2' name='x86' value='2' onclick='$("#subx86").focus();'/>不支持
+		</td>
+	</tr>
+	<tr><td >&nbsp;</td></tr>	
+	<tr><td id='sub_x86' align='center'></td></tr>
+	</table>
+</div>
+<div id="bj_shield" class="zxx_test_list" style="padding:0px; width:250px; height:150px;   display:none;">
+	<table>
+		<tr><td align='left' colspan="2"><h2 style="background-color:#ccc;width:250px;">屏蔽北京市</h2></td></tr>
+		<tr><td align='left' colspan="2">设置屏蔽状态</td></tr>
+		<tr><td align='left'><input type="radio" name='bj_shield_type' value='0' style="text-align:left;" />正常</td><td align='left'><input type="radio" name='bj_shield_type' value='1' style="text-align:left;"/>屏蔽</td></tr>
+		<tr><td align='left' colspan="2"><span style='color:red'>选择屏蔽并保存后，列表中IP地址及GPS位置为北京市的软件状态均更新为屏蔽</span></td></tr>
+		<tr><td align='left'><button  onclick="bj_shield_do();">提交</button></td><td align='left'><button  onclick="zxxbox_hide();">取消</button></tr>
+	</table>
+	<input type="hidden" value="" name="bj_shield_tmp_softids" id='bj_shield_tmp_softids'>
+	<input type="hidden" value="" name="bj_shield_shelves" id='bj_shield_shelves'>
+</div>
+<script>
+//监控浏览器关闭事件
+function onbeforeunload_handler() {
+	var warning = "确认离开此页面-有可能会导致数据丢失?";
+	return warning;
+}
+function pass_old(id){
+	if(confirm('您确定要执行该操作吗？')) {
+		pass(id,'old'); 
+	}else{
+		remove_color(id);
+	}
+}
+function pass_x86(id,record_type,abi_support,form_type){
+	pass_old(id);
+/*******
+	open_color(id);
+	if(record_type == 3 && form_type == 'softupgrade' ){
+		$.ajax({
+			url: '__URL__/x86_check',
+			data: '',
+			type: 'post',
+			dataType: 'json',
+			success: function(ret) {
+				if(ret['status'] == 0){
+					pass_old(id);
+				}else{
+					$("#x86_div").zxxbox();
+					$('#tmp_id').val(id);
+					$('#sub_x86').html("<button id='subx86' onclick=\"pass('"+id+"');\">确定</button>&nbsp;&nbsp;&nbsp;&nbsp;<button onclick=\"zxxbox_hide('"+id+"');\">取消</button>");
+					//移交点
+					$("#subx86").focus();
+				}
+			}
+		});
+	}else{
+		pass_old(id);
+	}
+	*******/
+}
+
+//通过
+function pass(id,old) {
+	if(!id) {
+		alert('请选择要通过的对象！');
+		return false;
+	}
+	var x86 = '';
+	$("[name='x86']").each(function(){
+		if($(this).is(':checked')) {
+			x86 = $(this).val();
+		}
+	});
+	var sign_str = '';
+	if(id.indexOf(",") == -1){
+		var sign = $("#sign_"+id).attr('sign');
+		if(sign ==  1){
+			if(confirm('是否将当前apk的签名更新为该软件的官方签名？')){
+				sign_str = '&sign=1';
+			}
+		}
+	}	
+	var buid = '#tr'+id+' td button';
+	$(buid).attr({disabled:'disabled', name:'disabled'});
+	//监控浏览器关闭事件
+	//window.onbeforeunload = onbeforeunload_handler;
+	$.ajax({
+		url: '__URL__/'+pass_url+'?id='+id+'&x86='+x86+sign_str,
+		data: '',
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(pass_url == 'updatesoft_pass' && old != 'old'){
+				//if(x86 != ''){
+					$.zxxbox.hide();
+				//}
+			}
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				location.reload();//加载页面
+				return false;
+			} else if(ret['code']==1 || ret['code']==2) {	//成功
+				if(ret['code']==2){
+					alert(ret['error']);
+				}
+				//变灰不可点击处理
+				gray_processing(ret['msg']);
+			}
+		}
+	});
+}
+//批量通过
+function batch_pass() {
+	id_str = Selected_check();
+	if(id_str){
+		pass_x86(id_str);
+	}
+}
+//上架列表x86适中配
+function soft_x86_adaptation(){
+	id_str = Selected_check();
+	//alert(id_str)
+	if(id_str){
+		$("#x86_div").zxxbox();
+		$('#sub_x86').html("<button onclick=\"x86_adaptation('"+id_str+"');\">确定</button>&nbsp;&nbsp;&nbsp;&nbsp;<button onclick=\"zxxbox_hide();\">取消</button>");
+	}
+}
+
+function x86_adaptation(id){
+	var x86 = '';
+	$("[name='x86']").each(function(){
+		if($(this).is(':checked')) {
+			x86 = $(this).val();
+		}
+	});
+	if(!x86){
+		alert('请选择适配');
+		return false;
+	}
+	$.zxxbox.hide();
+	$.ajax({
+		url: '/index.php/Dev/Soft/x86_adaptation?softid='+id+'&x86='+x86,
+		data: '',
+		type: 'get',
+		dataType: 'json',
+		success: function(ret) {
+			alert(ret['msg']);
+			location.reload();//加载页面
+		}
+	});
+}
+//隐藏北京
+function bj_shield_do(){
+	var id_str = $('#bj_shield_tmp_softids').val();
+	$("[name='bj_shield_type']").each(function(){
+		if($(this).is(':checked')) {
+			only_type = $(this).val();
+		}
+	});
+	var shelves_type=$('#bj_shield_shelves').val();
+	$.ajax({
+		url: '/index.php/Dev/Soft/update_bj_shield/tmp_softids/'+id_str+'/only_type/'+only_type+'/shelves_type/'+shelves_type,
+		data: '',
+		type: 'get',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				//location.reload();//加载页面
+				return false;
+			} else if(ret['code']==1) {	//成功
+				$.zxxbox.hide();
+				//变灰不可点击处理
+				gray_processing(ret['msg']);
+			}
+		}
+	});
+}
+
+function bj_shield_arr(){
+	id_str = Selected_check();
+	var shelves=arguments[0]?arguments[0]:0;
+	if(id_str){
+		$('#bj_shield_tmp_softids').val(id_str);
+		$("#bj_shield").zxxbox();  
+
+		$('#bj_shield_shelves').val(shelves);
+
+		open_color(id_str);
+	}
+}
+</script>

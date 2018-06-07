@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="/Public/css/style.css" />
+<script type="text/javascript" src="/Public/js/Base.js"></script>
+<script type="text/javascript" src="/Public/js/Form/CheckForm.js"></script>
+<script type="text/javascript" src="/Public/js/common.js"></script>
+<script type="text/javascript" src="/Public/js/Util/ImageLoader.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/default.js'></script>
+<script type="text/javascript" src='/Public/js/rcalendar.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+</head>
+<body>
+<script>
+function  add(){
+	window.location.href='__URL__/feature_tab_add'; 
+}
+</script>
+<div class="main" >
+<div class="content">
+<center>
+<table width="80%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <form method="get" action="__URL__/feature_tab_list" name="feature_tab_form">
+  <tr>
+    <td colspan="4" align="center"><h2>选项卡配置列表</h2></td>
+    <td align="center">
+	    选项卡状态
+		<select name="status" onchange="feature_tab_form.submit()">
+			<option value="1" <if condition="$status eq 1"> selected="selected" </if>>启用</option>
+			<option value="0" <if condition="$status eq 0"> selected="selected" </if>>停用</option>
+		</select>
+	</td>
+	<td align="center">
+	    <input type="button" name="button" value="添加选项卡" onclick="add()">
+	</td>
+  </tr>
+  </form>
+ <tr><td colspan="6"> 根据配置 只需添加 {$sum} 个专题</td></tr>
+  <tr>
+	<td width="20%" align="center">选项卡名称</td>
+	<td width="20%" align="center">选项卡描述</td>
+	<td width="20%" align="center">状态</td>
+	<td width="20%" align="center">排序</td>
+	<td width="20%" align="center">更新时间</td>
+	<td width="20%" align="center">操作</td>
+  </tr>
+  <?php if(isset($tab_list)):?>
+  <volist name="tab_list" id="vo">
+  <tr>
+	<td width="20%" align="center">{$vo.tab_name}</td>
+	<td width="20%" align="center">{$vo.tab_desc}</td>
+	<td width="20%" align="center">
+	    <if condition="$vo.status eq 1">启用</if>
+		<if condition="$vo.status eq 0">停用</if>
+	</td>
+	<td width="20%" align="center">
+		<if condition="$vo.status eq 1">
+		<select name="rank" rel="{$vo.tab_id}" class="rank_select">
+		<?php
+		for($i = 1;$i <= $count;$i++){
+			echo "<option value=\"".$i."\"";
+			if($vo['rank'] == $i) echo " selected=\"selected\" ";
+			echo ">".$i."</option>";
+		}
+		?>
+		</select>
+		</if>
+		<if condition="$vo.status eq 0">
+		{$vo.rank}
+		</if>
+	</td>
+	<td width="20%" align="center">{$vo.update_time|date='Y-m-d H:i:s',###|default='&nbsp;'}</td>
+	<td width="20%" align="center">
+	    <if condition="$vo.status eq 0">
+		    <if condition="$count egt $sum">
+			    <a href='__URL__/feature_tab_del/tab_id/{$vo.tab_id}/status/1' onclick="javascript: if( confirm('选项卡数量大于预定数量,确定要执行该操作吗?')){ return true } else { return false;}" >启用</a>
+			</if>
+			<if condition="$count lt $sum">
+			    <a href='__URL__/feature_tab_del/tab_id/{$vo.tab_id}/status/1' onclick="javascript: if( confirm('确定要执行该操作吗?')){ return true } else { return false;}" >启用</a>
+			</if>
+		</if>
+		<if condition="$vo.status eq 1">
+		    <if condition="$count egt $sum">
+				<a href='__URL__/feature_tab_del/tab_id/{$vo.tab_id}/status/0' onclick="javascript: if( confirm('选项卡数量小于预定数量,确定要执行该操作吗?')){ return true } else { return false;}" >停用</a>
+			</if>
+			<if condition="$count lt $sum">
+				<a href='__URL__/feature_tab_del/tab_id/{$vo.tab_id}/status/0' onclick="javascript: if( confirm('确定要执行该操作吗?')){ return true } else { return false;}" >停用</a>
+			</if>
+			<a href="__URL__/feature_tab_edit/tab_id/{$vo.tab_id}">编辑</a>
+		</if>
+		
+	</td>
+  </tr>
+  </volist>
+  <?php else:?>
+  <tr>
+    <td align="center" colspan="6">暂无记录</td>
+  </tr>
+  <?php endif; ?>
+</table>
+{$page}
+</center>
+</div>
+</div>
+<script>
+$('.rank_select').change(function(){
+	var url   = "__URL__/feature_tab_edit_rank/tab_id/"+$(this).attr('rel')+"/rank/"+$(this).val()+"/p/{$p}/lr/{$lr}";
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+			var url     = eval("("+response+")");
+			var jumpUrl = "__URL__/feature_tab_list/p/"+url.p+"/lr/"+url.lr;
+			//window.location.reload();
+			window.location.href = jumpUrl;
+		}
+	});
+});
+</script>
+</body>
+</html>
+

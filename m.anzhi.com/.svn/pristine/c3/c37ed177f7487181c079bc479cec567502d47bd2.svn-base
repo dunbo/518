@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html style="width:100%; height:100%">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title><!--{$out.list.title}--></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/booking/css/common.css"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="../js/common.js?v1"></script>
+<script type="text/javascript" src="/js/anzhi-fd-min.js?v1"></script>
+
+<style type="text/css">
+<!--{if $out.list.lose_no_img}-->	
+#list > li:nth-of-type(1){background:url(<!--{$out.img_url}--><!--{$out.list.lose_no_img}-->) no-repeat; background-size:100% 100%; display:block}
+<!--{/if}-->
+<!--{if $out.list.lose_yes_img}-->	
+#list > li:nth-of-type(2){background:url(<!--{$out.img_url}--><!--{$out.list.lose_yes_img}-->) no-repeat; background-size:100% 100%}
+<!--{/if}-->
+<!--{if $out.list.last_lottery_img}-->	
+#list > li:nth-of-type(3){background:url(<!--{$out.img_url}--><!--{$out.list.last_lottery_img}-->) no-repeat; background-size:100% 100%}
+<!--{/if}-->
+<!--{if $out.list.share_weixin_pic}-->	
+#list > li:nth-of-type(4){background:url(<!--{$out.img_url}--><!--{$out.list.share_weixin_pic}-->) no-repeat; background-size:100% 100%}
+<!--{/if}-->
+<!--{if $out.list.ranking_no_pic1}-->	
+#list > li:nth-of-type(5){background:url(<!--{$out.img_url}--><!--{$out.list.ranking_no_pic1}-->) no-repeat; background-size:100% 100%}
+<!--{/if}-->
+<!--{if $out.list.prize_pic}-->	
+#list > li:nth-of-type(6){background:url(<!--{$out.img_url}--><!--{$out.list.prize_pic}-->) no-repeat; background-size:100% 100%}
+<!--{/if}-->
+
+.arrow{width:46px; height:38px; background:url(<!--{$out.img_url}--><!--{$out.list.nextpage}-->) no-repeat; background-size:100% 100%; position:absolute; left:50%; margin-left:-23px; bottom:25px; z-index:99999; animation:1s arrowMove infinite; -webkit-animation:1s arrowMove infinite; opacity:0}
+
+.music{width:50px; height:50px; background:url(<!--{$out.img_url}--><!--{$out.list.bg_img}-->) no-repeat; background-size:100% 100%; position:absolute; right:20px; top:20px; z-index:99999;}
+.pause{background:url(<!--{$out.img_url}--><!--{$out.list.soft_bg}-->) no-repeat; background-size:100% 100%;}
+
+<!--{if $out.list.share_switch eq 1}-->
+	.form1{width:280px;top:65%;margin-left:-123px}
+	.form_btn{display:block; width:240px; height:60px; margin-top:20px; border:none; background:url(<!--{$out.img_url}--><!--{$out.list.popup_bg_pic}-->) no-repeat; background-size:100% 100%; border-radius:2px; font-size:16px; color:#fff; line-height:61px; text-align:center}
+	.weixin_share{display:block; width:240px; height:60px; margin-top:20px; border:none; background:url(<!--{$out.img_url}--><!--{$out.list.unclick_lottery_pic}-->) no-repeat; background-size:100% 100%; border-radius:2px; font-size:16px; color:#fff; line-height:61px; text-align:center}
+<!--{else}-->
+	<!--{if $out.list.change_switch eq 1}-->	
+	.form_btn{display:block; width:302px; height:50px; margin-top:20px; border:none; background:<!--{$out.list.button_color}-->; border-radius:2px; font-size:16px; color:#fff; line-height:51px; text-align:center}
+	<!--{else}-->	
+	.form_btn{display:block; width:302px; height:50px; margin-top:20px; border:none; background:url(<!--{$out.img_url}--><!--{$out.list.button_pic}-->) no-repeat; background-size:100% 100%; border-radius:2px; font-size:16px; color:#fff; line-height:51px; text-align:center}
+	<!--{/if}-->
+<!--{/if}-->
+</style>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var ap_id = '<!--{$out.ap_id}-->';
+var debug_mode = false;
+var share_switch = <!--{$out.list.share_switch}-->;
+var version_code = <!--{$out.soft_version}-->;
+var anzhi_package = "cn.goapk.market";
+var is_weixin = is_weixin();
+var wx_share_config = <!--{$out.wx_share_config}-->;
+//分享
+var share_img = '<!--{$out.img_url}--><!--{$out.list.rule_pic}-->';  // 分享后展示的一张图片
+var share_url = '<!--{$out.share_url}-->'; // 点击分享后跳转的页面地址
+var share_desc = "<!--{$out.list.share_text}-->";  // 分享后的描述信息
+var share_title = '<!--{$out.list.title}-->';  // 分享后的标题
+
+var is_log = 0;
+$(document).on('touchmove',function(ev){
+	ev.preventDefault();
+})
+$(function(){
+	var $list = $('#list');
+	var $li = $list.find('li');
+	var viewHeight = $(window).height();
+	slideList();
+	musicShow();
+	//滑屏
+	function slideList(){
+		var downY = 0;
+		var step = 1/4;
+		var nowIndex = 0;
+		var nextorprevIndex = 0;
+		var bBtn = true;
+		if($li.length==1)//只上传第一张
+		{
+			$li.siblings().hide();
+			if(share_switch==1)
+			{
+				var str = '<form action="" class="form1">';
+				if(is_weixin)
+				{
+					str += '<a type="button" id="weixin_share"  class="weixin_share" onclick="share_others()"></a>';
+					str += '<a type="button" id="sub_but"  class="form_btn" onclick="down_anzhi()"></a>';
+				}
+				else
+				{
+					str += '<a type="button" id="sub_but" style="margin-top:100px;"  class="form_btn" onclick="down_anzhi()"></a>';
+				}
+				str += '</form>';
+			}
+			else
+			{
+				var str = '<form action="" class="form1">';
+				str += "<input type='tel'  name='mobile_num' id='mobile_num' value='' maxlength='11' class='inputtext' placeholder='<!--{$out.list.telephone_warning}-->' />";
+				str += '<font id="error" color="red" ></font>';
+				str += '<a type="button" id="sub_but"  class="form_btn" onclick="booking_do()">立即预约</a>';
+				str += '</form>';
+			}
+			
+			$li.html(str);//平级的下一个标签
+		}
+		else
+		{
+			$li.on('touchstart',function(ev){
+				if(!bBtn){return;}
+				bBtn = false;
+				var touch = ev.originalEvent.changedTouches[0];
+				downY = touch.pageY;
+				nowIndex = $(this).index();
+				$li.on('touchmove',function(ev){
+					var touch = ev.originalEvent.changedTouches[0];
+					$(this).siblings().hide();
+					if(touch.pageY < downY){
+						//向上
+						nextorprevIndex = nowIndex == $li.length-1 ? $li.length-1 : nowIndex + 1;
+						$li.eq(nextorprevIndex).css('transform','translate(0,'+(viewHeight + touch.pageY - downY)+'px)');
+						//到最后一页
+						if(nextorprevIndex==$li.length-1){
+							if(is_log == 0){
+								is_log = 1;
+								if(share_switch==1)
+								{
+									var str = '<form action="" class="form1">';
+									if(is_weixin)
+									{
+										str += '<a type="button" id="weixin_share"  class="weixin_share" onclick="share_others()"></a>';
+										str += '<a type="button" id="sub_but"  class="form_btn" onclick="down_anzhi()"></a>';
+									}
+									else
+									{
+										str += '<a type="button" id="sub_but" style="margin-top:100px;"  class="form_btn" onclick="down_anzhi()"></a>';
+									}
+									str += '</form>';
+								}
+								else
+								{
+									var str = '<form action="" class="form1">';
+									str += "<input type='tel'  name='mobile_num' id='mobile_num' value='' maxlength='11' class='inputtext' placeholder='<!--{$out.list.telephone_warning}-->' />";
+									str += '<font id="error" color="red" ></font>';
+									str += '<a type="button" id="sub_but"  class="form_btn" onclick="booking_do()">立即预约</a>';
+									str += '</form>';
+								}
+								
+								$(this).next().html(str);//平级的下一个标签
+								setTimeout(function(){
+									//最后一页日志
+									get_log();
+								},1000);
+							}
+						}
+					}
+					else if(touch.pageY > downY){
+						//向下
+						nextorprevIndex = nowIndex == 0 ? 0 : nowIndex - 1;
+						$li.eq(nextorprevIndex).css('transform','translate(0,'+(-viewHeight + touch.pageY - downY)+'px)');
+					}
+					else{
+						bBtn = true;
+					}
+					$li.eq(nextorprevIndex).show().addClass('zIndex');
+					$(this).css('transform','translate(0,'+(touch.pageY - downY)*step+'px)')
+				})
+				$li.on('touchend',function(ev){
+					var touch = ev.originalEvent.changedTouches[0];
+					
+					if(touch.pageY < downY){
+						//向上
+						$(this).css('transform','translate(0,'+(-viewHeight*step)+'px)');
+					}
+					else if(touch.pageY > downY){
+						//向下
+						$(this).css('transform','translate(0,'+(viewHeight*step)+'px)');
+					}
+					$(this).css('transition','.3s')
+					$li.eq(nextorprevIndex).css('transition','.3s')
+					$li.eq(nextorprevIndex).css('transform','translate(0,0px)');
+				})
+			})
+			$li.on('transitionEnd webkitTransitionEnd',function(ev){
+				if( $li.is(ev.target) ){
+					resetFn();
+					//滑屏后 nowIndex出场  nextorprevIndex入场
+					if(cjAnimate[nowIndex]){
+						cjAnimate[nowIndex].outAn();
+					}
+					if(cjAnimate[nextorprevIndex]){
+						cjAnimate[nextorprevIndex].inAn();
+					}
+				}
+			});
+			function resetFn(){
+				$li.css('transition','');
+				$li.eq(nextorprevIndex).removeClass('zIndex').siblings().hide();
+				bBtn = true;
+			}
+		}
+	}
+	//定义每屏的动画
+	var cjAnimate = [
+		{
+			inAn : function(){
+				var $liChild = $('.liChild').eq(0);
+				$liChild.css('opacity',1);
+				$liChild.css('transform','translate(0,0)')
+				$liChild.css('transition','1s');
+			},
+			outAn : function(){
+				var $liChild = $('.liChild').eq(0);
+				$liChild.css('opacity',0);
+				$liChild.css('transform','translate(0,-100px)')
+				$liChild.css('transition','');
+			}
+		},
+		{
+			inAn : function(){
+				var $liChild = $('.liChild').eq(1);
+				$liChild.css('opacity',1);
+				$liChild.css('transform','translate(0,0)')
+				$liChild.css('transition','1s');
+			},
+			outAn : function(){
+				var $liChild = $('.liChild').eq(1);
+				$liChild.css('opacity',0);
+				$liChild.css('transform','translate(0,-100px)')
+				$liChild.css('transition','');
+			}
+		},
+		{
+			inAn : function(){
+				var $liChild = $('.liChild').eq(2);
+				$liChild.css('opacity',1);
+				$liChild.css('transform','translate(0,0)')
+				$liChild.css('transition','1s');
+			},
+			outAn : function(){
+				var $liChild = $('.liChild').eq(2);
+				$liChild.css('opacity',0);
+				$liChild.css('transform','translate(0,-100px)')
+				$liChild.css('transition','');
+			}
+		},
+		{
+			inAn : function(){
+				var $liChild = $('.liChild').eq(3);
+				$liChild.css('opacity',1);
+				$liChild.css('transform','translate(0,0)')
+				$liChild.css('transition','1s');
+			},
+			outAn : function(){
+				var $liChild = $('.liChild').eq(3);
+				$liChild.css('opacity',0);
+				$liChild.css('transform','translate(0,-100px)')
+				$liChild.css('transition','');
+			}
+		},
+		{
+			inAn : function(){
+				var $liChild = $('.liChild').eq(4);
+				$liChild.css('opacity',1);
+				$liChild.css('transform','translate(0,0)')
+				$liChild.css('transition','1s');
+			},
+			outAn : function(){
+				var $liChild = $('.liChild').eq(4);
+				$liChild.css('opacity',0);
+				$liChild.css('transform','translate(0,-100px)')
+				$liChild.css('transition','');
+			}
+		},
+		{
+			inAn : function(){
+				var $liChild = $('.liChild').eq(5);
+				$liChild.css('opacity',1);
+				$liChild.css('transform','translate(0,0)')
+				$liChild.css('transition','1s');
+			},
+			outAn : function(){
+				var $liChild = $('.liChild').eq(5);
+				$liChild.css('opacity',0);
+				$liChild.css('transform','translate(0,-100px)')
+				$liChild.css('transition','');
+			}
+		}
+	];
+	if($li.length==1)
+	{
+	}
+	else
+	{
+		//进来的时候，让所有的动画都是出场状态
+		$.each(cjAnimate,function(i,obj){
+			obj.outAn();
+		});
+		//先让第一屏执行动画
+		setTimeout(function(){
+			cjAnimate[0].inAn();
+		},300)
+	}
+	//音乐
+	function musicShow(){
+		var $music = $('.music');
+		var $audio1 = $('#audio1');
+		 $audio1.get(0).play();
+		var onOff = true;
+		
+		$music.on('touchstart',function(){
+			if(onOff){
+				 //$(this).addClass('active');
+				 $(this).removeClass('pause');
+				 $audio1.get(0).play();
+			}
+			else{
+				//$(this).removeClass('active');
+				$(this).addClass('pause');
+				 $audio1.get(0).pause();
+			}
+			onOff = !onOff;
+		})
+		$music.trigger('touchstart');
+	}
+})
+function down_anzhi()
+{
+	if(is_weixin)
+	{
+		//弹出引导层
+		$('#div1').css({'position':'absolute','top':'0px','left':'0px','width':'100%','height':'100%','z-index':'10','background':'url(<!--{$out.img_url}--><!--{$out.list.lottery_pic}-->) no-repeat','background-size':'100% 100%','display':'block',/*'filter':'alpha(opacity=80)','-moz-opacity':'0.8','opacity':'0.8'*/});
+	}
+	else
+	{
+		//请求一个错误的type 来获取市场版本 回调version_callback
+		var id = <!--{$out.jump_id}-->;
+		var php_param = {type:'launch', id:id};
+		var js_param = {type:'launchx',id:id,callback:'version_callback'};
+		//记载下载日志
+		$.ajax({
+			url: '/lottery/booking.php',
+			data:"aid="+aid+"&sid="+sid+"&package="+anzhi_package+'&ap_id='+ap_id+'&type=1',
+			type:"post",
+			dataType: 'json',
+			success:function(data) {
+			},
+		});
+		Azfd.share_download(js_param, php_param);
+	}
+}
+function share_others()
+{
+	$('#div1').css({'position':'absolute','top':'0px','left':'0px','width':'100%','height':'100%','z-index':'10','background':'url(<!--{$out.img_url}--><!--{$out.list.update_warning_pic}-->) no-repeat','background-size':'100% 100%','display':'block',/*'filter':'alpha(opacity=80)','-moz-opacity':'0.8','opacity':'0.8'*/});
+}
+function close_div()
+{
+	$('#div1').css('display','none');
+}
+function version_callback()
+{
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		var id = <!--{$out.jump_id}-->;
+		var php_param = {type:'launch', id:id};
+		//版本低 下载高版本
+		if (version<version_code) {
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;
+		}
+		else
+		{
+			//跳转安智市场
+			var js_param = {type:'launch', id:id};
+			Azfd.share_download(js_param, php_param);
+		}
+	}
+}
+</script>
+</head>
+<body style="width:100%; height:100%">
+<div style="display:none">
+	<img src="<!--{$out.img_url}--><!--{$out.list.rule_pic}-->" /> 
+	<p><!--{$out.list.share_text}--></p>
+</div>
+<div class="main">
+	<ul id="list">
+		<!--{if $out.list.lost_no_desc || $out.list.lose_no_img }-->	
+		<li>
+		<!-------1----->
+			<div class="liChild">
+				<!--{if $out.list.lost_no_desc}-->
+				<img src="<!--{$out.img_url}--><!--{$out.list.lost_no_desc}-->"/>
+				<!--{/if}-->
+			</div>
+			<div class="arrow"></div>
+		</li>
+		<!--{/if}-->
+		<!--{if $out.list.lose_yes_desc || $out.list.lose_yes_img}-->	
+		<li>
+		<!-------2----->
+			<div class="liChild">
+				<!--{if $out.list.lose_yes_desc}-->
+				<img src="<!--{$out.img_url}--><!--{$out.list.lose_yes_desc}-->"/>
+				<!--{/if}-->			
+			</div>
+			<div class="arrow"></div>
+		</li>	
+		<!--{/if}-->
+		<!--{if $out.list.last_lottery_desc || $out.list.last_lottery_img}-->	
+		<li>
+		<!-------3----->
+			<div class="liChild">
+				<!--{if $out.list.last_lottery_desc}-->
+				<img src="<!--{$out.img_url}--><!--{$out.list.last_lottery_desc}-->"/>
+				<!--{/if}-->		
+			</div>
+			<div class="arrow"></div>
+		</li>
+		<!--{/if}-->	
+		<!--{if $out.list.share_other_pic || $out.list.share_weixin_pic}-->			
+		<li>
+		<!-------4----->
+			<div class="liChild">
+				<!--{if $out.list.share_other_pic}-->
+				<img src="<!--{$out.img_url}--><!--{$out.list.share_other_pic}-->"/>
+				<!--{/if}-->		
+			</div>
+			<div class="arrow"></div>
+		</li>	
+		<!--{/if}-->		
+		<!--{if $out.list.ranking_pic1 || $out.list.ranking_no_pic1}-->	
+		<li>
+		<!-------5----->
+			<div class="liChild">
+				<!--{if $out.list.ranking_pic1}-->
+				<img src="<!--{$out.img_url}--><!--{$out.list.ranking_pic1}-->"/>
+				<!--{/if}-->		
+			</div>
+			<div class="arrow"></div>
+		</li>
+		<!--{/if}-->		
+		<!--{if $out.list.prize_bg_pic || $out.list.prize_pic}-->	
+		<li>
+		<!-------6----->
+			<div class="liChild">
+				<!--{if $out.list.prize_bg_pic}-->
+				<img src="<!--{$out.img_url}--><!--{$out.list.prize_bg_pic}-->"/>
+				<!--{/if}-->		
+			</div>
+			<div class="arrow"></div>
+		</li>
+		<!--{/if}-->
+	</ul>
+	<div class="music">
+		<audio id="audio1" src="<!--{$out.img_url}--><!--{$out.list.bg_color}-->" preload="auto" autoplay="true"></audio>
+	</div>
+</div>
+<div id="div1" style="display:none;" onclick="close_div()"></div>
+</body>
+</html>
+<script>
+//验证手机号码   验证规则：11位数字，以13|14开头。	
+function  checkMobile() {
+	var str = $('#mobile_num').val();
+	if(!str){
+		$("#error").html("请输入手机号");
+		return false;	
+	}
+	if(str.length == 11){
+		var  re = /^(13|14|15|17|18)\d{9}$/
+		if (!re.test(str)){
+			$("#error").html("请输入正确手机号");
+			$('#sub_but').attr('onclick','');
+			return false;
+		}else{
+			$("#error").html("");
+			$('#sub_but').attr('onclick','booking_do();');
+		}
+	}else{
+		$("#error").html("请输入正确手机号");
+		$('#sub_but').attr('onclick','');
+	}
+	return true;
+}
+$('#mobile_num').bind('input keyup', function(e){
+	//checkMobile();
+});
+function booking_do(){
+	$("#error").html("");
+	var mobile_phone = $('#mobile_num').val();
+	if(!mobile_phone){
+		$("#error").html("请输入手机号");
+		return false;	
+	}
+	if(mobile_phone.length == 11){
+		var  re = /^(13|14|15|17|18)\d{9}$/
+		if (!re.test(mobile_phone)){
+			$("#error").html("请输入正确手机号");
+			return false;
+		}
+	}else{
+		$("#error").html("请输入正确手机号");
+		return false;
+	}
+	$.ajax({
+		url: '/lottery/booking.php',
+		data:"aid="+aid+"&sid="+sid+"&mobile_phone="+mobile_phone+'&ap_id='+ap_id,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if(data.code == 1){
+				//alert('预约成功');
+				$("#sub_but").html("已预约");
+				$('#sub_but').attr('onclick','');
+			}else if(data.code == 2){
+				location.href=data.url;
+				return false;
+			}
+		},
+	});
+}
+function get_log(){
+	$.ajax({
+		url: '/lottery/booking.php',
+		data:"aid="+aid+"&sid="+sid+"&last_page=1&ap_id="+ap_id,
+		type:"get",
+		dataType: 'json',
+		success:function(data) {
+			is_log = 1;
+		},
+	});
+}
+</script>
+<script type="text/javascript"  src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script type="text/javascript">
+if (wx_share_config != false) {
+	wx.config({
+		debug: debug_mode, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+		appId: wx_share_config.appId, // 必填，公众号的唯一标识
+		timestamp: wx_share_config.timestamp, // 必填，生成签名的时间戳
+		nonceStr: wx_share_config.nonceStr, // 必填，生成签名的随机串
+		signature: wx_share_config.signature,// 必填，签名，见附录1
+		jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ','onMenuShareWeibo','onMenuShareQZone'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+	});
+	function weixin_share() {
+		// 分享到朋友圈
+		wx.onMenuShareTimeline({
+			title: share_desc, // 分享标题
+			link: share_url, // 分享链接
+			imgUrl: share_img, // 分享图标
+			success: function () { 
+				// 用户确认分享后执行的回调函数
+			},
+			cancel: function () { 
+				// 用户取消分享后执行的回调函数
+			}
+		});
+		// 分享给朋友
+		wx.onMenuShareAppMessage({
+			title: share_title, // 分享标题
+			desc: share_desc, // 分享描述
+			link: share_url, // 分享链接
+			imgUrl: share_img, // 分享图标
+			type: '', // 分享类型,music、video或link，不填默认为link
+			dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+			success: function () { 
+				// 用户确认分享后执行的回调函数
+			},
+			cancel: function () { 
+				// 用户取消分享后执行的回调函数
+			}
+		});
+		// 分享到QQ
+		wx.onMenuShareQQ({
+			title: share_title, // 分享标题
+			desc: share_desc, // 分享描述
+			link: share_url, // 分享链接
+			imgUrl: share_img, // 分享图标
+			success: function () { 
+			   // 用户确认分享后执行的回调函数
+			},
+			cancel: function () { 
+			   // 用户取消分享后执行的回调函数
+			}
+		});
+		// 分享到腾讯微博
+		wx.onMenuShareWeibo({
+			title: share_title, // 分享标题
+			desc: share_desc, // 分享描述
+			link: share_url, // 分享链接
+			imgUrl: share_img, // 分享图标
+			success: function () { 
+			   // 用户确认分享后执行的回调函数
+			},
+			cancel: function () { 
+				// 用户取消分享后执行的回调函数
+			}
+		});
+		// 分享到QQ空间
+		wx.onMenuShareQZone({
+			title: share_title, // 分享标题
+			desc: share_desc, // 分享描述
+			link: share_url, // 分享链接
+			imgUrl: share_img, // 分享图标
+			success: function () { 
+			   // 用户确认分享后执行的回调函数
+			},
+			cancel: function () { 
+				// 用户取消分享后执行的回调函数
+			}
+		});
+	}
+	wx.ready(weixin_share);
+}
+</script>

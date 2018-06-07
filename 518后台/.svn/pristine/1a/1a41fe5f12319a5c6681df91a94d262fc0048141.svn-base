@@ -1,0 +1,88 @@
+<script type="text/javascript" src='/Public/js/soft.js?v3'></script>
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="99">
+			<input  type="text" name="tag_name" id="tag_name" value="" />
+		</td>
+		<td width="99">
+			<input  type="button" onclick='add_hot_tag();' value="添加" />
+			<input  type="button" onclick='del_hot_tag()' value="删除" />
+		</td>
+	</tr>
+</table>
+<input type='hidden' name='c_id' id='c_id' value='<?php echo $_GET['cat_id']; ?>' />
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0">
+	<?php foreach($list as $k => $v){ ?>
+	<tr>
+		<td  colspan='5'>
+			<?php echo "<b>$k</b>"; ?>
+		</td>
+	</tr>
+	<tr>
+	<?php $i=0;  foreach($v as $vv){ ?>
+		<td >
+			<input type="checkbox" name="id[]" value="<?php echo $vv['id']; ?>" />
+			<?php echo $vv['tag_name']; ?>
+		</td>
+		<?php $i++; if($i % 5 == 0) echo "</tr><tr>"; ?>
+	<?php } ?>
+		
+	<?php } ?>
+	<!--0-9-->
+	<tr>
+		<td  colspan='5'>
+			<?php echo "<b>0-9 其他</b>"; ?>
+		</td>
+	</tr>
+	<tr>
+	<?php $i=0;  foreach($list1 as $vv){ ?>
+		<td >
+			<input type="checkbox" name="id[]" value="<?php echo $vv['id']; ?>" />
+			<?php echo $vv['tag_name']; ?>
+		</td>
+		<?php $i++; if($i % 5 == 0) echo "</tr><tr>"; ?>
+	<?php } ?>
+		
+</table>	
+<script>
+var cat_name = "<?php echo $cat_name; ?>";
+function add_hot_tag(){
+	var tag_name = encodeURIComponent($('#tag_name').val());
+	var c_id = $('#c_id').val();
+	var data = 'tag_name='+ tag_name + '&c_id='+c_id;
+	ajax_tag('hot_tag',data);
+}
+//删除标签
+function del_hot_tag(){
+	id_str = Selected_check();
+	if(id_str){
+		if(confirm('是否确认此操作？')) {
+			var data = 'id='+ id_str;
+			ajax_tag('del_hot_tag',data);
+		}
+	}
+}
+function ajax_tag(act,data){
+	var c_id = $('#c_id').val();
+	$.ajax({
+		url: '__URL__/'+act,
+		data: data,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['status']==0){
+				alert(ret['info']);
+				return false;
+			}
+			
+			if(ret['code'] == 1){
+				alert(ret['msg']);
+				tb_show(cat_name+'分类标签配置','__URL__/hot_tag?cat_id='+c_id+'&height=500&width=500',false);
+			}else{
+				alert(ret['msg']);
+				return false;
+			}	
+		}
+	});
+}
+</script>

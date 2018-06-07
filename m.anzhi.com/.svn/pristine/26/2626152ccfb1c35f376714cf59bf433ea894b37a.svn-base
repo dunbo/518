@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>关灯，办正事</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/lights/css/common.css?v1"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script>
+	var sid = '<!--{$out.sid}-->',aid = 200,soft_lists_go=[];
+	
+	function my_soft() {
+		var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+		var cmd = 'var soft_list=' + json_data;
+		eval(cmd);
+		var soft_lists = soft_list.DATA;
+		var data = soft_lists;
+
+		var str = '';
+		for(i = 0; i < data.length; i++) {
+			if(data[i][2].length > 4){
+				var softname = data[i][2].substring(0,3)+'...';
+			}else{
+				var softname = data[i][2];
+			}
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(data[i][0]));
+			window.AnzhiActivitys.registerInstallObserver(data[i][7]);
+			var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+			var cmd = 'var soft_status=' + json_datas;
+			eval(cmd);
+			if(soft_status == 1){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载中</a>';
+			}else if(soft_status == 2){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status == 3){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status == 4){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk(parseInt('+aid+'),'+data[i][0]+',"'+data[i][7]+'","'+data[i][2]+'",parseInt('+data[i][13]+'),"'+data[i][27]+'",0,0,'+data[i][27]+');" class="downlode">下载</a>';
+			}else if(soft_status == 5){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode" onclick="installApp(\''+data[i][7]+'\','+data[i][0]+');">安装</a>';
+			}else if(soft_status == 6){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode" onclick="openApp("'+data[i][7]+'",'+data[i][0]+');">打开</a>';
+			}else if(soft_status == 8){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status == 9){
+				var my_soft = '<a value="校验中" id="'+data[i][0]+'" class="downlode">校验中</a>';
+			}else if(soft_status == 10){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+			}else if(soft_status == -1){
+				var soft_other_status = window.AnzhiActivitys.isInstalledApp(data[i][7],parseInt(data[i][13]));
+				if(soft_other_status == -2){
+					var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载</a>';
+				}else if(soft_other_status == -1){
+					var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">更新</a>';
+				}else if(soft_other_status == 0){
+					var my_soft = '<a id="'+data[i][0]+'" class="downlode" onclick="openApp(\''+data[i][7]+'\','+data[i][0]+');">打开</a>';
+				}else if(soft_other_status == 1){
+					var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+				}
+			}
+			str += '<li><p class="soft-icon"><img src="'+data[i][1]+'" width="43" height="43" border="0"></p><p class="soft-name">'+softname+'</p><p class="soft-size">'+data[i][9]+'</p><p class="downlode">'+my_soft+'</p></li>';
+		}
+		$('#my_softs').html(str);
+	}
+
+	function installApp(pkg,softid){
+		window.AnzhiActivitys.installAppForActivity(softid);
+	}
+	
+	//下载软件
+	function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag,noflux,firmware,status){
+		window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+	}
+	
+	//更新软件状态（正在下载）
+	function onDownloadCreated(softid){
+		$('#'+softid+'').html("下载中");
+	}
+
+	function onDownloadStateChanged(softid,newState){
+		if(newState == 1){
+			$('#'+softid+'').html("下载中");
+		}else if(newState == 2){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 3){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 4){
+			$('#'+softid+'').html("重试");
+		}else if(newState == 5){
+			$('#'+softid+'').html("安装");
+			$('#'+softid+'').bind('click',function(){
+				installApp(parseInt(softid));
+			});
+		}else if(newState == 6){
+			$('#'+softid+'').html("打开");
+			for(i=0;i < soft_lists_go.length;i++){
+				if(soft_lists_go[i][0] == softid){
+					$('#'+softid+'').bind('click',function(){
+						openApp(soft_lists_go[i][7],softid);
+					});
+				}
+			}
+		}else if(newState == 8){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 9){
+			$('#'+softid+'').html("检查中");
+		}
+	}
+	
+	function openApp(pkg,softid){
+		the_soft = [softid];
+		window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+	}
+	
+	$(document).ready(function () {
+		my_soft();
+	});
+</script>
+</head>
+<body>
+<div class="banner">
+	<img src ="<!--{$out.static_url}-->/lights/images/banner.png" alt=""/>
+	<div class="stars"></div>
+	<div class="lamp"></div>
+	<div class="banner_txt"></div>
+</div>
+<div class="count">
+	<p>有<span><!--{$out.share_num_all}--></span>位小伙伴和你一起关灯办正事，为地球关灯！</p>
+</div>
+<div class="soft">
+	<h3>关灯很无聊，APP来陪你：</h3>
+        <ul class="soft-list clear" id="my_softs"></ul>
+</div>
+</body>
+</html>

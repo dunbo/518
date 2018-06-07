@@ -1,0 +1,95 @@
+
+<script>
+    function check_package(async) {
+        var package = $.trim($("#package").val());
+        if (package == '') {
+            return 0;
+        }
+        var param = {
+            package : package
+        }
+        var ret = 0;
+        $.ajax({
+            url:'__URL__/check_package',
+            type:'POST',
+            async:async,
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data) {
+                ret = data.status;
+            }
+        });
+        if(!ret){
+            alert("包名不存在，请重新填写！");
+        }
+        return ret;
+    }
+    
+    function form_action() {
+        var package = $.trim($("#package").val());
+        if (package == '') {
+            alert("包名不能为空！");
+            $("#package")[0].focus();
+            return false;
+        }
+        var start_time = $.trim($("#start_time").val());
+        if (start_time == '') {
+            alert("开始时间不能为空！");
+            $("#start_time")[0].focus();
+            return false;
+        }
+        var end_time = $.trim($("#end_time").val());
+        if (end_time == '') {
+            alert("结束时间不能为空！");
+            $("#end_time")[0].focus();
+            return false;
+        }
+        // 检查包名
+        var exists = check_package(false);
+        if (!exists) {
+            $("#package")[0].focus();
+            return false;
+        }
+        // 检查开始时间
+        if (start_time > end_time) {
+            alert('结束时间不能小于或等于开始时间');
+            return false;
+        }
+        $("#form_action").submit();
+    }
+</script>
+
+<div>
+    <br/><h2>添加</h2><br/>
+    <hr size="1" color="#ffffff" noshade><br/><br/>
+    <form method="post" action="__URL__/add_package" id="form_action">
+        <div>
+            <label><font color="red">* </font>包名：<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></label>
+            <input type="text" id="package" name="package" onblur="check_package(false)" style="width:200px"/>
+        </div>
+        <br/><br/>
+        <div>
+            <label><font color="red"></font>搜索词：<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></label>
+            <input type="text" id="name" name="name"  style="width:200px"/><span style='margin-left:20px;color:red;'>搜索词用英文逗号分隔</span>
+        </div>
+        <br/><br/>
+        <div>
+            <label><font color="red">* </font>开始时间：</label>
+            <input id="start_time" name="start_time" type="text" class="Wdate" style="width:200px" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"/>
+        </div>
+        <br/><br/>
+        <div>
+            <label><font color="red">* </font>结束时间：</label>
+            <input id="end_time" name="end_time" type="text" class="Wdate" style="width:200px" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"/>
+        </div>
+        <br/><br/>
+        <div class="clear"></div>
+        <br/><br/>
+        <div class="form_btns_box">
+            <a href="javascript:void(0)" onclick="form_action()">提交</a>
+            <a href="javascript:void(0)" onclick="tb_remove()">取消</a>
+        </div>
+        <div class="clear"></div>
+    </form>
+</div>

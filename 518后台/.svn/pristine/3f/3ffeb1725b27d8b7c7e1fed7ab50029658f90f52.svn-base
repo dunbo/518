@@ -1,0 +1,116 @@
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<!--使用灵活运营的推荐内容编辑必需添加此js-->
+<script type="text/javascript" src="/Public/js/edit_content_type.js?v3"></script>
+<script>
+function checkPost()
+{
+
+	if ($('input[name=rank]').val() == '') {
+		alert('请填写排序');
+		return false;
+	}else{
+		var g=/^-?\d+$/;  
+    	if(!g.test($('input[name=rank]').val())){
+    		alert('排序必须为整数');
+			return false;
+    	}
+	}
+	
+	if ($('input[name=key_word]').val() == '') {
+		alert('名称必填');
+		return false;
+	}
+	
+	if ($('#start_at').val() == '') {
+		alert('请填写开始时间');
+		return false;
+	}
+	if ($('#end_at').val() == '') {
+		alert('请填写结束时间');
+		return false;
+	}
+	
+	if (Date.parse($('#start_at').val()) > Date.parse($('#end_at').val()) ) {
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+
+}
+
+jQuery(function(){
+    <?php if( $content_list ) {?>
+		var soft_arr_one = <?php  echo json_encode($content_list); ?>;
+		var content_arr_one = edit_load(soft_arr_one);
+	    // 生成推荐内容展示
+	    generate_append_html("content_type_div", content_arr_one);
+	    // 生成推荐链接
+	    href_1 = generate_content_type_href('content_type_div', "<?php echo $content_list['content_type']; ?>", content_arr_one,'');
+	    $("#content_type_a").attr("href", href_1);
+    <?php echo ''; }?>
+})
+
+</script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+<FORM method="POST" action="__URL__/edit_list_recommend" onsubmit="return checkPost();" enctype="multipart/form-data">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td>名称：</td>
+		<td><input name='key_word' id='key_word' type='text' value='<?php echo $recommend['key_word'];?>'  readonly /></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>排序：</td>
+		<td><input id="rank" name='rank' type='text' value='<?php echo $recommend['rank'];?>'/></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>展示规则：</td>
+		<td>
+			<input name='show_rule' type='radio' <?php echo ($recommend['show_rule']==1)?'checked':'';?> value="1"  />无历史记录展示&nbsp;&nbsp;
+			<input name='show_rule' type='radio' value="2" <?php echo ($recommend['show_rule']==2)?'checked':'';?>/>有无历史记录均展示
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>开始时间：</td>
+		<td>
+            <input id="start_tm" name="start_tm" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value="{$recommend.start_tm|date='Y-m-d H:i:s',###}"/>
+        </td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>结束时间：</td>
+		<td>
+            <input id="end_tm" name="end_tm" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" value="{$recommend.end_tm|date='Y-m-d H:i:s',###}"/>
+        </td>
+		<td></td>
+	</tr>
+	
+	<tr class="sub_tr">
+		<td style="width: 15%">推荐内容：</td>
+		<td>
+			<a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+			<div id="content_type_div"></div>
+		</td>
+		<td></td>
+	</tr>
+
+	
+	
+	<tr class="sub_tr">
+		<td colspan="2"> 
+		<input type='hidden' name="id" value='<?php echo $recommend['id']?>'/>
+		<!-- <input type='hidden' name="life" value='<?php echo $_GET['life']?>'/> -->
+		<input type='submit' value="提交"/>
+		<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;"></td>
+	</tr>
+</table>
+</FORM>	

@@ -1,0 +1,406 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<link rel="stylesheet" type="text/css" media="all"	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<link rel="stylesheet" href="__PUBLIC__/css/bootstrap.min.css">
+<script type="text/javascript" src="__PUBLIC__/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/bootstrap.min.js"></script>
+<script type="text/javascript" src='__PUBLIC__/js/thickbox-compressed.js' ></script>
+<link rel="stylesheet" href="__PUBLIC__/css/thickbox.css" type="text/css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/Public/css/uploadify.css">
+<script src="/Public/js/jquery.uploadify.min.js?ver=<?php echo rand(0,9999);?>" type="text/javascript"></script>
+<style>
+    td{padding:5px 10px;text-align:left !important;}
+    .red{color:red;}
+    .green{color:green;}
+    input,select{width:250px !important;height:35px !important;}
+    .ajax_delete_file{color:red;font-size:20px;vertical-align: bottom;cursor:pointer;}
+    .unfinished{border:1px solid red;}
+</style>
+<h3 class="yahei" style="padding-left:16px;">合同列表 >> 合同录入</h3>
+<form action="__URL__/add_contract_do" method="post">
+    <input type="hidden" name="url_suffix" value="{$url_suffix}"/>
+    <table class="yahei">
+        <tr>
+            <td><font color=red>*</font>客户名称：</td>
+            <td>
+                <select name="client_id" class="yahei form-control" error-id="error_1">
+                    <option value="-1">选择客户</option>
+                    <volist name="clients" id="client">
+                        <option value="{$client.id}">{$client.client_name}</option>
+                    </volist>
+                </select>
+            </td>
+            <td><font color=red>*</font>协议编号：</td>
+            <td>
+                <select name="agreement_id" class="yahei form-control" error-id="error_2">
+                    <option value="-1">请先选择客户</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td id="error_1"></td>
+            <td></td>
+            <td id="error_2"></td>
+        </tr>
+        <tr>
+            <td><font color=red>*</font>合同编号：</td>
+            <td><input type="text" class="form-control" name="contract_code" error-id="error_3" id="input_contract_code"></td>
+            <td><font color=red>*</font>合同月份：</td>
+            <td><input type="text" class="form-control Wdate" name="month" error-id="error_9" id="input_month" value="<?php
+ 				$_y = (int)date('Y');
+ 				$_m = (int)date('n');
+            	if($_m==12)
+				{
+					echo ($_y+1).'-01';
+				}
+				else
+				{
+					if($_m<9)
+						echo $_y.'-0'.($_m+1);
+					else
+						echo $_y.'-'.($_m+1);
+				}
+            ?>" onClick="WdatePicker({startDate:'%y-%M',dateFmt:'yyyy-MM'})"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td id="error_3"></td>
+            <td></td>
+            <td id="error_9"></td>
+        </tr>
+        <tr>
+        	<td><font color=red>*</font>签订日期：</td>
+            <td><input type="text" class="form-control Wdate" name="sign_date" error-id="error_4" onClick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})"></td>
+            <td><font color=red>*</font>起始日期：</td>
+            <td><input type="text" class="form-control Wdate" name="start_date" error-id="error_5" onClick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})"></td>
+        </tr>
+        <tr>
+        	<td></td>
+            <td id="error_4"></td>
+            <td></td>
+            <td id="error_5"></td>
+        </tr>
+        <tr>
+            <td><font color=red>*</font>负责人：</td>
+            <td><input type="text" class="form-control" name="responsible" error-id="error_7" id="input_responsible"></td>
+            <td><font color=red>*</font>终止日期：</td>
+            <td><input type="text" class="form-control Wdate" name="end_date" error-id="error_6" onClick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})"></td>
+        </tr>
+        <tr>
+        	<td></td>
+        	<td id="error_7"></td>
+        	<td></td>
+            <td id="error_6"></td>
+        </tr>
+        <tr>
+            <td>上传附件：</td>
+            <td>
+                <div class="upload_apk_btn" style="margin-left:5px;"><input type="file" id="affix" name="affix" /></div>
+            </td>
+            <td colspan="3"> <span style="color:red;font-weight:700;">需加盖合同专用章</span>&nbsp;&nbsp;&nbsp;格式支持：word、excel、pdf、jpg、png。10M以内</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan='3' style="color:red;" id="my_error">
+            </td>
+        </tr>
+        <tr>
+            <td>附&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;件：</td>
+            <td id="uploaded_files" colspan=3>
+            </td>
+        </tr>
+        <tr>
+            <td>备&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注：</td>
+            <td colspan=3>
+                <textarea name="remark" class="yahei form-control" style="width:80%;height:100px;"></textarea>
+            </td>
+        </tr>
+    </table>
+    <div style="margin:10px auto;padding:0px 30px;">
+        <button class="btn btn-success yahei" id ="submit" type="submit"  style="padding-left:30px;padding-right:30px;margin-left:100px;" onClick="javascript:return checkBeforeSubmit();">保存</button>
+        <button class="btn btn-default yahei" type="button" style="padding-left:30px;padding-right:30px;margin-left:30px;" onClick="javascript:history.back();">取消</button>
+    </div>
+</form>
+<script>
+    $(function() {
+        /*******
+         *当用户选择了客户之后自动取出该客户的框架协议
+         *********/
+        $("select[name='client_id']").change(function() {
+            $.ajax({
+                url: '__URL__/ajax_get_agreement_info_by_client_id',
+                type: 'post',
+                data: 'client_id=' + $(this).val(),
+                dateType: 'html',
+                success: function(returnData) {
+                    $("select[name='agreement_id']").html(returnData);
+                }
+
+            })
+        });
+        /**ajax多文件上传**/
+        $("#affix").uploadify({
+            'height': 20,
+            'width': 100,
+            'swf': '/Public/images/uploadify.swf',
+            'fileObjName': 'affix',
+            'uploader': '/index.php/Settlement/Attachment/ajax_upload_file/name/affix/',
+            'onUploadSuccess': function(file, res, bool) {
+                var res = eval('(' + res + ')');
+                var str = '';
+
+                if (res['error'] == 1) {
+                    $('#my_error').html(res['msg']);
+                } else {
+                    $('#my_error').html('');
+                    var attachment_num = res['attachment_id'];
+                    $("form").append("<input type='hidden' name='attachment_id[]' id='attachment_id_" + attachment_num + "' value='" + res['attachment_id'] + "' >");
+                    $("#uploaded_files").append('<div class="file_wrapper" id="file_' + attachment_num + '"><span class="yahei"><a href="/index.php/Settlement/Attachment/download/attachment_id/' + res['attachment_id'] + '" target="_blank">' + file['name'] + '</a></span>&nbsp;&nbsp;&nbsp;<span class="ajax_delete_file" num="' + attachment_num + '" onClick="javascript:ajax_delete_file(' + attachment_num + ')">×</span></div>');
+                }
+            }
+        });
+        //检查合同编号是否唯一
+        $("#input_contract_code").change(function() {
+            var error_id = $(this).attr('error-id');
+            if ($(this).val() == "" || $(this).val() == undefined)
+            {
+                $("#" + error_id).text("请填写合同编号!").addClass('red');
+                $(this).addClass("unfinished");
+                return;
+            } else
+            {
+                var code = $(this).val();
+                $.ajax({
+                    url: "__URL__/ajax_check_contract_code",
+                    type: "post",
+                    dateType: "html",
+                    data: "code=" + code,
+                    success: function(returnData) {
+
+                        //处理返回数据
+                        if (returnData == "1")
+                        {
+                            $("#" + error_id).text("该合同编号已存在，请重新输入!").addClass('red');
+                            $(this).addClass("unfinished");
+                            $(this).focus();
+                            $('#submit').attr("disabled",true);
+                            return;
+                        } else {
+                            $("#" + error_id).text("");
+                            $(this).removeClass("unfinished");
+                            $('#submit').attr("disabled",false);
+                            return;
+                        }
+                    }
+                });
+            }
+        });
+        //判断用户输入的负责人是否已经存在
+        $("#input_responsible").change(function() {
+            var error_id = $("#input_responsible").attr('error-id');
+            if ($(this).val() == "" || $(this).val() == undefined)
+            {
+                $(this).parent().next().text("请填写负责人名字!").addClass('red');
+                $(this).addClass("unfinished");
+                return;
+            }
+            var name = $(this).val();
+            $.ajax({
+                url: "/index.php/Settlement/Agreement/ajax_check_admin_name",
+                type: "post",
+                dateType: "html",
+                data: "name=" + name,
+                success: function(returnData) {
+
+                    //处理返回数据
+                    if (returnData == "2")
+                    {
+                        $("#" + error_id).text("该负责人不存在!").addClass('red');
+                        $("#input_responsible").addClass("unfinished");
+                        $("#input_responsible").focus();
+                        return;
+                    } else {
+                        $("#" + error_id).text("");
+                        $("#input_responsible").removeClass("unfinished");
+                        return;
+                    }
+                }
+            });
+        });
+        //用户填写时提示
+
+        $("input,select").change(function() {
+            var error_id = $(this).attr("error-id");
+            if ($(this).val().length == 0 || $(this).val() == "-1")
+            {
+                $("#" + error_id).addClass("red").text("不可为空！");
+                $(this).addClass("unfinished").focus();
+            } else {
+                $(this).removeClass("unfinished");
+                $("#" + error_id).text("");
+            }
+        })
+    })
+    /*****删除附件*******/
+    function ajax_delete_file(num)
+    {
+        if (confirm("确认删除该附件？"))
+        {
+            $.ajax({
+                url: '/index.php/Settlement/Attachment/ajax_delete_file/attachment_id/' + num,
+                success: function(data) {
+                    if (data == 1)
+                    {
+                        //删除隐藏input
+                        $("#attachment_id_" + num).remove();
+                        //删除显示出来的附件
+                        $("#file_" + num).remove();
+                    }
+                }
+            });
+        }
+    }
+//提交前检查
+    function checkBeforeSubmit()
+    {
+        var error_id = "";
+        var tmp = '1';
+        //检查是否选择客户
+        if ($("select[name='client_id']").val() == "-1")
+        {
+            error_id = $("select[name='client_id']").attr("error-id");
+            $("select[name='client_id']").addClass("unfinished");
+            $("#" + error_id).addClass("red").text("请先选择客户！");
+            tmp = '0';
+        }
+        //检查是否选择协议
+        if ($("select[name='agreement_id']").val() == "-1")
+        {
+            error_id = $("select[name='agreement_id']").attr("error-id");
+            $("select[name='agreement_id']").addClass("unfinished");
+            $("#" + error_id).addClass("red").text("请先选择框架协议！");
+            tmp = '0';
+        }
+        //检查是填写合同编号
+        if ($("input[name='contract_code']").val().length == 0)
+        {
+            error_id = $("input[name='contract_code']").attr("error-id");
+            $("input[name='contract_code']").addClass("unfinished");
+            $("#" + error_id).addClass("red").text("请先填写合同编号！");
+            tmp = '0';
+        }
+        //判断合同编号是否正确
+        /*
+        var contract_code_ = $('#input_contract_code').val().substr(0, 6);
+        if ($("input[name='contract_code']").val().length != 0) {
+            if (contract_code_ < 197001 || contract_code_ > 210012)
+            {
+                alert("合同编号命名出错，合同编号的应以“年份月份”开始，如“20140920”，且年份段必须在“1970-2100”之间。");
+                tmp = '0';
+            }
+            if (isNaN(contract_code_))
+            {
+                alert("合同编号不规范，应该以“年份月份”开始命名，如“20140920”。");
+                tmp = '0';
+            }
+        }
+        */
+        
+        //2014.10.30 jiwei
+        //判断合同月份是否正确
+        if ($("input[name='month']").val().length == 0)
+        {
+            error_id = $("input[name='month']").attr("error-id");
+            $("input[name='month']").addClass("unfinished");
+            $("#" + error_id).addClass("red").text("请先填写合同月份（格式如：2014-10）！");
+            tmp = '0';
+        }
+        var var_month = $('#input_month').val().split('-');
+        
+        if(!((var_month[0]>=2000 && var_month[0]<=2030) && (var_month[1]>=1 && var_month[1]<=12)))
+        {
+        	error_id = $("input[name='month']").attr("error-id");
+            $("input[name='month']").addClass("unfinished");
+            $("#" + error_id).addClass("red").text("格式错误（格式如：2014-10）！");
+            tmp = '0';
+        }
+        
+
+        //检查是填写签订日期
+        if ($("input[name='sign_date']").val().length == 0)
+        {
+            error_id = $("input[name='sign_date']").attr("error-id");
+            $("input[name='sign_date']").addClass("unfinished");
+            $("#" + error_id).addClass("red").text("请先填写签订日期！");
+            tmp = '0';
+        }
+        //检查是填写起始日期
+        if ($("input[name='start_date']").val().length == 0)
+        {
+            error_id = $("input[name='start_date']").attr("error-id");
+            $("input[name='start_date']").addClass("unfinished");
+            $("#" + error_id).addClass("red").text("请先填写起始日期！");
+            tmp = '0';
+        }
+        //检查是填写终止日期
+        if ($("input[name='end_date']").val().length == 0)
+        {
+            error_id = $("input[name='end_date']").attr("error-id");
+            $("input[name='end_date']").addClass("unfinished");
+            $("#" + error_id).addClass("red").text("请先填写终止日期！");
+            tmp = '0';
+        }
+        //检查终止日期是否大于起始日期
+        if (!duibi($("input[name='start_date']").val(), $("input[name='end_date']").val()))
+        {
+            $("input[name='start_date']").addClass("unfinished");
+            $("input[name='end_date']").addClass("unfinished");
+            tmp = '0';
+        }
+        //检查是填写负责人
+        if ($("input[name='responsible']").val().length == 0)
+        {
+            error_id = $("input[name='responsible']").attr("error-id");
+            $("input[name='responsible']").addClass("unfinished");
+            $("#" + error_id).addClass("red").text("请先填写负责人！");
+            tmp = '0';
+        }
+
+        if (tmp == '0')
+        {
+            return false;
+        } else
+        {
+            return true;
+        }
+    }
+    function datetime_to_unix(datetime) {
+        var tmp_datetime = datetime.replace(/:/g, '-');
+        tmp_datetime = tmp_datetime.replace(/ /g, '-');
+        var arr = tmp_datetime.split("-");
+        var now = new Date(Date.UTC(arr[0], arr[1] - 1, arr[2], arr[3] - 8, arr[4], arr[5]));
+        return parseInt(now.getTime() / 1000);
+    }
+    function duibi(a, b) {
+        var arr = a.split("-");
+        var starttime = new Date(arr[0], arr[1], arr[2]);
+        var starttimes = starttime.getTime();
+
+        var arrs = b.split("-");
+        var lktime = new Date(arrs[0], arrs[1], arrs[2]);
+        var lktimes = lktime.getTime();
+
+        if (starttimes >= lktimes) {
+
+            alert('开始日期大于结束日期，请检查！');
+            return false;
+        }
+        else
+            return true;
+
+    }
+</script>
+{// 加载尾部部公共文件 }
+<include file="../../Public/footer" />

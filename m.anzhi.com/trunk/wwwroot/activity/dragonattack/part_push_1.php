@@ -1,0 +1,66 @@
+<?php
+   include_once('../../init.php');
+   //$ver = $_GET['ver'];
+   $device_id = (isset($_GET['device_id']))? trim($_GET['device_id']):'gomarket';
+   $ip = onlineip();
+   if (isset($_GET['sid']) && $device_id == 'gomarket') {
+	   $device_id = $_GET['sid'];
+   }
+   //echo $ip;
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="Android,安卓,安卓网,安卓市场,安卓游戏,电子市场,安卓软件,Android游戏,安卓手机,游戏汉化,手机游戏,Android软件,软件下载,最新汉化软件,安卓游戏下载,游戏汉化" />
+<meta name="description" content="安智市场,Android,安卓,安卓网,安卓市场,电子市场,安卓游戏,应用商店-国内最专业的Android安卓电子市场，提供海量安卓软件、Android手机游戏、安卓最新汉化软件、汉化游戏资源及最新APK汉化、汉化破解APP、APK免费下载，致力于为用户打造最贴心的Android安卓手机应用商店" />
+<title>《龙之逆袭》安智老用户召回活动</title>
+<link type="text/css" rel="stylesheet" href="css/common.css"/>
+<script src="../../js/jquery.js"></script>
+</head>
+<body>
+<div id="main">
+	<div class="content">
+		<img src="images/images_01.jpg" alt="">
+	</div>
+	<div class="content">
+		<img src="images/images_02.jpg" alt="">
+	</div>
+	<div class="content">
+		<img src="images/images_03.jpg" alt="">
+	</div>
+	<div class="content">
+		<img src="images/images_04.jpg" alt="">
+	</div>
+	<div class="content">
+		<img src="images/images_05.jpg" alt="">
+	</div>
+	<div id="content6">
+		<a href="#" id="activity_btn" ></a>';
+		<a href="javascript:window.AnzhiActivitys.downloadForActivity(19,955773,'com.hilink.dragonattack.anzhi','龙之逆袭',37,46997013, 7)" id="close_btn"></a>
+	</div>
+</div>
+<script>
+ $("#activity_btn").click(function()
+ {
+	var ip = '<?php echo $ip;?>';
+	var device_id = '<?php echo $device_id;?>';
+	$.getJSON("part_push_process.php",{p:1,ip:ip,device_id:device_id},function()
+	{
+		window.location.href = "http://bbs.anzhi.com/thread-8177368-1-1.html";
+	});
+ });
+ $("#close_btn").click(function()
+ {
+    var ip = '<?php echo $ip;?>';
+    var device_id = '<?php echo $device_id;?>';
+    $.getJSON("part_push_process.php",{p:2,ip:ip,device_id:device_id},function()
+    {
+      
+    });
+ });
+</script>
+</body>
+</html>

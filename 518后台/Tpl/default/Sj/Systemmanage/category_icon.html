@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>类别图标管理</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/school/update/swfobject.js"></script>
+<link type="text/css" href="/Public/school/update/uploadify.css" rel="stylesheet" />
+<script type="text/javascript" src="/Public/school/update/jquery.uploadify.v2.1.4.min.js"></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+var pic_id = 0;
+var category_id = 0;
+var category_skin_id = 0;
+
+// function addSkin()
+//{
+//	var id = $('#skin_list option:selected').val();
+//	var name = $('#skin_list option:selected').html();
+//	$('#skin_list option:selected').remove();
+//	var skin = $('#skin_tpl').clone();
+//	skin.show();
+//	skin.attr('id', 'cs' + id);
+//	skin.find('td').each(function(){
+//		$(this).attr('sid', id);
+//		$(this).attr('id', "td_" + id + "_" + $(this).attr('cid'));
+//	});
+//	skin.find('td:first').html(name);
+//	skin.find('td:last a').attr('href', '__URL__/category_icon_del/parentid/<?php echo $category_id ; ?>/pic_id/' + id);
+//	$('#skin_tpl').before(skin);
+//} 
+
+function open_upload(obj)
+{
+	pic_id = $(obj).attr('sid');
+	category_id = $(obj).attr('cid');
+	category_pic_id = $(obj).attr('csid');
+	
+	var oDiv = document.getElementById('openbox');
+	if(oDiv){
+		oDiv.style.display = 'block';
+		oDiv.style.top = (viewHeight() - oDiv.offsetHeight)/2 + scrollY() + 'px';
+		oDiv.style.left = (viewWidth() - oDiv.offsetWidth)/2 + 'px';
+	}
+	var oMark = document.createElement('div');
+	oMark.id = 'mark';
+	document.body.appendChild(oMark);
+	oMark.style.width = viewWidth() + 'px';
+	oMark.style.height = documentHeight() + 'px';
+	closeLogin();
+	function closeLogin(){
+		var oClose = document.getElementById('close');
+		oClose.onclick = function(){
+			document.body.removeChild(oMark);
+			oDiv.style.display = 'none';
+		};
+	}
+	window.onresize = window.onscroll = function(){
+		oMark.style.width = viewWidth() + 'px';
+		oMark.style.height = documentHeight() + 'px';
+		var oDiv = document.getElementById('openbox');
+		if(oDiv){
+			oDiv.style.top = (viewHeight() - oDiv.offsetHeight)/2 + scrollY() + 'px';
+			oDiv.style.left = (viewWidth() - oDiv.offsetWidth)/2 + 'px';
+		}
+	};
+}
+
+$(document).ready(function(){
+	$( "#uploadify").uploadify({
+		'buttonText': 'Upload ICON',
+		'uploader'  : '/Public/school/update/uploadify.swf',
+		'script'    : '/index.php/Sj/Systemmanage/category_icon_add',
+		'cancelImg' : '/Public/school/update/cancel.png',
+		'fileDataName' : 'iconurl',
+		'fileExt' : '*.png;*.jpg',
+		'fileDesc' : '*.png;*.jpg',
+		'auto'      : true,
+		'scriptData' : {'PHPSESSID':'<?php echo session_id();?>', pic_id: pic_id, category_id: category_id, category_skin_id:category_skin_id} ,
+		
+		'onSelect'   : function (event, queueID, fileObj) {
+			$("#uploadify").uploadifySettings('scriptData', {'PHPSESSID':'<?php echo session_id();?>', pic_id: pic_id, category_id: category_id, category_skin_id:category_skin_id});
+		},
+		
+		'onComplete' : function(event, ID, fileObj, response, data){
+			if (response.indexOf('http') != -1) {
+				var result = response.split(',');
+				$('#td_' + pic_id + '_' + category_id + ' img').attr("src",result[0]);
+				$('#td_' + pic_id + '_' + category_id).attr("csid",result[1]);
+			} else {
+				alert(response);
+			}
+			$('#close').click();
+		},
+	});
+});
+
+function viewWidth(){
+	return document.documentElement.clientWidth;
+}
+function viewHeight(){
+	return document.documentElement.clientHeight;
+}
+function scrollY(){
+	return document.documentElement.scrollTop || document.body.scrollTop;
+}
+function documentHeight(){
+	return Math.max(document.documentElement.scrollHeight || document.body.scrollHeight,document.documentElement.clientHeight);
+}
+</script>
+<style>
+#openbox{ width:400px; height:200px; padding:10px 8px; border:1px #0c0c0c solid; background:#FFFFFF; position:absolute; z-index:2; display:none;}
+#openbox #close{ position:absolute; top:8px; right:15px; cursor:pointer; font-size:14px;}
+#mark{ top:0; left:0; position:absolute; z-index:1; background:#000000; filter:alpha(opacity=50); opacity:0.5;}
+</style>
+</head>
+<body>
+类别图标列表：<a href="__URL__/add_category_pic?mm" class="thickbox"><input type="button" value="添加" onclick="addSkin()"/></a>
+
+<table border="1" cellspacing="0" cellpadding="0">
+	<tr>
+		<td>类别图标名称</td>
+		<?php foreach($category_list as $val):?>
+		<td><?php echo $val[1];?></td>
+		<?php endforeach;?>
+		<td>操作</td>
+	<tr>
+	<?php foreach($category_all as $sid => $val){ ?>
+	<tr id="cs<?php echo $sid?>">
+		<td class="name"><?php echo $val[name]; ?></td>
+		<?php foreach($category_list as $k => $v){ ?>	
+		<td id="td_<?php echo $sid;?>_<?php echo $v[0];?>" cid="<?php echo $v[0];?>" sid="<?php echo $sid?>" csid="<?php echo $val[$v[0]]['id'];?>" class="icon" onclick="open_upload(this)">
+		<?php if (!empty($val[$v[0]]['iconurl'])){ ?>
+		<img src="<?php echo IMGATT_HOST. $val[$v[0]]['iconurl'];?>" /></td>
+		<?php }else{ ?>
+		<img src="/Public/images/skin_icon.png" />
+		<?php }} ?>
+		<td><a href="__URL__/category_icon_del/pic_id/<?php echo $sid; ?>" onclick="return checkit();"> 删除</a></td>
+	<tr>
+	<?php } ?>
+	
+</table>
+<div id="openbox">
+	<div style="padding: 30px 0px 0px 10px; display: block;" id="uploader">
+	<input width="120" type="file" height="30" id="uploadify" name="file2" style="display: none;">
+	</div>
+    <div id="close">关闭</div>
+</div>
+</body>
+</html>
+

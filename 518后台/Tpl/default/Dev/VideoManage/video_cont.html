@@ -1,0 +1,231 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/contAtrribu.js'></script>
+<script type="text/javascript">
+function ret_select(){
+	var download_guide = $('input[name="download_guide"]:checked').val();
+    if (download_guide==null) {
+    	alert('请选择是否显示下载引导');
+    	return false;
+    } else if (download_guide==1) {
+    	var dg_type = $('input[name="dg_type"]:checked').val();
+	    if (dg_type==null) {
+	    	alert('请选择下载引导样式');
+	    	return false;
+	    }
+	    var dg_screen = $('input[name="dg_screen"]:checked').val();
+	    if (dg_screen==null) {
+	    	alert('请选择下载引导全屏/非全屏');
+	    	return false;
+	    }
+	    var dg_time_m = $('#dg_time_m').val();
+	    if (dg_time_m==='') {
+    		//alert('请输入显示时间分钟数');
+    		//return false;
+    	}else if (!/^\d*$/.test(dg_time_m)) {
+			alert('显示时间分钟数请输入大于等于0的的整数');
+			return false;
+		}
+		var dg_time_s = $('#dg_time_s').val();
+    	if (dg_time_s==='') {
+    		if(!dg_time_m){
+    			alert('0秒为无效时间，请重新输入');
+    			return false;
+    		}
+    	}
+    	if (!/^\d*$/.test(dg_time_s)) {
+			alert('显示时间秒数请输入大于等于0的的整数');
+			return false;
+		}
+		if (dg_time_s>59) {
+			$('#dg_time_s').val(59);
+			return false;
+		}
+		var dg_long = $('#dg_long').val();
+    	if (dg_long==='') {
+    		alert('请输入显示时长秒数');
+    		return false;
+    	}
+    	if (!/^[1-9]\d*$/.test(dg_long)) {
+			alert('显示时长请输入大于0的整数');
+			return false;
+		}
+	    var dg_position = $('input[name="dg_position"]:checked').val();
+	    if (dg_position==null) {
+	    	alert('请选择下载引导样式显示位置');
+	    	return false;
+	    }
+    }
+	var _num = $('input[name="content_level"]:checked').val();
+	var _nature = $('input[name="content_nature"]:checked').val();
+	if(_num == 0 || _num == undefined){
+		alert('请选择内容质量');
+		return false;
+	}
+	if(_nature == 0 || _nature == undefined){
+		alert('请选择内容性质');
+		return false;
+	}
+	var _column = '';
+	
+ 	$("input[name^='cont_column']:checked").each(function(){
+    	_column += this.value+',';
+    });
+	/*if(_column == '' || _column == undefined){
+		alert('请选择内容栏目');
+		return false;
+	}*/
+	$('#content_column').val(_column);
+	//内容标签
+	var _tag_check = cont_tags();
+	if(_tag_check == false) return false;
+	
+	return true;
+} 
+function checklist(obj){
+	var column_select = '';
+	$("input[name^='cont_column']:checked").each(function(){
+	    column_select += this.title+',';
+    });
+	$("#selectlist").text(column_select);
+}
+
+function toggle_dg() {
+	$('tr[id^=download_guide_]').css('display', 'none');
+	var download_guide = $("input[name='download_guide']:checked").val();
+	if (download_guide==1) {
+		$('tr[id^=download_guide_]').css('display', '');
+	}
+}
+function chk_int(obj, num) {
+	if (!/^[1-9]\d*$/.test($(obj).val())) {
+		//$(obj).val('');
+	} else {
+		if (num>0 && $(obj).val()>num) {
+			$(obj).val(num);
+		}
+	}
+	return false;
+}
+function chk_int2(obj, num) {
+	if (!/^\d*$/.test($(obj).val())) {
+		//$(obj).val('');
+	} else {
+		if (num>0 && $(obj).val()>num) {
+			$(obj).val(num);
+		}
+	}
+	return false;
+}
+$(function(){
+	toggle_dg();
+});
+	
+</script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+ul,li{list-style: none;}
+.table_list tbody td{text-align:left;}
+</style>
+<form method="post" action="__URL__/change_status"  onsubmit="return ret_select();">
+<table class="table_list">
+	<tr>
+	    <td>是否显示下载引导</td>
+	    <td>
+	    	<input name="download_guide" type="radio" value="1" <?php if($video_data['download_guide']==1){ ?>checked='checked'<?php } ?> onclick="toggle_dg()">显示 
+	    	<input name="download_guide" type="radio" value="0" <?php if($video_data['download_guide']==0){ ?>checked='checked'<?php } ?> onclick="toggle_dg()">不显示 
+	    </td>
+	    <td></td>
+	</tr>
+	<tr id="download_guide_1">
+		<td>样式:</td>
+		<td>
+			<input name='dg_type' type="radio" <?php if($video_data['dg_type']==1 || !$video_data['dg_type']){ ?>checked='checked'<?php } ?> value="1" />icon+名称+下载 
+			<input name='dg_type' type="radio" <?php if($video_data['dg_type']==2){ ?>checked='checked'<?php } ?> value="2" />icon+下载 
+			<input name='dg_type' type="radio" <?php if($video_data['dg_type']==3){ ?>checked='checked'<?php } ?> value="3" />icon+下载(左右) 
+		</td>
+		<td></td>
+	</tr>
+	<tr id="download_guide_2">
+		<td>全屏/非全屏显示:</td>
+		<td>
+			<input name='dg_screen' type="radio" <?php if($video_data['dg_screen']==1){ ?>checked='checked'<?php } ?> value="1" />全屏和非全屏均展示 
+			<input name='dg_screen' type="radio" <?php if($video_data['dg_screen']==2){ ?>checked='checked'<?php } ?> value="2" />仅非全屏展示 
+			<input name='dg_screen' type="radio" <?php if($video_data['dg_screen']==3){ ?>checked='checked'<?php } ?> value="3" />仅全屏展示 
+		</td>
+		<td></td>
+	</tr>
+	<tr id="download_guide_3">
+		<td>显示时间:</td>
+		<td>
+			<input name='dg_time_m' id="dg_time_m" type="number" min="0" style="width:70px" value="{$video_data.dg_time_m}" onchange="chk_int2(this, 0)" /> : 
+			<input name='dg_time_s' id="dg_time_s" type="number" min="0" value="{$video_data.dg_time_s}" style="width:70px" onchange="chk_int2(this, 59)" />
+		</td>
+		<td>显示时间是指下载引导在视频播放中显示的时间点</td>
+	</tr>
+	<tr id="download_guide_4">
+		<td>显示时长:</td>
+		<td>
+			<input name='dg_long' id="dg_long" type="number" min="1" value="<?php if($video_data['dg_long']){echo $video_data['dg_long'];}else{echo 7;} ?>" style="width:70px" onchange="chk_int(this, 0)" /> s
+		</td>
+		<td></td>
+	</tr>
+	<tr id="download_guide_5">
+		<td>显示位置:</td>
+		<td>
+			<input name='dg_position' type="radio" <?php if($video_data['dg_position']==1){ ?>checked='checked'<?php } ?> value="1" />视频左上角 
+			<input name='dg_position' type="radio" <?php if($video_data['dg_position']==2){ ?>checked='checked'<?php } ?> value="2" />视频右上角 
+			<input name='dg_position' type="radio" <?php if($video_data['dg_position']==3){ ?>checked='checked'<?php } ?> value="3" />视频左下角 
+			<input name='dg_position' type="radio" <?php if($video_data['dg_position']==4 || !$video_data['dg_position']){ ?>checked='checked'<?php } ?> value="4" />视频右下角 
+		</td>
+		<td></td>
+	</tr>
+	<tr><td colspan="3"><span style="font-size: 16px;">内容属性</span></td></tr>
+    <tr class="sub_tr tag">
+	    <td style="width: 15%">内容性质</td>
+	    <td><?php echo $content_xz ?></td>
+	    <td></td>
+	</tr>
+	<tr class="sub_tr tag">
+	    <td style="width: 15%">内容质量</td>
+	    <td><?php echo $content_zl ?></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr tag">
+	    <td style="width: 15%">内容栏目</td>
+	    <td>{$content_lm}</td>
+	    <td></td>
+	</tr>
+    <tr class="sub_tr tag">
+	    <td style="width: 15%">内容来源</td>
+	    <td>
+	    	<?php echo $con_source;?>
+	    </td>
+	    <td></td>
+	</tr> 
+	<tr class="sub_tr tag">
+	    <td style="width: 15%">用户倾向</td>
+	    <td>
+	    	<?php echo $user_tend;?>
+	    </td>
+	    <td></td>
+	</tr>
+<tr  class="sub_tr tag">
+	<td colspan="3">{$content_tag}</td>
+</tr>   
+	
+	<tr class="sub_tr">
+		<td colspan="3">
+			<input type='hidden' id="content_tags" name="content_tags" value=''/>
+			<input type='hidden' id="content_column" name="content_column" value=''/>
+            <input type='hidden' id="id" name="id" value='<?php echo $id ?>'/>
+            <input type='hidden' id="sysc" name="sysc" value='<?php echo $sysc ?>'/>
+            <input type='hidden' id="status" name="check_status" value='<?php echo $check_status ?>'/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>
+

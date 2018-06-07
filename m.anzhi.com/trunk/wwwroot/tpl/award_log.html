@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>中奖纪录</title>
+    <style type="text/css">
+        body{
+            height:1000px;
+        }
+        #lotteryContainer {
+            position:relative;
+            width: 300px;
+            height:100px;
+        }
+        #drawPercent {
+            color:#F60;
+        }
+    </style>
+<link href="/css/worldcup.css" type="text/css" rel="stylesheet">
+<script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+    <script src="js/lottery.js"></script>
+    <script>
+        window.onload = function () {
+            var award_level = ($("#award_level").val());
+            var lottery = new Lottery('lotteryContainer', '#CCC', 'color', 300, 125, drawPercent);
+            lottery.init('img/award'+award_level+'.jpg', 'image');
+
+            function drawPercent(percent) {
+                if(percent<0.3)
+                {
+                    var gid = $("#gid").val();
+                    var count = $("#setcount").html();
+                    
+                    var param = {
+                        gid : gid
+                    };
+                    $.ajax({
+                        url:'/award_log.php',
+                        type:'POST',
+                        data:param,
+                        secureuri:false,
+                        dataType:'json',
+                        success:function(data){
+                            $("#once").css('display','block');
+                            if(parseInt(count)>=1){
+                                $("#setcount").html(count-1);
+                            }
+                        }
+                    });
+                }
+                if(percent>=40)
+                {
+                    $("#lotteryContainer").css("display","none");
+                    $("#award_pic").css("display","block");
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+<section class="main">
+<input type="hidden" id="award_level" value="<!--{$out.result_nogua.award_level}-->">
+<div class="main_part">
+<!--{if $out.count gt 0}-->
+        <div class="scratch_part6">
+            <div class="rasp">
+                <input type="hidden" value="<!--{$out.result_nogua.g_id}-->" id="gid">
+                <div class="rasp_top_module" style="width:301px; height:124px;">
+
+                    <div id="lotteryContainer"></div>
+                    <div id="award_pic" style="display:none"><img src="img/award<!--{$out.result_nogua.award_level}-->.jpg"></img></div>
+
+                </div>
+                <p class="rasp_form" style="padding:10px 0px;" align="center">剩余刮刮卡数量:<span id="setcount"><!--{$out.count}--></span> <span id="once" style="display:none;"><input type="button" value="再刮一次" onclick="location.reload();"></span> </p>
+            </div>
+            <div class="clear"></div>
+        </div>
+<!--{/if}-->
+
+<!--{if $out.count eq 0}-->
+        <div class="scratch_part6">
+            <div class="rasp">
+                暂未获得刮刮卡,去竞猜比赛获得刮刮卡?<br>
+                <p style="padding:10px 0 15px;text-align:center;"><a href="/worldcup.php?sid=<!--{$out.sid}-->" style="background:url(/images/banner_description_bg.png) no-repeat scroll 0px -220px;padding:4px 15px; font-size:14px;color:#fff; cursor:pointer;text-decoration:none;">去竞猜</a>
+                </p>
+</div>
+        </div>
+<!--{/if}-->
+
+<!--{foreach from=$out.result item=v key=k}-->
+        <div class="scratch_btn">
+            <div class="rasp">
+                <div class="rasp_top_module">
+<!--{if $v.award_status eq 1}-->
+                	<p class="award">您中了<font class="money"><!--{$v.level_money}-->元</font>话费</p>
+                    <p class="notice">客服会在10个工作日内直充到您本次活动填写手机号，请注意查收短信。</p>
+<!--{/if}-->
+<!--{if $v.award_status eq 2}-->
+                    <p class="join">谢谢参与，请不要气馁，多刮几张，幸运之神一定会垂青您的。</p>
+<!--{/if}-->
+                </div>
+                <p class="rasp_form">来自&nbsp;<!--{$v.begintime}--> <span><!--{$v.home_name}-->VS<!--{$v.client_name}--></span></p>
+            </div>
+            <div class="clear"></div>
+        </div>
+<!--{/foreach}-->
+        <div class="clear"></div>
+    </div>
+</section>
+</body>
+</html>

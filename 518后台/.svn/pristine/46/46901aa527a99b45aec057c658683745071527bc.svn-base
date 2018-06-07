@@ -1,0 +1,199 @@
+<include file="../Public/header" />
+<script>
+
+	function check_user(){
+		var user = $("#username").val();
+		var uid = $("#uid").val();
+		if(user){
+			$.ajax({
+				type: "GET",
+				url: '__URL__/check_username/username/'+user+'/uid/'+uid+'',
+				dataType: 'json',
+				success:function(data){
+					if(data == 1){
+						$("#username1").html("用户名已存在");
+						$("#username").css("border","#ff0000 1px solid");
+						$("#repeat").val("1");
+					}else{
+						$("#username1").html("该用户名可用");
+						$("#repeat").val("2");
+						$("#username").css("border","");
+					}
+				}
+			});
+		}
+	}
+	
+	function checkit(){
+		if(confirm("确定要这么执行该操作吗？")){
+			$("#account_name").css("border","");
+			$("#bank_name").css("border","");
+			$("#bank_account").css("border","");
+			$("#bank_addr").css("border","");
+			$("#min_balance").css("border","");
+			$("#username1").html("");
+			return true;
+		}
+		return false;
+	}
+	
+	function check(){
+		var passwd_val = $("#passwd").val();
+		var rpasswd_val = $("#rpasswd").val();
+		var username = $("#username").val();
+		var account_type = $("#account_type").val();
+		var account_name = $("#account_name").val();
+		var bank_name = $("#bank_name").val();
+		var bank_addr = $("#bank_addr").val();
+		var min_balance = $("#min_balance").val();
+		var bank_account = $("#bank_account").val();
+		var repeat = $("#repeat").val();
+		var str = "[!~@#$%^&*(),.><\"/':;?/]|\/{}]]"; 
+		var reg = new RegExp(str);
+		var r   = "^[1-9]d*|0$";
+		var re   =   new   RegExp(r); 	
+		if(!username){
+			$("#username1").html('请输入用户名');
+			user_not = 1;
+		}else{
+			user_not = 2;
+			$("#username1").html('');
+		}
+		if(!passwd_val){
+			$("#passwd1").html('请输入密码');
+			pas_not = 1;
+		}else{
+			pas_not = 2;
+			$("#passwd1").html('');
+		}
+		if(passwd_val && (passwd_val != rpasswd_val)){
+			$("#rpasswd1").html('两次密码输入不一致');
+			rpas_not = 1;
+		}else{
+			rpas_not = 2;
+			$("#rpasswd1").html('');
+		}
+		if(!account_type){
+			$("#account_type1").html('请选择账户类型');
+			type_not = 1;
+		}else{
+			type_not = 2;
+			$("#account_type1").html('');
+		}
+		if(account_name.length > 50 || account_name.length < 2 || reg.test(account_name)){
+			$("#account_name").css("border","#ff0000 1px solid");
+			name_not = 1;
+		}else{
+			name_not = 2;
+			$("#account_name").css("border","");
+		}
+		if(bank_name.length<2 || bank_name.length>50 || reg.test(bank_name)){
+			$("#bank_name").css("border","#ff0000 1px solid");
+			bank_not = 1;
+		}else{
+			bank_not = 2;
+			$("#bank_name").css("border","");
+		}
+
+		if(bank_account.length<10 || bank_account.length>20 || isNaN(bank_account)){
+			$("#bank_account").css("border","#ff0000 1px solid");
+			account_not = 1;
+		}else{
+			account_not = 2;
+			$("#bank_account").css("border","");
+		}
+		if(bank_addr.length<2 || bank_addr.length>50 || reg.test(bank_addr)){
+			$("#bank_addr").css("border","#ff0000 1px solid");
+			addr_not =1;
+		}else{
+			addr_not = 2;
+			$("#bank_addr").css("border","");
+		}
+		if(min_balance.length > 8 || isNaN(min_balance) || min_balance <0 || !min_balance.match(re)){
+			$("#min_balance").css("border","#ff0000 1px solid");
+			balance_not =1;
+		}else{
+			balance_not = 2;
+			$("#min_balance").css("border","");
+		}
+		
+		if(repeat ==1){
+			$("#username1").html("用户名已存在");
+		}
+
+
+		if(repeat == 1 || balance_not == 1 || addr_not == 1 || account_not == 1 || bank_not == 1 || name_not == 1 || type_not == 1 || rpas_not == 1 || pas_not ==1 || user_not == 1){
+			return false;
+		}
+	}
+	
+
+</script>
+</head>
+<body>
+
+<span style="padding-left:50px">创建新账号</span><br /><br />
+<form action="__URL__/submit_channel_user" method="post" style="padding-left:50px" >
+<table>
+	<tr>
+		<td>创建用户名：</td>
+		<td><input type="text" name="username" id="username" value="{$user_result['username']}" onBlur="check_user();" /><input type="hidden" name="uid" value="{$uid}" id="uid" /></td>
+		<td><span style="color:red;" id="username1"></span><input type="hidden" name="repeat" id="repeat" /></td>
+	</tr>
+	<tr>
+		<td>密码：</td>
+		<td><input type="password" name="passwd" id="passwd" /></td>
+		<td><span style="color:red;" id="passwd1"></span></td>
+	</tr>
+	<tr>
+		<td>重复输入密码：</td>
+		<td><input type="password" name="rpasswd" id="rpasswd" /></td>
+		<td><span style="color:red;" id="rpasswd1"></span></td>
+	</tr>
+	<tr>
+		<td>账号类型：</td>
+		<td>
+			<select name="account_type" id="account_type">
+				<option value="">请选择账号类型</option>
+				<option value="1" <?php if($account_result['account_type'] == 1){ ?>selected<?php } ?> >企业</option>
+				<option value="2" <?php if($account_result['account_type'] == 2){ ?>selected<?php } ?> >个人</option>
+			</select>
+		</td>
+		<td><span style="color:red;" id="account_type1"></span></td>
+	</tr>
+	<tr>
+		<td>账户名：</td>
+		<td><input type="text" name="account_name" id="account_name" value="{$account_result['account_name']}"/></td>
+		<td align="left"><span style="color:red;" id="account_name1">2-50个字符的中文、英文大小写及数字</span></td>
+	</tr>
+	<tr>
+		<td>银行名称：</td>
+		<td><input type="text" name="bank_name" id="bank_name" value="{$account_result['bank_name']}" /></td>
+		<td align="left"><span style="color:red;" id="bank_name1">	2-50个字符的中文、英文大小写及数字</span></td>
+	</tr>
+	<tr>
+		<td>银行账号：</td>
+		<td><input type="text" name="bank_account" id="bank_account" value="{$account_result['bank_account']}" /></td>
+		<td align="left"><span style="color:red;" id="bank_account1">10-20位的数字</span></td>
+	</tr>
+	<tr>
+		<td>开户行：</td>
+		<td><input type="text" name="bank_addr" id="bank_addr" value="{$account_result['bank_addr']}" /></td>
+		<td><span style="color:red;" id="bank_addr1" align="left">2-50个字符的中文、英文大小写及数字<br />例：xx省xx市xx支行</span></td>
+	</tr>
+	<tr>
+		<td>最低结算值:</td>
+		<td><input type="text" name="min_balance" id="min_balance" value="{$account_result['min_balance']}" />元</td>
+		<td align="left"><span style="color:red;" >8个字符以内的数字</span></td>
+	</tr>
+	<tr>
+		<td><span style="color:red;">注：以上内容均为必填项</span></td>
+	</tr>
+	<tr>
+		<td><?php if($uid){ ?><input type="submit" value="下一步" onclick="return check();" />&nbsp;&nbsp;<a href="__URL__/create_channel_user/been_uid/{$uid}/" onclick="return checkit();" style="display:block;width:48px;height:22px;border:1px solid #CCC;background:#F5F5F5;float:right;text-align:center;">重置</a>&nbsp;&nbsp;&nbsp;&nbsp;<?php }else{ ?><input type="submit" value="下一步" onclick="return check();" />&nbsp;&nbsp;<input type="reset" value="重置" onclick="return checkit();" /><?php } ?></td>
+	</tr>
+</table>
+</form>
+
+</body>
+</html>

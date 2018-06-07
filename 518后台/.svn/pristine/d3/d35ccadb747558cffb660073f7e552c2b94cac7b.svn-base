@@ -1,0 +1,139 @@
+<style>
+table{
+    border: 0px;
+}
+td{
+    border: 0px solid #000;
+}
+</style>
+<body>
+
+<form method='post' action="__URL__/doadd/" enctype="multipart/form-data">
+<table width="80%" border="1" align="center">
+<tr>
+      <td height="25" align="left"><h2>|添加</h2></td>
+    </tr>
+	<tr>
+      <td align="right">TID：</td>
+      <td align="left"><input type="text" name="tid" id="tid" onblur="getTid(this.value)" value="" style="width:60%"/><span style="color:red" id="info"></span></td>
+    </tr>
+	<tr>
+      <td align="right">原文标题：</td>
+      <td align="left"><input type="text" name="title" id="title" disabled="disabled" value="" style="width:60%"/></td>
+    </tr>
+	<tr>
+      <td align="right">原文作者：</td>
+      <td align="left"><input type="text" name="author" id="author" disabled="disabled" value="" style="width:60%"/></td>
+    </tr>
+	<tr>
+      <td align="right">宣传标题：</td>
+      <td align="left"><input type="text" name="ext_title" id="ext_title" value="" style="width:60%"/></td>
+    </tr>
+	<tr>
+      <td align="right">宣传图片：</td>
+      <td align="left"><input id="viewFiles" name="ext_img" value="" type="file" onchange="show()"/><br />jpg,jpeg,png格式，最大宽度700像素</td>
+    </tr>
+	<tr>
+      <td></td>
+      <td align="left"><img id="viewImg" src="" style="max-height:100px;max-width:100px;"/>
+      <a href="javascript:;" onclick="delimg();">删除</a>
+      </td>
+    </tr>
+	<tr>
+      <td align="right">排序值：</td>
+      <td align="left"><input type="text" name="order" id="order" value="" style="width:60%"/></td>
+    </tr>
+	<tr>
+      <td align="right">开始时间：</td>
+      <td align="left"><input type="text" name="starttime" id="starttime" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value=""/></td>
+    </tr>
+	<tr>
+      <td align="right">结束时间：</td>
+      <td align="left"><input type="text" name="endtime" id="endtime" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value=""/></td>
+    </tr>
+	<tr>
+      <td colspan="2" align="center"><input type="submit" name="submit" onclick="return check()" class="search_btn" style="display:inline-block;" id="submit" value="添加" /> <input type="button" class="search_btn" style="display:inline-block;" onclick="tb_remove();" value="取消" /></td>
+    </tr>
+</table>
+</form>
+<script type="text/javascript">
+function check(){
+	var check =  document.getElementById("tid").value;
+	if($.trim(check) == ''){
+		alert('TID不能为空');
+		return false;
+	}
+	var check =  document.getElementById("info").style.color;
+	if(check == 'red'){
+		alert('TID不正确');
+		return false;
+	}
+	var check =  document.getElementById("order").value;
+    check = $.trim(check);
+	if(check > 100 || check < 1){
+		alert('排序值需要在1-100之间');
+		return false;
+	}
+	var starttime =  document.getElementById("starttime").value;
+	if($.trim(starttime) == ''){
+		alert('开始时间不能为空');
+		return false;
+	}
+	var endtime =  document.getElementById("endtime").value;
+	if($.trim(endtime) == ''){
+		alert('结束时间不能为空');
+		return false;
+	}
+    if(starttime >= endtime){
+        alert('开始时间必须小于结束时间');
+		return false;
+    }
+}
+function delimg(){
+	document.getElementById("viewFiles").value = '';
+	document.getElementById("viewImg").src = '';
+}
+function getTid(val){
+    var val = parseInt(val);
+	$.getJSON('__URL__/ajaxchecktid/tid/'+val+'/',
+        function(e){
+            if(e.ok){
+                document.getElementById("title").value = e.title;
+                document.getElementById("author").value = e.author;
+                document.getElementById("info").innerHTML = '√';
+                document.getElementById("info").style.color = 'green';
+            } else {
+                document.getElementById("title").value = '';
+                document.getElementById("author").value = '';
+                document.getElementById("info").innerHTML = '该帖子不存在';
+                document.getElementById("info").style.color = 'red';
+            }
+        }
+    )
+}
+</script>
+
+<!--[if lt IE 9]>
+<script type="text/javascript">
+function show(){
+	var viewFiles = document.getElementById('viewFiles').value;
+	document.getElementById('viewImg').src = viewFiles;
+}
+
+</script>
+<![endif]-->
+<!--[if !IE]><!-->
+<script type="text/javascript">
+    var viewFiles = document.getElementById("viewFiles");
+    var viewImg = document.getElementById("viewImg");
+    function show () {
+		var file = viewFiles.files[0];
+        var reader = new FileReader();
+        reader.onload = function( evt ){
+            viewImg.src = evt.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+
+</script>
+<!--<![endif]-->

@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>区间软件列表</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css?version1" />
+
+<link rel="stylesheet" href="/Public/css/tablelist.css?1" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+
+<script>
+	
+	function checkit(){
+		if(confirm("是否确认删除该条内容，点击确认删除"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	// function get_contnettype(id){
+	// 	$('#id').val(id);
+	// 	$("#content_type_div").html('');
+	// 	var url = "__URL__/pub_add_content/id/"+id;
+	// 	$.ajax({
+	// 		type: "GET",
+	// 		url : url,
+	// 		async:false,
+	// 		dataType: 'json',	
+	// 		success: function(data){
+	// 			var soft_arr = {:data};
+	// 			var content_arr = edit_load(soft_arr);
+	// 			// 生成推荐内容展示
+	// 			generate_append_html("content_type_div", content_arr);
+	// 			// 生成推荐链接
+	// 			var function_from="searchkeywords";
+	// 			href = generate_content_type_href('content_type_div', "2,3,4,5,6,7,8,9,10", content_arr,function_from);
+	// 			tb_show('title',href,"thickbox");
+	// 		}
+	// 	});
+	// }
+
+	
+</script>
+<div style="padding:20px;">
+&nbsp;&nbsp;<a href="__URL__/add_list_recommend/product_id/{$product_id}?1/1" class="thickbox search_btn" style="float:left; margin:0 10px 0 6px; display:inline">新增</a><a class="search_btn" href="__URL__/searchkeywords_list_hot/product_id/{$product_id}" style="float:left">返回</a>
+<div class="clear"></div>
+<!-- <form action="__URL__/update_searchkeywords" method="post"> -->
+<table width="99%" cellpadding="0" cellspacing="0" border="1" class="table_list">
+	<thead>
+		<tr>
+			
+			<th>名称</th>
+			<th>排序</th>
+			<th>推荐内容</th>
+			<th>展示规则</th>
+			<th>开始时间</th>
+			<th>结束时间</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach($list as $key => $val){ ?>
+		<tr <?php if($val['starts_tm'] > time()){ ?>style="background-color:#ccc;"<?php } ?>>
+			
+			<td><span class="normal">{$val.key_word}</span></td>
+			<td>
+				<span>{$val['rank']}</span>
+			</td>
+			<td>
+				<!--下面a里的href的url会在ready函数里自动生成-->
+				<!-- <a id="content_type_a" href="javascript:void(0)" onclick="get_contnettype({$val.id});" >
+					<font color="black" id='content_type_{$val.id}' >{$val.content_type}</font>
+				</a> -->
+				<font color="black" id='content_type_{$val.id}' >{$val.content_type}</font>
+				<script>
+					<?php if($val['content_type'] == 2){ ?>
+						var activity_name = convertActivityId2ActivityName({$val.activity_id});
+						$("#content_type_<?php echo $val['id']; ?>").html("活动-"+activity_name);	
+					<?php }else if($val['content_type'] == 3){ ?>
+						var feature_name = convertFeatureId2FeatureName({$val.feature_id});
+						$("#content_type_<?php echo $val['id']; ?>").html("专题-"+feature_name);	
+					<?php }else if($val['content_type'] == 4){ ?>
+						var page_name = convertPageType2PageName('{$val.page_type}');
+						$("#content_type_<?php echo $val['id']; ?>").html("页面-"+page_name);	
+					<?php }else if($val['content_type'] == 8 || $val['content_type'] == 10){ ?>
+						var order_name = convertOrderId2OrderName({$val.activity_id});
+						$("#content_type_<?php echo $val['id']; ?>").html("预约-"+order_name);	 
+					<?php } ?>
+				</script>
+			</td>
+			<td><?php if($val['show_rule']==1){ echo "无历史记录展示"; }else{echo "有无历史记录均展示";} ?></td>
+			<td>
+			<?php if($val['start_tm']){ ?>{$val.start_tm}<?php } ?>
+			</td>
+			<td><?php if($val['end_tm']){ ?>{$val.end_tm}<?php } ?>
+			</td>
+			<td><a href="__URL__/edit_list_recommend/id/{$val.id}" class="thickbox" style='color:blue;'>编辑</a> | <a href="__URL__/del_list_recommend/id/{$val.id}/content_id/{$val.content_id}" onclick="return checkit();" style='color:blue;'>删除</a></td>
+		</tr>
+		<?php } ?>
+	</tbody>
+</table>
+<!-- </form> -->
+</div>
+</body>
+</html>

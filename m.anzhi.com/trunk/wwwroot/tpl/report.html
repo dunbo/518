@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="Android,安卓,安卓网,安卓市场,安卓游戏,电子市场,安卓软件,Android游戏,安卓手机,游戏汉化,手机游戏,Android软件,软件下载,最新汉化软件,安卓游戏下载,游戏汉化" />
+<meta name="description" content="安智市场,Android,安卓,安卓网,安卓市场,电子市场,安卓游戏,应用商店-国内最专业的Android安卓电子市场，提供海量安卓软件、Android手机游戏、安卓最新汉化软件、汉化游戏资源及最新APK汉化、汉化破解APP、APK免费下载，致力于为用户打造最贴心的Android安卓手机应用商店" />
+<title>举报</title>
+<script type="text/javascript" src="/js/skin.js"></script>
+<script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript">
+var report_arr = <!--{$out.report_results}-->
+
+function my_describe(){
+	var report_id = $('input[name^=report_id]');
+			var report_str = '';
+			for(i=0;i<report_id.length;i++){
+				if(report_id[i].checked == true){
+					report_str += report_id[i].value+',';
+				}
+			}
+			var report_str_go = report_str.substring(0,report_str.length-1)
+			var report_id_arr = new Array();
+			report_id_arr = report_str_go.split(",");
+			
+			if(report_arr.length > 1){
+				for(i=0;i<report_id_arr.length;i++){
+					var first_report = report_id_arr[0];
+				}
+				for(i=0;i<report_arr.length;i++){
+					if(first_report == report_arr[i]['id'])
+					$('#describe').html(report_arr[i]['suggest']);
+				}
+			}else if(report_arr.length == 1){
+				for(i=0;i<report_arr.length;i++){
+					if(report_arr == report_arr[i]['id'])
+					$('#describe').html(report_arr[i]['suggest']);
+				}
+			}else if(report_arr == ''){
+				$('#describe').html('');
+			}
+}
+
+var flag = 1;
+$(document).ready(function(){
+	$('.report_list').click(function(){
+		if (!$(this).hasClass("checked")){
+			$(this).addClass("checked");
+			$(this).parent('.report_items li').children('span').addClass('checkedbg');
+			$(this).parent('.report_items li').children('input').attr('checked',true);
+			my_describe();
+		}
+		else {
+			$(this).removeClass("checked");
+			$(this).parent('.report_items li').children('span').removeClass('checkedbg');
+			$(this).parent('.report_items li').children('input').attr('checked',false);
+			my_describe();
+		}
+	});
+	$('.report_items ul li span').click(function(){
+		if (!$(this).parent('.report_items ul li').children('.report_list').hasClass("checked")){
+			$(this).parent('.report_items ul li').children('.report_list').addClass("checked");
+			$(this).addClass('checkedbg');
+			$(this).parent('.report_items ul li').children('input').attr('checked',true);
+			my_describe();
+		}
+		else {
+			$(this).parent('.report_items ul li').children('.report_list').removeClass("checked");
+			$(this).removeClass('checkedbg');
+			$(this).parent('.report_items li').children('input').attr('checked',false);
+			my_describe();
+		}
+	});
+});
+
+function del_question(){
+	if(flag == 1){
+		flag = 2;
+		$('#describe').html('');
+	}
+}
+
+$(function() {
+	$('#describe').blur(function() {
+		if($('#describe').val() == ''){
+			my_describe();
+			flag = 1;
+		}else{
+			flag = 2;
+		}
+	});
+});
+
+function _submit(){
+	var report_id = new Array();
+	$('input[name ^= "report_id[]"]:checked').each(function(){
+		report_id.push($(this).val());
+	});
+
+	var describe_str = $('#describe').val();
+	if(report_id.length == 0){
+		window.AnzhiActivitys.showToastForJs("请您选择举报类型");
+		return false;
+	}
+	
+	if(describe_str == ""){
+		window.AnzhiActivitys.showToastForJs("请您填写举报描述");
+		return false;
+	}
+
+	if(flag == 1){
+		window.AnzhiActivitys.showToastForJs("请您填写举报描述");
+		return false;
+	}
+
+	var str = '{"ITEMS":['+report_id.join(',')+'],"CONTENT":"'+describe_str+'"}';
+	window.AnzhiActivitys.reportHarm(str,'举报提交成功，安小智一定尽快核实并处理','举报提交失败，请您重试');
+
+}
+
+
+$(function() {	
+	$("#submit_btn").click(function() {
+		_submit();
+		return false;
+	});
+});
+</script>
+</head>
+
+<body>
+<div id="main">
+	<div class="report_wrap" style="min-height:480px;">
+		<div class="titles_01">
+			<p><span class="required_must">*</span>请选择举报类型：</p>
+		</div>
+		<form method="post" action="" class="report_form" onSubmit="return _submit();">
+			<div class="report_items">
+				<ul>
+					<!--{foreach from=$out.report_result key=k item=v }-->
+					<li>
+						<input type="checkbox" name="report_id[]" value="<!--{$v.id}-->"  />
+						<span></span>
+						<label class="report_list"><!--{$v.question}--></label>	
+					</li>
+					<!--{/foreach}-->
+				</ul>
+			</div>
+			<div class="titles_02">
+				<p><span class="required_must">*</span>描述：</p>
+			</div>
+			<textarea id="describe" onClick="del_question();"></textarea>
+			<div class="form_btn">
+				<input type="submit" value="举报" id="submit_btn">
+			</div>
+		</form>
+	</div>
+</div>
+</body>
+</html>

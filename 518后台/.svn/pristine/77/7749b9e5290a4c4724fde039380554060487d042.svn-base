@@ -1,0 +1,126 @@
+<script type="text/javascript" src="/Public/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/Public/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<html>
+<head></head>
+<body>
+<style type="text/css">
+.opentable{width:98%; margin:10px auto; border-collapse:collapse; font-size:13px;}
+.opentable td{border:1px solid #dcdcdc; padding:5px;}
+.inputtext{width:100px; height:22px; border:1px solid #ececec;}
+#add3{width:16px; height:16px; margin-top:2px; display:inline-block; background:url(/Public/images/icon_add.png) no-repeat; cursor:pointer}
+.icon_remove{width:16px; height:16px; margin-top:2px; display:inline-block; background:url(/Public/images/icon_remove.png) no-repeat; cursor:pointer}
+</style>
+
+<form action="/index.php/Channel_cooperation/AdScheme_p/doedit" method="post">
+<div>方案类型：<select id="scheme_type" name="scheme_type"><option value="1" <?php if($name[0]['scheme_type']==1){echo 'selected';}?>>人民币结算</option><option value="2" <?php if($name[0]['scheme_type']==2){echo 'selected';}?>>金币结算</option></select></div>
+<div id="add1"><span>方案名称：<input type="text" name="name" id="update_content" value="{$name.0.name}" onKeyDown="gbcount(this.form.update_content);" onKeyUp="gbcount(this.form.update_content);"></span>
+<input type="hidden" name="pid" id="pid" value="{$data.pid}">
+	<table cellpadding="0" cellspacing="0" class="opentable">
+	<tr>
+		
+		<td colspan=2 align='center'>日均激活量&emsp;&emsp;<span id="add3"></span></td>
+		<td>单价（元）</td>
+		</tr>
+		<tr>
+		<td>小于等于：</td>
+		<td><input type="text" name="arr[]" id="sta_num" value="{$data.sta}" class="inputtext"></td>
+		<td><input type="text" name="arr1[sta]" id="" value="{$data.sta_danjia}" class="inputtext"><input type="hidden" id="my_count" value="<?php echo count($data['asd']); ?>" /></td>
+		</tr>
+
+		<tbody id="add2">
+		<volist name="data['asd']" id="vo" key='k'>
+			<tr id="{$k}">
+			<td ><span onClick="del({$k})" class="icon_remove"></span>&nbsp;&nbsp;&nbsp;区间：</td>
+			<td><input type="text" name="arr[]" id="star_{$vo.id}" value="{$vo.star_activations}" class="inputtext">-<input type="text" name="arr[]" id="end_{$vo.id}" value="{$vo.end_activations}" class="inputtext"><input type="hidden" name="id[]"  value="{$vo.id}"></td>
+			<td><input type="text" name="arr1[]" value="{$vo.price}" class="inputtext"></td>
+			</tr>
+		</volist>
+		</tbody>
+
+		<tr>
+		<td>大于等于：</td>
+		<td><input type="text" name="arr[]" id="end_num" value="{$data.end}" class="inputtext"></td>
+		<td><input type="text" name="arr1[end]" id="" value="{$data.end_danjia}" class="inputtext"></td>
+		</tr>
+		
+		<tr>
+		<td><input type="hidden" value="{$data.0.id}" name="id"><input type="submit" value="确定" onclick="return f1();" class="search_btn"></td>
+		<td><a href="/index.php/Channel_cooperation/AdScheme_p/index"><button type="button" onclick='tb_remove();' class="search_btn">取消</button></a></td>
+		<td></td>
+		</tr>
+	</table>	
+	
+</div>
+<p>注：<br/>1.&nbsp&nbsp激活量仅可填写整数。</p>
+<p>2.&nbsp区间起始数值需比上一区间末尾值大1</p>
+<p>3.&nbsp单价保留两位小数。</p>
+</form>
+</body>
+</html>
+<script>
+var i = 1;
+$("#add3").click(function(){
+	var the_have= $('#my_count').val();
+	if(the_have && i==1){
+	i = eval(the_have) + 1;
+	}else{
+		i = i;
+	}
+	id = i;
+	i++;
+	var my_all = $('input[id^=end_]');
+	
+	if(eval(my_all.length) > 5){
+		return false;
+	}
+	
+	$("#add2").append("<tr id="+id+"><td><span onclick='del("+id+");' class='icon_remove'></span>&nbsp;&nbsp;&nbsp;区间：</td><td><input type='text' name='arr[]' id='' class='inputtext'>-<input type='text' name='arr[]' id='' class='inputtext'></td><td><input type='text' name='arr1[]' id='end_"+i+"' class='inputtext'></td></tr>");
+})
+function del(i){
+	$('#'+i+'').remove();
+}	
+function gbcount(message)
+{
+	var max;
+	max = 20;
+	if (message.value.length > max) {
+		message.value = message.value.substring(0,max);
+		alert("小组名称不能多于20个字符");
+		return false;
+	}
+}	
+function f1(){
+	var regs = /^[0-9]*[1-9][0-9]*$/;
+	var sta_num = $("#sta_num").val();
+	var nums= $("#nums").val();
+	var end_num = $("#end_num").val();
+	var reg =/^[0-9]{1,6}([.]{1,3}[0-9]{1,2})?$/;
+	var sta_val=$('input:text[name="arr1[sta]"]').val();
+	var val=$('input:text[name="arr1[]"]').val();
+	var end_val=$('input:text[name="arr1[end]"]').val();
+	if(!regs.test(sta_num) || !regs.test(end_num)){
+		alert("激活量仅可填写整数");
+		return false;
+	}
+	if(val==null){
+		if(val=="" || sta_val=="" || end_val==""){
+			alert("请填写单价");
+			return false;
+		}else if(!reg.test(sta_val) || !reg.test(end_val)){
+			alert("单价规则不符");
+			return false;
+		}
+	}else{
+		if(val=="" || sta_val=="" || end_val==""){
+			alert("请填写单价");
+			return false;
+		}else if(!reg.test(sta_val) || !reg.test(val) || !reg.test(end_val)){
+			alert("单价规则不符");
+			return false;
+		}
+	}
+}
+</script>

@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	
+<head>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script src="/Public/js/jquery.validate.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script>
+	function checkit_del(){
+		var choise = confirm("你确定进行删除操作吗？");
+		if(!choise){
+		return false;
+		}else{
+		 return true;
+		}
+	}
+	
+	function checkit(){
+		var choise = confirm("你确定进行取消认证吗？");
+		if(!choise){
+		return false;
+		}else{
+		 return true;
+		}
+	}
+</script>
+<title>官方软件认证列表</title>
+</head>
+<body>
+<div style="width:99%; margin-top:4px">
+	<form action="__URL__/accreditation_list" method="get">
+		<table width="99%" border="1" align="center" cellpadding="0" cellspacing="0">
+			<tbody align="middle">
+			<tr>
+				<td width="10%">软件名称：</td>
+				<td width="15%"><input type="text" name="softname" id="softname" value="{$softname}"></td>
+				<td width="10%">软件包名：</td>
+				<td width="15%"><input type="text" name="package" id="package" value="{$package}"></td>
+			</tr>
+			<tr>	
+				<td>开始时间</td>
+				<td><span id="WebCalendar3"
+					style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+				<input id="start_at" name="start_at"
+					style="border: 0px none black; width: 100px;" value="{$start_at}"
+					size="15" type="text"><img src="/Public/js/calendar.gif"
+					onclick="return showCalendar('start_at', 'y-mm-dd');"
+					style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+				</span></td>
+				<td>结束时间</td>
+				<td><span
+					id="WebCalendar3"
+					style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+				<input id="end_at" name="end_at"
+					style="cursor: hand; width: 100px; border: none 0px black;"
+					value="{$end_at}" size="15" type="text"><img
+					src="/Public/js/calendar.gif"
+					onclick="return showCalendar('end_at', 'y-mm-dd');"
+					style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+					height="15px"></span></td>
+			</tr>
+			<tr>
+			<td align="center" >软件ID：</td>
+			<td><input type="text" name="softid" id="softid" value="{$softid}"/></td>	
+			<td><input type="submit" value="搜索"></td>
+			</tr>
+			</tbody>
+		</table>
+	</form>
+	<form action="__URL__/accreditation_list" name="push_form" method="get">	
+	<div  align="right" style="width:99%; margin-top:4px">		
+			<td colspan="4" width="10%">当前状态：
+					<select name="zh_type" id="status" onChange="javascript:push_form.submit();">
+						<option value="" selected="selected">全部</option>
+						<option value="3" <?php if($zh_type==3) echo "selected";?>>未开始</option>
+						<option value="1" <?php if($zh_type==1) echo "selected";?>>正常</option>
+						<option value="2" <?php if($zh_type==2) echo "selected";?>>过期</option>
+					</select>
+			</td>
+	</div>
+	</form>
+	<table width="99%" border="1" align="center" cellpadding="0" cellspacing="0" style="margin-top:10px">
+		<thead>
+			<tr align="center">
+				<th width="3%" bgcolor="#E3E2FE">软件ID</th>
+				<th width="10%" bgcolor="#E3E2FE">软件名称</th>
+				<th width="5%" bgcolor="#E3E2FE">软件包名</th>
+				<th width="10%" bgcolor="#E3E2FE">版本名称</th>
+				<th width="5%" bgcolor="#E3E2FE">版本号</th>
+				<th width="5%" bgcolor="#E3E2FE"><a href="__URL__/accreditation_list/order/{$order}/">下载量</a></th>
+				<th width="10%" bgcolor="#E3E2FE">认证开始时间</th>
+				<th width="10%" bgcolor="#E3E2FE">认证结束时间</th>
+				<th width="5%" bgcolor="#E3E2FE">官方认证状态</th>
+				<th width="5%" bgcolor="#E3E2FE">当前状态</th>
+				<th width="10%" bgcolor="#E3E2FE">操 作</th>
+				<!-- <th width="3%" bgcolor="#E3E2FE">备注</th> -->
+			</tr>
+		</thead>
+		<tbody>
+		<tr>软件列表：</tr>
+			<volist name="officialfetch_list" id="officialfetch">
+				<tr align="center">
+					<td height="20" align="center"> {$officialfetch.softid}</td>
+					<td><a href="/index.php/Sj/Soft/soft_list/softid/{$officialfetch.softid}">{$officialfetch.softname}</a></td>
+					<td align="center">{$officialfetch.package}</td>
+					<td align="center">{$officialfetch.version}</td>
+					<td align="center">{$officialfetch.version_code}</td>
+					<td align="center">{$officialfetch.total_downloaded}</td>
+					<td align="center">{$officialfetch.start_time}</td>
+					<td align="center">{$officialfetch.terminal_time}</td>
+					<if condition="$officialfetch.status eq 1">
+					<td align="center">是</td>
+					</if>
+					<if condition="$officialfetch.status eq 2">
+					<td align="center">否</td>
+					</if>
+					<if condition="$officialfetch.type eq 1">
+					<td align="center">正常</td>
+					</if>
+					<if condition="$officialfetch.type eq 3">
+					<td align="center">未开始</td>
+					</if>
+					<if condition="$officialfetch.type eq 2">
+					<td align="center">已过期</td>
+					</if>
+					<if condition="$officialfetch.type eq 2 or $officialfetch.status eq 2">
+					<td align="center"><a href="__URL__/confirm_timelist_one/package/{$officialfetch.package}/?height=300&width=300" class="thickbox">编辑认证</a><br>
+					<a onclick="return checkit_del()" href="__URL__/del_accreditation/package/{$officialfetch.package}">删除</a></td>
+					</if>
+					<if condition="$officialfetch.type eq 1 and $officialfetch.status eq 1 or $officialfetch.type eq 3">
+					<td align="center"><a href="__URL__/confirm_timelist_one/package/{$officialfetch.package}/?height=300&width=300" class="thickbox">编辑认证</a><br>
+					<a onclick="return checkit()" href="__URL__/rm_accreditation/packages/{$officialfetch.package}">取消认证</a></td>
+					</if>
+				</tr>
+			</volist>
+		</tbody>
+	</table>
+</div>
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>
+</html>

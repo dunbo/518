@@ -1,0 +1,165 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<style>
+.selink,.selink:hover {
+	padding:5px;
+	margin:3px;
+	border:1px solid #dcdcdc;
+	background-color:white;
+	color:blue;
+}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+<div style="height:50px;margin:5px;">
+	<div style="position:absolute;left:10px;margin: 5px;">
+    <form method="get" action="__URL__/showlist/"> 
+        红包名称： <input type="text" name="pname" value="{$pname}"/> 
+        红包id： <input type="text" name="id" value="{$id}"/> 
+        红包类型：  <select name="tasktype">
+        <option value="0">选择类型</option>
+        <volist id="types" name="packtypes">
+        <option value="{$types.id}" <if condition="$tasktype eq $types['id']">selected</if>>{$types.ptypename}</option>
+
+        </volist>
+        </select>
+        发放类型： <select id="ttype" name="givetype">
+        <option value="0">发放类型</option>
+        <option value="1" <if condition="$givetype eq 1">selected</if>>一次性发放</option>
+        <option value="2" <if condition="$givetype eq 2">selected</if>>整点发放</option>
+        <option value="3" <if condition="$givetype eq 3">selected</if>>自定义</option>
+        </select>
+    <input type="submit" name="submit" class="search_btn" style="display:inline-block;" value="查询"/>
+    </form></div>
+</div>
+<div style="height:50px;margin:5px;">
+
+    
+    <div style="margin:10px;">
+		<a href="__URL__/showlist/" class="search_btn" style="display:inline-block;">全部</a>
+		<a href="__URL__/add/" class="search_btn" style="display:inline-block;">添加</a>
+	</div>
+</div>
+<div >
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<!-- <th ><input type="checkbox"  onclick="SelectAll(this)"></th> -->
+			<th >ID</th>
+			<th >红包名称</th>
+			<th >红包类型</th>
+			<th >红包总额</th>
+			<th >红包总数</th>
+			<th style="width: 50px;">红包最低金额</th>
+			<th style="width: 40px;">红包最高金额系数</th>
+			<th >红包真实随机范围</th>
+			<th style="width: 50px;">任务奖励说明</th>
+			<th >发放类型</th>
+			<th >已领红包金额</th>
+			<th >已领红包数</th>
+			<th >剩余红包金额</th>
+			<th >剩余红包数</th>
+			<th >无效红包数</th>
+			<th >无效红包金额</th>
+			<th style="width: 100px;">绑定情况</th>
+			<th style="width: 30px;">是否补充金额</th>
+			<th style="width: 90px;">更新时间</th>
+			<th >操作</th>
+		</tr>
+	</thead>
+	<volist name="list" id="list">
+	<tr>
+<!-- 		<td><input type="checkbox" name="id[]" value="{$list.id}"></td> -->
+		<td>{$list.id|default=' '}</td>
+		<td>{$list.pname|default=' '}</td>
+		<td>{$list.typename}</td>
+		<td>{$list.oldmon|default=' '}</td>
+		<td>{$list.totalnum|default=' '}</td>
+		<td>{$list.cashmin|default=' '}</td>
+		<td>{$list.coef|default=' '}</td>
+		<td>{$list.cashmin}-{$list.cashmax}</td>
+        
+		<td>
+        <if condition="$list.ptype neq 6">
+            <if condition= "$list.awardtxt1" >{$list.awardtxt1}+ </if> 
+            <if condition= "$list.awardtxt2" >{$list.awardtxt2} </if> 
+            <if condition= "$list.awardtxt3" >~ {$list.awardtxt3} </if>         
+        <else />
+            无
+        </if>
+
+        
+        </td>
+		<td>
+        <if condition="$list.givetype eq 1" > 一次性发放
+        <elseif condition= "$list.givetype eq 2" /> 整点发放 
+        <else /> 自定义发放
+        </if>
+        </td>
+        <td>{$list.getmon}</td>
+		<td>{$list.getnum}</td>
+		<td>{$list.restmon}</td>
+		<td>{$list.restnum}</td>
+		<td>{$list.disnum}</td>
+		<td>{$list.dismon}</td>
+		<td>{$list.bindtxt}</td>
+		<td>{$list.numpritxt}</td>
+		<td>{$list.lasttime}</td>
+		<td>
+        <if condition="$list.bindstatus eq 0">
+        <a href="__URL__/edit/id/{$list.id}/" style="color:blue">编辑|</a>
+        <a href="__URL__/del/id/{$list.id}/" onclick="return ok('确定要删除数据吗？');" style="color:blue">删除|</a>
+        </if>
+        <a href="__URL__/edit/id/{$list.id}/copy/1/" style="color:blue">复制</a>
+		</td>
+		
+	</tr>
+	</volist>
+</table>
+<div class="navgition">
+	{$page|default='&nbsp;'}
+</div>
+</div>
+<script>
+function ok(data)
+  {
+   if(confirm(data))
+    return true;
+   else return false
+  }
+  
+function edit_s(){
+	j=getSelect();
+	if(j === false)return false;
+	window.location='/index.php/Zhiyoo/Brand/edit?action=brand_type_match&id='+j;
+}
+
+function del_se(){
+	j=getSelect();
+	if(j === false)return false;
+	if(ok('您确定要执行批量删除操作吗？'))window.location='__URL__/del?action=brand_type_match&id='+j;
+}
+
+function getSelect(){
+	var c = document.getElementsByName('id[]');
+	var length = c.length;
+	var j=new Array;
+	for(i=0;i<length;i++){
+		if(c[i].checked)j.push(c[i].value);
+	}
+	if(j.length==0){
+		alert('未选择任何一个选项！');
+		return false;
+	}
+	j=j.join(',');
+	return j;
+}
+
+
+</script>
+</body>
+</html>

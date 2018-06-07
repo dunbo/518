@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<table style='margin-top:10px;float:left;' width="100%" cellspacing="0" cellpadding="0" class="search_table">
+	<tbody>
+	<form method='get' action="__URL__/audit_content" >
+		<tr>
+			<td width="20%">标题名称：<input type="text" value="{$title}" id="title" name="title" class="search_item_text" style="width:140px" onkeyup="this.value = this.value.substring(0, 50)"></td>
+			<td width="20%">合作站点：
+				<select name="website_name" id="website_name" style="width:140px">
+					<option value="">--请选择--</option>
+					<foreach name="website_list" item="vo">
+						<option value="{$vo.id}" <if condition="$website_name eq $vo.id ">selected</if>>{$vo.website_name}</option>
+					</foreach>
+				</select>
+				<!--<input type="text"  value="{$website_name}" id="website_name" name="website_name" class="search_item_text" style="width:140px">-->
+			</td>
+			<td width="20%">标签：
+				<select name="tag" id="tag" style="width:140px">
+					<option value="">--请选择--</option>
+					<foreach name="tag_list" item="vo">
+						<option value="{$vo.id}" <if condition="$tag_id eq $vo.id ">selected</if>>{$vo.tag_name}</option>
+					</foreach>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td width="40%" width="300" colspan='3' >原文发布时间：<span><input type="text" name="begintime" id="begintime" value="{$begintime}" style="cursor: hand; width: 150px;" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>~
+				<span><input id="endtime" name="endtime" style="cursor: hand; width: 150px;"
+							 value="{$endtime}" size="15" type="text" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>
+			</td>
+			<td align='right' width="10%" colspan='5'><input type="submit" class="search_btn" value="搜索"></td>
+		</tr>
+		<input type="hidden" id="status" name="status" value="<?php echo $status; ?>" />
+	</form>
+	</tbody>
+</table>
+<table  width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+<tr height="35">
+	<td align="center" style=<?php if($status ==2){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/audit_content/status/2"><font style="color:#000; font-weight:bold">待审核</font></a>
+	</td>
+	<td align="center" style=<?php if($status ==1){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/audit_content/status/1"><font style="color:#000; font-weight:bold">已通过</font></a>
+	</td>
+	<td align="center" style=<?php if($status ==3){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/audit_content/status/3"><font style="color:#000; font-weight:bold">未通过</font></a>
+	</td>
+</tr>
+</table>
+
+<table style='float:left;' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<td >
+				<input type="button" class="search_btn" value="全选" onclick='javascript:$("input[name=content_list]").attr("checked",true); ' style="background:white">
+			</td>
+			<td colspan='<?php if($status==1||$status==3){echo 10;}else{echo 9;}?>'>
+				<input type="button" class="search_btn" value="反选" onclick='ag_select()' style="background:white">
+			</td>
+			<?php if($status == 2){ ?>
+			<td align='right'>
+				<input type="button" class="search_btn" value="批量通过" onclick="save_content('',1,1)" style="width:150px;background:white">
+			</td>
+			<td align='right'>
+				<input type="button" class="search_btn" value="批量驳回" onclick="save_content('',3,1)" style="width:150px;background:white">
+			</td>
+			<?php }else{ ?>
+			<td align='right'>
+				<input type="button" class="search_btn" value="批量撤销" onclick="save_content('',2,1)" style="width:150px;background:white">
+			</td>
+			<?php } ?>
+		</tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr>
+			<th width="3%">选择</th>
+			<th width="6%">合作咨询<br>ID</th>
+			<th width="8%">标题</th>
+			<th width="7%">默认图片</th>
+			<th width="7%">展示标题</th>
+			<th width="7%">合作站点</th>
+			<th width="7%">标签</th>
+			<th width="7%">作者</th>
+			<th width="7%"><a href="__URL__/audit_content?order_num=<?php if($order_num==''||$order_num=='asc'){echo 'desc';}else{echo 'asc';}?>&{$param}">点击量<?php if($order_num==''){echo '↑↓';}else if($order_num=='desc'){echo '↓';}else{echo '↑';}?></a></th>
+			<th width="8%"><a href="__URL__/audit_content?order_create=<?php if($order_create==''||$order_create=='desc'){echo 'asc';}else{echo 'desc';}?>&{$param}">抓取时间<?php if($order_create==''){echo '↑↓';}else if($order_create=='desc'){echo '↓';}else{echo '↑';}?></a></th>
+			<th width="8%"><a href="__URL__/audit_content?order_push=<?php if($order_push==''||$order_push=='asc'){echo 'desc';}else{echo 'asc';}?>&{$param}">原文发布时间<?php if($order_push==''){echo '↑↓';}else if($order_push=='desc'){echo '↓';}else{echo '↑';}?></a></th>
+			<th width="5%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='content_list' id='list'>
+		<tr>
+			<td align='left' id='{$list.id}'>
+				<input type="checkbox" name="content_list" value="{$list.id}" /><br/>
+			</td>
+			<td>
+				{$list.id}
+			</td>
+			<td>{$list.title}</td>
+			<td><img src ="{$list.images_small}" width="63" height="50"></td>
+			<td align='center' ><if condition="$list.az_titile neq ''">{$list.az_titile}<else />{$list.title}</if></td>
+			<td align='center' >{$list.website_name}
+			</td>
+			<td>{$list.tag_name}</td>
+			<td>{$list.from}</td>
+			<td>{$list.view_num}</td>
+
+			<td align='center' >{$list.create_tm|date="Y-m-d H:i:s",###}</td>
+			<td align='center' >
+				{$list.push_tm|date="Y-m-d H:i:s",###}
+			</td>
+			<td align='center' id="pro_{$list.id}">
+				<?php
+					if($status == 1||$status == 3){
+						?>
+							<a href="javascript:void(0);" class="blue"  onclick="save_content('{$list.id}',2,0)" style="text-decoration:none;">撤销</a>
+						<?php
+					}else{
+						?>
+							<a href="javascript:void(0);" class="blue"  onclick="save_content('{$list.id}',1,0)" style="text-decoration:none;">通过</a><br/>
+							<a href="javascript:void(0);" class="blue"  onclick="save_content('{$list.id}',3,0)" style="text-decoration:none;">驳回</a>
+						<?php
+					}
+				?>
+				<br><a href="__URL__/save_content?id={$list.id}&title={$list.title}" class="blue thickbox">编辑</a>
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='12'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+</html>
+<script>
+	function ag_select(){
+		var chks=$("input[name='content_list']");
+		$(chks).each(function(){
+			if($(this).attr('checked')!='checked'){
+				$(this).attr('checked','checked');
+			}else{
+				$(this).attr('checked',false);
+			}
+		});
+	}
+
+	function save_content(id,passed,is_more){
+		if(is_more==1){
+			var chks=$("input[name='content_list']:checked");
+			var ids="";
+			var i=0;
+			$(chks).each(function(){
+				ids+=this.value+',';
+				i++;
+			});
+			if(ids==''){
+				alert('未选择任何内容');
+			}
+			id = ids;
+		}else{
+			if(passed==2){
+				var info = "撤销";
+			}else if(passed==1){
+				var info = '通过'
+			}else if(passed==3){
+				var info = '驳回';
+			}
+			if(!confirm("确认"+info+"吗")){
+				return false;
+			}
+		}
+		if(id){
+			$.ajax({
+				url:'__URL__/save_content',
+				data:'id='+id+'&status='+passed+'&is_more='+is_more,
+				type: 'post',
+				async:false,
+				dataType:'json',
+				success: function(data)
+				{
+					alert(data.msg);
+					if(data.code==1){
+						if(is_more==1){
+							data=id.split(',');
+							var str="";
+							$(chks).each(function(){
+								if(data.indexOf(this.value)!=-1){
+									$('#'+this.value).parent().css('background','#ccc');
+									$('#pro_'+this.value+' a ').each(function(){
+										$(this).html('');
+									})
+								}
+							});
+						}else{
+							$('#'+id).parent().css('background','#ccc');
+							$('#pro_'+id+' a ').each(function(){
+								$(this).html('');
+							})
+						}
+					}
+				}
+			});
+		}
+	}
+</script>

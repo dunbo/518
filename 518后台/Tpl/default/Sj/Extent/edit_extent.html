@@ -1,0 +1,185 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src="/index.php/Sj/Extent/pub_get_address?1"></script>
+<script>
+function submitChannel()
+{
+	var cids = '';
+	$('#channel_div').html('');
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		$('#channel_div').append(item);
+	})
+	$.cookie('cids', '', {path: '/'});
+	tb_remove();
+}
+//主层动态变化数据
+function onclikChannel()
+{	
+	$('#channel_div').html('');
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		$('#channel_div').append(item);
+	})
+	$.cookie('cids', '', {path: '/'});
+}
+
+function check_arr()
+{
+	$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+}
+
+function checkForm(form)
+{
+	if (!g.checkValue()) {
+		alert('投放区域设置有问题');
+		return false;		
+	}
+
+	$.ajaxSetup({async: false});
+	var flag = true;
+	$.ajax({
+		async: false,
+		type: "POST",
+		url: "/index.php/Sj/Extent/pub_check_extent_address",
+		data: {extent_id:'<?php echo $extent['extent_id'] ?>', province: $('select[name=province]').val(), city:$('select[name=city]').val()},
+		success: function(msg){
+			if (msg == 0) {
+				flag = confirm('该区间下的软件或者子区间已经有独立的区域设置，是否覆盖?');
+			}
+		}
+	});
+	return flag;
+}
+</script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+<FORM method="POST" action="/index.php/Sj/Extent/edit_extent" onsubmit='return checkForm(this);'>
+<table class="sub_tab" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td>区间名称</td>
+		<td><input name='extent_name' type='text' value='<?php echo $extent['extent_name'] ?>'/></td>
+	</tr>
+	<tr class="sub_tr" id="depot_limit_tr">
+		<td>投 放 区 域：</td>
+		<td><span id="top_area"></span></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>运营商</td>
+		<td>
+			<SELECT name='oid'>
+				<option value='0'>不限制</option>
+				<?php foreach($operatinglist as $val): ?>
+					<option value='<?php echo $val['oid']?>'<?php if ($val['oid'] == $extent['oid']) print ' selected';?>><?php echo $val['mname']?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>渠道</td>
+		<td>
+		<a href="__APP__/Public/showChannel?callback=submitChannel&type=radio&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+		<div id="channel_div">
+			<?php if(!empty($cid_array)){ ?>
+			<label class="l_cid_{$cid_array.cid}"><input type="radio" name="cid" checked="checked" value="{$cid_array.cid}"/>{$cid_array.chname}</label>
+			<?php } ?>
+		</div>
+		</td>
+	</tr>
+	<?php if($extent['type'] == 1): ?>
+	<tr class="sub_tr">
+		<td>区间位置数</td>
+		<td><input name='extent_size' type='text' value='<?php echo $extent['extent_size'] ?>'/></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>是否过滤已安装软件</td>
+		<td>
+			<SELECT name='filter_installed'>
+				<option value='1'<?php if ($extent['filter_installed'] == 1) print ' selected';?>>是</option>
+				<option value='0'<?php if ($extent['filter_installed'] == 0) print ' selected';?>>否</option>
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="depot_limit_tr">
+		<td>区间默认返回备选库数量</td>
+		<td><input name='depot_limit' type='text'/></td>
+	</tr>
+	<?php endif?>
+	<tr class="sub_tr">
+		<td>区间排序</td>
+		<td>
+			<select name="rank">
+				<?php
+				for($i = 1;$i <= $count; $i++){
+				    echo "<option value=\"".$i."\"";
+				    if($extent['rank'] == $i) echo " selected=\"selected\" ";
+				    echo ">".$i."</option>";
+				}
+				?>
+			</select>
+		</td>
+	</tr>
+	<!--
+	<tr>
+		<td>开始时间</td>
+		<td><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+		<input id="start_at" name="start_at"
+			style="border: 0px none black; width: 100px;" value="value='<?php echo date('Y-m-d',$extent['start_at'])?>'"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			onclick="return showCalendar('start_at', 'y-mm-dd');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span></td>
+	</tr>
+	<tr>
+		<td>结束时间</td>
+		<td><span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="end_at" name="end_at"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="<?php echo date('Y-m-d',$extent['end_at'])?>" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			onclick="return showCalendar('end_at', 'y-mm-dd');"
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span></td>
+	</tr>
+	-->
+	<tr class="sub_tr">
+		<td colspan="2"> 
+			<input type='hidden' name="extent_id" value='<?php echo $extent['extent_id']?>'/>
+			<input type='hidden' name="parent_id" value='<?php echo $extent['parent_id']?>'/>
+			<input type='submit' />
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+	</tr>
+</table>
+</FORM>	
+<script>
+var g = new GoAddress();
+
+<?php 
+if(!$address_edit_able) {
+	echo "g.disabled = true;\n";
+}
+if(!empty($extent['location'])) {
+	$location = explode(';', $extent['location']);
+	foreach($location as $val){
+		list($p, $c) = explode(',', $val);
+		echo "g.addTopArea('$p', '$c');\n";
+	}
+} else {
+	echo "g.addTopArea();\n";
+}
+?>
+</script>

@@ -1,0 +1,250 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+<!--csv文件上传 -->
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+<style>
+.sub_tr {
+    height: 35px;
+    text-align: left;
+}
+</style>
+
+<script>
+
+$(function(){
+    /*
+    ** generate_content_type_href 函数：生成推荐内容的链接
+    ** 第一个参数是要append到的div的id，必填
+    ** 第二个参数是可推荐的内容类型，非必填，默认为'1,2,3,4,5'
+    ** 第三个参数是数组类型，非必填，如果要传编辑的值或者自定义元素名称，需要用到此值
+    ** 返回：生成的链接
+    */
+	var function_from="returnback";
+    href = generate_content_type_href('content_type_div','1,2,3,4,5,6,7,9,10','',function_from);
+    $("#content_type_a").attr("href", href);
+});
+
+// 提交前的检查
+function checkPost() {
+    var ad_name = $("#add_content_form #ad_name").val();
+    if (!ad_name) {
+        alert("广告名称不能为空！");
+        return false;
+    }
+    var image_url = $("#add_content_form #image_url").val();
+    if (!image_url) {
+        alert("图片不能为空！");
+        return false;
+    }
+	var image_url_high = $("#add_content_form #image_url_high").val();
+    if (!image_url_high) {
+        alert("高分图片不能为空！");
+        return false;
+    }
+	var image_url_low = $("#add_content_form #image_url_low").val();
+    if (!image_url_low) {
+        alert("低分图片不能为空！");
+        return false;
+    }
+    var button_name = $("#add_content_form #button_name").val();
+    if (!button_name) {
+        alert("按钮名称不能为空！");
+        return false;
+    }
+    var pkg=$('#package').val();
+    var enable=true;
+    if(pkg){
+        $.ajax({
+            url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+            type: 'get',
+            async:false,
+            success: function(data){
+                if(data){
+                    if(!confirm(data)){
+                        enable=false;
+                    }
+                }
+            }
+        });
+        if(!enable){
+            return false;
+        }
+    }
+    return checkRcontent("#add_content_form");
+    
+    var start_at = $("#add_content_form #start_at").val();
+    if (!start_at) {
+        alert("开始时间不能为空！");
+        return false;
+    }
+    var end_at = $("#add_content_form #end_at").val();
+    if (!end_at) {
+        alert("结束时间不能为空！");
+        return false;
+    }
+    if (start_at > end_at) {
+        alert("开始时间不能大于结束时间！");
+        return false;
+    }
+}
+function checkPri()
+{
+	var r =/^([1-9][0-9]?|100)$/;
+	var priority = $("#priority").val();
+	if(r.test(priority)==false)
+	{
+		alert("优先级数必须是1-100整数");
+		return false;
+	}
+}
+	//精准投放
+	function choose_condition()
+	{
+		var div_val=$("#choose_div_id").html();
+		if(div_val=="")
+		{
+			$.ajax({
+				url:'/index.php/Public/showContions',
+				type: 'POST',
+				dataType:'html',
+				success: function(data)
+				{
+					$("#choose_div_id").html(data);
+					$("#choose_div_id #think_page_trace").remove();
+					$("#choose_div_id #think_run_time").remove();
+					tb_init('#choose_div_id a.thickbox');//pass where to apply thickbox
+					imgLoader = new Image();// preload image
+					imgLoader.src = tb_pathToImage;
+				}
+			});
+		}
+		else
+		{
+			$("#choose_div_id").toggle();
+		}
+	}
+</script>
+
+<form id="add_content_form" method="POST" action="__URL__/add_content" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr">
+        <td style="width:90px;"><font color="red">*</font>广告名称</td>
+        <td style="width:450px;">
+            <input type="text" name="ad_name" id="ad_name"/>
+        </td>
+        <td></td>
+    </tr>
+	<!-- <tr class="sub_tr">
+        <td>站点</td>
+            <td>
+                <select name="site_type">
+                <option value="0">安智市场</option>
+                <?php foreach($coop_site_list as $k => $v): ?>
+                <option value='<?php echo $v['id']?>'><?php echo $v['website_name']?></option>
+                <?php endforeach; ?>
+            </select>
+            </td>
+    </tr> -->
+    <tr class="sub_tr">
+        <td><font color="red">*</font>图片</td>
+        <td><input name='image_url' id="image_url" type='file'/></td>
+        <td class="image_size_hint">限制上传{$image_width}*{$image_height}的JPG/PNG图片</td>
+    </tr>
+	 <tr class="sub_tr">
+        <td><font color="red">*</font>高分图片</td>
+        <td><input name='image_url_high' id="image_url_high" type='file'/></td>
+        <td class="image_size_hint">限制上传{$image_width_high}*{$image_height_high}的JPG/PNG图片</td>
+    </tr>
+	 <tr class="sub_tr">
+        <td><font color="red">*</font>低分图片</td>
+        <td><input name='image_url_low' id="image_url_low" type='file'/></td>
+        <td class="image_size_hint">限制上传{$image_width_low}*{$image_height_low}的JPG/PNG图片</td>
+    </tr>
+    <tr class="sub_tr">
+        <td>描述</td>
+        <td>
+            <input type="text" name="description" id="description" onkeyup="checkLen(this, {$des_limit})" onblur="checkLen(this, {$des_limit})"/>
+        </td>
+        <td>限制{$des_limit}字以内</td>
+    </tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>按钮名称</td>
+        <td>
+            <input type="text" name="button_name" id="button_name" onkeyup="checkLen(this, 6)" onblur="checkLen(this, 6)"/>
+        </td>
+        <td>限制6字以内</td>
+    </tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>推荐内容</td>
+        <td>
+            <!--下面a里的href的url会在ready函数里自动生成-->
+            <a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+            <!--下面的content_type_div是选择推荐内容后append的地方-->
+            <div id="content_type_div"/>
+        </td>
+        <td/>
+    </tr>
+    <tr class="sub_tr">
+		<td>精准投放</td>
+		<td>
+			<a href="#" onclick="choose_condition()"><font color="blue">选择投放条件</font></a><br />
+			<div id="choose_div_id"></div>
+		</td>
+        <td></td>
+	</tr>
+    <tr class="sub_tr">
+		<td><font color="red">*</font>开始时间</td>
+		<td>
+            <input id="start_at" name="start_at" type="text" class="Wdate" style="float:left" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})' />
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>结束时间</td>
+		<td>
+            <input id="end_at" name="end_at" type="text" class="Wdate" style="float:left" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})' />
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>优先级</td>
+        <td>
+            <input type="text" name="priority" value="" id="priority" onblur="checkPri()"/>
+        </td>
+        <td>请填写1-100的整数</td>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>展示频次</td>
+        <td>
+            <select name="frequency">
+				<option value=0 checked >不限</option>
+				<option value=1>只展示一次</option>
+				<option value=2>只展示二次</option>
+				<option value=3>只展示三次</option>
+			</select>
+        </td>
+	</tr>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='co_type'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type="hidden" name="pid" value="{$pid}"/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

@@ -1,0 +1,204 @@
+<script type="text/javascript">
+	//渠道
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{
+		$('#channel_div').html($('.TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+</script>
+<br>
+<h3>编辑合作闪屏</h3>
+<br>
+<form method='post' action="__URL__/save_coop_splash_screen">
+<input type='hidden' value="{$list.id}" name='id'>
+	<table cellpadding="0" cellspacing="0" border="0"  class="tb">
+		<tr>
+			<td >指定区域</td>
+			<td>
+					<input type="radio" value="0" name="filter_area" id="filter_area" onclick="area_sel(0);"  <?php echo $list['filter_area'] == 0 ?  "checked" :  ""; ?> >展示全部区域<br/>
+					<input type="radio" value="1" name="filter_area" id="filter_area" onclick="area_sel(2);" <?php echo $list['filter_area'] == 1 ?  "checked" :  ""; ?> >展示指定区域<br/>
+					<input type="radio" value="2" name="filter_area" id="filter_area" onclick="area_sel(1);" <?php echo $list['filter_area'] == 2 ?  "checked" :  ""; ?> >只在指定区域屏蔽其他都展示<br/>
+					
+				</td>
+		</tr>
+			<tr>
+				<td >添加地区</td>
+				<td id='push_td'>
+					<span id='push_span' style='display:none;'>
+					<input type="button" class="act_btn" onclick="addArea()" value="添加"/>
+					</span>
+					<input id="area_value" type="hidden" name="area_value" value=""/>
+				</td>
+			</tr>
+			<tr class="sub_tr">
+				<td>精确投放</td>
+				<td align="left" width="300">
+				<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">查看</font></a><br />
+					<div id="channel_div">
+						<volist id="chl_list_vo" name="chl_list" >
+							&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+						</volist>
+					</div>
+				</td>
+			</tr>
+			<tr>
+			    <td>显示概率</td>
+				<td><input type="text"  value="{$list.show_probability}" name='show_probability' style="width:50px;" />%</td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center"><input type="submit"  value="提交" style="width:100px;margin-left:-50px;" /></td>
+				<!-- <td></td> -->
+			</tr>
+	</table>
+</form>
+<script type="text/javascript" src='/Public/js/cn_area.js'></script>
+<script type="text/javascript">
+var js_filter_module =  <?php echo json_encode($filter_module); ?>;
+//添加地区
+var area_num = 1;
+function addArea(){
+	var html = '<div id="area_div_' + area_num + '">';
+	html += '<select name="push_area[]" id="push_area_'+area_num+'" class="push_area" onchange="showSubArea(this)">';
+	html += '<option value="">请选择</option>';
+	var province = '';
+	if (typeof(arguments[0]) != 'undefined') {
+		province = arguments[0].trim();
+	}
+	for(var i in area_list){
+		if (i == 990000) continue ;//海外排除
+		var item = area_list[i]['name'].split("\t");
+		if(province == item[0].trim()) {
+	        html += "<option selected value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+        } else {
+			html += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+	    }
+	}
+	html += '</select>';
+	html += '<span class="sub_area"></span>';
+	html += '<input type="button" value="删除" onclick="delArea(this)" class="act_btn"/>';
+	html += '</div>';
+	$('#push_td').append(html);
+	var obj = $('#push_area_' + area_num);
+	area_num++;
+	return obj;
+}
+function delArea(obj){
+	$(obj).parent().remove();
+	refreshArea(obj);
+}
+
+function showSubArea(obj){
+	if ($(obj).val() =='') {
+		refreshArea(obj);
+	}
+	var sub_id = $(obj).attr('id').replace('push_area_', 'push_city_');
+	// var key = $(obj).attr('rel');
+	var sub_select = "<select style='width:55px;' name='push_city[]' id='"+sub_id+"' onchange='refreshArea(this)'><option value=''>请选择</option>";
+	var value = $(obj).children('option:selected').val();
+	var arr = value.split(':');
+	var code = arr[0];
+	var city = '';
+	if (typeof(arguments[1]) != 'undefined') {
+		city = arguments[1].trim();
+	}
+	if (typeof(area_list[code]) == 'undefined') {
+		$(obj).parent().find('.sub_area').html('');
+		return false;
+	}
+	var sub_area = area_list[code]['sub'];
+	for(var i in sub_area){
+		var item = sub_area[i].split("\t");
+		if(city == item[0].trim())  {
+	        sub_select += "<option selected value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+        } else {
+			sub_select += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+	    }
+	}
+	sub_select += "</select>";
+	$(obj).parent().find('.sub_area').html(sub_select);
+	refreshArea(obj);
+}
+
+function refreshArea(obj){
+	// var key = $(obj).attr('rel');
+	var area_value = '';
+	$('.push_area').each(function(){
+		var sub_id = $(this).attr('id').replace('push_area_', 'push_city_');
+		if ($(this).val() !='') {
+			area_value += $(this).find('option:selected').html() + ',';
+			if ($('#' + sub_id).val() !='') {
+				area_value += $('#' + sub_id).find('option:selected').html();
+			}
+			area_value += ';';
+		}
+	});
+	area_value = area_value.replace(/;$/, '');
+	$('#area_value').val(area_value);
+}
+
+
+$(document).ready(function(){
+	var push_area = <?php echo json_encode($list['area']); ?>;
+	if(push_area==''){
+		return;
+	}
+	var filter_area ={$list['filter_area']};
+	if(filter_area > 0){
+		var area_arr = new Array();
+		var area_arr = push_area.split(';');
+		for(var ii in area_arr){
+			var pro = area_arr[ii].split(',');
+			var select_obj = addArea(pro[0]);
+			showSubArea(select_obj, pro[1]);
+		}
+		$('#push_span').css('display','block');
+	}
+});
+
+function area_sel(type){
+	if(type == 0){
+		var str = "<span id='push_span' style='display:none;'>";
+			str += "<input type='button' class='act_btn'  value='添加'  onclick='addArea()' />";
+			str += "</span>";										
+			str += "<input id='area_value' type='hidden' name='area_value' value='' />";										
+		$('#push_td').html(str);
+	}else{
+		$('#push_span').css('display','block');
+	}
+}
+
+// function checkinput(){
+// 	var filter_area=$("input[name='filter_area']:checked").val();
+// 	if(filter_area>0 && !$("#area_value").val() ){
+// 		alert("请选择添加地区");
+// 		return false;
+// 	}
+// 	var show_probability=$('#show_probability').val();
+
+// 	return true;
+// }
+</script>
+

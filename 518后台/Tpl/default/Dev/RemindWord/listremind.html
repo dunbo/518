@@ -1,0 +1,172 @@
+<include file="../../Public/header" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox1.css" />
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+
+<table width="80%">
+<tr><td>监控词语</td>
+<form action='' method='get' >
+<td><input type="text" name='word' value='{$word}'></td>
+<td>监控人员</td><td><input type="text" name='user' value='{$user}'></td>
+<td>邮箱</td><td><input type="text" name='email' value='{$email}'></td>
+<td><button type='submit'>搜索</button></td>
+</form>
+<td></td>
+<td><a class="thickbox" href="__URL__/addremind/id"><button type='button'>添加提醒词</button></a></td>
+</tr></table>
+<br>
+<div style="float:left">{$count}条记录</div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+<tr>
+<td width="5%"><input type='checkbox' name='selectAll[]' onclick="SelectAll(this)" ></td>
+<td>
+<select id ='type'  onchange="changetype()">
+<option value='0'>所属类型</option>
+<option value='1' <if condition="$type eq '1' "> selected </if>  >软件反馈</option>
+<option value='2' <if condition="$type eq '2' "> selected </if> >所属举报</option>
+<option value='3' <if condition="$type eq '3' "> selected </if> >所属评论</option>
+</select></td>
+<td>监测词语</td>
+<td>累计总次数</td>
+<td>当前次数</td>
+<td>监测人员/邮箱</td>
+<td>接受频率（次/天）</td>
+<td>超量上限（次）</td>
+<td>操作</td>
+</tr>
+<volist name='remindlists' id='vo'>
+<tr>
+<td><input type='checkbox' name='id[]' value={$vo.id} ></td>
+<td>
+<if condition="$vo.type eq '1' "> 反馈
+<elseif condition="$vo.type eq '2' "/>举报
+<elseif condition="$vo.type eq '3' "/>评论
+</if>
+</td>
+<td><a  target='_blank'
+<if condition="$vo.type eq '1' "> href="/index.php/Dev/Message/feedback_list/content/{$vo.word}" </if> 
+<if condition="$vo.type eq '2' "> href="/index.php/Dev/Message/soft_feedback_list/feedbacktype/0/jbori/0/content/{$vo.word}" </if>  
+<if condition="$vo.type eq '3' "> href="/index.php/Dev/Message/message_soft/content/{$vo.word}" </if>  
+>{$vo.word}</a></td>
+<td>{$vo.total}</td>
+<td>{$vo.num}</td>
+<td><?php echo str_ireplace('|','<br>',$vo['usermail']); ?></td>
+<td>{$vo.mailnum}</td>
+<td>{$vo.maxnum}</td>
+<td><button onclick="clearnum({$vo.id})">清零</button>&nbsp;&nbsp;
+
+<a class="thickbox" href="__URL__/editremind/id/{$vo.id}"><button>编辑</button></a>&nbsp;&nbsp;
+<button onclick="delword({$vo.id})">删除</button></td>
+</tr>
+</volist>
+<tr><td colspan=9 >&nbsp;&nbsp;&nbsp;
+<input type='checkbox' name='selectAll[]' onclick="SelectAll(this)" >
+&nbsp;&nbsp;&nbsp;<button onclick='clearAll(1)'>批量清零</button>
+&nbsp;&nbsp;&nbsp;<button onclick='clearAll(2)'>批量删除</button></td></tr>
+</table>
+<div  align='left'>{$page}</div>
+ <script type='text/javascript' >
+function changetype(){		
+	window.location = '__URL__/listremind/type/'+$("#type").val();
+}
+function delAll()
+{	
+	var chkobj =  document.getElementsByName("id[]");
+	var sum = 0;
+	var len = chkobj.length;
+	var ids = '';
+	for(var i = 0; i < len; i++){
+		if(chkobj[i].checked){
+			sum++;
+			ids+= chkobj[i].value+',';
+		}
+	}
+	if(sum==0){
+		alert("请选择要操作的对像！");
+		return false;
+	}
+	if(!confirm("确定要这么执行该操作吗？"))
+    {
+        return false;
+    }
+
+}
+function clearAll(type)
+{	
+	var chkobj =  document.getElementsByName("id[]");
+	var sum = 0;
+	var len = chkobj.length;
+	var ids = '';
+	for(var i = 0; i < len; i++){
+		if(chkobj[i].checked){
+			sum++;
+			ids+= chkobj[i].value+',';
+		}
+	}
+	ids = ids.substr(0,ids.length-1);
+	if(sum==0){
+		alert("请选择要操作的对像！");
+		return false;
+	}
+	if(type==1) clearnum(ids);
+	else delword(ids);
+}
+
+ //全选
+function SelectAll(obj) {
+	var sid = document.getElementsByName("id[]");
+	var selectAll = document.getElementsByName("selectAll[]");
+	if ( obj.checked == true ) {
+		Select( sid , true );
+		Select( selectAll , true );
+	} else {
+		Select( sid , false );
+		Select( selectAll , false );
+	}
+}
+
+function Select( obj , check ) {
+	for ( i = 0 ; i < obj.length ; i++ ) {
+		obj[i].checked = check;
+	}
+	return;
+}
+function clearnum(id){
+	if(confirm("确定要把数据清零吗？")){
+		$.ajax({
+			url: '__URL__/delremind/type/clearnum/id/'+id,
+			data: '',
+			type: 'get',
+			dataType: 'json',
+			success: function(ret) {
+				if(ret['code'] == 1){
+					alert(ret['msg']);
+					location.reload();
+				}else{
+					alert(ret['msg']);
+				}
+			}
+		});
+	}
+}
+function delword(id){
+	if(confirm("确定要把该条数据删除吗？")){
+		$.ajax({
+			url: '__URL__/delremind/type/delword/id/'+id,
+			data: '',
+			type: 'get',
+			dataType: 'json',
+			success: function(ret) {
+				if(ret['code'] == 1){
+					location.reload();
+				}else{
+					alert(ret['msg']);
+				}
+			}
+		});
+	}
+}
+
+</script>
+

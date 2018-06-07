@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>意见反馈</title>
+<link type="text/css" rel="stylesheet" href="/css/fb_common_v6.css"/>
+<script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="/js/underscore.js"></script>
+<script>
+var proid_arr = getArgs();
+var namespace = 'AnzhiActivitys';
+
+if (typeof(proid_arr.pid) !='undefined') {
+	if (proid_arr.pid == '11') {
+		namespace = 'BBSActivitys';
+	}
+}
+var jsInterface = window[namespace];
+
+function getArgs() {
+	var args = {};
+	var query = location.search.substring(1);
+	var pairs = query.split("&");
+	for(var i = 0; i < pairs.length; i++) {
+		var pos = pairs[i].indexOf('=');
+		if (pos == -1) continue;
+		var argname = pairs[i].substring(0,pos);
+		var value = pairs[i].substring(pos+1);
+		value = decodeURIComponent(value);
+		args[argname] = value;
+	}
+	return args;
+}
+
+$(document).ready(function(){
+	var json_data =	jsInterface.getAllMessage();
+	//alert(json_data);
+	var cmd = 'var data=' + json_data;
+	eval(cmd);
+
+	var comment_data = [];
+	var feedback_data = [];
+	var selectType = 'feedback';
+	if (typeof(data) != 'undefined') {
+		for(var i in data['DATA']){
+			var type = parseInt(data['DATA'][i][5]);
+			switch(type) {
+				case 1:
+					if(data['DATA'][i][3]){
+						selectType = 'comment';
+					}
+					comment_data.push(data['DATA'][i]);
+				break;
+				
+				case 2:
+					if(data['DATA'][i][3]){
+						selectType = 'feedback';
+					}
+					feedback_data.push(data['DATA'][i]);
+				break;
+			}
+		}
+		$('#feedback_list').html(_.template($('#feedback_tpl').html(),{data:feedback_data}));
+	}
+});
+
+function maketotime(now){
+	return new Date(parseInt(now) * 1000).toLocaleString().replace(/年|月/g, "/").replace(/日/g, " ");
+}
+
+function go_detail(type,msgId){
+	jsInterface.inDetail(parseInt(type),parseInt(msgId));
+	$('#new_'+msgId+'').removeClass('feedback_new');
+}
+
+function formatDate(stmp)
+{
+	var timestamp=new Date().getTime();
+	console.log(timestamp);
+	console.log(stmp);
+	timestamp = Math.ceil(timestamp/1000);
+	timeoffset = timestamp - stmp;
+	var s = '';
+	if(timeoffset<60) {
+		s = '刚刚';
+	}else if(timeoffset < 3600){
+		s = Math.ceil(timeoffset/60) + "分钟前";
+	}else if(timeoffset >= 3600 && timeoffset <= 86400){
+		s = Math.ceil(timeoffset/3600) + "小时前";
+	}else if(timeoffset >= 86400 && timeoffset <= 2592000){
+		s = Math.ceil(timeoffset/86400) + "天前";
+	}else if(timeoffset >= 2592000 && timeoffset <= 31104000){
+		s = Math.ceil(timeoffset/2592000) + "天前";
+	} else {
+		s = "1年以上";
+	}
+	return s;
+}
+</script>
+
+<script type="text/template" id="feedback_tpl">
+	<% for(var i = 0; i < data.length; i++) { %>
+	<% var item = data[i] %>
+	<% var fd = formatDate(item[4]); %>
+	<li>
+		<a href="javascript:;" onclick="go_detail(2,<%=item[0]%>);" class="clickarea"></a>
+		<h4><%=item[1]%></h4>
+		<div class="feedback_tips">
+			<em><%=item[8]%></em>
+		</div>
+		<div class="feedback_mark"><%=fd%></div>
+		<div id="new_<%=item[0]%>" class="<% if(parseInt(item[3])>0){ %>feedback_new<% } %>"></div>
+	</li>
+	<% } %>
+</script>
+
+</head>
+<body>
+<div id="">
+	<div class="feedback_list">
+		<ul id="feedback_list"></ul>
+	</div>
+</div>
+</body>
+</html>

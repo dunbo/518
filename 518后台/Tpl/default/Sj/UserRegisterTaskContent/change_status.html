@@ -1,0 +1,80 @@
+<include header="../Public/header"/>
+
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+
+<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+
+<style type="text/css">
+    .widen {width:500px}
+</style>
+
+<script type="text/javascript">
+    
+    
+    function reject_submit() {
+        var id=$('#id').val();
+        var passed=$('#passed').val();
+        var reject_type=$('#reject_type').val();
+        var reject_reason=$('#reject_reason').val();
+        if(reject_type==3){
+            if((reject_reason.length>100 || reject_reason.length<1)){
+                alert('请输入1~100个字符');
+                return;
+            }
+        }
+        $.ajax({    
+            url:'__URL__/change_status/id/'+id+'/passed/'+passed+'/reject_type/'+reject_type+'/reject_reason/'+reject_reason,
+            type: 'get',
+            async:false,
+            success: function(data)
+            {   
+                if(data==1){
+                    alert('操作成功');
+                    window.location.reload();
+                }else{
+                    alert('操作失败');
+                }
+            }
+        });
+    }
+    
+    function checkLen(obj) {
+        var maxChars = 100;//最多字符数
+        var minChars = 1;//最多字符数
+        if (obj.value.length > maxChars||obj.value.length < minChars)
+            obj.value = obj.value.substring(0,maxChars);
+    };
+    
+</script>
+
+<body>
+    <h2 style='margin-left:50px;'>驳回：</h2>
+        <div class="form_list_one">
+            <label><font color="red">*</font>选择驳回理由：</label>
+            <select name="reject_type" id="reject_type" style="width:131px;">
+                <option value="1">截图不符合要求</option>
+                <option value="2">截图数量不够</option>
+                <option value="3">自定义</option>
+           </select>
+        </div>
+        <div class="clear"></div>
+        
+        
+        <div class="form_list_one">
+            <label><font color="red">*</font>详细说明：</label>
+            <textarea style="width:200px" name="reject_reason" id="reject_reason" onKeyUp="checkLen(this)" placeholder='非必填'></textarea>
+        </div>
+
+        <div class="clear"></div>
+        <input type="hidden" name="id" id="id" value="{$list_id}"/>
+        <input type="hidden" name="passed" id="passed" value="{$passed}"/>
+
+        <div class="form_btns_box_one">
+            <a href="javascript:void(0);" onclick='reject_submit()'>确定</a>
+            <a href="javascript:void(0);" onclick='tb_remove()'>取消</a>
+			<div class="clear"></div>
+        </div>
+
+</body>

@@ -1,0 +1,126 @@
+<include file="../../Public/header"  />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript">
+    function edit_priority() {
+        $("label[id^=label_priority_]").each(function(){
+            $(this).css('display', 'none');
+        });
+        $("input[id^=priority_]").each(function(){
+            $(this).css('display', 'block');
+        });
+        $("#btn_edit_priority").css('display','none');
+        $("#btn_save_priority").css('display','block');
+        $("#btn_cancel_priority").css('display','block');
+    }
+    
+    function cancel_priority() {
+        $("label[id^=label_priority_]").each(function(){
+            $(this).css('display', 'block');
+        });
+        $("input[id^=priority_]").each(function(){
+            var id_name = $(this).attr('id');
+            var old_value = '';
+            id_name.replace(/priority_(\d+)/, function(a,b) {
+                var id = b;
+                old_value = $("#label_priority_"+id).text();
+            });
+            // 取消编辑，将值还原回去
+            $(this).val(old_value);
+            // 输入框设为不可见
+            $(this).css('display', 'none');
+        });
+        $("#btn_edit_priority").css('display','block');
+        $("#btn_save_priority").css('display','none');
+        $("#btn_cancel_priority").css('display','none');
+    }
+
+    function save_priority() {
+        var data = {};
+        // 获得排序input里的所有值
+        $("input[id^=priority_]").each(function(){
+            var i = $(this).attr("id");
+            var val = $(this).val();
+            data[i] = val;
+        });
+		/*
+        // 检查排序是否有相同的数
+        for (i in data) {
+            for (j in data) {
+                if (data[i] == data[j] && i != j) {
+                    alert("排序不能相同");
+                    return false;
+                }
+            }
+        }
+		*/
+        $.ajax({
+            url: "__URL__/batch_priority",
+            data: data,
+            type: 'post',
+            dataType: 'json',
+            success: function(data) {
+                alert(data.info);
+                if (data.status == 0) {
+                    $("#btn_edit_priority").css('display','block');
+                    $("#btn_save_priority").css('display','none');
+                    $("#btn_cancel_priority").css('display','none');
+                    location.href="__URL__/index";
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert("编辑失败");
+            }
+        });
+    }
+</script>
+
+<body>
+    <div class="nav_btns">
+		<a href="__URL__/add_website" class="blue search_btn" style="float:right;">添加采集站点</a>
+		<span style="float:right;">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+		<input id="btn_edit_priority" class="search_btn" type="button" value="编辑优先级" onClick="edit_priority()" style="float:right;">
+		<span style="float:right;">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+		<input id="btn_cancel_priority" class="search_btn" type="button" value="取消优先级" onClick="cancel_priority()" style="display:none;float:right;">
+		<span style="float:right;">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+		<input id="btn_save_priority" class="search_btn" type="button" value="保存优先级" onClick="save_priority()" style="display:none;float:right;">
+        <div class="clear"></div>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="15%">优先级</th>
+                    <th width="15%">网站名称</th>
+                    <th width="15%">网页地址</th>
+                    <th width="170px">添加时间</th>
+                    <th width="10%">备注</th>
+                    <th width="20%">操作</th>
+                    <th width="10%">使用状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                    <td>
+						<label id="label_priority_{$list.id}">{$list.priority}</label>
+						<input id="priority_{$list.id}" type="text" onkeyup="if(isNaN(value))value=value.replace(/[^\\d]/g,'');" value="{$list.priority}" style="display:none;"/>
+					</td>
+                    <td>{$list.website_name}</td>
+                    <td><a href="{$list.website_page_url}" target="blank">{$list.website_page_url}</a></td>
+                    <td>{$list.create_time|date="Y-m-d H:i:s",###}</td>
+                    <td>{$list.remark}</td>
+                    <td>
+                        <a href="__URL__/edit_website?id={$list.id}" style="color:blue">编辑</a>
+                        <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                        <a href="__URL__/delete_website?id={$list.id}" style="color:blue" onClick="if(!confirm('确定删除此记录吗?'))return false;">删除</a>
+                    </td>
+
+                    <td><a href="__URL__/toggle_enabled_status?id={$list.id}&current_status={$list.status}" onClick="if(!confirm('确定要更新状态吗?'))return false;"><span <if condition="$list.status eq 1">style="color:blue">使用<else/>style="color:red">停用</if></span></a></td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>

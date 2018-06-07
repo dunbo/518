@@ -1,0 +1,99 @@
+<include file="../../Public/header"/>
+<link type="text/css" href="__PUBLIC__/school/css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet" />	
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script>
+
+	<!--
+	function checkinput(){
+		var pkg = $("#pkg").val();
+		var pkg1 = $("#pkg1").val();
+		var wei = $("#wei").val();
+		var pos = $("#pos").val();
+		if(pkg == ""){
+			alert("包名不能为空！");
+			return false;
+		}else if(pos ==""){
+			alert("排序不能为空！");
+			return false;
+		}else if(pos <= 0){
+			alert("排序必须大于0");
+			return false;
+		}
+	}
+	function checkinput1(){
+	var pkg1 = $("#pkg1").val();
+	if(pkg1 == ""){
+		alert("包名不能为空！");
+		return false;
+	}
+	}
+	-->
+</script>
+<center>
+<form action="__URL__/search_key_package_add_do" method="POST">
+<table border=1>
+<tr>
+<td>关键词:{$sk_info.srh_key}</td>
+<td colspan="2">添加包名:<input type="text" name="package" size="50" id="pkg" value=""/></td>
+</tr>
+<tr>
+<td style="display:none;">权重:<input type="text" name="weight" size="10" id="wei" value=""/>(10~100)</td>
+<td>排序:<input type="text" name="pos" size="10" id="pos" value="" /></td>
+<td>开始时间:<input type="text" id="datepicker" name="start_tm" value="{$start_tm}" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"datepicker",dateFmt:"yyyy-MM-dd HH:mm:ss"})' /></td>
+<td>结束时间:<input type="text" id="datepicker1" name="stop_tm" value="{$stop_tm}" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"datepicker1",dateFmt:"yyyy-MM-dd HH:mm:ss"})' /><input type="hidden"  name="kid" value="{$sk_info.id}"></td></tr>
+<tr>
+<td></td>
+<td><input type="submit" value="添加包名" onclick="return checkinput()"></td>
+<td><font color="red">红色为下线包名</font><font color="red">绿色为即将上线包</font></td>
+</tr>
+</table>
+</form>
+<form action="__URL__/search_key_package_add" method="GET">
+<table border=1>
+<tr><td>包名:<input type="text" name="package" size="50" id="pkg1" value="{$search_key}"/></td><input type="hidden"  name="id" value="{$sk_info.id}"></td><td><input type="submit" value="搜索" onclick="return checkinput1()"></td></tr>
+</table>
+</form>
+<table border=1>
+<tr>
+<th>关键词</th>
+<th>包名</th>
+<th>排序</th>
+<th>开始时间</th>
+<th>结束时间</th>
+<th>操作</th>
+</tr>
+<?php foreach($sk_pkg_list as $infos){?>
+<tr <?php 
+if($infos['stop_tm'] < time()){
+ echo 'bgColor="red" ';
+}else if($infos['start_tm'] > time()){
+ echo 'bgColor="green" ';
+}
+?> >
+<td>
+<?php echo $srh_key;?>
+</td>
+<td>
+(<?php echo $infos['softname'];?>)<?php echo $infos['package'];?>
+</td>
+<td>
+<?php echo $infos['pos'];?>
+</td>
+<td>
+<?php echo date("Y-m-d",$infos['start_tm']);?>
+</td>
+<td>
+<?php echo date("Y-m-d",$infos['stop_tm']);?>
+</td>
+<td><a href="__URL__/search_key_package_update/kid/<?php echo $infos['kid'];?>/id/<?php echo $infos['id'];?>">修改</a><a href="__URL__/search_key_package_delete/kid/<?php echo $infos['kid'];?>/id/<?php echo $infos['id'];?>" onclick="return checkit()">删除</a></td>
+</tr>
+<?php } ?>
+</table>
+<p>{$page}</p>
+</center>

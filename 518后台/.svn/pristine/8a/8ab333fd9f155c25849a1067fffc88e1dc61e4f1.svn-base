@@ -1,0 +1,67 @@
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+    <script type="text/javascript">
+        function upload() {
+            if($("#uploadFile1").val().length==0) {
+                alert('请上传文件');
+                return;
+            }
+            //弹出加载中
+            var timenow = new Date().getTime();
+            suffix = timenow;
+            window_list.push(suffix);
+            var param = {
+                is_status : 1
+            };
+            $.ajaxFileUpload( {
+                url:'__URL__/import',
+                type:'POST',
+                data:param,
+                files:[$('#uploadFile1')],
+                secureuri:false,
+                dataType:'json',
+                success:function(data) {
+                    if(data==2) {
+                        alert('请上传指定格式的文件');
+                        tb_remove();
+                    } else {
+                        $("#im_total").html('本次导入的产品总数为:'+data.data.totalnum+'条');
+                        $("#im_succ").html('导入成功的产品为:'+data.data.succnum+'条');
+                        $("#im_fail").html('导入失败的产品为:'+data.data.failnum+'条');
+                        if(data.data.failnum>0) {
+                            $("#daochu").html("导出失败明细");
+                            $("#daochu").attr('href','/index.php/Sendnum/Schedule/downfail/thistime/'+data.data.thistime); 
+                        }
+                        var urls ="#TB_inline?height=100&width=200&inlineId=resault&modal=true";
+                        tb_show('title',urls,"thickbox");
+                    }
+                }
+            });
+        };
+    </script>
+</head>
+ 
+<body>
+<div style="display:none;" id="resault">
+    <p id="im_total"></p>
+    <p id="im_succ"></p>
+    <p id="im_fail"></p>
+    <a href="/index.php/Sendnum/Schedule/schedule_list">关闭</a><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><a href="#" id="daochu"></a>
+</div>
+<div style="width:45; margin-top:4px">
+  <table width="99%" height="63" border="0" align="center" cellpadding="4" cellspacing="1"  bgcolor="#333333" id="table1">
+    <tr>
+        <td height="20" align="right" bgcolor="#FFFFFF">批量导入文件:</td>
+        <td bgcolor="#FFFFFF">
+           <input id="uploadFile1" type="file" name="upload" />
+        </td>
+    </tr>
+
+   <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="提交" onclick="upload()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onclick="tb_remove();"/></td>
+      </tr>
+</table>
+</div>
+</body>
+</html>
+

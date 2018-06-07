@@ -1,0 +1,723 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?v3"></script>
+<!--上传文件用到的js-->
+<script type="text/javascript" src="/Public/js/ajaxfileupload_anzhi.js?1"></script>   
+
+<!--使用灵活运营的推荐内容编辑必需添加此js-->
+<script type="text/javascript" src="/Public/js/edit_content_type.js?v5"></script>
+
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+    jQuery(function(){
+	
+		var soft_arr = {:json_encode($list)};
+		var content_arr = edit_load(soft_arr);
+        // 生成推荐内容展示
+        generate_append_html("content_type_div", content_arr);
+        // 生成推荐链接
+		var function_from="textpage";//添加个参数  区别来自文字链 并且选中 自动关联详情页的时候 
+        href = generate_content_type_href('content_type_div', "{$list.content_type}", content_arr,function_from);
+        $("#content_type_a").attr("href", href);
+        
+        // 剩余可输入字数展示
+        var title = "{$list.title}";
+        $("#title_hint").html(title.length + "/" + 3);
+        
+        // description值包含换行符\n，用$list.description的赋值方式会报错
+        var description = $("#edit_content_form #description").val();
+        $("#description_hint").html(description.length + "/" + 20);
+		
+		//V6.2搜索结果页 选中搜索结果页可以上传指定搜索词
+        if(document.getElementById("search_result_page").checked==true)
+		{
+			$("#result_page").css("display","");
+		}
+		else
+		{
+			$("#result_page").css("display","none");
+		}
+		var type = "<?php echo $list['type'];?>";
+		change_style(type);
+    });
+    
+    function checkLen(obj, maxChars, hint_id) {
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+        $("#" + hint_id).html(obj.value.length + "/" + maxChars);
+    };
+	function check_web_game(){
+		var rank = $("#rank").val();
+		var i_title = $("#i_title").val();
+		if(!rank||rank > 20){
+			alert("排序值20以内");
+			return false;
+		}
+		if (!i_title) {
+			alert("图标名称不能为空！");
+			return false;
+		}
+
+		var init_val = parseInt($.trim($('#init_val').val()));
+		var random_start = parseInt($.trim($('#random_start').val()));
+		var random_end = parseInt($.trim($('#random_end').val()));
+		var r=/^[1-9]\d*$/;
+		if(init_val)
+		{
+			if(r.test(init_val) == false)
+			{
+				alert("初始值请填写正整数");
+				return false;
+			}
+		}
+		else
+		{
+			alert("人气值初始值为必填");
+			return false;
+		}
+		if(random_start)
+		{
+			if(r.test(random_start) == false)
+			{
+				alert("随机值最小值请填写正整数");
+				return false;
+			}
+		}
+		else
+		{
+			alert("人气值随机值最小值为必填");
+			return false;
+		}
+		if(random_end)
+		{
+			if(r.test(random_end) == false)
+			{
+				alert("随机值最大值请填写正整数");
+				return false;
+			}
+		}
+		else
+		{
+			alert("人气值随机值最大值为必填");
+			return false;
+		}
+		if(random_start >= random_end)
+		{
+			alert("人气值随机值最小值不能大于最大值");
+			return false;
+		}
+		var s_description = $("#s_description").val();
+		if(!s_description){
+			alert('一句话简介不能为空');
+			return false;
+		}
+		return true;
+	}
+
+    function checkPost() {
+		var type = $("input[name='type']:checked").val();
+		if(type == 1) {
+			var title = $("#edit_content_form #title").val();
+			if (!title) {
+				alert("标题不能为空！");
+				return false;
+			}
+			var description = $("#edit_content_form #description").val();
+			var is_auto_connect = $("input[name='auto_connect']").is(':checked');
+			if (!is_auto_connect) {
+				if (!description) {
+					alert("描述不能为空！");
+					return false;
+				}
+			}
+			else {
+				//选择了 推荐内容就必须是页面 - 内容合作 详情页
+				var content_type = $("#content_type").val();
+				var coop_detail_url = $("#coop_detail_url").val();
+
+				var coop_detail_pos = $("#coop_detail_pos").val();//选择标签是填写的位置和标签
+				var coop_detail_label_id = $("#coop_detail_label_id").val();
+				if (content_type != 4 || (!coop_detail_url && !coop_detail_pos)) {
+					alert("选择自动关联，推荐内容必须选择内容合作详情页！");
+					return false;
+				}
+			}
+		}
+		if(type==2){
+			if(!check_web_game()) return false;
+		}
+        var show_place_elem = $("#edit_content_form input[name='show_place[]']");
+        var show_place = 0;
+        show_place_elem.each(function() {
+            if ($(this).attr("checked") == "checked") {
+                show_place |= $(this).val();
+            }
+        });
+        if (!show_place) {
+            alert("页面位置不能为空！");
+            return false;
+        }
+  		var pkg = $("#package").val();
+  		var enable=true;
+	  	if(pkg&&type==1){
+	  		$.ajax({
+				url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+				type: 'get',
+				async:false,
+				success: function(data){
+					if(data){
+						if(!confirm(data)){
+							enable=false;
+						}
+					}
+				}
+			});
+			if(!enable){
+				return false;
+			}
+	  	}
+        var start_time = $("#edit_content_form #start_time").val();
+        if (!start_time) {
+            alert("开始时间不能为空！");
+            return false;
+        }
+        var end_time = $("#edit_content_form #end_time").val();
+        if (!end_time) {
+            alert("结束时间不能为空！");
+            return false;
+        }
+        if (start_time > end_time) {
+            alert("开始时间不能大于结束时间！");
+            return false;
+        }
+		return checkRcontent("#edit_content_form");
+    }
+    
+    //////// 渠道弹出的thickbox相关函数
+    function count() {
+        $.ajaxFileUpload({
+            url:'__APP__/Public/pub_csv_count',
+            type:'POST',
+			fileElementId:'upload_file',
+			dataType: 'json',
+            secureuri:false,
+            dataType:'json',
+            success:function(data)
+			{
+			    if(data.error1==-1)
+				{
+					alert("请选择导入的CSV文件!");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+					return false;
+				}
+				else if(data.error2==-2)
+				{
+					alert("请上传CSV格式文件！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else if(data.error2==-3)
+				{
+					alert("CSV文件格式不正确,请您参考下载模板！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else
+				{
+					document.getElementById("csv_url").value=data.csv_url;
+					document.getElementById("csv_count").value=data.out_count;
+					document.getElementById("pre_dl_count").value=data.out_count;
+                }				
+            }
+        });
+    }
+	//V6.2上传指定搜索词
+	function upload_file_search_keys() {
+        $.ajaxFileUpload({
+            url:'__APP__/Public/pub_csv_count',
+            type:'POST',
+			fileElementId:'upload_search_keys',
+			dataType: 'json',
+            secureuri:false,
+            dataType:'json',
+            success:function(data)
+			{
+			    if(data.error1==-1)
+				{
+					alert("请选择导入的CSV文件!");
+					document.getElementById("search_keys_url").value="";
+					document.getElementById("search_keys_count").value="";
+					document.getElementById("show_search_keys_count").value=""; 
+					return false;
+				}
+				else if(data.error2==-2)
+				{
+					alert("请上传CSV格式文件！");
+					document.getElementById("search_keys_url").value="";
+					document.getElementById("search_keys_count").value="";
+					document.getElementById("show_search_keys_count").value=""; 
+                    return false;					
+				}
+				else if(data.error2==-3)
+				{
+					alert("CSV文件格式不正确,请您参考下载模板！");
+					document.getElementById("search_keys_url").value="";
+					document.getElementById("search_keys_count").value="";
+					document.getElementById("show_search_keys_count").value=""; 
+                    return false;					
+				}
+				else
+				{
+					document.getElementById("search_keys_url").value=data.csv_url;
+					document.getElementById("search_keys_count").value=data.out_count;
+					document.getElementById("show_search_keys_count").value="有效搜索热词数"+data.out_count;
+                }				
+            }
+        });
+    }
+	
+	//渠道
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{
+		$('#channel_div').html($('.TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	//机型
+	function onclikDevice()
+	{
+		$('#device_div').html($('.TB_ajaxContent #c_device_res').html());
+	}
+
+	function check_arrs()
+	{
+		$('.TB_ajaxContent #c_device_res').html($('#device_div').html());
+
+		$('#device_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_did_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	function delItem(obj) {
+	$(obj).parent().remove();
+	//  var fatie = $("#channel_div");
+	//	fatie.remove();
+
+	}
+	 function addItem() {
+		var channel_select = $("#device_div");
+		channel_select.clone().appendTo("#device_td");
+	}
+	function submitDevice()
+	{
+		var cids = '';
+		$('#device_div').empty();
+		$(".TB_ajaxContent #c_device_res input:checked").each(function(){
+			var item = $('<label>' + $('#c_device_res .l_did_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			item.find('input').click(function(){
+				$(this).parent().remove();
+			});
+			$('#device_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	//软件包名验证
+	function get_softname(){
+		var pkg=document.getElementById("single_pk").value;
+		$.ajax({
+			url:'/index.php/Sj/Onlinegame/get_softname/package/'+pkg,
+			type: 'get',
+			success: function(data)
+			{
+			    if(data != 2){
+					var obj = eval('(' + data + ')');
+					
+					//document.getElementById(id+"_name").value=obj.soft_name;
+					//$('#soft_name').val(obj.soft_name);
+					//$('#my_game').val(obj.category_name);
+				}
+				else
+				{
+				    document.getElementById("single_pk").value="";
+					//document.getElementById("error_info").value="该软件不存在";
+					alert("该软件不存在");
+					return false;
+				}
+			}
+		});
+	}
+	//检查单一包名
+	function check_single()
+	{
+	 if(document.getElementById("single_soft").checked==true)
+		{
+		  alert("选择单一详情页就不能选择详情页");
+		  document.getElementById("all_details").checked=false;
+		  return false;
+		}
+	}
+    function check()
+	{
+	    if(document.getElementById("all_details").checked==true)
+		{
+		  alert("选择详情页就不能选择单一软件详情页");
+		  document.getElementById("single_soft").checked=false;
+		  return false;
+		}
+		else
+		{
+			 if(document.getElementById("single_soft").checked==true)
+			{
+			  $("#single_package").css("display","block");
+			}
+			if(document.getElementById("single_soft").checked==false)
+			{
+			 $("#single_package").css("display","none");
+			}
+		}
+	}
+	function del_csv(obj)
+	{
+		var del_csv = $(obj).attr("id");
+		if(del_csv=="del_csv_value")
+		{
+			$("#csv_count").val("");
+			$("#csv_url").val("");
+			$("#have_pre_dl").val("");
+			$("#pre_dl_count").val("");
+		}
+		else if(del_csv=="del_search_csv_value")
+		{
+			$("#search_keys_count").val("");
+			$("#search_keys_url").val("");
+			$("#have_keys_url").val("");
+			$("#have_keys_count").val("");
+			$("#show_search_keys_count").val("");
+		}
+		alert("删除后提交即生效");
+	}
+	$(document).ready(function()
+	{
+		var have_csv="{$list.csv_url}";
+		var is_upload_csv="{$list.is_upload_csv}";
+		if(have_csv&&is_upload_csv==1)//添加的时候已经上传过了可以删除
+		{
+			$("#del_csv_value").css("display","");
+			$("#upload_csv").css("display","none");
+			$("#upload_file").css("display","none");
+			$("#have_pre_dl").css("display","");
+		}
+		else if(!have_csv&&is_upload_csv==1)//已经上传过了又删除了什么也不显示
+		{
+			$("#tr_csv").css("display","none");
+		}
+		else if(!have_csv&&is_upload_csv==0)//添加的时候没有上传可以上传
+		{
+			$("#del_csv_value").css("display","none");
+			$("#upload_csv").css("display","");
+			$("#upload_file").css("display","");
+			$("#have_pre_dl").css("display","none");
+		}
+	});
+	function check_search_result()
+	{
+		if(document.getElementById("search_result_page").checked==true)
+		{
+			$("#result_page").css("display","");
+		}
+		else
+		{
+			$("#result_page").css("display","none");
+		}
+	}
+
+	function change_style(val){
+		$(".type"+val).css('display','');
+		if(val==1){
+			$(".type2").css('display','none');
+			//$("input[name='show_place[]'][value='1048576']").attr('checked',false);
+		}else{
+			$(".type1").css('display','none');
+			$("input[name='show_place[]'][value='1048576']").attr('checked',true);
+
+		}
+		$("#content_type_a").attr("href", href);
+		check_search_result();
+	}
+</script>
+
+<form id="edit_content_form" method="POST" action="__URL__/update_textpage_to" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td style="width: 15%"><font color="red">*</font>样式</td>
+		<td>
+			<input type="radio" name="type" value="1" <?php if($list['type']==1){echo 'checked';}?> disabled onclick="change_style(1)"/>普通文字链
+			<input type="radio" name="type" value="2" <?php if($list['type']==2){echo 'checked';}?> disabled onclick="change_style(2)"/>网页游戏-软件列表
+			<input type="hidden" name="type" value="<?php echo $list['type'];?>">
+		</td>
+		<td></td>
+	</tr>
+    <tr class="sub_tr type1">
+        <td><font color="red">*</font>标题</td>
+        <td>
+            <input type="text" name="title" id="title" value="{$list.title}" onBlur="checkLen(this,3,'title_hint')" onKeyUp="checkLen(this,3,'title_hint')"/>
+        </td>
+        <td><span id="title_hint"></span></td>
+    </tr>
+    <tr class="sub_tr type1">
+        <td><font color="red">*</font>描述</td>
+        <td>
+            <textarea name="description" id="description" onBlur="checkLen(this,20,'description_hint')" onKeyUp="checkLen(this,20,'description_hint')">{$list.description}</textarea>
+			<input type="checkbox" name="auto_connect" id="auto_connect" value="1" <?php if($list['is_auto_connect']==1) echo 'checked'?> /><span>自动关联详情页标题</span>
+        </td>
+        <td><span id="description_hint"></span></td>
+    </tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>页面位置</td>
+        <td>
+			<div class="type1">
+            <input type='checkbox' name='show_place[]' value='4' <?php if($list['show_place']&4) echo 'checked'?>>首页推荐</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' id="all_details" onclick="check_single()" value='1' <?php if($list['show_place']&1) echo 'checked'?>>详情页</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='2' <?php if($list['show_place']&2) echo 'checked'?>>可更新页</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <input type='checkbox' name='show_place[]' value='64' <?php if($list['show_place']&64) echo 'checked'?>>应用-最热</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='512' <?php if($list['show_place']&512) echo 'checked'?>>游戏-最热</input><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='65536' <?php if($list['show_place']&65536) echo 'checked'?>>发现-推荐</input><span>&nbsp;&nbsp;&nbsp;</span><br/>
+			<input type='checkbox' name='show_place[]' value='131072' <?php if($list['show_place']&131072) echo 'checked'?>>发现-汉化</input><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='262144' <?php if($list['show_place']&262144) echo 'checked'?>>发现-专题</input><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='524288' <?php if($list['show_place']&524288) echo 'checked'?>>6.0应用排行</input><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='33554432' <?php if($list['show_place']&33554432) echo 'checked'?> >金币列表</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            
+            <label style="color:red;">以下页面请慎用</label><br/>
+            <input type='checkbox' name='show_place[]' value='8' <?php if($list['show_place']&8) echo 'checked'?>>飙升</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='16' <?php if($list['show_place']&16) echo 'checked'?>>首页必备</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <!--<input type='checkbox' name='show_place[]' value='32' <?php if($list['show_place']&32) echo 'checked'?>>首页尝鲜</input><span>&nbsp;&nbsp;&nbsp;</span>-->
+            <input type='checkbox' name='show_place[]' value='128' <?php if($list['show_place']&128) echo 'checked'?>>应用分类Tab</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <input type='checkbox' name='show_place[]' value='256' <?php if($list['show_place']&256) echo 'checked'?>>应用日排行</input><span>&nbsp;&nbsp;&nbsp;</span>
+            
+            <input type='checkbox' name='show_place[]' value='1024' <?php if($list['show_place']&1024) echo 'checked'?>>网游</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <input type='checkbox' name='show_place[]' value='2048' <?php if($list['show_place']&2048) echo 'checked'?>>单机</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='4096' <?php if($list['show_place']&4096) echo 'checked'?>>游戏分类Tab</input><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='8192' <?php if($list['show_place']&8192) echo 'checked'?>>管理</input><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='16384'<?php if($list['show_place']&16384) echo 'checked'?>>个人中心</input>
+			 <br/>
+			 <input type='checkbox' name='show_place[]' onclick="check()" id="single_soft" value='32768' <?php if($list['show_place']&32768) echo 'checked'?>>单一软件详情页</input><br/>
+			 <div <?php if($list['show_place']&32768) echo "style='display:block;'"; else  echo "style='display:none;'"; ?> id="single_package">
+			 <input type="text"  id="single_pk" value="{$list['single_soft']}"  name="single_pk" onblur="get_softname();"/>
+			 <input id="error_info" style="color:red; border:none;" readonly value=""/>
+			 </div>
+			</div>
+			 <input id="search_result_page" type='checkbox' name='show_place[]' value='1048576' onclick="check_search_result()" <?php if($list['show_place']&1048576) echo 'checked'?>>搜索结果页</input><span>&nbsp;&nbsp;&nbsp;</span>
+        </td>
+        <td/>
+    </tr>
+	<tr class="sub_tr type2">
+		<td><font color="red">*</font>排序值</td>
+		<td>
+			<input type="text"  id="rank"  name="rank" value="<?php echo $list['parameter_field1']['rank'];?>"/>
+		</td>
+		<td>20以内</td>
+	</tr>
+	<tr class="sub_tr type2">
+		<td ><font color="red">*</font>图标名称</td>
+		<td><input id="i_title" name='i_title' type='text' onKeyUp="checkLen(this, 20)" value="<?php if($list['type']==2)echo $list['title'];?>"/></td>
+		<td>2~20个字符</td>
+	</tr>
+	<tr class="sub_tr type2">
+		<td><font color="red">*</font>图标素材</td>
+		<td><input name='i_image_url' id="i_image_url" type='file'/></td>
+		<td>限制上传60*60的JPG/PNG图片</td>
+	</tr>
+	<tr class="sub_tr type2">
+		<td>GIF图片</td>
+		<td><input name='gif_image_url'  type='file'/></td>
+		<td>限制上传60*60的gif图片</td>
+	</tr>
+	<tr class="sub_tr type2">
+		<td><font color="red">*</font>人气值</td>
+		<td>
+			<span>初始值</span><input id="init_val" name='init_val' type='text' onKeyUp="checkLen(this, 10)" value="<?php echo $list['parameter_field1']['init_val'];?>"/><br/>
+			<span>随机数 从</span><input id="random_start" name='random_start' type='text' value="<?php echo $list['parameter_field1']['random_start'];?>"/>到<input id="random_end" name='random_end' type='text' value="<?php echo $list['parameter_field1']['random_end'];?>" /><br/>
+			<span style="color:red; font-size:12px">人气值 = 初始值 + N1 + N2 + ...+Nn(N为每次的随机数)</span>
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr type2">
+		<td><font color="red">*</font>一句话简介</td>
+		<td><input name='s_description' id='s_description' type='text' onKeyUp="checkLen(this, 40)" value="<?php if($list['type']==2) echo $list['description'];?>"/></td>
+		<td>40字符</td>
+	</tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>推荐内容</td>
+        <td>
+            <!--下面a里的href的url会在ready函数里自动生成-->
+            <a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+            <!--下面的content_type_div是选择推荐内容后append的地方-->
+            <div id="content_type_div"/>
+        </td>
+        <td/>
+    </tr>
+	<tr id="result_page" class="sub_tr" style="display:none;">
+		<td>指定搜索词：</td> 
+		<td style="height:70px;">
+		<a href="__APP__/Public/down_moban" class="blue" style="text-decoration:none;font-size:14px; color:blue">下载csv模板</a><br>
+		<input type="file" id="upload_search_keys" name="upload_search_keys" style="background:none; border:none; width:170px;"/><input type="button" value="上传" onclick="upload_file_search_keys()"/><br>
+		
+		<input type="text" id="show_search_keys_count" name="show_search_keys_count" style="border:none;background:none; color:red;" readonly value=""/><br>
+		<input type='hidden' name='search_keys_url' id='search_keys_url' value="">
+		<input type='hidden' name='search_keys_count' id='search_keys_count' value="">
+		<?php if($list['search_keys_url']) { ?>
+		<input type="text" id="have_keys_url" name="have_keys_url" value="<?php if($list['search_keys_url']){ ?>{$list.search_keys_url}<?php } ?>" readonly /><br/>
+		<span id="csv_count_show_span" style="color:red; font-size:14px;">有效搜索热词数</span>
+		<input type="text" id="have_keys_count" name="have_keys_count" readonly style="border:none;color:red; background:none;" value="<?php if($list['search_keys_count']){ ?>{$list.search_keys_count}<?php } ?>"/>
+		<input type="button" id="del_search_csv_value" value="删除" onclick="del_csv(this)" />
+		<?php } ?>
+	</tr>
+			
+	<tr id="tr_csv" class="sub_tr">
+		<td>覆盖用户：</td>
+		<td style="height:70px;">
+		<a href="__APP__/Public/down_moban" class="blue" style="text-decoration:none; color:blue;font-size:14px;">下载csv模板</a><br/>
+		<input type="file" id="upload_file" name="upload_file"  style="background:none; border:none; width:160px;" value="" /><input type="button" id="upload_csv" value="上传" onclick="count()" />
+		
+		<input type="text" id="have_pre_dl" name="have_pre_dl" value="<?php if($list['csv_url']){ ?>{$list.csv_url}<?php } ?>" readonly /><br>
+		<span id="csv_count_show_span" style="color:red; font-size:14px;">有效用户数</span>
+		<input type="text" id="pre_dl_count" name="pre_dl_count" readonly style="border:none;color:red; background:none;" value="<?php if($list['csv_count']){ ?>{$list.csv_count}<?php } ?>"/>
+		<input type='hidden' name='csv_url' id='csv_url' value="">
+		<input type='hidden' name='csv_count' id='csv_count' value="">
+		<input type="button" id="del_csv_value" value="删除" onclick="del_csv(this)" />
+		</td>
+	</tr>
+	<tr class="sub_tr">
+	<td>选择渠道可见</td>
+	<td align="left" width="300">
+	<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+		<div id="channel_div">
+			<volist id="chl_list_vo" name="chl_list" >
+				&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+			</volist>
+		</div>
+	</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>机型可见</td>
+			<td>
+			<a href="/index.php/Public/showDevice?callback=submitDevice&ready=check_arrs&type=checkbox&reset_device=1" class="thickbox"><font color="blue">选择机型</font></a>
+			<div id="device_div">
+			<volist id="chl_list_vo" name="device_selected" >
+				&nbsp;<label class="l_did_{$chl_list_vo.did}"><input type="checkbox" name="did[]" checked="checked" value="{$chl_list_vo.did}"/>{$chl_list_vo.dname}</label>&nbsp;
+			</volist>
+			</div>
+			</td>
+	</tr>
+	<tr class="sub_tr">
+	  <td>运营商</td>
+	  <td id="operator_td">
+		<div id="operator_div">
+			<?php foreach($operator_list as $k => $v): ?>
+			<label><input name="oid[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		  <br/>
+		</div>
+	  </td>
+	  </tr>
+	<tr class="sub_tr">
+	  <td>固件版本</td>
+	  <td id="channel_td">
+		<div id="abi_div">
+			<?php foreach($firmwarelist as $k => $v): ?>
+			<label><input name="firmware[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		</div>
+	  </td>
+	</tr>
+	<tr class="sub_tr">
+	  <td>市场版本</td>
+	  <td id="channel_td">
+		<div id="abi_div">
+			<?php foreach($version_list as $k => $v): ?>
+				 <label>
+				<input name="version_code[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		</div>
+	  </td>
+	</tr>
+    <tr class="sub_tr">
+		<td><font color="red">*</font>开始时间</td>
+		<td>
+            <input id="start_time" name="start_time" type="text" class="Wdate" style="float:left" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value='{$list.start_time|date="Y-m-d H:i:s",###}'/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>结束时间</td>
+		<td>
+            <input id="end_time" name="end_time" type="text" class="Wdate" style="float:left" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" value='{$list.end_time|date="Y-m-d H:i:s",###}'/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='co_type'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+    <input type="hidden" name="id" id="id" value="{$list.id}"/>
+	<input type="hidden" name="life" value="<?php echo $_GET['life']; ?>"/>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="pid" value='{$list.pid}'/>
+            <input type='hidden' name="extent_id" value='<?php echo $extent_id?>'/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

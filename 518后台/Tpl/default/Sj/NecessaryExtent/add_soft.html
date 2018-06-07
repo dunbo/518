@@ -1,0 +1,177 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+var options, a;
+//jQuery(function(){
+//	options = { 
+//		serviceUrl:'/index.php/Public/showSoft',
+//		minChars:2,
+//		width: '300px',
+//		deferRequestBy: 0,
+//		onSelect: function(value, data){
+//			$('#package').val(data)
+//		}
+//	};
+  //a = $('#search_key').autocomplete(options);
+//});
+function checkPost()
+{
+	if ($('input[name=prob]').val() > 100) {
+		alert('概率不能大于100');
+		return false;
+	}
+	
+	if ($('input[name=prob]').val() == '') {
+		alert('请填写概率');
+		return false;
+	}
+	
+	if ($('input[name=package]').val() == '') {
+		alert('填写的软件名为空，或者在数据库中无法定位到相关数据，请重试');
+		return false;
+	}
+	
+	var beid = $('#beid').val();
+	if (!/^\d+$/.test(beid) && beid) {
+		alert('行为id请填写大于等于0的整数');
+		return false;
+	}
+
+	if ($('#start_at').val() == '') {
+		alert('请填写开始时间');
+		return false;
+	}
+	if ($('#end_at').val() == '') {
+		alert('请填写结束时间');
+		return false;
+	}
+	
+	if (Date.parse($('#start_at').val()) > Date.parse($('#end_at').val()) ) {
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+	
+	var enable = true;
+	$.getJSON('/index.php/Sj/NecessaryExtent/index/act/checkProp/extent_id/<?php echo $soft['extent_id']?>/id/<?php echo $soft['id']?>', function(data){
+		var total = parseInt(data.total)
+		var max = parseInt(data.max)
+		var now = parseInt($('#prob').val());
+	
+		if (total + now > max) {
+			alert('概率总和不能大于区间(位置数*100)');
+			// enable = false;
+			return false;
+		}
+	});
+	
+	var enable_two = true;
+	var pkg=$('input[name=package]').val();
+	$.ajax({
+		url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+		type: 'get',
+		async:false,
+		success: function(data){
+			if(data){
+				if(!confirm(data)){
+					enable_two=false;
+				}
+			}
+		}
+	});
+	return enable_two;
+}
+//软件包名验证
+function get_softname(){
+	var pkg = $('#apply_pkg').val();
+	$.ajax({
+		url: '/index.php/Sj/Onlinegame/get_softname/package/'+pkg,
+		type: 'get',
+		success: function(data){
+			if(data != 2){
+				var obj = eval('(' + data + ')');
+				
+				$('#soft_name').val(obj.soft_name);
+				$('#my_game').val(obj.category_name);
+			}else{
+				$('#soft_name').val('');
+				$('#my_game').val('');
+				alert("该软件不存在");
+				return false;
+			}
+		}
+	});
+}
+</script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+<FORM method="POST" action="/index.php/Sj/NecessaryExtent/add_soft" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td>包名</td>
+		<td><input type="hidden" name="search_key" id="search_key"><input  id="apply_pkg" onblur="get_softname();" name='package' type='text'/></td>
+		
+	</tr>
+	<tr class="sub_tr">
+		<td>软件名称</td>
+		<td><input type="text" name="soft_name" id="soft_name" readonly /></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>行为id</td>
+		<td><input type="text" name="beid" id="beid" /></td>
+	</tr>
+	<tr class="sub_tr">
+		<td style="border:none">显示概率</td>
+		<td style="border:none"><input name='prob' type='text'/></td>
+	</tr>
+	<tr class="sub_tr">
+		<td></td>
+		<td><span style="align:left;"><input type="checkbox" name="been_install" value="1" /></span>已装最新版用户不展示</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>开始时间</td>
+		<td><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+		<input id="start_at" name="start_at"
+			style="border: 0px none black; width: 100px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>结束时间</td>
+		<td><span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="end_at" name="end_at"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='type'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="2"> <input type='hidden' name="extent_id" value='<?php echo $extent_id?>'/><input type='submit'/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;"></td>
+	</tr>
+</table>
+</FORM>	

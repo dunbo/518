@@ -1,0 +1,101 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/js/fancybox/jquery.fancybox-1.3.4.css" />
+<script type="text/javascript" src="/Public/js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+<script type="text/javascript">
+function checkorder(){
+    var p = true;
+	$('table input').each(function(){
+        if($(this).val() > 100){
+            alert('排序值不能大于100');
+            p = false;
+			return false;
+        }
+    });
+	return p;
+}
+$(document).ready(function() {
+		$("a.zshowbox").fancybox();
+});
+function checksearch(){
+	sval = document.getElementById('start_tm').value;
+	eval = document.getElementById('end_tm').value;
+	if(sval > eval){
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+	return true;
+}
+</script>
+<style>
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+<body>
+
+<div style="margin:20px 10px 20px 6px;">
+</div>
+
+<div style="margin:20px 10px 20px 6px;"></div>
+<form action="__URL__/doeditorder/" method="post">
+<div style="margin:10px;">
+		<a href="__URL__/add/" class="search_btn thickbox" style="display:inline-block;">添加</a>
+        <?php if($_GET['edit']):?>
+        <input type="submit" name="submit" onclick="return checkorder()" class="search_btn" style="display:inline-block;" value="保存排序" />
+		<a href="__URL__/index/<?php if($_GET['time']):?>time/out/<?php endif;?>p/{$_GET['p']|default=1}/lr/{$_GET['lr']|default=20}" class="search_btn" style="display:inline-block;">取消编辑排序</a>
+        <?php else:?>
+		<a href="__URL__/index/edit/1/<?php if($_GET['time']):?>time/out/<?php endif;?>p/{$_GET['p']|default=1}/lr/{$_GET['lr']|default=20}" class="search_btn" style="display:inline-block;">编辑排序</a>
+        <?php endif;?>
+		<div style="float:right;">
+        <?php if($_GET['time']):?>
+		<a href="__URL__/index/" class="search_btn" style="display:inline-block;">全部</a>
+        <?php else:?>
+		<a href="__URL__/index/time/out/" class="search_btn" style="display:inline-block;">已过期</a>
+        <?php endif;?>
+		</div>
+	  </div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th >序号</th>	
+			<th >排序值</th>	
+			<th >TID</th>	
+			<th >原文图片/标题</th>	
+			<th >宣传图片/标题</th>	
+			<th >开始时间</th>	
+			<th >结束时间</th>	
+			<th style="width: 80px;">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val): ?>
+	<tr>
+		<td>{$val.id}</td>
+        <?php if($_GET['edit']):?>
+        <td><input name="order[{$val.id}]" value="{$val.order}" type="text" onkeyup="this.value=this.value.replace(/\D/g,'')"/></td>
+        <?php else:?>
+		<td>{$val.order}</td>
+        <?php endif;?>
+		<td>{$val.tid}</td>
+		<td style="width: 200px;"><?php if($val['img']){ ?><div style="width: 100px; max-height: 80px; overflow: hidden;margin: auto;"><a href="http://attach.anzhi.com/forum/{$val.img}" class="zshowbox"><img width="100px" src="http://attach.anzhi.com/forum/{$val.img}"/></a></div><?php } ?><a href="http://bbs.zhiyoo.com/thread-{$val.tid}-1-1.html" target="_blank">{$val.title}</a></td>
+		<td style="width: 200px;"><?php if($val['ext_img']){ ?><div style="width: 100px; max-height: 80px; overflow: hidden;margin: auto;"><a href="{$imghost}{$val.ext_img}" class="zshowbox"><img width="100px" src="{$imghost}{$val.ext_img}"/></a></div><?php } ?><a href="http://bbs.zhiyoo.com/thread-{$val.tid}-1-1.html" target="_blank">{$val.ext_title}</a></td>
+		<td><?php echo date('Y/n/d',$val['starttime']).'<br>'.date('H:i:s',$val['starttime'])?></td>
+		<td><?php echo date('Y/n/d',$val['endtime']).'<br>'.date('H:i:s',$val['endtime'])?></td>
+		<td style="width: 120px;">
+        <a href="__URL__/edit/id/{$val.id}/" class="thickbox">编辑</a> |
+        <a href="__URL__/del/id/{$val.id}/" onclick="return confirm('您确定要删除内容吗？')">删除</a> 
+        
+        </td>
+		
+	</tr>
+	<?php endforeach; ?>
+</table>
+</form>
+<div class="navgition">
+	{$page|default='&nbsp;'}
+</div>
+</body>
+</html>

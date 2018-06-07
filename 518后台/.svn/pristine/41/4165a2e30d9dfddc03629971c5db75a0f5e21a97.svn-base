@@ -1,0 +1,335 @@
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+ 
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+   
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<!--上传文件用到的js-->
+<script type="text/javascript" src="/Public/js/ajaxfileupload_anzhi.js?1"></script>    
+<div class="main" >
+    <div class="content" >
+        <div style="float:left">
+            <a href='javascript:void(0)' style="float:left;" title="添加广告" class="search_btn" onclick="add_ad()">添加广告</a>
+        </div>
+		<div style="float:right">
+            <a href='__URL__/index/status/3' style="float:left;<?php if($status==3){echo 'color:red';}?>"  class="search_btn" >过期</a>
+        </div>
+		<div style="float:right;margin-right:5px">
+            <a href='__URL__/index/status/2' style="float:left;<?php if(!$status||$status==2){echo 'color:red';}?>"  class="search_btn" >当前</a>
+        </div>
+		<div style="float:right;margin-right:5px">
+            <a href='__URL__/index/status/1' style="float:left;<?php if($status==1){echo 'color:red';}?>"  class="search_btn" >未开始</a>
+        </div>
+        <div style="clear:both"></div>
+        <div>
+            <table class="table_list" style="table-layout:fixed;width:100%">
+                <tbody>
+                    <tr bgcolor="#ccc"><td>序号</td><td>广告类型</td><td>数据类型</td><td>渠道</td><td>平台</td><td width="7%">添加时间</td><td width="7%">开始时间</td><td width="7%">结束时间</td><td width="4%">优先级</td><td>操作</td></tr>
+                </tbody>
+               <volist name="result" id="vo">
+                   <tr>
+                       <td>{$vo.id}</td><td>{$vo.ad_type}</td><td>{$vo.content_type}</td><td>{$vo.channel_name}</td><td>{$vo.pid}</td><td>{$vo.create_at|date="Y-m-d H:i:s",###}</td>
+					   <td>{$vo.start_at|date="Y-m-d H:i:s",###}</td>
+					   <td>{$vo.end_at|date="Y-m-d H:i:s",###}</td>
+					   <td>{$vo.priority_show}</td>
+                       <td><a href="javascript:void(0)" onclick="edit({$vo.id},{$vo.type})">[编辑]</a> | <a href="javascript:void(0)" onclick="del({$vo.id})">[删除]</a></td>
+                   </tr>
+               </volist>
+            </table>
+        </div>
+    </div>
+</div>
+<div style="float:left;width:100%" >
+   {$page} 
+</div>
+<div style='clear:both'></div>
+<div style="display:none;width:330px;text-align: center;height:450px;padding-top:10px;padding-right:10px" id="ad_div" >
+    <div>
+    <table width="100%">
+        <tr>
+            <td width="24%" align="right">广告类型:</td>
+            <td align='left'>
+                <select  class="search_item_text" id="ad_type" name="ad_type" style="width: 100px" onchange="change_ad($(this).val())">
+                    <option>--请选择--</option>
+                    <?php
+                        foreach($ad_type as $key=>$val){
+                        ?>
+                        <option value="<?php echo $key;?>" <?php if($ad_choose_type==$key){echo 'selected="selected"';}else if($key==1){echo 'selected="selected"';}?>><?php echo $val;?></option>
+                        <?php
+                        }
+                    ?>
+                </select>
+            </td>
+        </tr>
+    </table>
+    </div>
+    
+
+    <form method="post" action="__URL__/add_ad" name="fml" enctype="multipart/form-data">    
+		<div  id="ad_div1" style="display:block;height: 416px;overflow: auto" class="ad_div_c">
+
+		</div>
+		<input type="hidden" id="edit" name="edit">
+		<input type="hidden" id="id" name="id">
+    </form>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        var ad_type = $('#ad_type').val();
+        var ad_type = $('#ad_type').val();
+        ajax_get_content(ad_type);
+    })
+    
+    function ajax_get_content(ad_type){
+        $.post("__URL__/choose_ad_type",
+            {ad_type:ad_type},
+            function(data){
+                $('#ad_div1').html(data);
+            }
+        );
+        
+    }
+    function add_ad(){
+        $('#ad_type').val('1');
+        $('#ad_type').attr("disabled",false); 
+        change_ad(1);
+        $('#edit').val(0);
+        $('#channel_div').html('');
+        $("#ad_div").zxxbox();
+    }
+    
+    function change_ad(id){
+        var ad_type = $('#ad_type').val();
+        ajax_get_content(ad_type)
+    }
+    
+    function change_content(id){
+        $('.type').css('display','none');
+        $('.type'+id).css('display','');
+        
+    }
+
+    function clear_cont(id,fill){
+        if(!fill){
+            if($(id).val()=='排序值'){
+                $(id).val('');
+            }
+        }else{
+            if($(id).val()==''){
+                $(id).val('排序值');
+            }
+        }
+        
+    }
+    
+    function edit(id,ad_type){
+        $("#ad_div").zxxbox();
+        var arr = new Array();
+        $.post("__URL__/choose_ad_type",
+            {ad_type:ad_type},
+            function(data){
+                $('#ad_div1').html(data);
+                $.post("__URL__/edit_ad",
+                    {id:id},
+                    function(data){
+                        $('#ad_type').attr("disabled",true); 
+                        fill_content(data);
+
+                        $('#edit').val(1);
+                        $('#id').val(data.id);
+                    },"json"
+                );
+            }
+        );
+        
+    }
+    
+    function fill_content(data){
+        var arr = ['ad_type','content_type','title','banner_type','description','url','channel_key','pid','start_at','end_at','package','show_flag','priority'];
+        var arr1 = ['close_flag','download_flag','open_mode','app_type','market_flag','show_intall_pic'];
+        for(var i=0;i<arr.length;i++){
+            if(data[arr[i]]){
+                $('#'+arr[i]).val(data[arr[i]]);
+            }
+        }
+        
+        if(data.channel_name&&data.channel_name !=''){
+            var channel_name = data.channel_name.split(',');
+            var channel_id = data.channel_id.split(',');
+            for(var c=0;c<channel_name.length;c++){
+                var str = '<label class="l_cid_'+channel_id[c]+'"><input type="checkbox" alt="'+channel_name[c]+'" onclick="selectChannel(this,onclikChannel,\'checkbox\')" value="'+channel_id[c]+'" name="cid[]" checked="checked">'+channel_name[c]+'</label>';
+                $('#channel_div').append(str);
+            }
+        }
+        
+        
+        
+        if(data.ad_type !=2){
+            change_content(data.content_type);
+        }
+        
+        for(var j=0;j<arr1.length;j++){
+            if(data[arr1[j]]){
+                $("input[name='"+arr1[j]+"'][value="+data[arr1[j]]+"]").attr("checked","true");
+            }
+        }
+        if(data.package&&data.ad_type==2){
+            for(var k=0;k<data.package.length;k++){
+                if(data.package.length>1&&k>0){
+                    $('#add_table').parent().append('<div style="float:left" class="add_pack"><input type="text" class="search_item_text" style="width:97px" id="package" name="package[]">-<input type="text" name="rank[]" value="排序值" class="search_item_text" style="width:39px;color:gray" onclick="clear_cont(this)" onblur="clear_cont(this,1)"></div>');
+                }
+            }
+            $("input[name='package[]']").each(function(i){
+                $(this).val(data.package[i].package);
+                $(this).next('input').val(data.package[i].rank);
+            })
+        }
+    }
+    
+    function del(id){
+        if(confirm('确认删除吗？')){
+            window.location.href = '__URL__/del_ad?id='+id;
+        }
+    }
+    
+    function selectChannel(obj,fselected,type)
+    {
+            if (obj.checked == true) {
+                    var item = $('<label class="l_cid_' + $(obj).val() + '">' + $('.l_cid_' + $(obj).val()).html() + '</label>');
+                    item.find('input').attr('checked', true);
+                    $('#channel_selected').append(item);
+                    //alert(fselected);
+                    if(type=="radio"){
+                            tb_remove();
+                    }
+                    fselected();
+            } else {
+                    $('.l_cid_' + $(obj).val() + ' input:checked').attr('checked', false);
+                    $('#channel_selected .l_cid_' + obj.value).remove();
+                    onclikChannel_c(obj.value);
+            }
+    }
+     function check_arr()
+    {
+        $('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+        $('#channel_div input:checked').each(function(){
+                $('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+        });
+    }
+    function onclikChannel()
+    {
+            $('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+    }
+    function onclikChannel_c(cid)
+    {
+            $('#channel_div .l_cid_' + cid).remove();
+    }
+    function set_style(){
+        document.getElementById('wrapOut').style.zIndex = 1;
+        document.getElementById('zxxBlank').style.zIndex = 1;
+    }
+    function submitChannel()
+    {
+        var cids = '';
+        $('#channel_div').html('');
+        $("#TB_ajaxContent #channel_selected input:checked").each(function(){
+                var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+                item.find('input').attr('checked', 'true');
+                $('#channel_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+        tb_remove();
+    }
+	//覆盖用户
+	function count(type) {
+		if(type=="fugai")
+		{
+			$.ajaxFileUpload({
+				url:'__URL__/csv_count',
+				type:'POST',
+				fileElementId:'upload_file',
+				dataType: 'json',
+				secureuri:false,
+				success:function(data)
+				{
+					if(data.error1==-1)
+					{
+						alert("请选择导入的CSV文件!");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("pre_dl_count").value=""; 
+						return false;
+					}
+					else if(data.error2==-2)
+					{
+						alert("请上传CSV格式文件！");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("pre_dl_count").value=""; 
+						return false;					
+					}
+					else if(data.error2==-3)
+					{
+						alert("CSV文件格式不正确,请您参考下载模板！");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("pre_dl_count").value=""; 
+						return false;					
+					}
+					else
+					{
+						document.getElementById("csv_url").value=data.csv_url;
+						document.getElementById("csv_count").value=data.out_count;
+						document.getElementById("pre_dl_count").value="有效用户数"+data.out_count;
+					}				
+				}
+			});
+		}
+    }
+	//优先级
+	function check_priority()
+	{
+		var priority = $('#priority').val();
+		var exchange_start = $('#start_at').val();	
+		var exchange_end = $('#end_at').val();	
+		var id = $('#id').val();
+		/*if(!priority){
+			alert('请填写广告优先级');
+			return false;
+		}*/
+		if(priority == 0)
+		{
+			alert('广告优先级应为1-100的阿拉伯数字');
+			$('#priority').val("");	
+			return false;
+		}
+		if(priority)
+		{
+			$.ajax({
+				url: '__URL__/check_priority',
+				data: "begintime="+exchange_start+"&endtime="+exchange_end+"&priority="+priority+'&id='+id,
+				type: 'GET',
+				dataType: 'json',
+				success: function(ret) {
+					if(ret.code == 0){
+						$('#priority').val("");	
+						alert('同一排期内优先级重复，请重新填写');
+						return false;
+					}
+				}
+			});	
+		}
+		else
+		{
+			alert('广告优先级应为1-100的阿拉伯数字');
+			return false;
+		}
+	}
+</script>

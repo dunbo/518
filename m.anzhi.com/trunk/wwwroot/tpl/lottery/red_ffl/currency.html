@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title><!--{$out.title}--></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/red_ffl/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+</head>
+<body>
+<div class="banner">
+<!--{if $out.list.imgurl}-->
+	<img style="height:248px;" src="<!--{$out.img_url}--><!--{$out.list.imgurl}-->"/>
+<!--{else}-->	
+	<img src="<!--{$out.static_url}-->/red_ffl/images/banner.png"/>
+<!--{/if}-->
+</div>
+<div class="main main2">
+<!--{if $out['status'] == 0 || $out['status'] == 2}-->
+	<div class="tips_p tips_p2">
+		<div class="tips_img">
+			<!--{if $out['status'] == 0}-->
+			<img src="<!--{$out.static_url}-->/red_ffl/images/tip_hd_01.png">
+			<!--{else}-->
+			<img src="<!--{$out.static_url}-->/red_ffl/images/tip_hd_02.png">
+			<!--{/if}-->
+		</div>
+		<!--{if $out['status'] == 0}-->
+		<p class="txt_spec">活动还未开始，请耐心等待哦</p>
+		<!--{else if $out['status'] == 2}-->
+		<p class="txt_spec">活动已经结束，下次再来吧</p>
+		<!--{else}-->
+		<p class="txt_spec" id="colockbox1">
+			<span class="day">00</span>天
+			<span class="hour">00</span>时
+			<span class="minute">00</span> 分
+			<span class="second">00</span>秒 
+			活动进行中
+		</p>
+		<!--{/if}-->
+		<p class="txt_spec2">活动时间
+			<br/>
+			<!--{$out.list.start_tm|date_format:'%Y-%m-%d %H:%M'}-->至<!--{$out.list.end_tm|date_format:'%Y-%m-%d %H:%M'}-->
+			<!--{if $out.list.red_start_tm}-->
+			<br/>每天<!--{$out.list.red_start_tm}-->开始
+			<!--{/if}-->			
+		</p>
+		
+	</div>
+	<!--{if $out['status'] == 2}-->
+	        <!--{if $out['noget'] == 1}-->
+                <div class="lottery_list">
+					<ul>
+						<!--{foreach from=$out.nogetlist key=mykey  item=v}-->
+						<li><p>中奖红包未领取　<!--{date('Y-m-d H:i:s',$v.time)}--> <a href="javascript:;" onclick="open_red(<!--{$v.red_id}-->,<!--{$mykey}-->,'<!--{$v.package}-->',<!--{$v.status}-->)">立刻领取</a></p></li>
+						<!--{/foreach}-->
+						<li class="list_spec"><p>请尽快领取，红包将在1小时后过期</p></li>
+					</ul>
+				</div>
+	        <!--{/if}-->
+		<!--{/if}-->
+<!--{else}-->
+	<div class="tips_p tips_p2">
+		<div class="tips_img">
+			<div class="red_packets">
+				<div class="red_packets_top">
+					<p>一大波红包正在来袭快来用手戳红包！</p>
+				</div>
+				<div class="red_packets_bom">
+					<p id="colockbox1">剩余时间<br/>
+						<span>
+						<b class="minute">00</b>
+						 :
+						<b class="second">00</b>
+						</span>
+					</p>
+				</div>
+			</div>
+		</div>
+		<p class="txt_spec">活动进行中</p>
+		<p class="txt_spec2">活动时间<br/>
+			<!--{$out.list.start_tm|date_format:'%Y-%m-%d %H:%M'}-->至<!--{$out.list.end_tm|date_format:'%Y-%m-%d %H:%M'}-->
+			<!--{if $out.list.red_start_tm}-->
+			<br/>每天<!--{$out.list.red_start_tm}-->开始
+			<!--{/if}-->
+		</p>
+		
+	</div>	
+	<!--{if $out['noget'] == 1}-->
+			<div class="lottery_list">
+				<ul>
+					<!--{foreach from=$out.nogetlist key=mykey  item=v}-->
+					<li><p>中奖红包未领取　<!--{date('Y-m-d H:i:s',$v.time)}--> <a href="javascript:;" onclick="open_red(<!--{$v.red_id}-->,<!--{$mykey}-->,'<!--{$v.package}-->',<!--{$v.status}-->)">立刻领取</a></p></li>
+					<!--{/foreach}-->
+					<li class="list_spec"><p>请尽快领取，红包将在1小时后过期</p></li>
+				</ul>
+			</div>
+		<!--{/if}-->
+<!--{/if}-->	
+    <!--{if $out.list.activity_type != 8}-->
+	<div class="rules">
+		<h3>规则说明：</h3>
+		<ul>
+            <li><!--{$out.list.red_at_desc}--></li>
+		</ul>
+	</div>
+	<!--{/if}-->
+</div>
+</body>
+</html>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->'
+var aid = '<!--{$out.aid}-->';
+var activity_name = '<!--{$out.list.name}-->';
+var actiontype = '<!--{$out.list.activity_type}-->';
+<!--{if $out['status'] == 1}-->
+//监听浏览器tab切换
+//页面可见性改变(visibilitychange)事件
+document.addEventListener('visibilitychange',function(){ 
+	if(document.visibilityState=='hidden') { 
+		normal_title=document.title; 
+		document.title='跳出tab';
+		//alert("跳出tab");
+	}else{
+		document.title=normal_title;
+		document.title='回来tab';
+		location.reload();
+	}	
+});
+$(function(){
+	countDown("<!--{$out.end_tm}-->","#colockbox1");
+});
+function countDown(time,id){
+//	var day_elem = $(id).find('.day');
+//	var hour_elem = $(id).find('.hour');
+	var minute_elem = $(id).find('.minute');
+	var second_elem = $(id).find('.second');
+	var end_time = new Date(time).getTime(),//月份是实际月份-1
+	sys_second = (end_time-new Date().getTime())/1000;
+	var timer = setInterval(function(){
+		if (sys_second > 1) {
+			sys_second -= 1;
+			//var day = Math.floor((sys_second / 3600) / 24);
+			//如果计算到天就得24小时整除
+		//	var hour = Math.floor((sys_second / 3600) % 24);
+			//计算小时
+			//var hour=Math.floor(sys_second/3600); 
+			//var minute = Math.floor((sys_second / 60) % 60);
+			var minute = Math.floor(sys_second / 60);
+			var second = Math.floor(sys_second % 60);
+			//day_elem && $(day_elem).text(day);//计算天
+			//$(hour_elem).text(hour<10?"0"+hour:hour);//计算小时
+			$(minute_elem).text(minute<10?"0"+minute:minute);//计算分钟
+			$(second_elem).text(second<10?"0"+second:second);//计算秒杀
+		} else { 
+			clearInterval(timer);
+			//location.reload();
+		}
+	}, 1000);
+}
+<!--{/if}-->
+
+//结果回调：签到结果、拆红包结果（活动or签到）
+function reportPacketResult(json){
+    var data = JSON.parse(json);
+    if(data.type==2){
+        if(data.result==2||data.error==-5){
+            //将未领取干掉
+            $.ajax({
+				url: '/lottery/red_package/index.php',//将已过滤的无效数据清除
+				data:'sid='+sid+'&aid='+aid+'&orderid='+data.orderId,
+				type: 'post',
+				dataType: 'json',				
+				success:function(res){
+					//var o='{"type":0,"activityId":'+aid+',"redPackId":'+red_id+',"LRTS":"1","status":"'+open_status+'","activityName":"'+activity_name+'","APP_INFO":'+res+',"orderId":'+order_id+'}';
+					location.reload();
+					//window.AnzhiActivitys.openRedPack(o);
+				}
+            });
+        }else{
+            location.reload();
+        }
+    }
+}
+
+//拆红包
+function open_red(red_id,order_id,ppackage,open_status){
+    if(actiontype==6){
+        open_status=4;
+    }else{
+        open_status=0;
+    }
+    //ppackage='com.guo.studenttimetkebiao';
+        //if(typeof(ppackage)!='undefined'){
+        if(ppackage!=''){//有任务
+            $.ajax({
+				url: '/lottery/red_package/index.php',//获取软件信息
+				data:'sid='+sid+'&aid='+aid+'&ppackage='+ppackage,
+				type: 'post',
+				dataType: 'json',				
+				success:function(res){
+                                        if(res =='""'){
+                                            open_status=3;
+                                        }
+					var o='{"type":0,"activityId":'+aid+',"redPackId":'+red_id+',"LRTS":"1","status":"'+open_status+'","activityName":"'+activity_name+'","activityType":"'+actiontype+'","APP_INFO":'+res+',"orderId":'+order_id+'}';
+					window.AnzhiActivitys.openRedPack(o);
+				}
+            });
+        }else{
+            //直接弹
+            var o='{"type":0,"activityId":'+aid+',"redPackId":'+red_id+',"LRTS":"1","status":"'+open_status+'","activityName":"'+activity_name+'","activityType":"'+actiontype+'","orderId":'+order_id+'}';
+            window.AnzhiActivitys.openRedPack(o);
+        }
+}
+<!--{if $out['is_share'] == 1 && ($out['status'] == 2 || $out.list.status != 1 || ($out.list.activity_type eq 6 && $out['status'] == 1))}-->
+$(document).ready(function () {
+	setTimeout(function(){
+		share_download();		
+	}, 1000);
+});
+//分享地址为活动页 用的方法
+//$.getScript("/js/anzhi-fd-min.js");
+document.write(unescape("%3Cscript src='/js/anzhi-fd-min.js' type='text/javascript'%3E%3C/script%3E"));
+var from = 8;
+var lock = false;
+function share_download(){
+	var js_param = {type:'action', id:0,actiontype:actiontype, from:from,callback:invite_callback};
+	var php_param = {type:'action', aid:0,actiontype:actiontype, from:from};	
+	Azfd.share_download(js_param, php_param);
+}
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6500){
+			js_param = {type:'action', id:aid, callback:null};
+			Azfd.lock = false;
+			//share_download(js_param, php_param);			
+		}else {
+			setTimeout(function(){
+				var php_url = '/fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;			
+			},1000);		
+		} 
+	}else{
+		setTimeout(function(){
+			var php_url = '/fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;			
+		},1000);		
+	}
+}
+<!--{/if}-->
+</script>

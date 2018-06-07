@@ -1,0 +1,174 @@
+<!--{if $out.soft.hide==1 && $out.soft.status==1}-->
+<div class="padding_bom"></div>
+<div class="footer_app">
+	<div class="footer_img"><img src="<!--{$out.image_url}--><!--{$out.soft.iconurl_72}-->" alt="<!--{$out.soft.SOFT_NAME|escape:html}-->" /></div>
+	<div class="footer_des">
+		<h4><!--{$out.soft.SOFT_NAME|truncate:12:'...'}--></h4>
+		<div class="footer_stars stars stars_<!--{$out.soft.SOFT_STAR|floor}-->"></div>
+		<span><!--{formatFileSize}--><!--{$out.soft.SOFT_SIZE}--><!--{/formatFileSize}--></span>
+	</div>
+	<a id="m_download" style="display:none;" class="footer_down az_down_btn1" rel="<!--{$out.soft.ID}-->,'<!--{$out.perfect.package}-->" href="download.php?softid=<!--{$out.soft.ID}-->">下载</a>
+	<a id="a_download" style="display:none;" class="footer_down" href="#">下载</a>
+</div>
+<div id="az_spirit"></div>
+<!--{/if}-->
+
+<script type="text/javascript" src="<!--{$out.public_url}-->/js/zepto.min.js"></script>
+<script type="text/javascript" src="/js/anzhi.js?v5"></script>
+<script type="text/javascript" src="<!--{$out.public_url}-->/js/common.js"></script>
+<script type="text/javascript">
+function ResumeError(a,b,c) { 
+	alert(a);
+	alert(b);
+	alert(c);
+    return true; 
+} 
+//window.onerror = ResumeError; 
+
+// 初始化软件信息
+var var_soft_id = parseInt('<!--{$out.soft.ID}-->');
+var var_soft_package = '<!--{$out.perfect.package}-->';
+var var_soft_ver = '<!--{$out.soft.SOFT_VERSION}-->';
+var var_soft_ver_code = parseInt('<!--{$out.soft.SOFT_VERSION_CODE}-->');
+var var_soft_name = '<!--{$out.soft.SOFT_NAME}-->';
+var var_soft_size = parseInt('<!--{$out.soft.SOFT_SIZE}-->');
+var var_soft_min_firmware = '<!--{$out.soft.min_firmware}-->';
+var var_soft_max_firmware = '<!--{$out.soft.max_firmware}-->';
+var var_activity = parseInt('-9999');
+var var_soft_status = 0;
+var var_interval = 0;
+
+$(function(){
+	if(typeof(window.AnzhiActivitys) == "undefined"){	
+		var var_write_log_url = 'perfect.php?method=write_log&id=<!--{$out.perfect.id}-->';
+		
+		if(!_GET('sid', false)){
+			
+			$('#top_bar').show();
+			$('#top_bar_margin').show();
+			
+			var_write_log_url += '&from=1';
+		}else{
+			var_write_log_url += '&from=2';
+		}
+		$('#m_download').show();
+		
+		$('#m_download').bind('mouseup',function(){
+			$.get(var_write_log_url, function(){});
+		});
+		
+	}else{
+		$('#a_download').bind('click', down);
+		$('#a_download').show();
+		
+		window.AnzhiActivitys.registerDownloadObserver(var_soft_id);
+		//window.AnzhiActivitys.registerInstallObserver(var_soft_package);
+		
+		status();
+	}
+});
+
+function status(){
+	if(var_interval!=0)
+		window.clearInterval(var_interval);
+	var_interval = window.setInterval(status, 2000);
+	
+	var var_a = $('#a_download');
+	var_soft_status = window.AnzhiActivitys.getDownloadStateForActivity(var_soft_id);
+	
+	if(var_soft_status == 1){ //下载中
+		var_a.html('下载中');
+		var_a.unbind('click');
+		var_a.bind('click', pause);
+	}else if(var_soft_status == 2){ //等待中
+		var_a.html('继续');
+		var_a.unbind('click');
+		var_a.bind('click', restart);
+	}else if(var_soft_status == 3){ //暂停
+		var_a.html('继续');
+		var_a.unbind('click');
+		var_a.bind('click', restart);
+	}else if(var_soft_status == 4){ //失败
+		var_a.html('失败');
+		var_a.unbind('click');
+	}else if(var_soft_status == 5){ //完成
+		var_a.html('安装');
+		var_a.unbind('click');
+		var_a.bind('click', install);
+	}else if(var_soft_status == 6){ //安装完成
+		var_a.html('打开');
+		var_a.unbind('click');
+		var_a.bind('click', open);
+	}else if(var_soft_status == 8){ //待校验
+		var_a.html('下载中');
+		var_a.unbind('click');
+	}else if(var_soft_status == 9){ //校验中
+		var_a.html('下载中');
+		var_a.unbind('click');
+	}else if(var_soft_status == 10){ //不可安装
+		var_a.html('已下载');
+		var_a.unbind('click');
+	}else if(var_soft_status == -1){
+		var var_soft_other_status = window.AnzhiActivitys.isInstalledApp(var_soft_package, var_soft_ver_code);
+
+		if(var_soft_other_status == -2){ //未安装
+			var_a.html('下载');
+			var_a.unbind('click');
+			var_a.bind('click', down);
+		}else if(var_soft_other_status == -1){ //已安装版本低
+			var_a.html('更新');
+			var_a.unbind('click');
+			var_a.bind('click', down);
+		}else if(var_soft_other_status == 0){ //版本相等
+			var_a.html('打开');
+			var_a.unbind('click');
+			var_a.bind('click', open);
+		}else if(var_soft_other_status == 1){ //已安装版本高
+			var_a.html('打开');
+			var_a.unbind('click');
+			var_a.bind('click', open);
+		}
+	}
+}
+
+function down(){
+	$('#a_download').html("下载中");
+	try{
+		window.AnzhiActivitys.downloadForActivity(var_activity, var_soft_id, var_soft_package, var_soft_name, var_soft_ver_code, var_soft_size, 0, 0, ''+var_soft_min_firmware+','+var_soft_max_firmware+'');
+	}
+	catch(e){
+		window.AnzhiActivitys.downloadForActivity(var_activity, var_soft_id, var_soft_package, var_soft_name, var_soft_ver_code, var_soft_size, 0);
+	}
+	return false;
+}
+
+function install(){
+	window.AnzhiActivitys.installAppForActivity(var_soft_id);
+	return false;
+}
+
+function open(){
+	window.AnzhiActivitys.openAppForActivity(var_soft_package, [var_activity, var_soft_id]);
+	return false;
+}
+
+function pause(){
+	$('#a_download').html("继续");
+	window.AnzhiActivitys.pauseDownloadForActivity(var_soft_id);
+	return false;
+}
+
+function restart(){
+	$('#a_download').html("下载中");
+	window.AnzhiActivitys.resumeDownloadForActivity(var_soft_id);
+	return false;
+}
+
+function onDownloadCreated(softid){return;}
+function onDownloadStateChanged(softid,newState){return;}
+function onDownloadDeleted(softid){return;}
+function onDownloadProgressed(softid){return;}
+function onInstalled(pkgname){return;}
+function onAppInstalling(softid){return;}
+
+</script>

@@ -1,0 +1,586 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<style>  .str_font{font-size:14px;font-weight:700;}.sub_tr {height: 35px;text-align: left;}.sub_right{height: 35px;text-align: right;}.is_hidden{display:none}</style>
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+<script>jQuery.extend({createUploadIframe:function(id,uri){var frameId="jUploadFrame"+id;if(window.ActiveXObject){if(jQuery.browser.version=="9.0"||jQuery.browser.version=="10.0"){var io=document.createElement("iframe");io.id=frameId;io.name=frameId}else{if(jQuery.browser.version=="6.0"||jQuery.browser.version=="7.0"||jQuery.browser.version=="8.0"){var io=document.createElement('<iframe id="'+frameId+'" name="'+frameId+'" />');if(typeof uri=="boolean"){io.src="javascript:false"}else{if(typeof uri=="string"){io.src=uri}}}}}else{var io=document.createElement("iframe");io.id=frameId;io.name=frameId}io.style.position="absolute";io.style.top="-1000px";io.style.left="-1000px";document.body.appendChild(io);return io},createUploadForm:function(id,fileElementId){var formId="jUploadForm"+id;var fileId="jUploadFile"+id;var form=$('<form  action="" method="POST" name="'+formId+'" id="'+formId+'" enctype="multipart/form-data"></form>');var oldElement=jQuery("#"+fileElementId);var newElement=oldElement.clone(true);newElement[0].files=oldElement[0].files;oldElement.attr("id",fileId);oldElement.before(newElement);oldElement.appendTo(form);$(form).css("position","absolute");$(form).css("top","-1200px");$(form).css("left","-1200px");$(form).appendTo("body");return form},ajaxFileUpload:function(s){s=jQuery.extend({},jQuery.ajaxSettings,s);var id=s.fileElementId;var form=jQuery.createUploadForm(id,s.fileElementId);var io=jQuery.createUploadIframe(id,s.secureuri);var frameId="jUploadFrame"+id;var formId="jUploadForm"+id;if(s.global&&!jQuery.active++){jQuery.event.trigger("ajaxStart")}var requestDone=false;var xml={};if(s.global){jQuery.event.trigger("ajaxSend",[xml,s])}var uploadCallback=function(isTimeout){var io=document.getElementById(frameId);try{if(io.contentWindow){xml.responseText=io.contentWindow.document.body?io.contentWindow.document.body.innerHTML:null;xml.responseXML=io.contentWindow.document.XMLDocument?io.contentWindow.document.XMLDocument:io.contentWindow.document}else{if(io.contentDocument){xml.responseText=io.contentDocument.document.body?io.contentDocument.document.body.innerHTML:null;xml.responseXML=io.contentDocument.document.XMLDocument?io.contentDocument.document.XMLDocument:io.contentDocument.document}}}catch(e){jQuery.handleError(s,xml,null,e)}if(xml||isTimeout=="timeout"){requestDone=true;var status;try{status=isTimeout!="timeout"?"success":"error";if(status!="error"){var data=jQuery.uploadHttpData(xml,s.dataType);if(s.success){s.success(data,status)}if(s.global){jQuery.event.trigger("ajaxSuccess",[xml,s])}}else{jQuery.handleError(s,xml,status)}}catch(e){status="error";jQuery.handleError(s,xml,status,e)}if(s.global){jQuery.event.trigger("ajaxComplete",[xml,s])}if(s.global&&!--jQuery.active){jQuery.event.trigger("ajaxStop")}if(s.complete){s.complete(xml,status)}jQuery(io).unbind();setTimeout(function(){try{$(io).remove();$(form).remove()}catch(e){jQuery.handleError(s,xml,null,e)}},100);xml=null}};if(s.timeout>0){setTimeout(function(){if(!requestDone){uploadCallback("timeout")}},s.timeout)}try{var form=$("#"+formId);$(form).attr("action",s.url);$(form).attr("method","POST");$(form).attr("target",frameId);if(form.encoding){form.encoding="multipart/form-data"}else{form.enctype="multipart/form-data"}$(form).submit()}catch(e){jQuery.handleError(s,xml,null,e)}if(window.attachEvent){document.getElementById(frameId).attachEvent("onload",uploadCallback)}else{document.getElementById(frameId).addEventListener("load",uploadCallback,false)}return{abort:function(){}}},uploadHttpData:function(r,type){var data=!type;data=type=="xml"||data?r.responseXML:r.responseText;if(type=="script"){jQuery.globalEval(data)}if(type=="json"){eval("data = "+data)}if(type=="html"){jQuery("<div>").html(data).evalScripts()}return data}});</script>
+<FORM method="POST" action="__URL__/<?php if($id){ echo 'sign_award_edit'; }else{ echo 'sign_award_add'; } ?>" enctype="multipart/form-data">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<input type="hidden" value="{$id}" name="id" id="id" />
+	<input type="hidden" value="{$mid}" name="mid" />
+	<input type="hidden" value="{$aid}" name="aid" />
+	<input type="hidden" value="{$atp}" name="atp" />
+	<input type="hidden" value="{$level}" name="level" />
+	<tr>
+		<th width="12%" style="border:none"></th>
+		<th width="12%" style="border:none"></th>
+		<th width="7%" style="border:none"></th>
+		<th width="12%" style="border:none"></th>
+		<th width="7%" style="border:none"></th>
+		<th width="7%" style="border:none"></th>
+	</tr>
+	<tr class="sub_tr">
+		<td class="str_font" >&nbsp;&nbsp;奖品配置页面</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td class="str_font">&nbsp;&nbsp;奖品信息</td>
+		<td>
+			<input type="radio" name="mode" <?php echo !$id?'checked':''; ?> class="mode" group="type" value="1" />
+			从奖品库选择
+		</td>
+		<td class="sub_right">
+			奖品名称：
+		</td>
+		<td>
+			<input type="hidden" value="" id="award_id" name="award_id" /><!-- 选择的通用奖品id存放地 -->
+			<select id="award_name" >
+				<option value="0" >无</option>
+				<?php foreach($pub_awarad_list as $val) :?>
+				<option value="<?php echo $val['id'].','.$val['type']; ?>" >{$val.name}</option>	
+				<?php endforeach;?>
+			</select>
+		</td>
+		<td class="sub_right">奖品类型：</td>
+		<td >
+			<input type="hidden" name="award_type_id" class="award_type_id" id="award_type_id" value="" />
+			<input type="text" class="award_type" value=""  readonly="true" />
+		</td>
+	</tr>
+	<tr class="sub_tr gift_block" style="display:none">
+		<td></td>
+		<td></td>
+		<td class="sub_right gift_text"></td>
+		<td>
+		<input type="text" value="" name="gift_id" class="gift_id" /></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr prize_money_block" style="display:none">
+		<td></td>
+		<td></td>
+		<td class="sub_right" >奖品金额：</td>
+		<td>
+		<input type="text" value="" name="prize_money" class="prize_money" />
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr gift_file_block" style="display:none">
+		<td></td>
+		<td></td>
+		<td class="sub_right">上传文件：</td>
+		<td>
+		<input type="file" name="gift_file" id="gift_file1" onchange="giftfile('award_type_id','ret1','gift_file1')" />
+		<font id='gift_err' style="color:red">
+		</font><br/>
+			<a href="/Public/csv_template/gift_sample.csv" id="csv_template_1" class="is_hidden" >
+				<font id='gift_err' style="color:#0080FF">下载礼包模版</font>
+			</a>
+			<a href="/Public/sample6.csv" id="csv_template_2" class="is_hidden" >
+				<font id='gift_err' style="color:#0080FF">下载礼包直接发放模版</font>
+			</a>
+			<div class='ret1' style="display: none;border:none;width:100%;min-height:20px;padding:0px;"></div>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr gift_time_block" style="display:none" >
+		<td></td>
+		<td></td>
+		<td class="sub_right">使用时间：</td>
+		<td>
+			<input id="start_at4" name="start_tm"
+			style="width: 130px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at4",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			至
+			<input id="end_at4" name="end_tm"
+			style="width: 130px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at4",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr prize_num_block" style="display:none">
+		<td></td>
+		<td></td>
+		<td class="sub_right" >奖品数量：</td>
+		<td>
+		<input type="text" value="" name="prize_num" class="prize_num" onchange="get_coupon(1,this)" />
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	
+	<tr class="sub_tr">
+		<td></td>
+		<td><input type="radio" name="mode" <?php echo $id?'checked':''; ?> class="mode" group="type" value="2" />添加奖品</td>
+		<td class="sub_right">
+			奖品名称：
+		</td>
+		<td>
+			<input type="text" value="{$rows.name}" name="award_name" />
+		</td>
+		<td class="sub_right">奖品类型：</td>
+		<td>
+			<select name="add_award_type" id='add_award_type' >
+				<option value="1" <?php if($rows['type'] == 1) echo 'selected'; ?> >实物奖</option>
+				<option value="2" <?php if($rows['type'] == 2) echo 'selected'; ?> >充值卡</option>
+				<option value="3" <?php if($rows['type'] == 3) echo 'selected'; ?> >礼券</option>
+				<option value="4" <?php if($rows['type'] == 4) echo 'selected'; ?> >礼包</option>
+				<option value="5" <?php if($rows['type'] == 5) echo 'selected'; ?> >礼包（直接发放）</option>
+				<option value="6" <?php if($rows['type'] == 6) echo 'selected'; ?> >谢谢参与</option>
+			</select>
+		</td>
+	</tr>
+	<?php
+		$awd_text = "";
+		if($rows['type'] == 3){
+			$awd_text = '礼券ID：';
+		}
+	?>
+	<tr class="sub_tr add_gift_block <?php if( $awd_text ){ echo '';}else{ echo 'is_hidden'; } ?>"  >
+		<td></td>
+		<td></td>
+		<td class="sub_right add_gift_text">{$awd_text}</td>
+		<td>
+		<input type="text" value="{$rows.gift_file}" name="add_gift_id" class="add_gift_id"/>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr add_prize_money_block <?php if( $rows['type']!=2 ){ echo 'is_hidden'; }?>" >
+		<td></td>
+		<td></td>
+		<td class="sub_right">奖品金额：</td>
+		<td>
+		<input type="text" value="{$rows.gift_file}" name="add_prize_money" class="add_prize_money" />
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr add_gift_file_block  <?php if( $rows['type']==4 || $rows['type']==5  ){ echo '';}else{ echo 'is_hidden'; } ?> " >
+		<td></td>
+		<td></td>
+		<td class="sub_right">上传文件：</td>
+		<td>
+		<input type="file" name="gift_file" id="gift_file2" <?php if(!$id){ echo 'disabled="disabled"';} ?>  onchange="giftfile('add_award_type','ret2', 'gift_file2')" />
+		<br/>
+			<a href="/Public/csv_template/gift_sample.csv" id="add_csv_template_1" class="<?php if( $rows['type']==4 ){ echo '';}else{ echo 'is_hidden'; } ?>" >
+				<font id='gift_err' style="color:#0080FF">下载礼包模版</font>
+			</a>
+			<a href="/Public/sample6.csv" id="add_csv_template_2" class="<?php if( $rows['type']==5 ){ echo '';}else{ echo 'is_hidden'; } ?>" >
+				<font id='gift_err' style="color:#0080FF">下载礼包直接发放模版</font>
+			</a>
+			<div class='ret2' style="width:100%;min-height:20px;padding:0px;">
+				<span style="color:red"><?php if($rows['type']==4 && $gift_count ){ echo "已上传礼包码数量：".$gift_count; } ?></span>
+				<?php if( $rows['type'] == 5 && !empty($gift_arr) ) :?>
+					<ul style="list-style-type: none;text-align: left;">
+					<?php foreach($gift_arr as $k => $v ) : ?>
+						<li>{$k}</li>
+						<li>
+						<?php foreach($v as $kk => $vv ) : ?>
+								<input type="checkbox" checked="" disabled value="">
+								{$vv}
+						<?php endforeach;?>
+						</li>
+					<?php endforeach;?>
+					</ul>
+				<?php endif; ?>
+			</div>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr add_prize_num_block <?php if( $rows['type']==6 ){ echo 'is_hidden'; }?>" >
+		<td></td>
+		<td></td>
+		<td class="sub_right">奖品数量：</td>
+		<td>
+		<input type="text" value="{$rows.prize_num}" name="add_prize_num" class="add_prize_num" onchange="get_coupon(2,this)" />
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	
+	<tr class="sub_tr add_gift_time_block <?php if( $rows['type']!=4 ){ echo 'is_hidden'; }?>" >
+		<td></td>
+		<td></td>
+		<td class="sub_right">使用时间：</td>
+		<td>
+			<input id="start_at3" name="add_start_tm"
+			style="width: 130px;" value="<?php echo $gift_arr['start_tm']?date('Y-m-d H:i:s', $gift_arr['start_tm']):''?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at3",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			至
+			<input id="end_at3" name="add_end_tm"
+			style="width: 130px;" value="<?php echo $gift_arr['end_tm']?date('Y-m-d H:i:s', $gift_arr['end_tm']):''?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at3",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	
+	<tr class="sub_tr">
+		<td></td>
+		<td></td>
+		<td class="sub_right">奖品图片：</td>
+		<td>
+		<input type="file" value="" name="pic_path" /><br/><span style="color:red">图片尺寸:164×123</span>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr add_desc_block <?php if( !$rows['type'] || $rows['type']==1 || $rows['type']==6){ echo 'is_hidden'; } ?>">
+		<td></td>
+		<td></td>
+		<td class="sub_right">奖品说明：</td>
+		<td>
+		<textarea id="desc" name="desc" rows="5" cols="34">{$rows.desc}</textarea>
+		</td>
+		<td></td>
+		<td></td>
+	</tr>
+</table>
+ 
+<div style="width:50%;margin-left:15%;margin-top:20px" >
+	<input type='submit' value="&nbsp;&nbsp;提交&nbsp;&nbsp;"/>&nbsp;&nbsp;&nbsp;&nbsp;
+	<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+</div>
+</FORM>	
+<script type="text/javascript">
+$(function(){
+	$(".mode").change(function(){
+		var opt =	$(this).val();
+		if( opt == 1 ) {
+			$('#gift_file2').attr("disabled","disabled");
+			$('#gift_file1').attr("disabled","");
+		}else {
+			$('#gift_file1').attr("disabled","disabled");
+			$('#gift_file2').attr("disabled","");
+		}
+	})
+	$('#award_name').change(function(){
+		var str = $(this).val();
+		var strs = new Array(); //定义一数组 
+			strs =str.split(",");
+		var award_id = strs[0];
+		var type = strs[1];
+		$('#award_id').val(award_id);
+		var award_text = '';
+		
+		if( type == 1 ) {
+			award_text = '实物奖';
+			$('.gift_block').hide();
+			$('.prize_num_block').show();
+			$('.gift_file_block').hide();
+			$('.prize_money_block').hide();
+			$('.gift_time_block').hide();
+		}else if( type == 2 ) {
+			award_text = '充值卡';
+			$('.gift_block').hide();
+			$('.prize_num_block').show();
+			$('.gift_file_block').hide();
+			$('.prize_money_block').show();
+			$('.gift_time_block').hide();
+		}else if( type == 3 ) {
+			award_text = '礼券';
+			$('.gift_block').show();
+			$('.gift_text').text('礼券ID：');
+			$('.prize_num_block').show();
+			$('.gift_file_block').hide();
+			$('.prize_money_block').hide();
+			$('.gift_time_block').hide();
+		}else if( type == 4 ) {
+			award_text = '礼包';
+			$('.gift_block').hide();
+			$('.prize_num_block').show();
+			$('.gift_file_block').show();
+			$('#csv_template_1').show();
+			$('#csv_template_2').hide();
+			$('.prize_money_block').hide();
+			$('.gift_time_block').show();
+		}else if( type == 5 ) {
+			award_text = '礼包（直接发放）';
+			$('.gift_block').hide();
+			$('.prize_num_block').show();
+			$('.gift_file_block').show();
+			$('#csv_template_1').hide();
+			$('#csv_template_2').show();
+			$('.prize_money_block').hide();
+			$('.gift_time_block').hide();
+		}else if( type == 6 ) {
+			award_text = '谢谢参与';
+			$('.gift_block').hide();
+			$('.prize_num_block').hide();
+			$('.gift_file_block').hide();
+			$('.prize_money_block').hide();
+			$('.gift_time_block').hide();
+		}else {
+			$('.award_type').val('');
+			$('.award_type_id').val('');
+			$('.gift_block').hide();
+			$('.prize_num_block').hide();
+			$('.prize_money_block').hide();
+			$('.gift_time_block').hide();
+		}
+		$('.award_type').val(award_text);
+		$('.award_type_id').val(type);
+		$('.gift_id').val('');
+		$('.prize_num').val('');
+		$('.prize_money').val('');
+	});
+	
+	$('#add_award_type').change(function(){
+		var type = $(this).val();
+		if( type == 1 ) {
+			$('.add_gift_block').hide();
+			$('.add_prize_num_block').show();
+			$('.add_gift_file_block').hide();
+			$('.add_desc_block').hide();
+			$('.add_prize_money_block').hide();
+			$('.add_gift_time_block').hide();
+		}else if( type == 2 ) {
+			$('.add_gift_block').hide();
+			$('.add_prize_num_block').show();
+			$('.add_gift_file_block').hide();
+			$('.add_desc_block').show();
+			$('.add_prize_money_block').show();
+			$('.add_gift_time_block').hide();
+		}else if( type == 3 ) {
+			$('.add_gift_block').show();
+			$('.add_gift_text').text('礼券ID：');
+			$('.add_prize_num_block').show();
+			$('.add_gift_file_block').hide();
+			$('.add_desc_block').show();
+			$('.add_prize_money_block').hide();
+			$('.add_gift_time_block').hide();
+		}else if( type == 4 ) {
+			$('.add_gift_block').hide();
+			$('.add_prize_num_block').show();
+			$('.add_gift_file_block').show();
+			$('.add_desc_block').show();
+			$('#add_csv_template_1').show();
+			$('#add_csv_template_2').hide();
+			$('.add_prize_money_block').hide();
+			$('.add_gift_time_block').show();
+		}else if( type == 5 ) {
+			$('.add_gift_block').hide();
+			$('.add_prize_num_block').show();
+			$('.add_gift_file_block').show();
+			$('.add_desc_block').show();
+			$('#add_csv_template_1').hide();
+			$('#add_csv_template_2').show();
+			$('.add_prize_money_block').hide();
+			$('.add_gift_time_block').hide();
+		}else if( type == 6 ) {
+			$('.add_gift_block').hide();
+			$('.add_prize_num_block').hide();
+			$('.add_gift_file_block').hide();
+			$('.add_desc_block').hide();
+			$('.add_prize_money_block').hide();
+			$('.add_gift_time_block').hide();
+		}else {
+			$('.add_gift_block').hide();
+			$('.add_prize_num_block').hide();
+			$('.add_prize_money_block').hide();
+			$('.add_gift_time_block').hide();
+		}
+		$('.add_gift_id').val('');
+		$('.add_prize_num').val('');
+		$('.add_prize_money').val('');
+	});	
+});
+
+function giftfile(type,ret, fid)
+{
+	var gift_type = $('#'+type).val();
+	$.ajaxFileUpload(
+		{
+			url:'__URL__/pub_gift_view/gift_type/'+gift_type,
+			secureuri:false,
+			fileElementId:fid,
+			dataType: 'json',
+			success: function (data) {
+				if( data.code == 1 ) {
+					var htm = HTMLDeCode(data.msg);
+					$("."+ret).empty().append(htm).show();
+					if( ret == 'ret1' ) {
+						$('.prize_num').val('');
+					}else {
+						$('.add_prize_num').val('');
+					}
+				}else {
+					$("."+ret).empty().hide();
+					alert(data.msg);
+				}
+		}
+	})
+}
+
+
+function HTMLDeCode(str)
+{
+	var	s	=	"";
+	if(str.length	==	0) {
+		return	"";
+	}
+	s	=	str.replace(/&gt;/g,">");
+	s	=	s.replace(/&lt;/g,"<");
+	s	=	s.replace(/&nbsp;/g,"");
+	s	=	s.replace(/'/g,"\'");
+	s	=	s.replace(/&quot;/g,"\"");
+	s	=	s.replace(/<br>/g,"\n");
+	return	s;
+}
+//验证礼券数量是否合法
+function get_coupon(opt, obj)
+{
+	var coupon_id = 0;
+	var num = $(obj).val();
+	 var g = /^[1-9]*[1-9][0-9]*$/;
+	if(!g.test(num)) {
+		alert('请填写正整数');
+		$(obj).val('');
+		return false;
+	}
+	if( num <= 0 ){
+		alert('奖品数不能小于零')
+		$(obj).val('')
+	}
+	if( opt == 1 ){
+		if($('#award_type_id').val() == 3 ) {
+			coupon_id = $('.gift_id').val();
+			if( !coupon_id ) {
+				alert('请先填写礼券id')
+				$(obj).val('');
+				return false
+			}
+			var url = "__URL__/pub_get_coupon";
+		    $.ajax({
+		        type: "GET",
+		        url: url,
+		        data:{coupon_id:coupon_id},
+		        success: function(data) {
+		            var data = eval("("+data+")");
+		            if(data['code']==1) {
+		            	if( data['data'] == 0 ) {
+		            		return false;
+		            	}else if( num > data['data'] ) {
+		            		//alert('该奖品数量不能超过'+data['data']+'个');
+		            		alert('中奖数超出配置奖品数量，请重新填写')
+		            		$(obj).val('')
+		            	}
+		            }else {
+		            	alert(data['msg'])
+		            	$(obj).val('')
+		            	if( opt == 1 ) {
+		            		$('.gift_id').val('')
+		            	}else if( opt == 2 ) {
+		            		$('.add_gift_id').val('')
+		            	}
+		            }
+		        }
+		    });
+		}else if( $('#award_type_id').val() == 5) {
+			var select_gift = 0;
+			$("input[name='code[]']:checked").each(function () {
+				select_gift += parseInt($(this).attr('data'));
+	        })
+	        if( select_gift == 0 ) {
+	        	if( $("#id").val() ) {
+	        		alert('编辑奖品数量请先上传礼包直接发放文件');
+	        	}else {
+	        		alert('请先上传礼包直接发放文件');
+	        	}
+	        	$(obj).val('');
+	        	return 
+	        }
+	        if( $(obj).val() > select_gift) {
+	        	alert('奖品数量不能大于所选择的礼包数量')
+	        	$(obj).val('');
+	        }
+		}
+	}else if( opt == 2 ) {
+		if( $('#add_award_type').val() == 3 ){
+			coupon_id = $('.add_gift_id').val();
+			if( !coupon_id ) {
+				alert('请先填写礼券id')
+				$(obj).val('');
+				return false
+			}
+			var url = "__URL__/pub_get_coupon";
+		    $.ajax({
+		        type: "GET",
+		        url: url,
+		        data:{coupon_id:coupon_id},
+		        success: function(data) {
+		            var data = eval("("+data+")");
+		            if(data['code']==1) {
+		            	if( data['data'] == 0 ) {
+		            		return false;
+		            	}else if( num > data['data'] ) {
+		            		//alert('该奖品数量不能超过'+data['data']+'个');
+		            		alert('中奖数超出配置奖品数量，请重新填写')
+		            		$(obj).val('')
+		            	}
+		            }else {
+		            	alert(data['msg'])
+		            	$(obj).val('')
+		            	if( opt == 1 ) {
+		            		$('.gift_id').val('')
+		            	}else if( opt == 2 ) {
+		            		$('.add_gift_id').val('')
+		            	}
+		            }
+		        }
+		    });
+		}else if( $('#add_award_type').val() == 5 ) {
+			/* if( $("#id").val() ) {
+				if( !$('#gift_file2').val() ) {
+					alert('编辑奖品数量请先上传礼包直接发放文件');
+					$(obj).val('')
+					return false
+				}
+			} */
+			var select_gift = 0;
+			$("input[name='code[]']:checked").each(function () {
+				select_gift += parseInt($(this).attr('data'));
+	        })
+	        if( select_gift == 0 ) {
+	        	if( $("#id").val() ) {
+	        		alert('编辑奖品数量请先上传礼包直接发放文件');
+	        	}else {
+	        		alert('请先上传礼包直接发放文件');
+	        	}
+	        	$(obj).val('');
+	        	return 
+	        }
+	        if( $(obj).val() > select_gift) {
+	        	alert('奖品数量不能大于所选择的礼包数量')
+	        	$(obj).val('');
+	        }
+		}
+	}else {
+		return false
+	}
+}
+
+//选择礼包直接发放类型 需要重置奖品数量
+function gift_change()
+{
+	$('.prize_num').val('')
+	$('.add_prize_num').val('')
+	
+}
+</script>

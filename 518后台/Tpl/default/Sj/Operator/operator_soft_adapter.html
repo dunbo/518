@@ -1,0 +1,79 @@
+﻿<include file="../Public/header" />
+<script>
+var checkflag = false;
+function check_it(){
+   var chkobj =  document.getElementsByName("pkgs[]");
+   var chked = 0
+   for(var i=0;i<chkobj.length;i++){
+	if(chkobj[i].checked == true){
+		chked++;
+	}
+   }
+   if(chked == 0){
+		alert("请选择软件！");
+		return false;		
+	}
+	return true;
+}
+function checkall(){
+   var chkobj =  document.getElementsByName("pkgs[]");
+   var i = 0;
+   if(!checkflag){
+       for(i=0;i < chkobj.length;i++){
+         chkobj[i].checked = true;
+       }
+       checkflag = true;
+       return;
+   }
+   var j=0;
+   if(checkflag){
+       for(j=0;j < chkobj.length;j++){
+         chkobj[j].checked = false;
+       }
+       checkflag = false;
+       return;
+   }
+}
+</script>
+<center>
+<form action="__URL__/operator_soft_adapter" method="GET">
+<table>
+<tr>
+<td></td>
+<td>搜索软件:<input type="text" id="search" name="search" value="{$search}"></td>
+<td><input type="submit" name="button" value="search" onclick="show_list()"/></td>
+</tr>
+</table>
+</form>
+<form action="__URL__/operator_soft_adapter" method="POST">
+<table>
+<tr><td colspan="3"><center><b>软件列表</b></center></td></tr>
+<tr>
+<th></th>
+<th>软件名</th>
+<th>包名</th>
+</tr>
+<?php foreach($softlist as $info){ ?>
+<tr>
+<td><input type="checkbox" name="pkgs[]" value="<?php echo $info['package'];?>"></td>
+<td><?php echo $info['softname'];?></td>
+<td><?php echo $info['package'];?></td>
+</tr>
+<?php } ?>
+<tr>
+<td><input type="checkbox" name="all" id="all" onclick="checkall()">全</td>
+<td>运营商:
+<select name="oid">
+<option value="selected" selected>--请选择营运商--</option>
+<?php foreach($operator_list as $info){ ?>
+<option value="<?php echo $info['oid'];?>"><?php echo $info['mname'];?></option>
+<?php } ?>
+</select>
+<input type="hidden"  name="do" value="1">
+</td>
+<td><input type="submit" name="adapter" value="批量添加" onclick="return check_it()"/></td>
+</tr>
+</table>
+</form>
+<p>{$page}</p>
+</center>

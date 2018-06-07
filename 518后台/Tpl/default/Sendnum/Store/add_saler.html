@@ -1,0 +1,343 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+    <script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+    <script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+    <script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript">
+        $(function () {
+                saler_id = $("#saler_id").val();
+                if(saler_id>0){
+                    selectcity_onload();
+                }
+        });
+
+        function selectcity_onload(){
+            var city = $("#city").val();
+            var param = {
+                city : city,
+                selectcity : 1
+            };
+            $.ajax({
+                url:'__URL__/add_saler',
+                type:'POST',
+                data:param,
+                dataType:'json',
+                success:function(data){
+                           var trs = "";  
+                           $.each(data.data,function(n,value) {
+                                trs +="<option value='"+value.name+"'>"+value.name+"</option>";
+                           });
+                  
+                         $("#school").append(trs);  
+                         $("#school option[value='{$select_school}']").attr("selected","true");
+                }
+            });
+        }
+
+        function selectcity(){
+            var city = $("#city").val();
+            var param = {
+                city : city,
+                selectcity : 1
+            };
+            $.ajax({
+                url:'__URL__/add_saler',
+                type:'POST',
+                data:param,
+                dataType:'json',
+                success:function(data){
+                           var trs = "";  
+                           $("#school").empty();
+                           $("#school").append("<option value='-1'>选择学校</option>");  
+                           $.each(data.data,function(n,value) {
+                                trs +="<option value='"+value.name+"'>"+value.name+"</option>";
+                           });
+                  
+                         $("#school").append(trs);
+                }
+            });
+        }
+
+        function isMobel(value)  {  
+                //if((/^13\d{9}$/g.test(value))||(/^14\d{9}$/g.test(value))||(/^15\d{9}$/g.test(value))||(/^18\d{9}$/g.test(value))){
+                if(/^1[34578]\d{9}$/g.test(value)){
+                        return true;  
+                }else{
+                        return false;  
+                }
+        }
+
+
+
+
+        function save(){
+            $("span").html('');
+            if($("#username").val().trim().length==0){
+                $("#username_mess").html("请输入用户名");
+                return;
+            }
+            var matchstr = /^[a-zA-Z0-9_]{2,20}$/;
+            var isIDCard1=/^[1-9]\d{7}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}$/;
+            var isIDCard2=/^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{4}$/;
+            if(matchstr.test($("#username").val())==false){
+                $("#username_mess").html("用户名只能是2-20个英文、数字");
+                return;
+            }
+
+
+            if($("#saler_id").val()==0){
+                if($("#password").val().trim().length==0){
+                    $("#password_mess").html("请输入密码");
+                    return;
+                }
+            }
+
+            if($("#password").val().trim().length>0){
+                var matchstr = /^[\@A-Za-z0-9\!\#\$\%\^\&\*\.\~]{6,16}$/;
+                if(matchstr.test($("#password").val())==false){
+                    $("#password_mess").html("密码只能是6-16个字符");
+                    return;
+                }
+            }
+            if($("#city").val()==-1){
+                $("#city_mess").html("请选择城市");
+                return;
+            }
+            if($("#school").val()==-1){
+                $("#school_mess").html("请选择学校");
+                return;
+            }
+
+            if($("#store_name").val().trim().length==0){
+                $("#store_name_mess").html("请输入店铺名称");
+                return;
+            }
+            var matchstr = /^.{1,30}$/;
+            if(matchstr.test($("#store_name").val())==false){
+                $("#store_name_mess").html("请输入30个字符以内");
+                return;
+            }
+
+            if($("#shopkeeper").val().trim().length==0){
+                $("#shopkeeper_mess").html("请输入店主姓名");
+                return;
+            }
+            var matchstr = /^.{1,10}$/;
+            if(matchstr.test($("#shopkeeper").val())==false){
+                $("#shopkeeper_mess").html("请输入10个字符以内");
+                return;
+            }
+
+            if($("#tel").val().trim().length==0){
+                $("#tel_mess").html("请输入联系电话");
+                return;
+            }
+            if(!isMobel($("#tel").val())){
+                $("#tel_mess").html("联系电话格式不正确");
+                return;
+            }
+
+            if($("#alipay").val().trim().length==0){
+                $("#alipay_mess").html("请输入支付宝账户");
+                return;
+            }
+            var matchstr = /^.{1,50}$/;
+            if(matchstr.test($("#alipay").val())==false){
+                $("#alipay_mess").html("请输入50个字符以内");
+                return;
+            }
+
+            if($("#alipay_name").val().trim().length==0){
+                $("#alipay_name_mess").html("请输入账户姓名");
+                return;
+            }
+
+            var matchstr = /^.{1,10}$/;
+            if(matchstr.test($("#alipay_name").val())==false){
+                $("#alipay_name_mess").html("请输入10个字符以内");
+                return;
+            }
+
+            if($("#id_number").val().trim().length==0){
+                $("#id_number_mess").html("请输入身份证号码");
+                return;
+            }
+
+           if (!(/(^\d{15}$)|(^\d{17}([0-9]|X)$)/.test($("#id_number").val())))  {
+                    $("#id_number_mess").html("请输入有效的身份证号");
+                    return;
+           }
+
+          /*
+            if($("#id_number").val().trim().length==15){
+                if(isIDCard1.test($("#id_number").val())==false){
+                    $("#id_number_mess").html("请输入有效的身份证号");
+                    return;
+                }
+            }else if($("#id_number").val().trim().length==18){
+                if(isIDCard2.test($("#id_number").val())==false){
+                    alert(1);
+                    $("#id_number_mess").html("请输入有效的身份证号");
+                    return;
+                }else{
+                
+                    alert(2);
+                }
+            }else{
+                    $("#id_number_mess").html("请输入有效的身份证号");
+                    return;
+            }
+            */
+
+            if($("#recommend").val()==-1){
+                $("#recommend_mess").html("请选择推荐人");
+                return;
+            }
+
+
+                var param = {
+                    saler_id: $("#saler_id").val(),
+                    username: $("#username").val(),
+                    password: $("#password").val(),
+                    city_val: $("#city").val(),
+                    city: $("#city").find("option:selected").text(),
+                    school_val: $("#school").val(),
+                    school: $("#school").find("option:selected").text(),
+                    store_name: $("#store_name").val(),
+                    shopkeeper: $("#shopkeeper").val(),
+                    tel: $("#tel").val(),
+                    alipay: $("#alipay").val(),
+                    alipay_name: $("#alipay_name").val(),
+                    recommend: $("#recommend").val(),
+                    id_number: $("#id_number").val(),
+                    remind_num: $("#remind_num").val(),
+                    remind_mails: $("#remind_mails").val()
+                };
+
+                $.ajax({
+                    url:'__URL__/add_saler',
+                    type:'POST',
+                    data:param,
+                    secureuri:false,
+                    dataType:'json',
+                    success:function(data){
+                            if(data==1){
+                                self.parent.window.location.reload();
+                            }else if(data==2){
+                                $("#username_mess").html("用户名已存在");
+                                return;
+                            }else if(data==3){
+                                $("#tel_mess").html("手机号已存在");
+                                return;
+                            }
+                    }
+                });
+        };
+    </script>
+</head>
+<body>
+<div style="width:45; margin-top:4px">
+  <table width="99%" align="center" cellpadding="4">
+      <if condition="($info.id eq '')"><tr><td>添加用户</td><td align="right"><a href="#" onClick="self.parent.tb_remove();">X</a></td></tr></if>
+      <if condition="($info.id neq '')"><tr><td>编辑用户</td><td align="right"><a href="#" onClick="self.parent.tb_remove();">X</a></td></tr></if>
+    </table>
+      <hr>
+	 <form id="form1" name="form1" method="post" action="__URL__/add/">
+  <table width="99%" height="83" align="center" cellpadding="4" cellspacing="10" id="table1">
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">用户名:</td>
+         <input type="hidden" id="saler_id" value="{$info.id}" />
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" id="username" value="{$info.username}" placeholder="2-20个英文、数字"/><font color="red"><span id="username_mess"></span></font></td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">密码:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <if condition="($info.id eq '')"><input type="password" id="password" placeholder="6-16个字符"/><font color="red"><span id="password_mess"></span></font></td></if>
+             <if condition="($info.id neq '')"><input type="password" id="password" placeholder="******"/><font color="red"><span id="password_mess"></span></font></td></if>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">城市:</td>
+         <td align="left" bgcolor="#FFFFFF">
+                        <select id="city" onchange="selectcity()">
+                        <option value="-1">选择城市</option>
+                            <volist name="city" id="city">
+                            <option value="{$city.id}" <if condition="($city.name eq $select_city)"> selected="selected"</if>>{$city.name}</option>
+                            </volist>
+                    </select>
+                    <font color="red"><span id="city_mess"></span></font></td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">学校:</td>
+         <td align="left" bgcolor="#FFFFFF">
+                        <select name="school" id="school">
+                        <option value="-1">选择学校</option>
+                        </div>
+                    </select>
+                    <font color="red"><span id="school_mess"></span></font></td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">店铺名称:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" id="store_name" value="{$info.store_name}" placeholder="30个字符以内" /><font color="red"><span id="store_name_mess"></span></font></td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">店主姓名:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" id="shopkeeper" value="{$info.shopkeeper}" placeholder="10个字符以内"/><font color="red"><span id="shopkeeper_mess"></span></font></td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">联系电话:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" id="tel" value="{$info.tel}" placeholder="数字,30个字符以内"/><font color="red"><span id="tel_mess"></span></font></td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">支付宝账号:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" id="alipay" value="{$info.alipay}" placeholder="50个字符以内"/><font color="red"><span id="alipay_mess"></span></font></td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">支付宝账户姓名:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" id="alipay_name" value="{$info.alipay_name}" placeholder="10个字符以内"/><font color="red"><span id="alipay_name_mess"></span></font></td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">身份证号码:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" id="id_number" value="{$info.id_number}" placeholder="20个字符以内"/><font color="red"><span id="id_number_mess"></span></font></td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">推荐人:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <select id="recommend">
+                        <option value="-1">选择推荐人</option>
+                            <volist name="recommend" id="recommend">
+                            <option value="{$recommend.name}" <if condition="($recommend.name eq $select_recommend)"> selected="selected"</if>>{$recommend.name}</option>
+                            </volist>
+                    </select>
+                    <font color="red"><span id="recommend_mess"></span></font></td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">报警金额:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" id="remind_num" <if condition="($info.id neq '')">value="{$info.remind_num}"</if><if condition="($info.id eq '')">value="500"</if> />元(每天累计超过)<font color="red"><span id="remind_num_mess"></span></font></td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">报警邮箱:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <textarea id="remind_mails" cols="35" rows="4"><if condition="($info.id neq '')">{$info.remind_mails}</if><if condition="($info.id eq '')">lining@anzhi.com;yangxu@anzhi.com;yangbo@anzhi.com;zhaojiuding@anzhi.com;gaohui@anzhi.com;suntao@anzhi.com</if></textarea> <font color="red"><span id="remind_mails_mess"></span></font></td>
+   </tr>
+   <tr><td></td><td>多个邮箱以;分割</td></tr>
+   <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="提交" onClick="save()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onClick="self.parent.tb_remove();"/></td>
+      </tr>
+</table>
+  </form>
+</div>
+</body>
+</html>

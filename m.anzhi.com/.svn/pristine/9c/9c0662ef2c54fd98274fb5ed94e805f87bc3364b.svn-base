@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>少年你脱了吗？</title>
+<link type="text/css" rel="stylesheet" href="/css/aprilstrip/common.css?v1"/>
+<script type="text/javascript" src="/js/jquery-1.8.0.min.js"></script>
+</head>
+<body>
+<section>
+    <div class="banner" id="top">
+        <a href="#"><img src="/images/aprilstrip/cam_banner.jpg"/></a>
+    </div>
+    <div class="notice clear">
+        <div class="notice-icon"></div>
+        <div class="notice-list">
+            <marquee scrollamount="2" scrolldelay="90" direction="left">
+				<!--{if $out.people_award_list|@count neq 0 }-->
+				<!--{foreach from=$out.people_award_list item=list}-->
+					<span><!--{$list.telephone}-->&nbsp;获得<!--{$list.award_name}--></span>
+				<!--{/foreach}-->
+				<!--{else}-->
+					<span>少年，快去脱了拿大奖！</span>
+				<!--{/if}-->
+			</marquee>
+        </div>
+    </div>
+	<div class="main">
+		<div class="prompt clear">
+			<a class="fl">我还有<!--{$out.my_num}-->次抽奖机会</a>
+			<a href="/lottery/aprilstrip_lottery_award.php?sid=<!--{$out.sid}-->" class="fr underline">我的奖品&gt;&gt;</a>
+		</div>
+		<!--非礼包类奖品-->
+		<!--{if $out.award_type == 0 || $out.award_type == 1}-->
+		<div class="wrap">
+			<p class="prize-title cnt"><span>少年恭喜你获得<!--{$out.award_level_name}--></span><br/><span class="spec"><!--{$out.award_name}--></span></p>
+			<form class="form1">
+				<div class="form_title"></div>
+				<div class="form-item clear">
+					<label for="username">姓名：</label>
+					<div class="textbox"><input type="text" id="username"/> </div>
+				</div>
+				<div class="form-item clear">
+					<label for="telephone">手机号：</label>
+					<div class="textbox"><input type="text" id="telephone"/> </div>
+				</div>
+				<!--实物奖品需要输入地址-->
+				<!--{if $out.award_type == 1}-->
+				<div class="form-item clear">
+					<label for="address">地址：</label>
+					<div class="textbox"><input type="text" id="address"/> </div>
+				</div>
+				<!--{/if}-->
+				<div id="my_error" class="prompt2 redcolor"></div>
+			</form>
+			<a class="btns" href="javascript:;" title="提交" onclick="get_info()">提交</a>
+		</div>
+		<!--{else if $out.award_type == 2}-->
+		<!--礼包类奖品-->
+		<div class="wrap" id="prize">
+			<p class="prize-title cnt"><span>少年恭喜你获得<!--{$out.award_level_name}--></span><br/><span class="spec"><!--{$out.award_name}--></span></p>
+			<p class="prize-text">
+			<!--{if $out.gift_card_no != ''}-->
+			卡号：<!--{$out.gift_card_no}--><br/>
+			<!--{/if}-->
+			<!--{if $out.gift_card_pwd != ''}-->
+			密码：<!--{$out.gift_card_pwd}--><br/>
+			<!--{/if}-->
+			<!--{if $out.award_hint != ''}-->
+			<!--{$out.award_hint}-->
+			<!--{/if}-->
+			</p>
+		</div>
+		<!--{/if}-->
+	</div>
+</section>
+</body>
+
+
+<script type="text/javascript">
+    var sid = '<!--{$out.sid}-->';
+    var award_type = <!--{$out.award_type}-->;
+	
+	var soft_lists_go = [];
+	
+	function get_info(){
+		var telphone = $('#telephone').val();
+		var name = $('#username').val();
+		name = name.replace(/\s+/g,"");
+		if(!telphone || telphone == '手机号'){
+			$('#my_error').css('display','');
+			$('#my_error').html('请输入手机号');
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+
+		if(name.length > 10){
+			$('#my_error').css('display','');
+			$('#my_error').html("请输入10个字以内的姓名");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		if(!name || name == ''){
+			$('#my_error').css('display','');
+			$('#my_error').html("请输入姓名");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		var address = '';
+        if (award_type == 1) {
+            address = $('#address').val();
+            if(address.length > 30){
+                $('#my_error').css('display','');
+                $('#my_error').html("请输入30个字以内的收货地址");
+                return false;
+            }else{
+                $('#my_error').css('display','none');
+            }
+            if(!address){
+                $('#my_error').css('display','');
+                $('#my_error').html("请输入收货地址");
+                return false;
+            }else{
+                $('#my_error').css('display','none');
+            }
+        }
+		
+		$.ajax({
+			url: '/lottery/aprilstrip_lottery_get_info.php?sid=' + sid,
+			data: 'telephone='+telphone+'&name='+name+'&address='+address,
+			type: 'post',
+			success: function(data){
+				if(data){
+					data = eval(''+data+'');
+					if(data == 500){
+						$('#my_error').css('display','');
+						$('#my_error').html('请输入正确的手机号');
+					} else if(data == 501){
+						$('#my_error').css('display','');
+						$('#my_error').html('请输入正确的姓名');
+					} else if(data == 502){
+						$('#my_error').css('display','');
+						$('#my_error').html('请输入正确的收货地址');
+					} else if(data == 300){
+						$('#my_error').css('display','');
+						$('#my_error').html('参数错误');
+					} else if (data == 400) {
+                        $('#my_error').css('display','');
+						$('#my_error').html('没有中奖信息');
+                    } else if(data == 200){
+						$('#my_error').css('display','');
+						$('#my_error').html('提交成功');
+						setTimeout(go_lottery,1000);
+					} else {
+						$('#my_error').css('display','');
+						$('#my_error').html('出错了');
+					}
+				}
+			}
+		});
+	}
+	
+	function go_lottery(){
+		window.location.href="/lottery/aprilstrip_lottery.php?sid="+sid;
+	}
+	
+	//下载软件
+    function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag) {
+        window.AnzhiActivitys.downloadForActivity(activity_id,parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+    }
+	
+	// 打开软件
+	function openApp(pkg,softid){
+        var the_soft = [softid];
+        window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+    }
+	
+	// 如果中了礼包，判断该礼包软件是否有安装，如果没有，显示去下载，如果有，显示打开
+	$(function() {
+		if (award_type != 2) {
+			return;
+		}
+		
+		var aid = <!--{$out.aid}-->;
+        var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+        var cmd = 'var soft_list=' + json_data;
+        eval(cmd);
+        var soft_lists = soft_list.DATA;
+        for(j=0;j<soft_lists.length;j++){
+            var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+            var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+            if((soft_status_go == -2 && json_datas_gos== -1) || json_datas_gos == 1 || json_datas_gos == 3){
+                soft_lists_go.push(soft_lists[j]);
+            }
+        }
+        
+        for(j=0;j<soft_lists.length;j++){
+            window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+            window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+            var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+            var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+            if(json_datas_gos == 5 && soft_status_gos == -2){
+                soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+            }
+        }
+        
+        for(j=0;j<soft_lists.length;j++){
+            window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+            window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+            var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+            var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+            if(soft_status_gos != -2){
+                soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+            }
+        }
+		
+		var pkgname = '<!--{$out.package}-->';
+		var i = 0;
+		for (; i < soft_lists_go.length; i++) {
+			if (pkgname == soft_lists_go[i][7]) {
+				break;
+			}
+		}
+		if (i >= soft_lists_go.length) {
+			// 被过滤掉了
+			return;
+		}
+		var softid = parseInt(soft_lists_go[i][0]);
+		var softname = soft_lists_go[i][2];
+		var versionCode = parseInt(soft_lists_go[i][13]);
+		var soft_size = parseInt(soft_lists_go[i][27]);
+		
+		window.AnzhiActivitys.registerInstallObserver(pkgname);
+		var soft_other_status = window.AnzhiActivitys.isInstalledApp(pkgname, parseInt(versionCode));
+		
+		// 根据软件状态展示按钮与事件
+		var my_soft = '';
+		if (soft_other_status == -2) {
+			my_soft = '<a class="btns" href="javascript:;" id="'+ softid +'" onClick="download_apk(' + aid + ',' + softid + ',\'' + pkgname + '\',\'' + softname + '\',' + versionCode + ',\'' + soft_size + '\',1);">下载去兑奖</a>';
+		} else if (soft_other_status == -1) {
+			my_soft = '<a class="btns" href="javascript:;" id="'+ softid +'" onClick="download_apk(' + aid + ',' + softid + ',\'' + pkgname + '\',\'' + softname + '\',' + versionCode + ',\'' + soft_size + '\',1);">更新去兑奖</a>';
+		} else if (soft_other_status == 0) {
+			my_soft = '<a class="btns" href="javascript:;" id="'+ softid +'" onClick="openApp(\''+ pkgname +'\','+ softid +');">打开去兑奖</a>';
+		} else if (soft_other_status == 1) {
+			my_soft = '<a class="btns" href="javascript:;" id="'+ softid +'">已安装</a>';
+		}
+		$("#prize").append(my_soft);
+		
+	});
+</script>
+
+</html>

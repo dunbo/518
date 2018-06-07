@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>安智超级碗之爱普快到碗里来</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/superbowl/css/common.css?v1"/>
+	<script type="text/javascript"  src="/js/jquery-1.8.0.min.js"></script>
+</head>
+<body>
+<div id="test"></div>
+<section>
+    <div class="banner"><img src="<!--{$out.static_url}-->/superbowl/images/banner.png"/></div>
+    <div class="main">
+		<div style="margin-bottom: 20px">
+			<!--{if $out.end}-->
+			<a href="/lottery/superbowl/superbowl_end.php" class="btns" >返回结束页</a>
+			<!--{else}-->
+			<a href="/lottery/superbowl/index.php" class="btns" >返回首页</a>
+			<!--{/if}-->
+
+		</div>
+		<ul class="nav">
+			<li class="current" id="game_li"><a href="/lottery/superbowl/superbowl_ranklist.php?type=1<!--{if $out.end}-->&end=1<!--{/if}-->&#game_li">游戏TOP榜</a></li>
+			<li  class="app" id="app_li"><a href="/lottery/superbowl/superbowl_ranklist.php?type=2<!--{if $out.end}-->&end=1<!--{/if}-->&#app_li"  class="app">应用TOP榜</a></li>
+		</ul>
+		<div id="rank_wrap">
+			<div class="wrap">
+				<div class="colorblock_03"></div>
+				<div class="colorblock_04"></div>
+				<!--{if !$out.activity_result}-->
+				<div class="tips_p prompt clear">
+					<p>还没有任何人投票哦<br/>赶紧去投票吧~</p>
+					<img src="<!--{$out.static_url}-->/superbowl/images/tip_hd_02.png">
+				</div>
+				<!--{/if}-->
+				<div class="title_bg3"></div>
+				<ul class="soft_list soft_list2 clear">
+					<!--{if $out.activity_result != ''}-->
+					<!--{foreach from=$out.activity_result item=v key=k}-->
+					<li>
+						<p class="soft_icon">
+							<img src="<!--{$out.img_host}--><!--{$v.iconurl}-->" />
+						</p>
+						<div class="soft_txt">
+							<p class="soft_rank"><!--{if $k<=2}-->Top<!--{/if}--><!--{$k+1}--></p>
+							<p class="soft_name"><!--{$v.softname}--></p>
+							<span>被喜欢<!--{if $v.num>0}--><!--{$v.num}--><!--{else}-->0<!--{/if}-->次</span>
+							<span id="soft_status_<!--{$v.softid}-->" class="soft_status"></span>
+						</div>
+					</li>
+					<!--{/foreach}-->
+
+					<!--{/if}-->
+
+				</ul>
+				<!--{if $out.activity_result&&!$out.all}-->
+				<a href="/lottery/superbowl/superbowl_ranklist.php?type=<!--{$out.type}-->&all=1<!--{if $out.end}-->&end=1<!--{/if}-->&#game_li" class="btns" onclick="javascript:$(this).hide()">&gt;&gt;查看完整榜单</a>
+				<!--{/if}-->
+			</div>
+		</div>
+		
+    </div>
+</section>
+<section>
+	<div class="footer clear">
+		<p>*本次活动最终解释权归安智所有</p>
+	</div>
+</section>
+<script type="text/javascript">
+	var sid = '<!--{$out.sid}-->';
+	var aid = '<!--{$out.aid}-->';
+	var soft_lists_go = [],has_soft=[];
+	var type ='<!--{$out.type}-->';
+	$(document).ready(function () {
+		if(type==1){
+			$("#game_li").addClass("current");
+			$("#app_li").addClass("app");
+			$("#app_li").removeClass("current2");
+		}else{
+			$("#game_li").removeClass("current");
+			$("#app_li").removeClass("app");
+			$("#app_li").addClass("current2");
+		}
+		<!--{if $out.activity_result != ''}-->
+		if(typeof(window.AnzhiActivitys) != "undefined"){
+			setTimeout(function(){
+				//get_soft();
+			}, 500)
+		}
+		<!--{/if}-->
+	});
+	function get_soft(){
+		var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+		var cmd = 'var soft_list=' + json_data;
+		eval(cmd);
+		soft_lists_go = soft_list.DATA;
+		for(var i=0;i<soft_lists_go.length;i++){
+			if($("#soft_status_"+soft_lists_go[i][0]).length>0){
+				has_soft.push(soft_lists_go[i]);
+			}
+		}
+
+		get_soft_status()
+	}
+	function get_soft_status(){
+		for(var j=0;j<has_soft.length;j++){
+			//$("#test").append(has_soft[j][2]+'<br>');
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(has_soft[j][0]));
+			var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(has_soft[j][0]));
+			var cmd = 'var soft_status=' + json_datas;
+
+			eval(cmd);
+
+			if(soft_status == 1){
+				var my_soft = '<a id="'+has_soft[j][0]+'" onclick="download_apk('+aid+','+has_soft[j][0]+',\''+has_soft[j][7]+'\',\''+has_soft[j][2]+'\','+has_soft[j][13]+','+has_soft[j][27]+',0,0,'+has_soft[j][27]+');" class="soft_btns download">下载中</a>';
+			}else if(soft_status == 2){
+				var my_soft = '<a id="'+has_soft[j][0]+'" onclick="download_apk('+aid+','+has_soft[j][0]+',\''+has_soft[j][7]+'\',\''+has_soft[j][2]+'\','+has_soft[j][13]+','+has_soft[j][27]+',0,0,'+has_soft[j][27]+');" class="soft_btns download">继续</a>';
+			}else if(soft_status == 3){
+				var my_soft = '<a id="'+has_soft[j][0]+'" onclick="download_apk('+aid+','+has_soft[j][0]+',\''+has_soft[j][7]+'\',\''+has_soft[j][2]+'\','+has_soft[j][13]+','+has_soft[j][27]+',0,0,'+has_soft[j][27]+');" class="soft_btns download">继续</a>';
+			}else if(soft_status == 4){
+				var my_soft = '<a id="'+has_soft[j][0]+'" onclick="download_apk(parseInt('+aid+'),'+has_soft[j][0]+',"'+has_soft[j][7]+'","'+has_soft[j][2]+'",parseInt('+has_soft[j][13]+'),"'+has_soft[j][27]+'",0,0,'+has_soft[j][27]+');" class="soft_btns download">下载</a>';
+			}else if(soft_status == 5){
+				var my_soft = '<a id="'+has_soft[j][0]+'" onclick="installApp(parseInt('+has_soft[j][0]+'),\''+has_soft[j][7]+'\');" class="soft_btns download">安装</a>';
+			}else if(soft_status == 6){
+				var my_soft = '<a id="'+has_soft[j][0]+'" class="soft_btns download" onclick="openApp(\''+has_soft[j][7]+'\','+has_soft[j][0]+');">打开</a>';
+			}else if(soft_status == 8){
+				var my_soft = '<a id="'+has_soft[j][0]+'" onclick="download_apk('+aid+','+has_soft[j][0]+',\''+has_soft[j][7]+'\',\''+has_soft[j][2]+'\','+has_soft[j][13]+','+has_soft[j][27]+',0,0,'+has_soft[j][27]+');" class="soft_btns download">继续</a>';
+			}else if(soft_status == 9){
+				var my_soft = '<a value="校验中" id="'+has_soft[j][0]+'" class="soft_btns download">校验中</a>';
+			}else if(soft_status == 10){
+				var my_soft = '<a id="'+has_soft[j][0]+'" class="soft_btns download">已下载</a>';
+			}else if(soft_status == -1){
+				var soft_other_status = window.AnzhiActivitys.isInstalledApp(has_soft[j][7],parseInt(has_soft[j][13]));
+
+				if(soft_other_status == -2){
+					var my_soft = '<a id="'+has_soft[j][0]+'" onclick="download_apk('+aid+','+has_soft[j][0]+',\''+has_soft[j][7]+'\',\''+has_soft[j][2]+'\','+has_soft[j][13]+','+has_soft[j][27]+',0,0,'+has_soft[j][27]+');" class="soft_btns download">下载</a>';
+
+				}else if(soft_other_status == -1){
+					var my_soft = '<a id="'+has_soft[j][0]+'" onclick="download_apk('+aid+','+has_soft[j][0]+',\''+has_soft[j][7]+'\',\''+has_soft[j][2]+'\','+has_soft[j][13]+','+has_soft[j][27]+',0,0,'+has_soft[j][27]+');" class="soft_btns download">更新</a>';
+				}else if(soft_other_status == 0){
+					var my_soft = '<a id="'+has_soft[j][0]+'" class="soft_btns download" onclick="openApp(\''+has_soft[j][7]+'\','+has_soft[j][0]+');">打开</a>';
+				}else if(soft_other_status == 1){
+					var my_soft = '<a id="'+has_soft[j][0]+'" class="soft_btns download">已下载</a>';
+				}
+			}
+			$("#soft_status_"+has_soft[j][0]).html(my_soft);
+		}
+	}
+	//下载软件
+	function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag,noflux,firmware,status){
+		window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+		setTimeout(function(){download_go(softid,pkgname)},3000);
+	}
+
+	function download_go(softid,pkgname){
+		$.ajax({
+			url: '/lottery/superbowl/superbowl_download.php',
+			data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+			type: 'get',
+			success: function(data){
+				if(data != 200){
+					setTimeout(function (){
+						$("#test").html(data);
+						$('#now_num').html(data);
+					},2000);
+				}
+			}
+		});
+	}
+	function installApp(softid,pkgname){
+		if(!pkgname){
+			for(i=0;i < soft_lists_go.length;i++){
+				if(soft_lists_go[i][0] == softid){
+					pkgname = soft_lists_go[i][7];
+				}
+			}
+		}
+		window.AnzhiActivitys.installAppForActivity(softid);
+	}
+
+	//更新软件状态（正在下载）
+	function onDownloadCreated(softid){
+		$('#'+softid+'').html("下载中");
+	}
+
+	function onDownloadStateChanged(softid,newState){
+		if(newState == 1){
+			$('#'+softid+'').html("下载中");
+		}else if(newState == 2){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 3){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 4){
+			$('#'+softid+'').html("重试");
+		}else if(newState == 5){
+			$('#'+softid+'').html("安装");
+			$('#'+softid+'').removeAttr("onclick");
+			$('#'+softid+'').bind('click',function(){
+				installApp(parseInt(softid));
+			});
+		}else if(newState == 6){
+			$('#'+softid+'').html("打开");
+			if(soft_lists_go[i][0] == softid){
+				$('#'+softid+'').bind('click',function(){
+					openApp(soft_lists_go[i][7],softid);
+				});
+			}
+		}else if(newState == 8){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 9){
+			$('#'+softid+'').html("检查中");
+		}
+	}
+
+	function openApp(pkg,softid){
+		the_soft = [softid];
+		window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+	}
+</script>
+</body>
+</html>

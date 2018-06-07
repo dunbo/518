@@ -1,0 +1,190 @@
+<include file="../../Public/new_header" />
+<link type="text/css" href="/Public/css/common.css" rel="stylesheet" />
+<link type="text/css" href="/Public/css/page4.css?v4" rel="stylesheet" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style type="text/css">
+	.label_t{float:left;text-align:right;margin-top:6px;width:100px}
+	.label_b{float:left;text-align:right;width:100px}
+	.div_t{float:left;padding-left:30px;width:100%;padding-top:10px}
+</style>
+<form name="fml" method = "post" action="">
+<input type="hidden" name="id" value="{$id}">
+<div style="padding-left:100px;padding-top:10px">
+	<div style="font-size:14px;font-weight:bold">基本信息</div>
+	<div style="padding-top:10px">
+		<div class="div_t"><label class="label_t">产品名称：</label><input type="text" name="softname" id="softname" class="inputtext" value="{$info.softname}"></div>
+		<div class="div_t"><label class="label_b" >公司名称：</label>{$settlement_info.company}</div>
+		<div class="div_t"><label class="label_b">联系地址：</label>{$settlement_info.base_company_address}</div>
+		<div class="div_t"><label class="label_b">邮政编码：</label>{$settlement_info.base_zip}</div>
+		<div class="div_t"><label class="label_b">公司电话：</label>{$settlement_info.company_tel}</div>
+		<div class="div_t"><label class="label_b">公司传真：</label>{$settlement_info.company_fax}</div>
+		<div class="div_t"><label class="label_b">联系人：</label>{$settlement_info.base_contacts}</div>
+		<div class="div_t"><label class="label_b">联系电话：</label>{$settlement_info.base_phone}</div>
+		<div class="div_t"><label class="label_b">联系人Email：</label>{$settlement_info.company_email}</div>
+	</div>
+	<div style="clear:both"></div>
+	<div style="font-size:14px;font-weight:bold;padding-top:10px">结算信息</div>
+	<div>
+		<div class="div_t"><label class="label_t">合同名称：</label><input type="text" name="contract_name" id="contract_name" class="inputtext" value="{$info.contract_name}"></div>
+		<div class="div_t"><label class="label_b">开户行：</label>{$settlement_info.company_bank}</div>
+		<div class="div_t"><label class="label_b" >开户姓名：</label>{$settlement_info.company_account}</div>
+		<div class="div_t"><label class="label_b">银行账号：</label>{$settlement_info.company_card}</div>
+		<div class="div_t">
+			<label class="label_b">发票税率：</label>
+			<if condition="$settlement_info.company_rate eq 1">
+			提供6%税率的增值税专用发票，不扣除6.72%税点
+			<elseif condition="$settlement_info.company_rate eq 2"/>
+			提供3%税率的增值税专用发票，扣除3.72%税点
+			<elseif condition="$settlement_info.company_rate eq 3"/>
+			提供普通发票，需扣除6.72%税点
+			</if>
+		</div>
+		<div class="div_t">
+			<label class="label_t">合同有效期：</label>
+			<input type="text" name="start_tm" id="start_tm" class="inputtext Wdate" onClick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})" readonly value="<?php if($info['start_tm']){ echo date("Y-m-d",$info['start_tm']);}?>">
+			<label style="float:left;margin-top:6px;">&nbsp;至&nbsp;</label>
+			<input type="text" name="end_tm" id="end_tm" class="inputtext Wdate" onClick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})"readonly value="<?php if($info['start_tm']&&$info['end_tm']){echo date("Y-m-d",$info['end_tm']);}?>">
+		</div>
+		<div class="div_t">
+			<label class="label_b">合同费率：</label>
+			<input type="radio" name="contract_rate" value="1" <?php if($info['contract_rate']==1){echo "checked='checked'";}?> onclick="change_c_rate(1)"/>旧(2%) &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+			<input type="radio" name="contract_rate" value="2" <?php if($info['contract_rate']==2){echo "checked='checked'";}?>onclick="change_c_rate(2)"/>新(5%)  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+			<input type="radio" name="contract_rate" value="3" <?php if($info['contract_rate']==3){echo "checked='checked'";}?> onclick="change_c_rate(3)"/>其他
+		</div>
+		<div class="div_t">
+			<label class="label_b">通道费率：</label>
+			<textarea id="rate" name="rate" <?php if($info['contract_rate']!=3){echo 'disabled';}?> cols="50" rows="10"><?php
+					if($info['contract_rate']==1){
+						echo $old_rate;
+					}elseif($info['contract_rate']==2){
+						echo $new_rate;
+					}elseif($info['contract_rate']==3){
+						echo $info['rate'];
+					}
+				?></textarea>
+		</div>
+		<div style="font-size:14px;font-weight:bold;padding-top:10px">其他信息(数据记录)</div>
+		<div class="div_t">
+			<label class="label_b">合同负责人：</label>
+			<select name="fuzeren" id="fuzeren">
+				<option value="">--请选择--</option>
+				<?php
+					foreach($fuzeren as $k=>$v){
+					?>
+					<option value="<?php echo $v;?>" <?php if($info['fuzeren']==$v){echo 'selected';}?>><?php echo $v;?></option>
+					<?php
+					}
+				?>
+			</select>
+		</div>
+		<div class="div_t">
+		<label class="label_b">结算方式：</label>
+		<select name="bill_method" id="bill_method" <?php if($info['contract_rate']!=3){echo 'disabled';}?>>
+			<option value="1" <?php if(($info['game_type']==3&&$info['contract_rate']==2)||$info['bill_method']==1){echo 'selected';}?>>先分后减</option>
+			<option value="2" <?php if($info['game_type']==1||$info['game_type']==2||($info['game_type']==3&&$info['contract_rate']==1)||$info['bill_method']==2){echo 'selected';}?>>先减后分</option>
+		</select>
+		</div>
+		<div class="div_t">
+			<label class="label_b">分成比例：</label>
+			<input type="text" name="proportion" id="proportion" class="inputtext" value="<?php if($info['contract_rate']!=3){
+						if($info['game_type']==1||$info['game_type']==2){
+							echo '50:50';
+						}elseif($info['game_type']==3){
+							if($info['contract_rate']==1){
+								echo '80:20';
+							}elseif($info['contract_rate']==2){
+								echo '50:50';
+							}
+						}
+					}else{
+						echo $info['proportion'];
+					}?>" <?php if($info['contract_rate']!=3){echo 'disabled';}?>/>
+		</div>
+		<input type='hidden' value='{$info.contract_rate}' name='contract_rate_old'/>
+		<input type='hidden' value='{$info.package}' name='package'/>
+	</div>
+	<div style="clear:both"></div>
+	<div class="process_btn">
+		<a onclick="return do_submit()" href="javascript:;">完成</a>
+		<a onclick="javascript:window.history.go(-1)" href="javascript:;">取消</a>
+	</div>
+
+	<div style="clear:both"></div>
+</div>
+</form>
+<script type="text/javascript">
+
+	function change_c_rate(val){
+		var new_rate = '<?php echo $new_rate;?>';
+		var old_rate = '<?php echo $old_rate;?>';
+		var game_type = "<?php echo $info['game_type'];?>";
+		var proportion = "<?php echo $info['proportion'];?>";
+		var rate = "<?php echo $info['rate'];?>";
+		var bill_method = "<?php echo $info['bill_method'];?>";
+		if(val==1){
+			$("#rate").attr('disabled','disabled');
+			$("#rate").html(old_rate);
+			$("#bill_method").attr('disabled','disabled');
+			$("#proportion").attr('disabled','disabled');
+		}else if(val==2){
+			$("#rate").attr('disabled','disabled');
+			$("#rate").html(new_rate);
+			$("#bill_method").attr('disabled','disabled');
+			$("#proportion").attr('disabled','disabled');
+		}else if(val==3){
+			$("#rate").attr('disabled',false);
+			$("#rate").html(rate);
+			$("#bill_method").attr('disabled',false);
+			$("#proportion").attr('disabled',false);
+		}
+		if(game_type==1||game_type==2){
+			$("#bill_method").val(2);
+		}else if(game_type==3){
+			if(val==3){
+				$("#bill_method").val(bill_method);
+			}else if(val==1){
+				$("#bill_method").val(2);
+			}else if(val==2){
+				$("#bill_method").val(1);
+			}
+
+		}
+		if(val==3){
+			$("#proportion").val(proportion);
+		}else{
+			if(game_type==3&&val==1){
+				$("#proportion").val("80:20");
+			}else{
+				$("#proportion").val("50:50");
+			}
+		}
+	}
+	function do_submit(){
+		var softname = $("#softname").val();
+		var start_tm = $("#start_tm").val();
+		var fuzeren = $("#fuzeren").val();
+		if(softname == ''){
+			alert('产品名称不能为空');
+			return false;
+		}
+		if(start_tm == ''){
+			alert('合同日期不能为空');
+			return false;
+		}
+		if(!fuzeren){
+			alert('请选择合同负责人');
+			return false;
+		}
+		window.fml.submit();
+	}
+	$("#start_tm").blur(function(){
+		var start_tm = $("#start_tm").val();
+		if(start_tm){
+			var d1=new Date(start_tm);
+			d1.setFullYear(d1.getFullYear() + 2);
+			$("#end_tm").val(d1.toLocaleDateString().replace(/\//g,'-'));
+		}
+		
+	})
+</script>

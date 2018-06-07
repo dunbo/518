@@ -1,0 +1,227 @@
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<script type="text/javascript">
+		var area_num = 1;
+		$(function(){
+			$('#top_bg_color').parent().children('div').remove();
+	        $('#top_bg_color').colorPicker();
+	        <volist id="area_list" key="k" name="push_area" >
+				<?php $pro=explode(",",$push_area[$k-1]); ?>
+				var select_obj = addArea('<?php echo $pro[0];?>');
+				showSubArea(select_obj, '<?php echo $pro[1];?>');
+			</volist>
+	    });
+	    
+		function addArea()
+		{
+			var html = '<div id="area_div_' + area_num + '">';
+			html += '<select name="push_area[]" id="push_area_'+area_num+'" class="push_area" onchange="showSubArea(this)">';
+			html += '<option value="">请选择</option>';
+			var province = '';
+			if (typeof(arguments[0]) != 'undefined') {
+				province = arguments[0].trim();
+			}
+			for(var i in area_list){
+				if (i == 990000) continue ;//海外排除
+				var item = area_list[i]['name'].split("\t");
+				if(province == item[0].trim()) {		
+			        html += "<option selected value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+		        } else {
+					html += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+			    }
+			}
+			html += '</select>';
+			html += '<span class="sub_area"></span>';
+			html += '<input type="button" value="删除" onclick="delArea(this)" class="act_btn"/>';
+			html += '</div>';
+			$('#push_td').append(html);
+			var obj = $('#push_area_' + area_num);
+			area_num++;
+			return obj;
+		}
+		function delArea(obj)
+		{
+			$(obj).parent().remove();
+			refreshArea();
+		}
+
+		function showSubArea(obj)
+		{
+			var sub_id = $(obj).attr('id').replace('push_area_', 'push_city_');
+			var sub_select = "<select name='push_city[]' id='"+sub_id+"' onchange='refreshArea()'><option value=''>请选择</option>";
+			var value = $(obj).children('option:selected').val();
+			var arr = value.split(':');
+			var code = arr[0];
+			var city = '';
+			if (typeof(arguments[1]) != 'undefined') {
+				city = arguments[1].trim();
+			}
+			if (typeof(area_list[code]) == 'undefined') {
+				$(obj).parent().find('.sub_area').html('');
+				return false;
+			}
+			var sub_area = area_list[code]['sub'];
+			for(var i in sub_area){
+				var item = sub_area[i].split("\t");
+				if(city == item[0].trim())  {		
+			        sub_select += "<option selected value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+		        } else {
+					sub_select += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+			    }
+			}
+			sub_select += "</select>";
+			$(obj).parent().find('.sub_area').html(sub_select);
+			refreshArea();
+		}
+
+		function refreshArea()
+		{
+			var area_value = '';
+			$('.push_area').each(function(){
+				var sub_id = $(this).attr('id').replace('push_area_', 'push_city_');
+				if ($(this).val() !='') {
+					area_value += $(this).find('option:selected').html() + ',';
+					if ($('#' + sub_id).val() !='') {
+						area_value += $('#' + sub_id).find('option:selected').html();
+					}
+					area_value += ';';
+				}
+			});
+			area_value = area_value.replace(/;$/, '');
+			$('#area_value').val(area_value);
+		}
+		function check_area()
+		{
+			var start_tm = $("input[name=start_tm]").val();
+			if(start_tm == '') {
+				alert("开始时间不能为空")
+				return false;
+			}
+			var end_tm = $("input[name=end_tm]").val();
+			if(end_tm == '') {
+				alert("结束时间不能为空")
+				return false;
+			}
+			var area=document.getElementById("area_value").value;
+			var area_arr=new Array;
+			area_arr=area.split(";");
+			var s = area_arr.join(";")+";";
+			for(i=0;i<area_arr.length;i++)
+			{
+				if(area_arr[i].split(",")[1]=="")
+				{
+				 var pro=area_arr[i].split(",")[0];
+				 for(j=0;j<area_arr.length;j++)
+				 {
+					 if(area_arr[j].split(",")[0]==pro&&j!=i)
+					 {
+						 alert("您选择的有冲突，请重新选择");
+							return false; 
+					 }
+				 }
+				}
+				else if(s.replace(area_arr[i]+";","").indexOf(area_arr[i]+";")>-1)
+				{
+					alert("您选择了重复的省市，请重新选择");
+					return false;
+					}
+			}
+		}
+</script>
+<div>
+	<form action="__URL__/edit_category" method="post" onsubmit="return check_area()" enctype="multipart/form-data">
+	<table>
+		<tr>
+			<td>分类名称：</td>
+			<td><input type="text" value="{$result[0]['category_name']}" name="category_name" />建议18字内<input type="hidden" name="id" value="{$result[0]['id']}" /></td>
+		</tr>
+		<tr>
+			<td>开始时间：</td>
+			<td>
+			<input id="start_at3" name="start_tm"
+			style="width: 130px;" value="<?php echo $result[0]['start_tm']?date('Y-m-d H:i:s', $result[0]['start_tm']):''?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at3",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			</td>
+		</tr>
+		<tr>
+			<td>结束时间：</td>
+			<td>
+			<input id="end_at3" name="end_tm"
+			style="width: 130px;" value="<?php echo $result[0]['end_tm']?date('Y-m-d H:i:s', $result[0]['end_tm']):''?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at3",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			</td>
+		</tr>
+		<!-- <tr>
+			<td>过滤已安装：</td>
+			<td>
+			<?php if($result[0]['filter_been'] == 1){ ?>是<?php }else{ ?>否<?php } ?>	
+			</td>
+		</tr> -->
+		<tr>
+			<td>过滤已安装：</td>
+			<td>
+				<select name="filter_been">
+					<option value="1" <?php echo ($result[0]['filter_been'] == 1)?'selected':'';?>>是</option>
+					<option value="2" <?php echo ($result[0]['filter_been'] == 2)?'selected':'';?>>否</option>
+				</select>
+			</td>
+		</tr>
+		
+		<tr>
+			<td>分类排序：</td>
+			<td><select name="rank"><?php foreach($rank_result as $key => $val){ ?><option value="{$val}" <?php if($result[0]['rank'] == $val){ ?>selected<?php } ?>>{$val}</option><?php } ?></select></td>
+		</tr>
+		<tr>
+			<td>顶部背景色：</td>
+			<td><input type="text" name="top_bg_color" id="top_bg_color" value="{$result[0]['top_bg_color']}" /></td>
+		</tr>
+		<tr>
+			<td>顶部图片：</td>
+			<td><input type="file" name="top_image_url" id="top_image_url"/></td>
+			<td>支持png,jpg 270x270 显示在顶部背景色中</td>
+		</tr>
+		<tr style="display:<?php echo $result[0]['top_image_url']?'':'none';?>">
+			<td>&nbsp;</td>
+			<td><img src="{$attachment_host}{$result[0].top_image_url}" width="320" height="240"></td>
+		</tr>
+		<tr>
+			<td>顶部背景图：</td>
+			<td><input type="file" name="top_bg_image_url" id="top_bg_image_url"/></td>
+			<td>支持png,jpg,gif 1080x510 顶部背景图和顶部背景色都配置时显示背景图</td>
+		</tr>
+		<tr style="display:<?php echo $result[0]['top_bg_image_url']?'':'none';?>">
+			<td>&nbsp;</td>
+			<td><img src="{$attachment_host}{$result[0].top_bg_image_url}" width="320" height="240"></td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>区域可见：</td>
+			<td align="left" id="push_td">
+			<input type="button" value="添加" onclick="addArea()" class="act_btn"/>
+			<input type="hidden" value="" name="area_value" id="area_value"/>
+			</td>
+		</tr>
+		<tr>
+			<td>机型可见：</td>
+				<td><a href="/index.php/Public/showDevice?callback=submitDevice&ready=check_arrs&type=checkbox&reset_device=1" class="thickbox" style="color:blue;">选择机型</a>
+				<div id="device_div">
+				<volist id="chl_list_vo" name="device_selected" >
+					&nbsp;<label class="l_did_{$chl_list_vo.did}"><input type="checkbox" name="did[]" checked="checked" value="{$chl_list_vo.did}"/>{$chl_list_vo.dname}</label>&nbsp;
+				</volist>
+				</div>
+				</td>
+		</tr>
+		<tr>
+			<td><input type="submit" value="保存" /></td>
+			<td><input type="button" value="取消" onclick="tb_remove();" /></td>
+		</tr>
+	</table>
+	</form>
+</div>

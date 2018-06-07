@@ -1,0 +1,533 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js?30'></script>
+<script>
+
+function showoffComment(str)
+{
+	if (confirm("是否忽略此条评论信息？")) {
+    location.href = '__URL__/showoff/id/'+str
+  }
+}
+
+function batchShowoffComment()
+{
+  if (confirm("是否批量忽略评论信息？")) {
+    var input = new Array();
+    var has = false;
+    $('input[name^=id_]').each(function(){
+      if (this.name != 'id_all' && this.checked) {
+        input.push(this.value);
+        has = true;
+      }
+    });
+    if (has) {
+      location.href = '__URL__/showoff/ids/'+ input.join(',');
+    } else {
+      alert('请选择需要进行忽略的评论信息');
+    }
+  }
+}
+
+function checkAll(obj)
+{
+	var flag = $(obj).attr('checked') == 'checked';
+	$('input[name^=id_]').attr('checked', flag);
+}
+var id_str = '';
+function choose_id(){
+	var id_arr = new Array();
+	var i = 0;
+	$('input[name^=id_]').each(function(){
+		if($(this).is(':checked')&&$(this).attr('name')!='id_all') {
+			id_arr[i] = $(this).val();
+			i++;
+		}
+	});
+	id_str = id_arr.join(',');
+	if(id_str=='') {
+		alert('请选择要操作的对象！');
+		return false;
+	}else{
+		return id_str;
+	}
+}
+function replace_comment(){
+	var id_arr = new Array();
+	var i = 0;
+	$('input[name^=id_]').each(function(){
+		if($(this).is(':checked')&&$(this).attr('name')!='id_all') {
+			id_arr[i] = $(this).val();
+			i++;
+		}
+	});
+	var id_str = id_arr.join(',');
+	if(id_str=='') {
+		alert('请选择要操作的对象！');
+		return false;
+	} else {
+		var content = encodeURIComponent($("#content").val());
+		var url = '/index.php/Dev/Message/replace_comment?ids='+id_str+'&content_type=1';
+		tb_show('批量替换',url,false);
+	}
+}
+
+function shelves_str() {
+	var id_arr = new Array();
+	var i = 0;
+	$('input[name^=id_]').each(function(){
+		if($(this).is(':checked')) {
+			id_arr[i] = $(this).val();
+			i++;
+		}
+	});
+	var id_str = id_arr.join(',');
+	if(id_str=='') {
+		alert('请选择要操作的对象！');
+		return false;
+	} else {
+		tb_show('批量删除','/index.php/Dev/Message/delete/callback/batchDeleteComment?ids='+id_str,false);
+	}
+}
+
+function set_info(){
+	content = $("#content").val();
+	var param = {
+		type: 1,
+		content: content
+	};
+	$.ajax({
+		url:'__URL__/pub_set_content',
+		type:'POST',
+		data:param,
+		secureuri:false,
+		dataType:'json',
+		success:function(data){
+
+		}
+	});
+	return true;
+}
+$(document).ready(function(){
+	var param = '{$param}';
+	if(param){
+		$.ajax({
+			url:'__URL__/pub_get_content',
+			type:'POST',
+			data:{type:1},
+			secureuri:false,
+			dataType:'json',
+			success:function(data){
+				$("#content").val(data.content);
+			}
+		});
+	}
+});
+
+</script>
+<style type="text/css">
+.tb td{word-break:break-all; word-wrap:break-word;}
+.margin_top{ float:left;}
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+</style>
+<div class="main" >
+<div class="content">
+<center>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+<tr height="35">
+	<td align="center" style=<?php if($from == 'cooper_soft'){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/cooper_soft"><font style="color:#000; font-weight:bold">合作软件</font></a>
+	</td>
+	<td align="center" style=<?php if($from == 'message'){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/message_soft"><font style="color:#000; font-weight:bold">评论信息列表</font></a>
+	</td>
+	<td align="center" >
+		<a href="__URL__/reply_list">
+			<font style="color:#000; font-weight:bold">评论回复列表</font>
+		</a>
+	</td>
+	<td align="center" style=<?php if($from == 'own'){ echo "background:#FFCC66" ;}?> >
+		<a href="__URL__/own_soft"><font style="color:#000; font-weight:bold">自有产品评论</font></a>
+	</td>
+	<td align="center">
+		<a href="__URL__/listBadFilter"><font style="color:#000; font-weight:bold">用户屏蔽列表</font></a>
+	</td>
+	<td align="center">
+		<a href="__URL__/del_soft_list"><font style="color:#000; font-weight:bold">已删除列表</font></a>
+	</td>
+</tr>
+</table>
+<br/>
+<form id="upload" method='get' action="__URL__/<?php if($from == 'message'){ echo "message_soft" ;}else{ echo "own_soft"; }?>" onsubmit="return set_info();">
+	<input type="hidden" name="search" value="1">
+  <table style="float:left;" width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="tb">
+	<tr>
+		<td>软件ID:</td><td><input size='15' type="text" name="softid" value="<?php echo $softid;?>" /></td>
+		<td>软件包名</td><td><input size='15' type="text" name="package" value="<?php echo $package;?>"/></td>
+		<td>软件名称</td><td><input size='15' type="text" name="softname" id="softname" value="<?php echo $softname;?>"/></td>	 
+		<td>IMEI</td> <td><input size='15' type="text" name="imei" value="<?php echo $imei;?>" /></td>
+		<td>IP地址</td> 
+		<td><input size='15' type="text" name="ipmsg" value="<?php echo $ipmsg;?>" /></td>	  
+		<td rowspan='3' align='center'><input type="submit" value="搜索" /></td>	
+	</tr>
+	<tr>	
+		<td>来源</td>
+		<td>
+		  <select name="pid" id="pid" style="width:80px;height:25px;font-size:12px;">
+		  <option value=''>全部</option>
+		  <?php foreach($product as $k => $v){ ?>
+		  <option value="<?php echo $k?>"<?php if( $k == $pid ) { echo "selected='selected'"; } ?>><?php echo $v['0']; ?></option>
+		  <?php } ?>
+		  </select>
+		</td>
+		<td>热门评论</td>	
+		<td>
+			<select name="hot" id="hot" style="width:80px;height:25px;font-size:12px;">
+				<option value='' <?php if( $hot == '' ) { echo "selected='selected'"; } ?>>全部</option>
+				<option value="1"<?php if( $hot == 1 ) { echo "selected='selected'"; } ?>>是</option>
+				<option value="0"<?php if( isset($hot) && $hot == 0 ) { echo "selected='selected'"; } ?>>否</option>
+			</select>
+		</td>
+		<td>评论信息</td>
+		<td>
+			<input size='15' type="text" id="content" value=""/>
+		</td>   	
+		<td>用户名</td><td><input size='15' type="text" name="user_name" id="user_name" value="<?php echo $user_name;?>"/></td>	 
+		<td colspan='2'></td>			
+	</tr>
+	<tr>
+		<td>积分</td>
+		<td colspan='3'>
+			<input size='15' type="text" name="beginscore" value="<?php echo $beginscore;?>"/>~<input size='15' type="text" name="endscore" value="<?php echo $endscore;?>"/>
+		</td>
+		<td>起止时间</td>
+		<td width="300" colspan='3'><?php showDatePicker('begintime','endtime', $begintime,$endtime);?></td>
+		<td colspan='2'></td>				
+	</tr>
+	<tr>
+		<td>类型</td>	
+		<td>
+			<select name="choose_type" id="choose_type" style="width:80px;height:25px;font-size:12px;">
+				<option value="" <?php if($choose_type == 0) { echo "selected='selected'"; } ?>>全部</option>
+				<option value="1" <?php if($choose_type == 1) { echo "selected='selected'"; } ?>>软件</option>
+				<option value="2" <?php if($choose_type == 2) { echo "selected='selected'"; } ?>>专题</option>
+			</select>
+		</td>
+		<td>专题名称</td>	
+		<td>
+			<input type="text" name="feature_name" value="<?php echo $feature_name;?>" />
+		</td>
+		<td>大家说</td>	
+		<td>
+			<select name="everybody_say" id="everybody_say" style="width:80px;height:25px;font-size:12px;">
+				<option value='' <?php if( $everybody_say == 0 ) { echo "selected='selected'"; } ?>>全部</option>
+				<option value="1"<?php if( $everybody_say == 1 ) { echo "selected='selected'"; } ?>>是</option>
+				<option value="2"<?php if($everybody_say == 2 ) { echo "selected='selected'"; } ?>>否</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>中文字符数量少于:</td>	
+		<td>
+			<input type="text" name="word_num" value="<?php echo $word_num;?>" />
+		</td>
+		<td>字符重复三次以上:</td>	
+		<td>
+			<select name="repeat_num" id="repeat_num" style="width:80px;height:25px;font-size:12px;">
+				<option value="" <?php if($repeat_num == 0 || !$repeat_num) { echo "selected='selected'"; } ?>>否</option>
+				<option value="1" <?php if($repeat_num == 1) { echo "selected='selected'"; } ?>>是</option>
+			</select>
+		</td>
+		
+	</tr>
+  <input type='hidden' name='processed' id='processed' value="{$processed}"/>
+  <input type='hidden' name='is_replace' id='is_replace' value="{$is_replace}"/>
+  <input type='hidden' name='all_post' id='all_post' value="{$all_post}"/>
+  <input type='hidden' name='from_processed' id='from_processed' value="{$from_processed}"/>
+  </table>
+</form>
+<table style='margin-top:30px;' width="40%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+<tr height="35">
+  <td align="center" style=<?php if($processed ==0 && $all_post !=1){ echo "background:#FFCC66"; }?>><a href="__URL__/<?php if($from == 'message'){ echo "message_soft" ;}else{ echo "own_soft"; }?>/processed/0?<?php echo $param; ?>"><font style="color:#000; font-weight:bold">未处理列表</font></a></td>
+  <td align="center" style=<?php if($all_post ==1){ echo "background:#FFCC66"; }?>><a href="__URL__/<?php if($from == 'message'){ echo "message_soft" ;}else{ echo "own_soft"; }?>/all_post/1?<?php echo $param; ?>"><font style="color:#000; font-weight:bold">再次回复</font></a></td>
+  <td align="center" style=<?php if($processed ==1 && $all_post !=1){ echo "background:#FFCC66"; }?>><a href="__URL__/<?php if($from == 'message'){ echo "message_soft" ;}else{ echo "own_soft"; }?>/processed/1?<?php echo $param; ?>"><font style="color:#000; font-weight:bold">已处理列表</font></a></td>
+  <td align="center" style=<?php if($processed ==3 && $all_post !=1){ echo "background:#FFCC66"; }?>><a href="__URL__/<?php if($from == 'message'){ echo "message_soft" ;}else{ echo "own_soft"; }?>/is_replace/1?<?php echo $param; ?>"><font style="color:red; font-weight:bold">替换历史列表</font></a></td>
+</tr>
+</table>
+<table style=" background:#e4e4e4;" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr align='left' bgcolor="" height='30'>
+  <td><?php echo $total;?>条</td>
+<?php if($total > 0) { ?>
+  <td align='right'><a onclick="export_data('__URL__/soft_message_export/count/{$total}/status/1/admin_show/1/?{$param}');">导出</a></td>
+<?php } ?>  
+	
+<td align='right'>
+<?php if($processed ==1 && $all_post !=1){ ?>
+	<select name="from_processed" id="from_processed" onChange="onchange_processed(this)" >
+		<option value=""  >全部回复 </option>
+		<option value="1" <?php if($from_processed == 1) echo "selected"; ?>>开发者回复</option>
+		<option value="0" <?php if(isset($from_processed) && $from_processed == 0) echo "selected"; ?>>安智回复</option>
+	</select>
+<?php } ?>
+</td>
+</tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td width="6%" align='center' height="30" bgcolor="#e3e2fe"><label><input type="checkbox" onclick="checkAll(this)" name="id_all"/><b>软件/专题ID</b></label></td>
+    <td width="12%" align='center' height="30" bgcolor="#e3e2fe"><b>软件/专题名称</b></td>
+    <td width="5%" align='center' height="30" bgcolor="#e3e2fe"><b>版本状态</b></td>
+    <td width="11%" align='center' height="30" bgcolor="#e3e2fe"><b>IMEI</b></td>
+    <td width="8%" align='center' height="30" bgcolor="#e3e2fe"><b>用户名及机型</b></td>
+    <td width="8%" align='center' height="30" bgcolor="#e3e2fe"><b>IP</b></td>
+    <td width="8%" align='center' height="30" bgcolor="#e3e2fe"><b>评论时间</b></td>
+    <td width="4%" align='center' height="30" bgcolor="#e3e2fe"><b>积分</b></td>
+    <td width="4%" align='center' height="30" bgcolor="#e3e2fe"><b>回复数</b></td>
+    <td width="6%" align='center' height="30" bgcolor="#e3e2fe"><b>来源</b></td>
+    <td align='center' bgcolor="#e3e2fe" width="10%"><b>评论信息</b></td>
+	<?php if($processed == 1 || $all_post ==1){ ?>
+    <td align='center' bgcolor="#e3e2fe" width="10%"><b>操作人员</b></td>
+    <td align='center' bgcolor="#e3e2fe" width="10%"><b>回复时间</b></td>
+	<?php } ?>
+	<?php if($processed == 0 ||  $processed == 1 || $all_post ==1){ ?>
+    <td width="10%" align='center' height="30" bgcolor="#e3e2fe"><b>操作</b></td>
+	<?php }elseif($is_replace==1){ ?>
+	<td align='center' bgcolor="#e3e2fe" width="7%"><b>被替换信息</b></td>
+    <td align='center' bgcolor="#e3e2fe" width="5%"><b>操作人</b></td>
+    <td align='center' bgcolor="#e3e2fe" width="5%"><b>时间</b></td>
+    <?php } ?>
+  </tr>
+  <?php foreach($commentlist as $val): ?>
+  <tr>
+	<td>
+		<input type="checkbox" value="<?php echo $val['id']?>" name="id_<?php echo $val['id']?>"/> 
+		<?php if(($processed ==0 || $processed == 1) && $all_post !=1){ ?>
+			<a href="/index.php/Dev/Message/message_soft/processed/<?php echo $processed; ?>/softid/<?php echo $val['softid']?>"><?php echo $val['softid']?></a>
+		<?php }else{ ?>
+		<a href="/index.php/Dev/Message/message_soft/all_post/1/softid/<?php echo $val['softid']?>"><?php echo $val['softid']?></a>
+		<?php } ?>
+	</td>
+    <td>
+		<?php if($val['comment_type'] ==1) { ?>
+		<a href="/index.php/Dev/Soft/softlist/package/<?php echo $val['package']?>" target="_blank">
+			<img width="48" height="48" alt="" src="<?php echo IMGATT_HOST. $softinfo[$val['softid']]['iconurl']?>">
+		</a>&nbsp; 
+		<a href="http://www.anzhi.com/pkg/<?php echo $val['package']?>" target="_blank"><?php echo $softinfo[$val['softid']]['softname']?></a>
+		<?php } else { ?>
+		<a href="http://www.anzhi.com/subject_<?php echo $val['softid']?>.html" target="_blank"><?php echo $featureinfo[$val['softid']]['name']?></a>
+		<?php } ?>
+	</td>
+	<td>
+		<?php if($val['comment_type'] ==1) {  if($softinfo[$val['softid']]['hide'] == 1) { echo "上架"; }elseif($softinfo[$val['softid']]['hide'] == 0) { echo "历史"; } } else if($val['comment_type'] ==2) { echo "-";} ?>
+	</td>
+    <td>&nbsp;
+		<?php if(($processed ==0 || $processed == 1) && $all_post !=1){ ?>
+		<a href="__URL__/message_soft/processed/<?php echo $processed; ?>/imei/<?php echo $val['imei']?>/begintime/{$begintime}/endtime/{$endtime}/"><span id="imei_<?php echo $val['id']?>"><?php echo $val['imei']?></span></a>
+		<?php }else{ ?>
+		<a href="__URL__/message_soft/all_post/1/imei/<?php echo $val['imei']?>/begintime/{$begintime}/endtime/{$endtime}/"><span id="imei_<?php echo $val['id']?>"><?php echo $val['imei']?></span></a>
+		<?php } ?>
+	</td>
+    <td>&nbsp; 
+    <span id="user_<?php echo $val['id']?>"><?php echo ($val['userid']==13176) ? '安智网友' : $val['user_name']?></span><br>
+   &nbsp;<?php !empty($val['did']) && print($dinfo[$val['did']]['dname']);?><br>
+    </td>
+    <td class="center">
+		&nbsp;
+	<?php if(($processed ==0 || $processed == 1) && $all_post !=1){ ?>
+		<a target="_blank" href="/index.php/Dev/Message/message_soft/processed/<?php echo $processed; ?>/ipmsg/<?php echo $val['ipmsg']?>/begintime/{$begintime}/endtime/{$endtime}/">
+			<span id="ipmsg_<?php echo $val['id']?>"><?php echo $val['ipmsg']?></span>
+		</a>
+	<?php }else{ ?>
+		<a target="_blank" href="/index.php/Dev/Message/message_soft/all_post/1/ipmsg/<?php echo $val['ipmsg']?>/begintime/{$begintime}/endtime/{$endtime}/">
+			<span id="ipmsg_<?php echo $val['id']?>"><?php echo $val['ipmsg']?></span>
+		</a>
+	<?php } ?>
+	</td>
+	<td class="center">
+		<?php echo date('Y-m-d', $val['create_time']);?><br><?php echo date('H:i:s', $val['create_time']);?>
+	</td>
+    <td class="center"><?php echo $val['score']?></td>
+    <td class="center">
+		<?php echo $val['reply_count'] ? "<a target='_blank' href='/index.php/Dev/Message/reply_list/comment_id/".$val['id']."'>".$val['reply_count']."</a>" : 0; ?>
+	</td>
+    <td class="center">
+	<?php echo $product[$val['pid']]['0']; ?> <br>
+	<?php echo $val['version_code'];?></td>
+    <td>
+		<?php if($val['nick_name']) echo "@".$val['nick_name']; ?>
+		&nbsp;<a href="javascript:;" onclick="open_content('<?php echo $val['id']?>');">
+			{$val['content']|msubstr=0,49,'utf-8',true}
+		</a>
+		<div id="content_<?php echo $val['id']?>" style="padding:20px; width:250px; display:none; word-break:break-all; word-wrap:break-word;">
+		<?php echo $val['create_time'] ? date('Y-m-d H:i:s', $val['create_time']) : '';?><br>
+		<?php echo $val['content']?><br/>
+	<?php if ($val['again_reply']) { ?>
+		<font style="color:#000; font-weight:bold"><?php if($val['user_type']==1&&$processed==1){echo '安智';}else if($all_post==1){echo '再次';}else if($val['user_type']==2){echo '开发者';}?>回复：</font><br/>
+		<?php	
+				if($all_post==1){
+					$str = $val['last_reply'];
+					$tm = $val['last_reply_tm'];
+				}else{
+					$str = $val['again_reply'];
+					$tm = $val['again_reply_tm'];
+				}
+				echo date('Y-m-d H:i:s', $tm). '<br>'. $str; 
+		?>
+    <?php } ?>
+	</div>
+	<br/>
+	<?php if ($val['again_reply']) { ?>
+		<font style="color:#000; font-weight:bold"><?php if($val['user_type']==1&&$processed==1){echo '安智';}else if($all_post==1){echo '再次';}else if($val['user_type']==2){echo '开发者';}?>回复：</font><br/>
+		<?php	$str = $val['again_reply'];?>
+				<a href="javascript:;" onclick="open_content('<?php echo $val['id']?>');">
+				<?php   if($all_post==1){      ?>
+				{$val['last_reply']|msubstr=0,49,'utf-8',trues}
+				<?php  }else{ ?>
+				{$val['again_reply']|msubstr=0,49,'utf-8',true}
+				<?php  }	?>     
+                </a>
+	<?php } ?>
+	<?php if($replace_data[$val['id']]['c_p_id'] && $is_replace!=1){ ?>
+		<br><font style="color:red;">(替换后)</font>
+	<?php } ?>
+	</td>
+	<div id="reply_<?php echo $val['id']?>" style="padding:20px; width:250px; display:none; word-break:break-all; word-wrap:break-word;">
+	<?php echo $val['again_reply']? date('Y-m-d H:i:s', $val['again_reply_tm']). '<br>'. $val['again_reply'] : '--'?>
+	</div>
+<?php if($processed == 1 || $all_post ==1){ ?>
+	<td align="center"> 
+		<?php 
+			if($val['from_processed'] ==0){
+				//"安智回复<br/>\n" .
+				echo $username[$val['update_user_id']]['admin_user_name'];
+			}else{
+				$user_name = '';
+				if($dev[$val['dev_id']]['user_name']){
+					$user_name = $dev[$val['dev_id']]['user_name'];
+				}else{
+					$user_name = $dev[$val['userid']]['user_name'];
+				}
+				echo "开发者";
+				//echo "开发者回复<br/>\n" .$user_name;
+			}
+		?>
+	</td>
+	<td align="center"> 
+	<div  style="width:70px">
+		<?php 
+			if($val['again_reply_tm']&&$all_post!=1){
+				echo date('Y-m-d H:i:s', $val['again_reply_tm']);
+			}else if($from=='cooper'&&$all_post=='1'){
+				echo date('Y-m-d H:i:s', $val['again_reply_tm']);
+			}else{
+				echo $val['update_time'] ? date('Y-m-d H:i:s', $val['update_time']) : '';
+			}
+		?>
+	</div>
+	</td>	
+<?php } ?>
+	<?php if($processed == 0 || $processed == 1 || $all_post ==1){ ?>
+	    <td  align='center'>
+			<button type="button"  onclick="postcheckit('<?php echo $val['id']?>');">&nbsp;回复&nbsp;</button>
+			<p style="padding-bottom: 5px;"></p>
+			<input type="button" value="屏蔽用户" class="thickbox" alt="/index.php/Dev/Message/addCommentBlock?id=<?php echo $val['id']?>&ip={$val['ipmsg']}&imei={$val['imei']}&user={$val['user_name']}"/>
+			<p style="padding-bottom: 5px;"></p>
+			<input type="button" value="删除记录" alt="__URL__/delete?id=<?php echo $val['id']?>" class="thickbox" />
+			<?php if($val['everybody_said_id']) { ?>
+			<input type="button" value="删除大家说" onclick="if(confirm('你确认删除该条评论的大家说吗？')){location.href='/index.php/Dev/EverybodySaid/delete_content?id=<?php echo $val['everybody_said_id']?>&comment_id=<?php echo $val['id']?>';}return false;" />
+			<?php } else { ?>
+			<input type="button" value="加入大家说" alt="/index.php/Dev/EverybodySaid/add_content?id=<?php echo $val['id']?>" class="thickbox" />
+			<?php } ?>
+
+			<p style="padding-bottom: 5px;"></p>
+			<!-- <input type="button" value="忽略记录" onclick="showoffComment(<?php echo $val['id']?>)" /><br> -->
+				<?php 
+					$time = time();
+					$hot_day = $time-$conf['hot_day']*86400 ;
+					$man_hot_day = $time-$conf['man_hot_day']*86400;	
+					if(($val['hot'] == 1 && $val['apply_rules_time'] >=$man_hot_day) || 
+						($val['create_time'] >=$hot_day && $val['reply_count'] >=$conf['reply_num'] && $val['like_count'] >= $conf['praise_num'] )
+					){ 
+				?>
+					<input type="button" value="取消热门"  onclick="update_hot('<?php echo $val['id']?>',0);" />
+				<?php }else{ ?>
+					<input type="button" value="置为热门"  onclick='update_hot("<?php echo $val['id']?>",1);' />
+				<?php } ?>
+	    </td>
+	<?php }else if($is_replace==1){ ?>  
+		<td><?php echo $comment_extent_data[$val['id']]['content'];?></td>
+		<td><?php echo $comment_extent_data[$val['id']]['admin_id_name'];?></td>
+		<td><?php echo $comment_extent_data[$val['id']]['update_tm'];?></td>
+	<?php } ?>
+
+  </tr>  
+  <?php endforeach; ?>
+</table>
+<table width="100%" border="1" cellpadding="0" cellspacing="0">
+<tr height='50px'>
+  <td align='left'>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="checkbox"  onclick="checkAll(this)" name="id_all"/> <input type="button" value="批量删除"  onclick="shelves_str()"  /><!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="批量忽略" onclick="batchShowoffComment()"/> -->
+  <input type="button" value="批量替换"  style="<?php if($replace_button!= 1){echo 'display: none';}?>" onclick="replace_comment()"  />
+  <input type="button" value="批量设置热门"  onclick="update_hot_more()"  />
+  </td>
+</tr>
+</table>
+<div  align='left'>{$page}</div>
+</center>
+</div>
+</div>
+<script language="javascript">
+
+function postcheckit(str){
+	location.href = '__URL__/Comment_reply/id/'+str;
+}
+function onchange_processed(obj){
+	location.href='__URL__/<?php if($from == 'message'){ echo "message_soft" ;}else{ echo "own_soft"; }?>/processed/1/from_processed/'+obj.value+'?{$param}';
+}
+function open_content(id){	
+		$("#content_"+id).zxxbox();
+}         
+function update_hot(id,type){
+	if(type == 0){
+		str = '取消热门';
+	}else{
+		str = '置为热门';
+	}
+	if (confirm("是否"+str)) {
+		location.href = '__URL__/update_hot/id/'+id+'/hot/'+type;
+	}
+}
+
+function update_hot_more(){
+	if(choose_id()){
+		if (confirm("是否批量设置成热门")) {
+			location.href = '__URL__/update_hot/ids/'+id_str+'/more/1';
+		}
+	}
+}
+
+function list_all(str){
+	location.href = '__URL__/list_all/id/'+str;
+}
+function check_del()
+{
+	if(confirm("你确认删除该条评论的大家说吗？"))
+	{
+		return true;
+	}
+	return false;
+}
+</script>
+<!-- 主页面结束 -->
+<include file="../../Public/await" />
+{// 加载尾部公共文件 }
+ 
+ 

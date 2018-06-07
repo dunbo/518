@@ -1,0 +1,232 @@
+{// 加载头部公共文件 }
+<include file="../Public/header" />
+<style type="text/css">
+<!--
+body,td,th {
+	font-size: 12px;
+}
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+.reject{width:350px; height:75px; padding:0 9px; background:#fff; position:absolute; left:-385px; top:-51px; border:1px solid #000}
+.reject p{height:30px; padding:0; margin:0; font-size:14px; line-height:32px; text-align:left; overflow:hidden;}
+.reject form input{width:340px; height:30px; background:#e9ffe3; border:1px solid #000; line-height:30px;}
+.arrow{width:24px; height:19px; background:url('__PUBLIC__/images/arrow_bg.png') no-repeat top left; position:absolute; bottom:20px; _bottom:13px; left:-26px;}
+.closebtn{width:14px; height:14px; background:url('__PUBLIC__/images/close.gif') no-repeat; cursor:pointer; position:absolute; right:5px; top:5px;}
+-->
+</style>
+<script type="text/javascript">
+<!--
+function deny_soft( softid ) {
+    var denymsgid=document.getElementById("denymsgid").value;
+    //alert(denymsgid);
+
+    var denymsg=document.getElementById("denymsg").value;
+    /*if (denymsg=='' ||denymsg==null) {
+        //denymsg='未通过';
+    }*/
+
+	if ( confirm("该操作将不可逆！\n您确定要执行该操作吗？")) {
+		window.location = "__URL__/soft_deny/softid/" + softid+"/denyid/"+denymsgid +"/denymsg/"+denymsg+"/type/<?php echo $type;?>/p/<?php echo $p; ?>/";
+	} else {
+		return false;
+	}
+	return true;
+}
+
+function postDeny(softid)
+{
+	var denymsg = document.getElementById(softid + '_txt').value;
+	if(denymsg == ''||denymsg==null){
+		alert(请填写原因);
+		return false;
+	}
+	window.location = "__URL__/soft_deny/softid/" + softid+"/denymsg/"+denymsg+"/type/<?php echo $type;?>/p/<?php echo $p; ?>/";
+	return false;
+}
+function postclear(){
+	$("#clear").submit();
+}
+//-->
+</script>
+<div class="main" >
+<div class="content">
+<center>
+<form id="clear" method='post' action="" >
+	<input type="text" name="sosotype" value="clear" style="display:none;"/> 
+</form>
+<form id="upload" method='post' action="__URL__/soft_new_list/type/{$type}" >
+<table width="935" height="89" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td colspan="7">{$actionname}-搜索软件：</td>
+  </tr>
+  <tr>
+    <td width="99">ID：</td>
+    <td width="166"><input type="text" name="softid" id="softid" value="{$post_softid}" /></td>
+    <td width="80">软件名称：</td>
+    <td width="153"><input type="text" name="softname" id="softname" value="{$post_softname}" /></td>
+    <td width="125">软件包名</td>
+    <td width="150"><input type="text" name="package" id="package" value="{$post_package}" /></td>
+    <td width="150" rowspan="2"><input type="submit" name="button" id="button" value="搜索" /><input type="button" name="button" id="button" value="清除" onclick="postclear();"/></td>
+  </tr>
+  <tr>
+    <td>软件类别：</td>
+    <td>{$conflist}</td>
+    <td>显示排序:</td>
+    <td><input type="text" name="email" id="email" value="{$post_email}" /></td>
+    <td>开发者名称:</td>
+    <td><input type="text" name="dev_name" id="dev_name" value="{$post_dev_name}" /></td>
+  </tr>
+  <tr>
+	<td>广告选择</td>
+	<td>
+		<select name="advertisement" id="advertisement">
+			<option value="0" selected>请选择...</option>
+			<?php 
+			  foreach($adlist as $key => $info){
+			    $str .= "<option value='".$key."'";
+					if($advertisement == $key ){
+						$str .= "selected";
+					}
+				$str .=">".$info."</option>";
+			  }
+				echo $str;
+			?>
+		</select>
+	</td>
+	<td>邮箱：</td>
+	<td><input type="text" name="dever_email" id="dever_email" value="{$post_dever_email}" /></td>
+  </tr>
+</table>
+</form>
+<br />
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <th>ID</th>
+    <th>软件名称</th>
+    <th>版本</th>
+    <th>软件类别</th>
+    <th>开发者信息</th>
+<!--     <td width="8%">介绍</td>
+ -->  
+ 	<th>开发者类别</th>
+	<th>关键词</th>
+ 	<th>备注</th>
+		<th>广告</th>
+        <th>权限</th>
+    <th>最后更新时间</th>
+    <th width="7%">审核操作</th>
+    <th>软件编辑</th>
+    <th>选?</th>
+  </tr>
+  <tr>
+  <volist name='softlist' id='softvo'>
+    <tr  id='tr{$softvo.softid}'>
+    <td>{$softvo.softid}<br /><img src="<?php echo IMGATT_HOST;?>{$softvo.iconurl}" width="32" height="32" alt="图标" /></td>
+    <td width="3%"><a target='_blank' href='__URL__/soft_preview/softid/{$softvo.softid}' name="sub5">{$softvo.softname}</a><br />{$softvo.package|default='&nbsp;'}</td>
+    <td>{$softvo.version|default='&nbsp;'}</td>
+    <td>{$softvo.category|default='&nbsp;'}</td>
+    <td>
+    <if condition="$softvo.dev_id neq 0">
+    <a target='_blank' href='__APP__/Admin/User/userlists/dev_id/{$softvo.dev_id}' name="sub6">
+    </if>
+    {$softvo.dev_name}</a><br />{$softvo.dever_email|default='&nbsp;'}</td>
+<!--     <td>{$softvo.intro|default=''|default='&nbsp;'}</td>
+ -->    
+ 	<td><?php if($softvo['type'] == 0 && $softvo['type'] != '') {echo '公司';} elseif($softvo['type'] == 1){echo '个人';} elseif($softvo['type'] == 2){echo '团队';} ?><?php if($softvo['approve'] == 'Y') { ?><span style="color: red">(已认证)</span><?php } ?></td>
+	<td>{$softvo.tags|default=''|default='&nbsp;'}</td>
+ <td>{$softvo.note|default=''|default='&nbsp;'}</td>
+	<td ><span style="color:red;">{$softvo.advertisement}</span>&nbsp;</td>
+    <td><font color="red">{$softvo.permission_desc|default='&nbsp;'}</font></td>
+    <td>{$softvo.last_refresh|date='Y-m-d H:i:s',###|default='&nbsp;'}</td>
+    <td bgcolor="#BAC5D9" style="position:relative; display:inline-block; height:55px;width:100%"><a href="javascript: void(0)" onclick="softpass({$softvo.softid})" name="sub" >软件通过</a><br />
+    <a href="javascript: void(0)" onclick="disDeny({$softvo.softid})"  name="sub1">软件驳回</a>
+     
+		<div class="reject">
+			<p>驳回原因：（输入原因后直接回车）</p>
+	          <form action="__URL__/soft_deny/softid/{$softvo.softid}/type/update/{$type}/p/{$p}/" method="get" onsubmit="return postDeny({$softvo.softid});">
+	          	<input type="text" id="{$softvo.softid}_txt" value="" name="{$softvo.softid}_txt" onkeydown="checkKey(this)">
+	          </form>
+			<div class="closebtn" onclick="closereject({$softvo.softid})"></div>
+		</div>
+		<div class="arrow"></div>
+	
+    </td>
+    <td bgcolor="#6666FF" ><a href='__URL__/soft_edit/softid/{$softvo.softid}/returnurl/{$returnurl}/p/{$p}/'  name="sub2">编辑</a></td>
+    <td><input type="checkbox" name="id[]" value="{$softvo.softid}" id="sub3" /></td>
+  </tr>
+  </volist>
+  <tr>
+    <td colspan="17"><input type="button" id="selectAll" name="selectAll" value="全选"  onclick="SelectAll(this)" /> | <input type="button" id="delete" value="批量通过"  onClick="Lotdo('__URL__/soft_permit','{$type}')"  />
+		&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="delete" value="批量通过并加入到专题"  onClick="Lotdo('__URL__/soft_permit/feature_id/'+$('#feature_id').val(),'{$type}')"  />
+	<select name="feature_id" id="feature_id">
+		<?php foreach($featurelist as $item): ?>
+		<option value="<?php echo $item['feature_id']?>"><?php echo $item['name'];?></option>
+		<?php endforeach; ?>
+	</select>
+	
+</td>
+  </tr>
+  <tr>
+    <td colspan="4">常用反驳信息</td>
+    <td colspan="10">
+    <select name="denymsgid" id="denymsgid">
+      <option value="0" >请选择</option>
+      <volist name='configlist' id='configlvo'>
+           <option value="{$configlvo.configname}" >{$configlvo.configcontent}</option> 
+      </volist>
+      </select> 
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4">自定义驳回信息：</td>
+    <td colspan="10"><textarea id="denymsg" name="denymsg" rows="6" cols="40">{$softlist.intro}</textarea>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="17"><input type="button" id="delete" value="批量驳回"  onClick="deny_msg('__URL__/soft_deny','{$type}')"  />
+</td>
+  </tr>
+</table>
+{$page}
+</center>
+</div>
+</div>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+ 
+<script>
+function disDeny(id){
+    document.getElementById(id).style.display="block";
+    document.getElementById(id+"_txt").focus();
+}
+function closereject(id)
+{
+	//obj.parentNode.style.display = 'none';
+	//$('.reject').css('display','none');
+	//$('.arrow').css('display','none');
+	document.getElementById(id).style.display="none";
+}
+function checkKey(obj){
+     if(event.keyCode==13){
+              var val = obj.value
+                if(val.length == 0){
+                   alert("请您输入下架原因！！"); 
+                   return false;
+                 }
+      }
+}
+
+function softpass(softid){
+	//alert(softid);
+	$.ajax({
+		type: "get",
+		url: "__URL__/soft_permit/softid/"+ softid+"/type/<?php echo $type;?>/p/<?php echo $p;?>/lr/<?php echo $lr ?>/",
+		success: function(data){
+			$( "#tr" + softid + " a[name^=sub]").attr('onclick', '');
+			$( "#tr" + softid + " a[name^=sub]").removeAttr('href');
+			$( "#tr" + softid + " input[id=sub3]").attr('disabled', 'true');
+			$( "#tr" + softid).attr('bgcolor', '#ADADAD');
+		},
+		});
+}
+</script>

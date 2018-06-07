@@ -1,0 +1,327 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style type="text/css">
+.tbspan{font-size:15px;margin:20px 6px;font-weight: bold;height:30px;background: #cdd;}
+.radiotype{margin:3px;}
+.table_list img{max-width:200px}
+</style>
+<script type="text/javascript">
+
+function checkline(name){
+	var obj = document.getElementsByName(name);
+	for(var i = 0;i<obj.length ;i++){
+		if(obj[i].checked == true) return true;
+	}
+	return false;
+}
+
+function checkstatus(self,name){
+	var obj = document.getElementsByClassName('radiotype');
+	document.getElementById('pstate').value = 1;
+	for(var i = 0;i<obj.length ;i++){
+		obj[i].checked = false;
+	}
+}
+
+var num = 1;
+function checkjpurl(){
+	<if condition="in_array($ltype,array(2,3,4,5,9,10,11,12,13,14,15))">
+    var picsrc = document.getElementsByTagName('img');
+    if(!picsrc.length || picsrc[0].src == ''){
+        var picobj = document.getElementById('pic');
+        if(picobj.value == '') {
+            alert('必须上传图片');
+            return false;
+        }
+    }
+	</if>
+	<if condition="in_array($ltype,array(1,4,5,6,7,14))">
+		var txtobj = document.getElementById('txt');
+		txtobj.value = txtobj.value.replace(/(^\\s*)|(\\s*$)/g, "");
+		if(txtobj.value == ''||txtobj.value == '请输入文案') {
+			alert('必须填写文案');
+			return false;
+		}
+	</if>
+	<if condition="in_array($ltype,array(12,16,17))">
+		var rankobj = document.getElementById('rank');
+		var rank = rankobj.value;
+		if(rank != ''){
+			if((rank | 0) == rank){
+				if(rank > 100){
+					alert('你输入的值大于100，请重新输入');
+					return false;
+				}
+				if (rank < 1){
+					alert('你输入的值小于1，请重新输入');
+					return false;
+				}
+			}else{
+				alert('请输入1-100的整数值');
+				return false;
+			}
+		}else{
+			alert('前端展示位置 不能为空');
+			return false;
+		}	
+	</if>
+	
+	if(document.getElementById('cat11').checked == true && document.getElementById('outerurl').value==""){
+		alert('请填写外部链接');
+		return false;
+	}
+	if(document.getElementById('cat10').checked == true && document.getElementById('innerurl').value==""){
+		alert('请填写内部链接');
+		return false;
+	}
+	if(document.getElementById('cat8').checked == true && document.getElementById('newfid').value=="0"){
+		alert('请选择版块');
+		return false;
+	}
+	if(document.getElementById('cat9').checked == true && document.getElementById('newtid').value=="0"){
+		alert('请选择主题');
+		return false;
+	}
+	
+	if(document.getElementById('cat0').checked == true && !checkline('op_type')){
+		alert('请选择客户端跳转位置');
+		return false;
+	}
+	
+	if(document.getElementById('cat1').checked == true && !checkline('cid')){
+		alert('请选择栏目');
+		return false;
+	}
+	if(document.getElementById('cat12').checked == true && !checkline('pid')){
+		alert('请选择专题');
+		return false;
+	}
+    if(document.getElementById('cat26').checked == true && !checkline('fid')){
+		alert('请选择 板块-精华热帖');
+		return false;
+	}
+    if(document.getElementById('cat25').checked == true && document.getElementById('shopurl').value==""){
+		alert('请填写商城链接');
+		return false;
+	}
+	if(document.getElementById('cat27').checked == true && document.getElementById('H5url').value==""){
+		alert('请填写H5地址链接');
+		return false;
+	}
+	<if condition="!$id">
+	if(document.getElementById('pstate').value == '0'){
+		alert('请在左边选择跳转位置');
+		return false;
+	}
+	</if>
+
+
+	num ++;
+	if(num>2) return false;
+	return true;
+}
+
+
+function changparent(obj,parent){
+	var cobj = document.getElementsByClassName('radiotype');
+	for(var i = 0;i<cobj.length ;i++){
+		cobj[i].checked = false;
+	}
+	obj.checked= true;
+	var pobj = document.getElementById(parent);
+	pobj.checked = true;
+	document.getElementById('pstate').value =1;
+	document.getElementById('cstate').value = 1;
+	if(parent == 'cat28'){
+		var actionbar = document.getElementsByName('actionbar');
+		actionbar[0].checked = true;
+		var fullscreen = document.getElementsByName('fullscreen');
+		fullscreen[1].checked = true;
+		var plugin = document.getElementsByName('plugin');
+		plugin[0].checked = true;
+	}else{
+		var actionbar = document.getElementsByName('actionbar');
+		actionbar[0].checked = false;
+		actionbar[1].checked = false;
+		var fullscreen = document.getElementsByName('fullscreen');
+		fullscreen[0].checked = false;
+		fullscreen[1].checked = false;
+		var plugin = document.getElementsByName('plugin');
+		plugin[0].checked = false;
+		plugin[1].checked = false;
+	}
+}
+function delimg(id){
+    if(!confirm('确实要删除图片吗?')) return false;
+    $.getJSON("__URL__/delimg/id/" + id + '/',function(e){
+        if(e.su){
+            var imgpath = document.getElementById("imgpath");
+            imgpath.src='';
+            alert('删除成功');
+        }else{
+            alert('删除失败');
+        }
+    })
+    return false;
+}
+</script>
+</head>
+<body>
+
+<h3>添加运营位</h3>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+<form method="post" action="__URL__/add_submit/type/{$ltype}/id/{$id}" enctype="multipart/form-data">
+<if condition="in_array($ltype,array(1,4,5,6,7,14))">
+<tr id="textline">
+<td>
+文案
+</td>
+<td style="text-align:left">
+<input type="text" id="txt" name="subject" style="width:400px" value="<if condition="$info['subject']">{$info.subject}<else />请输入文案</if>" onfocus="if(this.value=='请输入文案'){this.value=''}">
+</td>
+</tr>
+</if>
+<if condition="in_array($ltype,array(1,2,3,4,5,6,9,10,11,12,13,14,15,16,17))">
+<tr id="imgline">
+	<td>宣传图片上传：<br/><if condition="in_array($ltype,array(3,5,9,10,12,13,15,16,17))">图片参考宽度：700px<elseif condition= "in_array($ltype,array(2))" />图片参考宽度：350px<else />图片参考宽度：200px</if></td>
+	<td style="text-align:left">
+	<if condition="$info['pic_path']"><img id="imgpath" src="{$Think.const.IMGATT_HOST}/{$info.pic_path}"><a href="__URL__/delimg/id/{$id}/" onclick="return delimg({$id});">删除</a></if>
+	<br/>
+	<span ><input type="file" name="img" id="pic"></span></td>
+</tr>
+</if>
+<if condition="!in_array($ltype,array(16,17))">
+	<tr>
+		<td ><input type="radio" value="0" name="cat" onclick="checkstatus(this,'op_type')" id="cat0"<if condition="$info['cat'] eq 0 && $id">checked</if>> 客户端</td>
+		<td style="text-align:left">
+		<volist name="jump" id="vo" mod='6'>
+		<input class="radiotype" type="radio" value="{$vo.operation_type}" onclick="changparent(this,'cat0')" name="op_type"  <if condition="($info['operation_type'] eq $vo['operation_type']) AND ($info['cat'] == 0 )">checked</if>>
+		<span style="margin-right:15px;">{$vo.name}</span>
+		<eq name= "mod" value= "0" ><br/></eq> 
+		</volist>
+		</td>
+	</tr>
+</if>
+<if condition="in_array($ltype,array(12,16,17))">
+	<tr>
+		<td >前端展示位置</td>
+		<td style="text-align:left">
+		
+		<input id="rank" type="text" value="{$info.rank}" onclick="" name="rank">
+		<span style="margin-right:15px;"> 1-100的整数 </span>
+		</td>
+	</tr>
+</if>	
+<tr>
+	<td><input type="radio" value="1" name="cat" onclick="checkstatus(this,'cid')" id="cat1"<if condition="$info.cat eq 1">checked</if>> 栏目</td>
+	<td style="text-align:left">
+	<volist name="column" id="vo" mod='6'>
+	<input type="radio" value="{$vo.cid}" name="cid" class="radiotype" onclick="changparent(this,'cat1')" <if condition="$info['cid'] eq $vo['cid']"> checked</if>>
+	<span style="margin-right:15px;">{$vo.name}</span>
+	<eq name= "mod" value= "0" ><br/></eq> 
+	</volist>
+	</td>
+</tr>
+<if condition="!in_array($ltype,array(16,17))">
+	<tr>
+		<td><input type="radio" value="12" name="cat" onclick="checkstatus(this,'pid')" id="cat12"<if condition="$info.cat eq 12">checked</if>> 内容专题</td>
+		<td style="text-align:left">
+		<volist name="pref" id="vo" mod='6'>
+		<input type="radio" value="{$vo.cid}" name="pid" class="radiotype" onclick="changparent(this,'cat12')" <if condition="$info['pid'] eq $vo['cid']"> checked</if>>
+		<span style="margin-right:15px;">{$vo.name} </span>
+		<eq name= "mod" value= "0" ><br/></eq> 
+		</volist>
+		</td>
+	</tr>	
+
+	<tr>
+		<td><input type="radio" value="8" name="cat" onclick="checkstatus(this,'fid')" id="cat8"<if condition="$info.cat eq 8">checked</if>> 版块</td>
+		<td style="text-align:left">
+		<input id="newfid" type="hidden" name="fid" value="<if condition="$info['fid']">{$info.fid}<else />0</if>">
+		<span id="forumlist" style="margin-right: 20px;">{$fname}</span><a id="furl" href='__URL__/forum_list/<if condition="$info['fid']">fid/{$info.fid}/</if>' onclick="changparent(this,'cat8')" class="thickbox" style="text-decoration: underline;color: red;">选择版块
+		</td>
+		
+	</tr>
+</if>
+
+<!--<tr>
+	<td><input type="radio" value="26" name="cat" id="cat26" <if condition="$info.cat eq 26">checked</if>> 板块-精华热帖</td>
+	<td style="text-align:left" id="hotfid">
+	<volist name="hotforum" id="vo" mod='6'>
+	<input type="radio" value="{$vo.b_fid}" name="fid" class="radiotype" onclick="changparent(this,'cat26')" <if condition="($info['fid'] eq $vo['b_fid']) AND ($info['cat'] eq 26 )">checked</if>>
+	<span style="margin-right:15px;">{$vo.name}</span>
+	<eq name= "mod" value= "0" ><br/></eq> 
+	</volist>
+	</td>
+</tr>-->
+<tr>
+	<td><input type="radio" value="9" name="cat" onclick="checkstatus(this,'tid')" id="cat9"<if condition="in_array($info['cat'],array(9,18))">checked</if>> 帖子</td>
+	<td style="text-align:left" >
+	<input id="newtid" type="hidden" name="tid" value="<if condition="$info['tid']">{$info.tid}<else />0</if>">
+	<span id="thread" style="margin-right: 20px;"><if condition="$info['tid']"><a href="http://bbs.zhiyoo.com/forum.php?mod=viewthread&tid={$info.tid}" style="color:blue;" target="_blank">{$title}</a></if></span><a id="tdurl" href="__URL__/add_thread/" class="thickbox"  onclick="changparent(this,'cat9')" style="text-decoration: underline;color: red;">编辑
+	</td>
+</tr>
+<tr>
+	<td><input type="radio" value="10" name="cat" onclick="checkstatus(this,'innerurl')" id="cat10"<if condition="$info.cat eq 10">checked</if>> 内部链接地址</td>
+	<td style="text-align:left" >
+	<input type="text" name="innerurl" style="width:400px" id="innerurl"  onclick="changparent(this,'cat10')" value="<if condition="$info.operation_type eq 10">{$info.url}</if>">
+	</td>
+</tr>
+<tr>
+	<td><input type="radio" value="11" name="cat" onclick="checkstatus(this,'outerurl')" id="cat11"<if condition="$info.cat eq 11">checked</if>> 外部链接地址</td>
+	<td style="text-align:left" >
+	<input type="text" name="outerurl" style="width:400px" id="outerurl" onclick="changparent(this,'cat11')" value="<if condition="$info.operation_type eq 11">{$info.url}</if>">
+	</td>
+</tr>
+<tr>
+	<td><input type="radio" value="28" name="cat" onclick="checkstatus(this,'H5url')" id="cat28"<if condition="$info.cat eq 28">checked</if>> H5链接地址</td>
+	<td style="text-align:left" >
+	<div><input type="text" name="H5url" style="width:400px" id="H5url" onclick="changparent(this,'cat28')" value="<if condition="$info.operation_type eq 28">{$info.url}</if>">
+	</div>
+	<div style="float:left;margin-top:10px;width:280px;">是否使用端actionbar：<input type="radio" name="actionbar" <if condition="$info.cat eq 28 and $info.actionbar eq 1">checked</if> value="1">是 <input name="actionbar" type="radio" <if condition="$info.cat eq 28 and $info.actionbar eq '0'">checked</if> value="0">否</div>
+	<div style="float:left;margin-top:10px;width:260px;">横竖屏显示：<input type="radio" name="fullscreen" <if condition="$info.cat eq 28 and $info.fullscreen eq '0'">checked</if> value="0">横屏 <input name="fullscreen" type="radio" <if condition="$info.cat eq 28 and $info.fullscreen eq 1">checked</if> value="1">竖屏</div>
+	<div style="float:left;margin-top:10px;width:280px;">是否使用H5插件加载：<input type="radio" name="plugin" <if condition="$info.cat eq 28 and $info.plugin eq 1">checked</if> value="1">是 <input name="plugin" type="radio" <if condition="$info.cat eq 28 and $info.plugin eq '0'">checked</if> value="0">否</div>
+	</td>
+</tr>
+<if condition="in_array($ltype,array(1,2,3,4,6,9,12,13,15))">
+	<tr>
+		<td><input type="radio" value="29" name="cat" onclick="checkstatus(this,'advurl')" id="cat29" <if condition="$info.cat eq 29">checked</if>> 互动广告链接地址</td>
+		<td style="text-align:left" >
+		<div><input type="text" name="advurl_3700" style="width:400px" id="outerurl" onclick="changparent(this,'cat29')" value="<if condition="$info.operation_type eq 29">{$info.advurl_3700}</if>"> V3.7版本使用</div>
+		<div style="margin-top:10px;"><input type="text" name="advurl_3800" style="width:400px" id="outerurl" onclick="changparent(this,'cat29')" value="<if condition="$info.operation_type eq 29">{$info.advurl_3800}</if>"> V3.8版本使用</div>
+		</td>
+	</tr>	
+</if>
+<!-- <tr>
+	<td><input type="radio" value="25" name="cat" id="cat25" <if condition="$info.cat eq 25">checked</if>> 商场链接</td>
+	<td style="text-align:left">
+	<input type="text" name="shopurl" id="shopurl" style="width:400px" onclick="changparent(this,'cat25')" value="<if condition="$info.operation_type eq 25">{$info.url}</if>">
+	</td>
+</tr> -->
+
+<tr>	
+	<td colspan="2"><input type="submit" name="sub" value="提交" style="display:inline-block;margin:30px " onclick="return checkjpurl()" class="search_btn">
+	<if condition="$ltype eq 5">
+	<a style="display:inline-block;margin:30px " class="search_btn" href="__URL__/active_list_wrap">取消</a>
+	<elseif condition="$ltype eq 7"/>
+	<a style="display:inline-block;margin:30px " class="search_btn" href="__URL__/active_list_buyer">取消</a>
+	<elseif condition="$ltype eq 10"/>
+	<a style="display:inline-block;margin:30px " class="search_btn" href="__URL__/active_list_recommend">取消</a>
+	<elseif condition="$ltype eq 16"/>
+	<a style="display:inline-block;margin:30px " class="search_btn" href="__URL__/active_list1/type/16">取消</a>
+	<elseif condition="$ltype eq 17"/>
+	<a style="display:inline-block;margin:30px " class="search_btn" href="__URL__/active_list1/type/17">取消</a>
+	<else />
+	<a style="display:inline-block;margin:30px " class="search_btn" href="__URL__/active_list/type/{$ltype}">取消</a>
+	</if>
+	</td>
+</tr>
+<input type="hidden" value="0" name="pstate" id="pstate">
+<input type="hidden" value="0" name="cstate" id="cstate">
+</form>
+<table>
+</body>
+</html>

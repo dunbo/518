@@ -1,0 +1,66 @@
+<head>
+    <script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+    <script type="text/javascript">
+        function trim(str){ //删除左右两端的空格 
+            return str.replace(/(^\s*)|(\s*$)/g, ""); 
+        }
+        function save() {
+            var auth_online = $("#cb_online").attr("checked") != "checked" ? 0 : 1;
+            var auth_schedule = $("#cb_schedule").attr("checked") != "checked" ? 0 : 1;
+			if(trim($("#admin_name_toadd1").val())=="") {
+				alert("用户名不能为空");
+			} else if (auth_online == 0 && auth_schedule == 0) {
+                alert("请至少选择一个页面的权限");
+            } else {
+                var param = {
+                    admin_name : $("#admin_name_toadd1").val(),
+                    auth_online : auth_online,
+                    auth_schedule : auth_schedule
+                };
+                $.ajax({
+                    url:'__URL__/add',
+                    type:'POST',
+                    data:param,
+                    secureuri:false,
+                    dataType:'json',
+                    success:function(data){
+                        if(data.status != 0) {
+                            alert("添加失败，原因：" + data.info);
+                        } else {
+                            alert("添加成功！");
+                            location.href ="/index.php/Sendnum/CompetenceConfig/adminList";
+                        }
+                    }
+                });
+                
+            }
+        };
+    </script>
+</head>
+
+<body>
+    <div>
+        <br/><h2>添加管理员</h2><br/>
+        <hr size="1" color="#ffffff" noshade><br/><br/>
+        <form method="post" action="__URL__/add" id="add">
+            <div>
+            <label>用户名：</label>
+                <input type="text" id="admin_name_toadd1" name="admin_name_toadd1"/>
+                <input type="text" style="display:none"/>
+            </div>
+            <br/><br/>
+            <div>
+                <input id="cb_online" name="cb_online" type="checkbox"/><label for="cb_online">上线产品</label>
+                &nbsp;&nbsp;&nbsp;
+                <input id="cb_schedule" name="cb_schedule" type="checkbox"/><label for="cb_schedule">排期申请</label>
+            </div>
+            <div class="clear"></div>
+            <br/><br/>
+            <div class="form_btns_box">
+                <a href="#" onclick="save()">提交</a>
+                <a href="#" onclick="tb_remove()">取消</a>
+            </div>
+            <div class="clear"></div>
+        </form>
+    <div>
+</body>

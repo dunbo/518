@@ -1,0 +1,166 @@
+<script type="text/javascript">
+	function  add(){
+		window.location.href='__URL__/market_push_add'; 
+	}
+</script>
+<script>
+
+function checkit(){
+    var choise = confirm("你确定你的操作吗？");
+    if(!choise){
+    return false;
+    }else{
+     return true;
+    }
+}
+
+function showAreaName(id, name)
+{
+	if (name == ',,' || name == '' ) {
+		return false;
+	}
+	var arr = name.split(';');
+	var html = '';
+	$(arr).each(function(){
+		var t = this.split(' ');
+		if (typeof(t[0]) != 'undefined') {
+			var p = t[0].split(':');
+			var n = area_list[p[0]];
+			var m = n['name'].split("\t");
+			html += m[0] + ',';
+			
+			if (typeof(t[1]) != 'undefined') {
+				var ps = t[1].split(':');
+				var n = area_list[p[0]]['sub'][ps[0]];
+				var m = n.split("\t");
+				html += m[0];
+			}
+			html += '<br>';
+			$('#_div_' + id).html(html);
+		}
+	});
+}
+</script>
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src='/Public/js/cn_area.js'></script>
+<script type="text/javascript" src="__PUBLIC__/js/jquery.js"></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<style type="text/css">
+ul{margin:0; padding:0;}
+</style>
+<ul class="tab_title margin_top">
+	<li>
+	<a href="__URL__/custom_push_add/push_type/1" class="search_btn" style="float:right; line-height:23px;">新增</a>
+	</li>
+</ul>
+<div class="search_box">
+	<table width="98%" cellpadding="0" cellspacing="0" style="margin:0 auto; font-size:12px">
+	<form name="name1" action="__URL__/custom_push_list" method="get">
+		<tr>
+			<td width="25%">软件名称：<input type="text" style="width:150px;" name="soft_name" value="{$so_soft_name}"></td>
+			<td width="25%">软件包名：<input type="text" style="width:150px;" name="package" value="{$so_package}">
+			 </td>
+			<td width="20%">开始时间：<span
+				id="WebCalendar3"
+				style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+			<input id="fromdate" name="fromdate"
+				style="cursor: hand; width: 100px; border: none 0px black;"
+				value="{$so_start_tm}" size="15" type="text"><img
+				src="__PUBLIC__/js/calendar.gif"
+				class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"fromdate",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+				style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+				height="15px">
+			</span></td>
+			<td width="20%">结束时间：<span id="WebCalendar3"
+				style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+			<input id="todate" name="todate"
+				style="border: 0px none black; width: 100px;" value="{$so_end_tm}"
+				size="15" type="text"><img src="__PUBLIC__/js/calendar.gif"
+				class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"todate",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+				style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			</span></td>
+			<td width="10%"><input type="submit"  name="submit" value="搜索"></td>
+		</tr>
+		<tr>
+			<td>状态：
+				<select name="zh_type" id="zh_type">
+				<option value="0" selected="selected">全部</option>
+				<option value="1" <?php if($zh_type==1) echo "selected";?>>推送中</option> 
+				<option value="2" <?php if($zh_type==2) echo "selected";?>>未推送</option> 
+				<option value="3" <?php if($zh_type==3) echo "selected";?>>已推送</option> 
+				</select>
+			</td>
+			<td>推送类型：
+				<select name="search_push_type" id="search_push_type">
+					<option value="0" selected="selected">全部</option>
+					<option value="1" <?php if($search_push_type==1) echo "selected";?>>定制推送</option> 
+					<option value="2" <?php if($search_push_type==2) echo "selected";?>>安智市场手机助手</option> 
+					<option value="3" <?php if($search_push_type==3) echo "selected";?>>弹窗样式1</option> 
+					<option value="4" <?php if($search_push_type==4) echo "selected";?>>弹窗样式2</option> 
+					<option value="5" <?php if($search_push_type==5) echo "selected";?>>弹窗样式3</option> 
+					<option value="6" <?php if($search_push_type==6) echo "selected";?>>桌面红包</option>
+				</select>
+			</td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		</form>
+		</table>
+</div>
+
+<table cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="5%">ID</th>
+			<th width="11%">软件包名</th>
+			<th width="11%">实际包名</th>
+			<th width="7%">软件名称</th>
+			<th width="7%">导向页面</th>
+			<th width="8%">推送配置</th>
+			<th width="6%">描述详情</th>
+			<th width="5%">用户数量</th>
+			<th width="7%">渠道</th>
+			<th width="6%">开始时间</th>
+			<th width="6%">结束时间</th>
+			<th width="5%">状态</th>
+			<th width="6%">操作时间</th>
+			<th width="10%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		<volist name="push_list" id="list">
+			<tr>
+				<td>{$list.id}</td>
+				<td>{$list.monitor_soft_package}<br/><?php if($list['replace_soft_packages']&&$list['package_replace_suffix']) echo "需替换：<Br/> ".$list['replace_soft_packages'] ?></td>
+				
+				<td>{$list.monitor_soft_package}<br/><?php if($list['package_replace_suffix']&&$list['replace_soft_packages']) echo "替换包名：<Br/> ".$list['have_replace_packages'] ?></td>
+				
+				<td>{$list.monitor_soft_name}</td>
+				
+				
+				<td><if condition='$list.content_type eq 1'>{$list.package}<elseif condition='$list.content_type eq 2'/>{$list.activity_name}<elseif condition='$list.content_type eq 3'/>{$list.feature_name}<elseif condition='$list.content_type eq 4'/>{$list.page_name}<elseif condition='$list.content_type eq 5'/>{$list.website}<elseif condition='$list.content_type eq 6'/>{$list.gift_id}
+				<elseif condition='$list.content_type eq 7'/>{$list.strategy_id}</if></td>
+				<td>类型：{$list.push_types}<Br/>内容：{$list.content_type_name}<br/>节点：{$list.push_node_name}<br/>频率：{$list.push_frequency_name}<br/></td>
+				<td>{$list.push_text}</td>
+				<td><?php if($list['csv_count']==0) { ?>---<?php } else { ?>{$list.csv_count}<?php } ?>
+				</td>
+				<td><?php if($list['chname']){ ?>{$list.chname|default="&nbsp;"}<?php }  else{ ?>---<?php } ?></td>
+				<td><div style="width:70px;"><?php echo date("Y-m-d H:i:s",$list['start_at']);?></div></td>
+				<td><div style="width:70px;"><?php echo date("Y-m-d H:i:s",$list['end_at']);?></div></td>
+				<td>{$list.push_status}</td>
+				<td><div style="width:70px;"><?php echo date("Y-m-d H:i:s",$list['update_at']);?></div></td>
+				<td class="blue"><a href="__URL__/custom_push_edit/id/{$list.id}/p/{$p}">编辑</a>　|　<a href="__URL__/custom_push_del/id/{$list.id}/p/{$p}" onclick="return checkit();">删除</a></td>
+			</tr>
+		</volist>
+	</tbody>
+</table>
+{$page}
+<include file="../Public/footer" />

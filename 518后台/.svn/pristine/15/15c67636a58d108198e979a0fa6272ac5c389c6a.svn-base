@@ -1,0 +1,361 @@
+<include file="../Public/header" />
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+
+<style type="text/css">
+    body, td, th {
+        font-size: 12px;
+    }
+</style>
+
+<script>
+    
+    function select_all() {
+        $("[type='checkbox']").attr("checked", true);
+        $("[type='checkbox'][disabled='disabled']").attr('checked', false);
+    }
+    
+    function select_reverse() {
+        var checkbox = document.getElementsByName("checkbox");
+        for ( var j = 0; j < checkbox.length; j++) {
+            checkbox.item(j).checked = !checkbox.item(j).checked;
+        }
+    }
+    
+    // thickbox使用到的js
+    //主层动态变化数据
+    function onclikChannel() {	
+        $('#channel_div').html('');
+        $(".TB_ajaxContent #channel_selected input:checked").each(function(){
+            var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+            item.find('input').attr('checked', 'true');
+            item.find('input').attr('id','channelid');
+            $('#channel_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+    }
+    //
+    function check_arr() {
+        $('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+    }
+    
+    function check_arr_div() {
+        $('.TB_ajaxContent #c_device_res').html($('#device_div').html());
+        $('#device_div input').each(function(){
+            $('.TB_ajaxContent .l_did_'+this.value+' input').attr('checked', true);
+        });
+    }
+    
+    function submitDevice() {
+        var cids = '';
+        $('#device_div').empty();
+        $(".TB_ajaxContent #c_device_res input:checked").each(function(){
+            var item = $('<label class="l_did_'+this.value+'">' + $('#c_device_res .l_did_' + this.value).html() + '</label>');
+            item.find('input').attr('checked', 'true');
+            item.find('input').click(function(){
+                $(this).parent().remove();
+            });
+            $('#device_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+        tb_remove();
+    }
+    
+    function checkbox() {
+        var admin = $("[name='checkbox']");
+        var idArr = new Array();
+        admin.each(function() {
+            if ($(this).attr("checked") == 'checked') {
+                idArr.push($(this).val());	
+            }	
+        });
+        if (idArr.length > 0) {
+            return idArr.join(',');
+        }
+        return false; 
+    }
+    
+    function get_selected_ids() {
+        var ids = checkbox();
+        if (!ids) {
+            alert("请选择ID！");
+            tb_remove();
+            return null;
+        }
+        $('#TB_ajaxContent #ids').val(ids);
+        return ids;
+    }
+    
+    function get_selected_rules() {
+        var ids = checkbox();
+        if (!ids) {
+            alert("请选择ID！");
+            tb_remove();
+            return;
+        }
+        $('#TB_ajaxContent #ids').val(ids);
+        var param = {
+            ids : ids
+        };
+        $.ajax({
+            url:'__URL__/search_rules',
+            type:'POST',
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data){
+                if(data.status != 0) {
+                    alert("获取数据失败，原因：" + data.info);
+                } else {
+                    $('#TB_ajaxContent #rules').html(data.info);
+                }
+            }
+        });
+    }
+    
+    function enabled_in_use(id) {
+        if(confirm("您确定要对这条记录进行启用，请确认！")){
+            var param = {
+                ids : id,
+                status : 1
+            };
+            $.ajax({
+                url:'__URL__/modify_in_use',
+                type:'POST',
+                data:param,
+                dataType:'json',
+                success:function(data){
+                   location.href ="/index.php/Sj/Products2/marketupdate2_ineffective";
+                }
+            });
+        }
+    };
+    
+    function batch_enable() {
+        var ids = get_selected_ids();
+        if (!ids) {
+            return;
+        }
+        if(confirm("您确定要对"+ids+"记录进行启用，请确认！")){
+            var param = {
+                ids : ids,
+                status : 1
+            };
+            $.ajax({
+                url:'__URL__/modify_in_use',
+                type:'POST',
+                data:param,
+                dataType:'json',
+                success:function(data){
+                   location.href ="/index.php/Sj/Products2/marketupdate2_ineffective";
+                }
+            });
+        }
+    }
+    
+    // 点击搜索后（相当于重新打开页面，这时没有加载渠道的thickbox，所以需要在当前页面写一个点击事件），搜索栏-渠道的radio点击事件
+    function selectChannel_tmp(obj,fselected,type)
+    {
+        if (obj.checked == true) {
+            var item = $('<label class="l_cid_' + $(obj).val() + '">' + $('.l_cid_' + $(obj).val()).html() + '</label>');
+            item.find('input').attr('checked', true);
+            $('#channel_selected').append(item);
+            //alert(fselected);
+            if(type=="radio"){
+                tb_remove();
+            }
+            fselected();
+        } else {
+            $('.l_cid_' + $(obj).val() + ' input:checked').attr('checked', false);
+            $('#channel_selected .l_cid_' + obj.value).remove();
+            onclikChannel_c(obj.value);
+        }
+    }
+    
+    function selectDevice_tmp(obj)
+    {
+        if (obj.checked == true) {
+            var item = $('<label class="l_did_' + $(obj).val() + '">' + $('.l_did_' + $(obj).val()).html() + '</label>');
+            item.find('input').attr('checked', true);
+            $('#c_device_res').append(item);
+            $.get('__APP__/Public/setDevice/act/add/did/' + $(obj).val() + '/dname/' + $(obj).attr('alt'));
+        } else {
+            $('.l_did_' + $(obj).val() + ' input:checked').attr('checked', false);
+            console.log($('.l_did_' + $(obj).val() + ' input'));
+            $.get('__APP__/Public/setDevice/act/del/did/' + $(obj).val() );
+            $('#c_device_res .l_did_' + obj.value).remove();
+            $('#device_div .l_did_' + obj.value).remove();
+        }
+    }
+    
+</script>
+
+<body>
+    <div style="display:none;" id="loading">
+        <p style="position:absolute;left:20%;top:40%;">正在提交中，请稍候......</p>
+    </div>
+    <form action="__URL__/marketupdate2_ineffective" method="POST" enctype="multipart/form-data">
+    <ul class="tab_title margin_top">
+        <li><a href="/index.php/Sj/Products2/marketupdate2">有效</a></li>
+        <li class="current"> <a href="/index.php/Sj/Products2/marketupdate2_ineffective">无效</a></li>
+    </ul>
+    <div class="search_box">
+        <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+            <tr>
+                <td width="16%">版本号：<input type="text" name="version_code" id="version_code" value="{$version_code}" class="search_item_text"></td>
+                <td width="16%">版本名称：<input type="text" name="version_name" id="version_name" value="{$version_name}" class="search_item_text"></td>
+                <td width="16%">适配渠道：
+                    <a id="channel_link" href="/index.php/Public/showChannel?callback=submitChannel&type=radio&ready=check_arr&selected=onclikChannel" class="thickbox">选择渠道</a>
+                    <div id="channel_div">
+                        <?php if(isset($cid)):?>
+                            <label class="l_cid_<?php echo $cid?>">
+                                <input type="radio" name="cid" id="channelid" checked="checked" onclick='selectChannel_tmp(this,onclikChannel,"radio")' alt="<?php echo $cid_cname_map[$cid];?>" value="<?php echo $cid;?>"/><?php echo $cid_cname_map[$cid];?>
+                            </label>
+                        <?php endif;?>
+                    </div>
+                </td>
+                <td width="16%">排除机型：
+                    <a href="/index.php/Public/showDevice?callback=submitDevice&ready=check_arr_div&type=checkbox&reset_device=1" class="thickbox">选择机型</a>
+                    <div id="device_div">
+                        <?php foreach ((array)$did as $key=>$val):?>
+                        <label class="l_did_<?php echo $key?>">
+                            <input type="checkbox" name="did[]" checked="checked" onclick="selectDevice_tmp(this)" value="<?php echo $key;?>"/><?php echo $val;?>
+                        </label>
+                        <?php endforeach;?>
+                    </div>
+                </td>
+                <td width="16%">备注：<input type="text" name="remark" id="remark" value="{$remark}" class="search_item_text"></td>
+                <td width="16%"><input class="search_btn" style="float:left; height:30px" type="submit" value="搜索""></td>
+            </tr>
+                <td width="16%">ID：<input type="text" name="id" id="id" value="{$id}" class="search_item_text"></td>
+                <td width="16%">强制更新：
+                    <select name="force_update">
+                        <option value="-1"<?php if(!isset($force_update)) echo 'selected="selected"'; ?>>全部</option>
+                        <option value="0" <?php if(isset($force_update) && $force_update == 0) echo 'selected="selected"'; ?>>不强制</option>
+                        <option value="1" <?php if(isset($force_update) && $force_update == 1) echo 'selected="selected"'; ?>>强制</option>
+                    </select>
+                </td>
+                <td width="16%">平台：
+                    <select name="platform" >
+                        <option value="">全部</option>
+                        <?php foreach($product_list as $key => $val):?>
+                        <option value="<?php echo $key?>" <?php if($val[1]):?>selected="selected"<?php endif;?> ><?php echo $val[0]?></option>
+                        <?php endforeach;?>
+                    </select>
+                </td>
+                <td width="16%">针对版本号：<input type="text" name="target_version_code" id="target_version_code" value="{$target_version_code}" class="search_item_text"></td>
+                <td width="16%">类型：
+                    <select name="type">
+                        <option value="0">全部</option>
+                        <option value="1" <if condition="$type eq 1">selected="selected"</if> >OTA</option>
+                        <option value="2" <if condition="$type eq 2">selected="selected"</if> >初次</option>
+                    </select>
+                </td>
+                <td width="30%">Wi-Fi下是否自动下载：
+                    <select name="wifi_load">
+                        <option value="0">全部</option>
+                        <option value="1" <if condition="$wifi_load eq 1">selected="selected"</if> >是</option>
+                        <option value="2" <if condition="$wifi_load eq 2">selected="selected"</if> >否</option>
+                    </select>
+                </td>
+            <tr>
+            </tr>
+        </table>
+    </div>
+    </form>
+    <div class="nav_btns">
+        <input class="search_btn" type="button" value="全选" onClick="select_all()" style="height:30px;">
+        <input class="search_btn" type="button" value="反选" onClick="select_reverse()" style="height:30px;">
+        <input class="search_btn" type="button" value="批量启用" onClick="batch_enable()" style="height:30px;">
+		<div class="clear"></div>
+    </div>
+    <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list" id="table_list">
+		<thead>
+			<tr align="center">
+				<th width="2%" height="26"></th>
+				<th width="4%">ID</th>
+				<th width="5%">图标</th>
+				<th width="5%">版本号</th>
+				<th width="5%">版本名称</th>
+				<th width="4%">平台</th>
+				<th width="6%">适配渠道</th>
+				<th width="6%">强制更新</th>
+				<th width="6%">针对版本</th>
+				<th width="6%">适用固件</th>
+				<th width="5%">排除机型</th>
+				<th width="5%">更新描述</th>
+				<th width="7%">下载地址</th>
+				<th width="5%">大小</th>
+                <th width="4%">类型</th>
+                <th width="4%">Wi-Fi下是否自动下载</th>
+                <th width="6%">修改时间</th>
+                <th width="5%">限制规则</th>
+                <th width="5%">备注</th>
+                <th width="5%">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+            <volist name="list" id="list">
+                <tr>
+                    <td height="20" align="center">
+                        <input name="checkbox" value="<?php echo $list['id'];?>" type="checkbox"/>
+                    </td>
+                    <td height="20" align="center">{$list.id}</td>
+                    <td height="20" align="center"><img src="{$apkurl}{$list.iconurl|default='&nbsp;'}" /></td>
+                    <td height="20" align="center">{$list.version_code}</td>
+                    <td height="20" align="center">{$list.version_name}</td>
+                    <td height="20" align="center">
+                        <?php foreach($product_list as $key => $val):?>
+                        <if condition="$list.platform eq $key">{$val[0]}</if>
+                        <?php endforeach;?>
+                    </td>
+                    <td height="20" align="center">{$list.cid_name}</td>
+                    <td height="20" align="center">
+                        <if condition="$list.force_update eq 0">否</if>
+                        <if condition="$list.force_update eq 1">是</if>
+                    </td>
+                    <td height="20" align="center">{$list.target_version_code}</td>
+                    <td height="20" align="center">{$list.firmware}</td>
+                    <td height="20" align="center">{$list.exclude_did_names}</td>
+                    <td height="20" align="center">
+                        <a href="__URL__/show_remark?width=300&height=200&id={$list.id}&type=1" class="thickbox blue">{$list.note_short}</a>
+                    </td>
+                    <td height="20" align="center">
+                        <a href="<?php echo ATTACHMENT_HOST;?>{$list.apkurl}">{$list.apkurl}</a>
+                    </td>
+                    <td height="20" align="center">{$list.apksize}</td>
+                    <td height="20" align="center">
+                        <if condition="$list.type eq 1">OTA</if>
+                        <if condition="$list.type eq 2">初次</if>
+                    </td>
+                    <td height="20" align="center">
+                        <if condition="$list.wifi_load eq 1">是</if>
+                        <if condition="$list.wifi_load eq 2">否</if>
+                    </td>
+                    <td height="20" align="center">{$list.last_refresh|date="Y-m-d H:i:s",###}</td>
+                    <td height="20" align="center">
+                        <a href="__URL__/show_remark?width=300&height=200&id={$list.id}&type=3" class="thickbox blue">{$list.limit_rules_short}</a>
+                    </td>
+                    <td height="20" align="center">
+                        <a href="__URL__/show_remark?width=300&height=200&id={$list.id}&type=2" class="thickbox blue">{$list.remark_short}</a>
+                    </td>
+                    <td height="20" align="center">
+                        <a href="__URL__/edit_market_ineffective?width=600&height=500&modal=true&id={$list.id}" class="thickbox blue">编辑</a><br/>
+                        <a href="#{$list.id}" onClick="enabled_in_use({$list.id})" class="blue">启用</a>
+                    </td>
+                </tr>
+            </volist>
+        </tbody>
+    </table>
+    <div class="nav_btns">
+        <input class="search_btn" type="button" value="全选" onClick="select_all()" style="height:30px;">
+        <input class="search_btn" type="button" value="反选" onClick="select_reverse()" style="height:30px;">
+        <input class="search_btn" type="button" value="批量启用" onClick="batch_enable()" style="height:30px;">
+    </div>
+    <div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>

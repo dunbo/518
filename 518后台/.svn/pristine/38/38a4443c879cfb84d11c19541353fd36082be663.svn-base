@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>分发渠道管理</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+function del_batch(url){
+	if(confirm("是否批量删除？"))
+	{
+		var chks=$("input[alt='del']:checked");
+		var ids="";
+		var i=0;
+		$(chks).each(function(){
+			ids+=','+this.value;
+			i++;
+		});
+		var biaoshi=0;
+		if(i==0){
+			alert('请选择要批量删除的税率');
+			return;
+		}
+		$('#tmp_form')[0].action = url;
+		$('#referer').val(location.href);
+		$('#id').val(ids);
+		$('#tmp_form').submit();
+		if(window.ActiveXObject) window.event.returnValue = false;
+	}
+}
+</script>
+</head>
+
+<body>
+<div class="main_r">
+	<table width="100%">
+		<tr>
+			<td  width='5%'></td>
+			<td>
+			<a class="thickbox" href="__URL__/tax_rate_add?channel_id=<?php echo $channel_id?>"><button class="btn btn-sm btn-default yahei" style="margin:10px;">添加税率</button></a>
+			</td>
+		</tr>
+	</table>
+	<div class="currentNav">
+		<div class="currentNav_l"><a href="__URL__/ch_list?"">渠道管理</a> > <a href="__URL__/ch_list?">编辑渠道信息</a> > 配置税率</div>
+		<div class="currentNav_r">
+		<a class="recBtn_bg<?php if ($time_type == 'gt'):?> currentSel<?php endif;?>" href="__URL__/tax_rate_list/channel_id/<?php echo $channel_id ?>/time_type/gt">过期</a>
+		<a class="recBtn_bg<?php if ($time_type == 'eq'):?> currentSel<?php endif;?>" href="__URL__/tax_rate_list/channel_id/<?php echo $channel_id ?>/time_type/eq">当前</a>
+		<a class="recBtn_bg<?php if ($time_type == 'lt'):?> currentSel<?php endif;?>" href="__URL__/tax_rate_list/channel_id/<?php echo $channel_id ?>/time_type/lt">未开始</a>
+		</div>
+	</div>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="softlist_tab">
+		<thead>
+			<tr>
+				<td width="9%"><input type="checkbox" name="soft_allSelect" onclick="$('input[name^=ids]').attr('checked', $(this).attr('checked')=='checked')"  /></td>
+				<td width="18%">税率</td>
+				<td width="10%">生效日期</td>
+				<td width="18%">更新时间</td>
+				<td width="7%">操作人</td>
+				<td width="10%">操作</td>
+			</tr>
+		</thead>
+		<tbody>
+<?php foreach($list as $val) :?>
+	<tr>
+		<td><input name="ids[]" value="<?php echo $val['id'] ?>" type="checkbox" alt="del"/></td>
+		<td><?php echo "税率".$val['tax_rate']."%";?></td>
+		<td><?php echo substr($val['sl_date'],0,-3) ?></td>
+		<td><?php echo date('Y-m-d H:i:s', $val['update_tm'])?></td>
+		<td><?php echo $val['os_user'] ?></td>
+		<td>
+		<?php if( $time_type == 'gt' ) :?>
+			<a href='javascript:;' style="color: #d6d6d6">编辑</a>
+			<a href='javascript:;' style="color: #d6d6d6">删除</a>
+		<?php else :?>
+			<a href="__URL__/tax_rate_edit?id=<?php echo $val['id']?>" class="thickbox">编辑</a>
+			<a href="__URL__/tax_rate_delete?id=<?php echo $val['id']?>" onclick="javascript:return checkit()">删除</a>
+		<?php endif;?>
+		</td>
+	</tr>
+<?php endforeach;?>
+
+<?php if( $time_type != 'gt' ) :?>
+	<tr class="softbtn">
+		<td colspan="8">
+			<div class="soft_all">
+				<input type="button" value='批量删除' style="width:100px;" onclick="del_batch('__URL__/tax_rate_delete?')"/>
+			</div>
+		</td>
+	</tr>
+<?php endif;?>
+
+		</tbody>
+	</table>
+{$page}
+</div>
+<!-- 删除 -->
+<form method='post' action='' id='tmp_form'>
+<input type='hidden' name='referer' id='referer' value='' />
+<input type='hidden' name='id' id='id' value='' />
+</form>
+</body>
+</html>

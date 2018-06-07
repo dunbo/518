@@ -1,0 +1,312 @@
+<style type="text/css">
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+</style>
+<link type="text/css" href="__PUBLIC__/school/css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script>
+	function showSoft(user)
+	{
+		$('#userform').css('display', 'none');
+		$('#softform').css('display', '');
+		$('#user').val('');
+		$('#softform').attr('title', user);
+	}
+
+	function addSoft(usertoadd,packagetoadd)
+	{
+		$.getJSON("/index.php/Sj/Statistical/soft_up_dl_add_soft",
+			{
+				user: usertoadd,
+				package: packagetoadd
+			},
+			function(data){
+				if (data.info == "\u5bf9\u4e0d\u8d77,\u6743\u9650\u4e0d\u8db3!")
+				{
+					alert('对不起，权限不足');
+					return;
+				}
+				if (data.flag)
+				{
+					alert('添加成功');
+					window.location = "/index.php/Sj/Statistical/soft_up_dl_admin";
+				}
+				else
+				{
+					if (data.info == 'fault')
+						alert('添加失败');
+					else if (data.info == 'dumplicate')
+						alert('包名已存在');
+				}
+			}
+		);
+	}
+
+	function addUser(usertoadd)
+	{
+		if(usertoadd == null || usertoadd == '')
+		{
+			alert('用户名不能为空');
+			return;
+		}
+		$.getJSON("/index.php/Sj/Statistical/soft_up_dl_add_user",
+			{
+				user: usertoadd
+			},
+			function(data){
+				if(data.info == "\u5bf9\u4e0d\u8d77,\u6743\u9650\u4e0d\u8db3!")
+				{
+					alert('对不起，权限不足');
+					exit;
+				}
+				if (data.flag) {
+					alert('添加成功');
+					window.location.href = "/index.php/Sj/Statistical/soft_up_dl_admin";
+				}
+				else if (data.info == 'dumplicate') {
+					alert('用户已存在');
+				}
+				else if (data.info == 'unknown') {
+					alert('无此用户');
+				}
+				else if (data.info == 'fault') {
+					alert('添加失败');
+				}
+			}
+		);
+	}
+
+	function delUser(user)
+	{
+		if (confirm('确定要删除么')) {
+			$.getJSON("/index.php/Sj/Statistical/soft_up_dl_del_user",
+				{
+					user: user
+				},
+				function(data){
+					if (data.info == "\u5bf9\u4e0d\u8d77,\u6743\u9650\u4e0d\u8db3!")
+					{
+						flag = false;
+						if(qflag) alert("对不起，权限不足！");
+						qflag = false;
+						return;
+					}
+					else if (data.flag)
+					{
+						alert('删除成功');
+						window.location = "/index.php/Sj/Statistical/soft_up_dl_admin";
+					}
+					else
+					{
+						alert('删除失败');
+					}
+
+				}
+			);
+		}
+	}
+
+	function searchsoft(packagetosearch)
+	{
+		if(packagetosearch == null || packagetosearch == '')
+		{
+			alert('包名不能为空');
+			return;
+		}
+		$.getJSON("/index.php/Sj/Statistical/soft_up_dl_search_soft",
+			{
+				package: packagetosearch
+			},
+			function(data)
+			{
+				if (data.info == '\u5bf9\u4e0d\u8d77,\u6743\u9650\u4e0d\u8db3!')
+				{
+					alert('对不起，权限不足！');
+					return;
+				}
+				if (data.flag)
+				{
+					$('#softfound').html(data.data);
+					$('#softconfirm').removeAttr('disabled');
+				}
+				else
+				{
+					alert('未找到上架软件');
+					$('#softconfirm').attr('disabled', 'disabled');
+				}
+			}
+		);
+	}
+
+	function selectAll()
+	{
+		$(":checkbox").attr("checked", true);
+	}
+
+	function selectRev()
+	{
+		checkall = document.getElementsByTagName("input")
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox")
+				checkall[i].checked = !checkall[i].checked;
+		}
+	}
+
+	function selectDel()
+	{
+		check = document.getElementsByTagName("input");
+		var flag = true;
+		var cflag = false;
+		var qflag = true;
+		var count = 0;
+		for (i = 0; i < check.length; i++)
+		{
+			if(check[i].type == "checkbox" && check[i].checked)
+			{
+				cflag = true;
+				break;
+			}
+		}
+		if (cflag)
+		{
+			if (confirm('确定要删除么？'))
+			{
+				for (i = 0; i < check.length; i++)
+				{
+					if(check[i].type == "checkbox" && check[i].checked)
+					{
+						usertodel = check[i].value;
+						$.ajaxSettings.async = false;
+						$.getJSON("/index.php/Sj/Statistical/soft_up_dl_del_user/user/"+encodeURI(usertodel)+"/",
+							function(data){
+								if (data.info == "\u5bf9\u4e0d\u8d77,\u6743\u9650\u4e0d\u8db3!")
+								{
+									flag = false;
+									if(qflag) alert("对不起，权限不足！");
+									qflag = false;
+									return;
+								}
+								else if (data.flag)
+								{
+									count++;
+								}
+								else
+								{
+									flag = false;
+								}
+							}
+						);
+						//alert(qflag);
+						if (!qflag)
+						{
+							break;
+						}
+					}
+				}
+				if (flag)
+				{
+					alert('成功删除'+count+'项');
+					window.location = "/index.php/Sj/Statistical/soft_up_dl_admin";
+				}
+				else
+				{
+					alert('删除出错');
+					window.location = "/index.php/Sj/Statistical/soft_up_dl_admin";
+				}
+			}
+		}
+
+	}
+	function changesel(user, val){
+		$.getJSON(
+				"/index.php/Sj/Statistical/soft_up_dl_add_soft",
+				{user:user, lag:val, flag:'changeisgol'},
+				function(json){
+					if(json.flag){
+						alert('更新状态成功 !');
+						window.location.reload();
+					}
+				}
+		);
+	}
+</script>
+
+<body>
+	<a href="/index.php/Sj/Statistical/soft_up_dl_stat">软件下载量展示</a>
+	<center>下载量查看管理</center>
+	下载量查看管理
+
+	<center>
+	<br>
+	<table border=1 class="tb" width="99%" style="Z-index:1">
+	<thead>
+		<tr>
+			<th colspan=5 align="middle">
+				<span style="float:center;padding:0 0 0 40px;">人员列表</span>
+				<span style="float: right;"><input type="button" name="adduser" value="添加人员" onClick="$('#userform').css('display', '');$('#softform').css('display', 'none');"></span>
+			</th>
+		</tr>
+		<tr><th>选择</th><th>人员名单</th><th>软件数量</th><th>是否添加全部软件</th><th>操作</th></tr>
+	</thead>
+	<tbody>
+		<?php
+		/*$userlist = array(
+			0=>array(
+				'user' => 'a',
+				'softnum' => 'b'
+			),
+			1=>array(
+				'user' => 'a',
+				'softnum' => 'b'
+			)
+		);*/
+		foreach ($userlist as $k => $v)
+		{
+			echo "<tr align = 'middle'><td><input type='checkbox' id=sel$k value='" . $v['user'] ."'></td><td>" . $v['user'] . "</td><td><a href='/index.php/Sj/Statistical/soft_up_dl_edit?user=" . urlencode($v['user']) . "'>" . $v['softnum'] . "</td>";
+			if($v['isgol']){
+				echo "<td>是<input value='1' onclick='changesel(this.name, this.value);' name='".$v['user']."' type='radio' checked='checked' /><input value='0' onclick='changesel(this.name, this.value);' name='".$v['user']."' type='radio' />否</td>";
+			} else {
+				echo "<td>是<input value='1' onclick='changesel(this.name, this.value);' name='".$v['user']."' type='radio' /><input value='0' onclick='changesel(this.name, this.value);' name='".$v['user']."' type='radio' checked='checked' />否</td>";
+			}
+			echo "<td><input type='button' value='批量添加' onClick='window.location.href=\"/index.php/Sj/Statistical/soft_up_dl_admin_import_soft/user/" . $v['user'] . "\"'> <input type='button' id='as" . $v['user'] . "' value='添加软件' onClick='showSoft(\"" . $v['user'] . "\");'> <input type='button' id='del" . $v['user'] . "' value='删除' onClick='delUser(\"" . $v['user'] . "\");'></td></tr>";
+		}
+		?>
+	</tbody>
+	<tfoot>
+		<tr><td colspan=5 align="left"><input type="button" name="selectall" value="全选" onClick="selectAll()"><input type="button" name="selectrev" value="反选" onClick="selectRev()"><input type="button" name="selectdel" value="删除选中" onClick="selectDel();"></td></tr>
+	</tfoot>
+	</table>
+	<div id="userform" style="display:none; Z-index:2; position:absolute; left:350px; top:150px; border:1px solid black; background: #FFFFBF; width:400px; height:150px">
+		<div style="text-align:center; margin:50px 0 0 0">
+			<div>
+				添加配置人员：
+				<input type="text" id="user" />
+			</div>
+			<br>
+			<input type="button" id="confirm" value="确认" onClick="addUser($('#user').val())" >
+			<span style="margin: 0 20px 0 20px;"></span>
+			<input type="button" id="cancel" value="取消" onClick="$('#user').val('');$('#userform').css('display', 'none');" >
+		</div>
+	</div>
+	<div id="softform" title='none' style="display:none; Z-index:2; position:absolute; left:50%; top:50%; border:1px solid black; background: #FFFFBF; width:400px; height:150px; margin:-75px 0 0 -200px">
+		<div style="text-align:center; margin:30px 0 0 0">
+			添加软件(包名)：
+			<input type="text" id = "soft" onChange="$('#softconfirm').attr('disabled','disabled')">
+			<input type="button" id = "search" value="搜索" onClick="searchsoft($('#soft').val())">
+			<div align="left" style="margin:0 0 0 35px">
+				<br>
+				软件名：<span id="softfound"></span>
+				<br>
+				<br>
+			</div>
+			<input type="button" id = "softconfirm" value="确认" disabled='disabled' onClick="addSoft($('#softform').attr('title'),$('#soft').val())">
+			<span style="margin: 0 20px 0 20px;"></span>
+			<input type="button" id = "softcancel" value="取消" onClick="$('#soft').val('');$('#softfound').html('');$('#softconfirm').attr('disabled','disabled');$('#softform').css('display', 'none');">
+		</div>
+	</div>
+	{$page}
+	</center>
+	<include file="../../Public/footer"/>
+</body>

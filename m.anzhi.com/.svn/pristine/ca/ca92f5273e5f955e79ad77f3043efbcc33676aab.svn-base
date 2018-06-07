@@ -1,0 +1,13 @@
+$(function(){
+	//单选按钮
+	$('.label_group').bind('click',function(){
+		$(this).parent().find('.label_group').removeClass('label_selected');
+		$(this).parent().find('input').removeAttr('checked');
+		$(this).parent().find('input').removeProp('checked');
+		if(!$(this).hasClass('label_selected')){
+			$(this).addClass('label_selected');
+			$(this).find('input').attr('checked','checked');
+			$(this).find('input').prop('checked','checked');
+		}
+	})
+})

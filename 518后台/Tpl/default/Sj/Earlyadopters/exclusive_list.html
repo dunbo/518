@@ -1,0 +1,72 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+
+<script>
+	function checkit(){
+		if(confirm("删除后不可恢复，并且直接影响线上数据，是否确认删除"))
+		{
+			return true;
+		}
+		return false;
+	}
+</script>
+<body>
+<div style="margin:20px;">
+<h3><?php if($adopters_type == 1){ ?>首发管理<?php }elseif($adopters_type == 2){ ?>精选管理<?php } ?></h3>
+</div>
+<div style="float:right;margin-right:200px;margin-bottom:20px;">
+<ul class="tab_title margin_top">
+<li>
+<a href="__URL__/adopters_list/" >返回</a>
+</li>
+<li>
+<a href="__URL__/add_exclusive_show/adopters_id/{$adopters_id}" class="search_btn" style="float:left;margin-right:20px;">添加</a>
+</li>
+<li <?php if($my_time == 1){ ?>class="current"<?php } ?>>
+<a href="__URL__/exclusive_list/my_time/1/adopters_id/{$adopters_id}" style="float:left;margin-right:20px;">未开始</a></li>
+<li <?php if($my_time == 3 || !$my_time){ ?>class="current"<?php } ?>>
+<a href="__URL__/exclusive_list/my_time/3/adopters_id/{$adopters_id}" style="float:left;margin-right:20px;">正在运营</a></li>
+<li <?php if($my_time == 2){ ?>class="current"<?php } ?> >
+<a href="__URL__/exclusive_list/my_time/2/adopters_id/{$adopters_id}" style="float:left;">已过期</a>
+</li>
+</ul>
+<div class="clear"></div>
+</div>
+
+<table cellspacing="0" cellpadding="0" border="0" align="center" class="table_list">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>软件名称</th>
+			<th>软件包名</th>
+			<th>排序</th>
+			<th>开始时间</th>
+			<th>结束时间</th>
+			<th>运营商</th>
+			<th>渠道</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr>
+		<td>{$val.id}</td>
+		<td>{$val.soft_name}</td>
+		<td>{$val.package}</td>
+		<td>{$val.rank}</td>
+		<td><?php echo date('Y-m-d H:i:s',$val['start_tm']); ?></td>
+		<td><?php echo date('Y-m-d H:i:s',$val['end_tm']); ?></td>
+		<td><?php if($val['operating_name']){ ?>{$val.operating_name}<?php }else{ ?>不限制<?php } ?></td>
+		<td><a href="__URL__/show_channel/id/{$val.id}?width=300&height=200" class="thickbox blue">{$val.chname}</a></td>
+		<td><?php if($val['end_tm'] >= time()){ ?><a href="__URL__/edit_exclusive_show/id/{$val.id}/" class="blue">编辑</a>&nbsp;&nbsp;<a href="__URL__/del_exclusive/id/{$val.id}" class="blue" onclick="return checkit();">删除</a><?php } else { ?><a href="__URL__/edit_exclusive_show/id/{$val.id}/life/1" class="blue search_btn">复制上线</a><?php } ?></td>
+	</tr>
+	<?php } ?>
+</table>
+<div style="margin:20px;">
+{$page}
+</div>
+</body>
+</html>

@@ -1,0 +1,505 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script>
+function postcheckit(str,sectiontypeid)
+{
+	location.href = '__URL__/feedback_reback_show?id='+str+'&processed=<?php echo $processed; ?>&sectiontypeid='+sectiontypeid+'&pid=<?php echo $pid; ?>';
+/* 	$.zxxbox('<div style="width:600px; height:300px" ><form action="__URL__/feedback_reback/id/'+str+'" method="post"><span>回复</span><br /><textarea name="content" cols="" rows="" style="width:580px; height:250px" ></textarea><br /><input name="" type="submit" value="提交" /><input name="" type="button" value="取消" onclick="hide();"/></form></div>', {
+		title: "安智网",
+		bg: false		 
+	}); */
+}
+function hide(){
+	 $.zxxbox.hide();
+}
+function deleteFeedback(str)
+{ 
+  if(confirm('您确定要删除此条此条反馈信息？')) {
+		var buid = '#tr'+str+' td button';
+		$(buid).attr({disabled:'disabled', name:'disabled'});
+		$.ajax({
+			url: '__URL__/deleteFeedback/type/feedback/id/'+str, 
+			data: '',
+			type: 'get',
+			dataType: 'json',
+			success: function(ret) {
+				if(ret['code']==1) {	//成功
+					//变灰不可点击处理
+					for(var i in ret['msg']) {
+						var delid = '#tr'+ret['msg'][i];
+						var aid = '#tr'+ret['msg'][i]+' a';
+						var iid = '#tr'+ret['msg'][i]+' input';
+						var imgid = '#tr'+ret['msg'][i]+' img';
+						var bid = '#tr'+ret['msg'][i]+' td button';
+						
+						$(delid+' td').removeAttr('bgcolor');
+						$(delid).css({color:'#bcbcbc',background:'#ececec'});
+						$(aid).css('color', '#bcbcbc');
+						$(aid).removeAttr('href');
+						$(aid).removeAttr('onclick');
+						$(iid).attr({disabled:'disabled', name:'disabled'});
+						$(iid).attr('checked', false);
+						$(imgid).removeAttr('onclick');
+						$(bid).removeAttr('onclick');
+						$(bid).attr({disabled:'disabled', name:'disabled'});
+						
+					}   
+				}else{
+					alert('删除失败请重试');
+				}  
+			  }			
+		});
+	}
+	
+  
+}
+
+function batchDeleteFeedback()
+{
+  if (confirm("是否批量删除举报信息？")) {
+    var input = new Array();
+    var has = false;
+    $('input[name^=id_]').each(function(){
+      if (this.name != 'id_all' && this.checked) {
+        input.push(this.value);
+        has = true;
+      }
+    });
+    if (has) {
+      location.href = '__URL__/deleteFeedback/type/feedback/ids/'+ input.join(',');
+    } else {
+      alert('请选择需要删除的记录');
+    }
+  }
+}
+
+function batch_recovery(){
+    var input = new Array();
+    var has = false;
+    $('input[name^=id_]').each(function(){
+      if (this.name != 'id_all' && this.checked) {
+        input.push(this.value);
+        has = true;
+      }
+    });
+    if (has) {
+		var idstr = input.join(',');
+		var processed = '<?php echo $processed; ?>';
+		tb_show('批量回复','__URL__/feedback_reback_all?id='+idstr+'&height=500&width=500&processed='+processed,false);
+    } else {
+      alert('请选择需要操作的记录');
+    }	
+}
+ 
+function checkAll(obj)
+{
+  var flag = $(obj).attr('checked') == 'checked';
+  $('input[name^=id_]').attr('checked', flag);
+}
+
+function exportExcel(url)
+{
+ 	//进度条显示开始
+	popup('await');
+	$.ajax({
+		'url': url,
+		'type': 'get',
+		'dataType': 'json',
+		'success': function(res){
+			if (res.type == 'pager') {
+				//console.log(res.type);
+				console.log(res.url);
+				//进行下一页请求
+				return exportExcel(res.url);
+			}else if (res.type == 'file') {
+				//完成以后关闭进度条显示
+				popclose('await');
+				//进行文件下载
+				location.href = res.url;
+			}
+		}
+	}); 
+}
+function checkPost()
+{
+	if ($('#content').val().length >0 && $('#content').val().length < 2) {
+		alert('反馈内容长度必须大于2');
+		return false;
+	}
+
+	return true;
+}
+function checked_backtype(obj){
+	if(obj.value == 1){
+        $('option[rel=1]').css('display','block');
+    } else {
+        $('option[rel=1]').css('display','none');	
+	}
+}
+</script>
+<style type="text/css">
+<!--
+.intb td {
+border-right:none;
+border-bottom: none;
+}
+.searchbar input {
+  width: 70px;
+
+}
+
+.fixlong {
+  table-layout: fixed;
+}
+.fixlong td {
+  word-break: break-all;
+}
+-->
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<div class="main" >
+<div class="content">
+<center>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+<tr height="35">
+  <td align="center" <?php if($type=='self' &&  $processed==0) echo 'style="background:#FFCC66"'?>><a href="__URL__/feedback_list/processed/0"><font style="color:#000; font-weight:bold">未处理</font></a></td>
+  <td align="center" <?php if($type=='self' &&  $processed==1) echo 'style="background:#FFCC66"'?>><a href="__URL__/feedback_list/processed/1"><font style="color:#000; font-weight:bold">已处理</font></a></td>
+  <td align="center" <?php if($type=='unshow') echo 'style="background:#FFCC66"'?>><a href="__URL__/feedback_list/type/unshow"><font style="color:#000; font-weight:bold">已删除列表</font></a></td>
+</tr>
+</table>
+
+<form action="__URL__/feedback_list" method="GET" id="searchForm" onsubmit="return checkPost();">
+<table width="100%" height="29" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr height="29">
+    <td>version_code:</td> <td><input size='10' type="text" name="version_code" value="{$version_code}" ></td>
+    <td>反馈IP:</td> <td><input size='10' type="text" name="ipmsg" value="{$ipmsg}" /></td>
+    <td>IMEI:</td> <td><input size='10' type="text" name="imei" value="{$imei}" /></td>
+    <td>机型:</td>  <td><input size='10' type="text" name="dname" value="{$dname}" /></td>	
+    <td>渠道:</td> <td><input size='10' type="text" name="chname" value="{$chname}" /></td>
+	<td rowspan="2"  align='center' ><input name='search'  type="submit" value="搜索"/></td>  
+  </tr>
+  <tr>
+	  <td>反馈内容:</td><td><input size='9' type="text" name="content" id="content" value="{$content}" /></td>	  
+<?php if(!$is_Specified_user){ ?>
+	  <td>来源:</td>
+	  <td colspan="1" >
+	  <select name="pid" id="pid" style="width:80px;height:25px;font-size:12px;" onchange='checked_backtype(this);' >
+	  <?php foreach($product as $k => $v){ ?>
+	  <option value="<?php echo $k?>"<?php if( $k == $pid ) { echo "selected='selected'"; } ?>><?php echo $v['0']; ?></option>
+	  <?php } ?>
+	  </select>
+	  </td>
+<?php } ?>	  
+	  <td>信息类型:</td>
+	  <td colspan="1" >
+	  <select name="backtype" id="backtype" style="width:100px;height:25px;font-size:12px;">
+	  <option value=''>全部</option>
+<?php if ($pid == 1){ ?>
+	  <?php foreach ($feedbacktype as $key => $value): ?>
+	  <option rel = '1' value="<?php echo $key?>" <?php if(!is_null($backtype) && $key == $backtype) { ?> selected="selected"<?php } ?>><?php echo $value."(5.2及以下)"; ?></option>
+	  <?php endforeach; ?>
+<?php } ?>
+	  
+	  <?php foreach ($question_type as $key => $value): ?>
+	  <option value="<?php echo $key ?>" <?php if(!is_null($backtype) && $key == $backtype) { ?> selected="selected"<?php } ?>><?php echo $value['question']."(新)"?></option>
+	  <?php endforeach; ?>	  
+	  </select>
+	  </td>  
+	<?php if($type=='self' &&  $processed==1){ ?>  
+	  <td>操作人员:</td>
+	  <td><input size='10' type="text" name="admin_name" id="admin_name" value="{$admin_name}" /></td>
+	<?php } ?> 
+	  <td >联系方式：</td><td><input size='10' type="text" name="contact" value="{$contact}" /></td>	  
+  </tr>
+  <tr>
+	</td>    
+	<td>起止时间:</td>
+	<td width="300" colspan='3'><?php showDatePicker('fromdate','todate', $fromdate,$todate);?></td>
+<?php if(!$is_Specified_user){ ?>	
+	<?php if($processed == 0){ ?>  
+	<td>
+	<button type = 'button' onclick="javascript:window.location.href='__URL__/feedback_list/processed/0/sectiontypeid/{$sectiontypeid}'" >全部</button>
+	<a type='button' href="__URL__/feedback_list/all_post/1/processed/{$processed}/sectiontypeid/{$sectiontypeid}">再次回复<em id="count_reply">（0）</em></a>
+	</td>	
+	<?php } ?>	
+<?php } ?>	
+<!--   <td>读取状态：</td>
+  <td>
+  <select name="new_post" id="new_post" style="width:100px;height:25px;font-size:12px;">
+  <option value=''>全部</option>
+  <option value="0"<?php if(!is_null($new_post) && $new_post==0) { ?> selected="selected"<?php } ?>>已读</option>
+  <option value="1"<?php if(!is_null($new_post) && $new_post==1) { ?> selected="selected"<?php } ?>>未读</option>
+  </select>
+  </td>
+  <td>处理状态：</td>
+  <td colspan="3" >
+  <select name="processed" id="processed" style="width:100px;height:25px;font-size:12px;">
+  <option value=''>全部</option>
+  <option value="0"<?php if(!is_null($processed) && $processed==0) { ?> selected="selected"<?php } ?>>未处理</option>
+  <option value="1"<?php if(!is_null($processed) && $processed==1) { ?> selected="selected"<?php } ?>>已处理</option>
+  </select>
+  </td>  -->
+  </tr>
+<input type='hidden' name='processed' id='processed' value="{$processed}"/>
+<input type='hidden' name='all_post' id='all_post' value="{$all_post}"/>
+<input type='hidden' name='sectiontypeid' id='sectiontypeid' value="{$sectiontypeid}"/>
+</table>
+</form>
+<table style='margin-top:30px;' width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+<tr height="35">
+<?php if($is_Specified_user){ ?>
+	<td align="center" width="10%"><a href="__URL__/feedback_list/processed/{$processed}/sectiontypeid/2/all_post/<?php echo $all_post; ?>"><font style="color:#000; font-weight:bold" >游戏运营<em style="font-style:normal;" id="department_total_2">（0）</em></font></a></td>
+<?php }else{ ?>
+ <td align="center" width="10%"><a href="__URL__/feedback_list/processed/{$processed}/sectiontypeid/0/all_post/<?php echo $all_post; ?>"><font <?php if($sectiontypeid == 0){ ?>style="color:#000; font-weight:bold" <?php } ?>>待分配<em style="font-style:normal;" id="department_total_0">（0）</em></font></a></td>
+<?php foreach($config as $k => $v){ ?>  
+		<?php if($k ==0 || $k==-1) continue; ?>
+  <td align="center" width="10%"><a href="__URL__/feedback_list/processed/{$processed}/sectiontypeid/<?php echo $k; ?>/all_post/<?php echo $all_post; ?>"><font <?php if($sectiontypeid == $k){ ?>style="color:#000; font-weight:bold" <?php } ?>><?php echo $v; ?><em style="font-style:normal;" id="department_total_<?php echo $k; ?>">（0）</em></font></a></td>
+<?php } ?>  
+ <td align="center" width="10%"><a href="__URL__/feedback_list/processed/{$processed}/sectiontypeid/100/all_post/<?php echo $all_post; ?>"><font <?php if($sectiontypeid == '100'){ ?>style="color:#000; font-weight:bold" <?php } ?>>ALL<em style="font-style:normal;" id="department_total_all">（0）</em></font></a></td>
+<?php } ?>
+</tr>
+</table>
+<table style=" background:#e4e4e4;" width="100%" border="1" cellpadding="0" cellspacing="0">
+<tr align='left' bgcolor="" height='30'>
+  <td><?php echo $total;?>条&nbsp;&nbsp;&nbsp;<a onclick="exportExcel('__URL__/exportExcel/?{$param}')">导出数据</a></td>
+</tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+  <tr>
+    <td width="5%" align='center' height="30" bgcolor="#e3e2fe"><b>ID</b></td>
+    <td width="13%" align='center' height="30" bgcolor="#e3e2fe"><b>反馈机型/IMEI</b></td>
+    <td width="13%" align='center' height="30" bgcolor="#e3e2fe"><b>反馈者信息</b></td>
+    <td width="10%" align='center' height="30" bgcolor="#e3e2fe"><b>渠道</b></td>
+    <td width="10%" align='center' height="30" bgcolor="#e3e2fe"><b>来源</b></td>
+    <td width="10%" align='center' height="30" bgcolor="#e3e2fe"><b>信息类型</b></td>
+    <td width="13%" align='center' height="30" bgcolor="#e3e2fe"><b>反馈内容</b></td>
+	<?php if($processed==0) { ?>
+		<?php if($_GET['all_post'] == 1){ ?>
+		 <td width="10%" align='center' height="30" bgcolor="#e3e2fe"><b>操作人员</b></td>
+		<?php } ?>
+		<td width="<?php if($sectiontypeid == '100'){ echo 8; }else{ echo 13; }?>%" align='center' height="30" bgcolor="#e3e2fe"><b>反馈时间</b></td>
+	<?php }else{ ?>
+		<td width="6%" align='center' height="30" bgcolor="#e3e2fe"><b>操作人员</b></td>
+		<td width="8%" align='center' height="30" bgcolor="#e3e2fe"><b>回复时间</b></td>
+	<?php } ?>
+	<?php if($sectiontypeid == '100'){ ?>
+		<td width="5%" align='center' height="30" bgcolor="#e3e2fe"><b>部门</b></td>
+	<?php } ?>
+    <td width="15%" align='center' height="30" bgcolor="#e3e2fe"><b>操作</b></td>
+  </tr>
+  <?php foreach ($feedbacklist as $val):?>
+  <tr id="tr<?php echo $val['feedbackid']?>">
+    <td><input type="checkbox" value="<?php echo $val['feedbackid']?>" name="id_<?php echo $val['feedbackid']?>"/><?php echo $val['feedbackid']?></td>
+	<td>  IMEI:
+		<?php   
+			if($type=='self' &&  $processed==0 && $sectiontypeid ==100){ 
+				echo "<a href='__URL__/feedback_list/processed/0/sectiontypeid/100/imei/".$val['imei']."'>".$val['imei']."</a><br>" ;
+			}else if($type=='self' &&  $processed==1 && $sectiontypeid ==100){
+				echo "<a href='__URL__/feedback_list/processed/1/sectiontypeid/100/imei/".$val['imei']."'>".$val['imei']."</a><br>" ;
+			}else if($type=='unshow' && $sectiontypeid ==100){
+				echo "<a href='__URL__/feedback_list/type/unshow/sectiontypeid/100/imei/".$val['imei']."'>".$val['imei']."</a><br>" ;
+			}else{
+				echo $val['imei']."<br/>";
+			}
+		?>
+     机型: <?php echo $dmap[$val['did']] ?> <br>
+     固件版本: <?php echo $firmware_conf[$val['firmware']]['configcontent'] ?> <br>
+	 </td>
+   <td>
+     IP: <?php echo $val['ipmsg']?> <br>
+     联系方式: <?php echo $val['contact']?> <br>
+     QQ: <?php echo $val['qq'] ? $val['qq'] : ''; ?> <br>
+     电话: <?php echo $val['telphone'] ? $val['telphone'] : ''; ?> <br>	 
+    </td>
+    <td><?php echo $cmap[$val['cid']]?></td>
+    <td>
+	<?php echo $product[$val['pid']]['0']; ?> <br>
+	version_code: <?php echo $val['version_code']?>
+	</td>
+	
+    <td>
+		<?php if($feedbacktype[$val['backtype']]){
+			echo $feedbacktype[$val['backtype']]."(旧)";
+		}else if($question_type[$val['backtype']]){
+			echo $question_type[$val['backtype']]['question']."(新)" ;
+		} ?>
+	</td>
+
+    <td>
+	<?php echo $softlist[$val['softid']]['softname'] ? $softlist[$val['softid']]['softname']."<br/>" : ''; ?>
+	<a href="javascript:;" onclick="open_content('<?php echo $val['feedbackid']?>');">
+	<?php echo $val['content']?><br/>
+		<?php if( $val['user_content']){ ?>
+			<font style="color:#000; font-weight:bold">再次回复：</font><br/>
+			<?php echo $val['user_content']?><br/>
+		<?php } ?>
+	</a>
+	<?php if ($val['reply'] && $processed==1) { ?>
+	<font style="color:#000; font-weight:bold">安智回复：</font><br/>
+	<a href="javascript:;" onclick="open_reply('<?php echo $val['feedbackid']?>');">
+	<?php	if(strlen($val['reply'])>30){
+				$str = mb_substr($val['reply'],0,40,'utf-8')."…"; 
+			}else{
+				$str = $val['reply'];
+			}
+			echo $str; 
+	?>
+	</a>
+	<?php } ?>
+	</td>
+	<div id="content_<?php echo $val['feedbackid']?>" style="padding:20px; width:250px; display:none; word-break:break-all; word-wrap:break-word;">
+		<?php echo $val['submit_tm'] ? date('Y-m-d H:i:s', $val['submit_tm']) : '';?><br>
+		<?php echo $val['content']?><br/>
+		<?php if( $val['user_content']){ ?>
+			<font style="color:#000; font-weight:bold">再次回复：</font><br/>
+			<?php echo $val['user_content_tm'] ? date('Y-m-d H:i:s',$val['user_content_tm']) : '';?><br/>
+			<?php echo $val['user_content']?>
+		<?php } ?>
+	</div>
+	<?php if($processed==1 || $_GET['all_post'] == 1) { ?>
+		<td align="center"> <?php echo $username[$val['admin_id']]; ?></td>
+	<?php } ?>
+    <td align="center">
+<?php if($processed==0) { ?>
+		<div  style="width:70px">
+		<?php echo $val['user_content_tm'] ? date('Y-m-d H:i:s',$val['user_content_tm']) : date('Y-m-d H:i:s',$val['submit_tm']);?>
+		</div>
+<?php }else{ ?>	
+	<div  style="width:70px">
+		<?php echo $val['reply_tm'] ? date('Y-m-d H:i:s', $val['reply_tm']) : '';?>
+	</div>	
+<?php } ?>			
+	</td>
+	<div id="reply_<?php echo $val['feedbackid']?>" style="padding:20px; width:250px; display:none; word-break:break-all; word-wrap:break-word;">
+	<?php 
+			$search   = array("[img]", "[/img]");
+			$replace    = array("<img src='".IMGATT_HOST."","'/>");	
+			$cont = str_replace($search,$replace,$val['reply']);
+			echo $val['reply']? date('Y-m-d H:i:s', $val['reply_tm']). '<br>'. $cont : '--';
+	?>
+	</div>
+<?php if($sectiontypeid == '100'){ ?>
+<td align='center'> <?php echo $config[$val['sectiontypeid']]; ?> </td>
+<?php } ?>
+    <td align='center'>
+<?php if($sectiontypeid != 7){ ?>
+<button type="button" style="margin:5px 0px;" onclick="postcheckit('<?php echo $val['feedbackid']?>','<?php echo $sectiontypeid;  ?>');">&nbsp;回复&nbsp;</button><br/>
+<?php } ?>
+<button style="margin:5px 0px;" onClick="department('<?php echo $val['feedbackid']?>','<?php echo $sectiontypeid;  ?>');">&nbsp;分配&nbsp;</button><br/>
+<button type="button"  style="margin:5px 0px;" value=" 删 除 " onClick="deleteFeedback(<?php echo $val['feedbackid']?>)">&nbsp;删除&nbsp;</button><br/>
+<?php if($processed==0) { ?>
+<input type="button" value=" 已处理 " alt="/index.php/Dev/Message/processed_do/id/<?php echo $val['feedbackid']?>?height=500&width=600&sectiontypeid=<?php if($sectiontypeid == '100' ){ echo $val['sectiontypeid']; }else{  echo $sectiontypeid; }  ?>" title="已处理" class="thickbox" ><br/>
+<?php } ?>
+    </td>
+  <?php endforeach;?>
+  </tr>
+<tr height='50px'>
+    <td colspan="17">
+	<input type="checkbox"  onclick="checkAll(this)" name="id_all"/> <input type="button" id="delete" value="批量删除"  onClick="batchDeleteFeedback()"  />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<?php if(!in_array($sectiontypeid,array(100,0))){ ?>
+	<button  onClick="batch_recovery()" >批量回复</button>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<?php } ?>
+	<button  onClick="department_arr()" >批量分配</button>
+</td>
+  </tr> 
+</table>
+<div  align='left'>{$page}</div>
+</center>
+</div>
+</div>
+	<div id="feedback_reback_arr" style="padding:10px; width:300px; display:none; word-break:break-all; word-wrap:break-word;">
+	<form id="upload" method='post' action="__URL__/feedback_reback_all" enctype="multipart/form-data" target="channels_batch_check"  style="font-size:12px">
+	<table>
+	<tr><td colspan='2'><h2>批量回复</h2></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr>
+		<td colspan='2'><input type="file" name="csv" value="上传csv文件" onchange="onFileChange(this)" />
+		<a href='__PUBLIC__/sample.csv'>下载csv模版</a></td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td colspan='2'>选择要导入的，csv列表文件</td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td colspan='2'><span id='file_csv_a' ></span></td></tr>
+	</table>
+	</form>
+	</div>
+<script language="javascript">
+
+function open_reply(id){	
+	$("#reply_"+id).zxxbox();
+}
+function open_content(id){	
+	$("#content_"+id).zxxbox();
+}
+function feedback_reback_arr(){	
+	$("#feedback_reback_arr").zxxbox();
+}
+function onFileChange(obj){	
+	if( !obj.value.match( /.csv/i ) ){
+		alert('文件格式不正确');
+		return false;
+	}else{
+		$('#file_csv_a').html("<input type='submit' value='确认导入' />");
+	}
+}
+//分配部门
+function department(id,sectiontypeid){
+	if(id){
+		tb_show('选择部门','/index.php/Dev/Message/department/id/'+id+'/height=250/width=300/sectiontypeid/'+sectiontypeid+'/',false);
+	}
+}
+//批量分配部门
+function department_arr(){
+	var input = new Array();
+    var has = false;
+    $('input[name^=id_]').each(function(){
+      if (this.name != 'id_all' && this.checked) {
+        input.push(this.value);
+        has = true;
+      }
+    });
+    if (has) {
+		id_str = input.join(',');
+		department(id_str,'<?php echo $sectiontypeid;  ?>');
+    } else {
+      alert('请选择需要分配的记录');
+    }	
+}
+
+//部门总数-异步调用
+$(document).ready(function(){
+	$.ajax({
+		url: '__URL__/pub_department_total',
+		data: <?php echo json_encode($_GET); ?> ,
+	//	data: 'processed='+<?php echo $processed; ?>+'&all_post=<?php echo $all_post; ?>',
+		type: 'get',
+		dataType: 'json',
+		success: function(ret) {
+			for(var i in ret['result']){
+				if (typeof(ret['result'][i]) != 'undefined') {
+					$('#department_total_'+i).html("("+ret['result'][i]+")");
+				} else {
+					$('#department_total_'+i).html(0);
+				}
+			}
+			if(ret['count_reply']){
+				$('#count_reply').html("("+ret['count_reply']+")");
+			}else{
+				$('#count_reply').html("(0)");
+			}
+		}
+	});
+});
+</script>
+<include file="../../Public/await" />

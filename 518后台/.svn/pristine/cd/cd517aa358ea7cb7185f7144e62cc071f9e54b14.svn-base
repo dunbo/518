@@ -1,0 +1,275 @@
+<include file="../../Public/header"/>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link type="text/css" href="__PUBLIC__/school/css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet" />	
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+	function checkinput()
+	{
+		var pkg = $("#package").val();
+		var rank = $("#rank").val();
+		var start_tm = $("#start_tm").val();
+		var end_tm = $("#end_tm").val();
+		if(pkg == "")
+		{
+			alert("包名不能为空！");
+			return false;
+		}
+		if(start_tm == "")
+		{
+			alert("开始时间不能为空！");
+			return false;
+		}
+		if(end_tm == "")
+		{
+			alert("结束时间不能为空！");
+			return false;
+		}
+		if(start_tm>=end_tm)
+		{
+			alert("开始时间不能大于等于结束时间！");
+			return false;
+		}
+		if(rank =="")
+		{
+			alert("排序不能为空！");
+			return false;
+		}
+		if(rank <= 0)
+		{
+			alert("排序必须大于0");
+			return false;
+		}
+		var pkg=$('input[name=package]').val();
+		var enable=true;
+		$.ajax({
+			url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg+'/start_at/'+start_tm+'/end_at/'+end_tm,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data && data!=1){
+					if(!confirm(data)){
+						enable=false;
+					}
+				}
+			}
+		});
+		if(enable){
+			$("#addform").submit();	
+		}			
+	}
+	/*function checkinput1()
+	{
+		var pkg1 = $("#pkg1").val();
+		if(pkg1 == ""){
+			alert("包名不能为空！");
+			return false;
+		}
+	}*/
+	function package_check(){
+		var soft_package = $('#package').val();
+		$.ajax({
+			url: '__APP__/Public/package_check/soft_package/'+soft_package,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){
+				if(data == 1){
+					$('#soft_name').html('');
+					alert("该软件包名不存在！");
+				}else{
+					$('#soft_name').html(data);
+				}
+			}
+		});
+	}
+//全选
+var flag = false;
+function selectAlls() {
+	if(!flag){
+		$("[name='ids[]']").each(function(){
+			$(this).attr('checked',true);
+		});
+		$("[name='ids_all[]']").each(function(){
+			$(this).attr('checked',true);
+		});
+		flag = true;
+		return;
+	}
+	if(flag){
+		$("[name='ids[]']").each(function(){
+			$(this).attr('checked',false);
+		});
+		$("[name='ids_all[]']").each(function(){
+			$(this).attr('checked',false);
+		});
+		flag = false;
+		return;
+	}	
+}	
+function openxb(){
+	var id_arr = new Array();
+	var i = 0;
+	$("[name='ids[]']").each(function(){
+		if($(this).is(':checked')) {
+			id_arr[i] = $(this).val();
+			i++;
+		}
+	});
+	var id_str = id_arr.join(',');
+	if(id_str=='') {
+		alert('请选择要修改的软件');
+		return false;
+	}	
+	var srh_key = "{$sk_info.srh_key}";
+	var urls ="/index.php/Sj/Search_tips/save_endtm?width=400&height=400&ids="+id_str+"&num="+i+"&srh_key="+srh_key;
+	tb_show('批量修改结束时间',urls,"thickbox");
+}	
+</script>
+<style type="text/css">
+.tb{ border-top:1px solid #DCDCDC;border-left:1px solid #DCDCDC;}
+.tb th,.tb td{border-right:1px solid #DCDCDC; padding:5px 10px; border-bottom:1px solid #DCDCDC;}
+</style>
+<center>
+<br />
+<form id="addform" action="__URL__/search_tips_package_add_do" method="POST">
+	<table cellspacing="0" cellpadding="0" border=0 class="tb" width="52%">
+		<tbody>
+			<tr>
+				<td colspan="2">关键词:{$sk_info.srh_key}
+				<input type="hidden" id="srh_key" name="srh_key" value="{$sk_info.srh_key}">
+				</td>
+			</tr>
+			<tr>
+				<td>
+					软件包名：
+					<input type="text" name="package" id="package" size="30" onblur="package_check()" value=""/><br/>
+					<span style="display:inline-block; margin-left:65px;" id="soft_name" ></span>
+				</td>
+				<td>
+					自定义名称（选填）：
+					<input type="text" name="custom_name" id="custom_name" size="30" value=""/>
+				</td>
+			</tr>
+			<tr>
+				<td>开始时间:
+					<input type="text" id="start_tm" name="start_tm" value="{$start_tm}" size="30" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'/>
+				</td>
+				<td>结束时间:
+					<input type="text" id="end_tm" name="end_tm" value="{$end_tm}" size="30" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'/>
+					<input type="hidden" id="kid" name="kid" value="{$sk_info.id}">
+				</td>
+			</tr>
+			<tr>
+				<td>排序:
+					<input type="text" id="rank" name="rank" size="20" value="" />
+				</td>
+				<td>
+					合作形式
+					<SELECT name='co_type'>
+						<?php foreach($typelist as $key => $val): ?>
+							<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+						<?php endforeach; ?>				
+					</SELECT>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<input type="button" value="确认添加" onclick="checkinput()">
+				</td>
+				<td>
+					<!--<font color="red">红色为下线包名</font>
+					<font color="red">绿色为即将上线包</font>-->
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</form>
+<br />
+<form action="__URL__/search_tips_package_add" method="GET">
+	<table cellspacing="0" cellpadding="0" border=0 class="tb">
+		<tr>
+			<td>包名:
+				<input type="text" name="package" size="50" id="pkg1" value="{$search_package}"/>
+			</td>
+			<input type="hidden"  name="id" value="{$sk_info.id}">
+			<td>状态：
+				<select name="search_status">
+					<option value="1" <?php if($search_status == 1) echo "selected";?>>正在运营</option>
+					<option value="2" <?php if($search_status == 2) echo "selected";?>>已过期</option>
+					<option value="3" <?php if($search_status == 3) echo "selected";?>>未开始</option>
+				</select>
+			</td>
+			<td>
+				<input type="submit" value="搜索" onclick="return checkinput1()">
+			</td>
+		</tr>
+	</table>
+</form>
+<br />
+<table cellspacing="0" cellpadding="0" border=0 class="table_list" style="width:50%;">
+	<thead>
+		<tr>
+			<th width="6%" bgcolor="#e3e2fe">
+				<input type="checkbox" id="ids_all[]" name="ids_all[]" onclick="selectAlls();">
+			</th>		
+			<th width="10%">关键词</th>
+			<th width="15%">包名</th>
+			<th width="12%">自定义名称</th>
+			<th width="8%">排序</th>
+			<th width="15%">开始时间</th>
+			<th width="15%">结束时间</th>
+			<th width="10%">合作形式</th>
+			<th width="15%">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($sk_pkg_list as $infos){?>
+	<tr <?php 
+	/*if($infos['end_tm'] < time()){
+	 echo 'bgColor="red" ';
+	}else if($infos['start_tm'] > time()){
+	 echo 'bgColor="green" ';
+	}*/
+	?> >
+		<td align='left'>
+			<input type="checkbox" name="ids[]" value="<?php echo $infos['id'];?>" />
+		</td>	
+		<td>
+			<?php echo $srh_key;?>
+		</td>
+		<td>
+			<?php echo $infos['package'];?>
+		</td>
+		<td>
+			<?php echo $infos['custom_name'] ? $infos['custom_name'] :'-';?>
+		</td>
+		<td>
+			<?php echo $infos['rank'] == -1 ? '-' : $infos['rank'];?>
+		</td>
+		<td>
+			<?php echo date("Y-m-d H:i:s",$infos['start_tm']);?>
+		</td>
+		<td>
+			<?php echo date("Y-m-d H:i:s",$infos['end_tm']);?>
+		</td>
+		<td>
+			<?php if ($infos['co_type'] !=0) { echo $infos['types'] ; }else{ echo "-";} ?>
+		</td>
+		<td>
+			<a href="__URL__/search_tips_package_update/kid/<?php echo $infos['kid'];?>/id/<?php echo $infos['id'];?>">修改</a>&nbsp;
+			<a href="__URL__/search_tips_package_delete/kid/<?php echo $infos['kid'];?>/id/<?php echo $infos['id'];?>" onclick="return checkit()">删除</a>
+		</td>
+	</tr>
+	<?php } ?>
+	<tr>
+		<td align="left" colspan='9'>
+			<button onclick="openxb()" class="thickbox" >批量修改结束时间</button>
+		</td>
+	</tr>
+</table>
+<p>{$page}</p>
+</center>

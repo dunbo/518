@@ -1,0 +1,180 @@
+<script type="text/javascript" src='/Public/js/cooperation_public.js' ></script>
+<script>
+	function get_price(price_type){
+		if(price_type == 'yes'){
+			$('#the_price').css('display','block');
+			$('#project_price').css('display','none');
+		}else{
+			$.ajax({
+				url:'/index.php/Channel_cooperation/Clientlist_p/my_price_show/price_id/'+price_type,
+				type: 'get',
+				dataType: 'json',
+				success:function(data){
+					var str = '';
+					var all_str = '';
+					var my_str = '';
+					for(i=0;i<data.length;i++){
+						var max = '';
+						if(data[0]['end_activations']){ max =data[0]['end_activations']}
+						my_str = '<tr><td rowspan='+data.length+'>'+data[0]['price_name']+'</td><td>'+data[0]['star_activations']+'-'+max+'</td><td>'+data[0]['price']+'</td></tr>';
+					}
+					for(i=1;i<data.length;i++){
+						max = '';
+						if(data[i]['end_activations'] > 0){ max =data[i]['end_activations']}
+						str += '<tr><td>'+data[i]['star_activations']+'-'+max+'</td><td>'+data[i]['price']+'</td></tr>';
+					}
+					all_str = "<tr><td>方案名称</td><td>日均激活量</td><td>单价(元)</td></tr>"+my_str+str;
+					$('#project_price').html(all_str);
+				}
+			});
+			$('#the_price').css('display','none');
+			$('#project_price').css('display','block');
+		}
+	}
+	
+	
+	function my_check(){
+		var price_type = $('#price_type').val();
+		if(price_type == 'yes'){
+			if(!$('#price').val()){
+				$('#warning').html("请填写固定单价");
+				return false;
+			}
+		}
+		if($('#price_now').attr('checked') != 'checked' && $('#price_last').attr('checked') != 'checked'){
+			$('#warning').html("请选择生效时间");
+			return false;
+		}
+		
+	}
+</script>
+<div>
+	<form action="__URL__/edit_price" method="get">
+	<table>
+		<tr>
+			<td>渠道名称：
+			<input type="hidden" name="cid" value="{$cid}" />
+			<input type="hidden" name="my_price" value="{$my_price}" />
+			<input type="hidden" name="my_qualit" value="{$my_qualit}" />
+			<input type="hidden" name="my_status" value="{$my_status}" />
+			<input type="hidden" name="my_attribute" value="{$my_attribute}" />
+			<input type="hidden" name="category_id" value="{$category_id}" />
+			<input type="hidden" name="chname" value="{$chname}" />
+			<input type="hidden" name="client_name" value="{$client_name}" />
+			<input type="hidden" name="charge_id" value="{$charge_id}" />
+			<input type="hidden" name="billing" value="{$billing}" />
+			<input type="hidden" name="co_group" value="{$co_group}" />	
+			<input type="hidden" name="p" value="{$p}" />
+			<input type="hidden" name="lr" value="{$lr}" />
+			</td>
+			<td>{$channel_result[0]['chname']}</td>
+		
+		<tr><td>&nbsp;</td></tr>
+		
+			<td>选择方案：</td>
+			<td>
+				<select name="price_type" id="price_type" onchange="get_price(this.value);">
+					<option value="0">选择单价</option>
+					<option value="yes" <?php if($channel_result[0]['price_type'] == 2){ ?>selected<?php } ?>>固定单价</option>
+					<?php foreach($price_result as $key => $val){ ?>
+					<option value="{$val.id}" <?php if($channel_result[0]['price_type'] == 1 && $channel_result[0]['price'] == $val['id']){ ?>selected<?php } ?>>{$val.name}</option>
+					<?php } ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+		<tr><td>&nbsp;</td></tr>
+		<table border="1" cellspacing="0" cellpadding="0" id="project_price" <?php if($channel_result[0]['price_type'] != 1){ ?>style="display:none;"<?php }elseif($channel_result[0]['price_type'] == 1){ ?>style="display:block;"<?php } ?> width="300">
+			<tr>
+				<td>方案名称</td>
+				<td>日均激活量</td>
+				<td>单价(元)</td>
+			</tr>
+			<tr>
+				<td rowspan="<?php echo count($the_price); ?>">{$the_price[0]['price_name']}</td>
+				<td><?php echo $the_price[0]['star_activations']; ?>-<?php if($the_price[0]['end_activations']){ echo $the_price[0]['end_activations'];} ?></td>
+				<td><?php echo $the_price[0]['price'];?></td>
+			</tr>
+			<?php foreach(array_slice($the_price,1) as $k => $v){ ?>
+				<tr>
+				<td>{$v.star_activations}-<?php if($v['end_activations']){ ?>{$v.end_activations}<?php } ?></td>
+				<td>{$v.price}</td>
+				</tr>
+			<?php } ?>
+		</table>
+		<br />
+		<table border="0" cellspacing="0" cellpadding="0" id="the_price" <?php if($channel_result[0]['price_type'] != 2){ ?>style="display:none;"<?php }elseif($channel_result[0]['price_type'] == 2){ ?>style="display:block;"<?php } ?>>
+		<tr>
+			<td>渠道单价：</td>
+			<td>&nbsp;<input type="text" name="price" id="price" <?php if($channel_result[0]['price_type'] == 2){ ?>value="{$channel_result[0]['price']}"<?php } ?>  />&nbsp;元</td>
+		</tr>
+		</table>
+		<br />
+		
+		
+		<tr>
+			<td>生效时间：</td>
+			<td><input type="radio" name="price_time" id="price_now" value="1" <?php if($channel_result[0]['begin_month'] == 1){ ?>checked<?php } ?> />本月生效</td>
+			<td><input type="radio" name="price_time" id="price_last" <?php if($channel_result[0]['begin_month'] == 2){ ?>checked<?php } ?> value="2" />下月生效</td>
+		</tr>
+	</table>
+	<div style="margin-top:20px">
+	修改记录：
+	<table border="1" cellpadding="0" cellspacing="0">
+		<tr>
+			<td>单价</td>
+			<td>生效月份</td>
+			<td>操作人</td>
+			<td>操作时间</td>
+			<td>操作ip</td>
+		</tr>
+		<?php foreach($my_price_result as $key => $val){ ?>
+		<tr>
+			<td><?php if($val['price_type'] == 1){ ?><div class="check_prev"><div class="check_prev_shortbox"><span style="color:blue;">{$val.price_name}</span></div>
+				<?php if($val['price_type'] == 1){ ?>
+				<div style="display:none;" class="check_prev_newbox">
+				<table border="1" cellspacing="0" cellpadding="0">
+					<tr>
+						<td>方案名称</td>
+						<td>日均激活量</td>
+						<td>单价(元)</td>
+					</tr>
+					<tr>
+						<td rowspan="<?php echo count($val['the_price']); ?>">{$val.price_name}</td>
+						<td><?php echo $val['the_price'][0]['star_activations']; ?>-<?php if($val['the_price'][0]['end_activations']){ echo $val['the_price'][0]['end_activations'];} ?></td>
+						<td><?php echo $val['the_price'][0]['price']; ?></td>
+					</tr>
+					<?php foreach(array_slice($val['the_price'],1) as $k => $v){ ?>
+					<tr>
+						<td>{$v.star_activations}-<?php if($v['end_activations']){ ?>{$v.end_activations}<?php } ?></td>
+						<td>{$v.price}</td>
+					</tr>
+					<?php } ?>
+				</table>
+				</div>
+				<?php } ?>
+				</div>
+			
+			
+			<?php }else{ ?>{$val.price}<?php } ?>
+			</td>
+			<td>{$val.the_month}</td>
+			<td>{$val.admin_name}</td>
+			<td><?php echo date('Y-m-d H:i:s',$val['create_tm']); ?></td>
+			<td>{$val.admin_ip}</td>
+		</tr>
+		<?php } ?>
+	</table>
+	</div>
+	<div>
+		<span id="warning" style="color:red;"></span>
+	</div>
+	<br />
+	<table>
+		<tr>
+			<td><input type="submit" value="确定" class="search_btn" onclick="return my_check();" /></td>
+			<td><input type="button" value="取消" onclick="tb_remove();" class="search_btn" /></td>
+		</tr>
+	</table>
+	</form>
+</div>

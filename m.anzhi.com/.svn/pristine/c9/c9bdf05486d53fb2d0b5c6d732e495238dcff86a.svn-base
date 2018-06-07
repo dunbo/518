@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>圣诞大狂欢 撒欢跨新年</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/christmas_pin_2016/css/common.css?v2"/>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/jquery.easing-1.3.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/activity/christmas_pin_2016/js/tween.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/jQueryRotate-2.3.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/lottery_Rotate.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v4"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<!--{/if}-->
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/activity/christmas_pin_2016/js/lottery_softs.js?v5"></script>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/activity/christmas_pin_2016/js/show_box.js?v4"></script>
+<!--{if $out['is_share'] == 1}-->
+<script type="text/javascript" src="/js/anzhi.js"></script>
+<!--{/if}-->
+
+<style>	
+<!--{if count($out.puzzle_pic)>1 }-->
+#puzzle,#puzzle_list li{background: url("<!--{$out.imgurl}--><!--{$out.puzzle_pic[mt_rand(0,count($out.puzzle_pic)-1)]}-->") no-repeat;}	
+#puzzle{ width: 285px; height: 261px; margin:0 auto;  background-size:100% 100%; font-size: 0; position: relative;  overflow:hidden;}
+#puzzle_list li{ width: 95px; height: 87px; display: inline-block; background-position:0 0; position:absolute}
+<!--{/if}-->
+</style>
+</head>
+<body>
+<div class="banner"><img src="<!--{$out.new_static_url}-->/activity/christmas_pin_2016/images/banner.png"/></div>
+<div class="main">
+	<div class="notice">
+		<div class="notice-icon"></div>
+		<div class="notice_list">
+			<marquee scrollamount="2" scrolldelay="90" direction="left">
+				<!--{if $out.people_award_list}-->
+					<!--{foreach from=$out.people_award_list item=i}-->
+					<span><em><!--{$i.telephone}--></em>获得<!--{$i.award_name}--><em>　<!--{$i.date}-->　</em></span>
+					<!--{/foreach}-->
+				<!--{else}-->
+					<span>少年，要加油才能拿大奖喔！</span>
+				<!--{/if}-->
+			</marquee>
+		</div>
+	</div>
+	<div class="soft_wrap">
+		<div class="txt1" style="color:#fff">下载<span>1</span>个软件增加<span>1</span>次抽奖机会</div>
+		<!--<div class="soft2">
+			<ul class="soft-list clear" id="my_stable_softs">
+			</ul>
+		</div>-->
+		<div class="soft1">
+			<ul class="soft-list clear" id="my_softs">
+			</ul>
+			<a href="javascript:;"  onclick="get_soft()" class="lottery_btn3">下一页更精彩</a>
+		</div>
+	</div>
+	
+	<div class="wrap lottery_wrap" id="draw_wrap">
+		<div class="txt2">还有<span id="lottery_num"><!--{$out.lottery_num}--></span>次抽奖机会</div>
+		<div class="rotate_wrap">
+			<div class="rotate">
+				<div class="rotate-con">
+					<img src="<!--{$out.new_static_url}-->/activity/christmas_pin_2016/images/disk.png" width="100%"/>
+					<div class="rotate-pointer pointer-disabled" id="lottery"></div>
+				</div>  
+			</div>
+		</div>
+		<p style="padding:12px 0 0; text-align: center; color:#fff232">完成拼图也有抽奖机会哟！</p>
+	</div>
+	<div class="wrap puzzle_wrap">
+		<div id="puzzle">
+			<ul id="puzzle_list"><li></li></ul>
+		</div>
+		<div class="btns2">
+			<a href="/lottery/christmas_pin_2016/my_award.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->" class="fl">我的奖品</a>
+			<a href="javascript:;" onclick="go_share()" class="fr">分享</a>
+			<div class="clear"></div>
+		</div>
+		<div id="process_wrap">
+			<div id="process">
+				<span>0秒</span>	
+			</div>
+			<em>20秒</em>
+		</div>
+		
+		<div class="lottery_info clear">
+			<a id="begin_btn" href="javascript:;" class="lottery_btn3 lottery_disabled">拼图去抽奖</a>
+		</div>
+	</div>
+</div>
+<div class="footer">
+	<a href="/lottery/christmas_pin_2016/rules.php?sid=<!--{$out.sid}-->" class="rule_btn" style="margin-top:10px">活动规则</a>
+	<p>＊本次活动最终解释权归安智所有</p>
+</div>
+
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box1"  style="display: none; height:auto;">
+		<div class="tip-mid">
+			<img src="<!--{$out.new_static_url}-->/activity/christmas_pin_2016/images/tips_02.png"/>
+			<div class="tip-con">
+				<p id="again_text"></p>
+			</div>
+		</div>
+		<div class="tip_hd">
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box1');window.location.reload()">关闭</a></div>
+		</div>
+		<a  class="btns" onclick="cloBox('#tip-box1');lottery();">再玩一次</a>
+    </div>
+	
+	<div class="tip-box" id="tip-box2"  style="display: none;height:auto;">
+		<div class="tip-mid">
+			<img src="<!--{$out.new_static_url}-->/activity/christmas_pin_2016/images/tips_02.png"/>
+            <div class="tip-con">
+                <p id="again_text1"></p>
+            </div>
+        </div>
+        <div class="tip_hd">
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box2');window.location.reload()">关闭</a></div>
+        </div>
+		<a href="#my_softs" class="btns" onclick="cloBox('#tip-box2');window.location.reload()" style="margin-top:15px">去下载</a>
+    </div>
+	
+	<div class="tip-box pbot" id="tip-box3"  style="display: none;">
+		<!--<p class="prize-title cnt">少年恭喜获得<span class="spec" id="award_level_name"></span><br/><span id="award_name"></span></p>-->
+		<form class="form1">
+			<div class="form_title"></div>
+			<div class="prompt1">少年恭喜获得<span class="spec" id="award_level_name"></span><span id="award_name"></span></div>
+			<div class="form-item clear">
+				<label for="name">姓名：</label>
+				<div class="textbox"><input type="text" id="name"/> </div>
+			</div>
+			<div class="form-item clear">
+				<label for="telephone">手机：</label>
+				<div class="textbox"><input type="tel" maxlength="11" id="telephone" value=""/> </div>
+			</div>
+			<div class="form-item clear">
+				<label for="address">地址：</label>
+				<div class="textbox"><input type="text" id="address" value=""/> </div>
+			</div>
+			<div class="prompt1 prompt3" id="prompt"></div>
+			<div style="display:none" id="award_id"></div>
+		</form>
+		<a class="btns btns_tip" href="javascript:;" onclick="submit_info()">提交</a>
+	</div>
+	
+	<div class="tip-box" id="tip-box4"  style="display: none;">
+		<div class="tip-mid">
+			<img src="<!--{$out.new_static_url}-->/activity/christmas_pin_2016/images/tips_02.png"/>
+            <div class="tip-con">
+                <p>拼图成功！少年你好棒~</p>
+            </div>
+        </div>
+        <div class="tip_hd">
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box4');window.location.reload()">关闭</a></div>
+        </div>
+		<a href="#draw_wrap" class="btns" onclick="cloBox('#tip-box4');window.location.reload()">去抽奖</a>
+    </div>
+	
+	<div class="tip-box" id="tip-box5"  style="display: none;">
+		<div class="tip-mid">
+			<img src="<!--{$out.new_static_url}-->/activity/christmas_pin_2016/images/tips_02.png"/>
+            <div class="tip-con">
+                <p id="puzzle_lose_world">拼图失败！继续加油吧~</p>
+            </div>
+        </div>
+        <div class="tip_hd">
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box5');window.location.reload()">关闭</a></div>
+        </div>
+		<a href="javascript:;" class="btns" onclick="cloBox('#tip-box5');window.location.reload()">知道了</a>
+    </div>
+	
+</section>
+</body>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = <!--{$out.aid}-->;
+var lottery_num = <!--{$out.lottery_num}-->;
+var puzzle_num = <!--{$out.puzzle_num}-->;
+var rotate_flag = 0;//抽奖点击按钮是否可点击
+var submit_info_clickable = true;
+var again_text = ['没中奖不要紧！看成败人生豪迈，大不了从头再来。','少年姿势不对，再试一次~','默念三遍我一定会中，再试下~','少年你离奖品就差一步，再试试嘛~','说好的奖品呢，连辣条都不给我啊喂！','继续攒人品，下次一定RP大爆发！','少年别灰心，安智君相信下次你就能中~','天灵灵，地灵灵，下次中奖一定灵~','奖品是个磨人的小妖精，看我再试一次定会抓住你~'];
+var again_text1 = ['我真的还想再抽500次~','乖~下载APP增加抽奖机会再抽吧！'];
+// 软件
+var stable_soft_lists=<!--{$out.stable_soft_lists}-->;
+var new_static_url='<!--{$out.new_static_url}-->';
+
+var flags={canMove:true};
+
+
+function randomnum(smin, smax) {// 获取2个值之间的随机数
+	var Range = smax - smin;
+	var Rand = Math.random();
+	return (smin + Math.round(Rand * Range));
+}
+
+$(function(){
+	
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+	var unwritten = <!--{$out.unwritten}-->;
+	if (unwritten) 
+	{
+		$("#award_level_name").html('<!--{$out.award_level_name}-->');
+		$("#award_name").html('<!--{$out.award_name}-->');
+		$("#award_id").html('<!--{$out.award_id}-->');
+		showOpenBox("#tip-box3");
+	}
+	
+	if(puzzle_num<3)//还可以拼图
+	{
+		//拼图按钮可以点击
+		if($("#begin_btn").hasClass("lottery_disabled"))
+		{
+			$("#begin_btn").removeClass("lottery_disabled")
+		}
+		puzzle_pic_do();
+	}
+	else
+	{
+		//拼图按钮置灰
+		$('#begin_btn').unbind("click");
+		$("#begin_btn").addClass("lottery_disabled");
+	}
+	
+	if (!lottery_num||lottery_num<=0) {
+		//转盘是灰色的 不能点击
+		$('.rotate-pointer').unbind("click"); //移除click函数
+		//转盘变灰
+		$(".rotate-pointer").addClass("pointer-disabled");
+	} 
+	else 
+	{
+		//可以转盘
+		if($(".rotate-pointer").hasClass("pointer-disabled"))
+		{
+			$(".rotate-pointer").removeClass("pointer-disabled")
+		}
+		$(".rotate-pointer").rotate({
+            bind:{
+                click:function(){
+                    lottery();
+                }
+            }
+        });
+	}
+});
+
+//拼图失败
+function puzzle_lose()
+{
+	$.ajax({
+		url:'/lottery/christmas_pin_2016/lottery_puzzle.php?aid='+aid+'&sid='+sid+'&is_success=2',
+		dataType:'json',
+		success:function(data){
+			setTimeout(function() {
+				var lottery_num = data.lottery_num;
+				var puzzle_num = data.puzzle_num;
+				var rest_puzzle_num = parseInt(3)-parseInt(puzzle_num);
+				if (puzzle_num>3) {
+					//拼图按钮置灰
+					$('#begin_btn').unbind("click");
+					$("#begin_btn").addClass("lottery_disabled");
+				}
+				showOpenBox('#tip-box5');
+				$("#puzzle_lose_world").text("拼图失败，剩余"+rest_puzzle_num+"次机会");
+				//$("#puzzle_lose_world").text("拼图失败！继续加油吧~");
+			},200);
+		}
+	});
+}
+//拼图成功
+function puzzle_sucess() {
+	$.ajax({
+		url:'/lottery/christmas_pin_2016/lottery_puzzle.php?aid='+aid+'&sid='+sid+'&is_success=1',
+		//data:'package='+pkgname,
+		//type:'post',
+		dataType:'json',
+		success:function(data){
+			setTimeout(function() {
+				var lottery_num = data.lottery_num;
+				var puzzle_num = data.puzzle_num;
+				if (puzzle_num>3) {
+					//拼图按钮置灰
+					$('#begin_btn').unbind("click");
+					$("#begin_btn").addClass("lottery_disabled");
+				}
+				$("#lottery_num").html(lottery_num);
+				if (lottery_num > 0) {
+					if ($(".rotate-pointer").hasClass("pointer-disabled")) {
+						$(".rotate-pointer").removeClass("pointer-disabled");
+						/*$(".rotate-pointer").bind('click', function() {
+							lottery(lottery_num);
+						});*/
+						$(".rotate-pointer").rotate({
+							bind:{
+								click:function(){
+									lottery(lottery_num);
+								}
+							}
+						});
+					}
+				}
+				showOpenBox('#tip-box4');
+			},200);
+		}
+	});
+}
+
+function lottery(num) {
+	if(num)
+	{
+		lottery_num = num;
+	}
+	if(lottery_num<=0)
+	{
+		return;
+	}
+	if(parseInt(lottery_num) <= 0 ){
+		$('.rotate-pointer').attr('class', 'rotate-pointer pointer-disabled');
+		pop_tips("","剩余抽奖次数不足！","",1);			
+		return false;	
+	}
+	
+	$('.rotate-pointer').unbind("click");
+	$.ajax({
+		url: '/lottery/christmas_pin_2016/get_award_api.php?aid='+aid+'&sid='+sid,
+		dataType: 'json',				
+		success: function(data){
+			var status = data.status;
+			var award_level = data.info.award_level;
+			var left_num = data.info.left_num;
+			$("#lottery_num").html(left_num);
+			
+			if (rotate_flag == 1) {
+				return;
+			}
+			rotate_flag = 1;
+			if(award_level>0)
+			{
+				//$(obj).find(".backface img").attr('src',new_static_url+'/activity/christmas_pin_2016/images/lottery'+award_level+'.png');
+				//$(obj).find(".backface p").text(data.info.award_name);
+				var a = runzp_new(data.info.pid,8);
+			}
+			else
+			{
+				//$(obj).find(".backface img").attr('src',new_static_url+'/activity/christmas_pin_2016/images/lottery0.png');
+				//$(obj).find(".backface p").remove();
+				
+				var a = runzp_new(8,8);
+			}
+			setTimeout(function(){
+				if (award_level <= 0) {
+					if (left_num > 0) {
+						var random = randomnum(0, again_text.length-1);
+						$("#again_text").html(again_text[random]);
+						showOpenBox('#tip-box1');
+					} else {
+						var random = randomnum(0, again_text1.length-1);
+						$("#again_text1").html(again_text1[random]);
+						showOpenBox('#tip-box2');
+						//GO置灰
+						$(".rotate-pointer").addClass('pointer-disabled');
+						$(".rotate-pointer").unbind('click');
+					}
+				} else {
+					var award_level_name = data.info.award_level_name;
+					var award_type = data.info.award_type;
+					go_substantial(data.info);
+				}
+				rotate_flag = 0;
+			},3000);
+		},
+		error:function() {
+			alert('出错啦!');
+			rotate_flag = 0;
+		}
+	});
+}
+
+function go_substantial(info) {
+	$("#award_level_name").html(info.award_level_name);
+	$("#award_name").html(info.award_name);
+	$("#address").html(info.address);
+	$("#award_id").html(info.award_id);
+	$("#name").val("");
+	$("#telephone").val("");
+	$("#address").val("");
+	showOpenBox("#tip-box3");
+}
+
+//分享
+function go_share(){
+	$.ajax({
+		url: '/lottery/my_name_MT3_new/share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+		}
+	});
+	var share_text='<!--{$out.share_text}-->';
+	var share_url='<!--{$out.activity_share_url}-->lottery/christmas_pin_2016/index.php?is_share=1&aid='+aid;
+	var share_json = '{"TEXT":"'+share_text+'","URL":"<!--{$out.imgurl}-->/static/activity/christmas_pin_2016/images/weibo_share.jpg","ACTIONURL":"'+share_url+'","URLWEIXIN":"<!--{$out.imgurl}-->/static/activity/christmas_pin_2016/images/winxin_share.jpg"}';
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+
+<!--{if $out['is_share'] == 1}-->
+var js_param = {type:'action', id:aid, callback:invite_callback};
+var php_param = {type:'action', aid:aid};
+$(document).ready(function () {
+	share_download(js_param, php_param);
+});	
+<!--{/if}-->	
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6200){
+			js_param = {type:'action', id:aid, callback:null};
+			Azfd.lock = false;
+			share_download(js_param, php_param);			
+		}else {
+			setTimeout(function(){
+				var php_url = 'fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;			
+			},1000);		
+		} 
+	}else{
+		setTimeout(function(){
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;			
+		},1000);		
+	}
+}
+function is_null(){}
+
+//拼图
+var timer = null;
+var gameOn = true;
+var onOff = true; //此次拼图未停止，禁止点击下一次
+function puzzle_pic_do()
+{
+	var oBtn = document.getElementById('begin_btn');
+	var flag = false; //拼图是否成功
+	oBtn.onclick = function(){
+		$('#puzzle').css('background','none');
+		$('#process span').css('left','0px').css('display','none')
+		if(!onOff)
+		{
+			return;
+		}
+		onOff = false;
+		random();
+		game();
+		//倒计时
+		clearInterval(timer);
+		var count = 0;
+		timer = setInterval(function(){
+			count++;
+			$('#process').css('width',$('#process').width()+15+'px');
+			$('#process span').css('left',$('#process').width()-17+'px').css('display','block')
+			if(count >= 20 || flag){
+				clearInterval(timer);
+				setTimeout(function(){
+					puzzle_lose();
+				},1000)
+				$('#process span').css('left','0px').css('display','none')
+				 onOff = true;
+				 gameOn = false;
+			}
+			$("#process span").html(count+'s')
+		},1000)
+		
+	}
+}
+
+function game(){
+	var zIndex = 1;
+	var aLi = document.getElementById('puzzle_list').getElementsByTagName('li');
+	
+	var disX = 0;
+	var disY = 0;
+	gameOn = true;
+	for(var i =0; i<aLi.length; i++){
+		aLi[i].addEventListener('touchstart',start,false);
+		function start(ev){
+			if(!gameOn)
+			{
+				return;
+			}
+			disX = ev.changedTouches[0].pageX -this.offsetLeft;
+			disY = ev.changedTouches[0].pageY - this.offsetTop;
+			this.addEventListener('touchmove',move,false);
+			this.addEventListener('touchend',end,false);
+			function move(ev){	
+				if(!gameOn)
+				{
+					return;
+				}
+				this.style.left = ev.changedTouches[0].pageX - disX + 'px';
+				this.style.top = ev.changedTouches[0].pageY - disY + 'px';
+				this.style.zIndex =zIndex++;
+			}
+			function end(ev){
+				this.removeEventListener('touchend',end,false);
+				var aColl = [];
+				var value = null;
+				//获取碰到的对象
+				for(var i =0; i<aLi.length; i++){
+					if(isCollision(this,aLi[i])&& this!=aLi[i]){
+						aColl.push(aLi[i]);
+					}	
+				}
+				if(!aColl || aColl.length == 0){ //如果没有撞撞，则弹回原位置
+					animat(this,{left:$(this).attr('initialX'),top:$(this).attr('initialY')},500,4);
+					return;
+				}
+				//遍历碰到的对象，找到最大值
+				for(var i=0; i<aColl.length; i++){ 
+					var value=Math.pow(this.offsetLeft-aColl[i].offsetLeft,2)+Math.pow(this.offsetTop-aColl[i].offsetTop,2);
+					value=Math.sqrt(value);
+					aColl[i].distance=value;
+				}
+				aColl.sort(function(a,b){return a.distance-b.distance});
+				var ele = aColl[0];
+				//交换位置
+				var thisdata_value = $(this).attr('data-value'), tempX = $(this).attr('initialX'), tempY = $(this).attr('initialY'); 
+				animat(this,{left:$(ele).attr('initialx'),top:$(ele).attr('initialy')},500,4);
+				$(this).attr({
+					'initialX':$(ele).attr('initialX'),
+					'initialY':$(ele).attr('initialY'),
+					'data-value' : $(ele).attr('data-value')
+				});
+				animat(ele,{left:tempX,top:tempY},500,4);
+				$(ele).attr({
+					'initialX': tempX,
+					'initialY': tempY,
+					'data-value' : thisdata_value  //交换data-value顺序 检测正确顺序
+				})
+				delete aColl;
+				//判断拼图成功
+				for(var i=0; i<9; i++){
+					if(i!=aLi[i].getAttribute('data-value')){
+						return false;
+					}
+				}
+				flag = true;
+				setTimeout(function(){
+					puzzle_sucess();
+				},800);
+				
+				onOff = true;
+				gameOn = false;
+				console.log(onOff);
+				clearInterval(timer);
+				//this.removeEventListener('touchstart',start,false);
+				this.removeEventListener('touchmove',move,false);
+				this.removeEventListener('touchend',end,false);
+			}
+			ev.preventDefault();
+		}
+	}
+}
+//删除数组中已经随机出来的项
+function remove (arr){ 
+	var newAry = arr[Math.floor(Math.random() * arr.length)];
+	for(var i=0; i<arr.length; i++){
+		if(arr[i] == newAry){
+			arr.splice(i,1);
+			break;
+		}
+	}
+	return newAry;
+}
+//碰撞检测
+function isCollision(r,b){
+	if(r.offsetLeft+r.offsetWidth<b.offsetLeft||r.offsetTop+r.offsetHeight<b.offsetTop||r.offsetLeft>b.offsetLeft+b.offsetWidth||r.offsetTop>b.offsetTop+b.offsetHeight){
+		return false;
+    }else{
+		return true;
+    }
+}
+//随机摆放图片
+function random(){
+	var arr = [0,1,2,3,4,5,6,7,8];
+	var oLi = '';
+	$('#process').css('width','0px');
+	$('#process span').html('0s');
+	$('#puzzle_list').html(''); 
+	for(var i=0; i<9; i++){
+		var newAry = remove(arr);
+		var xpos = 95 * (newAry % 3);
+        var ypos = 79 * Math.floor(newAry / 3);
+		var xImg = 95*(i%3);
+		var yImg = 79*(Math.floor(i/3));
+		var oLi = '<li initialx = "'+ xpos +'"; initialy = "'+ ypos +'"; data-value="' + (newAry) + '" style="background-position:-'+xImg+'px -'+yImg+'px; left:'+xpos+'px; top:'+ypos+'px">'+i+'</li>';
+		$('#puzzle_list').append(oLi);  //插入
+	}
+}
+</script>
+</html>

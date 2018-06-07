@@ -1,0 +1,412 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<link rel="stylesheet" type="text/css" media="all"	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<link rel="stylesheet" href="__PUBLIC__/css/bootstrap.min.css">
+<script type="text/javascript" src="__PUBLIC__/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/bootstrap.min.js"></script>
+<script type="text/javascript" src='__PUBLIC__/js/thickbox-compressed.js' ></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/uploadify.css">
+<script src="/Public/js/jquery.uploadify.min.js?ver=<?php echo rand(0,9999);?>" type="text/javascript"></script>
+<link rel="stylesheet" href="__PUBLIC__/css/thickbox.css" type="text/css" media="screen" />
+<style>
+    td{padding:5px 20px;text-align:left !important;}
+    .red{color:red;}
+    .green{color:green;}
+    input{height:31px !important;}
+    .input-group{width:100%;}
+    .ajax_delete_file{color:red;font-size:20px;vertical-align: bottom;cursor:pointer;}
+</style>
+<h4 class="yahei" style="padding-left:25px;">编辑框架协议</h4>
+<form action="__URL__/edit_agreement_do" id="" method="post" class="uform">
+    <input type="hidden" name="url_suffix" value="{$url_suffix}"/>
+    <input type="hidden" name="id" value="{$list.id}"/>
+    <input type="hidden" name="action" value="edit"/>
+    <table class="yahei">
+        <tr>
+            <td><font color=red>*</font>客户名称：</td>
+            <td style="width:50%;">
+                <select name="client_id" class="select form-control" required  disabled>
+                    <option value="0">请选择客户</option>
+                    <volist name="client_lists" id="vo">
+                        <option value="{$vo.id}" <?php if($vo['id'] == $list['client_id']) echo "selected";?>>{$vo.client_name}</option>
+                    </volist>
+                </select>
+            </td>
+            <td class=""></td>
+        </tr>
+        <tr>
+            <td><font color=red>*</font>协议编号：</td>
+            <td><input type="text" class="form-control" name="agreement_code" required  style="width:100%;" disabled value="{$list.agreement_code}" id="input_agreement_code"/></td>
+            <td class=""></td>
+        </tr>
+        <tbody id="agreement_zhuti">
+        <tr id="zhuti_1">
+            <td><font color=red>*</font>协议主体：</td>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-addon">乙</span>
+                    <input type="text" name="party_b" class="form-control" required value="{$list.party_b}" placeholder="需填">
+                </div>
+            </td>
+            <td class=""></td>
+        </tr>
+        <tr id="zhuti_2">
+            <td></td>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-addon">丙</span>
+                    <input type="text" name="party_c" class="form-control" value="{$list.party_c}"  placeholder="可选">
+                </div>
+            </td>
+            <td class=""></td>
+        </tr>
+        </tbody>
+
+        <tr>
+            <td><font color=red></font>签订日期：</td>
+            <td><input type="text" class="form-control Wdate"  name="sign_date" value="{$list.sign_date}"  onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"style="width:100%;" id="input_sign_date"/></td>
+            <td class=""></td>
+        </tr>
+        <tr>
+            <td><font color=red></font>合作金额：</td>
+            <td><input type="text" class="form-control" name="amount"  style="width:100%;"value="{$list.amount}" id="input_amount"/></td>
+            <td class=""></td>
+        </tr>
+        <tr>
+			<td><font color=red>*</font>选择刊例：</td>
+			<td>
+				<select name="rate_card_id" class="form-control">
+					<option value="-1">选择刊例</option>
+					<?php foreach($rate_cards as $r):?>
+						<option value="{$r.id}" <?php if($rate_card_id == $r['id']) echo "selected"; ?>>{$r.rate_card_name}</option>
+					<?php endforeach;?>
+				</select>
+			</td>
+			<td class=""></td>
+		</tr>
+        <tbody name="purchase_channel_tbody" id="purchase_channel_tbody">
+        	<?php foreach ($purchase_ad_ids as $num => $ad_id):?>
+		        <tr id="tr_<?php echo $num;?>">
+		            <td>
+		            	<?php if($num == 0):?>
+		            		购买频道：
+		            	<?php endif;?>
+
+		            </td>
+		            <td>
+		                <select name="purchase_channel[]" id="purchase_channel[]" class="form-control" onchange="check_select(this)">
+		                   <option value="" >选择广告位</option>
+								<volist name="channels" id="channel">
+									<option value="{$channel.id}" <?php if($ad_id['advertising_id'] == $channel['id']) echo "selected";?>>{$channel.advertising_name}</option>
+								</volist>
+		                </select>
+		            </td>
+		            <td class="">
+		            	<?php if($num == 0):?>
+		            		<input type="button" value="添加" class="btn btn-default yahei" onclick="return add_purchase_channel();">
+		            	<?php else:?>
+							<input type="button" value="删除" class="btn btn-default" onclick="return delete_purchase_channel('<?php echo $num;?>');">
+		            	<?php endif;?>
+		            </td>
+		        </tr>
+	        <?php endforeach;?>
+	        <?php if(empty($purchase_ad_ids)):?>
+				<tr id="tr_0">
+		            <td>
+		            		<font color=red>*</font>购买频道：
+
+		            </td>
+		            <td>
+		                <select name="purchase_channel[]" id="purchase_channel[]" class="form-control" onchange="check_select(this)">
+		                   <option value="" >选择广告位</option>
+								<volist name="channels" id="channel">
+									<option value="{$channel.id}" >{$channel.advertising_name}</option>
+								</volist>
+		                </select>
+		            </td>
+		            <td class="">
+		            	<input type="button" value="添加" class="btn btn-default yahei" onclick="return add_purchase_channel();">
+		            </td>
+		        </tr>
+	        <?php endif;?>
+        </tbody>
+        <tr>
+            <td><font color=red>*</font>起始日期：</td>
+            <td><input type="text" class="form-control Wdate" name="start_date" value="{$list.start_date}" required onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"style="width:100%;" id="input_start_date"/></td>
+            <td class=""></td>
+        </tr>
+        <tr>
+            <td><font color=red>*</font>终止日期：</td>
+            <td><input type="text" class="form-control Wdate" name="end_date" value="{$list.end_date}" required onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"style="width:100%;" id="input_end_date"/></td>
+            <td class=""></td>
+        </tr>
+        <tr>
+            <td><font color=red>*</font>负责人：</td>
+            <td><input type="text" class="form-control" name="responsible" required style="width:100%;" value="{$list.responsible}" id="input_responsible"/></td>
+            <td class=""></td>
+        </tr>
+        <tr>
+            <td>预计保证金：</td>
+            <td><input type="text" class="form-control" name="expect_deposit" value="{$list.expect_deposit}" style="width:100%;" id="input_expect_deposit"/></td>
+            <td class=""></td>
+        </tr>
+        <tr>
+            <td><font color=red>*</font>保证金余额：</td>
+            <td><input type="text" class="form-control" name="deposit_balance" value="{$list.deposit_balance}" required style="width:100%;" id="input_deposit_balance"/></td>
+            <td class=""></td>
+        </tr>
+        <tr>
+            <td>上传附件：</td>
+            <td>
+                <div class="upload_apk_btn" style="margin-left:5px;"><input type="file" id="affix" name="affix" /></div>
+            </td>
+            <td class="yahei"><div id="error"></div>格式：word、excel、pdf、jpg、png。10M以内</td>
+        </tr>
+        <tr>
+            <td>附件：</td>
+            <td id="uploaded_files" colspan=2>
+                <volist name="attachment_lists" id="li">
+                    <div class="file_wrapper" id="file_{$li.id}">
+                        <span class="yahei">
+                            <a href="/index.php/Settlement/Attachment/download/attachment_id/{$li.id}" target="_blank">{$li.custom_name}</a>
+                        </span>
+                        &nbsp;&nbsp;&nbsp;
+                        <span class="ajax_delete_file" num="{$li.id}" onclick="javascript:ajax_delete_file({$li.id})">×</span>
+                    </div>
+
+                </volist>
+            </td>
+        </tr>
+        <tr>
+            <td>备注：</td>
+            <td>
+                <textarea name="remark" id="remark" class="form-control"style="width:100%;height:80px;">{$list.remark}</textarea>
+            </td>
+            <td class="yahei"></td>
+        </tr>
+    </table>
+    <div style="margin:10px auto;padding:0px 30px;">
+        <button class="btn btn-success yahei" type="submit" onclick="javascript:return checkBeforeSubmit();" style="padding-left:20px;padding-right:20px;margin-left:100px;">保存</button>
+        <button class="btn btn-default yahei" type="button" onClick="javascript:history.back();"style="padding-left:20px;padding-right:20px;margin-left:30px;">取消</button>
+    </div>
+</form>
+<script>
+var chanel_body = '<option value="" selected>选择栏目</option>\
+					    <volist name="channels" id="channel">\
+					    <option value="{$channel.id}">{$channel.advertising_name}</option>\
+					</volist>';
+    $(function(){
+    	//根据rate_card_id选出广告位
+    	$("select[name='rate_card_id']").change(function(){
+    		var old_rate_card = {$rate_card_id};
+    	    if(confirm("确认更改刊例？一旦更改，之前所保存的广告位将被全部清空，请谨慎操作！"))
+    		{
+	    		var rate_card_id = $(this).val();
+	    		if(rate_card_id == '-1')
+	    		{
+	    			alert("请先选择刊例！");
+	    			$(this).focus();
+	    			return;
+	    		}
+	    		$("#purchase_channel_tbody").html('<tr id="tr_0">\
+			    				<td><font color=red>*</font>购买频道：</td>\
+			    				<td>\
+			    							<select name="purchase_channel[]" id="purchase_channel[]" class="form-control" onchange="check_select(this)">\
+			    								<option value="-1" selected>请先选择刊例</option>\
+			    							</select>\
+			    				</td>\
+			    				<td class=""><input type="button" value="添加" class="btn btn-default yahei" onclick="return add_purchase_channel();"></td>\
+			    			</tr>'
+	    		);
+	    		$.ajax({
+	    			url:"__URL__/ajax_get_advertising_info/rate_card_id/"+rate_card_id,
+	    			type:'get',
+	    			success:function(data){
+	    				$("select[name='purchase_channel[]']").html(data);
+	    				chanel_body = data;
+	    			}
+	    		});
+    		}else{
+    			$(this).val(old_rate_card);
+    		}
+    	});
+        //判断用户输入的负责人是否已经存在
+        $("#input_responsible").change(function(){
+            if($(this).val() == "" || $(this).val() == undefined)
+            {
+                $(this).parent().next().text("请填写负责人名字!").addClass('red');
+                $(this).css({border:"1px solid red"});
+                return ;
+            }
+            var name = $(this).val();
+            $.ajax({
+                url:"__URL__/ajax_check_admin_name",
+                type:"post",
+                dateType:"html",
+                data:"name="+name,
+                success:function(returnData){
+                    //处理返回数据
+                    if(returnData == "2")
+                    {
+                        $("#input_responsible").parent().next().text("该负责人不存在!").addClass('red');
+                        $("#input_responsible").css({border:"1px solid red"});
+                        $("#input_responsible").focus();
+                        return ;
+                    }else{
+                        $("#input_responsible").parent().next().text("");
+                        $("#input_responsible").css({border:"1px solid gray"});
+                        return ;
+                    }
+                }
+            });
+        });
+        //判断用户输入的协议编号是否已经存在
+        $("#input_agreement_code").change(function(){
+            if($(this).val() == "" || $(this).val() == undefined)
+            {
+                $(this).parent().next().text("请填写协议编号!").addClass('red');
+                $(this).css({border:"1px solid red"});
+                return ;
+            }
+            var code = $(this).val();
+            $.ajax({
+                url:"__URL__/ajax_check_agreement_code",
+                type:"post",
+                dateType:"html",
+                data:"code="+code,
+                success:function(returnData){
+                    //处理返回数据
+                    if(returnData == "2")
+                    {
+                        $("#input_agreement_code").parent().next().text("该协议编号已存在!").addClass('red');
+                        $("#input_agreement_code").css({border:"1px solid red"});
+                        $("#input_agreement_code").focus();
+                        return ;
+                    }else{
+                        $("#input_agreement_code").parent().next().text("");
+                        $("#input_agreement_code").css({border:"1px solid gray"});
+                        return ;
+                    }
+                }
+            });
+        });
+        /**ajax多文件上传**/
+        $("#affix").uploadify({
+            'height' : 20,
+            'width'  : 100,
+            'swf' : '/Public/images/uploadify.swf',
+            'fileObjName' : 'affix',
+            'uploader' : '/index.php/Settlement/Attachment/ajax_upload_file/name/affix/',
+            'onUploadSuccess' : function(file, res, bool) {
+                var res = eval('('+res+')');
+                var str = '';
+
+                if(res['error'] == 1){
+                    $('#error').html('<span style="color:red;">'+res['msg']+'</span>');
+                }else{
+                    $('#error').html('');
+                    var attachment_num = res['attachment_id'];
+                    $("form").append("<input type='hidden' name='attachment_id[]' id='attachment_id_"+attachment_num+"' value='"+res['attachment_id']+"' >");
+                    $("#uploaded_files").append('<div class="file_wrapper" id="file_'+attachment_num+'"><span class="yahei"><a href="/index.php/Settlement/Attachment/download/attachment_id/'+res['attachment_id']+'" target="_blank">'+file['name']+'</a></span>&nbsp;&nbsp;&nbsp;<span class="ajax_delete_file" num="'+attachment_num+'" onClick="javascript:ajax_delete_file('+attachment_num+')">×</span></div>');
+                }
+            }
+        });
+
+    });
+    /*****删除附件*******/
+    function ajax_delete_file(num)
+    {
+        if(confirm("确认删除该附件？"))
+        {
+            $.ajax({
+                url:'/index.php/Settlement/Attachment/ajax_delete_file/attachment_id/'+num+"/agreement_id/{$list.id}",
+                success:function(data){
+                    if(data == 1)
+                    {
+                        //删除隐藏input
+                        $("#attachment_id_"+num).remove();
+                        //删除显示出来的附件
+                        $("#file_"+num).remove();
+                    }
+                }
+            });
+        }
+    }
+    function checkBeforeSubmit()
+    {
+        if($("select[name='client_id']").val() == '0')
+        {
+            alert("请先选择客户！");
+            $("select[name='client_id']").focus();
+            return false;
+        }
+    }
+    var tr_i = <?php echo count($purchase_ad_ids)?count($purchase_ad_ids):'1';?>;
+    // 增加购买栏目
+    function add_purchase_channel() {
+        // 如果有一个栏目没有选择，则报错，不让继续添加
+        var purchase_channel_arr = document.getElementsByName("purchase_channel[]");
+        for (var i = 0; i < purchase_channel_arr.length; i++) {
+            if (purchase_channel_arr[i].value == '') {
+                alert("请选择栏目！");
+                return false;
+            }
+        }
+        if (purchase_channel_arr.length > 10) {
+            alert("最多只能添加10个");
+            return false;
+        }
+        /*
+         var channels = <?php echo json_encode($channels); ?>;
+         alert(channels.EX);
+         var xxx = JSON.stringify(channels);
+         alert(xxx);
+         // 计算剩余可被添加渠道
+         for (var i = 0; i < purchase_channel_arr.length; i++) {
+         var prefix = purchase_channel_arr[i].value;
+         alert(prefix);
+         delete channels[prefix];
+         }
+         */
+        // 动态生成html代码
+        var purchase_channel_tbody = $("#purchase_channel_tbody");
+        purchase_channel_tbody.append('\
+    <tr id="tr_' + tr_i + '">\
+    <td></td>\
+    <td>\
+        <select name="purchase_channel[]" id="purchase_channel[]" class="form-control" onchange="check_select(this)">\
+            '+chanel_body+'\
+        </select>\
+    </td>\
+    <td><input type="button" value="删除" class="btn btn-default" onclick="return delete_purchase_channel(' + tr_i + ');"></td>\
+    </tr>');
+        tr_i++;
+    }
+
+    // 删除购买栏目
+    function delete_purchase_channel(i) {
+        var tr = $("#tr_" + i)[0];
+        tr.remove();
+    }
+
+    // 不能重复选择同一个频道
+    function check_select(obj) {
+        var purchase_channel_arr = document.getElementsByName("purchase_channel[]");
+        for (var i = 0; i < purchase_channel_arr.length; i++) {
+            if (!obj.value)
+                continue;
+            if (purchase_channel_arr[i] == obj)
+                continue;
+            if (purchase_channel_arr[i].value == obj.value) {
+                alert("已选择此频道，请选择其他频道！");
+                obj.options[0].selected = true;
+                return false;
+            }
+        }
+    }
+</script>
+
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />

@@ -1,0 +1,91 @@
+<style>
+table{border: 0px;}
+#editId th{float:right;padding-right:10px;}
+#editId td{border: 0px solid #000;}
+</style>
+<body>
+编辑内容
+
+<form method='post' action="__URL__/edit_prefecture" enctype="multipart/form-data" >
+<input type="hidden" name="fids" id="fids" value="{$editprefecture.b_fid}" />
+<input type="hidden" name="action" id="actionid" value="editprefecture" />
+<table width="80%" border="0" align="center" id="editId">
+	<if condition="$editprefecture.b_fup eq '0' && $editprefecture.b_fid lt 10000">
+	<tr>
+		<th style="background-color:#fff;">分类:</th>
+		<td>
+			<select name="classname" id="classid">
+				<option value="0">默认</option>
+				<option value="1">普通专区</option>
+				<option value="2">手机专区</option>
+				<option value="3">游戏专区</option>
+			</select>
+		</td>
+	</tr>
+	</if>
+	<tr>
+		<th style="background-color:#fff;">
+		<if condition="$editprefecture.b_fup eq '0'">专区<else />版块</if>ID:</th>
+		<td>{$editprefecture.b_fid}</td>
+	</tr>
+	<tr>
+		<th style="background-color:#fff;">
+		<if condition="$editprefecture.b_fup eq '0'">专区<else />版块</if>名称:</th>
+		<td>{$editprefecture.b_name}</td>
+	</tr>
+	<tr>
+		<th style="background-color:#fff;">显示名称:</th>
+		<td><input type="text" name="names" id="names" value="{$editprefecture.name}" /></td>
+	</tr>
+	<tr>
+		<th style="background-color:#fff;">买家秀TID:</th>
+		<td><input type="text" name="buyershowtid" id="buyershowtid" value="{$editprefecture.buyershowtid|default=''}" /></td>
+	</tr>
+	<tr>
+		<th style="background-color:#fff;">LOGO:</th>
+		<td>
+		
+		<!-- {if $editprefecture.icon==''}eee{/if} -->
+			
+			<if condition="$editprefecture.icon neq ''"><img id="viewImg" src="<?php echo IMGATT_HOST;?>{$editprefecture.icon}" height="100" /><a href="javascript:;" onclick="return delimg({$editprefecture.b_fid});">删除</a>
+		    <else /> 无
+		 </if><br />
+		 <input type="file" name="p_logo" id="p_logo_id" />
+		</td>
+	</tr>
+    
+	<tr>
+	 <th></th>
+      <td  >
+      	<input type="submit" class="search_btn" style="display:inline-block;"  value="提交" /> 
+      	<input type="button" class="search_btn" style="display:inline-block;" onclick="tb_remove();" value="取消" /></td>
+    </tr>
+</table>
+</form>
+<script>
+function checkform(){
+	if(!$.trim($('#names').val())){
+		alert('显示名称不能为空');
+		return false;
+	}
+	return true;
+}
+$(function(){
+	if($("#classid").length>0){
+		$("#classid").find("option[value='{$editprefecture.class}']").attr("selected",true);
+	}
+});
+function delimg(fid){
+    if(!confirm('确实要删除图片吗?')) return false;
+    $.getJSON("__URL__/delimg/fid/" + fid + '/',function(e){
+        if(e.su){
+            var viewImg = document.getElementById("viewImg");
+            viewImg.src='';
+            alert('删除成功');
+        }else{
+            alert('删除失败');
+        }
+    })
+    return false;
+}
+</script>

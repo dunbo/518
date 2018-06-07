@@ -1,0 +1,181 @@
+<script type="text/javascript" src='__PUBLIC__/js/thickbox-compressed.js'></script>
+<link media="screen" type="text/css" href="__PUBLIC__/css/thickbox.css" rel="stylesheet">         
+<table  width="100%">
+            <tr>
+                <td width="26%" align="right">广告数据类型:</td>
+                <td align='left'>
+                    <select class="search_item_text" id="content_type" name="content_type" style="width: 100px" onchange="change_content($(this).val())">
+                        <?php
+                        foreach($content_type as $key=>$val){
+                        ?>
+                        <option value="<?php echo $key;?>" <?php if($_GET['content_type']==$key){echo 'selected="selected"';}else if($key==1){echo 'selected="selected"';}?>><?php echo $val;?></option>
+                        <?php
+                        }
+                    ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td  align="right">标题:</td><td align='left'><input type="text" name="title" id="title" class="search_item_text" style="width:100px"></td>
+            </tr>
+            <tr>
+                <td  align="right">描述:</td><td align='left'><textarea name="description" id="description" class="search_item_text" style="width:150px;height:100px"></textarea></td>
+            </tr>           
+            <tr>
+                <td align="right">关闭控制:</td><td align='left'><input type="radio" name="close_flag" value="1">不再展示<input type="radio" name="close_flag" value="2" checked>下次启动展示</td>
+            </tr>
+            <tr>
+                <td align="right">渠道:</td>
+                <td align='left'>
+                    <a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel&platform=1" onclick="set_style()" class="thickbox">选择指定渠道</a><br>
+                    <div id="channel_div">
+
+                    </div>
+                </td>
+            </tr>
+<!--            <tr>
+                <td align="right">渠道key:</td><td align='left'><input type="text" class="search_item_text" style="width:100px" name="channel_key" id="channel_key"></td>
+            </tr>-->
+            <tr>
+                <td align="right">平台:</td><td align='left'><input type="text" class="search_item_text" style="width:100px" name="pid" id="pid"></td>
+            </tr>
+            <tr>
+                <td align="right">开始时间:</td><td align='left'><input type="text" style="width:150px" id="start_at" name="start_at" class="search_item_text Wdate" onclick='WdatePicker({startDate:"%y-%M-%d %H:%m:%s",dateFmt:"yyyy-MM-dd HH:mm:ss"})'></td>
+            </tr>
+            <tr>
+                <td align="right">结束时间:</td><td align='left'><input type="text" style="width:150px" id="end_at" name="end_at" class="search_item_text Wdate" onclick='WdatePicker({startDate:"%y-%M-%d %H:%m:%s",dateFmt:"yyyy-MM-dd HH:mm:ss"})'></td>
+            </tr>
+            <tr class ='type type1'>
+                <td align="right">链接地址:</td><td align='left'><input type='text' class="search_item_text" style="width:100px" id='url' name="url" value=''></td>
+            </tr>
+            <tr class ='type type1'>
+                <td align="right">链接打开方式:</td><td align='left'><input type="radio" name="open_mode" value="1" checked>内置浏览器<input type="radio" name="open_mode" value="2">外置浏览器</td>
+            </tr>
+            <tr class ='type type2' id="pack_td" style="display:none">
+                <td align="right">包名:</td><td align='left'>
+                    <div style="float:left"><input type="text" class="search_item_text" style="width:100px" id="package" name="package"></div> 
+                </td>
+            </tr>
+            <tr class ='type type2' style="display:none">
+                <td align="right">下载方式:</td>
+                <td align='left'>
+                    <?php 
+                    foreach($download_flag as $k=>$v){
+                    ?>
+                    <input type="radio" name="download_flag" value="<?php echo $k;?>"><?php echo $v;?><br>
+                    <?php
+                    }?>
+                </td>
+            </tr>
+			<tr>
+                <td align="right">投放区域:</td><td align='left'>
+                    <input type="radio" name="app_type" value="0">通用
+					<input type="radio" name="app_type" value="1">定制
+					<input type="radio" name="app_type" value="2" checked>不限制
+                </td>
+            </tr>
+			<tr class ='type type2' style="display:none">
+                <td  align="right">下载完成:</td><td align='left'>
+                    <input type="radio" name="show_intall_pic" value="1">弹出下载软件安装界面<br>
+					<input type="radio" name="show_intall_pic" value="2">不弹下载软件安装界面
+                </td>
+            </tr>
+			<tr>
+                <td align="right">启动次数展示:</td><td align='left'>
+                    <input type="text" class="search_item_text" style="width:100px" id="show_flag" value="0" name="show_flag">
+                </td>
+            </tr>
+			<tr>
+                <td align="right">安智市场安装状态:</td><td align='left'>
+                    <input type="radio" name="market_flag" value="0">未安装
+					<input type="radio" name="market_flag" value="1">已安装
+					<input type="radio" name="market_flag" value="2" checked>不限制
+                </td>
+            </tr>
+			<tr id="tr_csv">
+				<td align="right">覆盖用户：</td> 
+				<td align='left' style="height:70px;">
+				<a href="__PUBLIC__/fugaiyonghu_sdk.csv" class="blue" style="text-decoration:none;font-size:14px;">下载csv模板</a><br>
+				<input type="file" id="upload_file" name="upload_file" style="background:none; border:none; width:170px;"/><input type="button" value="上传" onclick="count('fugai')"/><br>
+				<input type="text" id="pre_dl_count" name="pre_dl_count" style="border:none;background:none; color:red;" readonly value=""/>
+				</td>
+				<div id="error_show_div"></div>
+				<input type='hidden' name='csv_url' id='csv_url' value="">
+				<input type='hidden' name='csv_count' id='csv_count' value="">
+			</tr>
+			<tr>
+                <td align="right">广告优先级:</td>
+				<td align='left'>
+					<input type="text" name="priority" id="priority" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" onblur="check_priority()"/> 
+					<b>请输入1-100阿拉伯数字</b>
+				</td>
+            </tr>
+        </table>
+<div>
+    <input type="hidden" id="c_ad_type" name="c_ad_type">
+    <div style="float:left;margin-left:45px;margin-top:10px;margin-bottom: 10px"><input type="submit" onclick="return sub()" class="search_btn" value="确定"></div>
+    <div style="float:left;margin-left:20px;margin-top:10px;margin-bottom: 10px"><input type="button" onclick="$.zxxbox.hide();" class="search_btn " value="取消"></div>
+</div>
+<script type="text/javascript">
+    function sub(){
+        var type = $('#ad_type').val();
+        $('#c_ad_type').val(type);
+        if($('#ad_type').val()==''){
+            alert('广告类型不能为空');
+            return false;
+        }
+        if($('#content_type').val()==''){
+            alert('广告数据类型不能为空');
+            return false;
+        }
+        if($('#title').val()==''){
+            alert('标题不能为空');
+            return false;
+        }
+        
+        if(!$("input[name='close_flag']:checked").val()){
+            alert('请选择关闭控制');
+            return false;
+        }
+        if($('#pid').val()==''){
+            alert("请输入平台");
+            return false;
+        }
+        if($('#start_at').val()==''){
+            alert("请输入开始时间");
+            return false;
+        }
+        if($('#end_at').val()==''){
+            alert("请输入结束时间");
+            return false;
+        }
+        
+        if($('#content_type').val()==1){
+            if($('#url').val()==''){
+                alert("请输入链接地址");
+                return false;
+            }
+            if(!$("input[name='open_mode']:checked").val()){
+                alert('请选择链接打开方式');
+                return false;
+            }
+        }else{
+            if($('#package').val()==''){
+                alert("请输入包名");
+                return false;
+            }
+            if(!$("input[name='download_flag']:checked").val()){
+                alert('请选择下载方式');
+                return false;
+            }
+			if(!$("input[name='show_intall_pic']:checked").val()){
+                alert('请选择下载完成是否弹出安装界面');
+                return false;
+            }
+
+        }
+		return check_priority();
+        
+    }
+</script>
+

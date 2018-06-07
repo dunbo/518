@@ -1,0 +1,308 @@
+<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+    <script type="text/javascript">
+//判断是否汉字
+function isChinese1(str){ 
+
+var badChar ="ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
+badChar += "abcdefghijklmnopqrstuvwxyz"; 
+badChar += "0123456789"; 
+badChar += " "+"　";//半角与全角空格 
+badChar += "`~!@#$%^&()-_=+]\\\\|:;\"\\\'<,>?/";//不包含*或.的英文符号 
+
+if(""==str){ 
+return false; 
+} 
+for(var i=0;i<str.length;i++){ 
+var c = str.charAt(i);//字符串str中的字符 
+if(badChar.indexOf(c) > -1){ 
+return false; 
+} 
+} 
+return true; 
+} 
+
+        function upload(){
+
+            var r = /^\+?[1-9][0-9]*$/;　　//正整数 
+
+            //各种判断  勾选了 框里就得有值
+            var bdid = $("#bdid").val();
+            var bdtype = $("#bdtype").val();
+            var scope =$('input:radio[name=scope]:checked').val();
+            var role =$('input:radio[name=role]:checked').val();
+            var bdname = $("#bdname").val();
+            var bdnum = $.trim($("#bdnum").val());
+            var xb_days = $.trim($("#xb_days").val());
+            var qx_days = $.trim($("#qx_days").val());
+
+            var from=<?php echo $from; ?>;
+
+            var today = $("#today").val();
+            var yesterday = $("#yesterday").val();
+            var deserted = $("#deserted").val();
+            var daqiantian = $("#daqiantian").val();
+            if(from<2){
+                var newdown = $("#newdown").val();
+                var install = $("#install").val();
+                var searchdown = $("#searchdown").val();
+                var pinglun = $("#pinglun").val();
+                var haoping = $("#haoping").val();
+            }else{
+                var now_seek = $("#now_seek").val();
+                var seek_one = $("#seek_one").val();
+                var seek_two = $("#seek_two").val();
+                var seek_three = $("#seek_three").val();
+
+                var consume_now = $("#consume_now").val();
+                var consume_one = $("#consume_one").val();
+                var consume_two = $("#consume_two").val();
+                var consume_three = $("#consume_three").val();
+            }
+			
+            if(bdname.length==0){
+                alert('榜单名称不能为空');
+                return;
+            }else
+            {
+                if (!isChinese1(bdname)){
+                    alert("榜单名称只能为汉字");
+                    return;
+                }
+                if(bdname.length<2||bdname.length>4)
+                {
+                    alert("榜单名称只能2-4个汉字");
+                    return;
+                }
+            }
+
+            if(bdnum.length==0){
+                alert('榜单显示软件数不能为空');
+                return;
+            }else
+            {
+                if(!r.test(bdnum))
+                {
+                    alert("软件数只能为正整数");
+                    return;     
+                }else if(parseInt(bdnum)<=20)
+                {
+                    alert("软件数仅可填写大于20的正整数");
+                    return;     
+                }
+            }
+            
+            if(typeof(scope)=='undefined'){
+                alert('请选择软件筛选范围类型');
+                return;
+            }else if(scope==1)
+            {
+                if(xb_days.length==0){
+                    alert('天数不能为空');
+                    return;
+                }else
+                {
+                    if(!r.test(xb_days))
+                    {
+                        alert("天数只能为正整数111");
+                        return;     
+                    }
+                }
+            }else if(scope==2)
+            {
+                if(qx_days.length==0){
+                    alert('天数不能为空');
+                    return;
+                }else
+                {
+                    if(!r.test(qx_days))
+                    {
+                        alert("天数只能为正整数");
+                        return;     
+                    }
+                }           
+            }
+
+            if(typeof(role)=='undefined'){
+                alert('请选择榜单规则类型');
+                return;
+            }else if(role==1)
+            {
+                if(today.length==0||yesterday.length==0||deserted.length==0||daqiantian.length==0){
+                    alert('权重系数不能为空');
+                    return;
+                }else
+                {
+                    if(!r.test(today)||!r.test(yesterday)||!r.test(deserted)||!r.test(daqiantian))
+                    {
+                        alert("权重系数只能为正整数");
+                        return;     
+                    }
+                }
+            }else if(role==2)
+            {   
+                       if(newdown.length==0||install.length==0||searchdown.length==0||pinglun.length==0||haoping.length==0){
+                        alert('权重系数不能为空');
+                        return;
+                        }else
+                        {
+                            if(!r.test(newdown)||!r.test(install)||!r.test(searchdown)||!r.test(pinglun)||!r.test(haoping))
+                            {
+                                alert("权重系数只能为正整数");
+                                return;     
+                            }
+                        } 
+            }else if(role==3){
+                if(consume_now.length==0||consume_one.length==0||consume_two.length==0||consume_three.length==0){
+                    alert('权重系数不能为空');
+                    return;
+                }else{
+                    if(!r.test(consume_now)||!r.test(consume_one)||!r.test(consume_two)||!r.test(consume_three))
+                    {
+                        alert("权重系数只能为正整数");
+                        return;     
+                    }
+                } 
+            }else if(role==4){
+                if(now_seek.length==0||seek_one.length==0||seek_two.length==0||seek_three.length==0){
+                        alert('权重系数不能为空');
+                        return;
+                    }else
+                    {
+                        if(!r.test(now_seek)||!r.test(seek_one)||!r.test(seek_two)||!r.test(seek_three))
+                        {
+                            alert("权重系数只能为正整数");
+                            return;     
+                        }
+                     } 
+            }
+
+                var param = {
+                    bdid:bdid,
+                    bdname :bdname,
+                    bdtype :bdtype ,
+                    scope :scope,
+                    role:role,
+                    bdnum:bdnum,
+                    xb_days:xb_days,
+                    qx_days:qx_days,
+
+                    today:today,
+                    yesterday:yesterday,
+                    deserted:deserted,
+                    daqiantian :daqiantian,
+
+                    newdown:newdown,
+                    install:install,
+                    searchdown:searchdown,
+                    pinglun:pinglun,
+                    haoping:haoping,
+
+                    now_seek:now_seek,
+                    seek_one:seek_one,
+                    seek_two:seek_two,
+                    seek_three:seek_three,
+                    consume_now:consume_now,
+                    consume_one:consume_one,
+                    consume_two:consume_two,
+                    consume_three:consume_three,
+
+                    searchday: $('#searchday').val(),
+
+					from : from
+                };
+                $.ajax({
+                    url:'__URL__/edit_bd',
+                    type:'POST',
+                    data:param,
+                    dataType:'json',
+                    success:function(data){
+                        if(data==1)
+                        {
+                            location.reload(true);
+                            //location.href ="/index.php/Sj/Systemmanage/tags_list";
+                        }else
+                        {
+                            alert('数据库操作失败');
+                        }
+                    }
+                });
+        };
+    </script>
+</head>
+ 
+<body>
+<div style="width:45; margin-top:4px">
+	 <form id="form1" name="form1" method="post" action="__SELF__">
+  <table>
+      {$title}榜单
+      <hr>
+    <tr align="center">
+         <td width="20%" height="20" align="right" bgcolor="#FFFFFF"><span id="s1"><font color="red">*</font></span>榜单名称:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="hidden" id="bdid" value="{$rs.id}">
+             <input type="text" size="20"  id="bdname" value="{$rs.name}"> 2-4个汉字
+        </td>
+    </tr>      
+      <tr align="center">
+         <td width="20%" height="20" align="right" bgcolor="#FFFFFF"><span id="s1"><font color="red">*</font></span>榜单显示软件数:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" size="20"  id="bdnum" value="{$rs.num}">仅可填写正整数
+        </td>
+    </tr>
+	<?php if($from == 1){ ?>
+		 <input type="hidden" name="fenlei" id="bdtype" value="1">
+    <?php }else if($from == 2){ ?>
+         <input type="hidden" name="fenlei" id="bdtype" value="3">
+    <?php }else if($from == 3){ ?>
+         <input type="hidden" name="fenlei" id="bdtype" value="4">
+    <?php }else if($from == 4){ ?>
+         <input type="hidden" name="fenlei" id="bdtype" value="0">         
+	<?php }else{ ?>
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF"><font color="red">*</font>软件类型:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <select name="fenlei" id="bdtype">
+                 <option value="0" <if condition = "$rs.type eq 0">selected = 'selected'</if>>不限</option>
+                 <option value="1" <if condition = "$rs.type eq 1">selected = 'selected'</if>>应用</option>
+                 <option value="2" <if condition = "$rs.type eq 2">selected = 'selected'</if>>游戏</option>
+             </select>
+        </td>
+    </tr>
+	<?php } ?>
+    <br>
+    <tr align="center">
+         <td width="20%" height="20" align="right" style="float:right; width:100px;" bgcolor="#FFFFFF"><span id="s1"><font color="red">*</font></span>软件筛选范围:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="radio" name="scope" style="margin-bottom:10px;" value="1" <if condition = "$rs.scope eq 1">checked = 'checked'</if>/><input type="text" size="5"  id="xb_days"  value="{$rs.xb_days}"> 天内有新版发布<br>
+             <input type="radio" name="scope" value="2" <if condition = "$rs.scope eq 2">checked = 'checked'</if>/><input type="text" size="5"  id="qx_days"  value="{$rs.qx_days}"> 天内全新发布<br>
+             <?php if($from == 4):?>
+             <input type="radio" name="scope" value="3" <if condition = "$rs.scope eq 3">checked = 'checked'</if>/> 不限制<br>
+         <?php endif;?>
+        </td>
+    </tr>
+    <tr align="center">
+         <td width="20%" height="20" align="right" style=" float:right;width:100px;" bgcolor="#FFFFFF"><span id="s1"><font color="red">*</font></span>榜单规则:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="radio" name="role" style="margin-bottom:10px" value="1"  <if condition = "$rs.role eq 1">checked = 'checked'</if>/>当天下载量*<input type="text" size="2"  id="today" value="{$role_one_arr.today}">+(当天-1天)下载量*<input type="text" size="2"  id="yesterday" value="{$role_one_arr.yesterday}">+(当天-2天)下载量*<input type="text" size="2"  id="deserted" value="{$role_one_arr.deserted}">+(当天-3天)下载量*<input type="text" size="2"  id="daqiantian" value="{$role_one_arr.daqiantian}"><br>
+             <?php if (!in_array($from, array(1,2,3))):?>
+                 <input type="radio" name="role" value="2" <if condition = "$rs.role eq 2">checked = 'checked'</if> />新增下载量*<input type="text" size="2"  id="newdown" value="{$role_two_arr.newdown}">+新增安装量*<input type="text" size="2"  id="install" value="{$role_two_arr.install}">+搜索下载量*<input type="text" size="2"  id="searchdown" value="{$role_two_arr.searchdown}">+评论数*<input type="text" size="2"  id="pinglun" value="{$role_two_arr.pinglun}">+好评数*<input type="text" size="2"  id="haoping" value="{$role_two_arr.haoping}">  <br>
+
+             <?php else: ?>
+              <input type="radio" name="role" style="margin-bottom:10px" value="4"  <if condition = "$rs.role eq 4">checked = 'checked'</if>/>当天搜索量*<input type="text" size="2"  id="now_seek" value="{$role_four_arr.now_seek}">+(当天-1天)搜索量*<input type="text" size="2"  id="seek_one" value="{$role_four_arr.seek_one}">+(当天-2天)搜索量*<input type="text" size="2"  id="seek_two" value="{$role_four_arr.seek_two}">+(当天-3天)搜索量*<input type="text" size="2"  id="seek_three" value="{$role_four_arr.seek_three}"><br>
+              <input type="radio" name="role" style="margin-bottom:10px" value="3"  <if condition = "$rs.role eq 3">checked = 'checked'</if>/>上周充值消费*<input type="text" size="2"  id="consume_now" value="{$role_three_arr.consume_now}">+(当天-1天)充值消费*<input type="text" size="2"  id="consume_one" value="{$role_three_arr.consume_one}">+(当天-2天)充值消费*<input type="text" size="2"  id="consume_two" value="{$role_three_arr.consume_two}">+(当天-3天)充值消费*<input type="text" size="2"  id="consume_three" value="{$role_three_arr.consume_three}">
+             <?php endif; ?>
+
+            <?php if($from == 4):?>
+            <input type="radio" name="role" value="5" <if condition = "$rs.role eq 5">checked = 'checked'</if> />按<input type="text" size="2"  id="searchday" value="{$role_one_arr.searchday}">日搜索量相加
+            <?php endif;?>
+
+        </td>
+    </tr>
+   <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="提交" onclick="upload()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onclick="tb_remove();"/></td>
+      </tr>
+</table>
+  </form>
+</div>
+</body>
+</html>

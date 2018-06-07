@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>安智购省钱 福利进校园</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/store/css/common.css?v1"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">
+var sid='<!--{$out.sid}-->';
+
+function save(){
+        $("#succ").css('display','none');
+        $("#yzm_mess").html("");
+        var yzm = $("#yzm").val();
+        if($("#yzm").val().trim().length==0){
+                $("#yzm_mess").html("请输入验证码");
+                return;
+        }
+                            $("#yanzheng1").css('display','none');
+                            $("#yanzheng2").css('display','block');
+        
+	$.ajax({
+		url: '/lottery/store/seller_index.php?sid='+sid,
+		data: 'yzm='+yzm,
+                type: 'post',
+                dataType:'json',
+                success:function(data){
+                    $("#yanzheng1").css('display','block');
+                    $("#yanzheng2").css('display','none');
+                    if(data.code==1){
+                        $("#succ").css('display','block');
+                        //var check_num = $("#check_num").html();
+                        if(parseInt(data.ke_use)==0){
+                            $("#yanzheng1").css('display','none');
+                            $("#yanzheng2").css('display','block');
+                        }
+                        $("#check_num").html(data.ke_use);
+                        $("#yzm").val('');
+                    }else if(data==2){
+                            $("#yzm_mess").html("验证码错误或已过期");
+                            return;
+                    }else if(data==3){
+                            $("#yzm_mess").html("网络原因，请重试");
+                            return;
+                    }else if(data==4){
+                            $("#yzm_mess").html("登录已失效，请重新登录");
+                            location.reload();
+                    }else if(data==5){
+                            $("#yzm_mess").html("您的店铺今日已超过20次上限");
+                            $("#yanzheng1").css('display','none');
+                            $("#yanzheng2").css('display','block');
+                            return;
+                    }
+                }
+	});
+}
+
+</script>
+</head>
+<body class="body2">
+<ul class="nav">
+	<li class="current"><a href="javascript:;">代金券验证</a></li>
+	<li><a href="/lottery/store/seller_balance.php?sid=<!--{$out.sid}-->">费用结算</a></li>
+	<li><a href="/lottery/store/seller_info.php?sid=<!--{$out.sid}-->">我的资料</a></li>
+</ul>
+<div class="main2">
+	<div class="register_wrap">
+		<h3>输入兑换码</h3>
+		<form method="post" action="">
+			<input type="text" placeholder="兑换码" class="inputtext" id="yzm"/>
+			<div class="btns2">
+                                <!--{if $out['ke_use'] != 0}-->
+				<a id="yanzheng1"  href="javascript:;" onclick="save()">验证</a>
+				<a id="yanzheng2" style="display:none;background:#ccc;" href="javascript:;">验证</a>
+                                <!--{/if}-->
+                                <!--{if $out['ke_use'] == 0}-->
+				    <a style="background:#ccc;" href="javascript:;">验证</a>
+                                <!--{/if}-->
+			</div>
+		</form>
+			<div class="error_form red" style="padding-top:15px">今日可验证数量:<span id="check_num"><!--{$out.ke_use}--></span>个</div>
+		<div class="coupon_infor">
+                    <div id="succ" style="display:none;">
+			<div class="coupon_size">
+                            <p><span>￥</span>5</p>
+			</div>
+			<div class="coupon_time">
+				验证成功！
+			</div>	
+                    </div>
+                    <div id="fail">
+                        <p class="coupon_infor_s" id="yzm_mess"></p>
+                    </div>
+		</div>
+	</div>
+</div>
+<div class="footer" style="padding-top:120px">
+	<p>客服电话：010-58851836-8002</p>
+</div>
+</body>
+</html>

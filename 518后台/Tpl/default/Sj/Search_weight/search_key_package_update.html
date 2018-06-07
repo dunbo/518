@@ -1,0 +1,184 @@
+<include file="../../Public/header"/>
+<link type="text/css" href="__PUBLIC__/school/css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet" />	
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script>
+	
+	function checkinput(){
+		var start_tm=$('#datepicker').val();
+		var end_tm=$('#datepicker1').val();
+		var pkg = $("#package").val();
+		if(start_tm == "")
+		{
+			alert("开始时间不能为空！");
+			return false;
+		}
+		if(end_tm == "")
+		{
+			alert("结束时间不能为空！");
+			return false;
+		}
+		if(start_tm>=end_tm)
+		{
+			alert("开始时间不能大于等于结束时间！");
+			return false;
+		}
+		if($('#res_type').val()=='package'){
+			var enable=true;
+			$.ajax({
+				url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+				type: 'get',
+				async:false,
+				success: function(data){
+					if(data && data!=1){
+						if(!confirm(data)){
+							enable=false;
+						}
+					}
+					
+				}
+			});
+			if(!enable){
+				return enable;
+			}
+		}
+		var url = '/index.php/Sj/Search_weight/search_key_package_add_precheck';
+		$.get(url, {kid:$("#kid").val(), id:$("#id").val()}, function(data) {
+			if (data == 'ispage') {
+				alert("该关键词已有设置推荐页面，无法继续添加。\n如果需要添加请先删除推荐页面");	
+				return false;
+			} else if (data == 'ispackage' && $("#res_type").val() == 'page') {
+				if (confirm("添加页面后，之前填写的对应软件将被删除。\n确定要添加页面？")) {
+					$("#editforum").submit();	
+				}
+			} else if (data == 'nodata' || (data == 'ispackage' && $("#res_type").val() != 'page')) {
+				var pkg = $("#package").val();
+				var wei = $("#wei").val();
+				var pos = $("#pos").val();
+				if(pkg == "" && $("#res_type").val() == 'package'){
+					alert("包名不能为空！");
+					return false;
+				}else if(pos =="" && $("#res_type").val() == 'package'){
+					alert("排序不能为空！");
+					return false;
+				}else if(pos <= 0 && $("#res_type").val() == 'package'){
+					alert("排序必须大于0");
+					return false;
+				}
+				$("#editforum").submit();		
+			} else {
+				alert('权限不足');	
+			}
+		});
+	}
+	$(function() {
+		$("#res_type").change(function() {
+			resTypeHide($(this).val());
+			pageTypeHide($("#page_type").val()); 
+		});		
+		$("#page_type").change(function() {
+			pageTypeHide($(this).val());
+		});		
+		//init
+		resTypeHide($("#res_type").val()); 
+		pageTypeHide($("#page_type").val()); 
+
+		function resTypeHide(val) {
+			if (val == 'page') {
+				$("#page_type").show();	
+				$("#package").hide();
+				$("#beid").hide();
+				$("#pos").attr("disabled", true);
+				$("#pos").val("");
+			} else {
+				$("#page_type").hide();	
+				$("#package").show();
+				$("#beid").show();
+				$("#pos").attr("disabled", false);
+			}
+		}
+
+		function pageTypeHide(val) {
+			if ($("#res_type").val() == 'page') {
+				if (val == 'page_soft') {
+					$("#page_type_soft").show();
+					$("#page_type_ebook").hide();
+				} else if (val == 'page_ebook') {
+					$("#page_type_ebook").show();
+					$("#page_type_soft").hide();
+				}
+			} else {
+				$("#page_type_soft").hide();
+				$("#page_type_ebook").hide();
+			}
+		}
+	});
+</script>
+<style type="text/css">
+.tb{ border-top:1px solid #DCDCDC;border-left:1px solid #DCDCDC;}
+.tb th,.tb td{border-right:1px solid #DCDCDC; padding:5px 10px; border-bottom:1px solid #DCDCDC;}
+.list a{border:1px solid #000;margin-right:20px;padding:5px;}
+.active {background:#cdd;font-weight:bold;}
+.verify {margin-right:10px; margin-left:10px; cursor:pointer;}
+#openbox{ text-align:left; width:400px; height:200px; padding:10px 8px; border:1px #0c0c0c solid; background:#FFFFFF; position:absolute; z-index:2; display:none;}
+#openbox #close{ position:absolute; top:8px; right:15px; cursor:pointer; font-size:14px;}
+#mark{ top:0; left:0; position:absolute; z-index:1; background:#000000; filter:alpha(opacity=50); opacity:0.5;}
+</style>
+<center>
+<p>软件修改</p>
+<form id="editforum" action="__URL__/search_key_package_update_do" method="POST">
+	<table cellspacing="0" cellpadding="0" border=0 class="tb" width="50%">
+	<tr><td>关键词:{$srh_key}</td><td colspan="2">
+	<select id="res_type" name="res_type">
+		<option <?php if(!$ispage){ ?>selected<?php }?> value="package">添加包名</option>
+		<option <?php if($ispage){ ?>selected<?php }?> value="page">添加页面</option>
+	</select>
+	<?php if($ispage) { ?>
+	<input style="display:none;" type="text" id="package" name="package" size="40" id="pkg" value="" style="width:170px;"/>
+	<span style="display:none;" id="beid">行为id<input type="text" name="beid"  size="" value="" style="width:50px;"/></span>
+	<?php } else { ?>
+	<input type="text" id="package" name="package" size="40" id="pkg" value="<?php echo $pkginfo['package'];?>" style="width:170px;"/>
+	<span id="beid">行为id<input type="text" name="beid"  size="" value="<?php if($pkginfo['beid']) echo $pkginfo['beid'];?>" style="width:50px;"/></span>
+	<?php } ?>
+	<select <?php if(!$ispage) { ?>style="display:none;"<?php } ?> name="page_type" id="page_type">
+	<?php foreach($category_list as $key => $val):?>
+		<option <?php if($category_list[$pkginfo['package']] == $val){ ?>selected<?php }?> value="<?php echo $key?>" <?php if($category_type == $key) echo "selected";?>><?php echo $val?></option>
+	<?php endforeach;?>
+	</select>
+	</td></tr>
+	<tr>
+		<td style="display:none;">权重:<input type="text" name="weight" size="10" id="wei" value="<?php echo $pkginfo['weight'];?>"/>(10~100)</td>
+		<td>排序:<input type="text" name="pos" size="10" id="pos" value="<?php  echo $pkginfo['pos'] == -1?'':$pkginfo['pos'];?>">
+		</td>
+		<td>开始时间:<input type="text" id="datepicker" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"datepicker",dateFmt:"yyyy-MM-dd HH:mm:ss"})' name="start_tm" value="<?php echo date('Y-m-d H:i:s',$pkginfo['start_tm']);?>"/></td>
+		<td>结束时间:<input type="text" id="datepicker1" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"datepicker1",dateFmt:"yyyy-MM-dd HH:mm:ss"})' name="stop_tm" value="<?php echo date('Y-m-d H:i:s',$pkginfo['stop_tm']);?>"/>
+		<input type="hidden" id="kid" name="kid" value="<?php echo $pkginfo['kid']?>"/>
+		<input type="hidden" id="id" name="id" value="<?php echo $pkginfo['id']?>"/>
+		<input type="hidden" id="srh_key" name="srh_key" value="<?php echo $srh_key?>"/>
+		</td>
+	</tr>
+	<tr>
+		<td style="width:170px;">
+			合作形式
+			<SELECT name='co_type'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+		<td colspan="2">是否展示提示语
+		    <input type="radio" name='is_show_prompt' id="is_show_prompt" <?php if ($pkginfo['is_show_prompt']==1):?>checked<?php endif; ?> value="1"/>否
+		    <span>&nbsp;</span>
+		    <input type="radio" name='is_show_prompt' id="is_show_prompt" value="2" <?php if ($pkginfo['is_show_prompt']==2):?>checked<?php endif; ?>/>是
+			<span><input type="text" name="percent" size="10" id="percent" <?php if ($pkginfo['percent']):?>value="<?php echo $pkginfo['percent']?>"<?php endif; ?> placeholder='请输入百分比'/></span>
+
+			<input type="button" value="修改" onclick="checkinput();" style="margin-left:50px;">
+		</td>
+	</tr>
+</table>
+</form>
+</center>

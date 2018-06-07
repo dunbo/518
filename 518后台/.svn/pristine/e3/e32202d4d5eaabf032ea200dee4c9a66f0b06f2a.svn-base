@@ -1,0 +1,82 @@
+<div>
+	<div style="float:left;margin-left:5px">软件名称：<input type="text" id="game_name" name="game_name" class="search_item_text" style="width:200px"></div>
+	<div style="float:left;margin-left:5px">包名：<input type="text" id="s_package" name="s_package" class="search_item_text" style="width:200px"></div>
+	<div style="float:left;margin-left:20px"><input type="submit" value="查询" class="search_btn" onclick='return search_game()'></div>
+</div>
+<div style="margin-top:50px" id="net_game">
+</div>
+<div style="margin-top:50px;margin-bottom:90px;display:none" id="confirm_game">
+	<div style="float:left;margin-left:280px"><input type="submit" value="确定" class="search_btn" onclick="save_game()"></div>
+	<div style="float:left;margin-left:20px"><input type="button" value="取消" class="search_btn " onclick="tb_remove();"></div>
+</div>
+
+<script type="text/javascript">
+	function search_game(){
+		var game_name = $("#game_name").val();
+		var package = $("#s_package").val();
+		if(game_name == ''&&package == ''){
+			alert('搜索条件不能为空');
+			return false;
+		}
+		$.post(
+		   "__URL__/sign_game_list", 
+		   { game_name: game_name,package:package },
+		   function(data){
+			 if(data){
+				if(data.length>=2){
+					$("#net_game").css('width','100%');
+					var table_th = '<table class="table_list"><th align="center"><input type="checkbox" name="chk_all" onclick="checkAll(this)"></th><th width="20%" align="center">游戏包名</th><th align="center">游戏名称</th><th></th><th width="20%" align="center">游戏包名</th><th align="center">游戏名称</th>';
+				}else if(data.length<1){
+					alert('未查询到结果');
+				}else{
+					$("#net_game").css('width','50%');
+					var table_th = '<table class="table_list"><th align="center"><input type="checkbox" name="chk_all" onclick="checkAll(this)"></th><th width="20%" align="center">游戏包名</th><th align="center">游戏名称</th>';
+				}
+				if(data.length>=1){
+					for(var i=0;i<data.length;i++){
+					//alert(data[i].softname)
+						if(i%2==0){
+							table_th += '<tr><td><input type="checkbox" name="id_'+data[i].package+'" value="'+data[i].package+'"></td><td>'+data[i].package+'</td><td>'+data[i].name+'</td>';	
+						}else{
+							table_th += '<td><input type="checkbox" name="id_'+data[i].package+'" value="'+data[i].package+'"><td>'+data[i].package+'</td><td>'+data[i].name+'</td></tr>';	
+						}
+					
+					}
+					table_th += '</table>';
+					$('#net_game').html(table_th);
+					$('#confirm_game').css('display','');
+				}
+				
+			 }else{
+				alert('未查询到结果');
+			 }
+		   },'json'
+		);
+	}
+	function checkAll(obj)
+	{
+	  var flag = $(obj).attr('checked') == 'checked';
+	  $('input[name^=id_]').attr('checked', flag);
+	}
+	
+	
+	function save_game(){
+		var choose_id_str = '';
+		var p = '{$p}';
+		var  lr = '{$lr}';
+		$('input[name^=id_]').each(function(i){
+			if($(this).attr('checked') == 'checked'){
+				choose_id_str += $(this).val()+',';
+			}
+			
+		});
+		//alert(channel_name);
+		if(choose_id_str !=''){
+			window.location.href = '__URL__/save_game_sign?game='+choose_id_str+'&p='+p+'&lr='+lr;
+		}else{
+			alert('请选择要关联的游戏');
+		}
+		
+	}
+</script>
+

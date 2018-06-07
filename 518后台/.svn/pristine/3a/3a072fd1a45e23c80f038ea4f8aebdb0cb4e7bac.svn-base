@@ -1,0 +1,208 @@
+<table id="type_tab" width="100%"  border="0" cellpadding="0" cellspacing="0">
+	<tr><td align='left' colspan= '4'  ><h2>角标状态：</td></h2></tr>
+	<tr>
+		<td colspan= '4' align='left'>选择后，会在列表图表中增加对应的角标</td>
+	</tr>
+	<tr>
+		<td colspan= '4' align='left'>	
+			当前状态：
+			<input type="radio"  name="type" value="0" checked />普通
+			<volist name='sj_corner_mark' id='m'>	
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type="radio"  name="type" value="{$m.id}" />{$m.name}
+			</volist>
+		</td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+</table>
+
+<table id="type_tm" style="display:none;"  border="0" cellpadding="0" cellspacing="0" >
+	<tr name="tr_new_version_feature" id="tr_new_version_feature">
+		<td colspan= '4' align='left'>
+			一句话简介:
+			<textarea id="new_version_feature" name="new_version_feature" cols="50" rows="4"/>限10-20字以内
+		</td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr>
+		<td colspan= '4' align='left'>
+			开始时间:<input id="type_start_time" name="type_start_time" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+				style="border: 0px none black; width: 150px;" value="{$type_start_time}"
+				size="15" type="text">
+		</td>
+	</tr>
+	
+	<tr><td>&nbsp;</td></tr>
+	<tr>
+		<td colspan= '4' align='left'>
+		结束时间:<input id="type_end_time" name="type_end_time" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+				style="border: 0px none black; width: 150px;" value="{$type_end_time}"
+				size="15" type="text">
+		</td>
+	</tr>
+	<tr><td>&nbsp;<br/></td></tr>
+	<tr  id="is_feature">
+		<td colspan= '4' align='left'>
+			<input type="checkbox" value="1" id="add_feature" onclick='feature_table();' >自动进入首发专题
+		</td>
+	</tr>			
+</table>
+<br/>
+<table id="feature_tm" border="0" cellpadding="0" cellspacing="0"  style="display:none;" >
+	<tr>	
+		<td colspan= '4' align='left' >
+			排序：
+			<select name="rank" id="rank">
+				<?php
+				for($i = 1;$i <= $count;$i++){
+					echo "<option value=\"".$i."\"";
+					//if($i == $featuresoftlist['rank']) echo " selected=\"selected\" ";
+					echo ">".$i."</option>";
+				}
+				?>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td colspan= '4' align='left'>
+			开始时间:<input id="feature_start_time" name="feature_start_time" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+				style="border: 0px none black; width: 150px;" value="{$type_start_time}"
+				size="15" type="text">
+		</td>
+	</tr>
+	
+	<tr><td>&nbsp;</td></tr>
+	<tr>
+		<td colspan= '4' align='left'>
+		结束时间:<input id="feature_end_time" name="feature_end_time" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+				style="border: 0px none black; width: 150px;" value="{$feature_end_time}"
+				size="15" type="text">
+		</td>
+	</tr>
+	<tr>
+		<td align="right" valign="top">推荐理由:</td>
+		<td align="left">
+			<textarea id="recommend_reason" name="recommend_reason" cols="40" rows="5">一句话短评</textarea><br>
+			<span style="color: #f00">限制字数10-20&nbsp;&nbsp;&nbsp;已用字数:<span id="word_reason"></span>&nbsp;&nbsp;剩余字数:<span id="words_reason"></span>&nbsp;</span>
+		</td>
+	</tr>
+	<tr>
+		<td align="right" valign="top">推荐人群:</td>
+		<td align="left">
+			<textarea id="recommend_person" name="recommend_person" cols="40" rows="5">一句话短评</textarea><br>
+			<span style="color: #f00">限制字数10-20&nbsp;&nbsp;&nbsp;已用字数:<span id="word_person"></span>&nbsp;&nbsp;剩余字数:<span id="words_person"></span>&nbsp;</span>
+		</td>
+	</tr>
+</table>
+	
+<table id="sub_tab" border="0" cellpadding="0" cellspacing="0" >
+	<tr id='sub_tab'>
+		<td><button  onclick="type_add();" >提交</button></td>
+		<td style="padding-left: 100px;">
+		<button  onclick="self.tb_remove()" >取消</button></td>
+	</tr>
+</table>	
+
+<table id="success_tab" style="display:none;" width="100%"  border="0" cellpadding="0" cellspacing="0">
+	<tr align='center'><td><h2>操作成功</h2></td></tr>
+</table>
+<script>
+$("[name='type']").click(function(){
+	$("[name='type']").each(function(){
+		if($(this).is(':checked')) {
+			type = $(this).val();
+			if(type == 0){
+				$('#type_tm').hide();
+			}else{
+				$('#type_tm').show();
+                if (type == 1) {
+                    $('#tr_new_version_feature').show();
+					//判断是否为数字--是否只选中一个
+					id_str = Selected_check();
+					if(!isNaN(id_str)){
+						$('#is_feature').show();
+					}else{
+						$('#is_feature').hide();
+					}
+                } else {
+					$('#is_feature').hide();
+                    $('#tr_new_version_feature').hide();
+                }
+			}
+		}
+	});
+});	
+
+//提交
+function type_add() {
+	$("[name='type']").each(function(){
+		if($(this).is(':checked')) {
+			type = $(this).val();
+		}
+	});
+	var add_feature = 0;
+	$("#add_feature").each(function(){
+		if($(this).is(':checked')) {
+			add_feature = 1;
+		}
+	});
+    var new_version_feature = $('#new_version_feature').val();
+	var type_start_time = $('#type_start_time').val();
+	var type_end_time = $('#type_end_time').val();
+	var feature_start_time = $('#feature_start_time').val();
+	var feature_end_time = $('#feature_end_time').val();
+	var rank = $('#rank').val();
+	id_str = Selected_check();
+    var param = {
+        type : type,
+        id : id_str,
+        new_version_feature : new_version_feature,
+        start_tm : type_start_time,
+        end_tm : type_end_time,
+        feature_start_time : feature_start_time,
+        feature_end_time : feature_end_time,
+        rank : rank,
+        add_feature : add_feature,
+        recommend_reason : $('#recommend_reason').val(),
+        recommend_person : $('#recommend_person').val()
+    };
+	$.ajax({
+		url: '/index.php/Dev/Soft/soft_angle',
+		type: 'post',
+        data: param,
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				return false;
+			} else if(ret['code']==1) {	//成功
+				$('#type_tab').hide();
+				$('#type_tm').hide();
+				$('#sub_tab').hide();
+				$('#feature_tm').hide();
+				$('#success_tab').show();
+				setTimeout(function(){is_success(ret['msg'])},2000); 				
+			}
+		}
+	});
+}
+
+function is_success(msg){
+	tb_remove();
+	//变灰不可点击处理
+	gray_processing(msg);
+}
+
+function feature_table(){
+	$("#add_feature").each(function(){
+		if($(this).is(':checked')) {
+			//选中显示
+			$('#feature_tm').show();
+		}else{
+			//不选中隐藏
+			$('#feature_tm').hide();
+		}
+	});
+	
+}
+</script>	

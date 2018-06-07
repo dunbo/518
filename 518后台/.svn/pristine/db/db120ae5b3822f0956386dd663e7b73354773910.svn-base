@@ -1,0 +1,409 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<style type="text/css">
+.fixlong {
+  table-layout: fixed;
+}
+.fixlong td {
+  word-break: break-all;
+}
+.intb td {
+border-right:none;
+border-bottom: none;
+}
+</style>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<div id="append_parent"></div>
+<div class="main" >
+<div class="content">
+<center>
+<table width="100%"  border="0" cellpadding="0" cellspacing="0" class="tb">
+	<tr height="35">
+		<td align="center" <?php if($status==1) { ?>style="background:#FFCC66"<?php } ?>><a href="/index.php/Dev/MonitoringSoft/monitor_white"><font style="color:#000; font-weight:bold">可疑IP列表</font></a></td>
+		<td align="center" <?php if($status==3) { ?>style="background:#FFCC66"<?php } ?>><a href="/index.php/Dev/MonitoringSoft/monitor_black"><font style="color:#000; font-weight:bold">IP黑名单列表</font></a></td>
+		<td align="center" <?php if($status==4) { ?>style="background:#FFCC66"<?php } ?>><a href="/index.php/Dev/MonitoringSoft/monitor_config"><font style="color:#000; font-weight:bold">IP规则配置</font></a></td>
+	</tr>
+</table>
+<form id="upload" method="GET" action="__URL__/monitor_black" >
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="tb">
+ <tr>
+    <td width="99">IP：</td>
+	<td width="150"><input type="text" size='20' name="ip" id="ip" value="<?php echo $_GET['ip']; ?>" /></td>
+	 <td width="99">加黑次数>=：</td>
+	<td width="150"><input type="text" size='10' name="black_num" id="black_num" value="<?php echo $_GET['black_num']; ?>" /></td>
+	 <td width="99">当前状态：</td>
+	<td width="150"><select name="status" style="width:80px;"><option value="1" <if condition="$seach_status eq '1' ">selected="selected" </if> >有效</option><option value="2" <if condition="$seach_status eq '2' ">selected="selected" </if>>无效</option><option value="3" <if condition="$seach_status eq '3' ">selected="selected" </if>>全部</option></select></td>
+	</tr><tr>
+    <td width="80">时间范围：</td>
+    <td width="300" colspan='4'><?php showDatePicker('stime','etime', $_GET['stime'],$_GET['etime']);?></td>
+	<td width="150" colspan="4"><input type="submit" name="button" id="button" value="&nbsp;搜 索&nbsp;"  /></td>
+  </tr>
+</table>
+</form>
+<br />
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr height='30'>
+		<td colspan='7' width='15%' align='right' >
+		<input type="button" style="width:150px;" value="添加IP" id="add_ip" />
+		</td>
+	</tr>
+</table>
+<table width="100%" cellspacing="0" cellpadding="0" border="0"  class="tb fixlong">
+<thead>
+  <tr>
+    <td align='center' width="15%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold"><input type="checkbox" onclick="selectAll();">全选&nbsp&nbspIP地址</font></td>
+    <td align='center' height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">软件监控</font>
+     <if condition="$url_field eq 'soft_num' && $url_type eq 'asc'">
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/monitor_black/order/soft_num/order_type/desc" >↑</a>
+    <else />
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/monitor_black/order/soft_num/order_type/asc" >↓</a>
+    </if>
+    </td>
+    <td align='center' height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">评论监控</font>
+    <if condition="$url_field eq 'comment_num' && $url_type eq 'asc'">
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/monitor_black/order/comment_num/order_type/desc" >↑</a>
+    <else />
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/monitor_black/order/comment_num/order_type/asc" >↓</a>
+    </if>
+    </td>
+    <td align='center' height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">开发者监控</font>
+     <if condition="$url_field eq 'reg_num' && $url_type eq 'asc'">
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/monitor_black/order/reg_num/order_type/desc" >↑</a>
+    <else />
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/monitor_black/order/reg_num/order_type/asc" >↓</a>
+    </if>
+    </td>
+    <td align='center' height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">加黑次数</font>
+    <if condition="$url_field eq 'black_num' && $url_type eq 'asc'">
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/monitor_black/order/black_num/order_type/desc" >↑</a>
+    <else />
+     <a style="font-size:14px;font-weight:bold;" href="__URL__/monitor_black/order/black_num/order_type/asc" >↓</a>
+    </if>
+    </td>
+    <td align='center' height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">开始时间</font></td>
+    <td align='center' height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">结束时间</font></td>
+    <td align='center' height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">当前状态</font></td>
+    <td align='center' height="30" bgcolor="#e3e2fe" ><font style="color:#000; font-weight:bold">加黑原因</font></td>
+    <td align='center' height="30" bgcolor="#e3e2fe" ><font style="color:#000; font-weight:bold">加黑时间</font></td>
+    <td align='center'  height="30" bgcolor="#e3e2fe" ><font style="color:#000; font-weight:bold">操作</font></td>
+ 
+  </tr>
+  </thead>
+  <tbody>
+  <volist name='list' id='vo'>
+  <tr>
+	<td>&nbsp&nbsp<input type="checkbox" id="id_all[]" name="id_all[]" value="{$vo.ip}" />&nbsp&nbsp<a href="__URL__/monitor_black/ip/{$vo.ip}" target="_blank" >{$vo.ip}</a></td> 
+	<td><a href="/index.php/Dev/LogStatic/dev_log_static_view/fromip/{$vo.ip}/time/{$vo.black_time}" target="_blank" >{$vo.soft_num}</a></td> 
+	<td><a href="/index.php/Dev/Message/message_soft/ipmsg/{$vo.ip}/time/{$vo.black_time}" target="_blank" >{$vo.comment_num}</a></td> 
+	<td><a href="/index.php/Dev/User/auditforuser/ip/{$vo.ip}/time/{$vo.black_time}" target="_blank" >{$vo.reg_num}</a></td>  
+	<td>{$vo.black_num}</td>
+	<td>{$vo.black_time_start|date="Y-m-d",###}</td> 
+	<td>{$vo.black_time_end|date="Y-m-d",###}</td>
+	<td>{$vo.is_status}</td>  
+	<td>{$vo.black_reason}</td>
+	<td>{$vo.black_time|date="Y-m-d H:i:s",###}</td>
+	<td>
+	&nbsp&nbsp<input type="button" value="编辑"  onclick="edit_black('{$vo.id}','{$vo.ip}')" />
+	<if condition="$vo.status eq '1'"> &nbsp&nbsp<input type="button" value="撤销"  onclick="out_black('{$vo.ip}')" /></if>
+	</td>
+	</tr>
+  </volist>
+  <tr height='50px' >
+	<td align='left' colspan='11'>
+	<input type="checkbox"  onclick="selectAll();">
+	<button  style="margin-left:20px;" onclick="del_all()">批量撤销</button>
+	<input name="out_black_id" id="out_black_id" type="hidden" value="" />
+	</td>
+  </tr>
+  </tbody>
+</table>
+<div>{$page}</div>
+</center>
+</div>
+</div>
+<div id="open" style="padding:10px; width:300px; height:300px;display:none;">
+		<h2>加黑IP:<span id="edit_black_ip"></span></h2>
+		加黑原因:<br>
+		<input type="checkbox" value="恶意提交软件" name="reason" />恶意提交软件<br>
+		<input type="checkbox" value="恶意发布评论" name="reason" />恶意发布评论<br>
+		<input type="checkbox" value="恶意提交开发者注册资料" name="reason" />恶意提交开发者注册资料<br>
+		<input type="text" id="write_reason" value="手动填写" /><br>
+		加黑期限：<br>
+		<input type="text" name="start_time" id="start_time" value="" style="cursor: hand; width:150px;" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>~
+				<span>
+				<input id="end_time" name="end_time"
+				style="cursor: hand; width: 150px;"
+				 value="" size="15" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" /><br><br>
+		<input type="hidden" value="" id="black_id" />
+		<input type='button'  value="确定" onclick="black_submit()" />
+		<input type="button" value="取消" onclick="closes()" />
+</div>
+<div id="open_add" style="padding:10px; width:300px; height:300px;display:none;">
+		<h2>加黑IP:<input id="add_black_ip" value="" type="text" /></h2>
+		加黑原因:<br>
+		<input type="checkbox" value="恶意提交软件" name="add_reason" />恶意提交软件<br>
+		<input type="checkbox" value="恶意发布评论" name="add_reason" />恶意发布评论<br>
+		<input type="checkbox" value="恶意提交开发者注册资料" name="add_reason" />恶意提交开发者注册资料<br>
+		<input type="text" id="add_write_reason" value="手动填写" /><br>
+		加黑期限：<br>
+		<input type="text" name="add_start_time" id="add_start_time" value="{$add_start_time}" style="cursor: hand; width:150px;"  class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"  /></span>~
+				<span>
+				<input id="add_end_time" name="add_end_time"
+				style="cursor: hand; width: 150px;"
+				 value="{$add_end_time}" size="15" type="text"  class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"  /></span><br><br>
+		<input type='button'  value="确定" onclick="add_black_submit()" />
+		<input type="button" value="取消" onclick="closes()" />
+</div>
+<script type="text/javascript">
+<!--
+focusBlur('#write_reason','手动填写');
+focusBlur('#add_write_reason','手动填写');
+function focusBlur(obj,text){ //输入框提示文字
+	if($.trim($(''+obj+'').val())==text) {
+		$(''+obj+'').css({color:'#999999',fontSize:'14px'});
+	} else {
+		$(''+obj+'').css({color:'#000',fontSize:'14px'});
+	}
+	$(''+obj+'').focus(function(){
+		if($.trim($(''+obj+'').val())==text){
+				$(''+obj+'').val('');
+		}
+	});
+	$(''+obj+'').blur(function(){
+		if($.trim($(''+obj+'').val())==''){
+				$(this).val(text);
+				$(''+obj+'').css({color:'#999999',fontSize:'14px'});
+		}
+	});
+}
+$('#add_ip').click(function(){
+	 $("#open_add").zxxbox();
+});
+function add_black_submit(){
+	
+	var ip = $('#add_black_ip').val();
+	var write_reason = $('#add_write_reason').val();
+	write_reason = write_reason=='手动填写'?'':write_reason;
+	var str = '';
+	$("input:[name='add_reason'][checked]").each(function(){   
+		str+=$(this).val()+",";   
+	});
+	str+=write_reason;
+	
+	var start_time = $('#add_start_time').val();
+	var end_time = $('#add_end_time').val();
+	if(ip==''){
+		alert('加黑IP不能为空！');
+		return false;
+	}	
+	if(str==''){
+		alert('加黑理由不能为空！');
+		return false;
+	}
+	if(start_time==''){
+		alert('开始时间不能为空！');
+		return false;
+	}
+	if(end_time==''){
+		alert('结束时间不能为空！');
+		return false;
+	}
+	var url = '__URL__/monitor_black_oper';
+    var data = '&reason='+str+'&start_time='+start_time+'&end_time='+end_time+'&ip='+ip;
+    //console.log(data);
+    $.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		success: function(data){
+				if(!!data && data.success){ 
+					alert(data.msg);
+					$.zxxbox.hide();
+					setTimeout(function(){
+						window.location.reload();
+					},800);
+				}else{
+					alert(data.msg);
+					$.zxxbox.hide();
+					setTimeout(function(){
+						window.location.reload();
+					},800);
+				}
+		},
+	    error: function(){
+	    	
+	    	      alert('对不起，服务器错误，请联系管理员！');
+	    }
+     })
+	
+}
+function edit_black(id,ip){
+	var url = '__URL__/get_edit_data';
+    var data = '&ip='+ip;
+    //console.log(data);
+    $("input[name=reason]").each(function(){
+			$(this).removeAttr("checked");
+	});
+    $('#black_id').val(id);
+    $.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		success: function(data){
+				if(!!data && data.success){ 
+						var ip = data.rows.ip;
+						var black_reason = data.rows.black_reason;
+						var black_time_start = data.rows.black_time_start;
+						var black_time_end = data.rows.black_time_end;
+						var reason_arr = black_reason.split(',');
+						$('#edit_black_ip').html(ip);
+						$('#start_time').val(black_time_start);
+						$('#end_time').val(black_time_end);
+						for(var i=0;i< reason_arr.length;i++){
+							$("input[name=reason]").each(function(){
+									if($(this).val() == reason_arr[i]){
+										$(this).attr("checked",'true');
+									}else{
+										$('#write_reason').val(reason_arr[i]);
+										
+									}
+							});
+								
+							
+						}
+				}
+		}
+     });
+    $("#open").zxxbox();
+}
+function black_submit(){
+	var id = $('#black_id').val();
+	var ip = $('#edit_black_ip').html();
+	var write_reason = $('#write_reason').val();
+	write_reason = write_reason=='手动填写'?'':write_reason;
+	var str = '';
+	$("input:[name='reason'][checked]").each(function(){   
+		str+=$(this).val()+",";   
+	});
+	str+=write_reason;
+	var start_time = $('#start_time').val();
+	var end_time = $('#end_time').val();
+	if(str==''){
+		alert('加黑理由不能为空！');
+		return false;
+	}
+	if(start_time==''){
+		alert('开始时间不能为空！');
+		return false;
+	}
+	if(end_time==''){
+		alert('结束时间不能为空！');
+		return false;
+	}
+	var url = '__URL__/monitor_black_oper';
+    var data = '&reason='+str+'&start_time='+start_time+'&end_time='+end_time+'&id='+id+'&ip='+ip;
+    //console.log(data);
+    $.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		success: function(data){
+				if(!!data && data.success){ 
+					alert(data.msg);
+					$.zxxbox.hide();
+					setTimeout(function(){
+						window.location.reload();
+					},800);
+				}else{
+					alert(data.msg);
+					$.zxxbox.hide();
+					setTimeout(function(){
+						window.location.reload();
+					},800);
+				}
+		},
+	    error: function(){
+	    	
+	    	      alert('对不起，服务器错误，请联系管理员！');
+	    }
+     })
+	
+}
+function del_all(){
+	var id = '';
+	$("[name='id_all[]']:checked").each(function(){
+		id+=$(this).val()+',';
+	});
+	do_out_black(id.substring(0,id.length-1));
+}
+function out_black(id){
+	do_out_black(id);
+}
+function do_out_black(id){
+	 
+     if(window.confirm('确定要撤销此黑名单吗？')){
+    	 //console.log(id); return false;
+		var url = '__URL__/monitor_black_out';
+	    var data = '&id='+id;
+	    //console.log(data);
+	    $.ajax({
+			url: url,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function(data){
+					if(!!data && data.success){ 
+						alert(data.msg);
+						setTimeout(function(){
+							window.location.reload();
+						},800);
+					}else{
+						alert(data.msg);
+						setTimeout(function(){
+							window.location.reload();
+						},800);
+					}
+			},
+		    error: function(){
+		    	
+		    	      alert('对不起，服务器错误，请联系管理员！');
+		    }
+	     })
+		
+	}
+	
+}
+var flag = false;
+function selectAll() {	//全选
+	if(!flag){
+		$("[name='id[]']").each(function(){
+			$(this).attr('checked',true);
+		});
+		$("[name='id_all[]']").each(function(){
+			$(this).attr('checked',true);
+		});
+		flag = true;
+		return;
+	}
+	if(flag){
+		$("[name='id[]']").each(function(){
+			$(this).attr('checked',false);
+		});
+		$("[name='id_all[]']").each(function(){
+			$(this).attr('checked',false);
+		});
+		flag = false;
+		return;
+	}	
+}
+function closes(){
+	$.zxxbox.hide();
+}
+//-->
+</script>

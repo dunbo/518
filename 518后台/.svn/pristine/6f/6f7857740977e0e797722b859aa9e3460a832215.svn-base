@@ -1,0 +1,87 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css?1" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<style>
+    .future_class {
+        background-color:#CCCCCC
+    }
+</style>
+
+<body style="position:relative;">
+    <div style="padding:10px 20px;">
+        站点<select id="site_id" name="site_id"  onchange="site_list();">
+            <?php foreach($coop_site as $k => $v){ ?>
+            <option value="<?php echo $v['id']; ?>" <?php if($site_id == $v['id']) echo 'selected="selected"'; ?> >
+                <?php echo $v['anzhi_name']; ?>
+            </option>
+            <?php } ?>
+        </select>
+        <a title ="添加标签" class="thickbox" href="__URL__/save_site_tag?zhiyoo_site_id={$site_id}&1=1" style="float:right;width:100px;height:30px;line-height:30px;text-align:center;background-color:#ccc;padding:0px;20px;text-decoration:none; color:black;" id="add_tag">添加标签</a>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="4%">标签ID</th>
+                    <th width="5%">标签名称（安智）</th>
+                    <th width="8%">标签名称</th>
+					<th width="8%">是否展示角标</th>
+                    <th width="4%">标签排序</th>
+                    <th width="8%">内容数量</th>
+                    <th width="4%">标签状态</th>
+                    <th width="8%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                    <td>{$list.id}</td>
+                    <td>{$list.tag_anzhi_name}</td>
+                    <td>{$list.tag_name}</td>
+                    <td><?php echo $list['is_mark'] == 1 ? "有" : "无";	?></td>
+                    <td>{$list.rank}</td>
+                    <td><?php echo $count_arr[$list['id']]+$video_count_arr[$list['id']];?></td>
+                    <td><?php echo $list['status'] == 1 ? "启用" : "停用";	?></td>
+                    <td>
+						<if condition="$list.status eq 1 ">
+						<a href="__URL__/switch_site_tag?id={$list.id}&status=0&tag_name={$list.tag_name}" class="blue" onClick="return confirm('确定要停用吗？');">停用</a>
+						<else/>
+						<a href="__URL__/switch_site_tag?id={$list.id}&status=1" class="blue" onClick="return confirm('确定要启用吗？');">启用</a>
+						</if>|
+						<a title ="编辑标签" class="thickbox" href="__URL__/save_site_tag?id={$list.id}&zhiyoo_site_id=<?php echo ($zhiyoo_site_id==$list['site_id'])?$list['site_id']:''; ?>" class="blue">编辑</a>
+                        <if condition="$list.site_id neq 16 ">
+                        <a  href="__URL__/audit_tag?tag_id={$list.id}&tag_name={$list.tag_name}" class="blue">内容管理</a>
+                        </if>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>
+<script type="text/javascript">
+function change_name(){
+	var configcontent=$("#configcontent").val();
+	$.ajax({    
+		url:'/index.php/Cooperate/Contentcooperation/save_meun_name/configcontent/'+configcontent,
+		type: 'get',
+		dataType: 'json',		
+		async:false,
+		success: function(res){   
+			if(res.code == 1){
+				alert(res.msg);
+			}else{
+				alert(res.msg);
+			}
+		}
+	});
+}
+function site_list(){
+    var site_id = $("#site_id").val();
+    window.location.href="__URL__/site_tag_list?site_id="+site_id;
+}
+</script>

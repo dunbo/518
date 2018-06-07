@@ -1,0 +1,246 @@
+<!--	<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>-->
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+    <script type="text/javascript">
+        function upload(){
+			$("[name='sdk']").each(function(){
+				if($(this).is(':checked')) {
+					sdk_val = $(this).val();
+				}
+			});
+            if($("#fc_type").val().length==0)
+            {
+                $("#s2").html('<font color="red">分成方式不能为空<font>');
+                return;
+            }else{
+                $("#s2").html('');
+            }
+
+           
+
+            if($("#jierujindu").val().length==0)
+            {
+                $("#s6").html('<font color="red">请填写接入测试进度<font>');
+                return;
+            }else{
+                $("#s6").html('');
+            }
+
+            if($("#jierutime").val().length==0)
+            {
+                $("#s7").html('<font color="red">请填写接入时间<font>');
+                return;
+            }else{
+                $("#s7").html('');
+            }
+			
+			$("[name='bili']").each(function(){
+				if($(this).is(':checked')) {
+					bili_val = $(this).val();
+				}
+			});
+			if(bili_val == 'txt'){
+				if($("#bili_txt").val().length==0){
+					$("#s8").html('<font color="red">请填写通道费比例<font>');
+					return;
+				}else{
+					$("#s8").html('');
+				}
+				bili_val =  $("#bili_txt").val();
+			}
+
+            var param = {
+                hhh_softname: $("#hhh_softname").val(),
+                soft_id: $("#soft_id").val(),
+                ol_package: $("#package").val(),
+                sdk: sdk_val,
+                fc_type: $("#fc_type").val(),
+                fuzeren: $("#fuzeren").val(),
+                reviewlevel: $("#reviewlevel2").val(),
+                jierujindu: $("#jierujindu").val(),
+                jierutime: $("#jierutime").val(),
+                bili: bili_val
+            };
+            
+            param['p_fenlei'] = $("#p_fenlei2").val();
+            param['p_leixing'] = $("#p_leixing").val();
+            $.ajaxFileUpload({
+                url:'__URL__/setonline',
+                type:'POST',
+                data:param,
+                files:[$('#uploadFile0')],
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                   if(data==1)
+                   {
+                        location.href ="/index.php/Sendnum/Product/readyonline";
+                    }else if(data==2)
+                    {
+                        $("#s3").html('<font color="red">该负责人不存在<font>');
+                        return;
+                    }else if(data==3)
+                    {
+                        $("#s11").html('<font color="red">只能上传jpg、png格式<font>');
+                        return;
+                    }else if(data==4)
+                    {
+                        $("#s5").html('<font color="red">合同结束时间不能小于合同签订时间<font>');
+                        return;
+                    }else if(data==5)
+                    {
+                        $("#s12").html('<font color="red">合同格式错误<font>');
+                        return;
+                    }
+                }
+            });
+          
+        };
+
+    function check_person_in_charge() {
+            var param = {
+                fuzeren : $("#fuzeren").val()
+            };
+            $.ajax({
+                url:'__URL__/check_fuzeren',
+                type:'POST',
+                data:param,
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    if(data.status != 0) {
+                        $("#s3").html('<font color="red">负责人不存在<font>');
+                    } else {
+                        $("#s3").html('');
+                    }
+                }
+            });
+    }
+	function onFileChange(obj){
+		var index = $(obj).attr('name');
+		if(index == 'agreement'){
+			if( !obj.value.match( /.zip|.pdf/i ) ){
+				$("#s12").html('<font color="red">合同格式错误<font>');
+				var file = $("#uploadFile1");
+				file.after(file.clone().val(""));
+				file.remove();	
+				return false;
+			}else{
+				$("#s12").html('');		
+			}
+		}
+		
+	}
+    </script>
+</head>
+ 
+<body>
+
+<div style="width:45; margin-top:4px">
+	 <form id="form1" name="form1" method="post" action="__URL__/add/">
+	 <input type='hidden' name='p_fenlei' id='p_fenlei2' value="{$p_fenlei}">
+	 <input type='hidden' name='p_leixing' id='p_leixing' value="{$p_leixing}">
+  <table width="99%" height="63" border="0" align="center" cellpadding="4" cellspacing="1"  bgcolor="#333333" id="table1">
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">产品名称:</td>
+        <input type="hidden" id="hhh_softname" value="{$rs.softname}">
+         <td align="left" bgcolor="#FFFFFF">
+             <span>{$rs.softname}</span>
+        </td>
+    </tr>    
+
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">包名:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" size="20"  id="package" name="package" value="{$rs.package}" readonly="true">
+        </td>
+    </tr> 
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">证书:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input id="uploadFile0" type="file" name="upload[]"/><span id="s11">证书格式限定为jpg,png;</span>
+        </td>
+    </tr>
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF"></td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" size="20" value="{$zsname}" readonly="true">
+        </td>
+    </tr> 
+       
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">SDK:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="radio" size="20"  id="sdk" name="sdk" value="是" <?php if($rs['p_fenlei'] != '单机(运营商)') echo "checked"; ?> >是
+			 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+             <input type="radio" size="20"  id="sdk1" name="sdk" value="否" <?php if($rs['p_fenlei'] == '单机(运营商)') echo "checked"; ?> > 否
+			  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			 <font color="red">*</font> <span id="s1"><font color="red"></font></span>
+        </td>
+    </tr> 
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">负责人:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" size="20"  id="fuzeren" name="fuzeren" value="" onblur="check_person_in_charge()"><span id="s3"><font color="red"></font></span>
+        </td>
+    </tr>   
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">分成方式:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" size="20"  id="fc_type" name="fc_type" value="<?php if($rs['p_fenlei'] == '单机(运营商)'){ echo "3:3:4"; }else{ echo "五:五"; } ?>" />
+			 <font color="red">*</font> <span id="s2"><font color="red"></font></span>
+        </td>
+    </tr>  
+    
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">评测级别:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <select name="reviewlevel2" id="reviewlevel2">
+				<?php foreach($reviewlevel as $v){ ?>
+                 <option value="<?php echo $v; ?>" <?php if($rs['reviewlevel'] == $v) echo "selected"; ?> ><?php echo $v; ?></option>
+				 <?php } ?>
+             </select>
+             <font color="red">*</font>
+        </td>
+    </tr>
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">接入测试进度:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="text" size="20"  id="jierujindu" name="jierujindu" value="<?php if($rs['jierujindu']){ echo $rs['jierujindu']; }else{ echo "已完成"; } ?>">
+			 <font color="red">*</font><span id="s6"><font color="red"></font></span>
+        </td>
+    </tr>
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">接入时间:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input id="jierutime" name="jierutime" type="text" class="Wdate" 
+			 value= "<?php echo $rs['jierutime'] ? date("Y-m-d H:i:s",$rs['jierutime']) : date("Y-m-d H:i:s",$rs['reviewtime']); ?>"
+			 onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"><font color="red">*</font><span id="s7"><font color="red"></font></span>网游请填SDK申请时间，单机请填CP打包时间
+        </td>
+    </tr>
+    <tr>
+        <input type="hidden" id="soft_id" value="{$rs.soft_id}">
+        <td height="20" align="right" bgcolor="#FFFFFF">通道费比例:</td>
+        <td align="left" bgcolor="#FFFFFF">
+		<?php if($rs['p_fenlei'] == '单机(运营商)'){ ?>
+			<input type="radio" size="20" name="bili" value="移动30%；联通30%；电信45%" >移动30%；联通30%；电信45%<br>
+		<?php }else{ ?>
+			<input type="radio" size="20" name="bili" value="支付宝3，充值卡5，银联1，扣税0" >支付宝3，充值卡5，银联1，扣税0<br>
+			<input type="radio" size="20" name="bili" value="支付宝3，充值卡5，银联1，扣税3.72" >支付宝3，充值卡5，银联1，扣税3.72<br>
+			<input type="radio" size="20" name="bili" value="支付宝3，充值卡5，银联1，扣税6.72" >支付宝3，充值卡5，银联1，扣税6.72<br>
+		<?php } ?>
+			<input type="radio" size="20" name="bili" value="txt" checked >
+			<input type="text" size="30" id="bili_txt" value="" ><br>
+			<span id="s8"><font color="red">*</font></span>
+		</td>
+    </tr>
+   <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" >
+			<input name="input" type="button" value="确定上线" onclick="upload()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<input name="" type="reset" value="取消" onclick="tb_remove();"/>
+		</td>
+      </tr>
+</table>
+  </form>
+</div>
+</body>
+</html>

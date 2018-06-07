@@ -1,0 +1,162 @@
+
+<script>
+	function del_anzhiapk(){
+		var exp = new Date();
+		exp.setTime(exp.getTime() + 2*60*60*1000);
+		document.cookie = "anzhiapks=1;expires=" + exp.toGMTString();
+		$('.adrift_module').css('display','none');
+	}
+</script>
+<div class="ft_module">
+	<a href="/download.php?softid=<!--{$out.anzhiid}-->">
+	<div class="ft_btnA">
+		<dl><img src="/images/fudong_logo.png" height="38" width="38" border="0"></dl>
+		 <dl class="ft_margin15">
+		  <p class="font18">上安智&nbsp;&nbsp;下软件</p>
+		  <p class="font14">不占内存&nbsp;&nbsp;省流量&nbsp;&nbsp;3亿用户都在用</p></dl>
+		 </dl>
+	</div>
+	</a>
+	<div class="ft_close">
+		<a href="javascript:;" onclick="del_anzhiapk();"></a>
+	</div>
+	<div class="ft_btnB" id="down_status">
+		
+	</div>
+
+	<div class="clear"></div>
+</div>
+<script>
+var softid = '<!--{$out.anzhiid}-->';
+var soft_lists_go = [];
+$(document).ready(function () {
+	my_soft();
+});
+function my_soft()
+{
+	var downloadurl='/download.php?softid='+softid;
+	try
+	{
+		
+		var jsontext = window.AnzhiActivitys.getAppInfo('cn.goapk.market',-24234);	
+		var jsonobj = JSON.parse(jsontext);
+		soft_lists_go.push(jsonobj[7]);
+		var activityId = -24234;
+		var aid = jsonobj[0];
+		var pkgName = jsonobj[7];
+		var name = jsonobj[2];
+		var versionCode = jsonobj[13];
+		var size = jsonobj[9];
+		var flag = 0;
+		var noFlow = 0;
+		var sdkStr = jsonobj[27];
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(aid));
+		window.AnzhiActivitys.registerInstallObserver(pkgName);
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(aid));
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);
+		if(soft_status == 1){
+			var my_soft = '<a onclick="download_apk('+activityId+','+aid+',\''+pkgName+'\',\''+name+'\','+versionCode+','+size+',0,0,'+sdkStr+');" ><dl class="down_button" onclick="pause_download(parseInt('+aid+'),\''+pkgName+'\');">下载中</dl></a>';
+		}else if(soft_status == 2){
+			var my_soft = '<a onclick="download_apk('+activityId+','+aid+',\''+pkgName+'\',\''+name+'\','+versionCode+','+size+',0,0,'+sdkStr+');" ><dl class="down_button">继续</dl></a>';
+		}else if(soft_status == 3){
+			var my_soft = '<a onclick="download_apk('+activityId+','+aid+',\''+pkgName+'\',\''+name+'\','+versionCode+','+size+',0,0,'+sdkStr+');" ><dl class="down_button">继续</dl></a>';	
+		}else if(soft_status == 4){
+			var my_soft = '<a onclick="download_apk('+activityId+','+aid+',\''+pkgName+'\',\''+name+'\','+versionCode+','+size+',0,0,'+sdkStr+');" ><dl class="down_button">下载</dl></a>';
+		}else if(soft_status == 5){
+			var my_soft = '<a onclick="installApp(parseInt('+aid+'),\''+pkgName+'\');" ><dl class="down_button">安装</dl></a>';
+		}else if(soft_status == 6){
+			var my_soft = '<a><dl class="down_button">已下载</dl></a>';
+		}else if(soft_status == 8){
+			var my_soft = '<a onclick="download_apk('+activityId+','+aid+',\''+pkgName+'\',\''+name+'\','+versionCode+','+size+',0,0,'+sdkStr+');" ><dl class="down_button">继续</dl></a>';
+		}else if(soft_status == 9){
+			var my_soft = '<a value="校验中"><dl class="down_button">校验中</dl></a>';
+		}else if(soft_status == 10){
+			var my_soft = '<a><dl class="down_button">已下载</dl></a>';
+		}else if(soft_status == -1){
+			var soft_other_status = window.AnzhiActivitys.isInstalledApp(pkgName,parseInt(versionCode));
+			if(soft_other_status == -2){
+				var my_soft = '<a onclick="download_apk('+activityId+','+aid+',\''+pkgName+'\',\''+name+'\','+versionCode+','+size+',0,0,'+sdkStr+');" ><dl class="down_button">下载</dl></a>';
+			}else if(soft_other_status == -1){
+				var my_soft = '<a onclick="download_apk('+activityId+','+aid+',\''+pkgName+'\',\''+name+'\','+versionCode+','+size+',0,0,'+sdkStr+');" ><dl class="down_button">更新</dl></a>';	
+			}else if(soft_other_status == 0){
+				var my_soft = '<a onclick="openApp('+aid+',\''+pkgName+'\');" ><dl class="down_button">打开</dl></a>';
+			}else if(soft_other_status == 1){
+				var my_soft = '<a><dl class="down_button">已下载</dl></a>';
+			}
+		}
+		if(soft_status&&soft_other_status&&soft_other_status==-1)
+		{
+			$('#down_status').html(my_soft);
+		}
+		else if(soft_status&&soft_status!==6&&soft_status!==10&&!soft_other_status)
+		{
+			$('#down_status').html(my_soft);
+		}
+		else
+		{
+			$(".ft_module").css('display','none'); 
+		}
+	}
+	catch(e)
+	{
+		var my_soft ='<a href='+downloadurl+'><dl class="down_button">立即下载</dl></a>';
+		$('#down_status').html(my_soft);
+	}
+}
+
+function download_apk(activity_id,aid,pkgName,name,versionCode,size,flag,noFlow,sdkStr,status)
+{
+	window.AnzhiActivitys.downloadForActivity(parseInt(activity_id),parseInt(aid),pkgName,name,parseInt(versionCode),parseInt(size),flag,noFlow,sdkStr);
+}
+
+function installApp(softid,pkgname)
+{
+	window.AnzhiActivitys.installAppForActivity(parseInt(softid));
+}
+function openApp(softid,pkg)
+{
+	the_soft = [softid];
+	window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+}
+function pause_download(softid)
+{
+	window.AnzhiActivitys.pauseDownloadForActivity(softid);
+}
+
+//更新软件状态（正在下载）
+function onDownloadCreated(softid)
+{
+	$('.down_button').html("下载中");
+}
+
+function onDownloadStateChanged(softid,newState)
+{
+	if(newState == 1){
+		$('.down_button').html("下载中");
+		$('.down_button').bind('click',function(){	
+			pause_download(parseInt(softid));
+		});
+	}else if(newState == 2){
+		$('.down_button').html("继续");
+	}else if(newState == 3){
+		$('.down_button').html("继续");
+	}else if(newState == 4){
+		$('.down_button').html("重试");
+	}else if(newState == 5){
+		$('.down_button').html("安装");
+		$('.down_button').bind('click',function(){	
+					installApp(parseInt(softid));
+				});
+	}else if(newState == 6){
+		$('.down_button').html("打开");
+		$('.down_button').bind('click',function(){
+					openApp(soft_lists_go,softid);
+				});
+	}else if(newState == 8){
+		$('.down_button').html("继续");
+	}else if(newState == 9){
+		$('.down_button').html("检查中");
+	}
+}
+</script>

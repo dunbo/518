@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="Android,安卓,安卓网,安卓市场,安卓游戏,电子市场,安卓软件,Android游戏,安卓手机,游戏汉化,手机游戏,Android软件,软件下载,最新汉化软件,安卓游戏下载,游戏汉化" />
+<meta name="description" content="安智市场,Android,安卓,安卓网,安卓市场,电子市场,安卓游戏,应用商店-国内最专业的Android安卓电子市场，提供海量安卓软件、Android手机游戏、安卓最新汉化软件、汉化游戏资源及最新APK汉化、汉化破解APP、APK免费下载，致力于为用户打造最贴心的Android安卓手机应用商店" />
+<title><!--{$out.activity.ap_name}--></title>
+<link type="text/css" rel="stylesheet" href="/css/activity_common.css"/>
+<script src="/js/jquery.js"></script>
+</head>
+<body>
+<div id="banner">
+	<img src="<!--{$out.imgurl}--><!--{$out.activity.ap_imgurl}-->" alt=""/>
+</div>
+<div id="main">
+	<div id="active_intro">
+		<script>
+				var proid_arr = getArgs();
+				var skinvc = proid_arr.skinvc;
+
+				function getArgs() {
+					var args = {};
+					var query = location.search.substring(1);
+					var pairs = query.split("&");
+					for(var i = 0; i < pairs.length; i++) {
+						var pos = pairs[i].indexOf('=');
+						if (pos == -1) continue;
+						var argname = pairs[i].substring(0,pos);
+						var value = pairs[i].substring(pos+1);
+						value = decodeURIComponent(value);
+						args[argname] = value;
+					}
+					return args;
+				}
+			
+			
+				function isMobel(value)  {  
+					if(/^13\d{9}$/g.test(value)||(/^14\d{9}$/g.test(value))||(/^15\d{9}$/g.test(value))||(/^17\d{9}$/g.test(value))||(/^18\d{9}$/g.test(value))){    
+						return true;  
+					}else{
+						return false;  
+					}  
+				}
+				
+				function _submit(){
+					var my_package = $('#my_package').val();
+					var url = window.location.href;
+					var aid = url.replace(/.*aid=(\d*).*/, "$1");
+					var sid = url.replace(/.*sid=([0-9a-z]*).*/, "$1");
+					var mobile_phone = $("#mobile_phone").val();
+					$("#mobile_phone").css("borderColor", "#CDCDCD");
+					if(mobile_phone == "") {  	
+						$("#mobile_phone").css("borderColor", "#f00");
+						return false;
+					 }
+					 if(mobile_phone !="" && !isMobel(mobile_phone)) { 
+						$("#mobile_phone").css("borderColor", "#f00");
+						return false;
+					 }
+					var phone = $("#mobile_phone").val();
+			
+					$.ajax({
+						url:"/writeLog.php", 
+						data:"sid="+sid+"&aid="+aid+"&package="+my_package+"&phone="+phone, 
+						type:"get",
+						success:function(data) {
+							var data = eval("("+data+")");
+							if(skinvc >= 5400){
+								window.AnzhiActivitys.downloadForActivity(parseInt(aid), data.ID, my_package, data.SOFT_NAME, parseInt(data.SOFT_VERSION_CODE), parseInt(data.SOFT_SIZE), 7, 0, ''+parseInt(data.min_firmware)+','+parseInt(data.max_firmware)+'');
+							}else{
+								window.AnzhiActivitys.downloadForActivity(parseInt(aid), data.ID, my_package, data.SOFT_NAME, parseInt(data.SOFT_VERSION_CODE), parseInt(data.SOFT_SIZE), 7);
+							}
+						},
+						error:function() {
+							alert("页面生成失败");
+						}
+					});
+					return false;
+				}
+				
+				
+				$(function() {
+					$("#mobile_phone").click(function() {
+						if (!$(this).attr("modify")) {
+							$(this).val("");	
+							$(this).attr("modify", true);
+						}
+					});
+					
+				});
+				
+				</script>
+				<h6 style="border-bottom:none; padding-bottom:0; margin-bottom:0">填写参加信息：</h6>
+				<form method="get" action="" >
+					<input type="hidden" id="my_package" value="<!--{$out.activity.ap_package}-->">
+					<input type="text" id="mobile_phone" class="inputtext" placeholder="请输入您的手机号"/>
+					<input type="submit" value="提交" class="submit_btns" onclick="return _submit();" />
+				</form>
+				<h6>活动规则：</h6><!--{$out.activity.ap_rule}--><br/>
+			</div>
+	</div>
+</body>
+</html>

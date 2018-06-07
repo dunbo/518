@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js?1'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<style>.qh{float:left;width:98px;height:28px;line-height:28px;text-align:center;cursor:pointer;font-size:14px;font-family:微软雅黑;text-decoration:none;color:#444;padding:0;border-width:1px;border-style:solid;border-color:#bdbdbd;display:block}</style>
+</head>
+<body>
+		<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+			<thead>
+			<tr>
+				<td style="font-size: 16px;font-weight: 700;">
+					<div style="margin-top:10px;margin-bottom:10px">签到配置</div>
+				</td>
+			</tr>
+			<tr >
+				<td style="border-bottom:solid 1px black">
+					<a href="__URL__/month_list" class="qh" <?php echo $list_type==0?"style='background: #D1D1D1;'":''?> >待审核列表</a>
+					<a href="__URL__/month_list?list_type=1" class="qh" <?php echo $list_type==1?"style='background: #D1D1D1;'":''?> >通过列表</a>
+				</td>
+				<td style="border-bottom:solid 1px black"></td>
+			</tr>
+			<tr>
+				<td width="90%">
+					<if condition="$list_type eq 1">
+						<a title="查看中奖记录" href="/index.php/Sj/Sign/award_record"><button class="btn btn-sm btn-default yahei" style="width:100px;margin:10px;">查看中奖记录</button></a>
+					<else/>
+						签到提醒：<?php echo $remind['configcontent']?'开启':'关闭';?> &nbsp;<a  href="__URL__/remind?&width=250&height=150" title="签到提醒" class="thickbox" style="color:blue;">编辑</a>
+					</if>
+				</td>
+				<td>
+					<if condition="$list_type eq 0">
+						<a class="thickbox"  title="添加新月份" href="__URL__/month_add?width=250&height=150"><button class="btn btn-sm btn-default yahei" style="width:70px;margin:10px;">添加</button></a>
+					</if>
+				</td>
+			</tr>
+			</thead>
+		</table>
+
+       <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+	        <thead >
+	          <tr align="center" >
+				<th width="10%">月份</th>
+				<th width="10%">每日签到</th>
+				<th width="10%">连续签到</th>
+				<th width="10%">补签卡</th>
+				<th width="10%">配置详情</th>
+				<th width="10%">状态</th>
+				<th width="15%">操作</th>
+	          </tr>
+	        </thead>
+            <tbody>
+				<?php foreach($list as $val) :?>
+					<tr>
+					<td height="20" align="center"><?php echo $val['year'].'-'.$val['month'] ?></td>
+					<td height="20" align="center">
+						<if condition="$list_type eq 1">
+							<a href="javascript:;" style="color:#d6d6d6">配置</a>
+						<else/>
+							<a href="__URL__/days_list?mid={$val['id']}" style="color:blue">配置</a>
+						</if>
+					</td>
+					<td height="20" align="center">
+						<if condition="$list_type eq 1">
+							<a href="javascript:;" style="color:#d6d6d6">配置</a>
+						<else/>
+							<a href="/index.php/Sj/SignContinuity/sign_continuity_list?mid={$val.id}" style="color:blue">配置</a>
+						</if>
+					</td>
+					<td height="20" align="center">
+						<if condition="$list_type eq 1">
+							<a href="javascript:;" style="color:#d6d6d6">配置</a>
+						<else/>
+							<a href="/index.php/Sj/SignMend/sign_mend_list?mid={$val.id}" style="color:blue">配置</a>
+						</if>
+					</td>
+					<td height="20" align="center">
+						<a href="/index.php/Sj/Sign/month_detail?mid={$val.id}" style="color:blue;">查看</a>
+					</td>
+					<td height="20" align="center">
+						<if condition="$list_type eq 1">
+							<?php 
+								$time_str = $val['year'].'-'.$val['month'];
+								$time = strtotime($time_str);
+								$str_status = '';
+								if( $val['status'] == 3 ) {
+									$str_status = '已停用';
+								}elseif( $time == $timestamp ) {
+									$str_status = '进行中';				
+								}elseif( $time > $timestamp ) {
+									$str_status = '已通过';
+								}else{
+									$str_status = '已过期';
+								}
+								echo $str_status;
+							?>
+						<else/>
+							待审核
+						</if>
+					</td>
+					<td height="20" align="center">
+						<if condition="$list_type eq 1">
+								<?php if( $val['status'] == 3 ){ ?>
+									<?php echo '————';?>
+								<?php }elseif( $time > $timestamp ){ ?>
+									<a style="color:blue;" href="javascript: if( confirm('确定驳回?') ){ window.location.href=\'__URL__/month_operation?id=<?php echo $val['id'] ?>&operation=bh\'}" >驳回</a>
+								<?php }elseif($time == $timestamp){ ?>
+									<a style="color:blue;" href="javascript: if( confirm('确定停用？停用后将不能重新启用。') ){ window.location.href=\'__URL__/month_operation?id=<?php echo $val['id'] ?>&operation=stp\'}" >停用</a>
+								<?php }else{ echo '————'; }?>
+						<else/>
+							<a href="__URL__/month_edit?id={$val['id']}&width=250&height=150" title="编辑月份" style="color:blue;" class="thickbox" >编辑</a>  |
+							<a style="color:blue;" href="javascript: if( confirm('确定删除?') ){ window.location.href=\'__URL__/month_operation?id={$val['id']}&operation=del\'}" >删除</a>  |
+							<a style="color:blue;" href="javascript: if( confirm('确定通过审核?') ){ window.location.href=\'__URL__/month_operation?id={$val['id']}&operation=tg\'}">通过</a>
+						</if>
+					</td>
+					</tr>
+				<?php endforeach;?>
+           </tbody>
+         </table>
+     <div style="width:92%; padding-top:4px; text-align:right">
+     {$page}
+     </div>
+ </body>
+ 
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title><!--{$out.welfare.name}--></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/welfare/css/common.css?v3"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<!--{if $out.show_video == 1}-->
+<script src="<!--{$out.new_static_url}-->/activity/welfare/js/video.js"></script>
+<link href="<!--{$out.new_static_url}-->/activity/welfare/css/video-js.css" rel="stylesheet">
+<!--{/if}-->
+<script type="text/javascript">
+(function (doc, win) {
+	var docEl = doc.documentElement,
+    resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+    recalc = function () {
+        var clientWidth = docEl.clientWidth;
+        if (!clientWidth) return;
+        if(clientWidth>=640){
+			docEl.style.fontSize = '100px';
+		}else{
+			docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+		}
+    };
+    // Abort if browser does not support addEventListener
+    if (!doc.addEventListener) return;
+    win.addEventListener(resizeEvt, recalc, false);
+    doc.addEventListener('DOMContentLoaded', recalc, false);
+   //以640像素设计图为准 ，1rem代表100像素
+})(document, window);
+
+var var_activity = parseInt('-99999');
+var var_soft_status = 0;
+var interval_arr = 0;
+var end_tm = <!--{$out.welfare.end_tm}-->;
+<!--{if $out['is_weixin'] == 1}-->
+var is_weixin = true;
+<!--{else}-->
+var is_weixin = false;
+<!--{/if}-->
+
+$(function(){
+	go();
+	end_tm_interval = window.setInterval(go, 1000);
+	$('.download_<!--{$out.welfare.pkg_info.ID}-->').unbind('click');
+	$('.download_<!--{$out.welfare.pkg_info.ID}-->').bind('click', function(){down(<!--{$out.welfare.pkg_info.ID}-->,'<!--{$out.welfare.package}-->','<!--{$out.welfare.pkg_info.SOFT_NAME}-->',<!--{$out.welfare.pkg_info.SOFT_VERSION_CODE}-->,<!--{$out.welfare.pkg_info.SOFT_SIZE}-->,'<!--{$out.welfare.name}-->',<!--{$out.welfare.id}-->)});
+	if(typeof(window.AnzhiActivitys) != "undefined"){
+		window.AnzhiActivitys.registerDownloadObserver(<!--{$out.welfare.pkg_info.ID}-->);
+		status(<!--{$out.welfare.pkg_info.ID}-->,'<!--{$out.welfare['package']}-->','<!--{$out.welfare.pkg_info.SOFT_NAME}-->',<!--{$out.welfare.pkg_info.SOFT_VERSION_CODE}-->,<!--{$out.welfare.pkg_info.SOFT_SIZE}-->,<!--{$out.welfare['id']}-->,'<!--{$out.welfare.name}-->');
+	}
+});
+
+function go(){
+	d = Math.floor(end_tm / 86400); //几天
+    h = Math.floor((end_tm % 86400) / 3600); //几小时
+    h2 = Math.floor(end_tm / 3600); //多少小时
+    m = Math.floor(((end_tm % 86400) % 3600) / 60); //几分钟
+    s = Math.floor(((end_tm % 86400) % 3600) % 60); //几秒钟
+    if(h2>100){
+    	$('#end_time').html('距结束还剩<span>'+d+'</span>天');
+	}else if(end_tm>0){
+		$('#end_time').html('距结束还剩<span>'+h2+'</span>小时<span>'+m+'</span>分<span>'+s+'</span>秒');
+	}else{
+		$('#end_time').html('已结束');
+	}
+	end_tm--;
+}
+
+function status(SOFT_ID,pkg,SOFT_NAME,SOFT_VERSION_CODE,SOFT_SIZE,welfare_id,welfare_name){
+	if(interval_arr != 0){
+		window.clearInterval(interval_arr);
+	}
+	interval_arr = window.setInterval("status("+SOFT_ID+",'"+pkg+"','"+SOFT_NAME+"',"+SOFT_VERSION_CODE+","+SOFT_SIZE+","+welfare_id+",'"+welfare_name+"')", 2000);
+	var var_a = $('.download_'+SOFT_ID);
+	var var_soft_status = window.AnzhiActivitys.getDownloadStateForActivity(SOFT_ID);	
+	if(var_soft_status == 1){ //下载中
+		var_a.html('下载中');
+		var_a.unbind('click');
+		var_a.bind('click', function(){pause(SOFT_ID)});
+	}else if(var_soft_status == 2){ //等待中
+		var_a.html('继续');
+		var_a.unbind('click');
+		var_a.bind('click', function(){restart(SOFT_ID)});
+	}else if(var_soft_status == 3){ //暂停
+		var_a.html('继续');
+		var_a.unbind('click');
+		var_a.bind('click', function(){restart(SOFT_ID)});
+	}else if(var_soft_status == 4){ //失败
+		var_a.html('失败');
+		var_a.unbind('click');
+		var_a.bind('click', function(){down(SOFT_ID,pkg,SOFT_NAME,SOFT_VERSION_CODE,SOFT_SIZE,welfare_name,welfare_id)});
+	}else if(var_soft_status == 5){ //完成
+		var_a.html('安装');
+		var_a.unbind('click');
+		var_a.bind('click', function(){install(SOFT_ID, pkg, welfare_name, welfare_id)});
+	}else if(var_soft_status == 6){ //安装完成
+		var_a.html('领取');
+		var_a.unbind('click');
+		$('#receive_'+welfare_id).attr('onclick', "open('"+pkg+"', "+SOFT_ID+", "+welfare_id+",'"+welfare_name+"')");
+	}else if(var_soft_status == 8){ //待校验
+		var_a.html('下载中');
+		var_a.unbind('click');
+	}else if(var_soft_status == 9){ //校验中
+		var_a.html('下载中');
+		var_a.unbind('click');
+	}else if(var_soft_status == 10){ //不可安装
+		var_a.html('已下载');
+		var_a.unbind('click');
+	}else if(var_soft_status == -1){
+		var var_soft_other_status = window.AnzhiActivitys.isInstalledApp(pkg, SOFT_VERSION_CODE);
+		if(var_soft_other_status == -2){ //未安装
+			var_a.html('下载领取');
+			var_a.unbind('click');
+			var_a.bind('click', function(){down(SOFT_ID,pkg,SOFT_NAME,SOFT_VERSION_CODE,SOFT_SIZE,welfare_name,welfare_id)});
+		}else if(var_soft_other_status == -1){ //已安装版本低
+			var_a.html('更新');
+			var_a.unbind('click');
+			var_a.bind('click', function(){down(SOFT_ID,pkg,SOFT_NAME,SOFT_VERSION_CODE,SOFT_SIZE,welfare_name,welfare_id)});
+		}else if(var_soft_other_status == 0){ //版本相等
+			var_a.html('领取');
+			var_a.unbind('click');
+			$('#receive_'+welfare_id).attr('onclick', "open('"+pkg+"', "+SOFT_ID+", "+welfare_id+",'"+welfare_name+"')");
+		}else if(var_soft_other_status == 1){ //已安装版本高
+			var_a.html('领取');
+			var_a.unbind('click');
+			$('#receive_'+welfare_id).attr('onclick', "open('"+pkg+"', "+SOFT_ID+", "+welfare_id+",'"+welfare_name+"')");
+		}
+	}
+}
+
+function down(soft_id,pkg,SOFT_NAME,SOFT_VERSION_CODE,SOFT_SIZE,welfare_name,welfare_id){
+	if(is_weixin == true){
+		showOpenBox('.share_01');
+		return false;
+	}
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		alert('请先安装安智市场');
+		return false;
+	}
+	$('.download_'+soft_id).html("下载中");
+	$.ajax({
+		url:'/lottery/welfare/write_log.php',
+		data:'from=detail&pkg='+pkg+'&soft_id='+soft_id+'&type=1&welfare_name='+welfare_name+'&welfare_id='+welfare_id,
+		type:'post',
+		success:function(){
+			window.AnzhiActivitys.downloadForActivity(var_activity, soft_id, pkg, SOFT_NAME, SOFT_VERSION_CODE, SOFT_SIZE, 0);
+		}
+	});
+}
+
+function install(soft_id,pkg,welfare_name,welfare_id){
+	if(is_weixin == true){
+		showOpenBox('.share_01');
+		return false;
+	}
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		alert('请先安装安智市场');
+		return false;
+	}
+	$('.download_'+soft_id).html("安装中");
+	$.ajax({
+		url:'/lottery/welfare/write_log.php',
+		data:'from=detail&pkg='+pkg+'&soft_id='+soft_id+'&type=2&welfare_name='+welfare_name+'&welfare_id='+welfare_id,
+		type:'post',
+		success:function(){
+			window.AnzhiActivitys.installAppForActivity(soft_id);
+		}
+	});
+}
+
+function open(pkg,soft_id,welfare_id,welfare_name){
+	if(is_weixin == true){
+		showOpenBox('.share_01');
+		return false;
+	}
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		alert('请先安装安智市场');
+		return false;
+	}
+	$.ajax({
+		url:'/lottery/welfare/write_log.php',
+		data:'from=detail&pkg='+pkg+'&soft_id='+soft_id+'&type=3&welfare_id='+welfare_id+'&welfare_name='+welfare_name,
+		type:'post',
+		success:function(num){
+			$('#click_num_'+welfare_id).text(num);
+			var welfare_draw_url = $('#receive_'+welfare_id).siblings('input[type=hidden]').val();
+			if(welfare_draw_url == ''){
+				window.AnzhiActivitys.openAppForActivity(pkg, [var_activity, soft_id]);
+			}else{
+				window.location.href = welfare_draw_url;
+			}
+		}
+	});
+}
+
+function pause(soft_id){
+	if(is_weixin == true){
+		showOpenBox('.share_01');
+		return false;
+	}
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		alert('请先安装安智市场');
+		return false;
+	}
+	$('.download_'+soft_id).html("继续");
+	window.AnzhiActivitys.pauseDownloadForActivity(soft_id);
+}
+
+function restart(soft_id){
+	if(is_weixin == true){
+		showOpenBox('.share_01');
+		return false;
+	}
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		alert('请先安装安智市场');
+		return false;
+	}
+	$('.download_'+soft_id).html("下载中");
+	window.AnzhiActivitys.resumeDownloadForActivity(soft_id);
+}
+//分享
+function go_share(pkg, soft_id){
+	if(is_weixin == true){
+		showOpenBox('.share_01');
+		return false;
+	}
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		alert('请先安装安智市场');
+		return false;
+	}
+	/*$.ajax({
+		url:'/lottery/welfare/write_log.php',
+		data:'pkg='+pkg+'&soft_id='+soft_id+'&type=4',
+		type:'post',
+		success:function(){
+		}
+	});*/
+	var share_text = '@安智市场 帮你捡福利啦！<!--{$out.welfare.name}-->，速来领取~';
+	var share_url='<!--{$out.activity_share_url}-->lottery/welfare/index.php?is_share=1';
+	var img_url = <!--{if $out.welfare.share_pic}-->"<!--{$out.imgurl}--><!--{$out.welfare.share_pic}-->"<!--{else}-->"<!--{$out.imgurl}--><!--{$out['welfare']['pkg_info']['iconurl_72']}-->"<!--{/if}-->;
+	var weixin_img_url = <!--{if $out.welfare.share_pic}-->"<!--{$out.imgurl}--><!--{$out.welfare.share_pic}-->"<!--{else}-->"<!--{$out.imgurl}--><!--{$out['welfare']['pkg_info']['iconurl_72']}-->"<!--{/if}-->;
+	var share_json = '{"TEXT":"'+share_text+'","URL":"'+img_url+'","ACTIONURL":"'+share_url+'","URLWEIXIN":"'+weixin_img_url+'"}';
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+</script>
+<style type="text/css">
+.main{padding-bottom:0.9rem;}.app a{}.title{}.title h3{}
+.lottery_info a{ background:#23b4ff}
+.lottery_info a.active_btn{background:#ffb83b}
+.share_btn{}
+</style>
+</head>
+<body>
+<!--{if $out.welfare.detail_pic_status eq 1}-->
+<div class="banner" id="top">
+    <img src="<!--{$out.imgurl}--><!--{$out.welfare.detail_pic}-->"/>
+</div>
+<!--{/if}-->
+<div class="main">  
+	<div class="app">
+		<div class="app_img">
+			<img src="<!--{$out.imgurl}--><!--{$out['welfare']['pkg_info']['iconurl_72']}-->"/>
+		</div>
+		<div class="app_txt">
+			<h3><!--{$out.welfare.name}--></h3>
+			<p><span id='end_time'></span>&nbsp;&nbsp;<span id='click_num_<!--{$out.welfare.id}-->'><span><!--{$out.welfare.click_num}--></span></span>人已领</p>
+			<h2><!--{$out.welfare.softname}--></h2>
+		</div>
+	</div>
+
+	<!--{if $out.content != ''}-->
+	<div class="infor_wrap">
+		<div class="title">
+			<h3>活动介绍</h3>
+		</div>
+		<div class="infor">
+			<!--{$out.content}-->
+		</div>
+	</div>
+	<!--{/if}-->
+
+	<div class="btns_wrap">
+		<input type='hidden' value="<!--{$out.welfare.welfare_draw_url}-->" />
+		<a class="app_btn download_<!--{$out.welfare.pkg_info.ID}-->" id="receive_<!--{$out.welfare.id}-->">下载领取</a>
+		<a href="javascript:;" onclick="go_share('<!--{$out.welfare.package}-->',<!--{$out.welfare.pkg_info.ID}-->)" class="share_btn">分享</a>
+		<div class="clear"></div>
+	</div>
+</div>
+<section>
+	<div id="body-bg" style="display: none;"></div>
+	<div class="share_01"><img src="<!--{$out.new_static_url}-->/activity/welfare/images/share_01.png"/></div>
+</section>
+<script type="text/javascript">
+var flags={canMove:true};
+function showOpenBox(obj){
+    var bg_h=$(window).height() + $(document).scrollTop(),
+        top_h= $(obj).height()/ 2 - $(document).scrollTop();
+    $(obj).css("margin-top",-top_h+"px").show();
+    $("#body-bg").css("height",bg_h+"px").show();
+    flags.canMove=false;
+	window.onresize = function(){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+            top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$('#body-bg').css("height",bg_h+"px");
+		$(obj).css("margin-top",-top_h+"px");	
+	}
+}
+$(function(){          
+	$("body").bind('touchmove', function (e) {
+        if(!flags.canMove){
+            e.preventDefault();	
+        }
+    });
+})
+</script>
+</body>
+</html>

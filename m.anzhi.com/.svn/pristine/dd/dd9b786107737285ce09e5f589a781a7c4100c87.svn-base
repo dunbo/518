@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>预购礼券</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/preorder/css/common.css?v2"/>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/activity/preorder/js/public.js"></script>
+<script type="text/javascript">
+	var coupons = {
+	<!--{foreach from=$out.coupon item=coupon}-->
+		<!--{$coupon.id}-->:{limit:<!--{if $coupon.available_amount<$coupon.remaining_amount}--><!--{$coupon.available_amount}--><!--{else}--><!--{$coupon.remaining_amount}--><!--{/if}-->,price:<!--{$coupon.coupon_price}-->,real_price:<!--{$coupon.coupon_real_price}-->},
+	<!--{/foreach}-->
+	}
+	function onLoginComplete(sid,tip){
+		sid_str = sid.replace("PHPSESSID=", "");
+		location.href="/lottery/preorder/index.php?sid="+sid_str+"&aid=<!--{$out.aid}-->";
+	}
+
+	var cart = []
+
+	function modify(coup_id, num) {
+	<!--{if !$out.is_login}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+	<!--{else}-->
+		cur_num=parseInt($("#num_"+coup_id).html());
+		limit = coupons[coup_id].limit;
+		tar_num=cur_num+num
+		if (tar_num <= limit && tar_num >= 0) {
+			$("#num_"+coup_id).html(tar_num);
+			if (tar_num == 0) {
+				//购买数量为0时，隐藏减号跟数字
+				$("#minus_"+coup_id).hide();
+				$("#num_"+coup_id).hide();
+				$("#num_"+coup_id).parent().addClass('order_list_r2');
+			}
+			if (tar_num > 0) {
+				//购买数量为正时，显示减号跟数字
+				$("#minus_"+coup_id).show();
+				$("#num_"+coup_id).show();
+				$("#num_"+coup_id).parent().removeClass('order_list_r2');
+			}
+			if (tar_num == limit) {
+				$("#add_"+coup_id).addClass('disabled_add');
+			} else {
+				$("#add_"+coup_id).removeClass('disabled_add');
+			}
+			//重新计算购物车
+			cart = []
+			total_price = 0;
+			total_real_price = 0;
+			$(".num").each(function(){
+				coupon_id = $(this).attr('id').substr(4);
+				num = parseInt($(this).html());
+				if (num > 0) {
+					goods = {"id":coupon_id, "num":num}
+					cart.push(goods);
+					total_price += num * coupons[coupon_id].price;
+					total_real_price += num * coupons[coupon_id].real_price;
+				}
+			});
+			if (cart.length > 0) {
+				$("#cart").html("<p>合计<span>￥"+(total_real_price/100)+"</span></p><em>"+(total_price/100)+"<i></i></em>");
+				$("#btn_buy").removeClass("disabled_pay")
+			} else {
+				$("#cart").html("<p>未选购礼券</p>");
+				$("#btn_buy").addClass("disabled_pay")
+			}
+		}
+	<!--{/if}-->
+	}
+
+	function checkout() {
+		if (cart.length > 0) {
+			$.post("checkout.php?aid=<!--{$out.aid}-->",{"goods":cart},function(data,status){
+				if (data.status == 1) {
+					window.location = data.jump_url;
+				} else if (data.status == 0) {
+					toast("出错了，请刷新页面后重试");
+				} else if (data.status == 2) {
+					toast("已超时，请重新登录");
+				}
+			},"json");
+		}
+	}
+</script>
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.new_static_url}-->/activity/preorder/images/banner.png" />
+</div>
+<div class="main" style="padding-bottom: 1.7rem;">
+	<div class="title">
+		<h3>选择预购礼券</h3>
+	</div>
+	<ul class="order_list">
+	<!--{foreach from=$out.coupon item=coupon}-->
+		<!--{if $coupon.remaining_amount gt 0}-->
+		<li>
+		<!--{else}-->
+		<li class="disabled">
+		<!--{/if}-->
+			<div class="order_money">
+				<span><!--{$coupon.coupon_price/100}-->元<i><!--{$coupon.coupon_discount}-->折</i></span>
+				<em <!--{if $coupon.available_amount == 0}-->class="disabled_txt"<!--{/if}-->>￥<!--{$coupon.coupon_real_price/100}--></em>
+			</div>
+			<div class="order_num">
+				<p>仅剩<span><!--{$coupon.remaining_amount}--></span>张</p>
+				<em>限量<!--{$coupon.total_amount}-->张</em>
+			</div>
+			<!--{if $coupon.available_amount > 0}-->
+			<div class="order_list_r order_list_r2">
+				<span id="minus_<!--{$coupon.id}-->" class="minus_btn" style="display:none" onclick="modify(<!--{$coupon.id}-->,-1)"></span>
+				<em id="num_<!--{$coupon.id}-->" style="display:none" class="num">0</em>
+				<span id="add_<!--{$coupon.id}-->" class="add_btn" onclick="modify(<!--{$coupon.id}-->,1)"></span>
+				<div class="clear"></div>
+				<p>还可购<!--{$coupon.available_amount}-->张</p>
+			</div>
+			<!--{else}-->
+			<div class="order_list_r order_list_r3">
+				<p>购买数量<br/>已达上限</p>
+			</div>
+			<!--{/if}-->
+		</li>
+	<!--{/foreach}-->
+	</ul>
+	<div class="user_wrap">
+	<!--{if $out.username}-->
+		<p>账号：<!--{$out.username}--></p>
+		<a href="pay_record.php?aid=<!--{$out.aid}-->">购买记录</a>
+	<!--{else}-->
+		<p>账号：<span>未登录</span></p>
+		<a href="#" onclick="login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');">立即登录</a>
+	<!--{/if}-->
+		<div class="clear"></div>
+
+	</div>
+	<div class="rule_wrap">
+		<div class="title">
+			<h3>活动说明：</h3>
+		</div>
+		<div class="rule">
+			<ul>
+				<li>1、活动期间用户在指定页面预购礼券，可享受折扣价格;</li>
+				<li>2、预购礼券自活动结束后的3个工作日内发出，<span>有效期为7天</span>，请尽快使用，礼券过期不予补发或者退还。</li>
+				<li>3、活动期间单用户每种折扣限购3张礼券，每个用户最多可购12张。</li>
+				<li>4、禁止采用非法手段抢购折扣礼券，超过限额部分将自动转换成等价安智币。</li>
+				<li>5、预购礼券不适用于以下游戏（海岛奇兵、梦幻西游、列王的纷争、大话西游、部落冲突、皇室战争、最终幻想：觉醒、镇魔曲、诛仙、阴阳师、倩女幽魂、剑侠世界、青云志、永恒纪元：戒、问道、率土之滨、大唐无双、火炬之光、王者传奇、仙剑奇侠传3D回合、传奇霸业、大天使之剑H5）</li>
+				<li>6、本次活动最终解释权归安智运营团队所有</li>
+			</ul>
+		</div>
+	</div>
+</div>
+<!--{if $out.unpaid_num > 0}-->
+<div class="order_tips">
+	<p>您有<!--{$out.unpaid_num}-->笔订单未支付，<a href="unpaid_order.php?aid=<!--{$out.aid}-->">点击查看</a></p>
+</div>
+<!--{/if}-->
+<div class="pay_money footer">
+	<div id="cart" style="margin-right:2.13em">
+	<p>未选购礼券</p>
+	</div>
+	<a id="btn_buy" href="javascript:;" onclick="checkout()" class="disabled_pay">立即购买</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="Android,安卓,安卓网,安卓市场,安卓游戏,电子市场,安卓软件,Android游戏,安卓手机,游戏汉化,手机游戏,Android软件,软件下载,最新汉化软件,安卓游戏下载,游戏汉化" />
+<meta name="description" content="安智市场,Android,安卓,安卓网,安卓市场,电子市场,安卓游戏,应用商店-国内最专业的Android安卓电子市场，提供海量安卓软件、Android手机游戏、安卓最新汉化软件、汉化游戏资源及最新APK汉化、汉化破解APP、APK免费下载，致力于为用户打造最贴心的Android安卓手机应用商店" />
+<title>新年狂欢，下软件，送豪礼！</title>
+<link type="text/css" rel="stylesheet" href="css/common.css?v=1"/>
+<script type="text/javascript" src="js/jquery-1.4.4.min.js"></script>
+</head>
+<script>
+
+var proid_arr = getArgs();
+var proid = proid_arr.selectsid;
+var package_name = proid_arr.package;
+var aid = proid_arr.aid;
+var sid = proid_arr.sid;
+if (proid >0 ) {
+	
+} else {
+	proid = 1;
+}
+
+function tabs(object)
+{
+	$('#select_'+proid+'').css("display","block");
+}
+
+
+function my_times(){
+	var package_arrs = "";
+	$('input[name = "package_arr"]:checked').each(function(){
+		package_arrs += $(this).val() + ',';
+	});
+	var packages = package_arrs.substring(0,package_arrs.length - 1);
+	var package_str = package_arrs.split(',');
+	var packages_str = packages.split(',');
+	
+	if(!package_arrs){
+		$('#submit_btn').addClass('gray');
+	}else{
+		$('#submit_btn').removeClass('gray');
+	}
+	if(package_arrs){
+		$('#times').html(packages_str.length);
+	}else{
+		$('#times').html(0);
+	}
+}
+
+window.onload = function()
+{
+	tabs("active_process");
+	
+	var package_arrs = "";
+	$('input[name = "package_arr"]:checked').each(function(){
+		package_arrs += $(this).val() + ',';
+	});
+	if(!package_arrs){
+		$('#submit_btn').addClass('gray');
+	}else{
+		$('#submit_btn').removeClass('gray');
+	}
+	var packages = package_arrs.substring(0,package_arrs.length - 1);
+	var packages_str = packages.split(',');
+	if(package_arrs){
+		$('#times').html(packages_str.length);
+	}else{
+		$('#times').html(0);
+	}
+}
+
+
+function getArgs() {
+	var args = {};
+	var query = location.search.substring(1);
+	// Get query string
+	var pairs = query.split("&");
+	// Break at ampersand
+	for(var i = 0; i < pairs.length; i++) {
+		var pos = pairs[i].indexOf('=');
+		// Look for "name=value"
+		if (pos == -1) continue;
+		// If not found, skip
+		var argname = pairs[i].substring(0,pos);// Extract the name
+		var value = pairs[i].substring(pos+1);// Extract the value
+		value = decodeURIComponent(value);// Decode it, if needed
+		args[argname] = value;
+		// Store as a property
+	}
+	return args;// Return the object
+}
+
+function isMobel(value)  {  
+	if(/^13\d{9}$/g.test(value)||(/^15\d{9}$/g.test(value))||(/^18\d{9}$/g.test(value))){    
+		return true;  
+	}else{
+		return false;
+	}  
+}
+
+function _submit()
+{
+	var package_arrs = "";
+	$('input[name = "package_arr"]:checked').each(function(){
+		package_arrs += $(this).val() + ',';
+	});
+
+	if(!package_arrs){
+		return false;
+	}
+	var mobile_phone = $("#mobile_phone").val();
+	
+	$("#mobile_phone").css("borderColor", "#CDCDCD");
+	if(mobile_phone == "") {
+		$("#mobile_phone").css("borderColor", "#f00");
+		return false;
+	 }
+	 
+	if(mobile_phone !="" && !isMobel(mobile_phone)) { 
+		$("#mobile_phone").css("borderColor", "#f00");
+		return false;
+	}
+	
+	var name = $("#username").val();
+	var phone = $("#mobile_phone").val();
+	var package_str = package_arrs.split(',');
+	var package_str_go = package_str.length - 1;
+	var setTime = 500;
+	$.ajax({
+		url:"/nyactivity.php", 
+		data:"sid="+sid+"&aid="+aid+"&package_arr="+package_arrs+"&phone="+phone,
+		type:"get",
+		success:function(data) {
+			var data = eval("("+data+")");
+			for(i=0;i<data.length;i++){
+				if(!data[i]['ID']){
+					continue;
+				}else{
+				window.AnzhiActivitys.downloadForActivity(parseInt(aid), data[i]['ID'], package_str[i], data[i]['SOFT_NAME'], parseInt(data[i]['SOFT_VERSION_CODE']), parseInt(data[i]['SOFT_SIZE']), 0);
+				}
+			}
+			window.location.href='index2.html?packages='+package_str_go;
+		}
+	});	
+	return false;
+}
+
+
+$(function() {
+	
+	$("#mobile_phone").click(function() {
+		if (!$(this).attr("modify")) {
+			$(this).val("");	
+			$(this).attr("modify", true);
+		}
+	});
+	
+	$("#submit_btn").click(function() {
+		_submit();
+	});
+});
+
+</script>
+<body>
+<div id="main">
+	<a name="top"></a>
+	<div id="banner">
+		<img src="images/banner_03.jpg" alt=""/>
+	</div>
+	<div id="active_process">
+		<h6>活动流程</h6>
+		<img src="images/process.jpg" alt=""/>
+		<form method="get" action="" onsubmit="return _submit();">
+			<p>您共有<span id="times"></span>次抽奖机会</p>
+			<div class="formlist">
+				<label>手机号码：</label>
+				<input type="text" class="inputtext" id="mobile_phone" onblur="if(this.value==''){this.value='仅用于中奖通知'}" onFocus="if(this.value=='仅用于中奖通知'){this.value=''}" value="仅用于中奖通知"/>
+				<div class="clear"></div>
+			</div>
+			<div class="form_btn">
+				<a href="javascript:;" id="submit_btn">提交并一键下载</a>
+			</div>
+		</form>
+	</div>
+	<div class="items">
+		<h3></h3>
+		<div class="list">
+			<div class="list_head">
+				<div class="list_img">
+					<img src="images/images_01.png" alt="" width="72" height="72" value="com.zip2zap.questnet.android"/>				</div>
+				<div class="list_right">
+					<h6>暴风影音</h6>
+					<span>10.7MB</span>
+					<input type="checkbox" name="package_arr" checked="checked" value="com.storm.smart" onclick="my_times();" />
+					<div class="clear"></div>
+					<p>海量高清视频，尽在暴风影音！</p>
+				</div>
+				<div class="clear"></div>
+			</div>
+			<div class="list_txt">
+				<p>奖品介绍：佳能 EOS600D 单反相机（1名） 、TP-link无线路由器（8名）、50元京东购物卡 （100名）</p>
+			</div>
+		</div>
+		<div class="list">
+			<div class="list_head">
+				<div class="list_img">
+					<img src="images/images_02.png" alt="" width="72" height="72"/>				</div>
+				<div class="list_right">
+					<h6>美丽说</h6>
+					<span>5.4MB</span>
+					<input type="checkbox" name="package_arr" checked="checked" value="com.meilishuo"  onclick="my_times();" />
+					<div class="clear"></div>
+					<p>美丽说购流行，女生买衣必备</p>
+				</div>
+				<div class="clear"></div>
+			</div>
+			<div class="list_txt">
+				<p>奖品介绍：OPPO U707T 3G手机（1名）、美丽说移动电源（10名） 、kisscat特制版潮妹公仔（50名）</p>
+			</div>
+		</div>
+	</div>
+	<div class="items" id="items_02">
+		<h3></h3>
+		<div class="list">
+			<div class="list_head">
+				<div class="list_img">
+					<img src="images/images_03.png" alt="" width="72" height="72"/>				</div>
+				<div class="list_right">
+					<h6>支付宝</h6>
+					<span>21.1MB</span>
+					<input type="checkbox" name="package_arr" checked="checked" value="com.eg.android.AlipayGphone"  onclick="my_times();" />
+					<div class="clear"></div>
+					<p>支付宝钱包，贴身资产管家。</p>
+				</div>
+				<div class="clear"></div>
+			</div>
+			<div class="list_txt">
+				<p>奖品介绍：100元手机充值卡（100名） </p>
+			</div>
+		</div>
+		<div class="list">
+			<div class="list_head">
+				<div class="list_img">
+					<img src="images/images_04.png" alt="" width="72" height="72"/>				</div>
+				<div class="list_right">
+					<h6>携程</h6>
+					<span>12MB</span>
+					<input type="checkbox" name="package_arr" checked="checked" value="ctrip.android.view"  onclick="my_times();" />
+					<div class="clear"></div>
+					<p>携程在手，说走就走</p>
+				</div>
+				<div class="clear"></div>
+			</div>
+			<div class="list_txt">
+				<p>奖品介绍：携程的礼品卡-5000（旅游基金卡1名）</p>
+			</div>
+		</div>
+	</div>
+	<div class="items"id="items_03">
+		<h3></h3>
+		<div class="list">
+			<div class="list_head">
+				<div class="list_img">
+					<img src="images/images_05.png" alt="" width="72" height="72"/>				</div>
+				<div class="list_right">
+					<h6>爱乐透</h6>
+					<span>3.3MB</span>
+					<input type="checkbox" name="package_arr" checked="checked" value="com.iletou.caipiao3"  onclick="my_times();" />
+					<div class="clear"></div>
+					<p>福彩.体彩在线购彩平台！</p>
+				</div>
+				<div class="clear"></div>
+			</div>
+			<div class="list_txt">
+				<p>奖品介绍：三星S4手机（1名）、100元手机充值卡（20名）、20元手机充值卡（100名） </p>
+			</div>
+		</div>
+  </div>
+	<div id="active_intro">
+		<h6>活动说明：</h6>
+		<p><strong>活动时间：</strong><br/>2013年12月30日至2014年1月3日</p>
+		<p><strong>参与方式：</strong><br/>
+		在安智市场活动页面<span style="color:red">下载安装</span>对应的APP应用，并提交联系方式，即有机会抽取相应活动的奖品，<span style="color:red">每人总共最多有五次获奖机会，</span>当土豪就是那么简单！</p>
+		<p><strong>中奖说明：</strong><br/>获奖用户将随机抽取，安智将于活动结束后5个工作日内公布参与本活动的中奖名单，请参与用户关注安智市场专题“安智有奖活动”或安智论坛内“安智活动”中奖公告。<br/>
+下载越多，获奖机会越多！</p>
+	</div>
+	<div class="return_top">
+		<a href="#top">返回顶部</a>
+	</div>
+</div>
+</body>
+</html>

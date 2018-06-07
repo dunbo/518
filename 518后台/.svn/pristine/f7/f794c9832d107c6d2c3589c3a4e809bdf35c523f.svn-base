@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+{//时间插件结束}
+
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<table  width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+<tr height="35">
+	<td align="center" style=<?php if($tab ==1): ?>"background:#FFCC66"; <?php endif; ?> >
+		<a href="__URL__/settle_audit/tab/1"><font style="color:#000; font-weight:bold">待审核</font></a>
+	</td>
+	<td align="center" style=<?php if($tab ==2): ?>"background:#FFCC66"; <?php endif; ?> >
+		<a href="__URL__/settle_passed/tab/2"><font style="color:#000; font-weight:bold">财务结算</font></a>
+	</td>
+</tr>
+</table>
+
+<table style='margin-top:10px;float:left;width:60%' cellspacing="0" cellpadding="0" class="search_table">
+	<tbody>
+	<form method='get' action="" >
+		<tr>
+			<td>选择月份：
+				<span><input type="text" name="begintime" id="begintime" value="{$begintime}" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" /></span>	~
+			<span><input id="endtime" name="endtime" style="cursor: hand; width: 150px;"
+						 value="{$endtime}" size="15" type="text" class="Wdate" onClick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" /></span>
+			</td>
+			<td>
+				账号名称：
+				<input type="text" name="user_name" id ="user_name" value="{$user_name}">
+			</td>
+			<td>账单状态：
+				<select name="status" id="status">
+					<option value="">全部</option>
+					<option value="4" <if condition="$status eq 4">selected</if>>待付款</option>
+					<option value="5" <if condition="$status eq 5">selected</if>>已付款</option>
+					<option value="7" <if condition="$status eq 7">selected</if>>已冻结</option>
+				</select>
+			</td>
+			<td align='right'><input type="submit" class="search_btn" value="确定"></td>
+		</tr>
+	</form>
+	 </tbody>
+</table>
+<div style="clear: both"></div>
+
+<table style='float:left;width:100%' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th>月份</th>
+			<th>用户名</th>
+			<th>结算金额</th>
+			<th>补差</th>
+			<th>应付金额</th>
+			<th>付款金额</th>
+			<th>差额补齐</th>
+			<th>状态</th>
+			<th>结算详情</th>
+			<th>备注</th>
+			<th>付款日期</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='list' id='vo'>
+		<tr>
+			<td>{$vo.month}</td>
+			<td>{$vo.user_name}</td>
+			<td>{$vo.settle_num}</td>
+			<td>
+				{$vo.compensate_num}
+			</td>
+			<td>{$vo.payable_num}</td>
+			<td>{$vo.pay_num}</td>
+			<td>{$vo.difference_num}</td>
+			<td>
+				<if condition="$vo.status eq 4">
+					待付款
+					<elseif condition="$vo.status eq 5" />
+					已付款
+					<elseif condition="$vo.status eq 7" />
+					已冻结
+				</if>
+			</td>
+			<td>
+				<a href="__URL__/settle_moreinfo?user_id={$vo.user_id}&month={$vo.month}&url=<?php echo base64_encode($_SERVER['REQUEST_URI']);?>">查看</a>
+			</td>
+			<td style="text-align:left">
+				{$vo.info}<if condition="$vo.reason neq ''"><br>补差原因：{$vo.reason}</if>
+			</td>
+			<td><if condition="$vo.pay_tm neq ''">{$vo.pay_tm|date='Y-m-d H:i',###}</if></td>
+			<td>
+				<if condition="$vo.status eq 4">
+					<a href="__URL__/compensation?id={$vo.id}&type=3" class="thickbox">结算</a> |
+					<a href="javascript:operation('{$vo.id}',3)">驳回</a> | <a href="javascript:operation('{$vo.id}',7)">冻结</a> |
+					<a href="__URL__/compensation?id={$vo.id}&type=1" class="thickbox">备注</a>
+				<elseif condition="$vo.status eq 5"/>
+					--
+				<elseif condition="$vo.status eq 7" />
+					<a href="javascript:operation('{$vo.id}',4)">解冻</a>
+					<a href="__URL__/compensation?id={$vo.id}&type=1" class="thickbox">备注</a>
+				</if>
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='12'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+</html>
+<script>
+	function operation(id,status){
+		if(status == 3){
+			var type = '驳回';
+		}else if(status == 4){
+			var type = '解冻';
+		}else if(status == 7){
+			var type = '冻结';
+		}
+		var msg = "是否进行"+type+"?";
+		if(confirm(msg)){
+			$.ajax({
+				url: '__URL__/compensation',
+				type: 'post',
+				data: {id:id,type:2,status:status},
+				dataType: 'json',
+				success: function(ret) {
+					if(ret.code == 200){
+						alert(type+'成功');
+						window.location.reload();
+					}else{
+						alert(type+'失败');
+					}
+				}
+			});
+		}
+	}
+</script>

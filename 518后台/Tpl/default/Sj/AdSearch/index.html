@@ -1,0 +1,187 @@
+<script type="text/javascript">
+	function  add(){
+		window.location.href='__URL__/market_push_add'; 
+	}
+</script>
+<script>
+
+function checkit(){
+     return confirm("你确定你的操作吗？");
+}
+
+function showAreaName(id, name)
+{
+	if (name == ',,' || name == '' ) {
+		return false;
+	}
+	var arr = name.split(';');
+	var html = '';
+	$(arr).each(function(){
+		var t = this.split(' ');
+		if (typeof(t[0]) != 'undefined') {
+			var p = t[0].split(':');
+			var n = area_list[p[0]];
+			var m = n['name'].split("\t");
+			html += m[0] + ',';
+			
+			if (typeof(t[1]) != 'undefined') {
+				var ps = t[1].split(':');
+				var n = area_list[p[0]]['sub'][ps[0]];
+				var m = n.split("\t");
+				html += m[0];
+			}
+			html += '<br>';
+			$('#_div_' + id).html(html);
+		}
+	});
+}
+</script>
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src='/Public/js/cn_area.js'></script>
+<script type="text/javascript" src="__PUBLIC__/js/jquery.js"></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<!--<a href="__URL__/market_push_list/push_type/1" class="search_btn" style="float:left; margin:0 10px 0 74px; display:inline;background:<?php if($push_type == 1 || !$push_type){ ?>white<?php }else{ ?>black<?php } ?>;">PUSH通知栏</a>&nbsp;&nbsp;<a href="__URL__/market_cpm_list/push_type/2"  class="search_btn" style="float:left; margin:0 10px 0 6px; display:inline;background:<?php if($push_type == 2){ ?>white<?php }else{ ?>black<?php } ?>;">弹窗广告</a><a href="__URL__/market_push_add" class="search_btn" style="float:right;margin:0 74px 0 6px;">新增</a><br />
+<br />-->
+<style type="text/css">
+ul{margin:0; padding:0;}
+input[type="text"] {width:63%}
+</style>
+
+<div class="search_box">
+	<table width="98%" cellpadding="1" cellspacing="3" style="margin:0 auto; font-size:12px">
+	<form name="name1" action="__URL__/index" method="get">
+		<tr>
+			<td width="18%">软件名称：<input type="text" name="name" value="{$name}"></td>
+			<td width="18%">软件包名：<input type="text" name="package" value="{$package}"></td>
+			<td width="20%">开始时间：<span
+				id="WebCalendar3"
+				style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+			<input id="fromdate" name="fromdate"
+				style="cursor: hand; width: 100px; border: none 0px black;"
+				value="{$so_start_tm}" size="15" type="text"><img
+				src="__PUBLIC__/js/calendar.gif"
+				onclick="return showCalendar('fromdate', 'y-m-d');"
+				style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+				height="15px">
+			</span></td>
+			<td width="20%">结束时间：<span id="WebCalendar3"
+				style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+			<input id="todate" name="todate"
+				style="border: 0px none black; width: 100px;" value="{$so_end_tm}"
+				size="15" type="text"><img src="__PUBLIC__/js/calendar.gif"
+				onclick="return showCalendar('todate', 'y-m-d');"
+				style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			</span></td>
+			
+			<td width="4%"><input type="submit" name="submit" value="搜索"></td>
+		</tr>
+		<tr>
+			<td width="20%">负责人：<input type="text" name="fuzeren" value="{$fuzeren}"></td>
+			<td width="20%">合作形式：
+			<select name="hezuo">
+				<?php foreach($hezuo as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</select></td>
+			<td width="20%">投放状态：<select name="status"> 
+			<option value=0 <if condition="$status eq 0"> selected</if> >全部 
+			<option value='1' <if condition="$status eq 1"> selected</if> >正在投放 
+			<option value='2' <if condition="$status eq 2"> selected</if> >已过期
+				 <option value='3' <if condition="$status eq 3"> selected</if> >即将投放
+			</select></td>
+		</tr>
+		</form>
+		</table>
+</div>
+
+<table cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="4%"><input type="checkbox" id="checkall" onclick="selectAll();" /></th>
+			<th width="8%">软件名称</th>
+			<th width="10%">包名/页面</th>
+			<th width="12%">广告位置</th>
+			<th width="8%">开始时间</th>
+			<th width="8%">结束时间</th>
+			<th width="6%">负责人</th>
+			<th width="6%">合作形式</th>
+			<th width="6%">投放状态</th>
+			<th width="10%">所属页面</th>
+		</tr>
+	</thead>
+	<tbody>
+		<volist name="list" id="list">
+			<tr><td><input type="checkbox" name="idlist[]" id="check{$list.id}" value="{$list.id}" alt='{$list.table}'/></td>
+				<td>{$list.softname}</td>
+				<td>{$list.package}</td>
+				<td>{$list.location}</td>
+				<td>{$list.start_at|date='Y-m-d H:i:s',###|default='&nbsp;'}</td>
+				<td>{$list.end_at|date='Y-m-d H:i:s',###|default='&nbsp;'}</td>
+				<td>{$list.fuzeren}</td>
+				<td>{$list.hezuo}</td>
+				<td>{$list.status} </td>
+				<td><a href="{$list.url}"><input type="button" value="{$list.pagelist}"></a></td>
+			</tr>
+		</volist>
+		<tr><td colspan="10" style="text-align:left">
+			<a href="javascript:void(0);" id='edit_all_1' onclick="edit_time(1)" style="text-decoration:none;"><input type="button" value="编辑排期时间" style="width:140px;"/></a>
+			<if condition="$status eq 2"><a href="javascript:void(0);" id='edit_all_2' onclick="edit_time(2)" style="text-decoration:none;"><input type="button" value="复制上线" style="width:100px;" /></a></if>
+		</td></tr>
+	</tbody>
+	<a id='show' class="thickbox" href=""></a>
+</table>
+{$page}
+<include file="../Public/footer" />
+<script type="text/javascript">
+	function selectAll() {
+		if ($("#checkall").attr('checked')) {
+			$("[name='idlist[]']").attr("checked", "checked");
+		}
+		else {
+			$("[name='idlist[]']").removeAttr("checked");
+		}
+	}
+	var idlist='';
+	var tblist='';
+	var num=0;
+	function edit_time(biaoshi='') {
+		idlist='';
+		tblist='';
+		num=0;
+		if (!checkit()){
+			// window.location.reload();
+			return false;
+		}
+		var location1='{$location1}';
+		var location2='{$location2}';
+		$("[name='idlist[]']").each(function(){
+			if ($(this).attr('checked')){
+				idlist +=$(this).val()+',';
+				tblist +=$(this).attr('alt')+',';
+				num++;
+			}
+		});
+		if (idlist.length > 0){
+			// $('#edit_all_'+biaoshi).attr('class','thickbox');
+			// $('#show').attr('class','thickbox');
+			// $('#edit_all_'+biaoshi).attr('href','/index.php/Sj/AdSearch/edit_all/width/600/biaoshi/'+biaoshi+'/idlist/'+idlist+'/tblist/'+tblist);
+			// $('#show').attr('href','/index.php/Sj/AdSearch/edit_all/width/600/biaoshi/'+biaoshi+'/idlist/'+idlist+'/tblist/'+tblist);
+			$('#show').attr('href','/index.php/Sj/AdSearch/edit_all/width/600/biaoshi/'+biaoshi+"?1=1");
+			// $('#edit_all_'+biaoshi).unbind("click");
+			// $('#edit_all_'+biaoshi).click();	
+			$('#show').click();	
+		}
+		else{
+			alert('请选择操作对象');
+			// window.location.reload();
+			return false;
+		}
+	}
+</script>

@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+        <script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+	<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript">
+        function award(){
+            var count= $("#count").val();
+
+            var award_num1 = $("#award_num1").val();
+            var award_num2 = $("#award_num2").val();
+            var award_num3 = $("#award_num3").val();
+            var award_num4 = $("#award_num4").val();
+
+
+
+            var cup_level1= $("#cup_level1").val();
+            var cup_level2= $("#cup_level2").val();
+            var cup_level3= $("#cup_level3").val();
+            var cup_level4= $("#cup_level4").val();
+
+            var str = "确认按照下面比例抽取？\r\n "+cup_level1+"元话费:"+award_num1+"人 "+cup_level2+"元话费:"+award_num2+"人 \r\n "+cup_level3+"元话费:"+award_num3+"人 "+cup_level4+"元话费:"+award_num4+"人";
+
+            if(award_num1==''||award_num2==''||award_num3==''||award_num4=='')
+            {
+                alert('中奖人数不能为空');
+                return;
+            }else
+            {
+                if(!(/^(\+|-)?\d+$/.test( award_num1 )) || award_num1< 0){
+                    alert("请输入正确的数字！");  
+                    $("#award_num1").focus();
+                    return ;  
+                }
+                if(!(/^(\+|-)?\d+$/.test( award_num2 )) || award_num2< 0){
+                    alert("请输入正确的数字！");  
+                    $("#award_num2").focus();
+                    return ;  
+                }
+                if(!(/^(\+|-)?\d+$/.test( award_num3 )) || award_num3< 0){
+                    alert("请输入正确的数字！");  
+                    $("#award_num3").focus();
+                    return ;  
+                }
+                if(!(/^(\+|-)?\d+$/.test( award_num4 )) || award_num4< 0){
+                    alert("请输入正确的数字！");  
+                    $("#award_num4").focus();
+                    return ;  
+                }                
+
+                if((parseInt(award_num1) + parseInt(award_num2)+ parseInt(award_num3)+ parseInt(award_num4))>parseInt(count))
+                {
+                    alert('中奖人数不能超过当前待处理刮刮卡数');
+                    return;
+                }
+            }
+
+            if(confirm(str)){
+                var param = {
+                    award_num1 : award_num1,
+                    award_num2 : award_num2,
+                    award_num3 : award_num3,
+                    award_num4 : award_num4
+                };
+                $.ajax({
+                    url:'__URL__/award_index',
+                    type:'POST',
+                    data:param,
+                    dataType:'json',
+                    success:function(data){
+                        if(data==1)
+                        {
+                            location.reload();
+                        }
+                    }
+                });
+            }
+        };
+
+        $(function(){
+            document.onkeydown = function(e){
+                var ev = document.all ? window.event : e;
+                if(ev.keyCode==13) {
+                    search();
+                 }
+            }
+        });
+
+        function search(){
+            var gua_btime = $("#gua_btime").val();
+            var gua_etime = $("#gua_etime").val();
+
+            var award_btime = $("#award_btime").val();
+            var award_etime = $("#award_etime").val();
+
+            if(gua_btime.length>0&&gua_etime.length>0&&gua_etime<gua_btime)
+            {
+                alert('刮奖结束时间不能小于开始时间');
+                return;
+            }else if(award_btime.length>0&&award_etime.length>0&&award_etime<award_btime)
+            {
+                alert('抽奖结束时间不能小于开始时间');
+                return;
+            }else
+            {
+                $("#search").submit();
+            }
+            $("#search").submit();
+        };
+    </script>
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+<body>
+    		<ul class="tab_title margin_top">
+			<li><a href="/index.php/Sendnum/WorldCup/match_index">比赛管理</a></li>
+			<li class="current"> <a href="/index.php/Sendnum/WorldCup/award_index">抽奖管理</a></li>
+		</ul>
+
+		<div class="search_box">
+                    <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                        <tr><td>当前待处理刮刮卡数:{$count}</td></tr>
+                        <input type="hidden" value="{$count}" id="count">
+                            <tr>
+                                <td width="6%">
+                                    {$cup_level.1}元话费:<input type="text"  id="award_num1" value="" class="search_item_text">人&nbsp;
+                                    {$cup_level.2}元话费:<input type="text"  id="award_num2" value="" class="search_item_text">人&nbsp;
+                                    {$cup_level.3}元话费:<input type="text"  id="award_num3" value="" class="search_item_text">人&nbsp;
+                                    {$cup_level.4}元话费:<input type="text"  id="award_num4" value="" class="search_item_text">人</td>
+                                <input type="hidden" id="cup_level1" value="{$cup_level.1}">
+                                <input type="hidden" id="cup_level2" value="{$cup_level.2}">
+                                <input type="hidden" id="cup_level3" value="{$cup_level.3}">
+                                <input type="hidden" id="cup_level4" value="{$cup_level.4}">
+                            </tr>
+
+                            <tr>
+                            <td width="20%"><a href="#" onclick="award()" style="float:left" class="search_btn">抽奖</a></td>
+                            </tr>
+                </table>
+		</div>
+
+	<form action="/index.php/Sendnum/WorldCup/award_index" method="get" id="search">
+		<div class="search_box">
+			<table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                                <tr>
+									<td width="16%">手机号:<input type="text" name="mobile" id="mobile" value="{.mobile}" class="search_item_text"></td>
+									<td width="16%">竞猜比赛：<input type="text" name="match_name" id="match_name" value="{.match_name}" class="search_item_text"></td>
+                                                                        <td width="16%">刮刮卡状态：
+                                                                            <select name="is_gua" id="is_gua">
+                                                                                <option value="2" <if condition="($is_gua eq 2)">selected="selected"</if>>全部</option>
+                                                                                <option value="0" <if condition="($is_gua eq 0)">selected="selected"</if>>未刮开</option>
+                                                                                <option value="1" <if condition="($is_gua eq 1)">selected="selected"</if>>已刮开</option>
+                                                                                </select>
+                                                                        </td>
+
+                                                                        <td colspan="2">刮奖时间:
+									<input id="gua_btime" name="gua_btime" value="{.gua_btime}" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px">到<input id="gua_etime" name="gua_etime" value="{.gua_etime}" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"></td>
+                            </tr>
+                            <tr>
+								<td colspan="2">抽奖时间:
+                                                                    <input id="award_btime" name="award_btime" value="{.award_btime}" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px">到<input id="award_etime" name="award_etime" value="{.award_etime}" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"></td> 
+                                                                <td>话费金额：
+                                                                            <select name="award_level" id="award_level">
+                                                                                <option value="0">全部</option>
+                                                                                <option value="1" <if condition="($award_level eq 1)">selected="selected"</if>>{$cup_level.1}元话费</option>
+                                                                                <option value="2" <if condition="($award_level eq 2)">selected="selected"</if>>{$cup_level.2}元话费</option>
+                                                                                <option value="3" <if condition="($award_level eq 3)">selected="selected"</if>>{$cup_level.3}元话费</option>
+                                                                                <option value="4" <if condition="($award_level eq 4)">selected="selected"</if>>{$cup_level.4}元话费</option>
+                                                                                </select>
+                                                                </td>
+                                <td colspan="2"><input class="search_btn" style="float:left; height:30px;" type="button" value="搜索" onclick="search()"></td>
+                            </tr>
+                            <tr>
+                            <td width="20%"><a href="award_index?down=1" class="search_btn" style="float:left; margin-left:5px; display:inline">导出报表</a></td>
+                            </tr>
+                </table>
+		</div>
+	</form>
+
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="7%" height="26">手机号</th>
+				<th width="6%">竞猜比赛</th>
+				<th width="7%">刮刮卡状态</th>
+				<th width="8%">刮奖时间</th>
+				<th width="7%">话费金额</th>
+				<th width="7%">抽奖时间</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="list">
+				<tr>
+					<td height="20" align="center"> {$list.mobile}</td>
+					<td height="20" align="center"> {$list.home_name}VS{$list.client_name}</td>
+					<td height="20" align="center"> <if condition="($list.is_gua eq 0)"> 未刮开</if><if condition="($list.is_gua eq 1)"> 已刮开</if> </td>
+                                        <td height="20" align="center"> <if condition="($list.is_gua eq 1)">{$list.gua_time|date="Y-m-d H:i:s",###}</if><if condition="($list.is_gua eq 0)">无</if></td>
+                                        <td height="20" align="center"> 
+                                            <if condition="($list.award_level eq 1)"> {$cup_level[1]}</if>
+                                            <if condition="($list.award_level eq 2)"> {$cup_level[2]}</if>
+                                            <if condition="($list.award_level eq 3)"> {$cup_level[3]}</if>
+                                            <if condition="($list.award_level eq 4)"> {$cup_level[4]}</if>
+                                        </td>
+                                        <td height="20" align="center"> {$list.award_time|date="Y-m-d H:i:s",###}</td>
+				</tr>
+			</volist>
+		</tbody>
+	</table>
+	<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<include file="../../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script>
+	document.onkeydown=function(event){
+            var e = event || window.event || arguments.callee.caller.arguments[0];       
+             if(e && e.keyCode==13){ // enter 键
+                 upload.submit();
+        }
+    };
+
+</script>
+<div style="margin:20px;">
+<form id="upload" method='get' name="upload" action="__URL__/channels_coefficient_list" >
+<table cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td width="20%">渠道名称：<input type="text" name="chname" id="chname" value="{$chname}"/></td>
+	<td width="20%">客户名称：<input type="text" name="client_name" id="client_name" value="{$client_name}"/></td>
+    <td width="15%">负责人：<select id="charge_id" name="charge_id" >
+    <option value="">--请选择--</option>
+    <?php foreach ($charge_result as $key => $val){ ?>
+    <option value="{$val.id}" <?php if($charge_id == $val['id']){ ?>selected<?php } ?>>{$val.charge_name}</option>
+	<?php } ?>
+	</select></td>
+	<td width="15%">扣量状态：<select name="co_status" >
+    <option value="0">全部</option>
+    <option value="1" <?php if($co_status == 1){ ?>selected<?php } ?>>已扣量</option>
+	<option value="2" <?php if($co_status == 2){ ?>selected<?php } ?>>未扣量</option>
+	</select></td>
+    <td rowspan="2" width="30%"><input type="submit" name="button" id="button" value="搜索" class="search_btn" /></td>
+  </tr>
+</table>
+</form>
+</div>
+<P>
+<P>
+<table cellpadding="0" cellspacing="0" class="table_list" >
+	<thead>
+		<tr> 
+          <th width="8%">渠道ID</th>
+          <th width="22%">渠道名称</th>
+          <th width="12%">客户名称</th> 
+          <th width="12%">负责人</th> 
+          <th width="12%">扣量系数</th>
+          <th width="12%">系数生效日期</th>
+          <th width="16%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name="list" id="vo">
+		<tr>
+		<td>{$vo.cid|default='&nbsp;'}</td>
+        <td>{$vo.chname|default='&nbsp;'}</td>
+        <td><a href="__URL__/channels_coefficient_list/client_id/{$vo.client_id}">{$vo.client_name|default='&nbsp;'}</td>
+        <td>{$vo.charge_name|default='&nbsp;'}</td>
+        <td><?php if(in_array($vo['cid'],$my_cid)){ echo $vo['coefficient'].'%'; }elseif(!in_array($vo['cid'],$my_cid)){ echo '';} ?></td>
+        <td><?php if($vo['last_refresh']){ echo date('Y-m-d',$vo['last_refresh']); }else{ echo '——';}?></td>
+        <td><?php if(!in_array($vo['cid'],$no_cid)){ ?><a href="__URL__/channels_coefficient_edit/cid/{$vo.cid}/p/{$p}/lr/{$lr}<?php if($chname){ ?>/chname/{$chname}/<?php } ?><?php if($client_name){ ?>/client_name/{$client_name}/<?php } ?><?php if($charge_id){ ?>/charge_id/{$charge_id}/<?php } ?><?php if($co_status){ ?>/co_status/{$co_status}/<?php } ?>" class="thickbox blue">编辑</a><?php } ?>&nbsp;&nbsp;<a href="__URL__/coefficient_log_show/cid/{$vo.cid}" class="thickbox blue">查看记录</a></td>
+		</tr>
+	</volist>
+	</tbody>
+</table>
+<br/>
+	<tr>{$page}</tr>
+<br/>
+<div style="margin-left:20px;">
+注：<br />
+1. 编辑渠道扣量系数后当日生效，系数生效日期为当日日期<br />
+2. 自系数生效日期起，如不再编辑渠道扣量系数，则激活量均按当前扣量系数扣量
+</div>
+</body>
+

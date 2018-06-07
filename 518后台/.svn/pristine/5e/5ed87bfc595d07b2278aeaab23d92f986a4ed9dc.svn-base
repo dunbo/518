@@ -1,0 +1,61 @@
+<include file="../Public/header" />
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+
+<script>
+    function get_checkbox_ids() {
+        var checkboxs = $("[name='checkbox']");
+        var idArr = new Array();
+        checkboxs.each(function(){
+            if ($(this).attr("checked")=="checked") {
+                idArr.push($(this).val());	
+            }
+        });
+        if (idArr.length > 0) {
+            return idArr.join(',');
+        }
+        return ''; 
+    };
+    
+    function save_simulator_type() {
+        var ids_checked = get_checkbox_ids();
+        param = {
+            ids_checked:ids_checked
+        };
+        $.ajax({
+            url:'__URL__/save_simulator_type',
+            type:'POST',
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data){
+                if(data.status != 0) {
+                    alert("保存失败！");
+                } else {
+                    alert("保存成功！");
+                    location.href="__URL__/simulator_type";
+                }
+            }
+        });
+    }
+</script>
+
+<body>
+<div style="padding:20px 0 0 40px">
+	<h2>模拟器类型配置</h2>
+<br/><br/>
+<volist id="list" name="list">
+    <span>
+        <input type="checkbox" name="checkbox" id="<?php echo $list['id'];?>" value="<?php echo $list['id'];?>" <?php if($list['status']==1) {echo "checked='checked'";}?>/>
+        <label for="{$list.id}">{$list.name}</label>
+        <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    </span>
+</volist>
+<br/><br/>
+<input type="button" value="保存" onClick="save_simulator_type()" class="search_btn"/>
+
+</div>
+</body>

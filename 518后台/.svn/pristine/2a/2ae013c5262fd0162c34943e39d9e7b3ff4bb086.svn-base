@@ -1,0 +1,88 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/zhiyoo/common.js"></script>
+<style type="text/css">
+#submid{height:31px;}
+
+</style>
+<body style="overflow-x: hidden; overflow-y: auto; ">
+<form method='post' action="__URL__/edit_rank" onsubmit="return clickConfirm('确定保存优先级更改吗？');">
+<div style="float:right;margin: 5px;">
+	<input class="search_btn" style="display:none;float:left;" type="submit" id="submid" value="保存优先级">
+	<a class="search_btn" style="display:inline-block;" href="javascript:priority('P_id');" id="priorityid">编辑优先级</a>
+	<?php if($scount > 49){ ?>
+		<span style="margin:10px;padding:3px;background-color:white;opacity: 0.2">
+			<a href="javascript:return false;" class="search_btn" style="display:inline-block;">添加标签组</a>
+		</span>
+	<?php }else{ ?>
+		<span style="margin:10px;padding:3px;background-color:white">
+			<a href="__URL__/add?" class="thickbox search_btn" style="display:inline-block;">添加标签组</a>
+		</span>
+	<?php } ?>
+	
+</div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th>
+				<a href="__URL__/class_list/field/rank/order/{$order}">优先级↓↑</a>
+			</th>
+			<th ><a href="__URL__/class_list/field/classname/order/{$order}">标签组名称↓↑</a></th>
+			<th style="width:35%;">包含标签</th>
+			<th ><a href="__URL__/class_list?corder={$corder}">标签个数↓↑</a></th>
+			<th style="width:25%;">备注</th>
+			<th >操作</th>
+		</tr>
+	</thead>
+	<volist name="list" id="tags">
+	<tr>
+		<td id="P_id">
+			<a>{$tags.rank|default=''}</a>
+			<input type="text" name="level[{$tags.classid}]" onkeyup="this.value=replaceNum(this.value);" size="4" id="level" style="display:none;" value="{$tags.rank|default=''}" /> 
+			
+		</td>
+		<td>{$tags.classname}</td>
+		<td>
+			<div>
+				<!-- <volist name="tags['classtagnames']" id="tagnames">{$tagnames.name}&nbsp;</volist> -->
+				<?php 
+					foreach($tag_result[$tags['classid']] as $group){
+						echo $group['name'].'：';
+						$i=0;
+						foreach($group['tag_arr'] as $tagid ){
+							$i++;
+							$point=',';
+							if($i==1) $point='';
+							echo $point;
+							if($taglist[$taglist[$tagid]['parentid']]['tagname']) echo $taglist[$taglist[$tagid]['parentid']]['tagname'].'>';
+							echo $taglist[$tagid]['tagname'];
+						}
+						echo '<br/>';
+					}
+				?>
+			</div>
+		</td>
+		<td>{$tags.count}</td>
+		<td>{$tags.remake}</td>
+		<td><a href="__URL__/edit?classid={$tags.classid}" class="thickbox" style="color:blue">编辑</a> |<a href="__URL__/doedit?classid={$tags.classid}&action=del" onclick="return del();" style="color:blue">删除</a>
+		</td>
+	</tr>
+	</volist>
+</table>
+<div class="navgition" style="text-align: right;">
+	{$page|default='&nbsp;'}
+</div>
+</form>
+<script>
+function del()
+  {
+   if(confirm("确定要删除数据吗？"))
+    return true;
+   else return false
+  }
+</script>
+</body>
+</html>

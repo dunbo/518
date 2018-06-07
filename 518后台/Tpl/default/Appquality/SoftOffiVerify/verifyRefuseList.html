@@ -1,0 +1,102 @@
+<include file="./common_header" />
+	<script>
+		$(function() {
+			var url;
+			$("[act='verifyrestore']").click(function() {
+				if ($(this).attr('sign') == 'single') {
+					var softid = $(this).parent().attr("softid");
+					if (confirm("是否撤销？\n撤销后该记录将返回至待审核列表")) {
+						url = "__URL__/verifyRestore/softid/" + softid
+						ajaxGet(url, softid);
+					}
+				} else if ($(this).attr('sign') == 'multiple') {
+					if (!(restoreid = checkbox())) {
+						alert("请选择要操作的对象");	
+					} else {
+						if (confirm("是否撤销？\n撤销后该记录将返回至待审核列表")) {
+							url = "__URL__/verifyAction/actType/restore/app/" + restoreid;
+							ajaxGet(url, restoreid);
+						}
+					}
+				}
+			});
+			$("[act='refuseDelDoc']").click(function() {
+				if ($(this).attr('sign') == 'single') {
+					var softid = $(this).parent().attr("softid");
+					if (confirm("是否删除此条记录？\n删除后该记录将被清空")) {
+						url = "__URL__/refuseDelDoc/softid/" + softid
+						ajaxGet(url, softid);
+					}
+				} else if ($(this).attr('sign') == 'multiple') {
+					if (!(deldocid = checkbox())) {
+						alert("请选择要操作的对象");	
+					} else {
+						if (confirm("是否删除此条记录？\n删除后该记录将被清空")) {
+							url = "__URL__/verifyAction/actType/deldoc/app/" + deldocid; 
+							ajaxGet(url, deldocid);
+						}
+					}
+				}
+			});
+		});
+		function preOpen(e) {
+			$("#box_content").html("<br/>" + $(e).attr("info"));
+			openWin();
+		}
+	</script>
+	<style type="text/css">
+	#box_content{padding-top:5px;}
+	</style>
+	<div id="openbox" style=" word-break:break-all; word-wrap:break-word; height:130px; min-height:130px; _height:130px">
+		<div id="box_content"></div>
+		<div id="close">关闭</div>
+	</div>
+	<form id="verifyAction" action="__URL__/verifyAction" method="POST">
+	<input type="hidden" name="actType" id="actType" />
+	<table border="0" cellpadding="0" cellspacing="0" class="table_list">	
+		<thead>
+			<tr>
+				<th width="3%"><input ajaxSign="ajaxClear" type="checkbox" class="checkAll" /></th>
+				<th width="7%" class="left iconimg">软件id</th>
+				<th width="20%">软件信息</th>
+				<th width="16%">开发者</th>
+				<th width="8%"><a val="{$Val}" id="downloadOrder" href="javascript:void();">下载量</a></th>
+				<th width="8%">软件状态</th>
+				<th width="8%"><a val="{$Val}" id="updatetmOrder" href="javascript:void();">驳回时间</a></th>
+				<th width="12%">驳回原因</th>
+				<th width="8%">来源详情</th>
+				<th width="10%">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach($verifyRefuseData as $info):?>
+			<tr line="<?php echo $info['softid'];?>" align="center" height="30px">
+				<td><input ajaxSign="ajaxClear" btn="<?php echo $info['softid'];?>" name="app[]" value="<?php echo $info['softid'];?>" type="checkbox" /></td>
+				<td class="iconimg">
+					<a href="__URL__/verifyRefuseList/searchMainStr/{$info.softid}/searchMainType/3">
+						<?php echo $info['softid_reset'];?></a></td>
+				<td class="left"><?php echo $info['softinfo_reset'];?></td>
+				<td class="left"><?php echo $info['developer_reset'];?></td>
+				<td><?php echo $info['download_reset'];?></td>
+				<td><?php echo $info['hide_reset'];?></td>
+				<td><?php echo str_replace(' ', '<br/>', $info['updatetm_reset']);?></td>
+				<td style="cursor:pointer; vertical-align:text-top" class="blue left" onclick="preOpen(this);" info="<?php echo $info['reason_reset'];?>">
+				<?php echo msubstr($info['reason_reset'], 0, 40, 'utf-8');?></td>
+				<td><?php echo $info['offidesc_reset'];?></td>
+				<td softid="<?php echo $info['softid'];?>">
+					<input btn="<?php echo $info['softid'];?>" sign="single" act="verifyrestore" value="撤销" type="button" class="verify" />
+					<br />
+					<br />
+					<input btn="<?php echo $info['softid'];?>" sign="single" act="refuseDelDoc" value="删除" type="button" class="verify" />
+				</td>
+			</tr>
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+	<div style="margin-top:10px; margin-bottom:10px; text-align:left; padding-left:20px;">
+		<input ajaxSign="ajaxClear" class="checkAll" type="checkbox" />
+		<input act="verifyrestore" sign="multiple" value="撤销" type="button" style="margin:0 8px 0 4px" />
+		<input act="refuseDelDoc" sign="multiple" value="删除" type="button" />
+	</div>
+	</form>
+<include file="./common_footer" />

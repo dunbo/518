@@ -1,0 +1,456 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<!--<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+-->
+<script type="text/javascript" src='/Public/js/cn_area.js'></script>
+<!--<script type="text/javascript" src="/index.php/Sj/ExtentV1/pub_get_address?1"></script>-->
+<script>
+function submitChannel()
+{
+	var cids = '';
+	$('#channel_div').html('');
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		$('#channel_div').append(item);
+	})
+	$.cookie('cids', '', {path: '/'});
+	tb_remove();
+}
+//主层动态变化数据
+function onclikChannel()
+{
+	$('#channel_div').html('');
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		$('#channel_div').append(item);
+	})
+	$.cookie('cids', '', {path: '/'});
+}
+
+function check_arr()
+{
+	$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+}
+
+function checkForm(form)
+{
+	//if (!g.checkValue()) {
+	//	alert('投放区域设置有问题');
+	//	return false;
+	//}
+var area=document.getElementById("area_value").value;
+	var area_arr=new Array;
+	area_arr=area.split(";");
+	var s = area_arr.join(";")+";";
+	for(i=0;i<area_arr.length;i++)
+	{
+		if(area_arr[i].split(",")[1]=="")
+		{
+		 var pro=area_arr[i].split(",")[0];
+		 for(j=0;j<area_arr.length;j++)
+		 {
+			 if(area_arr[j].split(",")[0]==pro&&j!=i)
+			 {
+				 alert("您选择的有冲突，请重新选择");
+					return false;
+			 }
+		 }
+		}
+		else if(s.replace(area_arr[i]+";","").indexOf(area_arr[i]+";")>-1)
+		{
+			alert("您选择了重复的省市，请重新选择");
+			return false;
+			}
+	}
+	var extent_size = $("input[name='extent_size']").val();
+	if(extent_size == "") {
+		alert('区间位置数不能为空');
+		return false;
+	}
+	if(!/^[0-9]+$/.test(extent_size) ) {
+		alert('区间位置数必须为正整数');
+		return false;
+	}
+
+	//$.ajaxSetup({async: false});
+	//var flag = true;
+	//$.ajax({
+	//	async: false,
+	//	type: "POST",
+	//	url: "/index.php/Sj/ExtentV1/pub_check_extent_address",
+	//	data: {extent_id:'<?php echo $extent['extent_id'] ?>', province: $('select[name=province]').val(), city:$('select[name=city]').val()},
+	//	success: function(msg){
+	//		if (msg == 0) {
+	//			flag = confirm('该区间下的软件或者子区间已经有独立的区域设置，是否覆盖?');
+	//		}
+	//	}
+	//});
+	//return flag;
+}
+
+var extent_list = <?php echo json_encode($extent_list); ?>;
+var extent_num = <?php echo count($sub_extent); ?>;
+
+function in_array(arr, str) {
+	var i = arr.length;
+	while (i--) {
+		if (arr[i] === str) {
+		return true;
+		}
+	}
+	return false;
+}
+
+function changeSubExtent()
+{
+	if ($(".sub_extent").length <= 2 + 1)
+	{
+		$('.delx').hide();
+	}
+	else
+	{
+		$('.delx').show();
+	}
+	if ($(".sub_extent").length > extent_list.length)
+	{
+		document.getElementById("add_ex").disabled=true;
+	}
+	else
+	{
+		document.getElementById("add_ex").disabled=false;
+	}
+	var selectedlist = new Array();
+	$(".sub_extent_class").each(function()
+		{
+			//alert(this.value);
+			selectedlist.push(this.value);
+		}
+	);
+	//alert(selectedlist);
+	$(".sub_extent_class").each(function()
+		{
+			//alert(this.value);
+			if (this.value == null || this.value == '')
+				tempvalue = 0;
+			else
+				tempvalue = this.value;
+			$(this).empty();
+			opt = new Option('请选择分区', 0);
+			this.options.add(opt);
+			//str = '<option value="0">请选择分区</option>';
+			for (eid in extent_list)
+			{
+				extent = extent_list[eid];
+				if (!in_array(selectedlist, extent['id']) || tempvalue == extent['id'])
+				{
+					//alert('display');
+					//str += '<option value="' + extent['id'] + '"';
+					//if (this.value == extent['id'])
+					//	str += ' selected="selected"';
+					//str += '>' + extent['name'] + '</option>';
+					opt = new Option(extent['name'], extent['id']);
+					this.options.add(opt);
+				}
+			}
+			//alert($(this));
+			//$(this).html(str);
+			this.value = tempvalue;
+		}
+	);
+}
+
+function addSubExtent()
+{
+	extent_num++;
+	var txt = '<span class="sub_extent" id="sub_extent_' + extent_num + '"><SELECT name="sub_extent[]" class="sub_extent_class" onchange="changeSubExtent(this.id)"><option value="0">请选择分区</option></SELECT><a href="javascript:void(0);" onclick="delSubExtent(' + extent_num + ')" class="delx">x</a></span>';
+	$(".sub_extent:last").after(txt);
+	changeSubExtent();
+}
+
+function delSubExtent(eid)
+{
+	//if ($(".sub_extent").length <= 3)
+	//	return;
+	$("#sub_extent_" + eid).remove();
+	changeSubExtent();
+}
+
+//推送区域
+var area_num = 1;
+$(document).ready(function(){
+    <if condition='$push_area[0] neq ""'>
+	<volist id="area_list" key="k" name="push_area" >
+	<?php $pro=explode(",",$push_area[$k-1]); ?>
+	var select_obj = addArea('<?php echo $pro[0];?>');
+	showSubArea(select_obj, '<?php echo $pro[1];?>');
+	</volist>
+   </if>
+
+});
+
+function addArea()
+{
+	var html = '<div id="area_div_' + area_num + '">';
+	html += '<select name="push_area[]" id="push_area_'+area_num+'" class="push_area" onchange="showSubArea(this)">';
+	html += '<option value="">请选择</option>';
+	var province = '';
+	if (typeof(arguments[0]) != 'undefined') {
+		province = arguments[0].trim();
+	}
+	for(var i in area_list){
+		if (i == 990000) continue ;//海外排除
+		var item = area_list[i]['name'].split("\t");
+		if(province == item[0].trim()) {
+	        html += "<option selected value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+        } else {
+			html += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+	    }
+	}
+	html += '</select>';
+	html += '<span class="sub_area"></span>';
+	html += '<input type="button" value="删除" onclick="delArea(this)" class="act_btn"/>';
+	html += '</div>';
+	$('#push_td').append(html);
+	var obj = $('#push_area_' + area_num);
+	area_num++;
+	return obj;
+}
+function delArea(obj)
+{
+	$(obj).parent().remove();
+	refreshArea();
+}
+
+function showSubArea(obj)
+{
+	var sub_id = $(obj).attr('id').replace('push_area_', 'push_city_');
+	var sub_select = "<select name='push_city[]' id='"+sub_id+"' onchange='refreshArea()'><option value=''>请选择</option>";
+	var value = $(obj).children('option:selected').val();
+	var arr = value.split(':');
+	var code = arr[0];
+	var city = '';
+	if (typeof(arguments[1]) != 'undefined') {
+		city = arguments[1].trim();
+	}
+	if (typeof(area_list[code]) == 'undefined') {
+		$(obj).parent().find('.sub_area').html('');
+		return false;
+	}
+	var sub_area = area_list[code]['sub'];
+	for(var i in sub_area){
+		var item = sub_area[i].split("\t");
+		if(city == item[0].trim())  {
+	        sub_select += "<option selected value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+        } else {
+			sub_select += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+	    }
+	}
+	sub_select += "</select>";
+	$(obj).parent().find('.sub_area').html(sub_select);
+	refreshArea();
+}
+
+function refreshArea()
+{
+	var area_value = '';
+	$('.push_area').each(function(){
+		var sub_id = $(this).attr('id').replace('push_area_', 'push_city_');
+		if ($(this).val() !='') {
+			area_value += $(this).find('option:selected').html() + ',';
+			if ($('#' + sub_id).val() !='') {
+				area_value += $('#' + sub_id).find('option:selected').html();
+			}
+			area_value += ';';
+		}
+	});
+	area_value = area_value.replace(/;$/, '');
+	$('#area_value').val(area_value);
+}
+</script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+
+#sub_extent_td select{
+	margin-left: 15px;
+	margin-right: 5px;
+}
+
+#sub_extent a{
+	color: red;
+}
+</style>
+<FORM method="POST" action="/index.php/Sj/ExtentV1/edit_extent" onsubmit='return checkForm(this);'>
+<table class="sub_tab" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td>区间名称</td>
+		<td><input name='extent_name' type='text' value='<?php echo $extent['extent_name'] ?>' <?php if($extent['parent_union_id'] != 0) echo 'disabled="disabled"';?>/></td>
+	</tr>
+	<!--
+	<tr class="sub_tr" id="depot_limit_tr">
+		<td>投 放 区 域：</td>
+		<td><span id="top_area"></span></td>
+	</tr>
+	-->
+	<tr class="sub_tr">
+		<td>列表展示形式</td>
+		<td>
+			<SELECT name='show_form' disabled="disabled">
+				<if condition="$extent['show_form'] eq 1" >
+					<option value='1'>单软件（列表单图）</option>
+				<else />
+					<option value='0'>ICON+名称（即现在安智市场列表样式）</option>
+				</if>
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>运营商</td>
+		<td>
+			<SELECT name='oid' <?php if($extent['parent_union_id'] != 0) echo 'disabled="disabled"';?>>
+				<option value='0'>不限制</option>
+				<?php foreach($operatinglist as $val): ?>
+					<option value='<?php echo $val['oid']?>'<?php if ($val['oid'] == $extent['oid']) print ' selected';?>><?php echo $val['mname']?></option>
+				<?php endforeach; ?>
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>渠道</td>
+		<td>
+		<?php if($extent['parent_union_id'] == 0): ?><a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br /><?php endif; ?>
+		<div id="channel_div">
+			<?php if(!empty($cid_array)){ ?>
+			<volist id="channel" name="cid_array" >
+			<label class="l_cid_{$channel.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$channel.cid}"/>{$channel.chname}</label>
+			</volist>
+			<?php } ?>
+		</div>
+		</td>
+	</tr>
+	<?php if($extent['type'] == 1): ?>
+	<tr class="sub_tr">
+		<td>区间位置数</td>
+		<td><input name='extent_size' type='text' value='<?php echo $extent['extent_size'] ?>' /></td>
+	</tr>
+	<?php endif?>
+	<tr class="sub_tr">
+		<td>是否过滤已安装软件</td>
+		<td>
+			<SELECT name='filter_installed' <?php if($extent['parent_union_id'] != 0) echo 'disabled="disabled"'; ?>>
+				<option value='1' <?php if ($extent['filter_installed'] == 1) print ' selected';?> >是</option>
+				<option value='0' <?php if ($extent['filter_installed'] == 0) print ' selected';?> >否</option>
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="depot_limit_tr">
+		<td>区间默认返回备选库数量</td>
+		<td><input name='depot_limit' type='text' <?php if($extent['parent_union_id'] != 0) echo 'disabled="disabled"'; ?>/></td>
+	</tr>
+	<tr class="sub_tr">
+	<td>推送区域</td>
+	<td align="left" id="push_td">
+		<input type="button" value="添加" onclick="addArea()" class="act_btn"/>
+	<input type="hidden" value="" name="area_value" id="area_value"/>
+	</td>
+</tr>
+	<tr class="sub_tr">
+		<?php if ($extent['type'] != 3): ?>
+		<td>区间排序</td>
+		<td>
+			<select name="rank">
+				<?php
+				for($i = 1;$i <= $count; $i++){
+					echo "<option value=\"".$i."\"";
+					if($extent['rank'] == $i) echo " selected=\"selected\" ";
+					echo ">".$i."</option>";
+				}
+				?>
+			</select>
+		</td>
+		<?php else: ?>
+		<td>区间位置</td>
+		<td id="sub_extent_td">
+			<span class="sub_extent"></span>
+			<?php foreach ($sub_extent as $k => $v): ?>
+			<span class="sub_extent" id="sub_extent_<?php echo $k + 1; ?>">
+				<SELECT name='sub_extent[]' class="sub_extent_class" onchange="changeSubExtent()">
+					<?php echo '<option value="0">请选择分区</option>'; ?>
+					<?php foreach ($extent_list as $key => $value): ?>
+					<?php echo '<option value="' . $value['id'] . '"'; ?>
+					<?php if ($v['extent_id'] == $value['id']):?>
+					<?php echo 'selected="selected"'; ?>
+					<?php endif; ?>
+					<?php echo '>' . $value['name'] . '</option>'; ?>
+					<?php endforeach; ?>
+				</SELECT><a href="javascript:void(0);" onclick="delSubExtent(<?php echo $k + 1; ?>)" class="delx">x</a>
+			</span>
+			<?php endforeach; ?>
+			<input type="button" id="add_ex" value="+" onclick="addSubExtent();" style="margin-left:10px;width:30px;height:30px;"/>
+		</td>
+		<?php endif; ?>
+	</tr>
+	<!--
+	<tr>
+		<td>开始时间</td>
+		<td><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+		<input id="start_at" name="start_at"
+			style="border: 0px none black; width: 100px;" value="value='<?php echo date('Y-m-d',$extent['start_at'])?>'"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			onclick="return showCalendar('start_at', 'y-mm-dd');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span></td>
+	</tr>
+	<tr>
+		<td>结束时间</td>
+		<td><span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="end_at" name="end_at"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="<?php echo date('Y-m-d',$extent['end_at'])?>" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			onclick="return showCalendar('end_at', 'y-mm-dd');"
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span></td>
+	</tr>
+	-->
+	<tr class="sub_tr">
+		<td colspan="2">
+			<input type='hidden' name="extent_id" value='<?php echo $extent['extent_id']?>'/>
+			<input type='hidden' name="parent_id" value='<?php echo $extent['parent_id']?>'/>
+			<input type='submit' value="&nbsp;&nbsp;提交&nbsp;&nbsp;"/>
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+	</tr>
+</table>
+</FORM>
+<script>
+//var g = new GoAddress();
+
+<?php
+//if(!$address_edit_able) {
+//	echo "g.disabled = true;\n";
+//}
+//if(!empty($extent['location'])) {
+//	$location = explode(';', $extent['location']);
+//	foreach($location as $val){
+//		list($p, $c) = explode(',', $val);
+//		echo "g.addTopArea('$p', '$c');\n";
+//	}
+//} else {
+//	echo "g.addTopArea();\n";
+//}
+?>
+
+<?php if ($extent['type'] == 3) echo 'changeSubExtent();'; ?>
+</script>

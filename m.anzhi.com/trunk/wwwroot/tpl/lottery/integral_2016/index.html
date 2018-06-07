@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>积分兑换 好礼不断</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/<!--{$out.prefix}-->/css/common.css?v1"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script><script type="text/javascript" src="<!--{$out.static_url}-->/coactivity/js/lottery_Rotate.js?v1"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/coactivity/js/jQueryRotate.js"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/coactivity/js/jquery.easing.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/soft_list_v1.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+</head>
+<body>
+<div class="main">
+    <div class="banner"><img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/banner.png"/></div>
+    <div class="mod">
+		<div class="mod_t"></div>
+		<div class="mod_m">
+			<div class="rule">
+				<p class="rule_title">01活动时间</p>
+				<p>5月28日00:00-5月31日23:59</p>
+				<p class="rule_title">02活动说明</p>
+				<p>充值送积分，积分兑换宝贝！活动期间凡在用户中心充值每满10元即可获得1积分；积分可用于兑换不同的宝贝，宝贝数量有限，活动期间售罄为止！成功使用积分兑换一次宝贝，即可获得一次抽奖机会哦！</p>
+				<p class="rule_title">03规则说明</p>
+				<p>每个宝贝数量有限，活动期间售罄为止，新的宝贝在下一个整点刷新，未兑换到宝贝......</p>
+				<a href="/lottery/<!--{$out.prefix}-->/rule.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->">查看更多</a>
+				<div class="clear"></div>
+			</div>
+		</div>
+		<div class="mod_b"></div>
+		<div class="decration_01"></div>
+    </div>
+	<div class="logined">
+	<!--{if $out['is_login'] == 1}-->
+		<ul>
+			<li>用户名：<!--{$out.username}--></li>
+			<!--{if $out.rest_integral != null}-->
+				<li class="clear">可用积分：<!--{$out.rest_integral}--></li>
+			<!--{else}-->
+				<li class="clear">可用积分：0</li>
+			<!--{/if}-->					
+			<li class="clear">充值即赠送积分，宝物数量有限，速来抢夺吧！</li>
+		</ul>
+		<div class="user_info"><a href="/lottery/<!--{$out.prefix}-->/userinfo.php?types=3&sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->">个人信息</a> </div>
+	<!--{else}-->	
+		<ul>
+			<li class="clear" style="margin-top:20px">登陆可查看个人积分获取情况</li>
+			<li class="clear">充值即赠送积分，宝物数量有限，速来兑换吧！</li>
+		</ul>			
+		<div class="user_info" >
+			<a href="javascript:;"   onclick="login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');" >登 录</a>
+		</div>
+	<!--{/if}-->		
+		<div class="clear"></div>
+    </div>
+	<div class="notice clear">
+        <div class="notice-list">
+            <marquee scrollamount="2" scrolldelay="90" direction="left">
+		<!--{if $out.top10_prize}-->
+			<!--{foreach from=$out.top10_prize item='val' key='k'}-->
+				<span >恭喜用户<!--{$val.username}-->，获得<!--{$val.prizename}-->奖品；</span>
+			<!--{/foreach}-->
+		<!--{else}-->		
+				<span> 活动已开始，赶紧抢夺吧！</span>
+		<!--{/if}-->					
+            </marquee>
+        </div>
+    </div>
+	<div class="mod list_mod" style="margin-bottom:0">
+		<div class="title">
+			<h3></h3>
+			<p>充值新增的积分15分钟刷新一次</p>
+		<!--{if $out['is_login'] == 1}-->
+			<a href="javascript:;" onclick='my_snatch_record();' class="prize_btn" >抢宝记录</a>	
+		<!--{else}-->	
+			<a href="javascript:;"  class="prize_btn" onclick="login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');" >抢宝记录</a>	
+		<!--{/if}-->				
+		</div>
+		<ul class="prize_list" id='prize_ul'>
+		<!--{foreach from=$out.prize_list item='val' key='k'}-->				
+			<li <!--{if $k%2 == 0}-->class="right" <!--{/if}--> >
+				<!--{if $val['start_time'] <= $out.now}-->
+					<h4><!--{$val.prizename}--></h4>
+					<p class="total_num">库存总数：<!--{$val.num}--> <br/>所需积分：<!--{$val.prize_integral}--></p>
+					<div class="prize_info">
+						<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/prize/<!--{$val.pic_name}-->.png"/>
+						<div class="prize_shapes">
+							<i style="width:<!--{$val.participants*103/$val.num}-->px"></i>
+							<span>已参与<br/><!--{$val.participants}--></span>
+							<em>剩余<br/><!--{$val.res_num}--></em>
+						</div>
+						<div class="clear"></div>
+					</div>
+					<!--{if $val['res_num'] <= 0}-->
+					<div class="prize_over"></div>
+					<!--{else}-->
+					<div class="prize_info_btn">
+						<a href='javascript:;' onclick="rob('<!--{$val.prizename}-->',<!--{$val.prize_integral}-->,<!--{$val.participants}-->,<!--{$val.res_num}-->,<!--{$val.id}-->,<!--{$val.start_time}-->,<!--{$k}-->);">立即抢夺</a>
+					</div>
+					<!--{/if}-->
+				<!--{else}-->				
+					<!--{if $val['sold_out'] ==1 and $val['refresh_time'] >0 and $val['start_time']-($val['refresh_time']/2)*3600 > $out.now}-->
+					<h4><!--{$val.prizename}--></h4>
+					<p class="total_num">库存总数：<!--{$val.num}-->  <br/>所需积分：<!--{$val.prize_integral}--> </p>
+					<div class="prize_info">
+						<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/prize/<!--{$val.pic_name}-->.png"/>
+						<div class="prize_shapes">
+							<i style="width:103px"></i>
+							<span>已参与<br/><!--{$val.num}--></span>
+							<em>剩余<br/>0</em>
+						</div>
+						<div class="clear"></div>
+					</div>						
+					<div class="prize_time" style="display: none;" id='countDown_<!--{$val.id}-->'>		
+						<span class="hour">00</span>
+						<em>:</em>
+						<span class="minute">00</span>
+						<em>:</em>
+						<span class="second">00</span>
+					</div>							
+					<!--{else}-->
+					<h4><!--{$val.prizename}--></h4>
+					<p class="total_num">库存总数：<!--{$val.num}-->  <br/>所需积分：<!--{$val.prize_integral}--> </p>
+					<div class="prize_info">
+						<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/prize/<!--{$val.pic_name}-->.png"/>
+						<div class="clear"></div>
+					</div>			
+					<div class="prize_time" id='countDown_<!--{$val.id}-->'>
+						<p>兑换倒计时</p>					
+						<span class="hour">00</span>
+						<em>:</em>
+						<span class="minute">00</span>
+						<em>:</em>
+						<span class="second">00</span>
+					</div>		
+					<!--{/if}-->
+					<!--{if $val['sold_out'] ==1 and $val['refresh_time'] >0 and $val['start_time']-($val['refresh_time']/2)*3600 > $out.now}-->
+					<div class="prize_over"></div>	
+					<!--{/if}-->
+					<input type="hidden" class="settime" start_time="<!--{$val.start_time}-->" rel="#countDown_<!--{$val.id}-->" prizename="<!--{$val.prizename}-->" prize_integral="<!--{$val.prize_integral}-->" participants="<!--{$val.participants}-->" res_num="<!--{$val.res_num}-->" pid="<!--{$val.id}-->" position="<!--{$k}-->"  pic_name="<!--{$val.pic_name}-->" />
+				<!--{/if}-->
+			</li>
+		<!--{/foreach}-->				
+			<div class="clear"></div>
+		</ul>
+	</div>
+	<div class="pagebars">
+		<a  href='javascript:;' id='uppage' title="上一页" > 上一页  </a>
+		<a href='javascript:;' class='next' id='nextpage' title="下一页" > 下一页  </a>
+		<input type='hidden' name='page' id='page' value='1' />				
+		<div class="clear"></div>
+	</div>
+	<div class="lottery_wrap">
+		<div class="prize_index">
+			<img style="display:block; max-width:60%; margin:0 0 10px 0"src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/txt_02.png"/>
+			<p>您还有<span id='lottery_num' ><!--{$out.lottery_num}--></span>次抽奖机会！</p>
+		<!--{if $out['is_login'] == 1}-->
+			<a href="javascript:;" onclick='my_prize();'  >我的奖品</a>	
+		<!--{else}-->	
+			<a href="javascript:;" onclick="login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');" >我的奖品</a>	
+		<!--{/if}-->				
+		</div>
+		<div class="lottery">
+			<div class="rotate">
+				<div class="rotate-con">
+					<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/lottery.png" width="100%"/>
+					<div <!--{if $out.lottery_num > 0}-->class="rotate-pointer" id='lottery_but' onclick='lottery_click()' <!--{else}-->class="rotate-pointer pointer-disabled" id='lottery_but' <!--{/if}-->  ></div>											
+				</div>
+				<div class="leaves_center"></div>
+				<div class="lottery_bg2"></div>
+			</div>
+			<div class="lottery_txt">
+				<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/txt_03.png"/>
+			</div>
+		</div>
+	</div>
+	<div class="mod" id="soft_mod">
+		<div class="title">
+				<h3>活动推荐游戏</h3>
+				<a class="btn_change" href="javascript:;" onclick="change_soft('<!--{$out.aid}-->','<!--{$out.sid}-->',4,2);" >换一换</a>
+			</div>
+			<ul class="soft-list clear" id="soft-list">
+			</ul>
+		</div>
+	</div>
+</div>
+
+<section>	
+    <div id="body-bg" style="display: none;"></div>
+    <div id="body-bg2" style="display: none;"></div>
+    <div class="tip-box" id="tip-box2"  style="display: none; z-index:100096" >
+        <div class="tip-mid">
+            <div class="tip-con">
+                <p id="notice2" >您暂时没有抢夺记录</p>
+				<div class="tip-btns">
+				<a href="javascript:;" onclick="cloBox('#tip-box2','#body-bg')" class="btns_false btns" id="btns_03">返回</a>
+				</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tip-box" id="tip-box5"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con" style="padding-bottom:15px">
+                <div class="win_sure">
+					<h4  >宝物名称：<span id='p_name'></span></h4>
+					<p class="win_sure_txt">兑换所需积分<span id='total_num' ></span></p>
+					<div class="win_shapes">
+						<i></i>
+					</div>
+					<div class="win_num">
+						<p>兑换数量：</p>
+						<div class="win_num_l">
+							<span class="win_reduce" id='lost'>－</span>
+							<input  maxlength='5' type="text" id="num" value="1" size='5' onchange='get_chances();'/>
+							<span class="win_add" id='add'>＋</span>
+						</div>
+						<div class="clear"></div>
+					</div>
+					<p class="win_sure_txt" id='chances' ></p>
+				</div>
+				<div class="tip-btns" id="win_sure_btns">
+					<a href="javascript:;"  class="btns" onclick="cloBox('#tip-box5','#body-bg')">返 回</a>
+					<a href="javascript:;"  class="btns blue" onclick="sub_rob();"  >确认兑换</a>
+					<div class="clear"></div>
+				</div>
+            </div>
+        </div>
+    </div>	
+</section>
+<input type='hidden' name='prizename' id='prizename' value='' />
+<input type='hidden' name='prize_id' id='prize_id' value='' />
+<input type='hidden' name='position' id='position' value='' />
+<input type='hidden' name='pic_name' id='pic_name' value='' />
+<input type='hidden' name='start_time' id='start_time' value='' />
+<input type='hidden' name='prize_integral' id='prize_integral' value='' />
+<input type='hidden' name='res_num' id='res_num' value='' />
+<input type='hidden' name='now_time' id='now_time' value='<!--{$out.now}-->' />
+<section>
+	<div class="footer clear">
+		<p>* 活动最终解释权归安智所有</p>
+	</div>
+</section>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var prefix = "<!--{$out.prefix}-->";
+var lottery_num = "<!--{$out.lottery_num}-->";
+$(document).ready(function () {
+	$('.prize_btn').bind('mousedown',function(){
+		$(this).addClass('prize_btnh');	
+		$('.prize_btn').bind('mouseup',function(){
+			$(this).removeClass('prize_btnh');	
+		})
+	})
+	setTimeout(function(){
+		//go_from 1排行榜（无软件名称、状态按钮） 2抽奖页面（有软件名称、和状态按钮）
+		var go_from =2;
+		my_soft(aid,sid,4,go_from);
+	}, 500);
+	set_time();
+});
+function onLoginComplete(sid,tip){
+	if(tip == "登录成功"){
+		sid_str = sid.replace("PHPSESSID=", "");
+		location.href="/lottery/"+prefix+"/index.php?sid="+sid_str+"&aid=<!--{$out.aid}-->";
+	}
+}
+$('#nextpage').bind('click',function(){
+	var page = parseInt($('#page').val());
+	if(page < 2){
+		page = page+1;
+		get_page_prize(page);
+		$('#page').val(page);
+	}
+});
+$('#uppage').bind('click',function(){
+	var page = parseInt($('#page').val());
+	if(page > 1){
+		page = page-1;
+		get_page_prize(page);
+		$('#page').val(page);
+	}
+});
+
+$('#num').bind('input keyup', function(e){
+	var num = $(this).val();
+	if( num != '包尾'){
+		if(isNaN(num)){
+			//cloBox('#tip-box');
+			$('#chances').html('<span style="color:Red">请输入数字</span>');
+			$(this).val(1);
+			return false;
+		} 
+	}
+	setTimeout(function(){
+			get_chances();
+	}, 2000);
+});
+$('#add').bind('click',function(){
+	var num = parseInt($('#num').val());
+	if(isNaN(num)){
+		num =0;
+	}
+	num = num+1;
+	$('#num').val(num);
+	get_chances();
+});
+$('#lost').bind('click',function(){
+	var num = parseInt($('#num').val());
+	if(isNaN(num)){
+		num =0;
+	}	
+	if(num > 1){
+		num = num-1;
+		$('#num').val(num);
+		get_chances();
+	}
+});
+$('#num_10').bind('click',function(){
+	$('#num').val(10);
+	get_chances();
+});
+$('#num_50').bind('click',function(){
+	$('#num').val(50);
+	get_chances();
+});
+$('#num_100').bind('click',function(){
+	$('#num').val(100);
+	get_chances();
+});
+$('#num_bw').bind('click',function(){
+	$('#num').val('包尾');
+	get_chances();
+});
+//计算所需积分
+function get_chances(){
+	$('#chances').html('');
+	var prize_id = $('#prize_id').val();
+	var start_time = $('#start_time').val();
+	var prize_integral = $('#prize_integral').val();
+	var res_num = parseInt($('#res_num').val());
+	var num = parseInt($('#num').val());
+	
+	if(!isNaN(num) && (num > res_num)){
+		$('#chances').html('<span style="color:Red">您购买的剩余数不足</span>');
+		return false;			
+	}	
+	$('#total_num').html(num*prize_integral);
+	var rest_integral = "<!--{$out.rest_integral}-->";
+	if(!isNaN(num) && (num*prize_integral > rest_integral)){
+		$('#chances').html('<span style="color:Red">您的积分不足</span>');
+		return false;			
+	}		
+} 
+//确认抢夺
+function sub_rob(){
+	var num = $('#num').val();
+	var res_num = parseInt($('#res_num').val());
+	if(num != '包尾' && num <= 0){
+		$('#chances').html('<span style="color:Red">请输入大于0的数字</span>');
+		return false;		
+	}	
+	if(num != '包尾' && isNaN(num)){
+		$('#chances').html('<span style="color:Red">请输入大于0的数字</span>');
+		return false;			
+	}	
+	if(!isNaN(num) && (num > res_num)){
+		$('#chances').html('<span style="color:Red">您购买的剩余数量不足</span>');
+		return false;			
+	}	
+	var prize_integral = $('#prize_integral').val();	
+	var rest_integral = "<!--{$out.rest_integral}-->";
+	if(!isNaN(num) && (num*prize_integral > rest_integral)){
+		$('#chances').html('<span style="color:Red">您的积分不足</span>');
+		return false;			
+	}		
+	var position = $('#position').val();
+	$.ajax({
+		url: "/lottery/"+prefix+"/lottery.php",
+		data: 'type_lottery=1&num='+num+'&position='+position+'&aid='+aid+'&sid='+sid,
+		type: 'post',
+		dataType: 'json',	
+		success: function(res){
+			if(res.code == 1){
+				location.href="/lottery/"+prefix+"/userinfo.php?types=2&prizename="+res.msg+"&num="+res.num+"&sid="+sid+"&aid="+aid+"&position="+position;
+			}else if(res.code == 2){
+				location.href=res.url+"?sid="+sid+"&aid="+aid;
+			}else{
+				if(res.res_num){
+					$('#res_num').val(res.res_num);
+					$('#res_num_num').html(res.res_num);
+					$('#chances').html('<span style="color:Red">您购买的剩余数不足</span>');
+				}
+				pop_tips("",res.msg,"2",1);	
+				return false;			
+			}
+		}
+	});		
+}
+function get_page_prize(p){
+	$.ajax({
+		url: "/lottery/"+prefix+"/index.php",
+		data: 'p='+p+'&aid='+aid,
+		type: 'post',
+		dataType: 'json',	
+		success: function(res){
+//console.log(res);
+			var now_time = res.now_time;
+			var res = res.data;
+			var str ='';
+			for(var i in res) {
+				//console.log(i)
+				if(i%2 == 0){
+					var	str2 = 'class="right"';
+				}else{
+					var	str2 = '';
+				}
+				str += '<li '+str2+'>';
+				if(res[i].start_time <= now_time){
+					str += '<h4>'+res[i].prizename+'</h4>';					
+					str += '<p>库存总数：'+res[i].num+' <br/>所需积分：'+res[i].prize_integral+' </p>';		
+					str += '<div class="prize_info">';	
+					str += '<img src="<!--{$out.static_url}-->/'+prefix+'/images/prize/'+res[i].pic_name+'.png"/>';					
+					str += '<div class="prize_shapes">';			
+					str += '<i style="width:'+(res[i].participants*103)/res[i].num+'px"></i>';	
+					str += '<span>已参与<br/>'+res[i].participants+'</span>';			
+					str += '<em>剩余<br/>'+res[i].res_num+'</em>';	
+					str += '</div><div class="clear"></div></div>';	
+					if(res[i].res_num <= 0){	
+						str += '<div class="prize_over"></div>';	
+					}else{
+						str += '<div class="prize_info_btn"><a onclick="rob(\''+res[i].prizename+'\','+res[i].prize_integral+','+res[i].participants+','+res[i].res_num+','+res[i].id+','+res[i].start_time+','+i+');" >立即抢夺</a></div>';	
+					}
+				}else{	
+					if(res[i].sold_out ==1 && res[i].refresh_time>0 && res[i].start_time-(res[i].refresh_time/2)*3600 > now_time){
+						str += '<h4>'+res[i].prizename+'</h4>';					
+						str += '<p>库存总数：'+res[i].num+' <br/>所需积分：'+res[i].prize_integral+' </p>';			
+						str += '<div class="prize_info">';	
+						str += '<img src="<!--{$out.static_url}-->/'+prefix+'/images/prize/'+res[i].pic_name+'.png"/>';					
+						str += '<div class="prize_shapes">';			
+						str += '<i style="width:103px"></i>';
+						str += '<span>已参与<br/>'+res[i].num+'</span>';
+						str += '<em>剩余<br/>0</em>';
+						str += '</div><div class="clear"></div></div>';	
+					}else{
+						str += '<h4>'+res[i].prizename+'</h4>';					
+						str += '<p>库存总数：'+res[i].num+' <br/>所需积分：'+res[i].prize_integral+' </p>';					
+						str += '<div class="prize_info">';					
+						str += '<img src="<!--{$out.static_url}-->/'+prefix+'/images/prize/'+res[i].pic_name+'.png"/>';
+					}
+					str += '<div class="clear"></div></div>';
+					if(res[i].sold_out ==1 && res[i].refresh_time>0 && res[i].start_time-(res[i].refresh_time/2)*3600 > now_time){
+						str += '<div style="display: none;" class="prize_time" id="countDown_'+res[i].id+'">';
+						str += '<span class="hour">00</span><em>:</em><span class="minute">00</span><em>:</em><span class="second">00</span></div>';
+						str += '<div class="prize_over"></div>';
+					}else{
+						str += '<div  class="prize_time" id="countDown_'+res[i].id+'">';		
+						str += '<p>兑换倒计时</p>';													
+						str += '<span class="hour">00</span><em>:</em><span class="minute">00</span><em>:</em><span class="second">00</span></div>';
+					}	
+					str +='<input type="hidden" class="settime" start_time="'+res[i].start_time+'" rel="#countDown_'+res[i].id+'" prizename="'+res[i].prizename+'" prize_integral="'+res[i].prize_integral+'" participants="'+res[i].participants+'" res_num="'+res[i].res_num+'" pid="'+res[i].id+'" position="'+i+'"  pic_name="'+res[i].pic_name+'" />';
+				}
+				str +='</div></li>';					
+			}
+			str += '<div class="clear"></div>';
+			$('#prize_ul').html(str);
+			$('#now_time').val(now_time);
+			set_time();
+			
+		}
+	});	
+}
+
+function rob(prizename,prize_integral,participants,res_num,prize_id,start_time,position){
+<!--{if $out['is_login'] != 1}-->
+	login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+	return false;	
+<!--{/if}-->
+	var rest_integral = "<!--{$out.rest_integral}-->";
+	if(!rest_integral || rest_integral == 0){	
+		pop_tips("",'您的积分不足，请您充值后再抢宝！',"2",1);	
+		return false;
+	}else if(rest_integral < prize_integral){
+		pop_tips("",'您的积分不足，请您充值后再抢宝！',"2",1);	
+		return false;	
+	}else{
+		$('#prize_id').val(prize_id);
+		$('#prizename').val(prizename);
+		$('#start_time').val(start_time);
+		$('#prize_integral').val(prize_integral);
+		$('#res_num').val(res_num);
+		$('#position').val(position);
+		$('#p_name').html(prizename);
+		str = '<i style="width:'+Number((participants/(res_num+participants))*100).toFixed(2)+'%"></i>';	
+		$('.win_shapes').html(str);
+		$('#total_num').html(prize_integral);
+		$('#participants_num').html(participants);
+		$('#res_num_num').html(res_num);
+		$('#num').val(1)
+		pop_tips("",'',"5",1);	
+		get_chances();
+	}
+}
+
+var is_user_winning = "<!--{$out.is_user_winning}-->";
+function my_snatch_record(){
+	if(is_user_winning == 2){
+		pop_tips("",'您暂时没有抢宝记录',"2",1);	
+		return false;
+	}else{
+		location.href="/lottery/"+prefix+"/userinfo.php?types=1&sid="+sid+"&aid="+aid;
+	}
+}
+
+var is_my_prize = "<!--{$out.is_my_prize}-->";
+function my_prize(){
+	if(is_my_prize == 2){
+		pop_tips("",'您现在还未抽奖，快抓紧时间速去抽奖吧！',"2",1);	
+		return false;
+	}else{
+		location.href="/lottery/"+prefix+"/userinfo.php?types=4&sid="+sid+"&aid="+aid;
+	}
+}
+
+//倒计时函数
+var addTimer = function () {   
+	var list = [],interval;   
+	return function (id, time,prize_name,prize_integral,participants,res_num,prize_id,time_s,position,pic_name) {   
+		if (!interval)   
+			interval = setInterval(go, 1000);   
+			list.push({ ele: id, time: time,prize_name:prize_name,prize_integral:prize_integral,participants:participants,res_num:res_num,prize_id:prize_id,time_s:time_s, position:position, pic_name:pic_name});   
+	}   
+
+	function go() {   
+		for (var i = 0; i < list.length; i++) {   
+			getTimerString(list[i].time ? list[i].time -= 1 : 0,list[i].ele,list[i].prize_name,list[i].prize_integral,list[i].participants,list[i].res_num,list[i].prize_id,list[i].time_s,list[i].position,list[i].pic_name);   
+			if (!list[i].time)   
+				list.splice(i--, 1);   
+		}   
+	}   
+
+	function getTimerString(time,id,prize_name,prize_integral,participants,res_num,prize_id,time_s,position,pic_name) {   
+			hour = Math.floor(time/ 3600),   
+			minute = Math.floor(((time % 86400) % 3600) / 60),   
+			second = Math.floor(((time % 86400) % 3600) % 60);   
+		if (time>0){   
+			var day_elem = $(id).find('.day');
+			var hour_elem = $(id).find('.hour');
+			var minute_elem = $(id).find('.minute');
+			var second_elem = $(id).find('.second');
+			var position = $(this).attr('position');
+			$(hour_elem).text(hour<10?"0"+hour:hour);//计算小时
+			$(minute_elem).text(minute<10?"0"+minute:minute);//计算分钟
+			$(second_elem).text(second<10?"0"+second:second);//计算秒杀				  
+		}else{
+			var total_num =  eval(parseFloat(res_num)+parseFloat(participants));
+			str = '<h4>'+prize_name+'</h4>';	
+			str += '<p>库存总数：'+total_num+'</p>';							
+			str += '<div class="prize_info">';	
+			str += '<img src="<!--{$out.static_url}-->/'+prefix+'/images/prize/'+pic_name+'.png"/>';				
+			str += '<div class="prize_shapes">';			
+			str += '<i style="width:'+(participants*103)/total_num+'px"></i>';
+			str += '<span>已参与<br/>'+participants+'</span>';
+			str += '<em>剩余<br/>'+res_num+'</em>';			
+			str += '</div><div class="clear"></div></div>';	
+			str += '<div class="prize_info_btn"><a onclick="rob(\''+prize_name+'\','+prize_integral+','+participants+','+res_num+','+prize_id+','+time_s+','+position+');" >立即抢夺</a></div>';	
+			$(id).parent('li').html(str);
+		}	
+	}   
+} ();  
+function set_time(){
+	var now_time = $('#now_time').val();
+	$(".settime").each(function(i){
+		var id = $(this).attr('rel');
+		var res_num = $(this).attr('res_num');
+		var position = $(this).attr('position');
+		var pic_name = $(this).attr('pic_name');
+		var prize_id = $(this).attr('pid');
+		var participants = $(this).attr('participants');
+		var prize_integral = $(this).attr('prize_integral');
+		var prize_name = $(this).attr('prizename');
+		var time_s = $(this).attr('start_time');		
+		sys_second = time_s-now_time;	
+		//console.log(pic_name)	
+		addTimer(id, sys_second,prize_name,prize_integral,participants,res_num,prize_id,time_s,position,pic_name);  
+	});
+}	
+
+
+//抽奖
+function lottery_click(){
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	var pkg_str = open_pkg_arr.join(";");	
+
+	if(parseInt(lottery_num) <= 0 ){
+		$('#lottery_but').attr('class', 'rotate-pointer pointer-disabled');
+		pop_tips("","剩余抽奖次数不足！","2",1);			
+		return false;	
+	}
+	$('#lottery_but').attr('onclick', '');
+	$.ajax({
+		url: '/lottery/'+prefix+'/lottery.php',
+		data: 'type_lottery=2&sid='+sid+'&aid='+aid+'&pkg='+pkg_str,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+			if(data.code == 1){
+				is_user_winning =1;
+				lottery_num = lottery_num-1;
+				$('#lottery_num').html(lottery_num);
+				if(data.pid > 0){
+					setTimeout(
+						function(){
+							location.href="/lottery/"+prefix+"/userinfo.php?types=5&sid="+sid+"&aid="+aid+"&prizename="+data.prizename;
+						},4000
+					);
+					var a = runzp(data.pid);	
+				}else if(data.pid == -1){
+					var a = runzp(8);
+				}else{
+					setTimeout(
+						function(){		
+							location.href="/lottery/"+prefix+"/userinfo.php?types=6&sid="+sid+"&aid="+aid+"&softname="+data.softname+'&gift_num='+data.gift_num+'&package='+data.package;
+						},4000
+					);	
+					var a = runzp(6);
+				}				
+		
+				$(".rotate-pointer").rotate({
+					duration:2000,
+					angle: 0,
+					animateTo:1800+a.angle,
+					easing: $.easing.easeOutSine,
+					callback: function(){
+							
+					}
+				});
+				if(lottery_num > 0){
+					setTimeout(function(){
+						$('#lottery_but').attr('class', 'rotate-pointer');
+						$('#lottery_but').attr('onclick', 'lottery_click();');
+					}, 3000);					
+				}else{
+					setTimeout(function(){
+						$('#lottery_but').attr('class', 'rotate-pointer pointer-disabled');
+					}, 3000);
+				}				
+			}else if(data.code == 2){
+				location.href=data.url+"?sid="+sid+"&aid="+aid;
+			}else{
+				pop_tips("",data.msg,"2",1);			
+			}
+		}
+	});
+}
+</script>
+</body>
+</html>

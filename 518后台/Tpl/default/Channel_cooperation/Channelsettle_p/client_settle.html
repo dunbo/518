@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='__PUBLIC__/js/jquery.jqprint.js'></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<style type="text/css">
+
+</style> 
+</head>
+
+<script>
+	function my_upload(){
+		var client_id = $('#client_id').val();
+		var month = $('#month').val();
+		var my_cid = $('#my_cid').val();
+		var my_go = '';
+		if(client_id){
+			my_go = my_go+"/client_id/"+client_id;
+		}
+		if(month){
+			my_go = my_go+"/month/"+month;
+		}
+		if(my_cid){
+			my_go = my_go+"/my_cid/"+my_cid;
+		}
+		location.href="__URL__/client_settle/from/1"+my_go;
+	}
+	
+	function my_print(){
+		//$("table#my_need").printArea();
+		$(".my_show").jqprint();
+	}
+	
+	function my_upload1(){
+		var client_id = $('#client_id').val();
+		var month = $('#month').val();
+		var my_cid = $('#my_cid').val();
+		var my_go = '';
+		if(client_id){
+			my_go = my_go+"/client_id/"+client_id;
+		}
+		if(month){
+			my_go = my_go+"/month/"+month;
+		}
+		if(my_cid){
+			my_go = my_go+"/my_cid/"+my_cid;
+		}
+		location.href="__URL__/client_settle/from/1/type/2"+my_go;
+	}
+	
+	function my_print1(){
+		//$("table#my_need").printArea();
+		$(".my_show1").jqprint();
+	}
+	
+</script>
+<body>
+<input type="hidden" name="client_id" id="client_id" value="{$client_id}" />
+<input type="hidden" name="month" id="month" value="{$month}" />
+<input type="hidden" name="my_cid" id="my_cid" value="{$my_cid}" />
+<div style="overflow:hidden; padding:0px; clear:borth;">
+<div style="float:left;">
+<div class="my_show">
+<table cellspacing="0" cellpadding="0" id="my_need" width="890px;" border="1px solid #000">
+	<tbody>
+	<tr>
+		<td colspan="<?php if($show_taxt){echo '10';}else{echo '9';}?>" style="background-color:green;text-align:center;">安智市场对账单</td>
+	</tr>
+	<tr>
+		<td style="text-align:center;">客户名称</td>
+		<td colspan="<?php if($show_taxt){echo '5';}else{echo '4';}?>" style="text-align:center;">{$client_name}</td>
+		<td style="text-align:center;" colspan="2">结算方式</td>
+		<td style="text-align:center;">{$show_bill}</td>
+	</tr>
+	<tr>
+		<td  style="text-align:center;">月份</td>
+		<td colspan="<?php if($show_taxt){echo '9';}else{echo '8';}?>" style="text-align:center;">{$my_month}</td>
+	</tr>
+	<tr>
+		<td  style="text-align:center;">渠道名称</td>
+		<td  style="text-align:center;">渠道分类</td>
+		<td  style="text-align:center;width:80px;">单价(元)</td>
+		<td  style="text-align:center;width:80px;">合计激活</td>
+		<td  style="text-align:center;width:80px;">金额(元)</td>
+		<?php
+			if($show_taxt){
+				?>
+				<td  style="text-align:center;width:50px;">扣税点<?php echo $my_channel_result[0]['taxt']; ?>%</td>
+				<?php
+			}
+		?>
+		<td style="text-align:center;width:85px;">ROI</td>
+		<td style="text-align:center;width:110px;">建议结算金额</td>
+		<td style="text-align:center;width:110px;">建议扣减金额</td>
+
+<!-- 		<td style="text-align:center;width:89px;">备注</td>  -->
+	</tr>
+	<?php $total_kou = 0; ?>
+	<?php foreach($my_channel_result as $key => $val){ ?>
+	<tr>
+		
+		<td style="text-align:center;">{$val.chname}</td>
+		<td style="text-align:center;">{$val.co_group}</td>
+		<td style="text-align:center;">{$val.price}</td>
+		<td style="text-align:center;">{$val.activation_count}</td>
+		<td style="text-align:center;">¥{$val.pay_amount}</td>
+		<?php
+			if($show_taxt){
+				?>
+				<td  style="text-align:center;width:80px;">¥<?php echo round($val['no_amount_account']*(1-$val['taxt']/100),2);?></td>
+				<?php
+			$total_kou += round($val['no_amount_account']*(1-$val['taxt']/100),2); }
+		?>
+		<td></td>
+		<td></td>
+		<td></td>
+
+	</tr>
+	<?php } ?>
+	<tr>
+		<td colspan="3" style="text-align:center;">合计</td>
+		<td style="text-align:center;">{$all_activation}</td>
+		<td style="text-align:center;"><span style="color:red;">¥{$all_pay_account}</span></td>
+		<?php
+			if($show_taxt){
+				?>
+				<td  style="text-align:center;width:89px;"><span style="color:red;">¥<?php echo $total_kou;?></span></td>
+				<?php
+			}
+		?>
+		<td></td>
+		<td></td>
+		<td></td>
+
+	</tr>
+	<tr>
+		<td colspan="3">技术确认（激活数）：<br /><br />日期：</td>
+		<td colspan="<?php if($show_taxt){echo '9';}else{echo '8';}?>">部门确认：<br /><br />日期：</td>
+	</tr>
+	<tr>
+		<td colspan="3" valign="top" style="height:55px;">部门主管确认：<br /><br />日期：</td>
+		<td colspan="<?php if($show_taxt){echo '9';}else{echo '8';}?>" valign="top" style="height:55px;">运营总监确认：<br/><br/>日期：</td>
+	</tr>
+	</tbody>
+</table>
+</div>
+<div>
+<table width="267px;" >
+	<tr>
+		<td><input type="button" value="打印" onclick="my_print();" /></td>
+		<td><input type="button" value="下载" onclick="my_upload();" /></td>
+	</tr>
+</table>
+</div>
+</div>
+<div style="float:left;margin-left:40px;">
+<div class="my_show1">
+<table cellspacing="0" cellpadding="0" id="my_need" width="400px;" border="1px solid #000">
+	<tbody>
+	<tr>
+		<td colspan="4" style="background-color:green;text-align:center;">安智市场对账单</td>
+	</tr>
+	<tr>
+		<td style="text-align:center;">客户名称</td>
+		<td colspan="3" style="text-align:center;">{$client_name}</td>
+	</tr>
+	<tr>
+		<td  style="text-align:center;">月份</td>
+		<td colspan="3" style="text-align:center;">{$my_month}</td>
+	</tr>
+	<tr>
+		<td  style="text-align:center;">渠道名称</td>
+		<td  style="text-align:center;">单价(元)</td>
+		<td  style="text-align:center;">合计激活</td>
+		<td  style="text-align:center;">金额(元)</td>
+	</tr>
+	<?php foreach($my_channel_result as $key => $val){ ?>
+	<tr>
+		<td style="text-align:center;">{$val.chname}</td>
+		<td style="text-align:center;">{$val.price}</td>
+		<td style="text-align:center;">{$val.activation_count}</td>
+		<td style="text-align:center;">¥{$val.pay_amount}</td>
+	</tr>
+	<?php } ?>
+	<tr>
+		<td colspan="2" style="text-align:center;">合计</td>
+		<td style="text-align:center;">{$all_activation}</td>
+		<td style="text-align:center;"><span style="color:red;">¥{$all_pay_account}</span></td>
+	</tr>
+	</tbody>
+</table>
+</div>
+<div>
+<table width="267px;">
+	<tr>
+		<td><input type="button" value="打印" onclick="my_print1();" /></td>
+		<td><input type="button" value="下载" onclick="my_upload1();" /></td>
+	</tr>
+</table>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+ 
+<div class="main" >
+<div class="content">
+<center>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr height="35">
+		<td align="center" style="<if condition='$sdk_status eq 2'>background:#FFCC66</if>" ><a href="__URL__/cooperation_channel?sdk_status=2"><div><font style="color:#000; font-weight:bold">待&nbsp;审&nbsp;核</font></div></a></td>
+		<td align="center" style="<if condition='$sdk_status eq 1'>background:#FFCC66</if>"><a href="__URL__/cooperation_channel?sdk_status=1"><div><font style="color:#000; font-weight:bold">已&nbsp;通&nbsp;过</font></div></a></td>
+		<td align="center" style="<if condition='$sdk_status eq 3'>background:#FFCC66</if>"><a href="__URL__/cooperation_channel?sdk_status=3"><div><font style="color:#000; font-weight:bold">未&nbsp;通&nbsp;过</font></div></a></td>
+	</tr>
+</table>
+<div class="search_box" style="height:37px;width:100%">
+	<form method="get" action="">
+		<table cellspacing="0" cellpadding="0" width="100%" class="search_table">
+			<tbody>
+				<tr>    
+					<td style="width:16%">渠道名称
+						<input type="text"  value="{$channel_name}" name="channel_name" id="channel_name" class="search_item_text" style="width:100px">
+					</td>
+					<td style="width:16%">游戏名称
+						<input type="text"  value="{$softname}" name="softname" id="softname" class="search_item_text" style="width:100px">
+					</td>
+					<td style="width:16%" >游戏包名
+						<input type="text" name="package" id="package" value="{$package}" class="search_item_text" style="width:100px">
+					</td>	
+					<td style="width:30%" >提交时间
+						<input type="text" onclick="WdatePicker({startDate:&quot;%y-%M-%d 00:00:00&quot;,dateFmt:&quot;yyyy-MM-dd HH:mm:ss&quot;})" class="Wdate search_item_text" style="cursor: hand; width: 100px;" value="{$begintime}" id="begintime" name="begintime"> ~ 
+						<input type="text" onclick="WdatePicker({startDate:&quot;%y-%M-%d 00:00:00&quot;,dateFmt:&quot;yyyy-MM-dd HH:mm:ss&quot;})" class="Wdate search_item_text" style="cursor: hand; width: 100px;" value="{$endtime}" id="endtime" name="endtime">
+					</td>						
+					<td>
+						<input type="button" onclick="search_game()" value="查询" style="float:left; height:30px;" class="search_btn">
+					</td>
+				</tr>
+			</tbody></table>
+</div>
+<if condition="$sdk_status eq 2">
+<div style="float:left;margin-top:15px;margin-bottom:10px">
+	<a href='javascript:void(0)' style="float:left;" title="批量通过 " class="search_btn" onclick="pass()">批量通过</a>
+</div>
+</if>
+<div style="margin-top:60px;width:100%">
+	<table style="width:100%" border="0" cellpadding="0" cellspacing="0" class="table_list">
+	  <tr>
+		<td align='center' width="2%" height="30" bgcolor="#e3e2fe"><input type="checkbox" name="chk_all" onclick="checkAll(this)"></td>
+		<if condition='$sdk_status eq 2'>
+		<td align='center' width="5%" height="30" bgcolor="#e3e2fe" > <font style="color:#000; font-weight:bold">优先级</font></td>
+		</if>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe" > <font style="color:#000; font-weight:bold">游戏名称</font></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">游戏包名</font></td>
+		<td align='center' width="6%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">SDK版本</font></td>
+		<td align='center' width="9%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">版本号/版本名</font></td>
+		<td align='center' width="6%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">渠道名称</font></td>
+		<td align='center' width="4%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">游戏类型</font></td>
+		<td align='center' width="4%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">测试类型</font></td>
+		<if condition='$sdk_status eq 1||$sdk_status eq 3'>
+		<td align='center' width="7%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">操作人</font></td>
+		</if>
+		<td align='center' width="7%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold"><if condition='$sdk_status eq 2'>添加时间<elseif condition='$sdk_status eq 1||$sdk_status eq 3'/>操作时间</if></font></td>
+		<td align='center' width="22%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">操作</font></td>
+	  </tr>
+	  <volist name="res" id ="vo">
+		<tr>
+			<td><input type="checkbox" name="id_{$vo.softid}" value="{$vo.id}"></td>
+			<if condition='$sdk_status eq 2'>
+			<td><input type="text" name="rank" value="{$vo.rank}" size="2" rel="<?php echo $vo['id'] ?>" class="extent_rank"></td>
+			</if>
+			<td>{$vo.softname}</td>
+			<td>{$vo.package}</td>
+			<td>{$vo.sdk_version}</td>
+			<td>{$vo.version_code}/{$vo.version}</td>
+			<td>{$vo.channel_name}</td>
+			<td>{$vo.game_type}</td>
+			<td><if condition="$vo.record_type eq 1">新软件<else />升级</if></td>
+			<if condition='$sdk_status eq 1||$sdk_status eq 3'>
+				<td><if condition='$vo.reviewer eq 20000'>testin<elseif condition='$vo.reviewer eq 10000'/>系统<else />{$vo.admin_user_name}</if></td>
+			</if>
+			<td><if condition='$sdk_status eq 2'>{$vo.create_tm|date="Y-m-d H:i:s",###}<elseif condition='$sdk_status eq 1||$sdk_status eq 3'/>{$vo.update_tm|date="Y-m-d H:i:s",###}</if></td>
+			<td>
+				<if condition="$sdk_status eq 1">
+					<if condition="$vo.test_report neq ''">
+						<a href="<?php echo IMGATT_HOST;?>{$vo.test_report}">下载测试报告</a>   
+					</if>
+					<if condition="$vo.type_report neq ''">
+						<a href="{$vo.test_report}">下载5.0兼容性报告</a>   
+					</if>
+					<a href="http://192.168.0.99/cmcc{$vo.url_apk}">下载软件包</a>
+				<elseif condition="$sdk_status eq 2"/>
+					<if condition="$vo.url_apk neq ''"><a href="__URL__/re_apk_status?softid={$vo.id}&type=3">通过</a></if>  
+					<if condition="$vo.url_apk neq ''"><a href="http://192.168.0.99/cmcc{$vo.url_apk}">下载软件包</a><else />生成中</if>
+				<elseif condition="$sdk_status eq 3"/>
+					<if condition="$vo.test_report neq ''">
+						<a href="<?php echo IMGATT_HOST;?>{$vo.test_report}">下载测试报告</a>   
+					</if> 
+					<if condition="$vo.type_report neq ''">
+						<a href="{$vo.test_report}">下载5.0兼容性报告</a>   
+					</if>					
+					<a href="http://192.168.0.99/cmcc{$vo.url_apk}">下载软件包</a>   <a href="__URL__/re_apk_status?softid={$vo.softid}&type=2">重新提交</a>
+				</if>
+			</td>
+		</tr>
+	  </volist>
+	  
+	</table>
+</div>
+
+<div  align='left'>{$page}</div>
+</center>
+</div>
+</div>
+
+<script type="text/javascript">
+function search_game(){
+	var sdk_status = <?php echo $sdk_status;?>;
+	var softname = $("#softname").val();
+	var package = $("#package").val();
+	var begintime = $("#begintime").val();
+	var endtime = $("#endtime").val();
+	var channel_name = $("#channel_name").val();
+	window.location.href = '__URL__/cooperation_channel?sdk_status='+sdk_status+'&softname='+softname+'&package='+package+'&begintime='+begintime+"&endtime="+endtime+"&channel_name="+channel_name;
+}
+
+function checkAll(obj)
+{
+	var flag = $(obj).attr('checked') == 'checked';
+	$('input[name^=id_]').attr('checked', flag);
+}
+function pass(){
+	var choose_id_str='';
+	$('input[name^=id_]').each(function(i){
+		if($(this).attr('checked') == 'checked'){
+			choose_id_str += $(this).val()+',';
+		}
+	});	
+	if(choose_id_str ==''){
+		alert("请选择要通过的游戏");
+		return false;
+	}
+	window.location.href = "__URL__/re_apk_status?softid="+choose_id_str+"&type=4";
+}
+
+$(".extent_rank").blur(function(){
+	var rank = $(this).val();
+	var id = $(this).attr('rel');
+	var param = '{$param}';
+	var url = "__URL__/edit_rank?id=" + id + "&rank=" + rank;
+	var jumpUrl = "__URL__/cooperation_channel?"+param;
+	$.ajax({
+		type: "GET",
+		url: url,
+		success: function(response) {
+			window.location.href = jumpUrl;
+		}
+	});
+})
+</script>

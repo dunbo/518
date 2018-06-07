@@ -1,0 +1,585 @@
+<include file="../Public/header" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript">
+KindEditor.ready(function(K) {
+		window.editor = K.create('#editor_content',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'bold','italic','underline','fontsize','forecolor','|','image','anchor','link','unlink','justifyleft','justifycenter','justifyright'
+			]
+		});
+});
+KindEditor.options.cssData = 'body { font-size: 14px; }';
+
+function check(){
+	var active_name = $('#active_name').val();
+	var usable = $('#usable').val();
+	var gift_type = $('#gift_type').val();
+	var bo = true;
+	if(!active_name){
+		alert("标题不能为空");
+		return false;
+	}
+	if(gift_type==0){
+		alert("请选择礼包类型");
+		return false;
+	}
+
+	if(!usable){
+		alert("使用范围不能为空");
+		return false;
+	}
+	var fill_num = 0;
+	var num = "{$result[0]['all_num']}";
+	var old_num = new Array();
+	old_num['sc_num'] = "{$result[0]['market_conf_cnt']}";
+	old_num['game_num'] = "{$result[0]['game_conf_cnt']}";
+	old_num['sdk_num'] = "{$result[0]['sdk_conf_cnt']}";
+	old_num['bbs_num'] = "{$result[0]['bbs_conf_cnt']}";
+	$(".active_target").each(function(i){
+		if($(this).is(':checked')){
+			var id = $(this).attr('target');
+			if($("#"+id).val()> parseInt(num)){
+				bo = false;
+			}
+			//alert($("#"+id+"_used").html())
+			limit_num = parseInt($("#"+id+"_used").html())*1.1;
+			if(parseInt($("#"+id).val()) != parseInt(old_num[id])){
+				if(parseInt($("#"+id).val())< limit_num){
+					bo = false;
+				}
+			}
+			
+			if($("#"+id).val()!=''){
+				fill_num += parseInt($("#"+id).val());
+			}
+			
+		}
+	})
+	if(fill_num > num){
+		bo = false;
+	}
+	if(bo == false){
+		alert("发布数量错误，请重新输入");
+	}else{
+		window.fml.submit();
+	}
+	
+}
+function check_num(check_id,input_id,used_num){
+	if(used_num){
+		limit_num = parseInt(used_num)*1.1;
+		if(parseInt($("#"+input_id).val()) < limit_num){
+			alert("发布数量错误，请重新输入");
+			return false;
+		}
+	}
+	if($("#"+check_id).is(':checked')){
+		var num = {$result[0]['all_num']};
+
+		if($("#"+input_id).val() > num){
+			alert("发布数量错误，请重新输入");
+			return false;
+		}
+		var fill_num = 0;
+		$(".active_target").each(function(i){
+			if($(this).is(':checked')){
+				var id = $(this).attr('target');
+				//alert($("#"+id).val())
+				if($("#"+id).val()!=''){
+					fill_num += parseInt($("#"+id).val());
+				}
+				
+			}
+		})
+		if(fill_num > num){
+			alert("发布数量错误，请重新输入");
+			return false;
+		}
+	}
+	
+}
+window.onload=function(){
+	sel_checked();
+	
+}
+function sel_checked(){
+	var vals = "{$result[0]['active_type']}";
+	if(vals==14){
+		$("#pt_market").attr("checked",true);
+		$("#pt_game").attr("checked",true);
+		$("#pt_sdk").attr("checked",true);
+	}else if(vals==2){
+		$("#pt_game").attr("checked",true);
+	}else if(vals==4){
+		$("#pt_market").attr("checked",true);
+	}else if(vals==6){
+		$("#pt_market").attr("checked",true);
+		$("#pt_game").attr("checked",true);
+	}else if(vals==8){
+		$("#pt_sdk").attr("checked",true);
+	}else if(vals==10){
+		$("#pt_game").attr("checked",true);
+		$("#pt_sdk").attr("checked",true);
+	}else if(vals==12){
+		$("#pt_market").attr("checked",true);
+		$("#pt_sdk").attr("checked",true);
+	}
+	
+	
+}
+
+function c_num(){
+	if($("#pt_market").attr("checked")=='checked'){
+		if(!isNaN($("#sc_num").val())){	
+			if($("#sc_num").val()==''){
+				var mark = 0;
+				alert("请填写礼包数量");
+				return false;
+			}else{
+				var mark = parseInt($("#sc_num").val());
+			}
+		}else{
+			alert("安智市场礼包数量填写的不是数字");
+			return false;
+		}	
+	}else{
+		var mark = 0;
+	}
+
+	if($("#pt_game").attr("checked")=='checked'){
+		if(!isNaN($("#game_num").val())){	
+			if($("#game_num").val()==''){
+				var game =0;
+				alert("请填写礼包数量");
+				return false;
+			}else{
+				var game = parseInt($("#game_num").val());
+			}
+		}else{
+			alert("安卓游戏礼包数量填写的不是数字");
+			return false;
+		}
+	}else{
+		var game = 0;
+	}
+
+	if($("#pt_sdk").attr("checked")=='checked'){
+		if(!isNaN($("#sdk_num").val())){
+			if($("#sdk_num").val()==''){
+				var sdk = 0;
+				alert("请填写礼包数量");
+				return false;
+				}else{
+					var sdk = parseInt($("#sdk_num").val());
+				}
+		}else{
+			alert("SDK礼包数量填写的不是数字");
+			return false;
+		}
+	}else{
+		var sdk = 0;
+	}
+
+	
+}
+
+var options, a;
+jQuery(function(){
+	options = {
+		serviceUrl:'/index.php/Sj/Onlinegame/active_add_show1',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+		}
+	};
+	$('#my_game').autocomplete(options);
+});
+
+
+function onFileChange(obj){
+	var index = $(obj).attr('name');
+	if(index == 'gift_num'){
+		if( !obj.value.match( /.csv/i ) ){
+			alert('上传格式出错');
+			var file = $("#gift_num");
+			file.after(file.clone().val(""));
+			file.remove();	
+			return false;
+		}
+	}
+	var active_id = $('input[name=id]').val();
+	var residue_num = parseInt($('#surplus_num').val());
+	$.ajaxFileUpload(
+		{
+			url:'/index.php/Sj/Onlinegame/gift_reseed/active_id/'+active_id+'/residue_num/'+residue_num, 
+			//你处理上传文件的服务端
+			secureuri:false,
+			fileElementId:'gift_num',
+			dataType: 'json',
+			success: function (data){
+				if(data.error){
+					alert(data.error);
+					var file = $("#gift_num");
+					file.after(file.clone().val(""));
+					file.remove();	
+					$('#file_path').val('');
+					$('#tmp_num').html('');
+					return false;
+				}
+				$('#file_path').val(data.file);
+				$('#file_add').val(data.file_add);
+				$('#tmp_num').html(data.num);
+				$('#num').val(data.num);
+				$('#all_num').val(data.all_num);
+				$('#num_cnt').html(data.all_num);
+			}
+		}
+	)
+}
+
+function post_gift_reseed(){
+	var pt_market=''; 
+	var pt_game=''; 
+	var pt_sdk=''; 
+	var pt_bbs='';
+	var pt_weixin='';
+	$("#pt_market").each(function(){
+		if($(this).is(':checked')) {
+			pt_market = $(this).val();
+		}
+	});
+	$("#pt_game").each(function(){
+		if($(this).is(':checked')) {
+			pt_game = $(this).val();
+		}
+	});
+	$("#pt_sdk").each(function(){
+		if($(this).is(':checked')) {
+			pt_sdk = $(this).val();
+		}
+	});
+	$("#pt_bbs").each(function(){
+		if($(this).is(':checked')) {
+			pt_bbs = $(this).val();
+		}
+	});
+	$("#pt_weixin").each(function(){
+		if($(this).is(':checked')) {
+			pt_weixin = $(this).val();
+		}
+	});
+	var all_num = parseInt($('#all_num').val());
+	//剩余数
+	var surplus_num = parseInt($('#surplus_num').val());
+	//追加礼包数
+	var num = parseInt($('#num').val());
+	var sc_num = 0;
+	var game_num = 0;
+	var sdk_num = 0;
+	var bbs_num = 0;
+	var weixin_num = 0;
+	if(pt_market != '')  sc_num = parseInt($('#sc_num').val());
+	if(pt_game != '')  game_num = parseInt($('#game_num').val());
+	if(pt_sdk != '')  sdk_num = parseInt($('#sdk_num').val());
+	if(pt_bbs != '')  bbs_num = parseInt($('#bbs_num').val());
+	if(pt_weixin != '')  weixin_num = parseInt($('#weixin_num').val());
+	if((sc_num+game_num+sdk_num+bbs_num+weixin_num) != (all_num)){
+		alert('各平台分配数量必须等于激活码总数量!')
+		return false;
+	}
+	var active_id = $('input[name=id]').val();
+	var	file = $('#file_path').val();
+	var	file_add = $('#file_add').val();
+
+	if(!file){
+		//alert('请上传激活码');
+		//return false;
+	}
+	$('#up_f').html("<img src='/Public/images/loading.gif'/>");
+	$.ajax({
+		url:'/index.php/Sj/Onlinegame/gift_reseed', 
+		data: 'active_id='+active_id+'&file_path='+file+'&file_add='+file_add+'&all_num='+all_num+'&market_conf_cnt='+sc_num+'&game_conf_cnt='+game_num+'&sdk_conf_cnt='+sdk_num+'&bbs_conf_cnt='+bbs_num+'&weixin_conf_cnt='+weixin_num,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret.status == 0){
+				alert(ret.info);
+				$('#up_f').html("<a href='javascript:;' onclick='post_gift_reseed();' >上传</a>");
+				return false;
+			}
+			if(ret.code == 1){
+				alert('上传成功');
+				$('#file_path').val('');
+				$('#file_add').val('');
+				$('#tmp_num').html('');
+				$('#all_num').val('');
+				location.reload();//加载页面
+			}else{
+				alert(ret['error']);
+				$('#up_f').html("<a href='javascript:;' onclick='post_gift_reseed();' >上传</a>");
+				return false;
+			}
+		}
+	});
+}
+function replace_tm(obj,tm_name){
+	if($('input[name='+tm_name+']').val() == ''){
+		$('input[name='+tm_name+']').val(obj.value);
+	}
+}
+
+function check_num(check_id,input_id,used_num){
+	if(used_num){
+		limit_num = parseInt(used_num)*1.1;
+		if(parseInt($("#"+input_id).val()) < limit_num){
+			alert("发布数量错误，请重新输入");
+			return false;
+		}
+	}
+	if($("#"+check_id).is(':checked')){
+		var num = {$result[0]['all_num']};
+
+		if($("#"+input_id).val() > num){
+			alert("发布数量错误，请重新输入");
+			return false;
+		}
+		var fill_num = 0;
+		$(".active_target").each(function(i){
+			if($(this).is(':checked')){
+				var id = $(this).attr('target');
+				//alert($("#"+id).val())
+				if($("#"+id).val()!=''){
+					fill_num += parseInt($("#"+id).val());
+				}
+				
+			}
+		})
+		if(fill_num > num){
+			alert("发布数量错误，请重新输入");
+			return false;
+		}
+	}
+	
+}
+
+</script>
+<div  style="padding-left:50px">
+<div><h3>编辑礼包</h3></div>
+<input type="hidden" id="file_path" value="" />
+<input type="hidden" id="file_add" value="" />
+<input type="hidden" id="surplus_num" value="{$result[0]['surplus_num']}" />
+<input type="hidden" id="num" value="" />
+
+<div>
+	<form action="__URL__/p_market_edit_submit" method="post" name="fml" enctype="multipart/form-data">
+	<input type="hidden" id="all_num" name="all_num" value="{$result[0]['all_num']}" />
+	<table>
+		<tr>
+			<td>礼包名称：</td>
+			<td>
+				<input type="text" name="active_name" value="{$result[0]['active_name']}" id="active_name" />
+				<input type="hidden" name="id" value="{$result[0]['active_id']}" /></td>
+		</tr>
+		<tr>
+			<td>礼包分类：</td>
+			<td><?php if($result[0]['gift_category'] == 1){ ?>应用礼包<?php }else{ ?>游戏礼包<?php } ?></td>
+		</tr>
+		<tr>
+			<td>礼包类型：</td>
+			<td><select name='gift_type' id='gift_type'>
+			<option value='0'>请选择</option>
+				<?php foreach($result_one as $key => $val){ ?>
+                                <option value="{$val['id']}" <?php if($val['id']==$result[0]['sel_type']):?>selected="selected"<?php endif; ?> >{$val['gift_type']}</option>
+				<?php } ?>
+			</select></td>
+		</tr>
+		<tr>
+			<td>软件包名：</td>
+			<td>
+                            {$result[0]['apply_pkg']}
+                            <input type="hidden" value="{$result[0]['apply_pkg']}" name="apply_pkg">
+                        </td>
+		</tr>
+		<tr>
+			<td>软件名称：</td>
+			<td>{$result[0]['soft_name']}</td>
+		</tr>
+		<tr>
+			<td>礼包领取时间:</td>
+			<td>
+				<input id="start_tm" name="start_tm" value="<?php echo date('Y-m-d H:i:s',$result[0]['start_tm']); ?>"  class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" onblur='replace_tm(this,"exchange_start");' style='width:150px;' >
+				&nbsp;&nbsp;~&nbsp;&nbsp;
+
+				<input id="cut_tm" name="cut_tm" value="<?php echo date('Y-m-d H:i:s',$result[0]['cut_tm']); ?>"  class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" onblur='replace_tm(this,"exchange_end");' style='width:150px;'>
+            </td>
+		</tr>
+
+		<tr>
+			<td>剩余激活码：</td>
+			<td>{$result[0]['surplus_num']}个</td>
+		</tr>
+		<tr>
+			<td>激活码总量：</td>
+			<td><span id='num_cnt'>{$result[0]['all_num']}</span>个</td>
+		</tr>
+
+		<tr >
+			<td>上传激活码：</td>
+			<td>
+				<input type="file" style="left:145px;" class="inputfile1"  value="" name="gift_num" id="gift_num" onchange="onFileChange(this);">	
+				<span style="color:blue;" id='up_f' ><a href="javascript:;" onclick='post_gift_reseed();' >上传</a></span><br />
+			</td>
+		</tr>
+		<tr >
+			<td></td>
+			<td>
+				已上传<span id='tmp_num'></span>个
+			</td>
+		</tr>
+		<?php if($result[0]['gift_category'] == 2){ ?>
+		<tr>
+			<td>分平台发布</td>
+			<td>
+				<input type="hidden" name="pt_market_bo" value="<?php if(($result[0]["active_from"] & 4) == 4 ){echo '1';}?>	">
+				<input class="active_target" type='checkbox' id='pt_market' name='pt_market' <?php if(($result[0]["active_from"] & 4) == 4 ){echo 'checked=checked disabled';}?>  target="sc_num">安智市场
+				<input type='text' name='sc_num' id='sc_num' value="{$result[0]['market_conf_cnt']}" style="width:40px;"  /> 
+				已发出：<font id="sc_num_used">{$result[0]["active_from_num"][4]}</font>
+				&nbsp&nbsp
+				
+				<input type="hidden" name="pt_game_bo" value="<?php if(($result[0]["active_from"] & 2) == 2 ){echo '1';}?>	">
+				<input class="active_target" type='checkbox' id='pt_game' name='pt_game' <?php if(($result[0]["active_from"] & 2) == 2 ){echo 'checked=checked disabled';}?> target="game_num">安卓游戏
+				<input type='text' name='game_num' id='game_num' value="{$result[0]['game_conf_cnt']}" style="width:40px;" />
+				已发出：<font id="game_num_used">{$result[0]["active_from_num"][2]}</font>
+				&nbsp&nbsp
+				<br><br>
+				<input type="hidden" name="pt_sdk_bo" value="<?php if(($result[0]["active_from"] & 8) == 8 ){echo '1';}?>	">
+				<input class="active_target" type='checkbox' id='pt_sdk' name='pt_sdk' <?php if(($result[0]["active_from"] & 8) == 8 ){echo 'checked=checked disabled';}?>  target="sdk_num">SDK &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+				<input type='text' name='sdk_num' id='sdk_num' value="{$result[0]['sdk_conf_cnt']}" style="width:40px;"  /> 
+				已发出：<font id="sdk_num_used">{$result[0]["active_from_num"][8]}</font>
+
+				&nbsp&nbsp
+				<input type="hidden" name="pt_bbs_bo" value="<?php if(($result[0]["active_from"] & 1) == 1 ){echo '1';}?>">
+				<input class="active_target" type='checkbox' id='pt_bbs' name='pt_bbs' <?php if(($result[0]["active_from"] & 1) == 1 ){echo "checked=checked";}?>  target="bbs_num">论坛 &nbsp&nbsp&nbsp&nbsp&nbsp 
+				<input type='text' name='bbs_num' id='bbs_num' style="width:40px;" value="{$result[0]['bbs_conf_cnt']}"  />
+				已发出：<font id="bbs_num_used">{$result[0]["active_from_num"][1]}</font>
+
+				&nbsp&nbsp
+				<input type="hidden" name="pt_weixin_bo" value="<?php if(($result[0]["active_from"] & 16) == 16 ){echo '1';}?>	">
+				<input class="active_target" type='checkbox' id='pt_weixin' name='pt_weixin' <?php if(($result[0]["active_from"] & 16) == 16 ){echo 'checked=checked disabled';}?>  target="weixin_num">微信 &nbsp&nbsp&nbsp&nbsp&nbsp
+				<input type='text' name='weixin_num' id='weixin_num' style="width:40px;" value="{$result[0]['weixin_conf_cnt']}"  />
+				已发出：<font id="weixin_num_used">{$result[0]["active_from_num"][16]}</font>
+				</td>
+		</tr>
+		<tr id="bbs_score">
+			<td>论坛领取所需金币：</td>
+			<td><input type="text" name="bbs_score" value="{$result[0]['bbs_score']}" /><span style="color:blue;">0代表免费，此字段仅在论坛兑换时使用</span></td>
+		</tr>
+		<tr id="game_prefix">
+			<td>游戏名称首字母：</td>
+			<td>
+			<select name="game_prefix">
+			<option value="A" <?php if($result[0]['game_prefix'] == 'A'){ ?>selected<?php } ?>>A</option>
+			<option value="B" <?php if($result[0]['game_prefix'] == 'B'){ ?>selected<?php } ?>>B</option>
+			<option value="C" <?php if($result[0]['game_prefix'] == 'C'){ ?>selected<?php } ?>>C</option>
+			<option value="D" <?php if($result[0]['game_prefix'] == 'D'){ ?>selected<?php } ?>>D</option>
+			<option value="E" <?php if($result[0]['game_prefix'] == 'E'){ ?>selected<?php } ?>>E</option>
+			<option value="F" <?php if($result[0]['game_prefix'] == 'F'){ ?>selected<?php } ?>>F</option>
+			<option value="G" <?php if($result[0]['game_prefix'] == 'G'){ ?>selected<?php } ?>>G</option>
+			<option value="H" <?php if($result[0]['game_prefix'] == 'H'){ ?>selected<?php } ?>>H</option>
+			<option value="I" <?php if($result[0]['game_prefix'] == 'I'){ ?>selected<?php } ?>>I</option>
+			<option value="J" <?php if($result[0]['game_prefix'] == 'J'){ ?>selected<?php } ?>>J</option>
+			<option value="K" <?php if($result[0]['game_prefix'] == 'K'){ ?>selected<?php } ?>>K</option>
+			<option value="L" <?php if($result[0]['game_prefix'] == 'L'){ ?>selected<?php } ?>>L</option>
+			<option value="M" <?php if($result[0]['game_prefix'] == 'M'){ ?>selected<?php } ?>>M</option>
+			<option value="N" <?php if($result[0]['game_prefix'] == 'N'){ ?>selected<?php } ?>>N</option>
+			<option value="O" <?php if($result[0]['game_prefix'] == 'O'){ ?>selected<?php } ?>>O</option>
+			<option value="P" <?php if($result[0]['game_prefix'] == 'P'){ ?>selected<?php } ?>>P</option>
+			<option value="Q" <?php if($result[0]['game_prefix'] == 'Q'){ ?>selected<?php } ?>>Q</option>
+			<option value="R" <?php if($result[0]['game_prefix'] == 'R'){ ?>selected<?php } ?>>R</option>
+			<option value="S" <?php if($result[0]['game_prefix'] == 'S'){ ?>selected<?php } ?>>S</option>
+			<option value="T" <?php if($result[0]['game_prefix'] == 'T'){ ?>selected<?php } ?>>T</option>
+			<option value="U" <?php if($result[0]['game_prefix'] == 'U'){ ?>selected<?php } ?>>U</option>
+			<option value="V" <?php if($result[0]['game_prefix'] == 'V'){ ?>selected<?php } ?>>V</option>
+			<option value="W" <?php if($result[0]['game_prefix'] == 'W'){ ?>selected<?php } ?>>W</option>
+			<option value="X" <?php if($result[0]['game_prefix'] == 'X'){ ?>selected<?php } ?>>X</option>
+			<option value="Y" <?php if($result[0]['game_prefix'] == 'Y'){ ?>selected<?php } ?>>Y</option>
+			<option value="Z" <?php if($result[0]['game_prefix'] == 'Z'){ ?>selected<?php } ?>>Z</option>
+			<option value="1" <?php if($result[0]['game_prefix'] == 1){ ?>selected<?php } ?>>1</option>
+			<option value="2" <?php if($result[0]['game_prefix'] == 2){ ?>selected<?php } ?>>2</option>
+			<option value="3" <?php if($result[0]['game_prefix'] == 3){ ?>selected<?php } ?>>3</option>
+			<option value="4" <?php if($result[0]['game_prefix'] == 4){ ?>selected<?php } ?>>4</option>
+			<option value="5" <?php if($result[0]['game_prefix'] == 5){ ?>selected<?php } ?>>5</option>
+			<option value="6" <?php if($result[0]['game_prefix'] == 6){ ?>selected<?php } ?>>6</option>
+			<option value="7" <?php if($result[0]['game_prefix'] == 7){ ?>selected<?php } ?>>7</option>
+			<option value="8" <?php if($result[0]['game_prefix'] == 8){ ?>selected<?php } ?>>8</option>
+			<option value="9" <?php if($result[0]['game_prefix'] == 9){ ?>selected<?php } ?>>9</option>
+			<option value="99" <?php if($result[0]['game_prefix'] == 99){ ?>selected<?php } ?>>0</option>
+			</select><span style="color:blue;">此字段仅在论坛兑换时使用</span>
+			</td>
+		</tr>
+		<tr id="game_type">
+			<td>游戏类型：</td>
+			<td><input type="text" name="game_type" id="my_game" value="{$result[0]['game_category']}" /><span style="color:blue;">此字段仅在论坛兑换时使用</span></td>
+		</tr>
+		<tr id="bbs_pic">
+			<td>论坛礼包图片：</td>
+			<td><input type="file" name="bbs_pic" /><span style="color:blue;">此字段仅在论坛兑换时使用</span><br /><img src="<?php echo IMGATT_HOST; ?>{$result[0]['bbs_pic']}"></td>
+		</tr>
+		<?php } ?>
+		<tr>
+			<td>每日限额：</td>
+			<td><input type="text" name="limit_num" id="limit_num" value="{$result[0]['limit_num']}" />(0为无限制)</td>
+		</tr>
+		<tr>
+			<td>简介：</td>
+			<td  colspan="3"><textarea name="intro">{$result[0]['intro']}</textarea></td>
+		</tr>
+		<tr>
+			<td colspan="4"></td>
+		</tr>
+		<tr>
+			<td>礼包详情：</td>
+			<td colspan="4"><textarea style="width:400px;height:130px;" name="detail">{$result[0]['detail']}</textarea></td>
+		</tr>
+		<tr>
+			<td>礼包使用时间：</td>
+			<td  colspan="3">
+				<input type="text" name="exchange_start"  class="Wdate" value="<?php echo date('Y-m-d H:i:s',$result[0]['exchange_start']); ?>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'});" onblur='replace_tm(this,"start_tm");' style='width:150px;'/>&nbsp&nbsp到&nbsp&nbsp
+				<input type="text" name="exchange_end"  class="Wdate" value="<?php echo date('Y-m-d H:i:s',$result[0]['exchange_end']); ?>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'});" onblur='replace_tm(this,"cut_tm");' style='width:150px;'/></td>
+		</tr>
+		<tr>	
+			<td>使用范围：</td>
+			<td><input type="text" name="usable" id="usable" value="{$result[0]['usable']}"/></td>
+		</tr>
+		<tr>
+			<td>使用方法：</td>
+			<td  colspan="3"><textarea name="usage">{$result[0]['usage']}</textarea></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td><input type="button" value="确定" onclick="return check();" /></td>
+			<input type="hidden" name='sur_num' value="{$result[0]['surplus_num']}" />
+			<input type="hidden" name='lr' value="{$lr}" />
+			<input type="hidden" name='p' value="{$p}" />
+			<td><input type="button" onclick="javascript:location.href='__URL__/active_gift_list1'" value="取消" /></td>
+			<td></td>
+		</tr>
+	</table>
+	</form>
+</div>
+</div>
+</body>
+</html>

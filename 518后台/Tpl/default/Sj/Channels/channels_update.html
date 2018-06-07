@@ -1,0 +1,111 @@
+<style type="text/css">
+<!--
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+-->
+</style>
+<include file="../Public/header" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	//主层动态变化数据
+	function onclikChannel()
+		{	
+			$('#channel_div').html('');
+			$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+				var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+				item.find('input').attr('checked', 'true');
+				$('#channel_div').append(item);
+			})
+			$.cookie('cids', '', {path: '/'});
+		}
+	//
+	function check_arr()
+		{
+			$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+		}
+</script>
+<body>
+<h2>渠道不更新软件列表</h2>
+<P>
+<a href="__URL__/channels_updateadd">添加不更新软件</a>
+<a href="__URL__/channels_updateaddall">批量添加不更新软件</a>
+<P>
+渠道查询
+<form method="POST" action="__URL__/Channels_up">
+<table  border="0" cellpadding="0" cellspacing="0" class="tb"  width="80%">
+<tr>
+<td >渠道-运营商选择&nbsp;：</td>
+
+<td >&nbsp;</td>
+</tr>
+<tr>
+<td>
+<select id="oid" name="oid" style= "width:80 ">
+    <volist name="list1" id="vo">
+    <option value="{$vo.oid}" >{$vo.mname}</option>
+	</volist>
+</select>
+</td>
+
+
+<td>
+<input type="submit" value="查找"></td>
+</tr>
+</table>
+</form>
+<p>
+渠道号查询
+<form method="get" action="__URL__/Channels_upda">
+<table  border="0" cellpadding="0" cellspacing="0" class="tb" width="80%" >
+<td>
+渠道号&nbsp;：</td>
+<td>
+<a href="__APP__/Public/showChannel?callback=submitChannel&type=radio&ready=check_arr&selected=onclikChannel" class="thickbox">选择指定渠道</a><br />
+		<div id="channel_div">
+			<?php if(!empty($cid_array)){ ?>
+			<label class="l_cid_{$cid_array.cid}"><input type="radio" name="cid" checked="checked" value="{$cid_array.cid}"/>{$cid_array.chname}</label>
+			<?php } ?>
+		</div>
+<!-- <input id="chl" name="chl" size="50" type="text" value="{$list}"> --></td>
+
+<td><input type="submit" value="查找"></td></table>
+</form>
+查询结果
+<hr>
+<br />
+<table   border="0" cellpadding="0" cellspacing="0" class="tb" width="80%" >
+<if condition="!empty($info)">
+<tr>
+<td>软件包名</td><td>软件名</td><td>取消不更新</td>
+</tr>
+	<volist name="info" id="vo">
+		<td>{$vo.package|default='&nbsp;'}</td><td>{$vo.softname|default='&nbsp;'}</td><td><a href="__URL__/Channels_u/cid/{$vo.cid}/package/{$vo.package}" onClick="javascript:return checkit()" >取消不更新</a></td>
+	</volist>
+</if>
+<if condition="!empty($arr)">
+<tr>
+<td>软件包名</td><td>软件名</td><td>取消不更新</td>
+</tr>
+	<volist name="arr" id="vo">
+		<tr><td>{$vo.package|default='&nbsp;'}</td><td>{$vo.softname|default='&nbsp;'}</td><td><a href="__URL__/Channels_u/cid/{$vo.cid}/package/{$vo.package}" onClick="javascript:return checkit()" >取消不更新</a></td></tr>
+	</volist>
+</if>
+
+</table>
+</body>
+</html>

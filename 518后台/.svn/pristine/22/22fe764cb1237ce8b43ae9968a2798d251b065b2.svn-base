@@ -1,0 +1,277 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+ <script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js"></script>
+<!--上传文件用到的js-->
+<script type="text/javascript" src="/Public/js/ajaxfileupload_anzhi.js?1"></script>   
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+    jQuery(function(){
+        // 生成推荐链接并赋值给a元素，第三个参数不配置，使用默认分配的名称
+        href = generate_content_type_href('content_type_div');
+        $("#content_type_a").attr("href", href);
+    });
+    function check_num(id){
+        var num=$("#"+id).val();
+        if(!num.match(/^\d+$/g)){
+        	$("#"+id).val("");
+        	alert('软件更新数量必须为正整数');
+        	return false;
+        }
+		if(num<=0){
+			$("#"+id).val("");
+			alert('软件更新数量必须为正整数');
+        	return false;
+		}
+    }
+   
+    function checkPost() {
+		  if(document.getElementById("single_pk").value=="")
+			  { 
+				 alert("请填写一个包名!");
+				 return false;
+			  }
+		if(!(document.getElementById('radio_del_one').checked || document.getElementById('radio_del_two').checked)){
+			alert("请选择软件icon删除条件!");
+			return false;
+		}
+		if(!(document.getElementById('radio_zero').checked || document.getElementById('radio_one').checked || document.getElementById('radio_two').checked)){
+			alert("请选择预下载触发条件!");
+			return false;
+		}
+		if(document.getElementById('radio_zero').checked){
+			var num=document.getElementById("upd_num").value;
+			if(!num.match(/^\d+$/g)){
+	        	alert('软件更新数量必须为正整数');
+	        	return false;
+        	}
+        	if(num<=0){
+				alert('软件更新数量必须为正整数');
+	        	return false;
+			}
+		}
+		if(document.getElementById('radio_one').checked){
+			if(document.getElementById("single_appoint").value==""){
+	        	alert('更新指定软件时请填写一个包名');
+	        	return false;
+        	}
+		}
+        var start_time = $("#add_content_form #start_time").val();
+        if (!start_time) {
+            alert("开始时间不能为空！");
+            return false;
+        }
+        var end_time = $("#add_content_form #end_time").val();
+        if (!end_time) {
+            alert("结束时间不能为空！");
+            return false;
+        }
+        if (start_time > end_time) {
+            alert("开始时间不能大于结束时间！");
+            return false;
+        }
+        //相同时间段更新指定软件包时，检查此包是否存在start_time和end_time
+        var pkg=document.getElementById('single_appoint').value;
+        var get_ready_pkg=document.getElementById('single_pk').value;
+
+        var enable = true;
+		$.ajax({
+			url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+get_ready_pkg,
+			// url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg+'/start_at/'+start_at+'/end_at/'+end_at,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					if(data==1){
+						alert('开始时间不能大于结束时间');
+						enable=false;
+					}else{
+						if(!confirm(data)){
+							enable=false;
+						}
+					}
+					
+				}
+			}
+		});
+		if(!enable){
+			return enable;
+		}
+		
+       	return get_softname('single_pk');
+        if(pkg==get_ready_pkg){
+        	alert("预下载软件包名和更新指定软件包名不能相同");
+        	return false;
+        }
+        if(document.getElementById('radio_one').checked){
+        	return get_softname('single_appoint');
+        	var k="";
+			$.ajax({
+				url:'/index.php/Sj/Deskdownset/check_package_appoint/package_appoint/'+pkg+'/start_time/'+start_time+'/num/'+Math.random()+'/end_time/'+end_time,
+				type: 'get',
+				async:false,
+				success: function(data)
+				{	
+					k=data;
+				}
+			});
+			if(k!=1){
+				alert(k);
+				return false;
+			}
+        }
+		return true;
+    }
+    
+	//软件包名验证
+	function get_softname(id)
+	{
+		var pkg=document.getElementById(id).value;
+		$.ajax({
+			url:'/index.php/Sj/Onlinegame/get_softname/package/'+pkg+'/num/'+Math.random(),
+			type: 'get',
+			success: function(data)
+			{
+			    if(data != 2)
+				{
+					if(id=='single_pk'){
+						var obj = eval('(' + data + ')');
+						// document.getElementById(id+"_name").value=obj.soft_name;
+						$('#'+id+'_ming').val(obj.soft_name);
+						//$('#my_game').val(obj.category_name);
+					}
+					if(id=='single_appoint'){
+						var obj = eval('(' + data + ')');
+						// document.getElementById(id+"_name").value=obj.soft_name;
+						$('#'+id+'_ming').val(obj.soft_name);
+						//$('#my_game').val(obj.category_name);
+					}
+					return true;
+				}
+				else
+				{
+				    document.getElementById(id).value="";
+					//document.getElementById("error_info").value="该软件不存在";
+					alert("该软件不存在");
+					return false;
+				}
+			}
+		});
+	}
+
+	//精准投放
+	function choose_condition()
+	{
+		//V6.2搜索结果页面如果选中精准投放中会有批量上传搜索结果词
+		// if(document.getElementById("search_result_page").checked==true)
+		// {
+		// 	$("#result_page").css("display","block");
+		// }
+		var div_val=$("#choose_div_id").html();
+		if(div_val=="")
+		{
+			$.ajax({
+				url:'/index.php/Public/showContions',
+				type: 'POST',
+				dataType:'html',
+				success: function(data)
+				{
+				
+
+					$("#choose_div_id").html(data);
+					$("#choose_div_id #think_page_trace").remove();
+					$("#choose_div_id #think_run_time").remove();
+					tb_init('#choose_div_id a.thickbox');//pass where to apply thickbox
+					imgLoader = new Image();// preload image
+					imgLoader.src = tb_pathToImage;
+				}
+			});
+		}
+		else
+		{
+			$("#choose_div_id").toggle();
+		}
+	}
+</script>
+
+<form id="add_content_form" method="POST" name="myform" action="__URL__/add_downset" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr">
+        <td style="width:130px;"><font color="red">*</font>预下载软件包名</td>
+        <td>
+            <!-- <input type="text" name="title" id="title" onBlur="checkLen(this,3,'title_hint')" onKeyUp="checkLen(this,3,'title_hint')"/> -->
+            <input type="text" name="package" id="single_pk" onBlur="get_softname(this.id)"/>
+        </td>
+        <!-- <td><span id="title_hint">0/3</span></td> -->
+    </tr>
+    <tr class="sub_tr">
+        <td style="width:130px;"><font color="red">*</font>预下载软件名称</td>
+        <td>
+            <input type="text" id="single_pk_ming"."1" readonly="true"/>
+        </td>
+<!--         <td><span id="title_hint">0/3</span></td> -->
+    </tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>触发条件</td>
+    </tr>
+    <tr class="sub_tr">
+        <td></td>
+        <td align="left" bgcolor="#FFFFFF">
+             <input type="radio" name="trigger_condition" style="margin-bottom:10px" value="0" id="radio_zero" />更新全部软件&nbsp;&nbsp;&nbsp;更新数量<input type="text" size="13"  id="upd_num" name='upd_count' onblur="check_num(this.id)"><br>
+			 <input type="radio" name="trigger_condition" style="margin-bottom:10px" value="1" id="radio_one" />更新指定软件&nbsp;&nbsp;&nbsp;软件包名<input type="text" size="13"  id="single_appoint" name="package_appoint" onBlur="get_softname(this.id)"><br>
+			  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;软件名称<input type="text" size="13" id="single_appoint_ming"."1" readonly="true" value=''/><br>
+			  <input type="radio" name="trigger_condition" style="margin-bottom:10px" value="2" id="radio_two" />点击市场icon启动市场
+        </td>
+    </tr>
+    <tr class="sub_tr">
+        <td style="width:140px;"><font color="red">*</font>软件icon删除条件</td>
+    </tr>
+    <tr class="sub_tr">
+        <td></td>
+        <td align="left" bgcolor="#FFFFFF">
+             <input type="radio" name="del_condition" style="margin-bottom:10px" value="0" id="radio_del_one" />点击图标后<br>
+			 <input type="radio" name="del_condition" style="margin-bottom:10px" value="1" id="radio_del_two" />安装完成后
+        </td>
+    </tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>精准投放</td>
+		<!-- <td>精准投放</td> -->
+		<td>
+		<a href="#" onclick="choose_condition()"><font color="blue">选择投放条件</font></a><br />
+		<div id="choose_div_id"></div>
+		</td>
+        <td></td>
+	</tr>
+    <tr class="sub_tr">
+		<td><font color="red">*</font>开始时间</td>
+		<td>
+            <input id="start_time" name="start_time" type="text" class="Wdate" style="float:left" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>结束时间</td>
+		<td>
+            <input id="end_time" name="end_time" type="text" class="Wdate" style="float:left" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="extent_id" value='<?php echo $extent_id?>'/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

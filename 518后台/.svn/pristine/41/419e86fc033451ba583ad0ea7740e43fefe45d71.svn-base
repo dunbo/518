@@ -1,0 +1,92 @@
+<link rel="stylesheet" href="/Public/css/jquery.autocomplete.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/js/jquery.autocomplete.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<form method='post' action='__URL__/add_record'>
+<input type="hidden" name="pkg" id="pkg">
+<div style="text-align: left">
+    <div style="margin-top:10px">
+        <div style="float: left">
+            软件名称：<input type="text" name="soft_name" id="soft_name" class='search_item_text' >
+        </div>
+        <div style="float: left;margin-left:20px">
+            <input type="button" style="float:left;" onclick="open_soft()" class="thickbox search_btn" value="从列表中选择">
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <div style="margin-top:10px">
+        反馈渠道：
+        <select name="feedback_type" id="feedback_type" class='search_item_text' onchange="get_ques()">
+            <option value="">--请选择--</option>
+            <volist name="feed_type" id="vo">
+                <option value="{$vo.id}">{$vo.c_name}</option>
+            </volist>
+        </select>
+    </div>
+    <div style="margin-top:10px">
+         问题类型：
+        <select name="ques_type" id="ques_type" class='search_item_text'>
+            <option value="">--请选择--</option>
+        </select>
+    </div>
+    <div style="margin-top:10px">
+        <div style="float: left">
+            添加数量：
+            <input type="text" name="num" id="num" class='search_item_text'>
+        </div>
+        <div style="float: left;margin-left:5px;margin-top:5px">
+            添加数量需为正整数
+        </div>
+         <div style="clear:both"></div>
+    </div>
+    <div style="margin-top:10px">
+        <div style="float:left;margin-left:35px"><input type="submit" value="确定" class="search_btn" onclick='return check_f()'></div>
+        <div style="float:left;margin-left:20px"><input type="button" value="取消" class="search_btn " onclick="tb_remove();"></div>
+    </div>
+</div>
+</form>
+<include file="../../Public/feed_soft" />
+<script type="text/javascript">
+    var data = [{$soft}];
+    $("#soft_name").autocomplete(data);
+    function get_ques(){
+        var feedback_type = $('#feedback_type').val();
+        var str = '<option value="">--请选择--</option>';
+        $.post(
+                '__URL__/get_ques',
+                {id:feedback_type},
+                function(data){
+                    for(var i=0;i<data.length;i++){
+                        str += '<option value="'+data[i].id+'">'+data[i].c_name+'</option>'
+                    }
+                    $('#ques_type').html(str);
+                },"json"
+         )
+    }
+    
+    
+    function check_f(){
+        var softname = $("#soft_name").val();
+        var feedback_type = $("#feedback_type").val();
+        var ques_type = $("#ques_type").val();
+        var num = $("#num").val();
+        if(softname == ''){
+            alert("软件名称不能为空");
+            return false;
+        }
+        if(feedback_type == ''){
+            alert("请选择反馈渠道");
+            return false;
+        }
+        if(ques_type == ''){
+            alert("请选择问题类型");
+            return false;
+        }
+        if(num==''||isNaN(num)||num<0){
+            alert("添加数量需为正整数");
+            return false;
+        }
+        return true;
+    }
+
+    
+</script>

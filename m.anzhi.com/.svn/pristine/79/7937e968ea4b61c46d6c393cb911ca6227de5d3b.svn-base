@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>评论(<!--{$out.soft.COMMENT_COUNT}-->)</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.public_url}-->/css/common.css?v1"/>
+</head>
+<body>
+
+<div id="top_bar" class="top_bar" style="display:none;"><a href="javascript:history.back();">评论(<!--{$out.soft.COMMENT_COUNT}-->)</a></div>
+<div id="top_bar_margin" class="mar_top59" style="display:none"></div>
+<div id="div_comment" class="comment">
+	<!--{foreach from=$out.comments.DATA item=v name=a}-->
+	<div class="cmnt_list part">
+		<div class="cmnt_top">
+			<span class="cmnt_nick"><!--{$v.2}--></span>
+			<i class="stars stars_<!--{$v.1}-->"></i>
+			<span class="cmnt_ver"><!--{$v.5}--></span>
+			<div class="clear"></div>
+		</div>
+		<div class="cmnt_txt"><!--{$v.4}--></div>
+		<div class="cmnt_date"><!--{$v.3}--></div>
+	</div>
+	<!--{/foreach}-->
+</div>
+
+<!--{if $out.comments.has_more}-->
+<div id="div_comment_more" class="load_more"><a id="a_comment_more" href="perfect.php?method=comment&id=<!--{$out.perfect.id}-->&ajax=1">点击查看更多</a></div>
+<div id="div_comment_load" class="load_more loading" style="display:none;"><a href="javascript:void(0);" class="loading">加载中</a></div>
+<div id="div_comment_no_more" class="load_more load_end" style="display:none;"><a href="javascript:void(0);">没有更多内容啦~</a></div>
+<!--{else}-->
+<div id="div_comment_no_more" class="load_more load_end"><a href="javascript:void(0);">没有更多内容啦~</a></div>
+<!--{/if}-->
+<div class="return_top"><a href="javascript:scroll(0,0);">返回顶部</a></div>
+
+<!--{include file="down.html"}-->
+
+<script type="text/javascript">
+
+var var_comment_last = false;
+var var_comment_page = 1;
+
+$(document).on('ajaxStart', function(e, xhr, options){
+	if(var_comment_last){
+		$('#div_comment_more').hide();
+		$('#div_comment_load').hide();
+		$('#div_comment_no_more').show();
+	}else{
+		$('#div_comment_more').hide();
+		$('#div_comment_load').show();
+		$('#div_comment_no_more').hide();
+	}
+});
+
+$(document).on('ajaxStop', function(e, xhr, options){
+	if(var_comment_last){
+		$('#div_comment_more').hide();
+		$('#div_comment_load').hide();
+		$('#div_comment_no_more').show();
+	}else{
+		$('#div_comment_more').show();
+		$('#div_comment_load').hide();
+		$('#div_comment_no_more').hide();
+	}
+});
+
+$(function(){
+
+	$('#a_comment_more').click(function(){		
+		//var var_request_url = $(this).attr('href')+'&page='+var_comment_page;
+		var var_request_url = 'pfcomjson_<!--{$out.perfect.id}-->_'+var_comment_page+'.html';
+		
+		$.getJSON(var_request_url, function(data){
+			var_comment_page++;
+			
+			var var_html = '';
+			$.each(data.DATA, function(key, value){
+				var_html += '<div class="cmnt_list part">';
+				var_html += '<div class="cmnt_top">';
+				var_html += '<span class="cmnt_nick">'+value[2]+'</span>';
+				var_html += '<i class="stars stars_<!--{$v.1}-->"></i>';
+				var_html += '<span class="cmnt_ver">'+value[5]+'</span>';
+				var_html += '<div class="clear"></div>';
+				var_html += '</div>';
+				var_html += '<div class="cmnt_txt">'+value[4]+'</div>';
+				var_html += '<div class="cmnt_date">'+value[3]+'</div>';
+				var_html += '</div>';
+			});
+			
+			$('#div_comment').append(var_html);
+			
+			if(data.has_more==false)
+				var_comment_last = true;
+		});
+
+		return false;
+	});
+});
+</script>
+
+<div style="display:none;">
+<script src="http://s16.cnzz.com/stat.php?id=3217453&web_id=3217453&show=pic1" language="JavaScript"></script>
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F230c63426e4fce3a604a2a9069e4d782' type='text/javascript'%3E%3C/script%3E"));
+</script>
+</div>
+</body>
+</html>

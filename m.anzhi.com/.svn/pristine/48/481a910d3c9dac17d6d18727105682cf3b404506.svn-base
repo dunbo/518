@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>我画你猜APP大作战</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/guessappbattle/css/common.css?v1"/>
+</head>
+<body>
+<div class="main_wrap">
+    <div class="main">
+		<div class="lottery_info clear">
+			<a class="fl" href="/lottery/guessappbattle/my_award.php?sid=<!--{$out.sid}-->">我的奖品</a>          
+			<p class="fr">我还有<span id="lottery_num"><!--{$out.lottery_num}--></span>次抽奖机会</p>
+		</div>
+		<div class="lottery">
+			<div class="rotate">
+				<div class="rotate-con">
+					<img src="<!--{$out.new_static_url}-->/activity/guessappbattle/images/lottery.png" width="100%"/>
+					<div class="rotate-pointer pointer-disabled"></div>
+				</div>
+			</div>
+		</div>
+		<div class="awards">
+			<dl class="awards_list">
+				<div class="slide_up">
+					<div>
+						<!--{if $out.people_award_list}-->
+							<!--{foreach from=$out.people_award_list item=i}-->
+							<dd><!--{$i.telephone}-->获得<!--{$i.award_name}--></dd>
+							<!--{/foreach}-->
+						<!--{else}-->
+							<dd>少年，要加油才能拿大奖喔！</dd>
+						<!--{/if}-->
+					</div>
+				</div>
+			</dl>
+		</div>
+		<div class="app_txt">
+			<p>安智君推荐专属搞机达人的APP给你！<br/>偷偷告诉你。下载APP增加抽奖机会哦~</p>
+		</div>
+		<div class="wrap" id="soft_wrap">
+			<div class="soft_title">搞机达人专用</div>
+			<ul class="soft_list wrap_inner clear" id="my_softs">
+			</ul>
+		</div>
+		<a class="btns" id="soft_btns" href="javascript:;" onclick="get_soft()">换一批</a>
+		<a href="/lottery/guessappbattle/index.php?sid=<!--{$out.sid}-->" class="btns" id="return_btn">返回首页</a>
+		<a href="/lottery/guessappbattle/rules.php?sid=<!--{$out.sid}-->" class="rule_btn">【活动规则】</a>
+    </div>
+	<div class="footer clear">
+		<img src="<!--{$out.new_static_url}-->/activity/guessappbattle/images/footer_bg.png"/>
+		<p>*本活动最终解释权归安智所有</p>
+	</div>
+</div>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box1"  style="display: none;">
+		<div class="tip-mid">
+			<div class="tip-con">
+				<p id="again_text"></p>
+			</div>
+		</div>
+		<div class="tip_hd">
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box1')">关闭</a></div>
+		</div>
+		<a href="javascript:;" class="btns" onclick="cloBox('#tip-box1');lottery_click();">再来一次</a>
+    </div>
+	<div class="tip-box" id="tip-box2"  style="display: none;">
+		<div class="tip-mid">
+            <div class="tip-con">
+                <p>我真的还想再抽500次~</p>
+            </div>
+        </div>
+        <div class="tip_hd">
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box2')">关闭</a></div>
+        </div>
+		<a href="#my_softs" class="btns" onclick="cloBox('#tip-box2')">去下载</a>
+    </div>
+	<div class="tip-box pbot" id="tip-box3"  style="display: none;">
+		<p class="prize-title cnt"><span class="spec" id="award_level_name"></span> <span id="award_name"></span></p>
+		<form class="form1">
+			<div class="form_title"></div>
+			<div class="prompt1">快填写个人信息领奖吧~</div>
+			<div class="form-item clear">
+				<label for="username">姓名：</label>
+				<div class="textbox"><input type="text" id="name"/> </div>
+			</div>
+			<div class="form-item clear">
+				<label for="telephone">手机：</label>
+				<div class="textbox"><input type="text" id="telephone"/> </div>
+			</div>
+			<div class="prompt1 prompt3" id="prompt"></div>
+		</form>
+		<a class="btns btns_tip" href="javascript:;" onclick="submit_info();">提交</a>
+	</div>
+</section>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/jQueryRotate-2.3.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/activity/guessappbattle/js/zp.js"></script>
+<script type="text/javascript">
+    function sliderUp(obj){
+        obj.each(function(){
+            var _this=$(this)[0],
+                    oDiv1=$(this).find("div:first")[0],
+                    oDiv2=$(this).find("div:last")[0];
+
+            if(oDiv2.offsetTop-_this.scrollTop<=0)
+                _this.scrollTop-=oDiv1.offsetHeight;
+            else{
+                _this.scrollTop++;
+            }
+        })
+    }
+    $(function(){
+        var speed=40;
+        var oSlider=$(".slide_up");
+        oSlider.each(function(){
+            var $oDiv1=$(this).find("div:first");
+			var len = $oDiv1.children().length;
+			if (len > 4) {
+				$oDiv1.after("<div>"+$oDiv1.html()+"</div>");
+			}
+        })
+        var run=setInterval(function(){
+            sliderUp(oSlider);
+        },speed);
+    })
+</script>
+<script type="text/javascript">
+var aid = <!--{$out.aid}-->;
+var sid = '<!--{$out.sid}-->';
+var unwritten = <!--{$out.unwritten}-->;
+var lottery_num = <!--{$out.lottery_num}-->;
+var award_count = <!--{$out.award_count}-->;
+var rotate_flag = 0;//抽奖点击按钮是否可点击
+var submit_info_clickable = true;
+
+var again_text = ['没中奖不要紧！看成败人生豪迈，大不了从头再来。','少年姿势不对，再试一次~','默念三遍我一定会中，再试下~','少年你离奖品就差一步，再试试嘛~','说好的奖品呢，连辣条都不给我啊喂！','继续攒人品，下次一定RP大爆发！','少年别灰心，安智君相信下次你就能中~','天灵灵，地灵灵，下次中奖一定灵~','奖品是个磨人的小妖精，看我再试一次定会抓住你~'];
+
+var flags={canMove:true};
+function showOpenBox(obj){
+	 var bg_h=$(window).height() + $(document).scrollTop(),
+			top_h= $(obj).height()/ 2 - $(document).scrollTop();
+	$(obj).css("margin-top",-top_h+"px").show();
+	$("#body-bg").css("height",bg_h+"px").show();
+	flags.canMove=false;
+	window.onresize = function(){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+			top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$('#body-bg').css("height",bg_h+"px");
+		$(obj).css("margin-top",-top_h+"px");
+		
+	}
+}
+function cloBox(obj){
+	$(obj).hide();
+	$("#body-bg").hide();
+	flags.canMove=true;
+}
+$(function(){
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+	if (unwritten) {
+		// 打开填写信息窗
+		$("#award_level_name").html('<!--{$out.award_level_name}-->');
+		$("#award_name").html('<!--{$out.award_name}-->');
+		showOpenBox("#tip-box3");
+	}
+	if (lottery_num > 0) {
+		// 抽奖按钮可点击
+		$(".rotate-pointer").removeClass('pointer-disabled');
+		$(".rotate-pointer").bind('click', lottery_click);
+		$(".rotate-pointer").bind('dblclick', lottery_click);
+	}
+})
+
+function lottery_click() {
+	if (rotate_flag == 1)
+		return;
+	rotate_flag = 1;
+	$.ajax({
+		url: '/lottery/guessappbattle/get_award.php?sid='+sid,
+		dataType: "json",
+		success: function(data){
+			var status = data.status;
+			if (status == 200) {
+				var info = data.info;
+				var award_level = info.award_level;
+				var left_num = info.left_num;
+				// 更新页面的剩余次数
+				$("#lottery_num").html(left_num);
+				var a = runzp(award_level);
+				$(".rotate-pointer").rotate({
+					duration:3000,
+					angle: 0,
+					animateTo:1800+a.angle,
+					easing: $.easing.easeOutSine,
+					callback: function(){
+						if (left_num <= 0) {
+							// 中奖按钮置灰，unbind点击事件
+							$(".rotate-pointer").unbind('click');
+							$(".rotate-pointer").unbind('dblclick');
+							$(".rotate-pointer").addClass('pointer-disabled');
+						}
+						if (award_level > award_count) {
+							// 没有中奖
+							if (left_num > 0) {
+								// random出一个句子
+								var random = randomnum(0, again_text.length-1);
+								$("#again_text").html(again_text[random]);
+								showOpenBox("#tip-box1");// 剩余次数大于0
+							} else {
+								showOpenBox("#tip-box2");// 剩余次数为0
+							}
+							rotate_flag = 0;//可以点击了
+						} else {
+							setTimeout(function (){go_info(info)},3000);
+						}
+					}
+				});
+			} else {
+				alert("您当前没有抽奖机会哟！下载游戏可以获得额外的抽奖机会哟！");
+				rotate_flag = 0;//可以点击了
+			}
+		},
+		error:function(){
+			alert('服务器出了点小问题，请稍等～～');
+		}
+	});
+}
+
+function go_info(info) {
+	var award_level = info.award_level;
+	var award_type = info.award_type;
+	if (award_type == 2 || award_type == 3) {
+		// 礼包
+	} else {
+		// 实物
+		$("#award_level_name").html(info.award_level_name);
+		$("#award_name").html(info.award_name);
+		$("#name").val("");
+		$("#telephone").val("");
+		showOpenBox("#tip-box3");
+	}
+	rotate_flag = 0;//可以点击了
+}
+
+// 提交信息
+function submit_info() {
+	if (!submit_info_clickable) {
+		return;
+	}
+	submit_info_clickable = false;
+	$("#prompt").text('');
+	var name = $.trim($("#name").val());
+	var telephone = $.trim($("#telephone").val());
+	if (name == '') {
+		submit_info_clickable = true;
+		$("#prompt").text('姓名不能为空');
+		return;
+	}
+	if (telephone == '') {
+		submit_info_clickable = true;
+		$("#prompt").text('手机号码不能为空');
+		return;
+	}
+	var pattern = /^1[34578][0-9]{9}$/
+	if (!pattern.test(telephone)) {
+		submit_info_clickable = true;
+		$("#prompt").text('手机号码格式不对！');
+		return;
+	}
+	$.ajax({
+		url:"/lottery/guessappbattle/get_info.php?sid="+sid,
+		data:{name:name, telephone:telephone},
+		type:"post",
+		success:function(data){
+			if (data == -1) {
+				submit_info_clickable = true;
+				$("#prompt").text('请插入sim卡！');
+			} else if (data == 500) {
+				submit_info_clickable = true;
+				$("#prompt").text('姓名不能为空！');
+			} else if (data == 501) {
+				submit_info_clickable = true;
+				$("#prompt").text('手机号码不能为空！');
+			} else if (data == 502) {
+				submit_info_clickable = true;
+				$("#prompt").text('姓名太长！');
+			} else if (data == 503) {
+				submit_info_clickable = true;
+				$("#prompt").text('手机号码格式不对！');
+			} else if (data == 200) {
+				$("#prompt").text('提交成功！');
+				setTimeout(function(){
+					submit_info_clickable = true;
+					$("#prompt").text('');
+					cloBox('#tip-box3');
+					location.href="/lottery/guessappbattle/lottery.php?sid="+sid;
+				}, 3000);
+			} else {
+				submit_info_clickable = true;
+				$("#prompt").text('出错啦！');
+			}
+		}
+	});
+}
+
+</script>
+<script type="text/javascript">
+var soft_lists = [];//返回的全部软件
+var soft_lists_go = [];//位置会变化的软件
+var stable_soft_lists_order = [];//位置不变化的且排好序的软件
+var soft_start = 0, slice_size = 8;
+$(function() {
+	my_soft();
+});
+
+var fix_category_id = <!--{$out.fix_category_id}-->;
+var cat_id = <!--{$out.cat_id}-->;
+var common_category_id = <!--{$out.common_category_id}-->;
+
+function my_soft() {
+	if (typeof(window.AnzhiActivitys) == 'undefined') {
+		return;
+	}
+	var go1=[], go2=[];
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var soft_list = $.parseJSON(json_data);
+	soft_lists = soft_list.DATA;
+	// 排序
+	for(var j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		var soft_list_length = soft_lists[j].length - 1;
+		if (soft_lists[j][soft_list_length] == fix_category_id) {
+			// 需要固定的软件
+			stable_soft_lists_order.push(soft_lists[j]);
+		} else if (soft_lists[j][soft_list_length] == cat_id || soft_lists[j][soft_list_length] == common_category_id) {
+			// 与得分相匹配的软件、排序
+			if((soft_status_gos == -2 && json_datas_gos== -1) || json_datas_gos == 1 || json_datas_gos == 2 || json_datas_gos == 3) {
+				soft_lists_go.push(soft_lists[j]);
+			} else if(json_datas_gos == 5 && soft_status_gos == -2) {
+				go1.push(soft_lists[j]);
+			} else if(soft_status_gos != -2) {
+				go2.push(soft_lists[j]);
+			}
+		}
+	}
+	// 合并soft_lists_go、go1、go2
+	soft_lists_go = soft_lists_go.concat(go1);
+	soft_lists_go = soft_lists_go.concat(go2);
+	slice_size = 8 - stable_soft_lists_order.length;
+	get_soft();
+}
+
+function get_soft() {
+	var data = soft_lists_go.slice(soft_start*slice_size, (soft_start+1)*slice_size);
+	if (data.length <= 0) {
+		soft_start = 0;
+		data = soft_lists_go.slice(soft_start*slice_size, (soft_start+1)*slice_size);
+	}
+	data = stable_soft_lists_order.concat(data);
+	soft_start++;
+	var str = '';
+	for (var i = 0; i < data.length; i++) {
+		var soft = data[i];
+		var softname = soft[2];
+		var short_softname;
+		short_softname = softname;
+		var softid = parseInt(soft[0]);
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(softid);
+		var soft_status = parseInt(json_datas);
+		// 根据软件不同状态，拼接展示
+		var my_soft = '';
+		var pkgname = soft[7];
+		var versionCode = parseInt(soft[13]);
+		var size = soft[27];
+		var icon_url = soft[1];
+		if (soft_status == 1) {
+			my_soft = '<a id="'+softid+'" onclick="download_apk('+aid+','+ softid +',\''+ pkgname +'\',\''+ softname +'\','+ versionCode +','+ size + ',0);" class="download">下载中</a>';
+		} else if (soft_status == 2 || soft_status == 3 || soft_status == 8) {
+			my_soft = '<a id="'+softid+'" onclick="download_apk('+aid+','+ softid +',\''+ pkgname +'\',\''+ softname +'\','+ versionCode +','+ size +',0);" class="download">继续</a>';
+		} else if (soft_status == 4) {
+			my_soft = '<a id="'+softid+'" onclick="download_apk('+aid+','+ softid +',\''+ pkgname +'\',\''+ softname +'\','+ versionCode +','+ size +',0);" class="download">下载</a>';
+		} else if (soft_status == 5) {
+			my_soft = '<a id="'+soft[0]+'" onclick="installApp(\''+ pkgname +'\','+ softid +');" class="download">安装</a>';
+		} else if (soft_status == 6) {
+			my_soft = '<a id="'+soft[0]+'" class="download" onclick="openApp(\''+ pkgname +'\','+softid+');">打开</a>';
+		} else if (soft_status == 9) {
+			my_soft = '<a value="校验中" id="'+ softid +'" class="download">校验中</a>';
+		} else if (soft_status == 10) {
+			my_soft = '<a id="'+ softid +'" class="download">已下载</a>';
+		} else if (soft_status == -1) {
+			var soft_other_status = window.AnzhiActivitys.isInstalledApp(pkgname, versionCode);
+			if (soft_other_status == -2) {
+				my_soft = '<a id="'+softid+'" onclick="download_apk('+aid+','+ softid +',\''+ pkgname +'\',\''+ softname +'\','+ versionCode +','+ size +',0);" class="download">下载</a>';
+			} else if (soft_other_status == -1) {
+				my_soft = '<a id="'+softid+'" onclick="download_apk('+aid+','+ softid +',\''+ pkgname +'\',\''+ softname +'\','+ versionCode +','+ size +',0);" class="download">更新</a>';
+			} else if (soft_other_status == 0) {
+				my_soft = '<a id="'+soft[0]+'" class="download" onclick="openApp(\''+ pkgname +'\','+softid+');">打开</a>';
+			} else if (soft_other_status == 1) {
+				my_soft = '<a id="'+soft[0]+'" class="download">已安装</a>';
+			}
+		}
+		str += '<li><p class="soft_icon"><a href="javascript:;"><img src="' + icon_url + '"/></a></p><p class="soft_name"><a href="javascript:;">' + short_softname + '</a></p><p class="soft_size">' + data[i][9] + '</p><p>' + my_soft + '</p></li>';
+		
+	}
+	$('#my_softs').html(str);
+}
+
+function download_apk(aid, softid, pkgname, softname, versionCode, size, flag) {
+	download_go(pkgname, softid, 'download_soft');
+	window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+}
+
+function installApp(pkgname, softid) {
+	download_go(pkgname, softid, 'install_soft');
+	window.AnzhiActivitys.installAppForActivity(parseInt(softid));
+}
+
+function openApp(pkgname, softid) {
+	window.AnzhiActivitys.openAppForActivity(pkgname,[softid]);
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		$('#'+softid+'').html("下载中");
+	}else if(newState == 2){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 3){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 4){
+		$('#'+softid+'').html("重试");
+	}else if(newState == 5){
+		$('#'+softid+'').html("安装");
+		$('#'+softid+'').removeAttr("onclick");
+		$('#'+softid+'').unbind("click");
+		for(var i=0;i < soft_lists.length;i++){
+			if(soft_lists[i][0] == softid){
+				$('#'+softid+'').bind('click',function(){
+					installApp(soft_lists[i][7],parseInt(softid));
+				});
+				break;
+			}
+		}
+	}else if(newState == 6){
+		$('#'+softid+'').html("打开");
+		$('#'+softid+'').removeAttr("onclick");
+		$('#'+softid+'').unbind("click");
+		for(var i=0;i < soft_lists.length;i++){
+			if(soft_lists[i][0] == softid){
+				$('#'+softid+'').bind('click',function(){
+					openApp(soft_lists[i][7],softid);
+				});
+				break;
+			}
+		}
+	}else if(newState == 8){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 9){
+		$('#'+softid+'').html("检查中");
+	}
+}
+
+function download_go(pkgname, softid, log_key) {
+	$.ajax({
+		url:'/lottery/guessappbattle/click.php?sid='+sid,
+		data:'log_key='+log_key+'&package='+pkgname,
+		type:'post',
+		dataType:'json',
+		success:function(data){
+			if (log_key == 'download_soft') {
+				setTimeout(function() {
+					var lottery_num = data;
+					$("#lottery_num").html(lottery_num);
+					if (lottery_num > 0) {
+						// 抽奖按钮可点击
+						if ($(".rotate-pointer").hasClass("pointer-disabled")) {
+							$(".rotate-pointer").removeClass('pointer-disabled');
+					        $(".rotate-pointer").bind('click', lottery_click);
+					        $(".rotate-pointer").bind('dblclick', lottery_click);
+						}
+					}
+				},5000);
+			}
+		}
+	});
+}
+
+function download_package(){
+	var own_softs = soft_lists;
+	for(var i=0;i<own_softs.length;i++){
+		if(gift_package == own_softs[i][7]){
+			var  soft_status_go = window.AnzhiActivitys.isInstalledApp(own_softs[i][7],parseInt(own_softs[i][13]));
+			var soft_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(own_softs[i][0]));
+			if((soft_status_go == -2 && soft_datas_gos== -1) || soft_datas_gos == 1 || soft_datas_gos == 3){
+				window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(own_softs[i][0]),own_softs[i][7],own_softs[i][2],parseInt(own_softs[i][13]),own_softs[i][27],1);
+			}else if(soft_datas_gos == 5 && soft_status_go == -2){
+				installApp(own_softs[i][7],parseInt(own_softs[i][0]));
+			}else if(soft_status_go != -2){
+				openApp(own_softs[i][7],parseInt(own_softs[i][0]));
+			}
+		}
+	}
+}
+</script>
+</body>
+</html>

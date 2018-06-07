@@ -1,0 +1,76 @@
+<!--{include file="header.html"}-->
+<script type="text/javascript">
+	var page = 1;
+	function formore(){
+		  $(".az_app-items-list li:last").ajaxStart(function(){
+			    $(".az_more").toggle();
+		  });		
+		$.ajax({
+				type: "GET",
+				url: "app.php?parent_cat_id==<!--{$out.parent_cat_id}-->&ajax=1&morelist="+page,
+				dataType: "html",
+				success: function(html){
+				  page++;
+				  if(page > 4){
+					  $(".az_more").empty();
+					  $(".az_more").remove();
+				  }
+				  $(".az_app-items-list li:last").after(html);
+				}
+		});
+		$(".az_app-items-list li:last").ajaxStop(function(){
+			$(".az_more").toggle();
+		});		
+	}
+</script>
+<header id="az_header">
+	<div id="az_logowrap">
+		<a <!--{if $out.channel_mk eq 'tencent'}-->style='background:url("../images/tencent_logo.png") no-repeat scroll 0 0 transparent'<!--{/if}--> href="/" id="az_logo" title="<!--{$out.title}-->"><!--{$out.title}--></a>
+		<div id="az_search">
+			<form action="search.php" method='get'>
+				<input name="keyword" type="text" value="<!--{if $smarty.get.keyword}--><!--{$smarty.get.keyword|escape:html}--><!--{else}-->应用搜索<!--{/if}-->" class="az_search_txt" onBlur="if(this.value==''){this.value='应用搜索'}" onFocus="if(this.value=='应用搜索'){this.value=''}" />
+				<input type="image" class="az_search_btn" src="images/search_btn.gif" />
+			</form>
+		</div>
+	</div>
+	<nav>
+		<ul class="az_mainnav">
+			<li><a href="/">首页</a></li>
+			<li <!--{if $out.parent_cat_id eq 1}-->class="az_current1"<!--{/if}-->><a href="app.php?type=recommend&parent_cat_id=1">应用</a></li>
+			<li <!--{if $out.parent_cat_id eq 2}-->class="az_current1"<!--{/if}-->><a href="app.php?type=recommend&parent_cat_id=2">游戏</a></li>
+			<li><a href="subject.php">专题</a></li>
+			<li style="border-right:none;"><a href="http://bbs.anzhi.com">论坛</a></li>
+		</ul>
+		<div class="az_subnav">
+	    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+			<td><a href="app.php?type=recommend&parent_cat_id=<!--{$out.parent_cat_id}-->">热门</a></td>
+			<td  class="az_current2"><a href="app.php?parent_cat_id=<!--{$out.parent_cat_id}-->">排行</a></td>
+			<td><a href="app.php?type=classify&parent_cat_id=<!--{$out.parent_cat_id}-->">类别</a></td>
+		</tr>
+		</table>
+		</div>
+	</nav>
+</header>
+<section>
+	<ul class="az_app-items-list">
+	<!--{foreach from=$out.app_new item=v key=k}-->
+		<li>
+			<div class="az_items-info">
+				<h2><!--{$v.softname|escape:html}--></h2>
+				<span class="az_items_size"><!--{math equation= round($v.filesize / 1048576 , 2 ) assign=size}--><span><!--{$size}--></span>M</span>
+				<div class="az_clear"></div>
+			</div>
+			<a class="az_down-btn" href="<!--{$v.down_url}-->">下载</a>
+			<a href="app.php?type=info&softid=<!--{$v.softid}-->" class="az_clickarea"></a>
+		</li>
+	<!--{/foreach}-->
+	</ul>
+	<div class="az_more">
+		<a href="javascript:void(0);" onclick="formore();">点击查看更多</a>
+	</div>
+	<div class="az_more" style='display: none'>
+		<a href="javascript:void(0);">正在加载<img src='images/waiting.gif' alt='加载中' /></a>
+	</div>			
+</section>
+<!--{include file="foot.html"}-->

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>反馈详情</title>
+<link type="text/css" rel="stylesheet" href="/css/fb_common_v6.css"/>
+<script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="/js/underscore.js"></script>
+<script>
+var proid_arr = getArgs();
+var type = proid_arr.type;
+var id = proid_arr.id;
+var market_version= proid_arr.skinvc;
+var namespace = 'AnzhiActivitys';
+
+if (typeof(proid_arr.pid) !='undefined') {
+	if (proid_arr.pid == '11') {
+		namespace = 'BBSActivitys';
+	}
+}
+var jsInterface = window[namespace];
+
+
+function getArgs() {
+	var args = {};
+	var query = location.search.substring(1);
+	var pairs = query.split("&");
+	for(var i = 0; i < pairs.length; i++) {
+		var pos = pairs[i].indexOf('=');
+		if (pos == -1) continue;
+		var argname = pairs[i].substring(0,pos);
+		var value = pairs[i].substring(pos+1);
+		value = decodeURIComponent(value);
+		args[argname] = value;
+	}
+	return args;
+}
+
+
+function onDownloadStateChanged(softid,download_status)
+{
+	switch (download_status)
+	{
+		case 5:
+			//	下载完成需要显示安装
+			$("a#a_"+softid).html('安装');
+			break;
+		default:
+			break;
+	}
+}
+
+function onInstalled(packagename)
+{
+	var softid=$('input[rel='+packagename+']').val();
+	$("a#a_"+softid).html('打开');
+}
+
+$(document).ready(function(){
+	var oElement = $('#feedback_list');
+	var oElements = $('#comments_user');
+	var titleElement = $('#title');
+	var json_data =	jsInterface.getDetail(parseInt(type),parseInt(id));
+	var cmd = 'var data=' + json_data;
+	eval(cmd);
+	
+	oElement.html(_.template($('#items_tpl').html(),data));
+	oElements.html(_.template($('#items_tpls').html(),data));
+	titleElement.html(_.template($('#title_tpls').html(),data));
+	if(namespace === 'AnzhiActivitys') {
+		titleElement.show();
+	}
+	/*var c_download =$('.c_download a');
+	c_download.each(function(){
+		$(this).bind("touchstart",function(e){
+			e.preventDefault();
+			$(this).addClass("on");
+		});
+		$(this).bind("touchend", function(e){
+			e.preventDefault();
+			$(this).removeClass("on");
+		});
+	});*/
+	/*var click_bar=$('.c_app a.click_bar');
+	click_bar.each(function(){
+		$(this).bind("mouseover",function(e){
+			e.preventDefault();
+			$(this).parent("li").addClass("on");
+		});
+		$(this).bind("mouseout", function(e){
+			e.preventDefault();
+			$(this).parent("li").removeClass("on");
+		});
+	});*/
+	hoverMobile();
+	var softinfos=[];
+	$(data.DATA).each(function(){
+		$($(this)[6]).each(function(){
+			softid=parseInt($(this)[0]);
+			packagename=$(this)[4];
+			softname=$(this)[1];
+			version_code=parseInt($(this)[5]);
+			filesize=$(this)[6];
+			if(!jsInterface.hasRegisterInstallObserver(packagename)){
+				jsInterface.registerInstallObserver(packagename);
+			}
+			var install_status = jsInterface.isInstalledApp(packagename,version_code);
+			if(install_status==0||install_status==1){
+				$("a#a_"+softid).html('打开');
+			}
+			else if(install_status==-1){
+				$("a#a_"+softid).html('更新');
+			}
+			else if(install_status==-2){
+				if(!jsInterface.hasRegisterDownloadObsever(softid)){
+					jsInterface.registerDownloadObserver(softid);
+				}
+			}
+			softinfos.push(Array(softid,packagename,version_code));
+		});
+	});
+	setInterval(function(){check_softinfos(softinfos)},2000);
+	check_softinfos(softinfos);
+});
+
+function check_softinfos(softinfos)
+{
+	var length=softinfos.length;
+	for(i=0;i<=length;i++){
+		var softid=softinfos[i][0];
+		var packagename=softinfos[i][1];
+		var version_code=softinfos[i][2];
+		var install_status = jsInterface.isInstalledApp(packagename,version_code);
+		if(install_status==0||install_status==1){
+			$("a#a_"+softid).html('打开');
+		}
+		else if(install_status==-2||install_status==-1){
+			var download_status = jsInterface.getDownloadStateForActivity(softid);
+			switch (download_status)
+			{
+				case 1:
+					//	下载中
+					$("a#a_"+softid).html('下载中');
+					break;
+				case 2:
+					//	等待
+					$("a#a_"+softid).html('下载中');
+					break;
+				case 3:
+					//	已暂停要显示继续
+					$("a#a_"+softid).html('继续');
+					break;
+				case 4:
+					//	下载失败要显示继续
+					$("a#a_"+softid).html('继续');
+					break;
+				case 5:
+					//	下载完成需要显示安装
+					$("a#a_"+softid).html('安装');
+					break;
+				case 6:
+					//	安装完成需要显示打开
+					$("a#a_"+softid).html('打开');
+					break;
+				default:
+					//	默认显示下载
+					if(install_status==-1){
+						$("a#a_"+softid).html('更新');
+					}
+					else{
+						$("a#a_"+softid).html('下载');
+					}
+					break;
+			}
+		}
+	}
+}
+
+function refresh_content()
+{
+	location.reload();
+}
+
+function add_href(str)
+{
+	var reg=/http:\/\/([\w-]+\.)+[\w-]+(\/[\w-.\/?%&=]*)?/ig;
+	var ret=str.match(reg);
+	$(ret).each(function(){
+		var replace=this;
+        var index=replace.indexOf('?');
+        if(index>0){
+            var query='&';
+        }
+        else{
+            var query='?';
+        }
+    	str = str.replace(replace,'<a href="'+replace+query+'ot=1" style="color:#0294f0">'+replace+'</a>');
+	});
+	return str;
+}
+
+function show_detail(packagename,market_version)
+{
+	var current_version=parseInt(market_version);
+	if(current_version>=5500){
+		jsInterface.inDetailByPackageName(packagename,-1,-1);
+	}
+	else{
+		jsInterface.inDetail(packagename,-1,-1);
+	}
+}
+
+function download_action(softid,packagename,softname,version_code,filesize,firmware)
+{
+	softid=parseInt(softid);
+	if(!jsInterface.hasRegisterInstallObserver(packagename)){
+		jsInterface.registerInstallObserver(packagename);
+	}
+	var install_status = jsInterface.isInstalledApp(packagename,version_code);
+	if(install_status==0||install_status==1){
+		$("a#a_"+softid).html('打开');
+		jsInterface.openAppForActivity(packagename,[0]);
+	}
+	else if(install_status==-2||install_status==-1){
+		if(!jsInterface.hasRegisterDownloadObsever(softid)){
+			jsInterface.registerDownloadObserver(softid);
+		}
+		var download_status = jsInterface.getDownloadStateForActivity(softid);
+		switch (download_status)
+		{
+			case -1:
+				//	初始状态要全新下载
+				jsInterface.downloadForActivity(-1,softid,packagename,softname,version_code,filesize,0,0,firmware);
+				$("a#a_"+softid).html('下载中');
+				break;
+			case 1:
+				//	下载中变暂停
+				$("a#a_"+softid).html('继续');
+				jsInterface.pauseDownloadForActivity(softid);
+				break;
+			case 2:
+				//	等待变暂停
+				$("a#a_"+softid).html('继续');
+				break;
+			case 3:
+				//	已暂停继续下载
+				$("a#a_"+softid).html('下载中');
+				jsInterface.resumeDownloadForActivity(softid);
+				break;
+			case 4:
+				//	下载失败变暂停
+				$("a#a_"+softid).html('重试');
+				break;
+			case 5:
+				//	下载完成启动安装程序
+				var old_text = $("a#a_"+softid).html();
+				if(old_text=='安装'){
+					jsInterface.installAppForActivity(softid);
+				}
+				else{
+					if(install_status==-2){
+						$("a#a_"+softid).html('安装');
+					}
+					else if(install_status==-1){
+						$("a#a_"+softid).html('更新');
+					}
+				}
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+function maketotime(now){
+	return new Date(parseInt(now) * 1000).toLocaleString().replace(/年|月/g, "-").replace(/日/g, " ");
+}
+
+
+function refresh(type,id){
+	var oElement = $('#feedback_list');
+	var oElements = $('#comments_user');
+	var titleElement = $('#title');
+	var json_data =	jsInterface.getDetail(parseInt(type),parseInt(id));
+	var cmd = 'var data=' + json_data;
+	eval(cmd);
+	oElement.html(_.template($('#items_tpl').html(),data));
+	oElements.html(_.template($('#items_tpls').html(),data));
+	titleElement.html(_.template($('#title_tpls').html(),data));
+	window.scrollTo(0, 99999);
+	hoverMobile();
+}
+//按钮按下效果
+function hoverMobile(){
+	$('.click_bar').each(function(index){
+		$(this).bind('touchstart',function(){
+			$(this).parents().addClass('on');
+			$(this).bind('touchmove',function(){
+				$(this).parents().removeClass('on');
+			})
+			$(this).bind('touchend',function(){
+				$(this).parents().removeClass('on');
+			})
+			$(this).bind('touchcancel',function(){
+				$(this).parents().removeClass('on');
+			})
+		})
+		
+	})
+	$('.c_download a').each(function(index){
+		$(this).bind('touchstart',function(){
+			$(this).addClass('on');
+			$(this).bind('touchmove',function(){
+				$(this).removeClass('on');
+
+			})
+			$(this).bind('touchend',function(){
+				$(this).removeClass('on');
+
+			})
+			$(this).bind('touchcancel',function(){
+				$(this).removeClass('on');
+			})
+		})	
+	})
+}
+</script>
+<script type="text/template" id="items_tpl">
+    <% for(var i = 0; i < DATA.length; i++) { %>
+        <% var item = DATA[i] %>
+			<% if(item[3] == 0){ %>
+			<div class="comments_user">
+				<div class="comments_img_user">
+					<img src="<%=MAIN_HEAD%>" alt=""/>
+				</div>
+				<div class="comments_az_infor">
+					<div class="comment_des inlineblock fr">
+						<p><%=item[0]%></p>
+						<span class="comment_icon_user"></span>
+					</div>
+					<div class="comment_tips clear">
+						<em><%=item[2]%></em>
+					</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+			<% }else{ %>
+			<div class="comments_az">
+				<div class="comments_img">
+					<img src="<%=item[4]%>" alt=""/>
+					<span>官方</span>
+				</div>
+				<div class="comments_az_infor">
+					<div class="comment_des">
+						<% var content=add_href(item[0]); %>
+						<p><%=content%></p>
+						<ul class="c_app">
+						<% var soft_infos = item[6] %>
+						<% for(var j = 0; j < soft_infos.length; j++) { %>
+                            <li id="soft_<%=soft_infos[j][0]%>" >
+								<a href="javascript:;" class="click_bar" onclick="show_detail('<%=soft_infos[j][4]%>','<%=market_version%>');"></a>
+								<div class="c_app_inner">
+									<div class="c_app_icon"><img src="<%=soft_infos[j][2]%>"/></div>
+									<div class="c_app_info">
+										<h4><%=soft_infos[j][1]%></h4>
+										<div class="c_app_size"><%=soft_infos[j][3]%></div>
+									</div>
+								</div>
+                                <div class="c_download"><a href="javascript:;" id="a_<%=soft_infos[j][0]%>" onclick="download_action(<%=soft_infos[j][0]%>,'<%=soft_infos[j][4]%>','<%=soft_infos[j][1]%>',<%=soft_infos[j][5]%>,<%=soft_infos[j][6]%>,'<%=soft_infos[j][7]%>');">下载</a> </div>
+								<input rel='<%=soft_infos[j][4]%>' type="hidden" value='<%=soft_infos[j][0]%>' >
+                            </li>
+						<% } %>
+						</ul>
+						<span class="comment_icon"></span>
+					</div>
+					<div class="comment_tips clear">
+						<span><%=item[1]%></span>　
+						<em><%=item[2]%></em>
+						<div class="clear"></div>
+					</div>
+				</div>
+			</div>
+			<% } %>
+    <% } %>
+</script>
+<script type="text/template" id="items_tpls">
+	<div class="comments_img_user">
+		<img src="<%=MAIN_HEAD%>" alt=""/>
+	</div>
+	<div class="comments_az_infor">
+		<div class="comment_des inlineblock fr">
+			<p><%=MAIN_CONTENT%></p>
+			<span class="comment_icon_user"></span>
+		</div>
+		<div class="comment_tips clear">
+			<em><%=MAIN_DATE%></em>
+		</div>
+		<div class="clear"></div>
+	</div>
+</script>
+<script type="text/template" id="title_tpls">
+<p><%=MAIN_TITLE%></p>
+</script>
+</head>
+<body>
+<div>
+</div>
+<div id="main">
+	<div class="comment">
+		<div class="titles_01" id="title" style="display:none"></div>
+		<div class="comment_cnt">
+			<div class="comments_user" id="comments_user"></div>
+			<div id="feedback_list"></div>
+		</div>
+		
+		<div id="test"></div>
+	</div>
+</div>
+<a name="end"></a>
+<script type="text/javascript">
+function sendmsg(msg){
+	var oDiv = document.getElementById('test');
+	oDiv.innerHTML = msg;
+	location.hash="end";
+}
+
+</script>
+</body>
+</html>

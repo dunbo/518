@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <script type="text/javascript" src="../internal.js"></script>
+    <link rel="stylesheet" type="text/css" href="video.css" />
+    <!-- jquery -->
+<script type="text/javascript" src="../../third-party/jquery-1.10.2.min.js"></script>
+
+<!-- webuploader -->
+<script type="text/javascript" src="../../third-party/webuploader/webuploader.js"></script>
+<link rel="stylesheet" type="text/css" href="../../third-party/webuploader/webuploader.css">
+
+<!-- video -->
+<script type="text/javascript" src="video.js"></script>
+    <script type="text/javascript">
+      //上传视频封面图片
+      function uploadpic(fileid){
+        // C:\fakepath\1512018740_ic_launcher.png
+         var formData = new FormData();
+          formData.append('upfile', $('#video_cover'+fileid)[0].files[0]);
+          var upurl = editor.getActionUrl('uploadimage');
+          $.ajax({
+              url:upurl,
+              type:"post",
+              data:formData,
+              processData: false,
+              contentType:false,
+              dataType:'json',
+              success:function(res){
+                if(res.state != 'SUCCESS'){
+                    alert(res.state);
+                }else{
+                  $("#cancelbtn"+fileid).show();
+                  $("#url_"+fileid).val(res.url);
+                  $('#photoCover'+fileid).val($('#video_cover'+fileid).val());
+                  var fname = $('#video_cover'+fileid).val();
+                  var name_arr = fname.split('\\');
+                  var true_name = name_arr[name_arr.length-1];
+                  $('#photoCover'+fileid).val(true_name);
+                  $('#photoCover'+fileid).attr('title',true_name);
+                }
+              },
+          })
+      }
+      function cancelpic(fileid){
+          $('#photoCover'+fileid).val('添加默认图');
+          $('#photoCover'+fileid).attr('title',"");
+          $('#video_cover'+fileid).val('');
+          $("#cancelbtn"+fileid).hide();
+          $("#url_"+fileid).val('');
+          alert("删除成功");
+      }
+      //获取视频信息
+      function get_video_info(){
+      var pkg=$('#pkgname').val();
+        if(pkg){
+            $.ajax({
+            url: '/index.php/Sj/ContentExplicit/get_video_lib/',
+            type: 'post',
+            data:{'package':pkg},
+            dataType:"json",
+            success: function(data){
+              if(data.status==1){
+                $('#esoftname').val(data.data.softname);
+                $("#videoselect").html('<option>选择视频</option>');
+                $.each(data.data.video_info,function(k,v){
+                   console.log(v.video_title);
+                  $("#videoselect").append("<option value='"+JSON.stringify(v)+"'>"+v.video_title+"</option>")
+
+                })
+                /*for(i in data.data.video_info)
+                {
+                  console.log(data.data.video_info[i].video_title);
+                  $("#videoselect").append("<option value='"+JSON.stringify(data.data.video_info[i])+"'>"+data.data.video_info[i].video_title+"</option>")
+                }*/
+              }else{
+                alert(data.info);
+                $('#package').val('');
+              }
+            }
+          });
+          }
+    }
+    </script>
+</head>
+<body>
+<div class="wrapper">
+    <div id="videoTab">
+        <div id="tabHeads" class="tabhead">
+            <span tabSrc="video" class="focus" data-content-id="video"><var id="lang_tab_insertV"></var></span>
+            <span tabSrc="upload" data-content-id="upload"><var id="lang_tab_uploadV"></var></span>
+            <span tabSrc="video_repo" data-content-id="video_repo">视频库</span>
+        </div>
+        <div id="tabBodys" class="tabbody">
+            <div id="video" class="panel focus">
+               <table><tr><td><label for="videoUrl" class="url"><var id="lang_video_url"></var></label></td><td><input id="videoUrl" type="text"><br><div style="color: red">仅支持优酷视频链接</div></td></tr></table>
+               <div id="preview"></div>
+               <div id="videoInfo">
+                   <fieldset>
+                       <legend><var id="lang_video_size"></var></legend>
+                       <table>
+                           <tr><td><label for="videoWidth"><var id="lang_videoW"></var></label></td><td><input class="txt" id="videoWidth" type="text"/></td></tr>
+                           <tr><td><label for="videoHeight"><var id="lang_videoH"></var></label></td><td><input class="txt" id="videoHeight" type="text"/></td></tr>
+                       </table>
+                   </fieldset>
+                   <fieldset>
+                      <legend><var id="lang_alignment"></var></legend>
+                      <div id="videoFloat"></div>
+                  </fieldset>
+               </div>
+            </div>
+            <div id="upload" class="panel">
+                <div id="upload_left">
+                    <div id="queueList" class="queueList">
+                        <div class="statusBar element-invisible">
+                            <div class="progress">
+                                <span class="text">0%</span>
+                                <span class="percentage"></span>
+                            </div><div class="info"></div>
+                            <div class="btns">
+                                <div id="filePickerBtn"></div>
+                                <div class="uploadBtn"><var id="lang_start_upload"></var></div>
+                            </div>
+                        </div>
+                        <div id="dndArea" class="placeholder">
+                            <div class="filePickerContainer">
+                                <div id="filePickerReady"></div>
+                            </div>
+                        </div>
+                        <ul class="filelist element-invisible">
+                            <li id="filePickerBlock" class="filePickerBlock"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="uploadVideoInfo">
+                    <fieldset>
+                        <legend><var id="lang_upload_size"></var></legend>
+                        <table>
+                            <tr><td><label><var id="lang_upload_width"></var></label></td><td><input class="txt" id="upload_width" type="text"/></td></tr>
+                            <tr><td><label><var id="lang_upload_height"></var></label></td><td><input class="txt" id="upload_height" type="text"/></td></tr>
+                        </table>
+                    </fieldset>
+                    <fieldset>
+                        <legend><var id="lang_upload_alignment"></var></legend>
+                        <div id="upload_alignment"></div>
+                    </fieldset>
+                    <div style="color:red;">上传视频仅支持
+                      <br>MP4编码H264格式</div>
+                </div>
+            </div>
+            <div id="video_repo" class="panel">
+              <div>软件包名：<input type="text" name="pkgname" onblur="get_video_info()" id="pkgname"></div>
+              <div>软件名称：<input type="text" name="esoftname" id="esoftname" disabled="" style="background-color:#ccc;border:none;" value="">
+              </div>
+              <div>选择视频：<select id="videoselect"><option>选择视频</option></select></div>
+            
+            
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

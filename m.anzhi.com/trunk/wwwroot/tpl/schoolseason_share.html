@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>年轻爱新鲜 开学上上签</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/schoolseason/css/common1.css?v1"/>
+<script type="text/javascript"  src="<!--{$out.static_url}-->/schoolseason/js/jquery-1.10.2.min.js?v1"></script>
+<script type="text/javascript">
+	var sid = '<!--{$out.sid}-->',aid='<!--{$out.aid}-->',tab='<!--{$out.tab}-->',static_url='<!--{$out.static_url}-->',status='<!--{$out.status}-->';
+    function sliderUp(obj){
+        obj.each(function(){
+            var _this=$(this)[0],
+                    oDiv1=$(this).find("div:first")[0],
+                    oDiv2=$(this).find("div:last")[0];
+
+            if(oDiv2.offsetTop-_this.scrollTop<=0)
+                _this.scrollTop-=oDiv1.offsetHeight;
+            else{
+                _this.scrollTop++;
+            }
+        })
+    }
+    $(function(){
+        //公告滚动
+        var speed=40;
+        var oSlider=$(".slide_up");
+        oSlider.each(function(){
+            var $oDiv1=$(this).find("div:first");
+            $oDiv1.after("<div>"+$oDiv1.html()+"</div>");
+        })
+        var run=setInterval(function(){
+            sliderUp(oSlider);
+        },speed);
+		$('#lot_mid').html('<img src="'+static_url+'/schoolseason/images/lot/lot_0'+tab+'.png"/>');
+    })
+	
+	function go_share(){
+		$.ajax({
+			url: '/lottery/schoolseason_share_go.php',
+			data: 'sid='+sid+'&aid='+aid,
+			type: 'get',
+			async:false,
+			success:function(data){
+				if(data == 200){
+					setTimeout(function(){
+						$('#the_lottery').attr('class','fr');
+						status = 100;
+					},5000);
+				}
+			}
+		});
+		if(tab == 1){
+			share_text = "你好。你好新同学，你好新环境，你好新的城市！年轻人，向新鲜的一切说你好！";
+		}else if(tab == 2){
+			share_text = "不翘课。男神女神当老师，学渣也能不翘课，愿你上课别迟到期末最终不挂科。";
+		}else if(tab == 3){
+			share_text = "吃吃吃。吃，能抚慰躁动心灵，治愈心底不安情绪，消灭嘤嘤嘤。正所谓吃饱，就不想家了。";
+		}else if(tab == 4){
+			share_text = "桃花朵朵开。情不知所起一往而深，一直相信最美好的事情，就是遇见你，在一起。";
+		}else if(tab == 5){
+			share_text = "防师兄。主动跟你来搭讪，接个站、吃个饭、学校湖边转一转，这样的师兄最危险！";
+		}
+		var share_json = '{"TEXT":"我的开学签是：'+share_text+' ","URL":"'+static_url+'/schoolseason/images/fenxiang.jpg","ACTIONURL":"http://fx.anzhi.com/a_'+aid+'.html","URLWEIXIN":"'+static_url+'/schoolseason/images/weixin.jpg"}';
+		window.AnzhiActivitys.getShareDialog(share_json);
+	}
+	
+	function go_lottery(){
+		if(status == 100){
+			 window.location.href='/lottery/schoolseason_lottery.php?sid='+sid+'&aid='+aid+'&tab='+tab+'';
+		}
+	}
+</script>
+</head>
+<body>
+<section>
+    <div class="banner" id="top">
+        <p><img src="<!--{$out.static_url}-->/schoolseason/images/banner1.jpg"/></p>
+        <p><img src="<!--{$out.static_url}-->/schoolseason/images/banner2.png"/></p>
+    </div>
+    <div class="notice clear">
+        <dl class="notice_list">
+			<!--{if $out.all_award_result}-->
+            <dt>恭喜用户</dt>
+            <div <!--{if $out.all_award_count > 4}-->class="slide_up"<!--{/if}-->>
+                <div>
+					<!--{foreach from=$out.all_award_result item=vo}-->
+                    <dd> <!--{$vo.telephone}-->获得<!--{$vo.award}--></dd>
+					<!--{/foreach}-->
+                </div>
+            </div>
+			<!--{else}-->
+			<dt class="notice_no">少年，要加油才能拿大奖喔！</dt>
+			<!--{/if}-->
+        </dl>
+    </div>
+    <div class="wrap">
+        <div class="lot_wrap">
+            <div class="lot_top"><img src="<!--{$out.static_url}-->/schoolseason/images/lot_top.png"/></div>
+            <div id="lot_mid" class="lot_mid">
+               <img src="<!--{$out.static_url}-->/schoolseason/images/lot/lot_01.png"/>
+            </div>
+            <div class="lot_bot"><img src="<!--{$out.static_url}-->/schoolseason/images/lot_bot.png"/></div>
+        </div>
+        <div class="btns wth clear">
+            <a href="javascript:;" class="fl" onclick="go_share();">先分享</a>
+            <a href="javascript:;" onclick="go_lottery();" id="the_lottery" class="<!--{if $out.status == 200}-->fr gray<!--{elseif $out.status == 100}-->fr<!--{/if}-->">去抽奖</a>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="btn_rule"><a href="/lottery/schoolseason_rule.php">活动规则</a></div>
+        <p>*求签游戏纯属娱乐，少年切勿太走心</p>
+    </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<include file="../Public/header" />
+<link type="text/css" href="/Public/school/css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+<script type="text/javascript" src="/Public/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/Public/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script>
+$(function() {
+	$( "#datepicker" ).datepicker();
+});
+$(function() {
+	$( "#datepicker1" ).datepicker();
+});
+
+function  submitaction(act,di){
+    if(act == 1 || act == 2){
+     var pkg = document.getElementById(di).value;
+     var nid = document.getElementById(di+"_nid").value;
+     var tid = document.getElementById(di+"_id").value;
+     }
+    if(act == 1){
+      window.location.href="__URL__/NecePkg_edit/nid/"+nid+"/id/"+tid+"/pkg/"+pkg;
+    }
+    if(act == 2){
+       var check = confirm("你将要删除这个软件吗？");
+      if(check){
+        window.location.href="__URL__/NecePkgs_delete/id/"+tid;
+      }else{
+      return false;
+      }
+    }
+    if(act == 3){
+    var nid = document.getElementById("nid").value;
+    var pkg = document.getElementById("package").value;
+    window.location.href="__URL__/NecePkgs_add/nid/"+nid+"/package/"+pkg;
+    }
+    if(act == 4){
+    var nid = di;
+    var nname = document.getElementById("nname").value;
+    window.location.href="__URL__/NecePkgs_edit_nname/nid/"+nid+"/nname/"+nname;
+    }
+}
+
+</script>
+<center>
+   <table>
+     <tr><td><a href="__URL__/NeceTypeList">软件必备类别管理</a></td><td><a href="__URL__/NecePkgList">软件必备软件管理</a></td><td></td></tr>
+     <tr><td>所在类别:<input type="text" name="name" id="nname" value="<?php echo $nname;?>"  /><input type="hidden" name="curname" value="<?php echo $nname;?>"></td><td><input type="button" value="修改" onclick="submitaction(4,<?php echo $nid;?>)"></td></tr>
+     <tr><td><form action="__URL__/NecePkgs_add" method="POST">添加包名:<input type="text" name="package" id="package">
+	 <td style="display:none;" >有效时间 开始:<input type="text" id="datepicker" name="start_tm" value="{$start_tm}"/> 结束:<input type="text" id="datepicker1" name="end_tm" value="{$end_tm}"/> </td>
+	 <input type="hidden" id="nid" name="nid" value="<?php echo $nid;?>"></td><td><input type="submit" value="添加"> </form></td></tr>
+	
+     <tr><th>包名</th><!-- <th>有效时间段</th> --><th>排名</th><th>操作</th></tr>
+     <?php foreach($softList  as $id => $info){ ?>
+	 <script> 
+		$(function() {
+			$( "#datepicker1{$id}" ).datepicker();
+		});
+		$(function() {
+			$( "#datepicker2{$id}" ).datepicker();
+		});	   
+	 </script>
+	 <form action="__URL__/NecePkg_edit" method="POST">
+           <tr  >
+		   <td><input type="text" name="package" id="<?php echo $id;?>" value="<?php echo $info['package'];?>"><input type="hidden" id="<?php echo $id;?>_nid"  name="nid" value="<?php echo $info['nid'];?>"><input type="hidden" id="<?php echo $id;?>_id"  name="id" value="<?php echo $info['id'];?>"></td>
+		   <!--  <td>开始:<input type="text" id="datepicker1{$id}" name="start_tm" value="<?php echo date("m/d/Y",$info['start_tm']);?>" /> 结束:<input type="text" id="datepicker2{$id}" name="end_tm" value="<?php echo date("m/d/Y",$info['end_tm']);?>" /> </td> -->
+		   <td>
+		   <select name="pm" id="pm" >
+		   <?php $i = count($softList);
+				for($k = 1 ; $k<=$i ; $k++){
+		   ?>
+    			<option value="<?php echo $k; ?>" <?php if($k == $info['rank']){ ?> selected="selected" <?php }?> ><?php echo $k;?></option>
+  			<?php } ?>
+  			</select>
+  			</td>
+		   <td><input type="submit" value="修改"></form><input type="button" value="删除" onclick="return submitaction(2,<?php echo $id;?>)"> </td>
+		   </tr>
+     <?php } ?>
+   </table>
+</center>
+<include file="../Public/footer" />

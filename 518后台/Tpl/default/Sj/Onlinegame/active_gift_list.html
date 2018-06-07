@@ -1,0 +1,100 @@
+<include file="../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+	function add_active(){
+		location.href="/index.php/Onlinegame/active_add_show";
+	}
+	
+	function checkit(){
+		if(confirm("确定要这么执行该操作吗？"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	function select_checkit(){
+		if(confirm("您是否确认将该条信息配置到网游精选中显示?"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	function checkit_no(){
+		if(confirm("您确认要移除该信息在网游精选中的显示？"))
+		{
+			return true;
+		}
+		return false;
+	}
+	function been_show(){
+		$("#no_release").css('display','none');
+		$("#been_release").css('display','block');
+		$("#bt_been").css("background","#949494");
+		$("#bt_no").css("background","#e4e4e4");
+	}
+	
+	function no_show(){
+		$("#no_release").css('display','block');
+		$("#been_release").css('display','none');
+		$("#bt_been").css("background","#e4e4e4");
+		$("#bt_no").css("background","#949494");
+	}
+</script>
+<div  style="padding-left:50px">
+<div>
+	<a href="__URL__/active_gift_list">未过期</a>&nbsp;&nbsp;
+	<a href="__URL__/active_gift_list_last">已过期</a>
+		<table border="1" cellpadding="0" cellspacing="0">
+		<tr>
+		<td width="97"></td>
+		<td width="1%"><input type="button" value="添加活动" onclick="javascript:location.href='__URL__/active_add_show'" /></td>
+		</tr>
+		</table>
+		<table border="1" cellpadding="0" cellspacing="0" id="been_release" <?php if($from == 2){ ?>style="display:none;"<?php } ?> />
+			<tr>
+				<td width="5%">序号</td>
+				<td width="5%">ID</td>
+				<td width="10%">名称</td>
+				<td width="10%">使用范围</td>
+				<td width="10%">简介</td>
+				<td width='10%'>精简礼包简介</td>
+				<td width="8%">开始时间</td>
+				<td width="8%">截止时间</td>
+				<td width="7%">总个数</td>
+				<td width="5%">剩余个数</td>
+				<td width="5%">每日限额</td>
+				<td width="10%">操作</td>
+				<td width="10%">排序</td>
+				<td width="3%">网游精选配置状态</td>
+			</tr>
+			<?php foreach($result as $key => $val){ ?>
+			<tr>
+				<td>{$val.num}</td>
+				<td>{$val.id}</td>
+				<td>{$val.active_name}</td>
+				<td>{$val.usable}</td>
+				<td align="center"><?php if($val['intro']){ ?>{$val.intro}<?php }else{ ?>......<?php } ?></td>
+				<td>{$val.sim_content}</td>
+				<td><?php echo date('Y-m-d H:i:s',$val['start_tm']); ?></td>
+				<td><?php echo date('Y-m-d H:i:s',$val['cut_tm']); ?></td>
+				<td>{$val.all_num}</td>
+				<td>{$val.surplus_num}</td>
+				<td>{$val.limit_num}</td>
+				<td><a href="__URL__/active_edit_show/id/{$val.active_id}">[编辑]</a>&nbsp;&nbsp;<a href="__URL__/active_del/id/{$val.active_id}" onclick="return checkit();">[删除]</a>&nbsp;&nbsp;<?php if($val['selection'] == 1){ ?><a href="__URL__/change_selection/id/{$val.id}" onclick="return checkit_no();">[关闭]<?php }else{ ?><a href="__URL__/change_selection/id/{$val.id}" onclick="return select_checkit();">[启用]<?php } ?></a></td>
+				<td><?php if($val['rank'] == 1 && $val['status'] == 1 && $val['cut_tm'] > time()){ ?><a href="__URL__/gift_stick/id/{$val.active_id}">[置顶]</a>&nbsp;&nbsp;<a href="__URL__/gift_rank_change/id/{$val.active_id}/change/down">[下移]</a>
+				<?php }elseif($val['rank'] != 1 && $val['rank'] != $count && $val['status'] == 1 && $val['cut_tm'] > time()){ ?><a href="__URL__/gift_stick/id/{$val.active_id}">[置顶]</a>&nbsp;&nbsp;<a href="__URL__/gift_rank_change/id/{$val.active_id}/change/up">[上移]</a>&nbsp;&nbsp;<a href="__URL__/gift_rank_change/id/{$val.active_id}/change/down">[下移]</a>
+				<?php }elseif($val['rank'] == $count && $val['status'] == 1 && $val['cut_tm'] > time()){ ?><a href="__URL__/gift_stick/id/{$val.active_id}">[置顶]</a>&nbsp;&nbsp;<a href="__URL__/gift_rank_change/id/{$val.active_id}/change/up">[上移]</a><?php }else{ ?>&nbsp;<?php } ?></td>
+				<td><span style="color:blue;align:center;"><?php if($val['selection'] == 1){ ?>已开启<?php }else{ ?>---<?php } ?></span></td>
+			</tr>
+			<?php } ?>
+		</table>
+	</div>
+	<div>
+		{$page}
+	</div>
+</div>
+</body>
+</html>

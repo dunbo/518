@@ -1,0 +1,98 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<style>
+    .future_class {
+        background-color:#CCCCCC
+    }
+</style>
+
+<script>
+    function changeOverdue() {
+        var overdue = $("#overdue").val();
+        if (overdue == 1)
+            $("#overdue").val("-1");
+        else
+            $("#overdue").val("1");
+    }
+</script>
+
+<body>
+    <div class="search_box">
+        <form method="get" action="__URL__/index" name="index" id="index">
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="16%">
+                        <label>类型：</label>
+                        <select name="search_content_type" id="search_content_type">
+                            <option value="0" selected>全部</option>
+                            <option value="1" <if condition="$search_content_type eq 1">selected</if>>软件</option>
+                            <option value="2" <if condition="$search_content_type eq 2">selected</if>>活动</option>
+                            <option value="3" <if condition="$search_content_type eq 3">selected</if>>专题</option>
+                            <option value="4" <if condition="$search_content_type eq 4">selected</if>>页面</option>
+                            <option value="5" <if condition="$search_content_type eq 5">selected</if>>网页</option>
+                        </select>
+                    </td>
+                    <td>
+                        <label>时间：</label>
+                        <input id="start_at" name="start_at" value='<if condition="$start_at neq 0">{$start_at|date="Y-m-d H:i:s",###}</if>' type="text" class="Wdate" onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="width:140px; height:28px"/>
+                        至
+                        <input id="end_at" name="end_at" value='<if condition="$end_at neq 0">{$end_at|date="Y-m-d H:i:s",###}</if>' type="text" class="Wdate" onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="width:140px; height:28px"/>
+                    </td>                    
+                    <input type="hidden" name="overdue" id="overdue" value="{$overdue}">
+                    <td width="16%"><input type="submit" value="搜索" class="search_btn"/></td>
+                    <td width="16%"><a href="__URL__/add_content?" class="search_btn thickbox">添加</a></td>
+                    <td width="16%"><input type="submit" value="<if condition='$overdue eq 1'>未过期<else/>已过期</if>" onclick="changeOverdue()" class="search_btn"/></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="4%">类型</th>
+                    <th width="10%">小编推荐/图片</th>
+                    <th width="8%">导向内容</th>
+                    <th width="10%">开始时间</th>
+                    <th width="10%">结束时间</th>
+                    <th width="8%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr <if condition='$list.start_at gt $now'>class='future_class'</if>>
+                    <td>
+                        <switch name="list.content_type">
+                            <case value="1">软件</case>
+                            <case value="2">活动</case>
+                            <case value="3">专题</case>
+                            <case value="4">页面</case>
+                            <case value="5">网页</case>
+                        </switch>
+                    </td>
+                    <td><if condition='$list.content_type eq 1'>{$list.editor_recommendation}<else/><a href='{$apkurl}{$list.image_url|default='&nbsp;'}' target="_blank"><img height="80" width="130" src="{$apkurl}{$list.image_url|default='&nbsp;'}"/></a></if></td>
+                    <td><if condition='$list.content_type eq 1'>{$list.package}<elseif condition='$list.content_type eq 2'/>{$list.activity_name}<elseif condition='$list.content_type eq 3'/>{$list.feature_name}<elseif condition='$list.content_type eq 4'/>{$list.page_name}<elseif condition='$list.content_type eq 5'/>{$list.website}</if></td>
+                    <td>{$list.start_at|date="Y-m-d H:i:s",###}</td>
+                    <td>{$list.end_at|date="Y-m-d H:i:s",###}</td>
+                    <td>
+                        <if condition='$overdue eq 1'><!--过期数据不可以编辑和删除-->
+                        <else/>
+                            <a href="__URL__/edit_content?id={$list.id}" class="thickbox blue">编辑</a>
+                            <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                            <a href="__URL__/delete_content?id={$list.id}" class="blue" onclick="return confirm('确定要删除此记录吗？');">删除</a>
+                        </if>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>

@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<style>.qh{float:left;width:98px;height:28px;line-height:28px;text-align:center;cursor:pointer;font-size:14px;font-family:微软雅黑;text-decoration:none;color:#444;padding:0;border-width:1px;border-style:solid;border-color:#bdbdbd;display:block}</style>
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js?1'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+</head>
+<body>
+		<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+			<thead>
+				<tr>
+					<td>
+						<form method="get" class="search_table" action="__URL__/soft_list?">
+							<span>软件包名：<input type="text" name="package" value="{$package}"></span>
+							<span>软件名称：<input type="text" name="softname" value="{$softname}"></span>
+							<input type="submit" value="搜索" style="width:70px;height:30px;margin-left:30px">
+						</form>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<a class="thickbox" title="添加"  href="__URL__/soft_add?v1"><button class="btn btn-sm btn-default yahei" style="width:80px;margin:10px;">添加软件</button></a>
+						<a class="thickbox" title="批量添加软件" href="__URL__/soft_import?v1"><button class="btn btn-sm btn-default yahei" style="width:100px;margin:10px;">批量添加软件</button></a>
+					</td>
+				</tr>
+			</thead>
+		</table>
+
+       <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+	        <thead >
+	          <tr align="center" >
+	           <th width="4%">
+					<input type="checkbox" name="soft_allSelect" onclick="$('input[name^=package]').attr('checked', $(this).attr('checked')=='checked')">
+	           </th>
+				<th width="10%">包名</th>
+				<th width="10%">软件名称</th>
+				<th width="10%" onclick="window.location.href='__URL__/soft_list?order=<?php echo $order?>'">创建时间<?php echo $order?'↓':'↑'?></th>
+				<th width="10%">操作</th>
+	          </tr>
+	        </thead>
+            <tbody>
+				<?php foreach($list as $val) :?>
+					<tr>
+					<td height="20" align="center"><input type="checkbox" name="package" value="{$val.package}"></input></td>
+					<td height="20" align="center">{$val.package}</td>
+					<td height="20" align="center">{$val.softname}</td>
+					<td height="20" align="center"><?php echo date("Y-m-d H:i:s", $val['add_tm'])?></td>
+					<td height="20" align="center">
+						<a style="color:blue" href="__URL__/soft_delete/package/<?php echo $val['package']?>/"  onclick="javascript:return checkit()">删除</a>					
+					</td>
+					</tr>
+				<?php endforeach;?>
+           </tbody>
+         </table>
+		
+		<div style="margin-left: 6px;">
+			<a class="recBtn_bg move" style="width:60px" href="javascript:" onclick="batch_del_soft()">批量删除</a>
+		</div>
+         <div style="width:98%; padding-top:4px; text-align:right">
+     		{$page}
+		</div>
+		
+ </body>
+
+<script>
+function batch_del_soft()
+{
+	var package = '';
+	var erro = '';
+	var cfm_notice = '确定删除已勾选软件吗？';
+	$('input[name^=package]:checked').each(function(){
+	    if($(this).prop("checked")){
+	      	var package_val = $(this).val();
+	      	package += package_val+',';
+	    }
+	});
+	package = package.substr(0, package.length-1);  
+	if(package == ''){
+		alert('请选择软件');
+		return false;
+	}
+	if(confirm(cfm_notice)){
+		window.location.href="__URL__/batch_del_soft/package/"+package;
+	}
+}
+</script>
+
+</html>

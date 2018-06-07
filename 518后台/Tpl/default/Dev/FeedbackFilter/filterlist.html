@@ -1,0 +1,490 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>软件反馈过滤规则列表</title>
+<style type="text/css">
+body, td, th {font-size: 12px;height:35px;}
+</style>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<link rel="stylesheet" type="text/css" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="/Public/js/json2.js"></script>
+</head>
+<body>
+<div style="width:99%; margin-top:4px">
+	<div class="search_box">
+		<form action="__URL__/filterlist" method="get">
+		<table width="99%" cellpadding="0" cellspacing="0">
+			<tbody align="middle">
+				<tr>
+				<td >规则关键字：
+				<input type="text" name="feedbackword" id="feedbackword" value="<?php
+				 echo $_GET['feedbackword']; ?>" ></td>			
+				<td >
+				部门：
+				<select name="sectiontypeid">
+					<option value=''>全部</option>
+					<?php foreach($sectiontype as $key=>$section): ?>				
+					<option value='<?php echo $key;?>' <?php if( isset($_GET['sectiontypeid']) && ($key == $_GET['sectiontypeid'])): ?> selected="selected" <?php endif;?> >
+					<?php echo $section; ?></option>
+					<?php endforeach; ?>
+				</select>
+				&nbsp&nbsp&nbsp&nbsp
+				反馈主题：
+				<select name="backtype">
+					<option value=''>全部</option>
+					<?php foreach($feedbacktype as $key=>$feedback): ?>				
+					<option value='<?php echo $key;?>' <?php if($key == $_GET['backtype']): ?> selected="selected" <?php endif;?> >
+					<?php echo $feedback; ?>(5.2及以下)</option>
+					<?php endforeach; ?>
+					<?php foreach ($question_type as $key => $value): ?>
+					<option value="<?php echo $key; ?>" <?php if($key == $_GET['backtype']): ?> selected="selected"<?php endif; ?>><?php echo $value['question']."(新)"?></option>
+					<?php endforeach; ?>
+				</select>
+				&nbsp&nbsp	
+				<td>起止时间:</td>
+                                <td ><input type="text" name="start_time" id="start_time" value="{$start_time}" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({startDate: '%y-%M-%d %h:%i:%s', dateFmt: 'yyyy-MM-dd HH:mm:ss'})" />&nbsp&nbsp-&nbsp
+                            <input type="text" name="end_time" id="end_time" value="{$end_time}" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({startDate: '%y-%M-%d %h:%i:%s', dateFmt: 'yyyy-MM-dd HH:mm:ss'})" />
+				</td>
+				</tr>
+				<tr>
+					<td>
+						来源：
+					  <select name="pid" id="pid" style="width:80px;height:25px;font-size:12px;">
+					  <?php foreach($product as $k => $v){ ?>
+					  <option value="<?php echo $k?>" <?php if( $k == $pid ) { echo "selected='selected'"; } ?> ><?php echo $v['0']; ?></option>
+					  <?php } ?>
+					  </select>
+					</td>
+					<td>
+					  <input type="submit" value="搜索">
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+	</div>
+	
+	<div style="margin:10px;float:left;">
+	<button style="float:left; margin-right:15px; display:inline; line-height:20px; cursor:pointer;" onclick="popup('_add_div')" class="search_btn">添加</button><br />
+	{$count}条记录
+	</div>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px" class="table_list">
+		<thead>
+			<tr align="center">				
+				<th width="5%" bgcolor="#E3E2FE">优先级</th>
+				<th width="15%" bgcolor="#E3E2FE">规则名称</th>
+				<th width="35%" bgcolor="#E3E2FE">规则</th>
+				<th width="13%" bgcolor="#E3E2FE">分配部门</th>
+				<th width="10%" bgcolor="#E3E2FE">添加时间</th>
+				<th width="14%" bgcolor="#E3E2FE">操作人</th>
+				<th width="14%" bgcolor="#E3E2FE">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach($list as $row): ?>
+				<tr>
+					<td>
+					<select class='extent_rank' rel=<?php echo $row['id'];?> >
+					   <?php for($i=1;$i<$num ;$i++): ?>
+					       	<option <?php if($row['rank']==$i){ ?> selected='selected' <?php } ?> value=<?php echo $i;?>    ><?php echo $i; ?></option>
+    				   <?php endfor; ?>					
+					</select>
+					</td>
+					<td>{$row.filter_name}</td>
+					<td>{$row.filterword}</td>
+					<td><?php echo $sectiontype[$row['sectiontypeid']];  ?></td>
+					<td><?php echo $row['update_time'] ? date("Y-m-d",$row['update_time']) : '' ?></td>
+					<td><?php echo $username[$row['admin_id']];  ?></td>
+					<td align="center">						
+						<a style="cursor:pointer;" href="javascript:void(0);" onclick="edit({$row.id})" class="blue">编辑</a>&nbsp&nbsp
+						<a href="javascript:void(0);" onclick="deleteOne({$row.id})" class="blue">删除</a>
+					</td>
+				</tr>
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+</div>
+<div id="_add_div" style="position:absolute;top:150px;left:350px;display:none;background:#EEEEEE;width:650px;height:auto;border:1px solid #cccccc;font-size:14px;">
+	<form name="form_add" method="post" action="__URL__/addfilter"  
+	onsubmit="return form_chk_add()" id="_form_add"  style="width:100%;height:100%;">
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%; padding:30px;" class="tb_add">
+		<tr>
+			<td class="td1" colspan="2">
+				来源：
+			  <select name="pid" id="pid" style="width:80px;height:25px;font-size:12px;">
+			  <?php foreach($product as $k => $v){ ?>
+			  <option value="<?php echo $k?>" ><?php echo $v['0']; ?></option>
+			  <?php } ?>
+			  </select>
+			</td>
+		</tr>	
+		<tr>
+			<td class="td1" colspan="2" >系统内置规则：
+			<select name='rank'  style=" height:22px;" >
+			<?php for($i=1;$i<=$num;$i++):  ?>				    
+				<option value="<?php echo $i; ?>"><?php echo $i; ?> </option>				 
+			<?php endfor; ?>		
+			</select>
+			</td>
+		</tr>
+        <tr>
+		<td colspan="3">规则名称：<input name='filter_name' type='text' style="height:22px;" value=''/></td>
+		</tr>  		
+		<tr>
+		<td colspan="3"><input  name='filter' type='radio' checked="checked" value='0'  />将符合下列条件之一的反馈自动分配到指定部门</td>
+		</tr>
+		<tr>
+		<td colspan="3"><input name='filter' type='radio' value='1' />将同时符合下列所有条件的反馈自动分配到指定部门</td>
+		</tr>
+		<tr>
+		<td colspan="3">反馈主题为：
+			<?php foreach ($question_type as $key => $value): ?>
+			<input name='backtype' type='radio' value='<?php echo $key;?>' /><?php echo $value['question'];?>
+			<?php endforeach; ?>
+			<input name='backtype' type='radio' value='1'/>下载问题（5.2及以下）
+			<input name='backtype' type='radio' value='2'/>安装问题（5.2及以下）
+			<input name='backtype' type='radio' value='3'/>软件使用问题（5.2及以下）
+			<input name='backtype' type='radio' value='5'/>建议意见（5.2及以下）
+			<input name='backtype' type='radio' value='4'/>其它问题（5.2及以下）
+		</td>		
+		</tr>
+		<tr>
+			<td style="width:90px;">反馈内容包含：</td><td style="width:250px;"><input name='feedbackword[]' style="width:200px; height:22px;" value='' class='addfilter'/></td><td>
+			<a href="javascript:;" id="add_table" style="font-size:30px;text-decoration: none;color:#000" rel="">+</a>&nbsp;&nbsp;
+                        <a href="javascript:;" id="cut_table" style="font-size:30px;text-decoration: none;color:#000" rel="">-</a>
+			</td>
+       </tr>		                   
+        <tr>
+		<td colspan="3">英文及特殊字符长度: 大于<input name='wordlenght' type='text' style="height:22px;" value=''/>字</td>
+		</tr>  
+		<tr>
+			<td class="td1" colspan="2" >分配至：
+			<select name='sectiontypeid' style="height:22px;" id='sectiontypeid'>
+				<option value='' >请选择</option>
+				<?php foreach($sectiontype as $k => $v){ ?>
+				<option value='<?php echo $k; ?>'><?php echo $v; ?></option>
+				<?php } ?>
+			</select></td>
+		</tr> 
+		<tr id="cut_add_input">
+			<td colspan="3" style="text-align:center;"><button style="margin:15px 55px 15px 15px; height:30px; width:90px;" type="submit" >确定</button><input name="sub_type" type="hidden" value="add" /><button type="button" style="height:30px; width:90px;" onclick="popclose('_add_div')">取消</button></td>
+		</tr>
+	</table>
+	</form>
+</div>
+<div id="_edit_div" style="position:absolute;top:150px;left:350px;display:none;background:#EEEEEE;width:650px;height:auto;border:1px solid #cccccc;font-size:14px;">
+            <form name="form_add" method="post" action="__URL__/editfilter" onsubmit="return form_chk_edit()" style="width:100%;height:100%;">
+                <input type='hidden' name='filterid' id='filterid' value=''>
+                <table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%; padding:30px;" class="tb_add" >
+					<tr>
+						<td class="td1" colspan="2">
+							来源：
+						  <select name="exitpid" id="exitpid" style="width:80px;height:25px;font-size:12px;">
+						  <?php foreach($product as $k => $v){ ?>
+						  <option value="<?php echo $k?>"<?php if( $k == $reason_info['pid'] ) { echo "selected='selected'"; } ?>><?php echo $v['0']; ?></option>
+						  <?php } ?>
+						  </select>
+						</td>
+					</tr>
+                    <tr>
+                        <td class="td1" colspan="2" >优先级：
+                            <select name='editrank' id="editrank" style="height:22px;">
+                                <?php for($i=1;$i<=$num-1;$i++):  ?>				    
+                                <option value="<?php echo $i; ?>"><?php echo $i; ?> </option>				 
+                                <?php endfor; ?>		
+                            </select>
+                        </td>
+                    </tr>
+					<tr>
+					<td colspan="3">规则名称：<input name='filter_name' id='filter_name' type='text' style="height:22px;" value=''/></td>
+					</tr>  	
+                    <tr>
+                        <td colspan="3"><input  name='editfilter'  type='radio' checked="checked" value='0'  />将符合下列条件之一的反馈自动分配到指定部门</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><input name='editfilter' type='radio' value='1' />将同时符合下列所有条件的反馈自动分配到指定部门</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">反馈主题为：
+							<?php foreach ($question_type as $key => $value): ?>
+							<input name='editbacktype' type='radio' value='<?php echo $key;?>' /><?php echo $value['question'];?>
+							<?php endforeach; ?>
+                            <input name='editbacktype' type='radio' value='1'/>下载问题（5.2及以下）
+                            <input name='editbacktype' type='radio' value='2'/>安装问题（5.2及以下）
+                            <input name='editbacktype' type='radio' value='3'/>软件使用问题（5.2及以下）
+                            <input name='editbacktype' type='radio' value='5'/>建议意见（5.2及以下）
+                            <input name='editbacktype' type='radio' value='4'/>其它问题（5.2及以下）
+                        </td>		
+                    </tr>
+                    <tr>
+                        <td style="width:90px;">反馈内容包含：</td><td style="width:250px;"><input name='editfeedbackword[]' style="width:200px; height:22px;"value='' class='edit'/></td><td>
+                            <a href="javascript:;" id="edit_add_table" style="font-size:30px;text-decoration: none;color:#000" rel="">+</a>&nbsp;&nbsp; 
+                            <a href="javascript:;" id="edit_cut_table" style="font-size:30px;text-decoration: none;color:#000" rel="">-</a>
+                        </td>
+                    </tr>		                   
+                    <tr>
+                        <td colspan="3">英文及特殊字符长度: 大于<input name='editwordlenght' type='text' style="height:22px;" value=''/>字</td>
+                    </tr>  
+                    <tr>
+			<td class="td1" colspan="2" >分配至：
+			<select name='editsectiontypeid' style="height:22px;" id='editsectiontypeid'>
+				<option value='' >请选择</option>
+				<?php foreach($sectiontype as $k => $v){ ?>
+				<option value='<?php echo $k; ?>'><?php echo $v; ?></option>
+				<?php } ?>
+			</select></td>
+                    </tr> 
+                    <tr id="cut_add_input">
+                        <td colspan="3" style="text-align:center;"><button style="margin:15px 55px 15px 15px; width:90px; height:30px;" type="submit" >确定</button><input name="sub_type" type="hidden" value="edit" /><button type="button" style="height:30px; width:90px;"onclick="popclose('_edit_div')">取消</button></td>
+                    </tr>
+                </table>	
+            </form>
+        </div>
+
+<div  align='left'>{$page}</div>
+<style type="text/css">
+	.error_msg{height: 25px;}
+</style>
+<script type="text/javascript">
+	var  shelves = 0;
+	var  p_key = 0;
+	var  s_key = 0;
+	var  dev_name_key = 0;
+	var  dev_id_key = 0;
+        var intervres_key = 0;
+        var run_key = 0;
+        var cut_num = 0;
+        var edit_cut_num = 0;
+        var size;
+        var editsize;
+    $('#add_table').click(function(){
+                cut_num=0;
+		shelves++;
+		p_key++;
+		s_key++;
+		dev_name_key++;
+		dev_id_key++;
+                intervres_key++;
+                run_key++;
+		var str = '<tr><td></td><td style="width:250px;"><input name="feedbackword[]"  style="width:200px; height:22px;" value="" class="addfilter"/></td></tr>';
+		$(this).closest('tr').after(str);
+                size = $(".addfilter").size()
+	});
+    
+    $('#edit_add_table').click(function(){
+                edit_cut_num = 0
+		shelves++;
+		p_key++;
+		s_key++;
+		dev_name_key++;
+		dev_id_key++;
+                intervres_key++;
+                run_key++;
+		var str = '<tr class="edittr"><td></td><td style="width:250px;"><input name="editfeedbackword[]" style="width:200px; height:22px;" value="" class="edit"/></td></tr>';
+		$(this).closest('tr').after(str);
+                editsize = $(".edit").size();
+	}); 
+        
+	$('#cut_table').click(function(){
+                if(cut_num<size-1){
+                    $(this).closest('tr').next('tr').remove();
+                    cut_num++;
+                }
+	});
+	$('#edit_cut_table').click(function(){
+
+                if(edit_cut_num<editsize-1){
+                    $(this).closest('tr').next('tr').remove();
+                    edit_cut_num++;
+                }
+	});
+	function deleteOne(pid)
+	{
+		if (!confirm("确定要删除该项么？"))
+			return false;
+		window.location="__URL__/del_filter/id/"+pid;
+	}
+	var flag = false;
+	function selectAll()
+	{
+		if(!flag){
+			$("[name='id[]']").each(function(){
+				$(this).attr('checked',true);
+			});
+			
+			flag = true;
+			return;
+		}
+		if(flag){
+			$("[name='id[]']").each(function(){
+				$(this).attr('checked',false);
+			});
+			
+			flag = false;
+			return;
+		}	
+	}
+	
+	
+	//排序
+$('.extent_rank').change(function(){
+	var url = '__URL__/changerank/id/'+$(this).attr('rel')+'/rank/'+$(this).val();
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+				if(response==1){
+					var jumpUrl = '__URL__/filterlist/p/<?php echo is_numeric($_GET['p']) ? $_GET['p'] : '1'; ?>/lr/<?php echo is_numeric($_GET['lr']) ? $_GET['lr'] : '10'; ?>';
+					window.location.href = jumpUrl;
+					if(window.ActiveXObject) window.event.returnValue = false;
+				}else{
+					alert('参数错误');
+				}
+		}
+	});
+});
+	
+        
+function form_chk_add(){
+    var sectiontypeid = $("#sectiontypeid").val();
+    var pass = false;
+    var backtype = $("input[name='backtype']:checked").val();
+    var wordlenght = $("input[name='wordlenght']").val();    
+    if(backtype){
+        pass = true;
+    }
+    $('.addfilter').each(function(){
+        if($(this).val()!=''){
+            pass = true;
+            return false;
+        }
+    })
+    if(wordlenght&&wordlenght>0){
+        pass = true;
+    }
+    if(sectiontypeid == ''){
+          	alert('请选择分配部门');return false;
+    }     
+    if(isNaN(wordlenght)){
+        alert('请输入数字');
+        return false;
+    }
+    if(!pass){
+        alert("请至少填写一项规则");return false;
+    }
+}
+	
+function form_chk_edit() {
+            $sectiontypeid = $("#editsectiontypeid").val();
+            var pass = false;
+            var backtype = $("input[name='editbacktype']:checked").val();
+            var wordlenght = $("input[name='editwordlenght']").val();    
+            if(backtype){
+                pass = true;
+            }
+            $('.edit').each(function(){
+                if($(this).val()!=''){
+                    pass = true;
+                    return false;
+                }
+            })
+            if(wordlenght&&wordlenght>0){
+                pass = true;
+            }
+            if($sectiontypeid == ''){
+                        alert('请选择分配部门');return false;
+            }
+            if(isNaN(wordlenght)){
+                alert('请输入数字');
+                return false;
+            }
+            if(!pass){
+                alert("请至少填写一项规则");return false;
+            }
+	}
+	
+	function popup(id) {
+		$("#bgdiv").css("display","block");
+		$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+        $(".intervclass").eq(0).attr("checked",'checked');
+        $(".runclass").css("display","none");
+		$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+		$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+		$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+	}
+	
+	function popclose(id) {
+                $(".intervclass[value=0]").attr("checked",'checked');
+                $(".runclass").css("display","none");
+		$("#"+id).css({display:"none"});
+		$("#bgdiv").css({display:"none"});
+                
+	}
+	
+function edit(rowid) {
+	$('.edittr').remove();
+	var feedbackwords = new Array();
+	var url = "__URL__/filter_edit";
+    var data = '&id=' + rowid;
+	$.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		success: function(data) {
+			if (data) {
+				$("#filterid").val(data.id);
+				$("#filter_name").val(data.filter_name);
+				$("#editrank option[value='"+data.rank+"']").attr("selected", true);
+				$("#exitpid option[value='"+data.pid+"']").attr("selected", true);
+				$("input[name=editfilter][value="+data.filter+"]").attr("checked",'checked');
+				$("input[name=editbacktype][value="+data.backtype+"]").attr("checked",'checked');
+				if(data.feedbackword){
+					feedbackwords = data.feedbackword.split('||');                    
+				   if(feedbackwords.length>$('.edit').size()){
+					   var addtrnum = feedbackwords.length-$('.edit').size();
+					   for(i=0;i<addtrnum;i++){
+						   var str = '<tr class="edittr"><td></td><td><input name="editfeedbackword[]" value="" class = "edit" /></td></tr>';
+						   $('#edit_add_table').closest('tr').after(str);                           
+					   }
+				   }
+				   for(i=0;i<feedbackwords.length;i++){
+					   $('.edit').each(function(j){
+						   if(i==j){
+							   $(this).val(feedbackwords[i])
+						   }
+					   })
+				   }   
+				}
+				
+				$("input[name=editwordlenght]").val(data.wordlenght);
+				$("#editsectiontypeid option[value='"+data.sectiontypeid+"']").attr("selected", true);
+				editsize = $('.edit').size();
+			} else {
+				alert('获取数据失败！');
+			}
+		},
+		error: function() {
+			alert('服务器错误');
+		}
+	})
+		popup("_edit_div");              
+}
+
+        function is_interv(id,bool){
+            if(bool){
+                $('#runindex'+id).css('display','');
+                $('#runintro'+id).css('display','');
+            }else{
+                $('#runindex'+id).css('display','none');
+                $('#runintro'+id).css('display','none');
+            }
+        }
+</script>
+</body>
+</html>

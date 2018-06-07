@@ -1,0 +1,317 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/contAtrribu.js'></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+
+<style>
+.sub_tr {
+    height: 35px;
+    text-align: left;
+}
+.table_list tbody td{text-align:left;}
+</style>
+<script language="JavaScript">
+
+// 提交前的检查
+function checkPost() {
+	//内容属性判断
+	var _num = $('input[name="content_level"]:checked').val();
+	var _nature = $('input[name="content_nature"]:checked').val();
+	if(_num == 0 || _num == undefined){
+		alert('请选择内容质量');
+		return false;
+	}
+	if(_nature == 0 || _nature == undefined){
+		alert('请选择内容性质');
+		return false;
+	}
+	var _column = '';
+
+    $("input[name^='cont_column']:checked").each(function(){
+    	_column += this.value+',';
+    });
+	$('#content_column').val(_column);
+	//内容标签
+    var _tag_check = cont_tags();
+    if(_tag_check == false) return false;
+
+    var video_title = $("#video_title").val();
+    if (!video_title) {
+        alert("视频名称不能为空！");
+        return false;
+    }else if(video_title.length>20){
+    	alert("最多输入20个汉字和字符。");
+        return false;
+    }
+    if(!$("#package").val()){
+    	alert("软件包名不能为空！");
+        return false;
+    }
+    var obj_file = document.getElementById("video_url");  
+    var filesize = 0;  
+    var  browserCfg = {};  
+    var ua = window.navigator.userAgent;  
+    if(ua.indexOf("Firefox")>=1){  
+        browserCfg.firefox = true;  
+    }else if(ua.indexOf("Chrome")>=1){  
+        browserCfg.chrome = true;  
+    }  
+    /*if(browserCfg.firefox || browserCfg.chrome ){  
+        filesize = obj_file.files[0].size;  
+    }*/
+    if(filesize>200*1024*1024){
+    	alert("请上传200M以内MP4格式视频");  
+        return false;  
+    }
+    
+    var download_guide = $('input[name="download_guide"]:checked').val();
+    if (download_guide==null) {
+    	alert('请选择是否显示下载引导');
+    	return false;
+    } else if (download_guide==1) {
+    	var dg_type = $('input[name="dg_type"]:checked').val();
+	    if (dg_type==null) {
+	    	alert('请选择下载引导样式');
+	    	return false;
+	    }
+	    var dg_screen = $('input[name="dg_screen"]:checked').val();
+	    if (dg_screen==null) {
+	    	alert('请选择下载引导全屏/非全屏');
+	    	return false;
+	    }
+	    var dg_time_m = $('#dg_time_m').val();
+	    if (dg_time_m==='') {
+    		//alert('请输入显示时间分钟数');
+    		//return false;
+    	}else if (!/^\d*$/.test(dg_time_m)) {
+			alert('显示时间分钟数请输入大于等于0的的整数');
+			return false;
+		}
+		var dg_time_s = $('#dg_time_s').val();
+    	if (dg_time_s==='') {
+    		if(!dg_time_m){
+    			alert('0秒为无效时间，请重新输入');
+    			return false;
+    		}
+    	}
+    	if (!/^\d*$/.test(dg_time_s)) {
+			alert('显示时间秒数请输入大于等于0的的整数');
+			return false;
+		}
+		if (dg_time_s>59) {
+			$('#dg_time_s').val(59);
+			return false;
+		}
+		var dg_long = $('#dg_long').val();
+    	if (dg_long==='') {
+    		alert('请输入显示时长秒数');
+    		return false;
+    	}
+    	if (!/^[1-9]\d*$/.test(dg_long)) {
+			alert('显示时长请输入大于0的整数');
+			return false;
+		}
+	    var dg_position = $('input[name="dg_position"]:checked').val();
+	    if (dg_position==null) {
+	    	alert('请选择下载引导样式显示位置');
+	    	return false;
+	    }
+    }
+	return true;
+}
+
+
+function get_softname(){
+	var pkg=$('#package').val();
+	if(pkg){
+	    	$.ajax({
+			url: '__URL__/pub_check_package/package/'+pkg,
+			type: 'get',
+			async:false,
+			success: function(data){
+				var data = eval('(' + data + ')');
+				if(data.status==1){
+					$('#softname').val(data.info);
+				}else{
+					$('#package').val('');
+					alert('软件包名不存在');
+				}
+			}
+		});
+    }
+}
+
+function checklist(obj){
+	var column_select = '';
+	$("input[name^='cont_column']:checked").each(function(){
+	    column_select += this.title+',';
+    });
+	$("#selectlist").text(column_select);
+}
+function toggle_dg() {
+	$('tr[id^=download_guide_]').css('display', 'none');
+	var download_guide = $("input[name='download_guide']:checked").val();
+	if (download_guide==1) {
+		$('tr[id^=download_guide_]').css('display', '');
+	}
+}
+function chk_int(obj, num) {
+	if (!/^[1-9]\d*$/.test($(obj).val())) {
+		//$(obj).val('');
+	} else {
+		if (num>0 && $(obj).val()>num) {
+			$(obj).val(num);
+		}
+	}
+	return false;
+}
+function chk_int2(obj, num) {
+	if (!/^\d*$/.test($(obj).val())) {
+		//$(obj).val('');
+	} else {
+		if (num>0 && $(obj).val()>num) {
+			$(obj).val(num);
+		}
+	}
+	return false;
+}
+$(function(){
+	toggle_dg();
+});
+</script>
+
+<body>
+<div  style="margin:20px;">
+	<form action="__URL__/video_edit" method="post" enctype="multipart/form-data" onsubmit="return checkPost();">
+		<h2 style="font-size:24">添加视频</h2><br/>
+		<input type="hidden" name="id" value="{$video_data.id}">
+		<input type='hidden' id="content_tags" name="content_tags" value=''/>
+		<input type='hidden' id="content_column" name="content_column" value=''/>
+		<table class="table_list">
+			<tr>
+				<td style="width:90px;">视频名称：</td>
+				<td><input type="text" name="video_title" id="video_title" value="{$video_data.video_title}" /></td>
+				<td>20个汉字</td>
+			</tr>
+			<tr>
+				<td>上传视频：</td>
+				<td><input type="file" name="video_url" id="video_url"/></td>
+				<td>支持MP4格式，200M以内，建议分辨率1280*720以上，推荐1920*1080</td>
+			</tr>
+		
+			<tr style="display:<?php echo $video_data['video_pic']?'':'none';?>">
+				<td>&nbsp;</td>
+				<td>
+					<video id="myVideo" width="320" height="240" controls>
+					  <source src="{$attachment_host}{$video_data.video_url}" type="video/mp4">
+					</video>
+				</td>
+			</tr>
+			<tr>
+				<td>视频默认图：</td>
+				<td><input type="file" name="video_pic" id="video_pic"/></td>
+				<td>1256*706 JPG/PNG图片</td>
+			</tr>
+			<tr style="display:<?php echo $video_data['video_pic']?'':'none';?>">
+				<td>&nbsp;</td>
+				<td><img src="{$attachment_host}{$video_data.video_pic}" width="320" height="240"></td>
+			</tr>
+			<tr>
+				<td>软件包名：</td>
+				<td><input type="text" name="package" id="package" value="{$video_data.package}" onblur="get_softname()" /></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>软件名称：</td>
+				<td><input type="text" name="softname" id="softname" disabled style="background-color:#ccc;" value="{$video_data.softname}"/></td>
+				<td></td>
+			</tr>
+			<tr>
+			    <td>是否显示下载引导</td>
+			    <td>
+			    	<input name="download_guide" type="radio" value="1" <?php if($video_data['download_guide']==1){ ?>checked='checked'<?php } ?> onclick="toggle_dg()">显示 
+			    	<input name="download_guide" type="radio" value="0" <?php if($video_data['download_guide']==0){ ?>checked='checked'<?php } ?> onclick="toggle_dg()">不显示 
+			    </td>
+			    <td></td>
+			</tr>
+			<tr id="download_guide_1">
+				<td>样式:</td>
+				<td>
+					<input name='dg_type' type="radio" <?php if($video_data['dg_type']==1 || !$video_data['dg_type']){ ?>checked='checked'<?php } ?> value="1" />icon+名称+下载 
+					<input name='dg_type' type="radio" <?php if($video_data['dg_type']==2){ ?>checked='checked'<?php } ?> value="2" />icon+下载 
+					<input name='dg_type' type="radio" <?php if($video_data['dg_type']==3){ ?>checked='checked'<?php } ?> value="3" />icon+下载(左右) 
+				</td>
+				<td></td>
+			</tr>
+			<tr id="download_guide_2">
+				<td>全屏/非全屏显示:</td>
+				<td>
+					<input name='dg_screen' type="radio" <?php if($video_data['dg_screen']==1){ ?>checked='checked'<?php } ?> value="1" />全屏和非全屏均展示 
+					<input name='dg_screen' type="radio" <?php if($video_data['dg_screen']==2){ ?>checked='checked'<?php } ?> value="2" />仅非全屏展示 
+					<input name='dg_screen' type="radio" <?php if($video_data['dg_screen']==3){ ?>checked='checked'<?php } ?> value="3" />仅全屏展示 
+				</td>
+				<td></td>
+			</tr>
+			<tr id="download_guide_3">
+				<td>显示时间:</td>
+				<td>
+					<input name='dg_time_m' id="dg_time_m" type="number" min="0" style="width:70px" value="{$video_data.dg_time_m}" onchange="chk_int2(this, 0)" /> : 
+					<input name='dg_time_s' id="dg_time_s" type="number" min="0" value="{$video_data.dg_time_s}" style="width:70px" onchange="chk_int2(this, 59)" />
+				</td>
+				<td>显示时间是指下载引导在视频播放中显示的时间点</td>
+			</tr>
+			<tr id="download_guide_4">
+				<td>显示时长:</td>
+				<td>
+					<input name='dg_long' id="dg_long" type="number" min="1" value="<?php if($video_data['dg_long']){echo $video_data['dg_long'];}else{echo 7;} ?>" style="width:70px" onchange="chk_int(this, 0)" /> s
+				</td>
+				<td></td>
+			</tr>
+			<tr id="download_guide_5">
+				<td>显示位置:</td>
+				<td>
+					<input name='dg_position' type="radio" <?php if($video_data['dg_position']==1){ ?>checked='checked'<?php } ?> value="1" />视频左上角 
+					<input name='dg_position' type="radio" <?php if($video_data['dg_position']==2){ ?>checked='checked'<?php } ?> value="2" />视频右上角 
+					<input name='dg_position' type="radio" <?php if($video_data['dg_position']==3){ ?>checked='checked'<?php } ?> value="3" />视频左下角 
+					<input name='dg_position' type="radio" <?php if($video_data['dg_position']==4 || !$video_data['dg_position']){ ?>checked='checked'<?php } ?> value="4" />视频右下角 
+				</td>
+				<td></td>
+			</tr>
+			<tr><td colspan="3">内容属性</td></tr>
+			<tr class="sub_tr tag">
+			    <td>内容性质：</td>
+			    <td colspan="2"><?php echo $content_xz ?></td>
+			</tr>
+			<tr class="sub_tr tag">
+			    <td>内容质量：</td>
+			    <td colspan="2"><?php echo $content_zl ?></td>
+			</tr>
+			</tr>
+			<tr class="sub_tr tag">
+			    <td>内容栏目：</td>
+			    <td colspan="2">{$content_lm}</td>
+			</tr>
+			<tr>
+				<td>内容来源：</td>
+				<td colspan="2"><?php echo $con_source;?></td>
+			</tr>
+			<tr>
+				<td>用户倾向：</td>
+				<td colspan="2"><?php echo $user_tend;?></td>
+			</tr>
+			<tr>
+				<td colspan="3">{$content_tag}</td>
+			</tr>
+		
+		<table>
+			<tr>
+				<td><input type="submit" class="search_btn" value="确定" /></td>
+				<td><input type="button" class="search_btn" value="取消"  onclick="location.href='/index.php/Dev/VideoManage/video_list/check_status/{$video_data.check_status}'" /></td>
+			</tr>
+		</table>
+	</form>
+</div>
+</body>
+</html>

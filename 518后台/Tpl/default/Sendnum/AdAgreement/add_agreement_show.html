@@ -1,0 +1,199 @@
+<include file="../../Public/header"/>
+<link rel="stylesheet" type="text/css" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/uploadify.css">
+<script src="/Public/js/jquery.uploadify.min.js" type="text/javascript"></script>
+<script>
+	function add_pos(){
+		var my_pos = document.getElementsByName("ad_pos[]");
+		var my_select = '';
+		for(i=0;i<my_pos.length;i++){
+			my_select += my_pos[i].value + ',';
+			if(my_pos[i].value == 0){
+				alert("请选择频道");
+				return false;
+			}
+		}
+		if(my_pos.length > 10){
+				return false;
+		}
+		$.ajax({
+			url : '__URL__/ajax_add_pos/my_select/'+my_select,
+			type : 'get',
+			dataType : "json",
+			success : function(data){
+				var str = '';
+				
+				if(data){
+					for(i=0;i<data.length;i++){
+						str += "<option value='"+data[i]['ad_id']+"'>"+data[i]['ad_name']+"</option>";
+					}
+					
+					$('#add_ad').append("<tr><td></td><td><select name='ad_pos[]'  onchange='give_id(this.value);'><option value='0'>选择栏目</option>"+str+"</select>&nbsp;&nbsp;&nbsp;&nbsp;<input type='button' value='删除' /></td></tr>");
+				}else{
+					alert("添加栏目失败");
+				}
+			}
+		});
+	}
+	
+	function give_id(my_id){
+		
+		var my_pos = document.getElementsByName("ad_pos[]");
+		var my_select = '';
+		for(i=0;i<my_pos.length;i++){
+			if(my_pos[i].value == my_id){
+				my_pos[i].parentNode.parentNode.setAttribute('id',my_id+'_tr');
+				my_pos[i].parentNode.lastChild.setAttribute('onclick',"del_pos("+my_id+");");
+			}
+		}
+		
+	}
+	
+	function del_pos(my_id){
+		$('#'+my_id+'_tr').remove();
+	}
+
+</script>
+<body>
+<div style="margin:20px;" class="content_inner">
+<form action="__URL__/add_agreement_do" method="post">
+<table>
+	<tr>
+		<td>*选择客户：</td>
+		<td>
+			<select name="client_id">
+				<option value="0">请选择...</option>
+				<?php foreach($client_result as $key => $val){ ?>
+				<option value="{$val.id}">{$val.client_name}</option>
+				<?php } ?>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>*协议编号：</td>
+		<td><input type="text" name="agree_num" /></td>
+	</tr>
+	<tr>
+		<td>*签订日期：</td>
+		<td><input id="begintime" name="sign_tm" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:20px" /></td>
+	</tr>
+	<tr>
+		<td>*合作金额：</td>
+		<td><input type="text" name="co_account" /></td>
+	</tr>
+	<tbody id="add_ad">
+	<tr>
+		<td>*购买频道：</td>
+		<td>
+		<select name="ad_pos[]">
+		<option value="0">选择栏目</option>
+		<?php foreach($ad_channel as $key => $val){ ?>
+		<option value="{$key}">{$val}</option>
+		<?php } ?>
+		</select>&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="增加" onclick="add_pos();" />
+		</td>
+	</tr>
+	</tbody>
+	<tr>
+		<td>*起始日期：</td>
+		<td><input id="begintime" name="start_tm" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:20px" /></td>
+		<td>*终止日期：</td>
+		<td><input id="endtime" name="end_tm" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:20px" /></td>
+	</tr>
+	<tr>
+		<td>*负责人：</td>
+		<td><input type="text" name="charge_name" /></td>
+	</tr>
+	<tr>
+		<td>*预计保证金：</td>
+		<td><input type="text" name="plan_margin" /></td>
+	</tr>
+	<tr>
+		<td><label>上传附件：</label></td>
+		<td>
+		<div style="position:relative" class="add_acount_item">
+			<div class="upload_apk" style="margin-left:10px;margin-top:10px;">
+			<div class="upload_apk_div">
+					<div class="upload_apk_btn" style="margin-left:5px;"><input type="file" id="affix" name="affix" /></div>
+			</div>
+			</div>
+			<div id="error"></div>
+			<span class="add_acount_errors" style="color:red;">格式要求：word、excel、pdf、jpg、png、zip、rar</span>
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td><div class="add_acount_item">
+			<label>附件：</label>
+			
+		</div>
+		<div class="clear"></div></td>
+		<td><div id="my_file"></div></td>
+	</tr>
+	<tr>
+		<td>备注：</td>
+		<td colspan="4"><textarea name="comment" cols="50" rows="3"></textarea></td>
+	</tr>
+	<tr>
+		<td><input type="hidden" name="my_hash" id="my_hash" value="{$my_hash}" /><input type="submit" value="保存" class="search_btn" /></td>
+		<td><a href="javascript:history.go(-1);" class="search_btn">取消</a></td>
+	</tr>
+</table>
+</form>
+</div>
+</body>
+<script>
+$(function() {
+	var hash = $("input[name='my_hash']").val();
+	var my_file = $('#my_file').html();
+    $("#affix").uploadify({
+        'height' : 20,
+		'width'  : 100,
+        'swf' : '/Public/images/uploadify.swf',
+		'fileObjName' : 'affix',
+        'uploader' : '/index.php/Sendnum/AdAgreement/ajax_upload_file/hash/'+hash+'/sessid/<?php echo session_id(); ?>',
+        'onUploadSuccess' : function(file, res, bool) {
+			var res = eval('('+res+')');
+			var str = '';
+	
+			if(res['code'] != 1){
+				$('#error').html('<span style="color:red;">'+res['msg']+'</span>');
+			}else{
+				$('#error').html('');
+				my_arr = res['msg'];
+				for(i=0;i<my_arr.length;i++){
+					str += "<span id='"+my_arr[i]['id']+"'>&nbsp;&nbsp;<a href='__URL__/upload_file/id/"+my_arr[i]['id']+"/from/1' style='color:blue;'>"+my_arr[i]['affix_name']+"</a>&nbsp;<a href='javascript:;' onclick=\"del_file("+my_arr[i]['id']+",'"+hash+"');\"><img src='/Public/images/del_file.jpg' /></a></span>";
+				}
+				$('#my_file').html(str);
+			}
+		}
+    });
+});
+
+	function del_file(id,hash){
+		if(!confirm("是否执行此操作！")){
+			return false;
+		}
+		
+		$.ajax({
+			url:"/index.php/Sendnum/AdAgreement/del_file/sessid/"+hash+"/id/"+id+"/hash/"+hash+"/from/1", 
+			dataType:"json",
+			type:"get",
+			success:function(data) {
+				if(data){
+				var str = '';
+				for(i=0;i<data.length;i++){
+					str += "<span id='"+data[i]['id']+"'>&nbsp;&nbsp;<a href='__URL__/upload_file/id/"+data[i]['id']+"/from/1' style='color:blue;'>"+data[i]['affix_name']+"</a>&nbsp;<a href='javascript:;' onclick=\"del_file("+data[i]['id']+",'"+hash+"');\"><img src='/Public/images/del_file.jpg' /></a></span>";
+				}
+				$('#my_file').html(str);
+				}else{
+					$('#my_file').html("");
+				}
+			}
+		
+		});
+	
+	}
+</script>
+</html>

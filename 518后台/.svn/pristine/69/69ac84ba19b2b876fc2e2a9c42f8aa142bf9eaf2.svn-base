@@ -1,0 +1,97 @@
+<notempty name="applys">
+<div>
+	<form action="__URL__/awardAdd/" method="post">
+	<table style="border-spacing:10px 20px;">
+		<tr>
+			<td>奖项：</td>
+			<td><input type="text" name="name" value="{$list.name}"/></td>	
+			<input type="hidden" value="{$tid}" name="tid">
+			<input type="hidden" value="{$id}" name="id">
+			<input type="hidden" value="1" name="addsubmit">
+		</tr>
+		<tr>
+		<td>奖品：</td><td><input type="text" name="award" value="{$list.award}"/></td>
+		</tr>
+            <tr>
+            <td>奖品通知：</td><td><textarea name="info" style="width:280px;height:200px;">{$list.info}</textarea></td>
+            </tr>
+        <tr>
+        <td>获奖者：</td>
+        <td><div id="users">
+        <volist name="list.users" id="user">
+        <div id='d_{$key}'>{$user.username}<input type='hidden' name='rank[{$key}]' value='{$user.rank}'></input></div>
+        </volist>
+        
+        </div></td>
+        
+        </tr>
+         <tr>
+        <td></td>
+        <td>
+        <table style="width: 100%;">
+       
+        <volist name= "applys" id= "vo" mod= "2"  > 
+        <eq name= "mod" value= "1" >
+        <tr height="40px">
+        </eq> 
+        <td ><input type="checkbox" name="user[{$vo.uid}]" id="{$vo.uid}" class="username" <if condition="in_array($vo['uid'],array_keys($list['users'])) or in_array($vo['uid'],$awarduser)">checked</if> <if condition="!in_array($vo['uid'],array_keys($list['users'])) and in_array($vo['uid'],$awarduser)">disabled</if>><span id="u_{$vo.uid}">{$vo.username}</span> </td>
+        <eq name= "mod" value= "0" >
+        </tr>
+        </eq> 
+
+        </volist> 
+        
+        </table>
+        
+
+        </td>
+        
+        </tr>
+		<tr>
+			<td><input type="submit" class="search_btn" value="提交" /></td>
+			<td><input type="button" class="search_btn" value="取消" onclick="tb_remove();" /></td>
+		</tr>
+	</table>	
+	</form>
+    
+    
+</div>
+
+<script type="text/javascript">
+$(function(){
+    $(".username").each(function(index1){
+        $(this).click(function(){
+            var uid = $(this).attr("id");
+            var uname = $(this).siblings().first().text();
+            
+            if(($(this).is(':checked'))){
+                var rerank = '';
+                var i = 0;
+                $("#users").children().each(function(){
+                    var uids = $(this).attr("id").split('_');
+                    var uid1 = uids[1];
+                    var uname1 = $(this).text();
+                    console.log(uname1);
+                    rerank = rerank + "<div id='d_"+uid1+"'>"+uname1+"<input type='hidden' name='rank["+uid1+"]' value='"+i+"'></input></div>";
+                    i=i+1;
+                })
+                var addchid = "<div id='d_"+uid+"'>"+uname+"<input type='hidden' name='rank["+uid+"]' value='"+i+"'></input></div>";
+                rerank = rerank + addchid;
+                console.log(rerank);
+                $("#users").html('');
+                $("#users").append(rerank);
+            }else{
+                $("#d_"+uid).remove();
+                
+            }
+        })
+    })
+    
+})
+
+
+
+</script>
+<else />
+<div style="font-size: 20px;color: red;margin: 20px auto;">该产品还没有申请通过的用户，请先审核用户申请</div>
+</notempty>

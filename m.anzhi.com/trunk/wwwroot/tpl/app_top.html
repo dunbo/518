@@ -1,0 +1,95 @@
+<!--{include file="header.html"}-->
+<!--{include file="header_search_1.html"}-->
+<script type="text/javascript">
+	var page = 1, lock = false;
+	function formore(mores,container,actions){
+		 $(mores).html("正在加载<img src='/images/waiting.gif' alt='加载中' />");
+		 if(lock) {
+	         return;
+	      }
+		lock = true;	
+		$.ajax({
+				type: "GET",
+				url: actions+page,
+				dataType: "html",
+				success: function(html){
+					page++;
+					if(page > 4){
+						$(mores).empty();
+						$(mores).remove();
+					} else if (!/<(.*)>.*<\/\1>/.test(html)){
+						$(mores).empty();
+						$(mores).html('<a href="javascript:void(0);">没有更多！</a>');
+					} else {
+						$(container).after(html);
+						var more = '<a href="javascript:void(0);" onclick="formore(\''+mores+'\',\''+container+'\',\''+actions+'\');">点击查看更多</a>';
+						$(mores).html(more);
+						lock = false;
+					}
+				}
+		});	
+	}	
+</script>
+	<nav>
+                <!--{if $out.channel_mk neq 'yqby'}-->
+		<ul class="az_mainnav">
+			<li><a href="<!--{url2static_url}-->index.php<!--{/url2static_url}-->">首页</a></li>
+			<li <!--{if $out.parent_cat_id eq 1}-->class="current1"<!--{/if}-->><a href="<!--{url2static_url}-->app.php?type=recommend&parent_cat_id=1<!--{/url2static_url}-->">应用</a></li>
+			<li <!--{if $out.parent_cat_id eq 2}-->class="current1"<!--{/if}-->><a href="<!--{url2static_url}-->app.php?type=recommend&parent_cat_id=2<!--{/url2static_url}-->">游戏</a></li>
+			<li><a href="/reading/reading.html">小说</a></li>
+			<li><a href="http://bbs.anzhi.com">论坛</a></li>
+		</ul>
+                <!--{/if}-->
+
+                <!--{if $out.channel_mk eq 'yqby'}-->
+		<ul class="new_az_mainnav">
+			<li><a href="<!--{url2static_url}-->index.php<!--{/url2static_url}-->">首页</a></li>
+			<li <!--{if $out.parent_cat_id eq 1}-->class="current1"<!--{/if}-->><a href="<!--{url2static_url}-->app.php?type=recommend&parent_cat_id=1<!--{/url2static_url}-->">应用</a></li>
+		</ul>
+                <!--{/if}-->
+
+		<div class="az_subnav">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td><a href="<!--{url2static_url}-->app.php?type=recommend&parent_cat_id=<!--{$out.parent_cat_id}--><!--{/url2static_url}-->">热门</a></td>
+			<td  class="current2"><a href="<!--{url2static_url}-->app.php?type=top&parent_cat_id=<!--{$out.parent_cat_id}--><!--{/url2static_url}-->">排行</a></td>
+			<td><a href="<!--{url2static_url}-->app.php?type=classify&parent_cat_id=<!--{$out.parent_cat_id}--><!--{/url2static_url}-->">分类</a></td>
+			</tr>
+			</table>
+			</div>
+	</nav>
+</header>
+<section>
+	<ul class="az_app_items_list" id="applistbox">
+	<!--{foreach from=$out.app_top item=v key=k}-->
+		<li>
+			<div class="az_itmes_icon"><img onerror="javascript:this.src='/images/ic_app_default.png'" src="<!--{imgurltrans}--><!--{$v.iconurl}--><!--{/imgurltrans}-->" alt="<!--{$v.softname|escape:html}-->" /></div>
+			<div class="az_items_info">
+				<h4><!--{$v.softname}--></h4>
+				<div class="az_items_score" style="width:160px;">
+					<span class="az_items_score" style="line-height:24px;"><!--{$v.scorehtml}--></span>
+                    <!--{if $v.isoffice}--><span class="az_items_score"><!--{$out.offical_icon}--></span><!--{/if}-->
+                    <span class="az_items_size"><em><!--{formatFileSize}--><!--{$v.filesize}--><!--{/formatFileSize}--></em></span>
+				</div>
+				<a href="<!--{url2static_url}-->app.php?type=info&softid=<!--{$v.softid}--><!--{/url2static_url}-->" class="az_clickarea"></a>
+				<!--{if $v.package == 'cn.goapk.market'}-->
+				<a class="az_down_btn" href="<!--{if $smarty.server.REQUEST_URI|strstr:'uc/'}-->http://m.goapk.com/redirect.php?do=dlapk&puid=18<!--{elseif $smarty.server.REQUEST_URI|strstr:'qq/'}-->http://m.anzhi.com/redirect.php?do=dlapk&puid=52<!--{elseif $smarty.server.REQUEST_URI|strstr:'tencent/'}-->http://m.anzhi.com/redirect.php?do=dlapk&puid=74<!--{elseif $smarty.server.REQUEST_URI|strstr:'360/'}-->http://m.anzhi.com/redirect.php?do=dlapk&puid=422<!--{elseif $smarty.server.HTTP_HOST|strstr:'bj.'}-->http://xiaoyuan.anzhi.com/dl_app.php<!--{else}-->download.php?softid=<!--{$v.softid}--><!--{if $out.anzhilist.recommend eq 1}--><!--{/if}--><!--{/if}-->">立即下载</a>
+				<!--{else}-->
+				<!--{if $out.channel_mk eq 'baidu'||$out.channel_mk eq 'yqby'}-->
+				<a class="az_down_btn" href="download.php?from=&softid=<!--{$v.softid}-->">立即下载</a>
+				<!--{else}-->
+				<a class="az_down_btn" rel="<!--{$v.softid}-->,'<!--{$v.package}-->'" href="download.php?softid=<!--{$v.softid}-->">极速下载</a>
+				<!--{/if}-->
+				<!--{/if}-->
+			</div>
+			
+		</li>
+	<!--{/foreach}-->
+	</ul>
+	<div class="az_more" id="az_more">
+		<a href="javascript:void(0);" onclick="formore('.az_more','.az_app_items_list li:last','<!--{url2static_url}-->ajax.php?f=app.php&type=top&parent_cat_id=<!--{$out.parent_cat_id}--><!--{/url2static_url}-->&morelist=');">点击查看更多</a>
+	</div>
+		
+</section>
+<div id="az_spirit"></div>
+<!--{include file="foot.html"}-->

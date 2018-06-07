@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-all.js?<?php echo time(); ?>"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+</head>
+<style>
+.margin_b tr td{ text-align:right;}
+.margin_b tr td{ padding-bottom:10px;}
+.margin_b tr td input{ width:250px; height:30px; line-height:30px; border:1px solid #999;}
+</style>
+<body>
+<h3 class="yahei" style="margin:10px; text-shadow: 0 0 5px gray; font-size:16px;">编辑精选</h3>
+<form id="form_perfect_soft" name="perfect_soft" action="" method="POST" enctype="multipart/form-data">
+<table class="yahei margin_b" style="margin:15px;">
+	<tr>
+		<td>软件包名：</td>
+		<td style="text-align:left;"><span id="span_package">{$perfect.package}</span></td>
+	</tr>
+	<tr>
+		<td>软件名称：</td>
+		<td style="text-align:left;"><span id="span_softname">{$perfect.softname}</span></td>
+	</tr>
+	<tr>
+		<td>标题：</td>
+		<td style="text-align:left;"><input type="text" id="input_subject" name="subject" value="{$perfect.subject}"/><div style="color:#666666; text-align:left; font-size:12px;">标题字符不可超过20个字</div></td>
+	</tr>
+	<tr>
+		<td>图片：</td>
+		<td style="text-align:left;">
+			<input type="file" id="input_file" name="banner"/>
+			<neq name="banner_path" value=""><div style="margin-top:3px;"><img style=" display:block; text-align:left;" src="{$banner_path}"/></div></neq>
+			<div style="color:#666666; text-align:left; font-size:12px;">请上传480*181的JPG/PNG/GIF图</div>
+		</td>
+	</tr>
+	<tr>
+		<td>标识：</td>
+		<td style="text-align:left;">
+			<select name="select_label_id" id="select_label_id" style="width:100px">
+				<?php foreach($label_list as $key => $val){ ?>
+					<option value='{$val.id}'<?php if($val['id']==$perfect['select_label_id']){ echo "selected='selected'";}?> >{$val.label_name}</option>
+				<?php } ?>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>评论条数：</td>
+		<td style="text-align:left;"><input type="text" id="input_comment_num" name="comment_num" value="{$perfect.comment_num}"/></td>
+	</tr>
+	<tr>
+		<td>精选列表是否显示：</td>
+		<td style="text-align:left;">
+			<select name="is_show" id="is_show" style="width:100px">
+					<option value='1' <?php if($perfect['is_show']==1){ echo "selected='selected'";}?>>是</option>
+					<option value='0' <?php if($perfect['is_show']==0){ echo "selected='selected'";}?>>否</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>往期条数：</td>
+		<td style="text-align:left;"><input type="text" id="input_history_num" name="history_num" value="{$perfect.history_num}"/></td>
+	</tr>
+	<tr>
+		<td>简介：</td>
+		<td style="text-align:left;"><textarea id="brief_intro" name="brief_intro" style="width:650px;">{$perfect.brief_intro}</textarea></td>
+	</tr>
+	<tr>
+		<td>页面内容：</td>
+		<td style="text-align:left;"><textarea id="editor_content" name="content" style="height:300px;">{$content}</textarea></td>
+	</tr>
+	<tr>
+		<td>上架时间：</td>
+		<td style="text-align:left;"><input id="input_public_date" name="public_date" value="<?php if($perfect['public_date']) echo date('Y-m-d H:i:s', $perfect['public_date']); else echo ""; ?>" type="text" class="Wdate" onClick="WdatePicker({startDate: '%y-%M-%d 00:00:00', dateFmt: 'yyyy-MM-dd HH:mm:ss'})"></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td style="text-align:left;"><button class="btn btn-success" style="margin-right:20px;" type="submit">保存</button><button type="button" class="btn btn-default" id="button_return">返回</button></td>
+	</tr>
+</table>
+</form>
+
+<script type="text/javascript">
+
+KindEditor.ready(function(K) {
+    window.editor = K.create('#editor_content',{
+        allowImageRemote : false,
+        allowImageUpload : true,
+		allowFileManager : true,
+        items : [
+            'bold','italic','underline','fontsize','forecolor','|','image','media','anchor','link','unlink','justifyleft','justifycenter','justifyright'
+        ]
+    });
+});
+KindEditor.options.cssData = 'body { font-size: 16px; }';
+
+
+$(function(){
+	
+	var var_soft_status = 0;
+	
+	$('#input_package').blur(function(){
+		
+		if($(this).val()==''){
+			$('#span_softname').html('');
+			$('#span_softname').css('color','');
+			return false;
+		}
+		
+		$.getJSON('__URL__/ajax_soft_status/package/'+$(this).val(), function(json){
+			var_soft_status = json.result_no;
+			if(json.result_no < 0){
+				$('#span_softname').html(json.result_msg);
+				$('#span_softname').css('color','red');
+			}else{
+				$('#span_softname').html(json.result_data.softname);
+				$('#span_softname').css('color','');
+				$('#input_softname').val(json.result_data.softname);
+			}
+		});
+	});
+	
+	$('#form_perfect_soft').submit(function(){
+		
+		var var_alert = '';
+		
+		if($('#input_package').val()==''){
+			var_alert += '软件包名不能为空\n';
+		}
+		
+		if($('#input_softname').val()==''){
+			var_alert += '软件名称不能为空\n';
+		}
+		
+		if($('#input_subject').val()==''){
+			var_alert += '标题不能为空\n';
+		}
+		
+		if($('#input_subject').val().length>20){
+			var_alert += '标题不能超过20个字符\n';
+		}
+		
+		if($('#input_comment_num').val()==''){
+			var_alert += '评论条数不能为空\n';
+		}
+		var is_show=$('#is_show').val();
+		if(is_show==1 && $('#brief_intro').val()==''){
+			var_alert += '简介内容不能为空\n';
+		}
+		if(isNaN($('#input_comment_num').val())){
+			var_alert += '评论条数必须为数字\n';	
+		}
+		
+		if($('#input_history_num').val()==''){
+			var_alert += '往期条数不能为空\n';
+		}
+		
+		if(isNaN($('#input_history_num').val())){
+			var_alert += '往期条数必须为数字\n';	
+		}
+		
+		if(editor.html()==''){
+			var_alert += '页面内容不能为空\n';
+		}
+			
+		if(var_soft_status==-2){
+			var_alert += '该软件不存在！\n';
+		}
+		
+		if(var_soft_status==-3){
+			var_alert += '该软件已下架！\n';
+		}
+		
+		if(var_alert!=''){
+			alert(var_alert);
+			return false;
+		}
+		
+		return true;
+		
+	});
+	
+	$('#button_return').click(function(){
+		location.href='__URL__/index{$return_url}';
+	});
+});
+</script>
+</body>
+</html>

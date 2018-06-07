@@ -1,0 +1,158 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+
+function delBadFilter(str)
+{
+  if (confirm("是否删除此条屏蔽信息？")) {
+    location.href = '__URL__/delBadFilter/id/'+str
+  }
+}
+
+function batchDelBadFilter()
+{
+  if (confirm("是否批量删除屏蔽信息？")) {
+    var input = new Array();
+	var has = false;
+    $('input[name^=id_]').each(function(){
+      if (this.name != 'id_all' && this.checked) {
+        input.push(this.value);
+		has = true;
+      }
+    });
+	if (has) {
+      location.href = '__URL__/delBadFilter/id/'+ input.join(',');
+    } else {
+      alert('请选择需要进行删除的评论信息');
+    }
+  }
+}
+  
+function checkAll(obj)
+{
+  var flag = $(obj).attr('checked') == 'checked';
+  $('input[name^=id_]').attr('checked', flag);
+}
+</script>
+
+<style type="text/css">
+<!--
+.intb td {
+border-right:none;
+border-bottom: none;
+}
+.searchbar input {
+  width: 70px;
+
+}
+
+.fixlong {
+  table-layout: fixed;
+}
+.fixlong td {
+  word-break: break-all;
+}
+-->
+</style>
+<div class="main" >
+<div class="content">
+<center>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+<tr height="35">
+    <td align="center">
+		<a href="__URL__/cooper_soft"><font style="color:#000; font-weight:bold">合作软件</font></a>
+	</td>
+	<td align="center">
+		<a href="__URL__/message_soft"><font style="color:#000; font-weight:bold">评论信息列表</font></a>
+	</td>
+	<td align="center" >
+		<a href="__URL__/reply_list">
+			<font style="color:#000; font-weight:bold">评论回复列表</font>
+		</a>
+	</td>  
+	<td align="center" style=<?php if($from == 'own'){ echo "background:#FFCC66" ;}?> >
+		<a href="__URL__/own_soft"><font style="color:#000; font-weight:bold">自有产品评论</font></a>
+	</td>
+	<td align="center" style="background:#FFCC66">
+		<a href="__URL__/listBadFilter"><font style="color:#000; font-weight:bold">用户屏蔽列表</font></a>
+	</td>
+	<td align="center" >
+		<a href="__URL__/del_soft_list"><font style="color:#000; font-weight:bold">已删除列表</font></a>
+	</td>
+</tr>
+</table>
+<form id="upload" method='get' action="__URL__/listBadFilter" >
+  <table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td>屏蔽值:</td><td><input size='9' type="text" name="source_value" value="<?php echo $source_value;?>" /></td>
+    <td>屏蔽类型</td><td>
+		<select name="source_type" id="source_type">
+			<option value="">请选择</option>
+			<option value="1" <?php $source_type==1 && print('selected')?>>IP</option>
+			<option value="2" <?php $source_type==2 && print('selected')?>>IMEI</option>
+			<option value="3" <?php $source_type==3 && print('selected')?>>用户名</option>
+		</select>
+    </td>
+    <td>起止时间</td>
+    <td width="300" colspan='4'><?php showDatePicker('begintime','endtime', $begintime,$endtime);?></td>
+    <td>当前状态</td>
+    <td>
+<select name="type">
+	<option value="0">全部</option>
+	<option value="1" <?php $type==1 && print('selected')?>>正常</option>
+	<option value="2" <?php $type==2 && print('selected')?>>过期</option>
+	<option value="3" <?php $type==3 && print('selected')?>>未开始</option>
+</select>
+    </td>
+    <td><input type="submit" value="搜索" /></td>
+  </tr>
+  </table>
+</form>
+<table width="100%" border="1" cellpadding="0" cellspacing="0">
+<tr align='left' bgcolor="" height='30'>
+  <td><?php echo $total;?>条&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="button" value="添加屏蔽" class="thickbox" alt="/index.php/Dev/Message/addCommentBlock?"/></td>
+</tr>
+</table>
+<form id="filterForm" onsubmit="return checkForm()">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+		<tr>
+		<td align='center'  width="3%" height="30" bgcolor="#e3e2fe"><b>ID</b></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe">&nbsp;&nbsp;<b>类型</b></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe">&nbsp;&nbsp;<b>值</b></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe">&nbsp;&nbsp;<b>起始时间</b></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe">&nbsp;&nbsp;<b>结束时间</b></td>
+		<td align='center' width="15%" height="30" bgcolor="#e3e2fe">&nbsp;&nbsp;<b>屏蔽原因</b></td>
+		<td align='center' width="5%" height="30" bgcolor="#e3e2fe">&nbsp;&nbsp;<b>当前状态</b></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe">&nbsp;&nbsp;<b>屏蔽时间</b></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe">&nbsp;&nbsp;<b>操作</b></td>
+		</tr>
+		<volist name='black_list' id='filter'>
+		<tr>
+			<td><input type="checkbox" value="{$filter.id}" name="id_{$filter.id}"/>{$filter.id}</td>
+			<td>{$filterDesc[$filter[source_type]]}</td>
+			<td>{$filter.source_value}</td>
+			<td align='center'><if condition="$filter.limit_time eq 1">{$filter.begintime|date='Y-m-d H:i:s',###|default='&nbsp;'}<else/>-</if></td>
+			<td align='center'><if condition="$filter.limit_time eq 1">{$filter.endtime|date='Y-m-d H:i:s',###|default='&nbsp;'}<else/>-</if></td>
+			<td>{$filter.reason|nl2br}</td>
+			<td align='center'>{$filter.time_status}</td>
+			<td align='center'><?php echo date('Y-m-d H:i:s', $filter['addtime']);?></td>
+			<td align='center'><br/>
+<input type="button" value=" 编 辑 " class="thickbox" alt="/index.php/Dev/Message/editBadFilter?id=<?php echo $filter['id']?>"/><br/><br/>
+<input type="button" value=" 删 除 " onclick="delBadFilter({$filter.id})" /><br/><br/></td>
+		</tr>
+		</volist>
+<tr height='50px'>
+    <td colspan="9"><input type="checkbox"  onclick="checkAll(this)" name="id_all"/> <input type="button" id="delete" value="批量删除"  onClick="batchDelBadFilter()"  />
+</td>
+</tr>
+	</table>
+</form>
+<div  align='left'>{$page}</div>

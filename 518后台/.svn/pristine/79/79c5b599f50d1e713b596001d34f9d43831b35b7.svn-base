@@ -1,0 +1,107 @@
+<include file="../../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+
+<body>
+    <div class="search_box">
+        <form method="get" action="__URL__/index" name="index" id="index">
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="15%">
+                        <label>协议编号：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_framework_number" id="search_framework_number" value="{$search_framework_number}"/>
+                    </td>
+                    <td width="15%">
+                        <label>客户名称：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_client_name" id="search_client_name" value="{$search_client_name}"/>
+                    </td>
+                    <td width="15%">
+                        <label>合作日期：</label>
+                        <input id="search_start_time" name="search_start_time" value="{$search_start_time}" type="text" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM'})" style="width:140px; height:28px"/>到<input id="search_end_time" name="search_end_time" value="{$search_end_time}" type="text" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM'})" style="width:140px; height:28px"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="20%">
+                        <label>&nbsp;&nbsp;&nbsp;负责人：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_charge_name" id="search_charge_name" value="{$search_charge_name}"/>
+                    </td>
+                    <td width="20%">
+                        <label>购买频道：</label>
+                        <select name="search_channel" id="search_channel">
+                            <option value="" selected>选择栏目</option>
+                            <volist name="channels" id="channel">
+                                <option value="{$key}" <if condition="$search_channel eq $key">selected</if>>{$channel}</option>
+                            </volist>
+                        </select>
+                    </td>
+                    <td width="20%">
+                        <label>签订日期：</label>
+                        <input id="search_sign_start" name="search_sign_start" value="{$search_sign_start}" type="text" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM'})" style="width:140px; height:28px"/>到<input id="search_sign_end" name="search_sign_end" value="{$search_sign_end}" type="text" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM'})" style="width:140px; height:28px"/>
+                    </td>
+                    <td width="5%"><input type="submit" value="搜索" class="search_btn"/></td>
+                </tr>
+                <tr>
+                    <td width="10%"><a href='__URL__/add_framework_show' class="search_btn">新增协议</a></td>
+                    <td width="10%"><a href='__URL__/index?down=1&{$url_param}' class="search_btn">导出报表</a></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="4%" rowspan="1">协议编号</th>
+                    <th width="6%" rowspan="1">客户名称</th>
+                    <th width="6%" rowspan="1">起始日期</th>
+                    <th width="6%" rowspan="1">终止日期</th>
+                    <th width="6%" colspan="1">购买频道</th>
+                    <th width="6%" colspan="1">签订日期</th>
+                    <th width="4%" colspan="1">负责人</th>
+                    <th width="6%" rowspan="1">合作金额</th>
+                    <th width="6%" rowspan="1">预计保证金</th>
+                    <th width="6%" rowspan="1">已收保证金</th>
+                    <th width="6%" rowspan="1">待抵扣</th>
+                    <th width="6%" rowspan="1">已开发票/票据</th>
+                    <th width="4%" rowspan="1">合同数量</th>
+                    <th width="6%" rowspan="1">备注</th>
+                    <th width="10%" rowspan="1">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="record">
+                    <tr>
+                        <td>{$record.framework_number}</td>
+                        <td>{$record.client_name}</td>
+                        <td>{$record.start_time|date="Y-m-d",###}</td>
+                        <td>{$record.end_time|date="Y-m-d",###}</td>
+                        <td>{$record.purchase_channel_name}</td>
+                        <td>{$record.sign_time|date="Y-m-d",###}</td>
+                        <td>{$record.charge_name}</td>
+                        <td>{$record.cooperate_account}</td>
+                        <td>{$record.expected_deposit}</td>
+                        <td>{$record.total_input_account}</td>
+                        <td>{$record.left_amount}</td>
+                        <td>{$record.total_input_invoice}</td>
+                        <td>{$record.contract_count}</td>
+                        <td>{$record.remark}</td>
+                        <td>
+                            <a href="__URL__/edit_framework_show?id={$record.id}" class="blue">编辑协议</a><br/>
+                            <a href="__URL__/delete_framework?id={$record.id}" class="blue" onclick="return confirm('确定删除？');">删除协议</a><br/>
+                            <a href="__URL__/add_account?id={$record.id}&modal=true" class="thickbox blue">录入保证金</a><br/>
+                            <a href="__URL__/add_invoice?id={$record.id}&modal=true&height=600" class="thickbox blue">录入发票/票据</a>
+                            <br/>
+                            <a href="__URL__/add_account_detail?id={$record.id}" class="blue">保证金详情</a>
+                        </td>
+                    </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>

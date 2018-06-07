@@ -1,0 +1,261 @@
+<include file="../../Public/header" />
+<script src="/Public/js/thickbox.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox1.css" />
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<style type=text/css>
+.intb td {
+border-right:none;
+border-bottom: none;
+}
+.fixlong {
+  table-layout: fixed;
+}
+.fixlong td {
+  word-break: break-all;
+}
+</style>
+</head>
+
+<body>
+<div style="width:95%; margin-top:4px">
+	<table  width="90%" align="center" cellpadding="0" cellspacing="0" style="margin:10px auto;border:0px;">
+		<tbody>
+			<!-- <tr>
+				<td colspan="10">活动搜索</td>
+			</tr> -->
+			<tr>
+				<td>预约ID</td>
+				<td><input type="text" style="width:80%;"name="id" value="{$id}"id="id" /></td>
+				<td>预约名称</td>
+				<td><input type="text" style="width:80%;"name="order_name" value="{$order_name}"id="order_name"placeholder="模糊查询"/></td>
+				<td>游戏名称</td>
+				<td><input type="text" style="width:80%;" name="game_name"  value="{$game_name}"id="game_name"placeholder="模糊查询"/></td>
+				<td rowspan="3">&nbsp;<button id="searchGo">确认搜索</button>&nbsp;&nbsp;<button id="ressetSearch">清空</button></td>
+			</tr>
+			<tr>
+				<td colspan="10">&nbsp;</td>
+			</tr>
+			<tr>	
+				<td>预约开始时间</td>
+				<td><input type="text" style="width:80%;" name="startDate" value="{$startDate}" id="startDate"placeholder="全匹配,格式:2014-07-07"/><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"startDate",dateFmt:"yyyy-MM-dd"})'  style="border:1px solid #000;vertical-align:middle;line-height:30px;"/></td>
+				<td>预约结束时间</td>
+				<td><input type="text" style="width:80%;" name="endDate" value="{$endDate}" id="endDate"placeholder="全匹配,格式:2014-07-07"/><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"endDate",dateFmt:"yyyy-MM-dd"})'  style="border:1px solid #000;vertical-align:middle;line-height:30px;"/></td>
+			</tr>
+		</tbody>
+	</table>
+	<div width="99%" style="margin-top:10px;margin-left:50px;">
+		<a href="__URL__/addGameorder_show?{$url_subff}?mm"><button>添加游戏预约</button></a>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<a href="/index.php/Sj/Config/subscriber_config{$url_subff}?mm" class="thickbox">预约设置</a>
+	</div>
+<script type="text/javascript">
+	$(function(){
+        document.onkeydown = function(e){
+            if(e.keyCode==13) {
+                search();
+             }
+        }
+		$("#searchGo").click(function(){
+                                    search();
+		}
+		);
+
+		$("#ressetSearch").click(function(){
+			$("#id").val("");
+			$("#order_name").val("");
+			$("#startDate").val("")
+			$("#endDate").val("")
+			$("#game_name").val("")
+		});
+	});
+
+    function search(){
+            var id = $("#id").val();
+            var order_name = encodeURIComponent($("#order_name").val());
+            var startDate = $("#startDate").val();
+            var endDate = $("#endDate").val();
+            var game_name = $("#game_name").val();
+            var go_url = "__URL__/showGameorderList?order_name="+order_name+"&startDate="+startDate+"&endDate="+endDate+"&game_name="+game_name+"&id="+id;
+            window.location.href=go_url;
+    }
+    function change_rank(id){
+    	var rank=$('#rank_'+id).val();
+    	var rank_old=$('#rank_old_'+id).val();
+    	if(rank==rank_old){
+    		return;
+    	}
+    	if(!rank){
+    		alert('排序值不能为空'); 
+    		return;
+    	}
+    	var reg = /^[1-9]{1}[0-9]*$/;   
+        var r = rank.match(reg); 
+    	if(r==null){    
+            alert('排序值必须为大于0的整数!'); 
+        	return;
+        }
+         $.ajax({
+			'url': '/index.php/Sj/GameSubscribe/change_rank',
+			'type': 'get',
+			'data' : 'id='+id+'&rank='+rank+'&rank_old='+rank_old,
+			'dataType': 'json',
+			'success': function(data){
+				if(data == 1){
+					alert('预约游戏修改排序值成功');
+					location.reload(true);//加载页面
+				}else{
+					alert('预约游戏修改排序值失败');
+					// return false;
+				}
+			}
+		});	
+    }
+    function delete_act(deleteid) {
+		if (confirm('确定要删除指定游戏预约么？'))
+		{
+			location.href='/index.php/Sj/GameSubscribe/deleteGameorder/id/' + deleteid+"{$url_subff}";
+		}
+	}
+</script>
+	<table width="99%" class='fixlong' border="1" align="center" cellpadding="0" cellspacing="0" style="margin-top:10px">
+		<thead>
+			<tr align="center">
+				<th width="4%">ID</th>
+				<th width="4%" height="26" bgcolor="#E3E2FE">预约名称</th>
+				<th width="4%">游戏名称</th>
+				<!-- <th width="5%" bgcolor="#E3E2FE">图片</th> -->
+				<th width="5%" bgcolor="#E3E2FE">低分图片</th>
+				<th width="5%" bgcolor="#E3E2FE">高分图片</th>
+				<th width="6%" bgcolor="#E3E2FE">开始时间</th>
+				<th width="6%" bgcolor="#E3E2FE">结束时间</th>
+				<th  width="7%" bgcolor="#E3E2FE">上线时间</th>
+				<th width="5%" bgcolor="#E3E2FE">排序</th>
+				<th width="5%" bgcolor="#E3E2FE">合作形式</th>
+				<th width="10%" bgcolor="#E3E2FE">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="vo">
+			<tr style="color:#707070; background-color:#fff">
+				<td align="center">{$vo.id}</td>
+				<td align="center" id="name_{$vo.id}">{$vo.title}</td>
+				<td align="center" id="name_{$vo.ids}">{$vo.game_name}</td>
+				<!-- <td align="center" id="img_{$vo.id}">
+					<a target='_blank' href='<?php echo IMGATT_HOST;?>{$vo.image}' >
+					<img src="<?php echo IMGATT_HOST;?>{$vo.image}" width="50" height="50" >
+					</a>
+				</td>	 -->
+				<td>	
+					<?php if($vo['low_image']){ ?>
+					<a target='_blank' href='<?php echo IMGATT_HOST;?>{$vo.low_image}' >
+					<img src="<?php echo IMGATT_HOST;?>{$vo.low_image}" width="50" height="50" >
+					</a>
+					<?php } ?>
+				</td>	
+				<td>	
+					<?php if($vo['high_image']){ ?>
+					<a target='_blank' href='<?php echo IMGATT_HOST;?>{$vo.high_image}' >
+					<img src="<?php echo IMGATT_HOST;?>{$vo.high_image}" width="50" height="50" >
+					</a>
+					<?php } ?>
+				</td>
+				<td align="center" id="start_tm_{$vo.id}">{$vo.start_tm}</td>
+				<td align="center" id="end_tm_{$vo.id}">{$vo.end_tm}</td>
+				<td align="center" id="shelves_time_{$vo.id}">{$vo.shelves_time}</td>
+				<td align="center"><input type="text" id='rank_{$vo.id}' value='{$vo.rank}' style="width:50px;" onblur="change_rank({$vo.id})" />
+				<input type='hidden' id='rank_old_{$vo.id}' value='{$vo.rank}'/>
+				</td>
+				<TD align="center"><?php if ($vo['co_type'] !=0) { echo $vo['co_types'] ; }else{ echo "-";} ?></TD>
+				<td align="center">
+					<!-- <a href="__URL__/showpuserlist/id/{$vo.id}/p/{$p}/lr/{$lr}{$url_subff}" >参与预约用户</a><br/> -->
+					<a href="__URL__/showpuserlist/subscriber_id/{$vo.id}/aid/{$vo.activity_id}/ap_id/{$vo.ap_id}/game_name/{$vo.game_name}" >参与预约用户</a><br/>
+					<a href="__URL__/edit_test_show/id/{$vo.id}/p/{$p}/lr/{$lr}{$url_subff}" >编辑</a><br/>
+					<a style="cursor:pointer;" href="javascript:delete_act({$vo.id});">删除</a><br />
+				</td>
+			</tr>
+			</volist>
+
+		</tbody>
+	</table>
+	{$page}
+</div>
+
+<!-- 添加活动 -->
+<style type="text/css">
+.tb_add .td1 {height:30px;line-height:30px;font-size:14px;}
+.tb_add input {width:300px;height:22px;font-size:14px;}
+.tb_add .td2 {height:30px;line-height:30px;font-size:14px;}
+</style>
+<div id="_add_div" style="position:absolute;top:0px;left:0px;display:none;background:#fff;width:500px;height:410px;border:1px solid #000;">
+
+</div>
+<div id="box" class="zxx_test_list" style="padding:10px; width:350px; height:100px; word-break:break-all; word-wrap:break-word;overflow-y:scroll  display:none;">
+	<table>
+		<tr>
+			<td align='center' id='link' ></td>
+		</tr>
+	</table>
+</div>
+
+
+
+<form method="post" action="" id="tmp_form">
+
+<input type="hidden" id="sta" name="sta" />
+</form>
+<div id="bgdiv" style="position:absolute;display:none; left:0px; top:0px; width:100%; height:100%; filter:alpha(opacity=40);opacity:0.4; background-color:#000000; z-index:1000;"></div>
+<script language="javascript">
+function edit(editid) {
+	popup('_edit_div');
+	$('#edit_name').val($('#name_'+editid).html());
+	$('#edit_url').val($('#url_'+editid).html());
+	$('#edit_pre_url').val($('#pre_url_'+editid).html());
+	$('#edit_end_url').val($('#end_url_'+editid).html());
+	$('#edit_start_tm').val($('#start_tm_'+editid).html());
+	$('#edit_end_tm').val($('#end_tm_'+editid).html());
+	$('#edit_show_start_tm').val($('#show_start_tm_'+editid).html());
+	$('#edit_show_end_tm').val($('#show_end_tm_'+editid).html());
+	$('#editid').val(editid);
+}
+
+
+function form_chk() {
+	return true;
+}
+function form_chk_edit() {
+	return true;
+}
+
+function status(beid,sta) {
+	if(confirm('你确认执行此操作！')) {
+		$('#tmp_form')[0].action = '/index.php/Sj/Products/push_oper';
+		$('#beid').val(beid);
+		$('#sta').val(sta);
+		$('#tmp_form').submit();
+	}
+}
+
+function popup(id) {
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+}
+
+function open_box(txt){	
+	$('#link').html(txt);
+	$("#box").zxxbox();
+}
+</script>
+</body>
+</html>

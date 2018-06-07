@@ -1,0 +1,117 @@
+<script type="text/javascript">
+
+function getCommon()
+{
+    tags= $("#tagss").val();
+    category_id= $("#category_id").val();
+
+    var param = {
+        tags: tags,
+        category_id: category_id
+    };
+
+    $.ajax({
+        url:'__URL__/getCommontag',
+        type:'POST',
+        data:param,
+        dataType:'json',
+        success:function(data){
+            if(data==1)
+            {
+                alert('该分类下没有常用标签');
+            }else
+            {
+                $("#tagss").val(data.data);
+            }
+        }
+    });
+}
+
+function getSoftTop()
+{
+    tags= $("#tagss").val();
+    category_id= $("#category_id").val();
+
+    var param = {
+        tags: tags,
+        category_id: category_id
+    };
+
+    $.ajax({
+        url:'__URL__/getSoftTop',
+        type:'POST',
+        data:param,
+        dataType:'json',
+        success:function(data){
+            if(data==1)
+            {
+                alert('没有符合条件的标签');
+            }else{
+                $("#tagss").val(data.data);
+            }
+        }
+    });
+}
+
+function save(){
+    tags= $("#tagss").val();
+    old_tags= $("#old_tags").val();
+    package= $("#package1").val();
+            var timenow = new Date().getTime();
+            suffix = timenow;
+            window_list.push(suffix);
+            var urls ="#TB_inline?height=100&width=200&inlineId=loading&modal=true";
+            tb_show('title',urls,"thickbox");
+    var param = {
+        tags: tags,
+        old_tags: old_tags,
+        package : package
+    };
+    $.ajax({
+        url:'__URL__/edit_soft_tag',
+        type:'POST',
+        data:param,
+        dataType:'json',
+        success:function(data){
+            if(data==1)
+            {
+                //alert('修改成功');
+                $("#old_tags").val(tags);
+                location.reload();
+                //location.href ="/index.php/Sj/Systemmanage/tags_softlist";
+            }else if(data==2){
+                alert('修改失败');
+            }else if(data==3){
+                alert('修改失败!');
+            }else if(data==4){
+                alert('修改失败!!');
+            }
+        }
+    });
+};
+</script>
+修改标签
+<hr>
+<table>
+    <tr>
+        <td width="30%">软件名:</td>
+        <td>{$info.softname}</td>
+        <input type="hidden" id="old_tags" value="{$info.tags}">
+        <input type="hidden" id="package1" value="{$info.package}">
+        <input type="hidden" id="category_id" value="{$info.category_id}">
+        </tr>
+    <tr>
+        <td>软件分类:</td>
+        <td>{$cname}</td>
+        </tr>
+    <tr>
+        <td>标签:</td> 
+        <td><textarea style="width:250px;height:200px;" id="tagss">{$info.tags}</textarea><br>多个标签请以英文逗号隔开</td>
+        </tr>
+    <tr>
+        <td>建议标签:</td>
+        <td><input type="button" value="分类常用标签" onclick="getCommon()"><input type="button" value="分类软件前10标签" onclick="getSoftTop()"></td>
+        </tr>
+    </table>
+    <br>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="input" type="button" value="提交" onclick="save()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onclick="tb_remove();"/></td>

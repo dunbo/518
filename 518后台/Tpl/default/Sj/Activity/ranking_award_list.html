@@ -1,0 +1,71 @@
+<include file="../../Public/header"/>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script src="/Public/js/thickbox-compressed.js"></script>
+
+<body>
+<div  style="margin:20px;">
+<h2>充值类活动"{$activity_result['name']}"活动奖品列表</h2>
+</div>
+<div style="margin:20px;">
+<a href="__URL__/ranking_award_add/aid/{$activity_result['id']}/lottery_style/{$lottery_style}/" class="search_btn thickbox">添加奖品</a>
+</div>
+<div style="margin:20px;">
+<table class="table_list">
+<tr>
+	<td>奖品名称</td>
+	<td>奖品等级</td>
+	<td>奖品类型</td>
+	<td>奖品总数量</td>
+	<td>奖品说明</td>
+	<td>奖品图片</td>
+	<td>创建时间</td>
+	<td>操作</td>
+</tr>
+<?php foreach($result as $key => $val){ ?>
+<tr>	
+	<td>{$val.name}</td>
+	<td>{$val.level}</td>
+	<td>
+		<?php if($val['type'] == 1){ ?>
+		实物奖品
+		<?php }else if($val['type'] == 2){ ?>
+		礼包
+		<?php }else if($val['type'] == 3){ ?>
+		谢谢参与
+		<?php }else if($val['type'] == 4){ ?>
+		礼券
+		<?php }else if($val['type'] == 5){ ?>
+		礼包（直接发放）
+		<?php } ?>
+	</td>
+	<td><?php echo $award_probability[$val['pid'].$activity_result['id']]['upperlimit']; ?></td>
+	<td style=" width:150px;word-break:break-all; word-wrap:break-word;" >{$val.desc}</td>	
+	<td><img src="<?php echo IMGATT_HOST; ?>{$val.pic_path}" width="200px;" height="100px;"></td>
+	<td><?php echo date('Y-m-d H:i:s',$val['create_tm']); ?></td>
+	<td>
+		<a href="__URL__/ranking_award_edit/pid/{$val.pid}/aid/{$activity_result['id']}/lottery_style/{$lottery_style}/start_tm/{$activity_result['start_tm']}/" class="thickbox">编辑</a>
+		<br/>
+		<?php if($val['type'] != 3 && ($activity_result['start_tm'] > time())){ ?>
+		<a href="__URL__/ranking_award_probability/pid/{$val.pid}/aid/{$activity_result['id']}/" class="thickbox" >设置中奖概率</a><br />
+		<?php } ?>
+		<a href="__URL__/ranking_award_del/pid/{$val.pid}/aid/{$activity_result['id']}/type/{$val['type']}/" onclick="return checkit(this);" >删除</a>
+		<?php  if($val['type'] == 2){ ?>
+		<br />
+		<a href="javascript:if(confirm('是否确认导出？')) location.href='__URL__/acrivity_export_gift/pid/{$val.pid}/aid/{$activity_result['id']}/type/5/'">导出未发放礼包</a>
+		<?php } ?>		
+	</td>
+</tr>
+<?php } ?>
+</table>
+</div>
+</body>
+</html>
+<script>
+	function del_check(obj){
+		console.log(obj);
+		alert(obj.attr('href'));
+		return false;
+	}
+
+</script>

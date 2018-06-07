@@ -1,0 +1,96 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+<div class="main" >
+<div class="content">
+<center>
+<?php if(!$_GET['form']){ ?>
+<a href='__URL__/index/form/1' >new</a>
+<?PHP } ?>
+<form id="sub_apply" method='post' action="__URL__/index" >
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+<?php if($_GET['type'] == 1 || $_GET['type'] == 2){ ?>
+    <td width="70">IP：</td>
+    <td width="166">
+		<input type="text" size='15' name="ip_address" id="ip_address" value="{$ip_address}" />
+	</td>
+    <td width="70">operation：</td>
+    <td width="166">
+		<input type="text" size='15' name="operation" id="operation" value="{$operation}" />
+	</td>
+    <td width="99">文件：</td>
+    <td width="166">
+	<input type="text" size='15' name="file_name" id="file_name" value="{$file_name}" />
+	</td>
+	<input type="hidden" size='15' name="type" id="type" value="1" />
+	<td width="70">时间：</td>		
+	<td width="300" colspan='3'><?php showDatePicker('begintime','endtime', $_GET['begintime'],$_GET['endtime']);?></td>	
+<?php }else{ ?>
+	<input type="hidden" size='15' name="file_name" id="file_name" value="" />
+	<input type="hidden" size='15' name="type" id="type" value="" />
+    <td width="70">时间：</td>		
+	<td width="300" colspan='3'><?php showDatePicker('begintime','endtime', $_GET['begintime'],$_GET['endtime']);?></td>	
+<?php } ?>
+	<input type="hidden" size='15' name="form" id="form" value="<?php echo $_GET['form']; ?>" />
+	<td width="100" align='center' rowspan="2"><input type="submit" name="button" id="button" value="&nbsp;搜 索&nbsp;"  /></td>
+
+  </tr>
+</table>
+</form>
+<br />
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+  <tr>
+	<?php if($_GET['type'] == 1 || $_GET['type'] == 2){ ?>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">ip</font></td>
+		<td align='center' width="15%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">时间</font></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">动作</font></td>
+		<td align='center' width="65%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">文件</font></td>
+	<?php }else{ ?>
+    <td align='center' width="80%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">文件</font></td>
+    <td align='center' width="20%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">文件个数</font></td>
+	<?php } ?>
+  </tr>
+  <volist name='list' id='vo'>
+  <tr id='tr{$vo.dev_id}' >
+	<?php if($_GET['type'] == 1 || $_GET['type'] == 2){ ?>
+		<td>{$vo.ip_address}</td>
+		<td align='center'><?php echo $vo['attribute_time'] ? date("Y-m-d H:i:s", $vo['attribute_time']) : ''; ?></td>
+		<td>{$vo.operation}</td>
+		<td>
+			{$vo.file_name}
+		</td>
+	<?php }else{ ?>
+		<td>
+			{$vo.file_name}
+		</td>
+		
+		<td align='center'>
+			<?php if($vo['toal'] > 1){ ?>
+			<a href="javascript:;" onclick="details('<?php echo $vo['file_name']; ?>')" >{$vo.toal}</a> 
+			<?php }else{ ?>
+			1
+			<?php } ?>
+		</td>	
+	<?php } ?>
+  </tr>
+  </volist>
+</table>
+<div  align='left'>{$page}</div>
+</center>
+</div>
+</div>
+<script>
+	function details(file){
+		$('#file_name').val(file);
+		$('#type').val(2);
+		$('#sub_apply').submit();
+		$('#file_name').val('');
+		$('#type').val('');
+	}
+</script>	

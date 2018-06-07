@@ -1,0 +1,90 @@
+<link rel="stylesheet" type="text/css" href="/Public/zoom/zoom.css" />
+<script src="/Public/zoom/zoom.js"></script> 
+<script>
+function show_detail()
+{
+	var ad_id=$("#ad_id").val();
+	$.ajax({
+			url: '__URL__/get_exp_detail',
+			data: 'id='+ad_id,
+			type: 'get',
+			success: function(data){
+				if(data != 2)
+				{
+					$("#show_div").css('display','');
+					$("#ad_id_note").css('display','none');
+					var val = eval("("+data+")");
+					document.getElementById('title').innerHTML=val.title;
+					document.getElementById('rec_reason').innerHTML=val.rec_reason;
+					document.getElementById('tid').innerHTML=val.tid;
+	
+					document.getElementById('pic_url').src=val.pic_url;
+					document.getElementById('pic_url').file=val.pic_url;
+					document.getElementById('pic_url').zoomfile=val.pic_url;
+					//window.location.reload(true);
+				}
+				else
+				{
+					$("#ad_id_note").css('display','block');
+					$("#show_div").css('display','none');
+					return false;
+				}
+			}
+		});
+}
+</script>
+<div>
+<form action="__URL__/add_exp_show" method="post" enctype="multipart/form-data">
+<table>
+<tr>
+	<td>广告ID：</td>
+	<td><input type="text" id="ad_id" name="ad_id" value="" style="width:200px;" onblur="show_detail()" /><span id="ad_id_note" style="color:red; display:none;"><font >*</font>广告ID未在该模块「素材配置」中</span></td>
+</tr>
+<tr>
+	<td>排序：</td>
+	<td>
+	<select name="rank" style="width:210px;">
+		<?php for($i=1;$i<=$num; $i++) { ?>
+			<option><?php echo $i; ?></option>
+		<?php } ?>
+	</select></td>
+</tr>
+<tr>
+	<td>开始时间：</td>
+	<td><input id="start_tm" name="start_tm" style="width:200px;" value="{$start_tm}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></td>
+</tr>
+<tr>
+	<td>结束时间：</td>
+	<td><input id="end_tm" name="end_tm" style="width:200px;" value="{$end_tm}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></td>
+</tr>
+<tr id="show_div" style="display:none;">
+	<td colspan="2">
+		<table>
+			<tr><h3>素材预览</h3><hr/></tr>
+			<tr>
+				<td style="width:100px;">宣传标题</td>
+				<td id="title" style="width:200px; word-break:break-all;"></td>
+			</tr>
+			<tr>
+				<td style="width:100px;">TID</td>
+				<td id="tid" style="width:200px; word-break:break-all;"></td>
+			</tr>
+			<tr>
+				<td style="width:100px;">宣传图片</td>
+				<td style="width:200px; word-break:break-all;"><img id="pic_url" src="" zoomfile="" file=""  class="zoom" width="120" height="80" inpost="1" onclick="_zoom(this, this.src)"/></td>
+			</tr>
+			<tr>
+				<td style="width:100px;">推荐理由</td>
+				<td id="rec_reason"  style="width:200px; word-break:break-all;"></td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td><input type="submit" style="display:inline;" value="添加" class="search_btn" /></td>
+	<td><input type="button" style="display:inline;" value="取消" class="search_btn" onclick="tb_remove();" /></td>
+</tr>
+</table>
+</form>
+</div>
+<div id="append_parent"></div>

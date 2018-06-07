@@ -1,0 +1,587 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+</head>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<script>
+var change_switch = "<?php echo $list['change_switch'] ? $list['change_switch'] : 1; ?>";
+var share_switch = "<?php echo $list['share_switch'] ? $list['share_switch'] : 0; ?>";
+var music_switch = "<?php echo $list['back_top'] ? $list['back_top'] : 1; ?>";
+$(document).ready(function(){
+	//颜色
+	$(function(){
+		$('.color').colorPicker();
+	});
+	open_change_switch(change_switch);
+	show_type_table(share_switch);
+	open_music_switch(music_switch);
+}); 
+//图片验证	
+function test(file_name)
+{
+	var result =/\.[^\.]+/.exec(file_name);
+	return result;
+}
+function onupload_mp3(sender,id){
+    if( $("#"+id).val()){        
+		if(!sender.value.match( /.mp3/i )){
+			alert('背景音乐格式无效');   
+			remove_file(id);	
+			return false;       
+		}
+		var size = sender.files[0].size;
+		if(size > 10*1024*1024){
+			alert('音乐最大支持10M');   
+			remove_file(id);			
+			return false;    
+		}
+    }  
+}	
+function onUploadImgChange(sender,img,obj){  
+	if(!$("#"+img).val()){
+		return false;
+	}
+    if( $("#"+img).val() && !sender.value.match( /.jpg|.gif|.png|.bmp|.jpeg/i ) )
+	{        
+        alert('图片格式无效！');   
+		remove_file(img);	
+        return false;       
+    }   
+	var ap_id = $('#ap_id').val();//图片名称后缀必须为小写，大些报错
+	var b=test(sender.value);
+	if( $("#"+img).val() &&  b!=".jpg"&&b!=".gif"&&b!=".png"&&b!=".bmp"&&b!=".jpeg")
+	{
+		alert('后缀只支持小写格式！');
+		if(!ap_id)
+		{
+			remove_file(img);	
+		}
+		else
+		{
+			var file = $("#"+img);
+			file.after(file.clone().val(""));
+			file.remove();
+		}
+		return false;  
+	}
+	
+	var imgSrc = check_img(sender);
+    var img_url = imgSrc;
+    var newimg = new Image();
+    newimg.src = img_url;
+    // 加载完成执行
+    newimg.onload = function () {
+		// 打印
+		var w = newimg.width;
+		var h = newimg.height;
+		if(img != 'button_pic' && img != 'bg_img' && img != 'soft_bg'  && img != 'nextpage' && w != 640 && img !='popup_bg_pic' && img!='unclick_lottery_pic' && img!='rule_pic' && img !='no_prize_pic'){
+			alert('宽必须640');  
+			remove_file(img);			
+			return false;    			
+		}
+		var objPreview = document.getElementById(obj); 
+		$('#'+img+'_del').remove();
+		str = '<button id="'+img+'_del" type="button" onclick="del_img(\''+img+'\');" >&nbsp;&nbsp;删&nbsp;&nbsp;除&nbsp;&nbsp;</button>';
+		$('#'+obj).closest('img').after(str);		
+		var imgs=document.getElementById(img);
+		if( sender.files &&  sender.files[0] ){ 
+			objPreview.style.display = 'block';  
+			if(w!=640)
+			{
+				objPreview.style.width = 'auto';        
+				objPreview.style.height = 'auto';
+			}
+			else
+			{
+				objPreview.style.width = '200px';        
+				objPreview.style.height = '150px';
+			}
+			objPreview.src = window.URL.createObjectURL(imgs.files[0]);
+		}       
+	}	
+} 	
+function del_img(img){
+	if(confirm('是否确认删除？')) {
+		remove_file(img);
+	}
+}
+function remove_file(file){
+	$('#'+file+'_div').removeAttr('src').css('display','none');
+	$('#'+file+'_del').remove();	
+	var file = $("#"+file);
+	file.after(file.clone().val(""));
+	file.remove();	
+	return false;   	
+}
+function check_img(obj){
+   var imgSrc = '';
+    if (obj.files && obj.files[0]) {
+        if (getOs() == 'Chrome') {
+            imgSrc = window.webkitURL.createObjectURL(obj.files[0]);
+        } else {
+            imgSrc = window.URL.createObjectURL(obj.files[0]);
+        }
+    } else {
+        //IE下，使用滤镜
+        obj.select();
+        //解决IE9下document.selection拒绝访问的错误
+        if (navigator.appName == "Microsoft Internet Explorer" && navigator.appVersion.match(/9./i) == "9.") {
+            obj.blur();
+        }
+        var imgSrc = document.selection.createRange().text;
+        document.selection.empty();
+    }
+	return imgSrc;
+}
+function getOs() 
+{ 
+   var OsObject = ""; 
+   if(isIE = navigator.userAgent.indexOf("MSIE")!=-1) { 
+        return "MSIE"; 
+   }
+   if(isFirefox=navigator.userAgent.indexOf("Firefox")!=-1){ 
+        return "Firefox"; 
+   }
+   if(isChrome=navigator.userAgent.indexOf("Chrome")!=-1){ 
+        return "Chrome"; 
+   }
+   if(isSafari=navigator.userAgent.indexOf("Safari")!=-1) { 
+        return "Safari"; 
+   }
+   if(isOpera=navigator.userAgent.indexOf("Opera")!=-1){ 
+        return "Opera"; 
+   } 
+} 
+function checkinput(){
+	var ap_name = $.trim($('#ap_name').val());
+	if (!ap_name){
+		alert('活动名称不可为空');
+		return false;
+	}
+	//对外预约添加分享功能
+	var title = $.trim($('#title').val());
+	if (!title){
+		alert('分享标题不可为空');
+		return false;
+	}
+	var share_text = $.trim($('#share_text').val());
+	if (!share_text){
+		alert('分享文案不可为空');
+		return false;
+	}
+	var share_switch = $('#share_switch option:selected').val();
+	if(share_switch==1)
+	{
+		/*var title = $.trim($('#title').val());
+		if (!title){
+			alert('分享标题不可为空');
+			return false;
+		}
+		var share_text = $.trim($('#share_text').val());
+		if (!share_text){
+			alert('分享文案不可为空');
+			return false;
+		}*/
+	}
+	else
+	{
+		var telephone_warning = $.trim($('#telephone_warning').val());
+		if (!telephone_warning){
+			alert('手机号输入框文字不可为空');
+			return false;
+		}
+	}
+	var ap_id = $('#ap_id').val();
+	if(!ap_id){
+		if(share_switch==1)
+		{
+			if (!$('#popup_bg_pic').val()){
+				alert('请上传下载按钮背景图片');
+				return false;
+			}	
+			if (!$('#lottery_pic').val()){
+				alert('请上传下载按钮引导遮层图片');
+				return false;
+			}	
+			if (!$('#unclick_lottery_pic').val()){
+				alert('请上传分享按钮背景图片');
+				return false;
+			}
+			if (!$('#update_warning_pic').val()){
+				alert('请上传分享按钮引导遮层图片');
+				return false;
+			}
+			/*if (!$('#rule_pic').val()){
+				alert('请上传分享朋友圈图片');
+				return false;
+			}*/ 	
+			/*if (!$('#no_prize_pic').val()){
+				alert('请上传分享给朋友图片');
+				return false;
+			}*/				
+		}
+		else
+		{
+			$("[name='change_switch']").each(function(){
+				if($(this).is(':checked')) {
+					change_switch = $(this).val();
+				}
+			});		
+			if(change_switch == 2 && !$('#button_pic').val()){	
+				alert('请上传预约按键背景图片');
+				return false;			
+			}			
+		}
+		if (!$('#rule_pic').val()){
+			alert('请上传分享朋友圈图片');
+			return false;
+		}	
+			
+		var pic_num = 0;//是否开启换一换开关
+		$(".pic_class").each(function(){
+			if($(this).val()) {
+				pic_num++;
+			}
+		});	
+		/*if(pic_num < 3){
+			alert('活动图片不可小于3张');
+			return false;		
+		}*/	
+		//是否选择背景图片
+		var is_show_music = $('input:radio[name="back_top"]:checked').val(); 
+		if(is_show_music==1)
+		{
+			if (!$('#bg_img').val()){
+				alert('请上传背景音乐图标');
+				return false;
+			}	
+			if (!$('#bg_color').val()){
+				alert('请上传背景音乐');
+				return false;
+			}	
+			if (!$('#soft_bg').val()){
+				alert('请上传背景音乐(关闭)');
+				return false;
+			}		
+		}
+		/*if (!$('#nextpage').val()){
+			alert('请上传下拉箭头图片');
+			return false;
+		}*/	
+	}
+}
+
+function open_change_switch(type){
+    if (type == 1) {
+		$('#button_sel_1').removeAttr('style');
+        $('#button_sel_2').css('display','none');
+    } else {
+        $('#button_sel_1').css('display','none');
+		$('#button_sel_2').removeAttr('style');
+    } 
+}
+function show_type_table(type)
+{
+	//var type = $(obj).val();
+	if (type == 1) {
+		$('#reserve_table').css('display','none');
+		$('#share_table').css('display','');
+    } else {
+		$('#reserve_table').css('display','');
+        $('#share_table').css('display','none');
+    } 
+}
+
+function open_music_switch(type)
+{
+	if(type==1)
+	{
+		$(".music_tr").css("display","");
+	}
+	else
+	{
+		$(".music_tr").css("display","none");
+	}
+}
+</script>
+<body>
+<form action="__URL__/<?php if($_GET['ap_id']){ echo 'booking_activity_edit'; }else{ echo 'booking_activity_add'; } ?>" method="post" onsubmit="return checkinput();" enctype="multipart/form-data">
+<input type='hidden' name='ap_id' id='ap_id' value="{$list['ap_id']}"/>
+<div style="margin:20px;">
+<a href="/index.php/Sendnum/CoActivity/booking_activity" class="search_btn">返回</a>&nbsp;&nbsp;
+<h2><span class="my_activate"><?php if($_GET['ap_id']){ echo '编辑'; }else{ echo '添加'; } ?>活动页面</span></h2>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr>
+		<td width="110" >活动名称</td>
+		<td  colspan='2'>
+		<input type="text" id="ap_name" name="ap_name" value="{$list['ap_name']}" /></td>
+	</tr>
+	<tr>
+		<td>活动图片1</td>
+		<td>
+			<input class='pic_class' type="file" name="lose_no_img" id="lose_no_img" onchange="onUploadImgChange(this,'lose_no_img','lose_no_img_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="lose_no_img_div" style="width:200px; height:150px;" <?php if($list['lose_no_img']){ echo "src="."'". IMGATT_HOST .$list['lose_no_img']."'"; }?> /></td>
+	</tr>	
+	<tr>
+		<td>渐变图层1</td>
+		<td>
+			<input  type="file" name="lost_no_desc" id="lost_no_desc" onchange="onUploadImgChange(this,'lost_no_desc','lost_no_desc_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="lost_no_desc_div" style="width:200px; height:150px;"   <?php if($list['lost_no_desc']){ echo "src="."'". IMGATT_HOST .$list['lost_no_desc']."'"; }?>/></td>
+	</tr>	
+	<tr>
+		<td>活动图片2</td>
+		<td>
+			<input class='pic_class' type="file" name="lose_yes_img" id="lose_yes_img" onchange="onUploadImgChange(this,'lose_yes_img','lose_yes_img_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="lose_yes_img_div" style="width:200px; height:150px;"  <?php if($list['lose_yes_img']){ echo "src="."'". IMGATT_HOST .$list['lose_yes_img']."'"; }?> /></td>
+	</tr>	
+	<tr>
+		<td>渐变图层2</td>
+		<td>
+			<input type="file" name="lose_yes_desc" id="lose_yes_desc" onchange="onUploadImgChange(this,'lose_yes_desc','lose_yes_desc_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="lose_yes_desc_div" style="width:200px; height:150px;"  <?php if($list['lose_yes_desc']){ echo "src="."'". IMGATT_HOST .$list['lose_yes_desc']."'"; }?>  /></td>
+	</tr>	
+
+	<tr>
+		<td>活动图片3</td>
+		<td>
+			<input class='pic_class' type="file" name="last_lottery_img" id="last_lottery_img" onchange="onUploadImgChange(this,'last_lottery_img','last_lottery_img_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="last_lottery_img_div" style="width:200px; height:150px;"  <?php if($list['last_lottery_img']){ echo "src="."'". IMGATT_HOST .$list['last_lottery_img']."'"; }?> /></td>
+	</tr>	
+	<tr>
+		<td>渐变图层3</td>
+		<td>
+			<input type="file" name="last_lottery_desc" id="last_lottery_desc" onchange="onUploadImgChange(this,'last_lottery_desc','last_lottery_desc_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="last_lottery_desc_div"  style="width:200px; height:150px;" <?php if($list['last_lottery_desc']){ echo "src="."'". IMGATT_HOST .$list['last_lottery_desc']."'"; }?> /></td>
+	</tr>
+	<tr>
+		<td>活动图片4</td>
+		<td>
+			<input class='pic_class' type="file" name="share_weixin_pic" id="share_weixin_pic" onchange="onUploadImgChange(this,'share_weixin_pic','share_weixin_pic_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="share_weixin_pic_div" style="width:200px; height:150px;" <?php if($list['share_weixin_pic']){ echo "src="."'". IMGATT_HOST .$list['share_weixin_pic']."'"; }?>/></td>
+	</tr>	
+	<tr>
+		<td>渐变图层4</td>
+		<td>
+			<input type="file" name="share_other_pic" id="share_other_pic" onchange="onUploadImgChange(this,'share_other_pic','share_other_pic_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="share_other_pic_div" style="width:200px; height:150px;" <?php if($list['share_other_pic']){ echo "src="."'". IMGATT_HOST .$list['share_other_pic']."'"; }?> /></td>		
+	</tr>
+	<tr>
+		<td>活动图片5</td>
+		<td>
+			<input class='pic_class' type="file" name="ranking_no_pic1" id="ranking_no_pic1" onchange="onUploadImgChange(this,'ranking_no_pic1','ranking_no_pic1_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="ranking_no_pic1_div" style="width:200px; height:150px;" <?php if($list['ranking_no_pic1']){ echo "src="."'". IMGATT_HOST .$list['ranking_no_pic1']."'"; }?> /></td>
+	</tr>	
+	<tr>
+		<td>渐变图层5</td>
+		<td>
+			<input type="file" name="ranking_pic1" id="ranking_pic1" onchange="onUploadImgChange(this,'ranking_pic1','ranking_pic1_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="ranking_pic1_div" style="width:200px; height:150px;" <?php if($list['ranking_pic1']){ echo "src="."'". IMGATT_HOST .$list['ranking_pic1']."'"; }?> /></td>		
+	</tr>	
+	<tr>
+		<td>活动图片6</td>
+		<td>
+			<input class='pic_class' type="file" name="prize_pic" id="prize_pic" onchange="onUploadImgChange(this,'prize_pic','prize_pic_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="prize_pic_div" style="width:200px; height:150px;" <?php if($list['prize_pic']){ echo "src="."'". IMGATT_HOST .$list['prize_pic']."'"; }?>  /></td>
+	</tr>	
+	<tr>
+		<td>渐变图层6</td>
+		<td>
+			<input type="file" name="prize_bg_pic" id="prize_bg_pic" onchange="onUploadImgChange(this,'prize_bg_pic','prize_bg_pic_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="prize_bg_pic_div" style="width:200px; height:150px;" <?php if($list['prize_bg_pic']){ echo "src="."'". IMGATT_HOST .$list['prize_bg_pic']."'"; }?> /></td>		
+	</tr>	
+	<tr >
+		<td>页面类型</td>
+		<td>
+			<?php if($list['ap_id']) { ?>
+				<input type="hidden" value="{$list['share_switch']}" name="share_switch"/>
+				<select name="share_switch" id="share_switch" onchange="show_type_table($(this).val())" disabled>
+					<option value="0" <?php if($list['share_switch']==0) echo "selected"?>>对外预约</option>
+					<option value="1" <?php if($list['share_switch']==1) echo "selected"?>>分享模板</option>
+				</select>
+			<?php } else { ?>
+			<select name="share_switch" id="share_switch" onchange="show_type_table($(this).val())">
+				<option value="0" >对外预约</option>
+				<option value="1" >分享模板</option>
+			</select>
+			<?php } ?>
+		</td>
+		<td></td>	
+	</tr>
+</table>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb" id="reserve_table" style="border-bottom:none;border-top:none;">	
+	<tr>
+		<td>手机号输入框文字：</td>
+		<td colspan='2'>
+			<input type="text" name="telephone_warning" id="telephone_warning" value="{$list['telephone_warning']}" />
+		</td>
+	</tr>
+	
+	<tr >
+		<td colspan='3'>
+			<input type="radio" id = "change_switch" name="change_switch" value='1' onclick="open_change_switch(1);" <if condition="$list.change_switch eq '1' || $list.change_switch eq ''"> checked =true</if> />预约按键背景颜色
+			<input type="radio" id = "change_switch" name="change_switch" value='2' onclick="open_change_switch(2);" <if condition="$list.change_switch eq '2'"> checked =true</if>   />预约按键背景图片
+		</td>
+	</tr>
+	<tr id='button_sel_1' >
+		<td>预约按键背景颜色：</td>
+		<td colspan='2'>
+            <div class="color_box">
+			<input type="text" class='color' name="button_color" id="button_color" value="{$list['button_color']}" />
+			</div>
+		</td>
+	</tr>
+	<tr id='button_sel_2' >
+		<td>预约按键背景图片：</td>
+		<td>
+			<input type="file" name="button_pic" id="button_pic" onchange="onUploadImgChange(this,'button_pic','button_pic_div');" />
+			<p class="tips">大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="button_pic_div" <?php if($list['button_pic']){ echo "src="."'". IMGATT_HOST .$list['button_pic']."'"; }?> /></td>
+	</tr>	
+</table>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb" id="share_table" style="display:none;border-bottom:none;border-top:none;">
+	<tr>
+		<td width="110">下载安智市场按钮背景图片：</td>
+		<td>
+			<input class='pic_class' type="file" name="popup_bg_pic" id="popup_bg_pic" onchange="onUploadImgChange(this,'popup_bg_pic','popup_bg_pic_div');" />
+			<p class="tips">大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="popup_bg_pic_div" <?php if($list['popup_bg_pic']){ echo "src="."'". IMGATT_HOST .$list['popup_bg_pic']."'"; }?> /></td>
+	</tr>	
+	<tr>
+		<td>下载按钮引导遮层图片</td>
+		<td>
+			<input  type="file" name="lottery_pic" id="lottery_pic" onchange="onUploadImgChange(this,'lottery_pic','lottery_pic_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="lottery_pic_div" style="width:200px; height:150px;"  <?php if($list['lottery_pic']){ echo "src="."'". IMGATT_HOST .$list['lottery_pic']."'"; }?>/></td>
+	</tr>	
+	<tr>
+		<td>分享页面按钮背景图片：</td>
+		<td>
+			<input class='pic_class' type="file" name="unclick_lottery_pic" id="unclick_lottery_pic" onchange="onUploadImgChange(this,'unclick_lottery_pic','unclick_lottery_pic_div');" />
+			<p class="tips">大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="unclick_lottery_pic_div"  <?php if($list['unclick_lottery_pic']){ echo "src="."'". IMGATT_HOST .$list['unclick_lottery_pic']."'"; }?> /></td>
+	</tr>	
+	<tr>
+		<td>分享页面引导遮层图片：</td>
+		<td>
+			<input type="file" name="update_warning_pic" id="update_warning_pic" onchange="onUploadImgChange(this,'update_warning_pic','update_warinng_pic_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="update_warinng_pic_div"  style="width:200px; height:150px;" <?php if($list['update_warning_pic']){ echo "src="."'". IMGATT_HOST .$list['update_warning_pic']."'"; }?>  /></td>
+	</tr>	
+</table>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb" style="border-bottom:none;border-top:none;">
+	<tr>
+		<td>分享到朋友圈解析图片：</td>
+		<td>
+			<input class='pic_class' type="file" name="rule_pic" id="rule_pic" onchange="onUploadImgChange(this,'rule_pic','rule_pic_div');" />
+			<p class="tips">尺寸：100*100 大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="rule_pic_div"  <?php if($list['rule_pic']){ echo "src="."'". IMGATT_HOST .$list['rule_pic']."'"; }?> /></td>
+	</tr>	
+	<!--<tr>
+		<td>分享给朋友解析图片：</td>
+		<td>
+			<input type="file" name="no_prize_pic" id="no_prize_pic" onchange="onUploadImgChange(this,'no_prize_pic','no_prize_pic_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="no_prize_pic_div"  <?php if($list['no_prize_pic']){ echo "src="."'". IMGATT_HOST .$list['no_prize_pic']."'"; }?> /></td>
+	</tr><!-->
+	<tr>
+		<td width="110" >分享标题：</td>
+		<td  colspan='2'>
+		<input type="text" id="title" name="title" value="{$list['title']}" /></td>
+	</tr>
+	<tr>
+		<td width="110" >分享文案：</td>
+		<td  colspan='2'>
+		<input type="text" id="share_text" name="share_text" value="{$list['share_text']}" /></td>
+	</tr>
+</table>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb" style="border-top:none;">
+	<tr>
+		<td width="110" >是否有背景音乐：</td>
+		<td colspan='2'>
+			<input type="radio" id = "back_top" name="back_top" value='1' onclick="open_music_switch(1);" <if condition="$list.back_top eq '1' || $list.back_top eq ''"> checked =true</if> />有
+			<input type="radio" id = "back_top" name="back_top" value='2' onclick="open_music_switch(2);" <if condition="$list.back_top eq '2'"> checked =true</if>   />无
+		</td>
+	</tr>
+	<tr class="music_tr">
+		<td>背景音乐：</td>
+		<td >
+			<input type="file" name="bg_color" id="bg_color" onchange="onupload_mp3(this,'bg_color');" />
+			<p class="tips">音乐最大支持10M,支持mp3格式</p>
+		</td>
+		<td>
+		 <?php if($list['bg_color']){ echo "<p class='tips'>背景音乐已上传</p>"; }?>
+		</td>
+	</tr>	
+	<tr class="music_tr">
+		<td>背景音乐图标：</td>
+		<td>
+			<input type="file" name="bg_img" id="bg_img" onchange="onUploadImgChange(this,'bg_img','bg_img_div');" />
+			<p class="tips">大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="bg_img_div" <?php if($list['bg_img']){ echo "src="."'". IMGATT_HOST .$list['bg_img']."'"; }?> /></td>
+	</tr>	
+	<tr class="music_tr">
+		<td>背景音乐图标(关闭)：</td>
+		<td>
+			<input type="file" name="soft_bg" id="soft_bg" onchange="onUploadImgChange(this,'soft_bg','soft_bg_div');" />
+			<p class="tips">大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="soft_bg_div" <?php if($list['soft_bg']){ echo "src="."'". IMGATT_HOST .$list['soft_bg']."'"; }?> /></td>
+	</tr>	
+	<tr>
+		<td>下拉箭头图片：</td>
+		<td>
+			<input type="file" name="nextpage" id="nextpage" onchange="onUploadImgChange(this,'nextpage','nextpage_div');" />
+			<p class="tips">大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="nextpage_div" <?php if($list['nextpage']){ echo "src="."'". IMGATT_HOST .$list['nextpage']."'"; }?> /></td>
+	</tr>	
+</table>		
+</div>
+<div style="margin-top:20px;margin-left:100px;">
+	<table>
+		<tr>
+			<td><input type="submit" class="search_btn" value="确定" /></td>
+			<td><a href="javascript:;" onclick="javascript:history.go(-1);" class="search_btn" >取消</a></td>
+		</tr>
+	</table>
+</div>
+</form>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title></title>
+<link type="text/css" rel="stylesheet" href="http://img4.anzhi.com/static/activity/predown/css/common2.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/activity/predown/js/jquery-1.8.0.min.js?v1"></script>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/activity/predown/js/TouchSlide.1.1.js"></script>
+</head>
+<style type="text/css">
+body{max-width:640px;min-width:320px; margin:0 auto;font-size:14px; font-family:Microsoft Yahei,"微软雅黑"; }
+.slideBox{ position:relative;padding:25px; background:url(/images/slider_bg.jpg) no-repeat; background-size:100% 100%}
+</style>
+<script>
+	var aid = '',sid='',is_telephone = '1';
+	function download_go(obj){
+		var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+		var cmd = 'var soft_list=' + json_data;
+		eval(cmd);
+		var soft_lists = soft_list.DATA;
+		var softid = soft_lists[0][0];
+		var pkgname = soft_lists[0][7];
+		var softname = soft_lists[0][2];
+		var versionCode = soft_lists[0][13];
+		var size = soft_lists[0][27];
+		if(is_telephone == 1){
+			var telephone = $('#telephone').val();
+			if(!telephone){
+				window.scrollTo(0,0);
+				$('#error').css('display','');
+				$('#error').html('请输入手机号');
+				$('#telephone').css('border','1px solid red');
+				return false;
+			}else{
+				$('#error').css('display','none');
+				$('#telephone').css('border','');
+			}
+			
+			$.ajax({
+				url: '/lottery/pre_download_telephone.php',
+				data: 'aid='+aid+'&sid='+sid+'&telephone='+telephone+'&download='+obj,
+				type: 'get',
+				success: function(data){
+					var data = eval(''+data+'');
+					if(data == 500){
+						window.scrollTo(0,0);
+						$('#error').css('display','');
+						$('#error').html('请输入正确手机号');
+						$('#telephone').css('border','1px solid red');
+					}else if(data == 200){
+						$('#error').css('display','none');
+						$('#telephone').css('border','');
+						window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,1);
+					}
+				}
+			});
+		}else{
+			$.ajax({
+				url: '/lottery/pre_download.php',
+				data: 'aid='+aid+'&sid='+sid+'&download='+obj,
+				type: 'get',
+				success: function(data){
+					window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,1);
+				}
+			});
+		}
+	}
+	
+	$(function(){
+        //轮播图
+        TouchSlide({
+            slideCell:"#slideBox1",
+            mainCell:".bd ul",
+            effect:"leftLoop",
+            autoPlay:true //自动播放
+        });
+		 TouchSlide({
+            slideCell:"#slideBox2",
+            mainCell:".bd ul",
+            effect:"leftLoop",
+            autoPlay:true //自动播放
+        });
+		 TouchSlide({
+            slideCell:"#slideBox3",
+            mainCell:".bd ul",
+            effect:"leftLoop",
+            autoPlay:true //自动播放
+        });
+    })
+</script>
+<body style="background-color:rgba(255,255,255,1) ; background-size:100% 100%">
+<section>
+    <div class="banner">
+        <img src="http://wap.img.anzhi.com/img/201511/02/81877100.jpg"/>
+    </div>
+</section>
+<form class="input_box">
+	<img src="http://wap.img.anzhi.com/img/201511/02/82345100.jpg" />	<div class="input_box_inner">
+		<p><input type="text" id="telephone" placeholder="输入手机号，赢取公测豪礼！" /></p>
+		<p style="color:red;display:none;margin:-10px 96px 0px 30px; padding-bottom:10px" id="error"></p>
+		<a href="javascript:;" class="form_btn" onclick="download_go(1);" style="background: url(http://wap.img.anzhi.com/img/201511/02/82472500.png) 0 0 no-repeat; background-size:86px 44px;"></a>
+	</div>
+	
+</form>
+<div class="part">
+		<img src="http://wap.img.anzhi.com/img/201511/03/34965600.jpg" />
+	</div>
+<div class="btns">
+<img src="http://wap.img.anzhi.com/img/201511/02/82609500.jpg" /><a href="javascript:;" onclick="download_go(2);" style="background: url(http://wap.img.anzhi.com/img/201511/02/82768400.png) 0 0 no-repeat;  background-size:100% 100%"></a></div>
+</body>
+</html>

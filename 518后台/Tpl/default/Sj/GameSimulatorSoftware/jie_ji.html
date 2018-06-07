@@ -1,0 +1,67 @@
+<include file="../Public/header"/>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+
+<script>
+    function delete_simulator_software(id) {
+        if (confirm("确认要删除该条信息？")) {
+            var url = "__URL__/delete_simulator_software/id/" + id;
+			location.href = url;
+        }
+    }
+</script>
+
+<body>
+    <ul class="tab_title margin_top" style="margin-left:0; padding:0; position:relative">
+        <?php if($all_status[0]['status']==1):?><li><a href="__URL__/ren_tian_tang">{$all_status[0]['name']}</a></li><?php endif; ?>
+        <?php if($all_status[1]['status']==1):?><li><a href="__URL__/gba">{$all_status[1]['name']}</a></li><?php endif; ?>
+        <?php if($all_status[2]['status']==1):?><li class="current"><a href="__URL__/jie_ji">{$all_status[2]['name']}</a></li><?php endif; ?>
+        <?php if($all_status[3]['status']==1):?><li><a href="__URL__/super_ren_tian_tang">{$all_status[3]['name']}</a></li><?php endif; ?>
+        <?php if($all_status[4]['status']==1):?><li><a href="__URL__/shi_jia">{$all_status[4]['name']}</a></li><?php endif; ?>
+        <a href="__URL__/add_simulator_software?from=2" class="search_btn" style="position:absolute; right:10px; top:0;">添加</a>
+    </ul>
+
+    <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+        <thead>
+            <tr align="center">
+                <th width="6%">序号</th>
+                <th width="10%">软件ICON</th>
+                <th width="14%">软件名称</th>
+                <th width="12%">星级</th>
+                <th width="18%">简介</th>
+                <th width="12%">操作</th>
+                <th width="15%">排序</th>
+            </tr>
+        </thead>
+        <tbody>
+            <volist id="list" name="list">
+                <tr align="center">
+                    <td>{$list.rank}</td>
+                    <td height="20" align="center"><img src="{$apkurl}{$list.icon_url|default='&nbsp;'}" /></td>
+                    <td>{$list.software_name}</td>
+                    <td><span class="stars" style="background-position:0 -<?php echo $list['star']*12 ?>px" ></span></td>
+                    <td class="left">{$list.note}</td>
+                    <td>
+                        <a href="__URL__/edit_simulator_software?from=2&id={$list.id}" class="blue">编辑</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="#{$list.id}" onClick="delete_simulator_software({$list.id})" class="blue">删除</a>
+                         <php> if($list['status'] == 1){ </php>
+                        <a href='javascript:if(confirm("确定要禁用该条信息吗？"))location="__URL__/manage_jie_ji?id={$list.id}&status={$list.status}"'>禁用</a>
+                        
+                        <php>}else if($list['status'] == 2){</php>
+                        <a href='javascript:if(confirm("确定要恢复该条信息吗?"))location="__URL__/manage_jie_ji?id={$list.id}&status={$list.status}"'>恢复</a>
+                        <php>}</php>
+                    </td>
+                    <td>
+                        <?php if ($list['rank'] != 1):?><a href="__URL__/up_the_rank?id={$list.id}&type={$list.type}">上移</a>&nbsp;&nbsp;&nbsp;&nbsp;<?php endif;?>
+                        <?php if ($list['rank'] != $last_rank):?><a href="__URL__/down_the_rank?id={$list.id}&type={$list.type}">下移</a>&nbsp;&nbsp;&nbsp;&nbsp;<?php endif;?>
+                        <a href="__URL__/top_the_rank?id={$list.id}&type={$list.type}">置顶</a>
+                    </td>
+                </tr>
+            </volist>
+        </tbody>
+    </table>
+    <div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>

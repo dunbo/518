@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>书包里的小精灵</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/LittleElfInBag/css/common.css?v1"/>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/activity/LittleElfInBag/js/lottery_softs.js?v1"></script>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/activity/LittleElfInBag/js/show_box.js?v1"></script>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = <!--{$out.aid}-->;
+var lottery_num = <!--{$out.lottery_num}-->;
+var grasp_num = <!--{$out.grasp_num}-->;
+var rotate_flag = 0;//抽奖点击按钮是否可点击
+//var submit_info_clickable = true;
+var again_text = ['没中奖不要紧！看成败人生豪迈，大不了从头再来。','少年姿势不对，再试一次~','默念三遍我一定会中，再试下~','少年你离奖品就差一步，再试试嘛~','说好的奖品呢，连辣条都不给我啊喂！','继续攒人品，下次一定RP大爆发！','少年别灰心，安智君相信下次你就能中~','天灵灵，地灵灵，下次中奖一定灵~','奖品是个磨人的小妖精，看我再试一次定会抓住你~'];
+var again_text1 = ['我真的还想再抽500次~','乖~下载APP增加抽奖机会再抽吧！'];
+// 软件
+var stable_soft_lists=<!--{$out.stable_soft_lists}-->;
+
+//var flags={canMove:true};
+// function showOpenBox(obj){
+// 	var bg_h=$(window).height() + $(document).scrollTop(),
+// 				top_h= $(obj).height()/ 2 - $(document).scrollTop();
+// 	$(obj).css("margin-top",-top_h+"px").show();
+// 	$("#body-bg").css("height",bg_h+"px").show();
+// 	//flags.canMove=false;
+// 	window.onresize = function(){
+// 		var bg_h=$(window).height() + $(document).scrollTop(),
+// 			 top_h= $(obj).height()/ 2 - $(document).scrollTop();
+// 		$('#body-bg').css("height",bg_h+"px");
+// 		$(obj).css("margin-top",-top_h+"px");	
+// 	}
+// }
+// function showOpenBox2(obj){
+// 	var bg_h=$(window).height(),
+// 			top_h= $(obj).height()/ 2;
+// 	$(obj).css("margin-top",-top_h+"px").show();
+// 	$("#body-bg").css("height",bg_h+"px").show();
+// 	//flags.canMove=false;
+// 	window.onresize = function(){
+// 		var bg_h=$(window).height();
+// 		$("#body-bg").css("height",bg_h+"px");
+// 	}
+// }
+// function cloBox(obj){
+// 	$(obj).hide();
+// 	$("#body-bg").hide();
+// 	//flags.canMove=true;
+// }
+
+function randomnum(smin, smax) {// 获取2个值之间的随机数
+	var Range = smax - smin;
+	var Rand = Math.random();
+	return (smin + Math.round(Rand * Range));
+}
+
+$(function(){
+	// $("body").bind('touchmove', function (e) {
+	// 	if(!flags.canMove){
+	// 		e.preventDefault();
+	// 	}
+	// });
+	// var unwritten = <!--{$out.unwritten}-->;
+	// if (unwritten) {
+	// 	$("#award_level_name").html('<!--{$out.award_level_name}-->');
+	// 	$("#award_name").html('<!--{$out.award_name}-->');
+	// 	showOpenBox("#tip-box3");
+	// }
+	if (!lottery_num||lottery_num==0) {
+		//宝箱是灰色的 不能点击
+		$('.gift_box').unbind("click"); //移除click函数
+		//图片变灰
+		$(".gift_box").addClass("gift_box_disabled");
+	} 
+	else 
+	{
+		//抽奖
+		if($(".gift_box").hasClass("gift_box_disabled"))
+		{
+			$(".gift_box").removeClass("gift_box_disabled")
+		}
+		$('.gift_box').click(function(){
+			lottery();
+		})
+	}
+});
+
+function lottery() {
+	//开宝箱效果
+	$(".gift_box").css('display','none');
+	$(".gift_box").siblings('.gift_box2').addClass('open');
+	$(".gift_box").siblings('.light').addClass('light_open');
+	if (rotate_flag == 1) {
+		return;
+	}
+	rotate_flag = 1;
+	$.ajax({
+		url:'/lottery/LittleElfInBag/get_award_api.php?aid='+aid+'&sid='+sid,
+		dataType:'json',
+		success:function(data) {
+			var status = data.status;
+			var award_level = data.info.award_level;
+			var left_num = data.info.left_num;
+			$("#lottery_num").html(left_num);
+			/*if (left_num <= 0) {
+				$(".gift_box").addClass("gift_box_disabled");
+				$(".gift_box").unbind('click');
+			}*/
+			setTimeout(function(){
+				if (award_level <= 0) {
+					//打开效果先隐藏
+					$(".gift_box").css('display','');
+					$(".gift_box").siblings('.gift_box2').removeClass('open');
+					$(".gift_box").siblings('.gift_box2').html('');
+					$(".gift_box").siblings('.light').removeClass('light_open');
+					$(".gift_box").siblings('.light').html('');
+						
+					if (left_num > 0) {
+						var random = randomnum(0, again_text.length-1);
+						$("#again_text").html(again_text[random]);
+						showOpenBox('#tip-box1');
+					} else {
+						var random = randomnum(0, again_text1.length-1);
+						$("#again_text1").html(again_text1[random]);
+						showOpenBox('#tip-box2');
+						//宝箱置灰
+						$(".gift_box").addClass('gift_box_disabled');
+						$(".gift_box").unbind('click');
+					}
+				} else {
+					var award_level_name = data.info.award_level_name;
+					var award_type = data.info.award_type;
+					go_substantial(data.info);
+				}
+				rotate_flag = 0;
+			},2000);
+		},
+		error:function() {
+			alert('出错啦!');
+			rotate_flag = 0;
+		}
+	});
+}
+
+
+
+function go_substantial(info) {
+	$("#award_level_name").html(info.award_level_name);
+	$("#award_name").html(info.award_name);
+	$("#address").html(info.address);
+	$("#name").val("");
+	$("#telephone").val("");
+	$("#address").val("");
+	showOpenBox("#tip-box3");
+}
+
+
+function go_share()
+{
+	var share_text='<!--{$out.share_text}-->';
+	$.ajax({
+		url: '/lottery/LittleElfInBag/share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+		}
+	});
+	var share_json = '{"TEXT":"'+share_text+'","URL":"<!--{$out.new_static_url}-->/activity/LittleElfInBag/images/weibo_share.jpg","ACTIONURL":"<!--{$out.share_url}-->","URLWEIXIN":"<!--{$out.new_static_url}-->/activity/LittleElfInBag/images/weixin_share.jpg"}';
+	
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+</script>
+</head>
+<body>
+<div class="banner"><img src="<!--{$out.new_static_url}-->/activity/LittleElfInBag/images/banner.png"/></div>
+<div class="main">
+	<div class="notice">
+		<div class="notice-icon"></div>
+		<div class="notice_list">
+			<marquee scrollamount="2" scrolldelay="90" direction="left">
+				<!--{if $out.people_award_list}-->
+					<!--{foreach from=$out.people_award_list item=i}-->
+					<span><!--{$i.telephone}-->获得<!--{$i.award_name}--><em>　<!--{$i.date}-->　</em></span>
+					<!--{/foreach}-->
+				<!--{else}-->
+					<span>少年，要加油才能拿大奖喔！</span>
+				<!--{/if}-->
+			</marquee>
+		</div>
+	</div>
+	<div class="soft_wrap">
+		<div class="txt1">每下载完成<span>1</span>个活动软件增加<span>1</span>次开宝箱机会</div>
+		<ul class="soft-list clear" id="my_softs">
+		</ul>
+		<a href="javascript:;" class="lottery_btn3" onclick="get_soft()" >换一换</a>
+	</div>
+	<div class="wrap lottery_wrap">
+		<div class="gift">
+			<div class="txt1">还有<span id="lottery_num"><!--{$out.lottery_num}--></span>次开宝箱机会</div>
+			<a href="/lottery/LittleElfInBag/my_award.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->" class="lottery_btn1">我的奖品</a>
+			<div class="gift_img">
+				<div class="gift_box"></div>
+				<div class="gift_box2"></div>
+				<div class="light"></div>
+			</div>
+		</div>
+		<div class="lottery_info clear">
+			<a id="begin_btn" href="javascript:;" class="share_btn" onclick="go_share()">分享活动</a>
+		</div>
+	</div>
+	<a href="/lottery/LittleElfInBag/rules.php" class="rule_btn">活动规则</a>
+</div>
+<div class="footer">
+	<p>本次活动最终解释权归安智所有</p>
+</div>
+</body>
+<section>
+	<div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box1"  style="display: none;">
+		<div class="tip-mid">
+			<div class="tip-con">
+				<p id="again_text"></p>
+			</div>
+		</div>
+		<div class="tip_hd">
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box1');window.location.reload()">关闭</a></div>
+		</div>
+		<a href="javascript:;" class="btns" onclick="cloBox('#tip-box1');lottery()">再来一次</a>
+    </div>
+
+  	<div class="tip-box" id="tip-box2"  style="display: none;">
+		<div class="tip-mid">
+            <div class="tip-con">
+                <p id="again_text1"></p>
+            </div>
+        </div>
+        <div class="tip_hd">
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box2');window.location.reload()">关闭</a></div>
+        </div>
+		<a href="#my_softs" class="btns" onclick="cloBox('#tip-box2');">去下载</a>
+    </div>
+
+    <div class="tip-box pbot" id="tip-box3"  style="display: none; height:260px">
+		<form class="form1">
+			<div class="form_title"><span id="award_level_name"></span></div>
+			<div class="prompt1"><span id="award_name"></span></div>
+			<div class="form-item clear">
+				<label for="name">姓名：</label>
+				<div class="textbox"><input type="text" id="name"/> </div>
+			</div>
+			<div class="form-item clear">
+				<label for="telephone">手机：</label>
+				<div class="textbox"><input type="text" id="telephone" value=""/> </div>
+			</div>
+			<div class="form-item clear">
+				<label for="address">地址：</label>
+				<div class="textbox"><input type="text" id="address" value=""/> </div>
+			</div>
+			<div class="prompt1 prompt3" id="prompt"></div>
+		</form>
+		 <!--<div class="tip_hd">
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box3')">关闭</a></div>
+        </div>-->
+		<a class="btns btns_tip" href="javascript:;" onclick="submit_info()">提交</a>
+	</div>
+</section>
+</html>

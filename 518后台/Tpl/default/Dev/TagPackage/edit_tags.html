@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="/Public/css/jquery.autocomplete.css" type="text/css" media="screen" />
+	<script type="text/javascript" src="/Public/js/jquery.autocomplete.js"></script>
+</head>
+<div>
+	<if condition="$from eq 'tags_softlist' && $tags">
+	<div>
+		<label>
+			已选标签:
+		</label>
+		<table  cellpadding="0" cellspacing="10">
+			<tr>
+			<?php foreach($tags as $k=>$v){ ?>
+				<td>{$v.tag_name} <a href="javascript:void(0)" onclick="del_tag(this,'{$v.tag_id}')">Χ</a></td>
+				<?php if($k!=0&&$k%5==0){ ?>
+					</tr><tr>
+				<?php } ?>
+			<?php } ?>
+			</tr>
+		</table>
+		<label></label>
+	</div>
+	<hr>
+	</if>
+	<div style="margin-top:10px;">
+		<form action="__URL__/edit_tags" method="get" name='s_tags'>
+		<label style="float:left;margin-top:6px">标签：</label>
+		<label style="float:left">
+			<input style="width:150px;" type="text" name="s_tag_name" id="s_tag_name" value="{.tag_name}" class="search_item_text">
+		</label>
+		<label style="float:left;margin-left:10px">
+		<input type="button" style="width:80px;height:30px" class="search_btn" onclick = 'search_tags()' value='查询'>
+		</label>
+		<label style="float:left;margin-left:10px;margin-top:6px;">
+			<a href='javascript:void(0)' onclick='clear_c()' style='color:blue'>清空</a>
+		</label>
+		</form>
+	</div>
+	<div style="clear:both"></div>
+	<form name="tag_sub" action="__URL__/edit_tags" method="post">
+		<?php foreach($tags as $k=>$v){ ?>
+			<input type="hidden" name="tag_id[]" id="tag_id_{$v.tag_id}" value="{$v.tag_id}">
+		<?php } ?>
+		<input type="hidden" name="softid" value="{$softid}">
+		<input type="hidden" name="save_tag" value="1">
+	<div style="margin-left:25px;margin-top:10px;width: 300px" id="content">
+
+		<!--<table cellpadding="10" cellspacing="10"  id="content">-->
+		<!--</table>-->
+	</div>
+	<div style="margin-top: 10px;text-align:center;margin-left: 36px;display:none" id="sub_div">
+		<label style="float: left"><input type="submit" value="确定" class="search_btn"></label>
+		<label style="float: left;margin-left: 10px"><input type="button" value="取消" class="search_btn" onclick="tb_remove();"></label>
+	</div>
+	</form>
+	<div style="clear:both"></div>
+</div>
+
+<script type='text/javascript'>
+
+	$(document).ready(function(){
+		var tags = "{$tags}";
+		if(tags){
+			$("#sub_div").css('display','');
+		}
+		
+		var all_tags = [{$all_tags}];
+        $("#s_tag_name").autocomplete(all_tags,{
+            minChars: 0,//自动完成激活之前填入的最小字符
+            max:12,//列表条目数
+            width: 400,//提示的宽度
+            scrollHeight: 300,//提示的高度
+            matchContains: true,//是否只要包含文本框里的就可以
+        });
+	})
+	function del_tag(target,id){
+		$(target).parent().html('');
+		$('#tag_id_'+id).remove();
+	}
+	function clear_c(){
+		$("#s_tag_name").val('');
+	}
+	
+	function search_tags(){
+		var s_tag_name = $("#s_tag_name").val();
+		var param = {
+			s_tag_name : s_tag_name
+        };
+		$.ajax({
+            url:'__URL__/edit_tags',
+            type:'POST',
+            data:param,
+            dataType:'json',
+            success:function(data){
+				if(data=='') return false;
+				var content = $("#content").html();
+				$.each(data,function(i,item){
+					pi_str = 'value="'+i+'"';
+					if(content.indexOf(pi_str) == -1){
+						var str = '<label style="margin-left:10px"><input type="checkbox" name="tag_id[]" value="'+i+'">'+item+'</label>';
+						$("#content").append(str);
+					}
+				});
+				$("#sub_div").css('display','');
+            }
+        });
+	}
+</script>

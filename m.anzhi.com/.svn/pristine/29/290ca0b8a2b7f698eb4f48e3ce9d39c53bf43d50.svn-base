@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>每日签到</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/<!--{$out.prefix}-->/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v4"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/js/jquery.SuperSlide.2.1.1.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+</head>
+<body>
+<div class="sign_in">
+	<div class="sing_in_top">
+		<p>
+			<!--{$out.m_arr.year}-->-<!--{$out.m_arr.month}-->
+			<span>已签到<em><!--{$out.sign_total_days}--></em>天</span>
+		</p>
+	</div>
+	<ul>
+<!--{foreach from=$out.sign_config item='val' key='k'}-->
+	<!--有配置-->
+	<!--{if $val.status == 1 }-->	
+	<!---------已签到------------->
+		<li class="sign_end">
+			<div class="sign_in_item">
+				<i><!--{$val.level}--></i>
+				<span><img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/img_01.png"/><em></em></span>
+			</div>
+		</li>
+	<!--{else if $val.status == 2}-->	
+	<!---------补签------------->
+		<li class="sign_add">
+			<div class="sign_in_item">
+				<i><!--{$val.level}--></i>
+				<span><img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/img_01.png"/><em></em></span>
+			</div>
+		</li>	
+	<!--{else}-->	
+		<!--{if $val.level < $out.day }-->	
+		<!--{if $out['is_login'] == 1}-->
+		<!---------漏签------------->
+		<li class="sign_slip" onclick="retroactive('<!--{$k}-->');" >
+			<div class="sign_in_item">
+				<i><!--{$val.level}--></i>
+				<span >
+				<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/img_01.png"/><em></em>
+				</span>
+			</div>
+		</li>	
+		<!--{else}-->
+		<li class="sign_slip" >
+			<div class="sign_in_item">
+				<i><!--{$val.level}--></i>
+				<span >
+				<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/img_04.png"/>
+				</span>
+			</div>
+		</li>		
+		<!--{/if}-->	
+		<!--{elseif $val.level > $out.day}-->
+			<!--{if $val.type gt 0}-->
+			<!---------有奖品未开始------------->	
+				<li onclick="prize_info('<!--{$val.did}-->','<!--{$val.type}-->')">
+					<div class="sign_in_item">
+						<i><!--{$val.level}--></i>
+						<span><img  src="<!--{$out.img_url}--><!--{$val.pic}-->" onerror="this.src='<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/img_01.png'"/></span>
+					</div>
+				</li>				
+			<!--{else}-->
+			<!---------【金币】未开始------------->	
+				<li>
+					<div class="sign_in_item">
+						<i><!--{$val.level}--></i>
+						<span><img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/img_02.png"/></span>
+					</div>
+				</li>				
+			<!--{/if}-->		
+		<!--{else}-->
+			<!---------可签到------------->		
+			<!--{if $val.type gt 0}-->
+				<li onclick="prize_info('<!--{$val.did}-->','<!--{$val.type}-->')">
+					<div class="sign_in_item">
+						<i><!--{$val.level}--></i>
+						<span><img  src="<!--{$out.img_url}--><!--{$val.pic}-->" onerror="this.src='<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/img_01.png'"/></span>
+					</div>
+				</li>					
+			<!--{else}-->	
+				<li>
+					<div class="sign_in_item">
+						<i><!--{$val.level}--></i>
+						<span><img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/img_02.png"/></span>
+					</div>
+				</li>					
+			<!--{/if}-->					
+		<!--{/if}-->	
+	<!--{/if}-->	
+<!--{/foreach}-->	
+	<!--{if $out.m_arr.same_month_day eq 28}-->
+		<li><div class="sign_in_item"><i>&nbsp;</i><span>&nbsp;</span></div></li>	
+		<li><div class="sign_in_item"><i>&nbsp;</i><span>&nbsp;</span></div></li>	
+	<!--{elseif $out.m_arr.same_month_day eq 29}-->		
+		<li><div class="sign_in_item"><i>&nbsp;</i><span>&nbsp;</span></div></li>	
+	<!--{elseif $out.m_arr.same_month_day eq 31}-->		
+		<li><div class="sign_in_item"><i>&nbsp;</i><span>&nbsp;</span></div></li>	
+		<li><div class="sign_in_item"><i>&nbsp;</i><span>&nbsp;</span></div></li>	
+		<li><div class="sign_in_item"><i>&nbsp;</i><span>&nbsp;</span></div></li>	
+		<li><div class="sign_in_item"><i>&nbsp;</i><span>&nbsp;</span></div></li>	
+	<!--{/if}-->	
+	<div class="clear"></div>
+	</ul>
+	<div class="btns">
+<!--{if $out.is_lottery eq 1 || ($out.is_sign == 1 && $out.red_or_lottery == 0)}-->
+		<a href="javascript:;" id='sub_sign_id' class="disabled">已签到</a>
+<!--{elseif $out.is_lottery eq 0 && $out.is_sign == 1 && $out.red_or_lottery == 1}-->	
+		<a href="javascript:;" class="red" id='sub_sign_id' onclick="open_red()" >拆红包</a>
+<!--{elseif $out.is_lottery eq 0 && $out.is_sign == 1 && $out.red_or_lottery == 2}-->	
+		<a href="javascript:;" class="red" id='sub_sign_id' onclick="lottery('<!--{$out.did}-->')" >抽奖</a>
+<!--{else}-->	
+		<a href="javascript:;" id='sub_sign_id' onclick="sign_do()" >签到</a>
+<!--{/if}-->	
+	</div>
+</div>
+
+<!--{if $out.card_config.0.buy_num gt 0 || $out.card_config.1.task_num gt 0}-->	
+<div class="sign_info sign_info1">
+	<p class="spec">补签卡：<!--{$out.cards_num}-->张</p>
+	<p>用补签卡点击漏签日期即可完成补签</p>
+	<a href="javascript:;" onclick="signature_card()">获取补签卡</a>
+</div>
+<!--{/if}-->
+
+<!--{if $out.admin_switch_remind eq 1}-->
+<div class="sign_info sign_info2" style="border-bottom: 1px solid #e9e9e9; margin-bottom: 25px">
+	<p class="spec">签到提醒</p>
+	<p>未签到将在通知栏提醒</p>
+<!--{if $out.switch_remind eq 0}-->
+	<a href="javascript:;" id='is_remind' onclick="switch_remind(1)"  >签到提醒【关】</a>
+<!--{else}-->	
+	<a href="javascript:;" id='is_remind' onclick="switch_remind(0)" class="sign_on" >签到提醒【开】</a>
+<!--{/if}-->	
+</div>
+<!--{/if}-->
+<!--{if $out.continuity_config}-->
+<!--{if $out.ontinuity_top30}-->
+<div class="sign_log" style="border-bottom:1px solid #e9e9e9">
+	<div class="sign_log_title">
+		<h3>连续签到活动</h3>
+	</div>
+	<div class="txtScroll-top">
+		<div class="bd">
+			<div class="tempWrap">
+				<ul class="infoList">
+				<!--{foreach from=$out.ontinuity_top30 item='val' key='k'}-->
+					<li>
+						<span><!--{$val.username}--> </span>
+						获得   <!--{$val.prizename}-->  <!--{$val.create_tm}-->
+					</li>
+				<!--{/foreach}-->	
+				</ul>
+			</div>
+		</div>
+	</div>	
+</div>
+<!--{else}-->
+<div class="sign_log" style="min-height:0px; margin-bottom:15px">
+	<div class="sign_log_title">
+		<h3>连续签到活动</h3>
+	</div>
+</div>
+<!--{/if}-->
+<ul class="sign_list">
+<!--{foreach from=$out.continuity_config item='val' key='k'}-->
+	<li>
+		<div class="sign_list_l" onclick="prize_info('','',<!--{$val.id}-->)" >
+			<img src="<!--{$out.img_url}--><!--{$val.pic_path}-->"  />
+		</div>
+		<div class="sign_list_c">
+			<h6>本月连续签到<span><!--{$val.count}--></span>天</h6>
+			<div class="process_wrap">
+				<div class="process">
+				<!--{if $out.continuity_sign_days <= $val.count }-->	
+					<span style="width:<!--{(($out.continuity_sign_days/$val.count)*100)|string_format:"%d"}-->%" ></span>
+				<!--{else}-->	
+					<span style="width:100%" ></span>
+				<!--{/if}-->
+				</div>
+				<em>(
+					<!--{if $out.continuity_sign_days <= $val.count }-->
+						<!--{$out.continuity_sign_days}-->
+					<!--{else}-->
+						<!--{$val.count}-->
+					<!--{/if}-->
+					/<!--{$val.count}-->
+					)
+				</em>
+			</div>
+			<p><!--{$val.name}--></p>
+		</div>
+		<div class="sign_list_r">
+		<!--{if $val.is_lottery eq 1}-->
+			<a href="javascript:;" class="disabled" >已抽奖</a>
+		<!--{else}-->
+			<!--{if $out.continuity_sign_days >= $val.count}-->
+			<a href="javascript:;" onclick="continuity_lottery('<!--{$val.id}-->')" >抽奖</a>
+			<!--{else}-->
+			<a href="javascript:;" class="disabled">抽奖</a>	
+			<!--{/if}-->	
+		<!--{/if}-->			
+		</div>
+		<span class="joined"><!--{$out.attendance[$val['id']]}-->人 已参与</span>
+	</li>
+<!--{/foreach}-->
+	<div class="clear"></div>
+</ul>
+<!--{/if}-->
+<a href="javascript:;" class="rules_more" onclick="go_sign_rule();" >查看规则说明</a>
+</body>
+
+	<div id="body-bg" style="height:1200px;display: none;"></div>
+    <div class="tip-box" id="tip-box9"  style="display: none;">
+		<div class="tip-title">
+			<h6>奖品列表</h6>
+			<span onclick="cloBox('#tip-box9')"></span>
+		</div>
+        <div class="tip-con">
+			<ul class="prize_list3" id='notice9'></ul>
+		</div>
+    </div>
+    <div class="tip-box" id="tip-box4"  style="width:190px; margin-left:-100px; display: none;">
+        <div class="tip-con2">
+			<span onclick="cloBox('#tip-box4')"></span>
+			<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/tips_01.png"/>
+			<h6>现金红包</h6>
+			<p style="padding:0 25px 20px">完成当日签到，即可领取现金红包一个，数量有限，先到先得哦！</p>
+		</div>
+    </div>
+    <div class="tip-box" id="tip-box3"  style="display: none;">
+		<div class="tip-title">
+			<h6>温馨提示</h6>
+			<span onclick="cloBox('#tip-box3')"></span>
+		</div>
+        <div class="tip-con">
+			<p>补签卡数量为<font class="red">0</font>，无法进行补签</p>
+		</div>
+		<a href="javascript:;" onclick="signature_card();cloBox('#tip-box3');" class="btns_close">做任务领取补签卡</a>
+    </div>
+	
+    <div class="tip-box" id="tip-box2"  style="display: none;">
+		<div class="tip-title">
+			<h6>温馨提示</h6>
+			<span onclick="cloBox('#tip-box2')"></span>
+		</div>
+        <div class="tip-con">
+			<p>使用补签卡进行补签</p>
+		</div>
+		<div class="btns2">
+			<a href="javascript:;" onclick="cloBox('#tip-box2')" class="cancel">取消</a>
+			<a href="javascript:;" id='sub_retroactive' onclick="retroactive_do();" >确认</a>
+		</div>
+    </div>	
+</html>
+	
+<script type="text/javascript">
+//扣除的金币数量
+//window.AnzhiActivitys.setWealthPointNum(100);
+
+
+var sid = '<!--{$out.sid}-->',img_url = '<!--{$out.img_url}-->';
+var mid = '<!--{$out.m_arr.id}-->';
+var did = '<!--{$out.did}-->';
+var redid = '<!--{$out.redid}-->';
+//当天是抽奖或拆红包
+var red_or_lottery = '<!--{$out.red_or_lottery}-->';
+var prefix = '<!--{$out.prefix}-->';
+var activity_host = '<!--{$out.activity_host}-->';
+<!-- window.AnzhiActivitys.login(); -->
+ <!-- javascript:window.history.forward(1); -->
+function onLoginComplete(sid,tip){
+	if(tip == "返回键退出")	return false;	
+	var is_register = 0;
+	if(tip == "注册成功"){
+		var is_register = 1;
+	}
+	sid_str = sid.replace("PHPSESSID=", "");
+	var url = activity_host+"/"+prefix+"/index.php?sid="+sid_str+"&mid="+mid+"&is_register="+is_register;
+	//"isFinish":"0 默认 不关闭签到页面，1 打开新页面时关闭之前的签到页面，2从打开的页面返回后刷新页面"
+	var url_json = '{"text":"每日签到","url":"'+url+'","isFinish":"1"}';
+	window.AnzhiActivitys.loadUrlNextPage(url_json);		
+}
+//端注消、登录回调js
+//{"type":1登录2注消，"sessionId":当前会话id}
+function onAccountChanged(json){
+	var data = JSON.parse(json);
+	var sid_str = data.sessionId;
+	var url = activity_host+"/"+prefix+"/index.php?sid="+sid_str+"&mid="+mid;
+	var url_json = '{"text":"每日签到","url":"'+url+'","isFinish":"1"}';
+	window.AnzhiActivitys.loadUrlNextPage(url_json);	
+}
+$(document).ready(function () {
+<!--{if $out.admin_switch_remind eq 1}-->
+//刷新页面重新加载提醒状态
+	<!--{if $out.switch_remind eq 0}-->
+		signAlarm_js(0);
+	<!--{else}-->	
+		signAlarm_js(1);
+	<!--{/if}-->	
+<!--{/if}-->
+});
+//修改右侧actionBar,紧支持文本
+<!--{if $out['is_login'] == 2}-->
+var isLogin = 1;
+<!--{else}-->
+var isLogin = 0;
+<!--{/if}-->
+var rightaction_url = activity_host+"/"+prefix+"/my_prize.php?sid="+sid+"&mid="+mid+"&is_expired=0";
+var rightaction_json = '{"text":"我的奖品","url":"'+rightaction_url+'","isLogin":"'+isLogin+'"}';
+window.AnzhiActivitys.updateRightActionBar(rightaction_json);
+
+
+//查看规则说明
+function go_sign_rule(){
+	var url = activity_host+"/"+prefix+"/prize_info.php?sid="+sid+"&is_sign_rule=1";
+	var url_json = '{"text":"查看规则说明","url":"'+url+'","isFinish":"0"}';
+	window.AnzhiActivitys.loadUrlNextPage(url_json);	
+}
+function signature_card(){
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	var url = activity_host+"/"+prefix+"/signature_card.php?sid="+sid+"&mid="+mid;
+	var url_json = '{"text":"补签卡","url":"'+url+'","isFinish":"2"}';
+	window.AnzhiActivitys.loadUrlNextPage(url_json);
+}
+var checkSubmitFlg = false;
+function prize_info(did,type,cid){
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	if(checkSubmitFlg ==true){ 
+		return false; //当表单被提交过一次后checkSubmitFlg将变为true,根据判断将无法进行提交。
+	}
+	checkSubmitFlg = true;
+	setTimeout(function(){		
+		checkSubmitFlg = false;
+	},2000);	
+	if(type == 1){
+		pop_tips('','','4',1);
+		//滚动结束
+		scroll_end('4');		
+		return false;
+	}
+	$.ajax({
+		url: '/'+prefix+'/prize_info.php',
+		data: 'sid='+sid+'&mid='+mid+'&did='+did+'&cid='+cid,
+		type: 'post',
+		async:false,
+		dataType: 'json',			
+		success:function(data){
+			var str = '';
+			for(var i in data) {
+				str += '<li>';
+				str += '<img src="'+img_url+data[i].pic_path+'" />';
+				str += '<h3>'+data[i].name+'</h3>';
+				str += '<p>数量：'+data[i].num+'/'+data[i].prize_num+'</p>';
+				str += '</li>';
+			}
+			str += '<div class="clear"></div>';
+			pop_tips('',str,'9',1);	
+			//滚动结束
+			scroll_end('9');
+		}
+	});	
+}
+//签到
+function sign_do(){
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	$('#sub_sign_id').removeAttr("onclick");
+	$.ajax({
+		url: '/'+prefix+'/sign.php',
+		data: 'sid='+sid+'&mid='+mid,
+		type: 'post',
+		async:false,
+		dataType: 'json',			
+		success:function(data){
+			if(data.code == 1){
+				//端的签到js
+				window.AnzhiActivitys.userSign();
+				setTimeout(function(){	
+					if(data.type == 1){
+						$('#sub_sign_id').attr('onclick', 'open_red("'+data.did+'");').attr('class', 'red').html("拆红包");	
+					}else if(data.type == 2){
+						$('#sub_sign_id').attr('onclick', 'lottery("'+data.did+'");').attr('class', 'red').html("抽奖");
+					}else{
+						$('#sub_sign_id').attr('class','disabled').html("已签到");
+					}
+				},1000);	
+			}else{	
+				window.AnzhiActivitys.showToastForJs(data.msg);
+				setTimeout(function(){		
+					location.reload();//加载页面
+				},1000);					
+				return false;
+			}
+		}
+	});
+}
+//每天签到抽奖
+function lottery(did){
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	if(!did) return false;
+	var url = activity_host+"/"+prefix+"/lottery.php?sid="+sid+"&mid="+mid+"&did="+did;
+	var url_json = '{"text":"每日签到抽奖","url":"'+url+'","isFinish":"2"}';
+	window.AnzhiActivitys.loadUrlNextPage(url_json);	
+}
+//连续签到抽奖
+function continuity_lottery(cid){
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	if(!cid) return false;
+	var url = activity_host+"/"+prefix+"/lottery.php?sid="+sid+"&mid="+mid+"&cid="+cid;
+	var url_json = '{"text":"连续签到抽奖","url":"'+url+'","isFinish":"2"}';
+	window.AnzhiActivitys.loadUrlNextPage(url_json);	
+}
+//var json_data = '{"type":"1","activityId ":"'+mid+'","redPackId":"'+'11'+'","LRTS":"密钥","APP_INFO":"简化红包任务软件通用列表","status":"'+'0'+'"}';
+//window.AnzhiActivitys.openRedPack(json_data)
+//拆红包
+function open_red(){
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	if(checkSubmitFlg ==true){ 
+		return false; //当表单被提交过一次后checkSubmitFlg将变为true,根据判断将无法进行提交。
+	}
+	checkSubmitFlg = true;
+	setTimeout(function(){		
+		checkSubmitFlg = false;
+	},2000);	
+	
+	$.ajax({
+		url: '/'+prefix+'/open_red.php',
+		data: 'sid='+sid+'&mid='+mid+'&open_red=1&red_id='+redid+'&did='+did,
+		type: 'post',
+		async:false,
+		dataType: 'json',			
+		success:function(data){
+			if(data.code == 1){
+				//拆红包js
+				if(data.app_info){
+					var json_appinfo = ',"APP_INFO":'+data.app_info+'';
+				}else{
+					var json_appinfo = '';
+				}
+				var json_data = '{"type":"1","activityId ":"","activityName":"每日签到","redPackId":"'+redid+'","LRTS":"'+data.lrts+'"'+json_appinfo+',"status":"'+data.status+'","orderId":"'+data.id+'"}';
+				window.AnzhiActivitys.openRedPack(json_data)
+			}else{
+				window.AnzhiActivitys.showToastForJs(data.msg);
+				location.reload();//加载页面
+			}
+		}
+	});	
+}
+//结果回调：签到结果、拆红包结果（活动or签到）
+//reportPacketResult(json)
+//{"type":"1 签到;2 拆红包","result":"0 失败；1成功;2任务无法完成","packetId":"拆红包时的红包ID"}
+function reportPacketResult(json){
+	var data = JSON.parse(json);
+	if(data.result == 0){
+		if(data.type == 2){
+			var str = '拆红包失败';
+			$('#sub_sign_id').attr('onclick', 'open_red("'+did+'");');	
+		}else if(data.type == 1){
+			var str = '签到失败';
+			$('#sub_sign_id').attr('onclick', 'sign_do()').removeAttr("class").html("签到");			
+			window.AnzhiActivitys.showToastForJs(str);
+		}
+	}else{
+		if(data.type == 2){
+			//拆红包
+			$.ajax({
+				url: '/'+prefix+'/open_red.php',
+				data: 'sid='+sid+'&mid='+mid+'&open_red=2&red_id='+redid+'&did='+did+'&result='+data.result,
+				type: 'post',
+				async:false,
+				dataType: 'json',			
+				success:function(data){
+					//alert('拆红包');
+					if(data.code == 1){
+						$('#sub_sign_id').removeAttr("onclick").attr('class','disabled').html("已签到");	
+					}
+				}
+			});	
+		}else if(data.type == 1){
+			window.AnzhiActivitys.showToastForJs('签到成功');
+		}		
+	}
+	setTimeout(function(){		
+		location.reload();//加载页面
+	},2000);			
+}
+//签到提醒			
+function switch_remind(status){
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	$.ajax({
+		url: '/'+prefix+'/sign.php',
+		data: 'sid='+sid+'&mid='+mid+'&is_remind=1&switch_remind='+status,
+		type: 'post',
+		async:false,
+		dataType: 'json',			
+		success:function(data){
+			if(data.code == 1){
+				if(status == 1){
+					var str = "签到提醒已开启";
+				}else{		
+					var str = "签到提醒已关闭";
+				}				
+				signAlarm_js(status);
+			}else{
+				var str = data.msg;
+			}
+			window.AnzhiActivitys.showToastForJs(str);
+		}
+	});	
+}
+/*
+	var switch_json = '{"title":"安智市场","text":"每日签到享好礼，红包抽奖等着你","time":"13:28"}';
+	var str = window.AnzhiActivitys.signAlarm(switch_json);
+	window.AnzhiActivitys.showToastForJs(str);
+*/	
+function signAlarm_js(status){
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	if(status == 1){
+		var switch_json = '{"title":"安智市场","text":"每日签到享好礼，红包抽奖等着你","time":"18:00"}';
+		$('#is_remind').attr('class','sign_on').attr('onclick','switch_remind(0)');
+	}else{
+		var switch_json = "";
+		$('#is_remind').removeAttr("class").attr('onclick','switch_remind(1)');
+	}
+	window.AnzhiActivitys.signAlarm(switch_json);	
+}
+//补签
+function retroactive(repair_date){
+	<!--{if $out.card_config.0.buy_num eq 0 || $out.card_config.1.task_num eq 0}-->	
+		return false;
+	<!--{/if}-->
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	if(checkSubmitFlg ==true){ 
+		return false; //当表单被提交过一次后checkSubmitFlg将变为true,根据判断将无法进行提交。
+	}
+	checkSubmitFlg = true;
+	setTimeout(function(){		
+		checkSubmitFlg = false;
+	},2000);		
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	var cards_num = '<!--{$out.cards_num}-->';
+	if(cards_num == 0){
+		pop_tips('','抱歉，您的补签次数已经用完！','3',1);
+		//滚动结束	
+		scroll_end('3');		
+		return false;
+	}
+	$("#sub_retroactive").attr('onclick', 'retroactive_do(\''+repair_date+'\')');	
+	pop_tips('','','2',1);
+	//滚动结束
+	scroll_end('2');	
+}
+function retroactive_do(repair_date){
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	cloBox('#tip-box2');
+	$.ajax({
+		url: '/'+prefix+'/retroactive.php',
+		data: 'sid='+sid+"&repair_date="+repair_date,
+		type: 'post',
+		async:false,
+		dataType: 'json',			
+		success:function(data){
+			if(data.code == 1){
+				window.AnzhiActivitys.showToastForJs(data.msg);
+				setTimeout(function(){		
+					location.reload();//加载页面
+				},2000);					
+				return false;
+			}else if(data.code == 2){
+				location.reload();//加载页面
+			}else{
+				window.AnzhiActivitys.showToastForJs(data.msg);
+				setTimeout(function(){		
+					location.reload();//加载页面
+				},2000);									
+			}
+		}
+	});	
+}
+//连续签到滚动
+jQuery(".txtScroll-top").slide({titCell:".hd ul",mainCell:".bd ul",autoPage:true,interTime:5000,effect:"topLoop",autoPlay:true,scroll:2,vis:2});
+
+//滚动结束
+function scroll_end(id){
+	$("body").bind("touchend",function(event){
+		setTimeout(function(){	
+			var bg_h=$(window).height() + $(document).scrollTop(),
+				top_h= $("#tip-box"+id).height()/ 2 - $(document).scrollTop();
+			$('#body-bg').css("height",bg_h+"px");	
+			$("#tip-box"+id).css("margin-top",-top_h+"px");	
+		},500);			
+	});	
+}
+</script>

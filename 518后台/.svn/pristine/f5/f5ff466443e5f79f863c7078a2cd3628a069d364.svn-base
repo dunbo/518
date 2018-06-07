@@ -1,0 +1,220 @@
+<!--等待-->
+<div id="await" style="padding:10px; display:none;z-index:10011;">
+<table border="0" cellpadding="0" cellspacing="0" style="width:100%;height:100%;">
+<tr><td><img src="/Public/images/loading.gif" width="32" height="32" border="0" style="vertical-align:middle;text-align:center;" /></td></tr>
+</table>
+</div>
+
+<!-------//区域选中---------->
+<script language="javascript">
+var flags = false;
+function onc_(id){
+	return false;
+	if(!flags){
+		$("[name='id[]'][value="+id+"]").each(function(){
+			$(this).attr('checked',true);
+		});
+		flags = true;
+	}else{	
+		$("[name='id[]'][value="+id+"]").each(function(){
+			$(this).attr('checked',false);
+		});
+		flags = false;
+	}
+}
+
+
+</script>
+
+<!--驳回-->
+<div id="reject_div" style="position:absolute;top:0px;left:0px;width:500px; min-height:400px; _height:400px; border:1px solid #000;background:#fff;display:none;">
+<table border="0" cellpadding="0" cellspacing="0" >
+	<tr height="30">
+		<td style="padding-left:10px;"><span style="font-weight:bold;text-align:center;">驳回原因：</span></td>
+	</tr>
+	
+	<tr >
+		<td id='surplus_content'></td>
+	</tr>	
+	<volist name='reason_list' id='reason_list' key='i'>
+	<tr height="30">
+		<td style="padding-left:10px;">
+		<input <if condition="($reason_list.content2 neq '')"> onclick=tip_show("div_{$reason_list.id}") type="hidden" <else /> type="checkbox" </if>    mark='0' name="reject[]" value="{$reason_list.content}" />{$i}&nbsp;&nbsp;&nbsp;
+		<span id = "f_div_{$reason_list.id}" <notempty name="reason_list.content2"> onclick=tip_show("div_{$reason_list.id}") style="color:#58c5c7;cursor:pointer" </notempty> >{$reason_list.content}</span></td>
+	</tr>
+	<notempty name="reason_list.content2">
+		<tr id = "div_{$reason_list.id}" style="display:none;padding-left:30px;" ><td>
+		<foreach  name='reason_list.content2' item='content2'>
+		<input type="checkbox"  name="reject[]" mark='1' value="{$content2}">{$content2}
+		</foreach >
+		</td></tr>		
+	</notempty>
+	</volist>
+	<tr height="30">
+		<td style="padding-left:10px;">其他原因：</td>
+	</tr>
+	<tr height="30">
+		<td style="padding-left:10px;"><textarea cols="75" rows="4" onblur="if(value==''){value='请输入其他驳回原因：'}" style="color:#999999;" id="reject_reason" name="reject_reason">请输入其他驳回原因：</textarea></td>
+	</tr>
+	<tr>
+		<td style="text-align:left;padding-left:130px;"><button type="button" onclick="reject_submit()" style="margin-right:10px;">确定</button><button type="button" onclick="popclose('reject_div')">取消</button></td>
+	</tr>
+</table>
+</div>
+<input type="hidden" name="tmp" id="tmp" />
+
+<div id="bgdiv" style="position:absolute;display:none; left:0px; top:0px; width:100%; height:100%; filter:alpha(opacity=40);opacity:0.4; background-color:#000000; z-index:1000;"></div>
+
+<script language="javascript">
+$('#reject_reason').click(function(){
+	if($(this).val()=='请输入其他驳回原因：') {
+		$(this).val('');
+		$(this).css({'color':'#000'});
+	}
+});
+//驳回
+var last_id = null;
+function reject(id,type) {	
+	if (last_id != id) {
+		if(action_url == 'nextframe_down'){
+		//申请下架驳回时才验证	
+			$.ajax({
+				url: '__URL__/pub_downloaded_surplus_check',
+				data: 'id='+id,
+				type: 'post',
+				dataType: 'json',
+				success: function(ret) {
+					if(ret['code'] != 0){
+						if(type ==1){
+							var surplus_content = ret.msg+"软件下载量过百万，<font color='red'>请单独选择驳回原因</font>";
+						}else{
+							var surplus_content = "<font color='red'>请选择</font>该软件用户较多，建议暂不下架，请提示开发者在软件简介中备注：该软件已停止维护，有需要的用户请搜索xxx下载。请修改新包的软件名称加上（原旧包名称）再提出申请";
+						}
+						$('#surplus_content').html(surplus_content);
+					}else{
+						$('#surplus_content').html("");
+					}
+				}
+			});	
+		}
+		$("[name='reject[]']").each(function(){
+			$(this).attr('checked',false);
+		});
+		$('#reject_reason').val('请输入其他驳回原因：');
+		$('#reject_reason').css({'color':'#000'});
+
+	}
+	popup('reject_div');
+	last_id = id;
+	$('#tmp').val(id);
+	open_color(id);
+}
+//批量驳回
+function batch_reject() {
+	var id_arr = new Array();
+	var i = 0;
+	$("[name='id[]']").each(function(){
+		if($(this).is(':checked')) {
+			id_arr[i] = $(this).val();
+			i++;
+		}
+	});
+	var id_str = id_arr.join(',');
+	if(id_str=='') {
+		alert('请选择要操作的对象！');
+		return false;
+	}
+
+	reject(id_str,1);
+}
+
+
+//驳回提交
+function reject_submit() {
+	var  rt = '';
+	rt = reject_check_public();
+	if(!rt){
+		alert('请选择或填写驳回原因！');
+		return false;
+	}	
+	//开启加载层	
+	popup('await');
+	//关闭下架层
+	popclose('reject_div');
+	$.ajax({
+		url: '__URL__/'+action_url+'/id/'+$('#tmp').val(),
+		data: 'msg='+rt,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				location.reload();//加载页面
+				return false;
+			} else if(ret['code']==1 || ret['code']==2) {	//成功
+				if(ret['code']==2){
+					alert(ret['error']);
+				}
+				//关闭加载层
+				popclose('await');
+				//变灰不可点击处理
+				for(var i in ret['msg']) {
+					var delid = '#tr'+ret['msg'][i];
+					var aid = '#tr'+ret['msg'][i]+' a';
+					var iid = '#tr'+ret['msg'][i]+' input';
+					var imgid = '#tr'+ret['msg'][i]+' img';
+					var bid = '#tr'+ret['msg'][i]+' button';
+					$(delid+' td').removeAttr('bgcolor');
+					$(delid).css({color:'#bcbcbc',background:'#ececec'});
+					$(aid).css('color', '#bcbcbc');
+					$(aid).removeAttr('href');
+					$(aid).removeAttr('onclick');
+					$(iid).attr({disabled:'disabled', name:'disabled'});
+					$(iid).attr('checked', false);
+					$(imgid).removeAttr('onclick');
+					$(bid).removeAttr('onclick');
+					$(bid).attr({disabled:'disabled', name:'disabled'});
+				}
+			}
+		}
+	});
+}	
+</script>
+
+<script language="javascript">
+function popup(id) {
+	var ids=['reg','login','bgdiv'];
+	for(var i in ids) {
+		popclose(ids[i]);
+	}
+
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	if($(document).scrollTop()<=0){
+		$("#"+id).css("top","20px");
+	}
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+}
+//点击灰色区域关闭层
+$('#bgdiv').click(function(){
+	popclose('reject_div');
+	var id_str = $('#tmp').val();
+	remove_color(id_str);
+
+});
+function popclose(id) {
+	$("#"+id).css({display:"none"});
+	$("#bgdiv").css({display:"none"});
+	var id_str = $('#tmp').val();
+	remove_color(id_str);
+}
+$("input:checkbox[name='reject[]']").click(function(){
+	if(this.attr('mark') == 1){
+		$(this).parent().find()
+	}
+});
+</script>
+<!--驳回结束-->

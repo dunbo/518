@@ -1,0 +1,334 @@
+<!--{include file="header.html"}-->
+<script>
+var stateObject = {};
+var args = getArgs();
+var newUrl = "";
+if (typeof(args['chl_cid']) != 'undefined') {
+    newUrl += "?chl_cid="+args.chl_cid;
+    if (typeof(args['auto']) != 'undefined') {
+    	newUrl += "&auto="+args.auto;
+	}
+}
+function is_weixin() {
+    var ua = navigator.userAgent.toLowerCase();
+    if(ua.match(/MicroMessenger/i)=="micromessenger") {
+        return true;
+    } else {
+        return false;
+    }
+}
+function jump_url(content_id){
+	location.href = "/news/content_tf_"+content_id+".html"+newUrl;
+}
+
+$(document).ready(function(){
+    $(".app_btn").live('click', down_action);
+    $(".open_btn").live('click', down_action);
+    if(is_weixin()){
+    	$('.focus_wrap').css('display', 'none');
+    	$('.app_info').css('display', 'none');
+    	$('.app_similar').css('display', 'none');
+    	$('.az_more').css('display', 'none');
+    	$('body').css('background', 'rgba(0,0,0,.8)');
+    	$('.share_01').css('display', '');
+    }
+    var args = getArgs();
+    if (typeof(args['share']) != 'undefined') {
+    	$('.az_app_more').click();
+    }
+
+});
+
+function getArgs() {
+    var args = {};
+    var query = location.search.substring(1);
+    var pairs = query.split("&");
+    for(var i = 0; i < pairs.length; i++) {
+        var pos = pairs[i].indexOf('=');
+        if (pos == -1) continue;
+        var argname = pairs[i].substring(0,pos);
+        var value = pairs[i].substring(pos+1);
+        value = decodeURIComponent(value);
+        args[argname] = value;
+    }
+    return args;
+}
+
+function down_action() {
+    var rel = $(this).attr('rel');
+    var info_arr = rel.split(',');
+    var info_len = info_arr.length;
+    if (info_len < 2) {
+        return false;
+    }
+    var softid = $.trim(info_arr[0]);
+    var pkg = $.trim(info_arr[1]);
+    var id = $.trim(info_arr[2]);
+    var puid = 0;
+    if (info_len > 2) {
+        puid = $.trim(info_arr[2]);
+    }
+
+    var m = 'callback_' + id;
+    if (typeof(window[m]) == 'undefined') {
+    	window[m] = null;
+    }
+
+    var args = getArgs();
+    var js_param = {type:'ivwdetails', id:id, callback:m};
+    var php_param = {type:'content', id:id};
+    if (typeof(args['auto']) != 'undefined') {
+        php_param['pkg'] = pkg;
+        js_param['pkg'] = pkg;
+    } 
+    if (typeof(args['chl_cid']) != 'undefined') {
+        php_param['chl_cid'] = args.chl_cid;
+    }
+    if (window[m] === null) {
+    	window[m] = function() {
+		    if (typeof(arguments[0]) != 'undefined') {
+		        var magic = arguments[0];
+		        var version = parseInt(arguments[1]);
+		        var firmware = arguments[2];
+		        var flag = arguments[3];
+		        if(version < 6490){
+		            Azfd.share_download({type:'details', id:softid, callback:null}, php_param);        
+		        }
+		    }  
+		}
+    }
+    Azfd.share_download(js_param, php_param);
+    return false;
+}
+</script>
+<style>
+.share_01{width:258px; height:162px; position: absolute; left:50%; top:15px; margin-left:-120px; z-index:99999}
+.share_01 img{display: block; width:258px; height: 162px;}
+</style>
+
+
+<!--{if $out.content_list_top}-->
+<div class="focus_wrap">
+	<div class="swiper-container" id="focus_01">
+		<div class="swiper-wrapper">
+			<!--{foreach from=$out.content_list_top item=val}-->
+			<div class="swiper-slide">
+				<div class="app_wrap">
+					<div class="app_img">
+						<a href="javascript:jump_url(<!--{$val.id}-->);"><img src="<!--{$out.intro.ICON}-->" /></a>
+					</div>
+					<div class="app_txt  <!--{if $val.is_zhehang eq 1 }-->app_txt2<!--{/if}-->">
+						<h3><a href="javascript:jump_url(<!--{$val.id}-->);"><!--{$val.title}--></a></h3>
+					</div>
+					<a class="app_btn" rel="<!--{$out.intro.ID}-->,<!--{$out.intro.PACKAGENAME}-->,<!--{$val.id}-->" href="javascript:">打开</a>
+				</div>
+			</div>
+			<!--{/foreach}-->
+		</div>
+		<div class="swiper-pagination"></div>
+	</div>
+	<!--{if $out.top_count gt 1 }-->
+	<script type="text/javascript">
+		var swiper = new Swiper('.swiper-container', {
+			pagination: '.swiper-pagination',
+			slidesPerView: 1,
+			paginationClickable: true,
+			spaceBetween: 10,
+			autoplay : 3000,
+			autoplayDisableOnInteraction:false
+		});
+	</script>
+	<!--{/if}-->
+</div>
+<!--{/if}-->
+
+<div class="app_info" <!--{if $out.content_list_top}-->style="padding-top:1rem"<!--{/if}--> >
+	<div class="app_info_short">
+		<p style="font-size:0.32rem; font-weight:bold; padding-bottom:0.1rem"><!--{$out.title}--></p>
+		<!--{$out.content_str}-->
+	</div>
+	<a href="javascript:" rel="<!--{$out.intro.ID}-->,<!--{$out.intro.PACKAGENAME}-->,<!--{$out.content_id}-->" class="open_btn az_app_more">打开安智，查看更多独家内容</a>
+</div>
+
+<!--{if $out.content_info_1 or $out.content}-->
+<div class="app_similar">
+	<h3 class="title">热门推荐</h3>
+	<!--{if $out.content_info_1}-->
+	<!--{foreach from=$out.content_info_1 item=val}-->
+		<!--{if $val.IS_VIDEO==1}-->
+		<div class="app_similar2">
+			<div class="app_similar2_info">
+				<h4><a href="javascript:jump_url(<!--{$val.id}-->);"><!--{$val.title}--></a></h4>
+				<div class="app_similar2_img">
+					<a href="javascript:jump_url(<!--{$val.id}-->);"><img src="<!--{$val.VIDEO_ICON}-->" style="width:100%" alt=""></a>
+					<span class="video_icon"></span>
+				</div>
+			</div>
+			<div class="app_wrap">
+				<div class="app_img">
+					<img src="<!--{$val.ICON}-->" />
+				</div>
+				<div class="app_txt">
+					<h3><!--{$val.SOFT_NAME}--></h3>
+					<p><!--{$val.SOFT_SIZE}--><span><!--{$val.SOFT_DOWNLOAD_REGION}-->次下载</span></p>
+				</div>
+				<a class="app_btn" rel="<!--{$val.SOFT_ID}-->,<!--{$val.package}-->,<!--{$val.id}-->" href="javascript:">下载</a>
+			</div>
+		</div>
+		<!--{else}-->
+		<!--{if $val.show_style==1}-->
+		<div class="app_similar1">
+			<div class="app_similar1_info">
+				<!--{foreach from=$val.explicit_pic item=v}-->
+				<a href="javascript:jump_url(<!--{$val.id}-->);"><img src="<!--{$out.ImageHost}--><!--{$v}-->" /></a>
+				<!--{/foreach}-->
+				<h4><a href="javascript:jump_url(<!--{$val.id}-->);"><!--{$val.title}--></a></h4>
+				<div class="clear"></div>
+			</div>
+			<div class="app_wrap">
+				<div class="app_img">
+					<img src="<!--{$val.ICON}-->" />
+				</div>
+				<div class="app_txt">
+					<h3><!--{$val.SOFT_NAME}--></h3>
+					<p><!--{$val.SOFT_SIZE}--><span><!--{$val.SOFT_DOWNLOAD_REGION}-->次下载</span></p>
+				</div>
+				<a class="app_btn" rel="<!--{$val.SOFT_ID}-->,<!--{$val.package}-->,<!--{$val.id}-->" href="javascript:">下载</a>
+			</div>
+		</div>
+		<!--{else if $val.show_style==2}-->
+		<div class="app_similar3">
+			<div class="app_similar3_info">
+				<h4><a href="javascript:jump_url(<!--{$val.id}-->);"><!--{$val.title}--></a></h4>
+				<ul>
+					<!--{foreach from=$val.explicit_pic item=v}-->
+					<li><a href="javascript:jump_url(<!--{$val.id}-->);"><img src="<!--{$out.ImageHost}--><!--{$v}-->" /></a></li>
+					<!--{/foreach}-->
+					<div class="clear"></div>
+				</ul>
+			</div>
+			<div class="app_wrap">
+				<div class="app_img">
+					<img src="<!--{$val.ICON}-->" />
+				</div>
+				<div class="app_txt">
+					<h3><!--{$val.SOFT_NAME}--></h3>
+					<p><!--{$val.SOFT_SIZE}--><span><!--{$val.SOFT_DOWNLOAD_REGION}-->次下载</span></p>
+				</div>
+				<a class="app_btn" rel="<!--{$val.SOFT_ID}-->,<!--{$val.package}-->,<!--{$val.id}-->" href="javascript:">下载</a>
+			</div>
+		</div>
+		<!--{/if}-->
+		<!--{/if}-->
+	<!--{/foreach}-->
+	<!--{/if}-->
+
+	<!--{if $out.content}-->
+	<!--{foreach from=$out.content item=val}-->
+	<!--{if $val.IS_VIDEO==1}-->
+		<div class="app_similar2">
+			<div class="app_similar2_info">
+				<h4><a href="javascript:jump_url(<!--{$val.id}-->);"><!--{$val.title}--></a></h4>
+				<div class="app_similar2_img">
+					<a href="javascript:jump_url(<!--{$val.id}-->);"><img src="<!--{$val.VIDEO_ICON}-->" style="width:100%" alt=""></a>
+					<span class="video_icon"></span>
+				</div>
+			</div>
+			<div class="app_wrap">
+				<div class="app_img">
+					<img src="<!--{$val.ICON}-->" />
+				</div>
+				<div class="app_txt">
+					<h3><!--{$val.SOFT_NAME}--></h3>
+					<p><!--{$val.SOFT_SIZE}--><span><!--{$val.SOFT_DOWNLOAD_REGION}-->次下载</span></p>
+				</div>
+				<a class="app_btn" rel="<!--{$val.SOFT_ID}-->,<!--{$val.package}-->,<!--{$val.id}-->" href="javascript:">下载</a>
+			</div>
+		</div>
+		<!--{else}-->
+		<!--{if $val.show_style==1}-->
+		<div class="app_similar1">
+			<div class="app_similar1_info">
+				<!--{foreach from=$val.explicit_pic item=v}-->
+				<a href="javascript:jump_url(<!--{$val.id}-->);"><img src="<!--{$out.ImageHost}--><!--{$v}-->" /></a>
+				<!--{/foreach}-->
+				<h4><a href="javascript:jump_url(<!--{$val.id}-->);"><!--{$val.title}--></a></h4>
+				<div class="clear"></div>
+			</div>
+			<div class="app_wrap">
+				<div class="app_img">
+					<img src="<!--{$val.ICON}-->" />
+				</div>
+				<div class="app_txt">
+					<h3><!--{$val.SOFT_NAME}--></h3>
+					<p><!--{$val.SOFT_SIZE}--><span><!--{$val.SOFT_DOWNLOAD_REGION}-->次下载</span></p>
+				</div>
+				<a class="app_btn" rel="<!--{$val.SOFT_ID}-->,<!--{$val.package}-->,<!--{$val.id}-->" href="javascript:">下载</a>
+			</div>
+		</div>
+		<!--{else if $val.show_style==2}-->
+		<div class="app_similar3">
+			<div class="app_similar3_info">
+				<h4><a href="javascript:jump_url(<!--{$val.id}-->);"><!--{$val.title}--></a></h4>
+				<ul>
+					<!--{foreach from=$val.explicit_pic item=v}-->
+					<li><a href="javascript:jump_url(<!--{$val.id}-->);"><img src="<!--{$out.ImageHost}--><!--{$v}-->" /></a></li>
+					<!--{/foreach}-->
+					<div class="clear"></div>
+				</ul>
+			</div>
+			<div class="app_wrap">
+				<div class="app_img">
+					<img src="<!--{$val.ICON}-->" />
+				</div>
+				<div class="app_txt">
+					<h3><!--{$val.SOFT_NAME}--></h3>
+					<p><!--{$val.SOFT_SIZE}--><span><!--{$val.SOFT_DOWNLOAD_REGION}-->次下载</span></p>
+				</div>
+				<a class="app_btn" rel="<!--{$val.SOFT_ID}-->,<!--{$val.package}-->,<!--{$val.id}-->" href="javascript:">下载</a>
+			</div>
+		</div>
+		<!--{/if}-->
+		<!--{/if}-->
+	<!--{/foreach}-->
+	<!--{/if}-->
+</div>
+<!--{/if}-->
+
+<div id="az_more" class="az_more">
+	<a href="javascript:void(0);" onclick="formore('.az_more','.app_similar .app_wrap:last','ajax.php?f=content_tf_detail.php&content_id=<!--{$out.content_info.id}-->&morelist=');">点击查看更多</a>
+</div>
+
+<div class="share_01" style="display: none"><img src="<!--{$out.new_static_url}-->/activity/download_for_flow/images/share_notice2.png"/></div>
+
+</body>
+</html>
+
+
+
+<script>
+(function (doc, win) {
+    var docEl = doc.documentElement,resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+    recalc = function () {
+        var clientWidth = docEl.clientWidth;
+        if (!clientWidth) return;
+        if(clientWidth>=640){
+			docEl.style.fontSize = '100px';
+		}else{
+			docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+		}
+    };
+	// Abort if browser does not support addEventListener
+	if (!doc.addEventListener) return;
+	win.addEventListener(resizeEvt, recalc, false);
+	doc.addEventListener('DOMContentLoaded', recalc, false);
+	//以640像素设计图为准 ，1rem代表100像素
+})(document, window);
+$(function(){
+	$('.all_more').bind('click',function(){
+		$(".app_info_hide").show();
+		$(".all_bg").hide();
+	})
+})
+
+</script>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>新年福利第2弹</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/newyears/css/common.css?v1"/>
+<script type="text/javascript" src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public.js"></script>
+<script type="text/javascript">
+var sid='<!--{$out.sid}-->';
+var aid='<!--{$out.aid}-->';
+var open_pkg_arr = [];
+$(document).ready(function(){
+        my_soft(aid,sid,8);
+	$('.egg_btn').click(function(){
+                lottery($(this).attr('rel'),open_pkg_arr);
+	})
+})
+
+
+function lottery(eggtype,pkg_str){
+
+	$.ajax({
+		url: '/lottery/xy2/yd_lottery_egg.php',
+		data: 'type=1&sid='+sid+'&aid='+aid+'&pkg='+pkg_str+'&eggtype='+eggtype,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+                    if(data.code==0){
+                        showOpenBox('#tip-box1');
+                    }else{
+                            if(eggtype==1){
+                                var $crack1 = $("#gold").siblings('.crack1');
+                                var $crack2 = $("#gold").siblings('.crack2');
+                                var $crack3 = $("#gold").siblings('.crack3');
+                                var $light = $("#gold").siblings('.light');
+                                var $hammer = $("#gold").siblings('.hammer');
+                                $("#gold").parent().addClass("active");
+                            }else if(eggtype==2){
+                                var $crack1 = $("#silver").siblings('.crack1');
+                                var $crack2 = $("#silver").siblings('.crack2');
+                                var $crack3 = $("#silver").siblings('.crack3');
+                                var $light = $("#silver").siblings('.light');
+                                var $hammer = $("#silver").siblings('.hammer');
+                                $("#silver").parent().addClass("active");                                
+                            }
+                	setTimeout(function(){
+                            if(data.pid==0){
+                                location.href="/lottery/xy2/yd_myprize.php?lfrom=1&pid=0&aid="+aid+"&sid="+sid+"&package="+data.package+"&softname="+data.softname+"&gift_num="+data.gift_num;
+                            }else{
+                                location.href="/lottery/xy2/yd_myprize.php?lfrom=1&aid="+aid+"&sid="+sid+"&pid="+data.pid+"&prizename="+data.prizename;
+                            }
+		        },1500)
+
+
+                    }
+		}
+	});
+}
+
+
+function my_soft(aid,sid,limit) {
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	var soft_lists = soft_list.DATA;
+	var open_list = [];
+	var install_list = [];
+	var down_list = [];
+	for(j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var json_data =  window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(json_data == 0 || json_data == 1 ){
+			open_list.push(soft_lists[j]);
+			open_pkg_arr.push(soft_lists[j][7]);
+		}
+		if(json_data == -2 && soft_status_gos == 5){
+			install_list.push(soft_lists[j]);
+		}
+		if((json_data == -2 && soft_status_gos != 5 ) || json_data == -1){
+			down_list.push(soft_lists[j]);
+		}
+	}
+}
+
+function go_myprize(){
+	$.ajax({
+		url: '/lottery/xy2/yd_myprize_page.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+                    if(data==1){
+                        showOpenBox('#tip-box2')
+                    }else if(data==2){
+                        location.href="/lottery/xy2/yd_myprize_page.php?lfrom=1&aid="+aid+"&sid="+sid;
+                    }
+		}
+	});
+}
+</script>
+</head>
+<body>
+<section>
+	<div class="main2">
+		<div class="notice">
+			<div class="notice_list">
+				<marquee scrollamount="2" scrolldelay="90" direction="left">
+                                <span><!--{$out.lunbo}--></span>
+				</marquee>
+			</div>
+		</div>
+		<div class="main">
+			<div class="lottery3">
+				<h3 class="title2">第2弹【下载砸金蛋】</h3>
+				<div class="lottery_info lottery_info2">
+					<a class="btns" href="javascript:;" onclick="go_myprize()">我的奖品</a>
+					<a class="btns heart" href="/lottery/xy2/yd_softlist.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->">获取次数</a>
+					<div class="clear"></div>
+					<p>您还有<span><!--{$out.za_num}--></span>次砸蛋机会！<br/><span>100%</span>中奖！</p>
+					<div class="clear"></div>
+				</div>
+				<ul class="egglist">
+					<li>
+						<div class="egg"><img src="<!--{$out.static_url}-->/newyears/images/egg1.png"/></div>
+						<div class="crack1"><img src="<!--{$out.static_url}-->/newyears/images/crack1.png"></div>
+						<div class="crack2"><img src="<!--{$out.static_url}-->/newyears/images/crack2.png"></div>
+						<div class="crack3"><img src="<!--{$out.static_url}-->/newyears/images/crack3.png"></div>
+						<div class="light"><img src="<!--{$out.static_url}-->/newyears/images/light.png"></div>
+						<div class="hammer"><img src="<!--{$out.static_url}-->/newyears/images/hammer.png"></div>
+						<a href="javascript:;" class="egg_btn" rel="1" id="gold">砸金蛋</a>
+					</li>
+					<li>
+						<div class="egg"><img src="<!--{$out.static_url}-->/newyears/images/egg2.png"/></div>
+						<div class="crack1"><img src="<!--{$out.static_url}-->/newyears/images/crack1.png"></div>
+						<div class="crack2"><img src="<!--{$out.static_url}-->/newyears/images/crack2.png"></div>
+						<div class="crack3"><img src="<!--{$out.static_url}-->/newyears/images/crack3.png"></div>
+						<div class="light"><img src="<!--{$out.static_url}-->/newyears/images/light.png"></div>
+						<div class="hammer"><img src="<!--{$out.static_url}-->/newyears/images/hammer.png"></div>
+						<a href="javascript:;" class="egg_btn egg_btn2" rel="2" id="silver">砸银蛋</a>
+					</li>
+					<div class="clear"></div>
+				</ul>
+			</div>
+			<div class="wrap">
+				<ul class="active_ctn">
+					<li>
+						<span>1.</span>
+						<p>活动期间，下载1款软件，即送1次砸银蛋机会！</p>
+					</li>
+					<li>
+						<span>2.</span>
+						<p>活动期间，累计获取的砸银蛋次数到达3次，还额外赠送1次砸金蛋机会！</p>
+					</li>
+					<li>
+						<span>3.</span>
+						<p>活动期间同一个设备下载相同软件，仅第一次可以获得抽奖机会哦。</p>
+					</li>
+					<li>
+						<span>4.</span>
+						<p>活动期间，每天每位用户最多可获得2次砸银蛋机会！</p>
+					</li>
+					<li>
+						<span>5.</span>
+						<p>活动期间，每日完成1次砸蛋，连续完成5天，即可完成【下载砸金蛋】任务，即送20安智币奖励！</p>
+					</li>
+					<div class="clear"></div>
+				</ul>
+				<div class="btns2 clear" id="lottery3_btns">
+					<a class="fl" href="/lottery/xy2/yd_weixin.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->">去第3弹对口令</a>
+					<a class="fr" href="/lottery/xy2/yd_index.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->">返回三部曲主菜单</a>
+				</div>
+				<div class="coin_01"></div>
+				<div class="coin_02"></div>
+				<div class="coin_03"></div>
+			</div>
+		</div>
+	</div>
+</section>
+<section>
+	<div class="footer clear">
+		<p>活动最终解释权归安智所有</p>
+	</div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box1"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con">
+				<div class="tip_title">
+					<h6>砸蛋次数不足！</h6>
+				</div>
+				<div class="clear"></div>
+                <p>您当前可用砸蛋次数不足，若未达到获取上限，请尽快下载软件获取砸蛋次数！</p>
+            </div>
+			<div class="btns4">
+				<a class="btns fl" href="/lottery/xy2/yd_softlist.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->">获取次数</a>
+				<a class="btns fr" href="javascript:;" onclick="cloBox('#tip-box1')">返 回</a>
+			</div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box2"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con">
+				<div class="tip_title">
+					<h6>我的奖品</h6>
+				</div>
+				<div class="clear"></div>
+                <p>抱歉，您现在暂未获得奖品，快去抓紧时间砸蛋or翻卡吧！</p>
+            </div>
+			<div class="btns1"><a class="btns" href="javascript:;" onclick="cloBox('#tip-box2')">返 回</a></div>
+        </div>
+		
+    </div>
+</section>
+</body>
+</html>

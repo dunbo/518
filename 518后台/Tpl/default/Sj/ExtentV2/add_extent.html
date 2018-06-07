@@ -1,0 +1,447 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src='/Public/js/cn_area.js'></script>
+<!--<script type="text/javascript" src="/index.php/Sj/ExtentV2/pub_get_address?1"></script>-->
+
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+
+#sub_extent_td select{
+	margin-left: 15px;
+	margin-right: 5px;
+}
+
+#sub_extent a{
+	color: red;
+}
+
+</style>
+<script>
+function submitChannel()
+{
+	var cids = '';
+	$('#channel_div').html('');
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		$('#channel_div').append(item);
+	})
+	$.cookie('cids', '', {path: '/'});
+	tb_remove();
+}
+//主层动态变化数据
+function onclikChannel()
+{
+	$('#channel_div').html('');
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		$('#channel_div').append(item);
+	})
+	$.cookie('cids', '', {path: '/'});
+}
+//
+function check_arr()
+{
+	$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+}
+
+function switchExtentType(obj)
+{
+	if ($(obj).val() == 1) {
+		$('#extent_size_tr').show();
+		$('#filter_installed_tr').show();
+		$('#depot_limit_tr').show();
+		$('#select_rank').show();
+		$('#union_sub_extent').hide();
+		$('.sign_soft').show();
+		$('.filter_rule_tr').show();
+	} else if ($(obj).val() == 2) {
+		$('#extent_size_tr').hide();
+		$('#filter_installed_tr').hide();
+		$('#depot_limit_tr').hide();
+		$('#select_rank').hide();
+		$('#union_sub_extent').hide();
+		$('#show_form').val(0);
+		$('.sign_soft').hide();
+		$('.filter_rule_tr').hide();
+	} else if ($(obj).val() == 3) {
+		$('#filter_installed_tr').show();
+		$('#depot_limit_tr').show();
+		$('#extent_size_tr').hide();
+		$('#select_rank').hide();
+		$('#union_sub_extent').show();
+		$('#show_form').val(0);
+		$('.sign_soft').hide();
+		$('.filter_rule_tr').show();
+	}
+}
+
+
+var extent_list = <?php echo json_encode($extent_list); ?>;
+var extent_num = 2;
+function in_array(arr, str) {
+	var i = arr.length;
+	while (i--) {
+		if (arr[i] === str) {
+		return true;
+		}
+	}
+	return false;
+}
+function changeSubExtent()
+{
+	if ($(".sub_extent").length <= 2)
+	{
+		$('.delx').hide();
+	}
+	else
+	{
+		$('.delx').show();
+	}
+	if ($(".sub_extent").length >= extent_list.length)
+	{
+		document.getElementById("add_ex").disabled=true;
+	}
+	else
+	{
+		document.getElementById("add_ex").disabled=false;
+	}
+	var selectedlist = new Array();
+	$(".sub_extent_class").each(function()
+		{
+			//alert(this.value);
+			selectedlist.push(this.value);
+		}
+	);
+	//alert(selectedlist);
+	$(".sub_extent_class").each(function()
+		{
+			//alert(this.value);
+			if (this.value == null || this.value == '')
+				tempvalue = 0;
+			else
+				tempvalue = this.value;
+			$(this).empty();
+			opt = new Option('请选择分区', 0);
+			this.options.add(opt);
+			//str = '<option value="0">请选择分区</option>';
+			for (eid in extent_list)
+			{
+				extent = extent_list[eid];
+				if (!in_array(selectedlist, extent['id']) || tempvalue == extent['id'])
+				{
+					//alert('display');
+					//str += '<option value="' + extent['id'] + '"';
+					//if (this.value == extent['id'])
+					//	str += ' selected="selected"';
+					//str += '>' + extent['name'] + '</option>';
+					opt = new Option(extent['name'], extent['id']);
+					this.options.add(opt);
+				}
+			}
+			//alert($(this));
+			//$(this).html(str);
+			this.value = tempvalue;
+		}
+	);
+}
+
+function addSubExtent()
+{
+	extent_num++;
+	var txt = '<span class="sub_extent" id="sub_extent_' + extent_num + '"><SELECT name="sub_extent[]" class="sub_extent_class" onchange="changeSubExtent(this.id)"><option value="0">请选择分区</option></SELECT><a href="javascript:void(0);" onclick="delSubExtent(' + extent_num + ')" class="delx">x</a></span>';
+	$(".sub_extent:last").after(txt);
+	changeSubExtent();
+}
+
+function delSubExtent(eid)
+{
+	if ($(".sub_extent").length <= 2)
+		return;
+	$("#sub_extent_" + eid).remove();
+	changeSubExtent();
+}
+//推送区域
+var area_num = 1;
+function addArea()
+{
+	var html = '<div id="area_div_' + area_num + '">';
+	html += '<select name="push_area[]" id="push_area_'+area_num+'" class="push_area" onchange="showSubArea(this)">';
+	html += '<option value="">请选择</option>';
+	for(var i in area_list){
+		if (i == 990000) continue ;//海外排除
+		var item = area_list[i]['name'].split("\t");
+		html += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+	}
+	html += '</select>';
+	html += '<span class="sub_area"></span>';
+	html += '<input type="button" value="删除" onclick="delArea(this)" class="act_btn"/>';
+	html += '</div>';
+	$('#push_td').append(html);
+	var obj = $('#push_area_' + area_num);
+	area_num++;
+	return obj;
+}
+function delArea(obj)
+{
+	$(obj).parent().remove();
+	refreshArea();
+}
+
+function showSubArea(obj)
+{
+	var sub_id = $(obj).attr('id').replace('push_area_', 'push_city_');
+	var sub_select = "<select name='push_city[]' id='"+sub_id+"' onchange='refreshArea()'><option value=''>请选择</option>";
+	var value = $(obj).children('option:selected').val();
+	var arr = value.split(':');
+	var code = arr[0];
+	if (typeof(area_list[code]) == 'undefined') {
+		$(obj).parent().find('.sub_area').html('');
+		return false;
+	}
+	var sub_area = area_list[code]['sub'];
+	for(var i in sub_area){
+		var item = sub_area[i].split("\t");
+		sub_select += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+	}
+	sub_select += "</select>";
+	$(obj).parent().find('.sub_area').html(sub_select);
+	refreshArea();
+}
+
+function refreshArea()
+{
+	var area_value = '';
+	$('.push_area').each(function(){
+		var sub_id = $(this).attr('id').replace('push_area_', 'push_city_');
+		if ($(this).val() !='') {
+			area_value += $(this).find('option:selected').html() + ',';
+			if ($('#' + sub_id).val() !='') {
+				area_value += $('#' + sub_id).find('option:selected').html();
+			}
+			area_value += ';';
+		}
+	});
+	area_value = area_value.replace(/;$/, '');
+	$('#area_value').val(area_value);
+}
+
+function show_form_select(val){
+	if(val == 5){
+		document.getElementById("show_form_datas").style.display = "";
+	}else{
+		document.getElementById("show_form_datas").style.display = "none";
+	}
+}
+</script>
+<FORM method="POST" action="/index.php/Sj/ExtentV2/add_extent" onsubmit="return checkForm()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td width="30%">&nbsp;&nbsp;</td>
+		<td>&nbsp;&nbsp;</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>区间名称</td>
+		<td><input name='extent_name' type='text'/></td>
+	</tr>
+	<?php if (empty($parent_id)): ?>
+	<tr class="sub_tr" style='height:70px'>
+		<td>区间类型</td>
+		<td>
+			<SELECT name='type' onchange="switchExtentType(this)">
+				<option value='1'>普通区间</option>
+				<option value='2'>活动区间</option>
+				<option value='3'>联合区间</option>
+			</SELECT><br>普通区间：该区间下不可再分区间，只有软件列表。
+			活动区间：分区下可以再进行分区操作。联合分区：可联合多个普通分区
+		</td>
+	</tr>
+	<?php endif;?>
+	<!--
+	<tr class="sub_tr" id="depot_limit_tr">
+		<td>投 放 区 域：</td>
+		<td><span id="top_area"></span></td>
+	</tr>
+	-->
+	<tr class="sub_tr">
+		<td>列表展示形式</td>
+		<td>
+			<SELECT name='show_form' id="show_form" onchange="show_form_select(this.value);">
+				<option value='0'>ICON+名称（即现在安智市场列表样式）</option>
+				<option value='1' class="sign_soft">单软件（列表单图）</option>
+				<option value='2' class="sign_soft">根据内容规则匹配</option>
+				<option value='3' class="sign_soft">单软件（三图）</option>
+				<option value='4' class="sign_soft">单软件（视频）</option>
+				<option value='5' class="sign_soft">个性化推荐内容</option>
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>运营商</td>
+		<td>
+			<SELECT name='oid'>
+				<option value='0'>不限制</option>
+				<?php foreach($operatinglist as $val): ?>
+					<option value='<?php echo $val['oid']?>'><?php echo $val['mname']?></option>
+				<?php endforeach; ?>
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>渠道</td>
+		<td>
+		<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+		<div id="channel_div">
+		</div>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="union_sub_extent" style="display:none;">
+		<td>区间位置</td>
+		<td id="sub_extent_td">
+			<span class="sub_extent" id="sub_extent_1">
+				<SELECT name='sub_extent[]' class="sub_extent_class" onchange="changeSubExtent()">
+					<!--<option value="0">请选择分区</option>-->
+				</SELECT>
+				<a href="javascript:void(0);" onclick="delSubExtent(1)" class="delx">x</a>
+			</span>
+			<span class="sub_extent" id="sub_extent_2" >
+				<SELECT name='sub_extent[]' class="sub_extent_class" onchange="changeSubExtent()">
+					<!--<option value="0">请选择分区</option>-->
+				</SELECT>
+				<a href="javascript:void(0);" onclick="delSubExtent(2)" class="delx">x</a>
+			</span>
+			<input type="button" id="add_ex" value="+" onclick="addSubExtent();" style="margin-left:10px;width:30px;height:30px;"/>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="depot_limit_tr">
+		<td>区间位置数</td>
+		<td><input name='depot_limit' type='text'/><font color="red">注：该数值是服务端返还几个软件数据给客户端</font></td>
+	</tr>
+	<tr class="sub_tr" id="show_form_datas" style="display:none;">
+		<td>个性化数据选择</td>
+		<td>
+			<select name="sform_data" id="sform_data">
+				<option value="1">新</option>
+				<option value="2">热</option>
+			</select>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="filter_installed_tr">
+		<td>是否过滤已安装软件</td>
+		<td>
+			<SELECT name='filter_installed'>
+				<option value='1' >是</option>
+				<option value='0' >否</option>
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="extent_size_tr">
+		<td>区间默认返回备选库数量</td>
+		<td><input name='extent_size' type='text'/><font color="red">注：该数值是指客户端展示几个软件数据</font></td>
+	</tr>
+	<tr class="sub_tr" id="filter_rule_tr">
+		<td>过滤重复规则</td>
+		<td>
+			<SELECT name='filter_rule'>
+				<option value='0' >不过滤重复</option>
+				<option value='1' >过滤重复，删除之前已出现过的数据</option>
+				<option value='2' >过滤重复，删除将要出现的重复数据</option>
+			</SELECT>
+		</td>
+		<td></td>
+	</tr>
+<tr class="sub_tr">
+	<td>推送区域</td>
+	<td align="left" id="push_td">
+	<input type="button" value="添加" onclick="addArea()" class="act_btn"/>
+	<input type="hidden" value="" name="area_value" id="area_value"/>
+	</td>
+</tr>
+
+	<tr class="sub_tr"  id="select_rank">
+		<td>区间排序</td>
+		<td>
+			<SELECT name='rank'>
+				<?php
+					for($i = 1;$i <= $count; $i++){
+						echo "<option value=\"".$i."\"";
+						if($count == $i) echo " selected=\"selected\" ";
+						echo ">".$i."</option>";
+					}
+				?>
+			</SELECT>
+			<input type='hidden' name="currank" value='<?php echo $count ?>' />
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+		<input type='hidden' name="parent_id" value='<?php echo $parent_id?>' />
+		<input type='hidden' name="pid" value='<?php echo $pid?>' />
+		<input type='submit'  value="&nbsp;&nbsp;提交&nbsp;&nbsp;"/>
+		<input type="button" onclick="tb_remove();" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+	</tr>
+</table>
+</FORM>
+<script>
+
+
+function checkForm()
+{
+	var area=document.getElementById("area_value").value;
+	var area_arr=new Array;
+	area_arr=area.split(";");
+	var s = area_arr.join(";")+";";
+	for(i=0;i<area_arr.length;i++)
+	{
+		if(area_arr[i].split(",")[1]=="")
+			{
+			 var pro=area_arr[i].split(",")[0];
+			 for(j=0;j<area_arr.length;j++)
+			 {
+				 if(area_arr[j].split(",")[0]==pro&&j!=i)
+				 {
+					 alert("您选择的有冲突，请重新选择");
+						return false;
+				 }
+			 }
+			}
+		else if(s.replace(area_arr[i]+";","").indexOf(area_arr[i]+";")>-1)
+		{
+			alert("您选择了重复的省市，请重新选择");
+			return false;
+			}
+	}
+	var extent_size = $("input[name='extent_size']").val();
+	if(extent_size == "") {
+		alert('区间位置数不能为空');
+		return false;
+	}
+	if(!/^[0-9]+$/.test(extent_size) ) {
+		alert('区间位置数必须为正整数');
+		return false;
+	}
+
+	var _form_data = $('#show_form option:selected').val();
+	if(_form_data == 5){
+		var _sf_data = $('#sform_data option:selected').val();
+		if(_sf_data == 0 || _sf_data == undefined){
+			alert('个性化数据选择不能为空');
+			return false;
+		}
+	}
+
+	return true;
+}
+
+changeSubExtent();
+</script>

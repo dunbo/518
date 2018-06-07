@@ -1,0 +1,340 @@
+<include header="../Public/header"/>
+
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+<!--上传图片的JS-->
+<script charset="utf-8" src="/Public/js/ajaxfileupload_anzhi.js"></script>
+<!--文本编辑器用到的-->
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<!-- 选择颜色用到的-->
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<!--弹框用到的样式和js-->
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+
+<!--boot样式加载-->
+<link rel="stylesheet" href="__PUBLIC__/css/bootstrap.min.css">
+<script type="text/javascript" src="__PUBLIC__/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    KindEditor.ready(function(K) {
+        window.editor = K.create('#editor_content',{
+            allowImageRemote : false,
+            allowImageUpload : true,
+            items : [
+                'bold','italic','underline','fontsize','forecolor','|','image','anchor','link','unlink','justifyleft','justifycenter','justifyright'
+            ]
+        });
+    });
+    KindEditor.options.cssData = 'body { font-size: 16px; }';
+    
+    //提交判断函数
+    function promotion_add_submit() 
+	{
+        // 不为空的数据，key为id值，value为提示值
+        var nonempty = new Object();  
+        nonempty['page_name'] = '页面名称';
+        nonempty['content_type'] = '推荐内容';
+        nonempty['page_title'] = '页面标题';
+        for (key in nonempty) 
+		{
+            var str = "#" + key;
+            if ($.trim($(str).val()) == '') 
+			{
+                alert(nonempty[key]+'不能为空！');
+				$(str).focus();
+                return false;
+            }
+        }
+		var btn_type = $('input:radio[name="btn_type"]:checked').val();
+		if(btn_type == 1)
+		{
+			var text_color = $("#text_color").val();
+			var text_font_size = $('[name="text_font_size"]:checked').val();
+			var text_alignment = $('[name="text_alignment"]:checked').val();
+			var text_content = $('[name="text_content"]').val();
+			if(text_color == "")
+			{
+				alert('按钮文本颜色不能为空！');
+                return false;
+			}
+			if(text_font_size == "")
+			{
+				alert('按钮文本字体大小不能为空！');
+                return false;
+			}
+			if(text_alignment == "")
+			{
+				alert('按钮文本对齐样式不能为空！');
+                return false;
+			}
+			if(text_content == "")
+			{
+				alert('按钮文本内容不能为空！');
+                return false;
+			}
+		}
+		if(btn_type == 2)
+		{
+			//var btn_pic = $('#preview2').attr('src');
+			var btn_pic = $('[name="btn_pic"]').val();
+			if(btn_pic =='')
+			{
+				alert('按钮图片不能为空！');
+                return false;
+			}
+		}
+        // 判断KindEditor内容是否为空
+        window.editor.sync();//同步一下
+        if ($.trim(window.editor.text()) == '') {
+            alert('页面正文不能为空！');
+            return false;
+        }
+        $("#promotion_add_submit").submit();
+    }
+	//渠道有关
+	 function submitChannel() {
+        var cids = '';
+        $('#channel_div').html('');
+        $("#TB_ajaxContent #channel_selected input:checked").each(function(){
+            var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+            item.find('input').attr('checked', 'true');
+            $('#channel_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+        tb_remove();
+    }
+    //主层动态变化数据
+    function onclikChannel() {	
+        $('#channel_div').html('');
+        $("#TB_ajaxContent #channel_selected input:checked").each(function(){
+            var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+            item.find('input').attr('checked', 'true');
+            item.find('input').unbind("click");
+            item.find('input').attr("onclick", '');
+            $('#channel_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+    }
+
+    function check_arr() {
+        $('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+    }
+	//推荐内容函数
+	$(function(){
+    /*
+    ** generate_content_type_href 函数：生成推荐内容的链接
+    ** 第一个参数是要append到的div的id，必填
+    ** 第二个参数是可推荐的内容类型，非必填，默认为'1,2,3,4,5'
+    ** 第三个参数是数组类型，非必填，如果要传编辑的值或者自定义元素名称，需要用到此值
+    ** 返回：生成的链接
+    */
+    href = generate_content_type_href('content_type_div','','','ExPromotion');
+    $("#content_type_a").attr("href", href);
+	});
+
+//颜色模板所用到的函数	
+$(function(){
+	$('#page_color').colorPicker();
+	$('#text_color').colorPicker();
+	$('#second_bg_color').colorPicker();
+	$('#third_bg_color').colorPicker();
+	$('.colorPicker-picker').css('display','inline-block');
+});
+//图片展示和删除
+function onUploadImgChange(sender,img,obj){  
+    if( !sender.value.match( /.jpg|.gif|.png|.bmp|.jpeg/i ) ){        
+        alert('图片格式无效！');   
+        return false;       
+    }                    
+    var objPreview = document.getElementById(obj);        
+    var file=document.getElementById(img);
+    if( sender.files &&  sender.files[0] ){ 
+        objPreview.style.display = 'block';        
+        objPreview.style.width = 'auto';        
+        objPreview.style.height = 'auto';
+		objPreview.src = window.URL.createObjectURL(file.files[0]);
+    }  
+	//上传到服务器图片方便预览
+	$.ajaxFileUpload ({
+		url:'__URL__/page_preview', //你处理上传文件的服务端
+		secureuri:false, //与页面处理代码中file相对应的ID值
+		fileElementId:'btn_pic',
+		dataType: 'json', //返回数据类型:text，xml，json，html,scritp,jsonp五种
+		success: function (data) 
+		{
+			if(data.file_infor ==1 )
+			{
+				//存放的地址展示出来
+				$("#tmp_btn_pic").val(data.file_url);
+			}
+		}
+	})
+}        
+
+function onPreviewLoad(sender){
+    autoSizePreview( sender, sender.offsetWidth, sender.offsetHeight );      
+}
+
+function autoSizePreview( objPre, originalWidth, originalHeight ){     
+    var zoomParam = clacImgZoomParam( 300, 300, originalWidth, originalHeight );        
+    objPre.style.width = zoomParam.width + 'px';        
+    objPre.style.height = zoomParam.height + 'px';        
+    objPre.style.marginTop = zoomParam.top + 'px';        
+    objPre.style.marginLeft = zoomParam.left + 'px';        
+}        
+
+function clacImgZoomParam( maxWidth, maxHeight, width, height ){        
+    var param = { width:width, height:height, top:0, left:0 };        
+    if( width>maxWidth || height>maxHeight ){        
+        rateWidth = width / maxWidth;        
+        rateHeight = height / maxHeight;        
+        if( rateWidth > rateHeight ){        
+            param.width =  maxWidth;        
+            param.height = height / rateWidth;        
+        }else{        
+            param.width = width / rateHeight;        
+            param.height = maxHeight;        
+        }        
+    }        
+    param.left = (maxWidth - param.width) / 2;        
+    param.top = (maxHeight - param.height) / 2;              
+    return param;        
+}
+
+function del_img(obj,div){
+	if(confirm("确定要删除此图片？"))
+	{
+		$('#'+obj+'').val('');
+		objPreview = document.getElementById(div);
+		objPreview.style.display = 'none';
+	}else{
+		return false;
+	}
+}
+$('#button_return').click(function(){
+		location.href='__URL__/{$function_name}';
+	});
+</script>
+
+<body>
+    <h3 class="yahei" style="margin:10px; text-shadow: 0 0 5px gray; font-size:16px;">外部推广</h3>
+    <form method="post" action="__URL__/promotion_add_do" id="promotion_add_submit" enctype="multipart/form-data">
+		<table width="900" height="30" border="1">
+			<tr>
+				<td><font color="red">*</font>页面标题：</td>
+				<td><input type="text" class="" name="page_name" id="page_name"/></td>
+			</tr>
+			<tr>
+				<td><font color="red">*</font>推广操作按钮样式：</td>
+				<td>
+					<input type="radio" checked class="" name="btn_type" value="1"/>&nbsp;&nbsp;文本
+					&nbsp;&nbsp;&nbsp;颜色：<input type="text" name="text_color" id="text_color" />
+					&nbsp;&nbsp;&nbsp;大小：
+					<select name="text_font_size" id="text_font_size" class="">
+						<option value="9">9px</option>
+						<option value="10">10px</option>
+						<option value="12">12px</option>
+						<option value="14">14px</option>
+						<option value="16">16px</option>
+						<option value="18">18px</option>
+						<option value="24">24px</option>
+						<option value="32">32px</option>
+					</select>
+					&nbsp;&nbsp;&nbsp;&nbsp;对齐方式：
+					<select name="text_alignment" id="text_alignment" class="">
+						<option value="1">左对齐</option>
+						<option value="2">居中</option>
+						<option value="3">右对齐</option>
+					</select>
+					<br/>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;文本内容：
+					<input type="text" id="text_content" name="text_content" />
+					<br/>
+					<input type="radio" class="" name="btn_type" value="2"/>&nbsp;&nbsp;图片&nbsp;&nbsp;&nbsp;
+					<input type="file" name="btn_pic" id="btn_pic" onchange="onUploadImgChange(this,'btn_pic','preview2');" />
+					<div><img id="preview2" onload="onPreviewLoad(this)"/>
+					</div><input type="button" value="删除" onclick="del_img('btn_pic','preview2');" />
+				</td>
+			</tr>
+			<tr class="sub_tr">
+				<td><font color="red">*</font>推荐内容</td>
+				<td>
+					<!--下面a里的href的url会在ready函数里自动生成-->
+					<a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+					<!--下面的content_type_div是选择推荐内容后append的地方-->
+					<div id="content_type_div"/>
+				</td>
+			</tr>
+			<tr>
+				<td>渠道</td>
+				<td align="left" width="300">
+					<a href="__APP__/Public/showChannel?callback=submitChannel&type=radio&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+					<div id="channel_div"></div>	
+				</td>
+			</tr>
+			<tr>
+				<td><font color="red">*</font>页面文案  标题：</td>
+				<td><input type="text" class="" name="page_title" id="page_title"/></td>
+			</tr>
+			<tr>
+				<td><font color="red">*</font>页面文案  正文：</td>
+				<td> <textarea style="width:690px;height:300px;" name="editor_content" id="editor_content"></textarea></td>
+			</tr>
+			<tr>
+				<td colspan= '2' style="text-align:center;">
+					<input type="hidden" name="from" id="from" value="{$function_name}"/>
+					<input type="hidden" name="url_param" id="url_param" value="{$url_param}"/>
+					<button class="btn btn-success" style="margin-right:20px;" onClick="return promotion_add_submit();" type="submit">保存</button>
+					<button style="margin:10px 20px 10px 0px;" class="btn btn-default" type="button" id="button_return" onclick="javascript:history.go(-1);">取消</button>
+					<button onclick="editor_preview()" class="btn btn-success" type="button"  id="button_preview">预览</button>
+				</td>
+			</tr>
+		</table>
+    </form>
+	<form method="post" action="" name="tmp_form" id="tmp_form" target="_blank">
+		<input type="hidden" id="tmp_page_name" name="tmp_page_name" />
+		<input type="hidden" id="tmp_title" name="tmp_title" />
+		<input type="hidden" id="tmp_content" name="tmp_content" />
+		<input type="hidden" id="tmp_btn_type" name="tmp_btn_type"/>
+		<input type="hidden" id="tmp_text_color" name="tmp_text_color"/>
+		<input type="hidden" id="tmp_text_font_size" name="tmp_text_font_size"/>
+		<input type="hidden" id="tmp_text_alignment" name="tmp_text_alignment"/>
+		<input type="hidden" id="tmp_text_content" name="tmp_text_content"/>
+		<input type="hidden" id="tmp_btn_pic" name="tmp_btn_pic"/>
+	</form>
+	<script>
+	function editor_preview() 
+	{
+		var server_addr = '<?php echo $_SERVER['SERVER_ADDR']; ?>';
+		if(server_addr == '118.26.203.23')
+		{
+			$('#tmp_form')[0].action = 'http://118.26.203.23/lottery/promotion.php';
+		}
+		else if(server_addr == '192.168.0.99')
+		{
+			$('#tmp_form')[0].action = 'http://9.m.anzhi.com/lottery/promotion.php';
+		}
+		else 
+		{
+			$('#tmp_form')[0].action = 'http://m.anzhi.com/lottery/promotion.php';
+		}
+		$('#tmp_page_name').val($('#page_name').val());
+		$('#tmp_title').val($('#page_title').val());
+		$('#tmp_content').val($.trim(window.editor.html()));
+		$('#tmp_btn_type').val($('input:radio[name="btn_type"]:checked').val());
+		$('#tmp_text_color').val($('#text_color').val());
+		$('#tmp_text_font_size').val($('#text_font_size').val());
+		$('#tmp_text_alignment').val($('#text_alignment').val());
+		$('#tmp_text_content').val($('[name="text_content"]').val());
+		$('#tmp_btn_pic').val();
+		$('#tmp_form').submit();
+		return false;
+	}
+	</script>
+</body>

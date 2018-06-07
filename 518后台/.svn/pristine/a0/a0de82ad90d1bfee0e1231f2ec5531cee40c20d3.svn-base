@@ -1,0 +1,230 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+
+<script>
+    $(function() {
+        options = {
+            serviceUrl:'/index.php/ContentType/showTagPage',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+                var general_page_type = $("#general_page_type").val();
+                location.href = '/index.php/Sj/TextQuickEntry/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type + '/page_name/' + value;
+            }
+        };
+        $('#tag_name').autocomplete(options);
+
+        options = {
+            serviceUrl:'/index.php/ContentType/showCommonTagPage',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+                var general_page_type = $("#general_page_type").val();
+                location.href = '/index.php/Sj/TextQuickEntry/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type + '/page_name/' + value;
+            }
+        };
+        $('#commontag_name').autocomplete(options);
+        
+        $('#tag_name').bind('keypress',function(event) {
+            if(event.keyCode == "13") {
+                var general_page_type = $("#general_page_type").val();
+                var page_name = $("#tag_name").val();
+                location.href = '/index.php/Sj/TextQuickEntry/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type + '/page_name/' + page_name;
+            }
+        });
+        
+        $('#commontag_name').bind('keypress',function(event) {
+            if(event.keyCode == "13") {
+                var general_page_type = $("#general_page_type").val();
+                var page_name = $("#commontag_name").val();
+                location.href = '/index.php/Sj/TextQuickEntry/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type + '/page_name/' + page_name;
+            }
+        });
+    });
+    
+    // 选择平台时，刷新整个页面，清空之前选的频道数据等
+    function changePid(obj) {
+      window.location.href = '/index.php/Sj/TextQuickEntry/index?pid=' + $(obj).val();
+    }
+    
+    // 选择频道类型时，页面发生变化
+    function changePageType(obj) {
+        opt = $(obj).val();
+        showPageType(opt);
+    }
+    
+    // 显示所选择的频道类型页面，隐藏其他类型
+    function showPageType(opt) {
+        if (opt == 0) {
+            document.getElementById("select_category").style.display="none";
+            document.getElementById("input_category").style.display="none";
+            document.getElementById("input_commontag_category").style.display="none";
+			document.getElementById("select_list").style.display="none";
+			document.getElementById("coop_channel_list").style.display="none";
+        } else if (opt == 1) {
+            document.getElementById("select_category").style.display="";
+            document.getElementById("input_category").style.display="none";
+            document.getElementById("input_commontag_category").style.display="none";
+			document.getElementById("select_list").style.display="none";
+			document.getElementById("coop_channel_list").style.display="none";
+        } else if (opt == 2) {
+            document.getElementById("select_category").style.display="none";
+            document.getElementById("input_category").style.display="";
+            document.getElementById("input_commontag_category").style.display="none";
+			document.getElementById("select_list").style.display="none";
+			document.getElementById("coop_channel_list").style.display="none";
+        } else if (opt == 3) {
+            document.getElementById("select_category").style.display="none";
+            document.getElementById("input_category").style.display="none";
+            document.getElementById("input_commontag_category").style.display="";
+			document.getElementById("select_list").style.display="none";
+			document.getElementById("coop_channel_list").style.display="none";
+        }else if (opt == 5) {
+			document.getElementById("select_list").style.display="";
+			document.getElementById("select_category").style.display="none";
+			document.getElementById("input_category").style.display="none";
+			document.getElementById("input_commontag_category").style.display="none";
+			document.getElementById("coop_channel_list").style.display="none";
+		}else if (opt == 8) {
+			document.getElementById("select_list").style.display="none";
+			document.getElementById("select_category").style.display="none";
+			document.getElementById("input_category").style.display="none";
+			document.getElementById("input_commontag_category").style.display="none";
+			document.getElementById("coop_channel_list").style.display="";
+		}
+        location.href = '/index.php/Sj/TextQuickEntry/index/pid/<?php echo $pid?>/general_page_type/' + opt;
+    }
+    
+    // 普通频道时，下拉选择后跳转
+    function changeCategoryType(obj) {
+        var general_page_type = $("#general_page_type").val();
+        location.href = '/index.php/Sj/TextQuickEntry/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type + '/belong_page_type/' + $(obj).val();
+    }
+
+    
+    
+</script>
+
+<body>
+    <div class="search_box">
+        <span>
+            请选择要操作的产品:
+            <select name="pid" id="pid" onChange="changePid(this)">
+                <?php foreach($product_list as $k => $v): ?>
+                <option value="<?php echo $k;?>"<?php if ($v[1] == true):?> selected="true"<?php endif; ?> ><?php echo $v[0] ?></option>
+                <?php endforeach; ?>
+            </select>
+            请选择频道类型：
+            <select name="general_page_type" id="general_page_type" onChange="changePageType(this)">
+                <option value="0">全部</option>
+                <option value="1" <if condition="$general_page_type eq 1">selected</if>>普通</option>
+                <option value="2" <if condition="$general_page_type eq 2">selected</if>>标签</option>
+                <option value="3" <if condition="$general_page_type eq 3">selected</if>>常用标签</option>
+				<option value="5" <if condition="$general_page_type eq 5">selected</if>>榜单</option>
+				<option value="8" <if condition="$general_page_type eq 8">selected</if>>内容合作</option>
+            </select>
+            <span id="select_category" <if condition="$general_page_type eq 1"><else/>style="display:none"</if>>
+            请选择频道: 
+            <select onChange="changeCategoryType(this)">
+                <?php foreach($category_list as $key => $val):?>
+                    <option value="<?php echo $key?>" <?php if($belong_page_type == $key) echo "selected";?>><?php echo $val?></option>
+                <?php endforeach;?>
+            </select>
+            </span>
+			<span id="select_list" <if condition="$general_page_type eq 5"><else/>style="display:none"</if>>
+            请选择频道: 
+            <select name="soft_type_add" id="soft_type_add" onchange="changeCategoryType(this)">
+                <?php foreach($bd_list as $key => $val):?>
+                    <option value="<?php echo $key?>" <?php if($belong_page_type == $key) echo "selected";?>><?php echo $val?></option>
+                <?php endforeach;?>
+            </select>
+            </span>
+            <span id="input_category" <if condition="$general_page_type eq 2"><else/>style="display:none"</if>>
+            请输入频道：
+            <input type="text" name="tag_name" id="tag_name" value="{$page_name}"/>
+            </span>
+            <span id="input_commontag_category" <if condition="$general_page_type eq 3"><else/>style="display:none"</if>>
+            请输入频道：
+            <input type="text" name="commontag_name" id="commontag_name" value="{$page_name}"/>
+            </span>
+			<span id="coop_channel_list" <if condition="$general_page_type eq 8"><else/>style="display:none"</if>>
+			<select name="coop_channel" id="coop_channel" onchange="changeCategoryType(this)">
+				<option value="">全部</option>
+				<volist name="coop_result" id="vo">
+					<option value="{$vo.coop_key_val}" <?php if($belong_page_type == $vo['coop_key_val']){ ?>selected<?php } ?> >{$vo.new_channel_name}</option>
+				</volist>
+			</select>
+			</span>
+		
+			<div class="ad_pic_q">
+			 <img src="/Public/images/appfirst_btn_02.png" onMouseOver="appear_pic('pic_appear')" onMouseOut="disappear_pic('pic_appear')">
+				<div id="pic_appear" class="ad_pic" style="right:30px;">
+				 <img src="/Public/images/quick_entrance.jpg">
+				 </div>
+			</div>
+        </span>
+    </div>
+	<script type="text/javascript">
+ function appear_pic(id)
+ {
+   var pic=document.getElementById(id);
+    pic.style.display="block";
+ }
+ function disappear_pic(id)
+ {
+   var pic=document.getElementById(id);
+    pic.style.display="none";
+ }
+</script>
+    <div style="margin:10px">
+        <notempty name="belong_page_type"><a href="__URL__/add_extent?pid=<?php echo $pid?>&belong_page_type=<?php echo $belong_page_type?>" class="search_btn thickbox">添加新分区</a></notempty>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <!--<th width="4%">分区ID</th>-->
+                    <th width="8%">区间名</th>
+                    <th width="8%">所属页面</th>
+                    <th width="5%">渠道</th>
+                    <th width="5%">运营商</th>
+                    <th width="4%">实际入口数</th>
+					<th width="4%">设置入口数</th>
+                    <!--<th width="8%">发布时间</th>-->
+                    <th width="10%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                    <!--<td>{$list.extent_id}</td>-->
+                    <td>{$list.extent_name}</td>
+                    <td>{$list.belong_page_name}</td>
+                    <td>{$list.chname}</td>
+                    <td>{$list.oname}</td>
+                    <td>{$list.count}</td>
+					<td>{$list.entrance_count}</td>
+                    <!--<td>{$list.create_time|date="Y-m-d H:i:s",###}</td>-->
+                    <td>
+                        <a href="__URL__/add_content?extent_id={$list.extent_id}&pid={$pid}&width=700&height=500" class="blue thickbox">添加</a>
+                        ｜<a href="__URL__/list_content?extent_id={$list.extent_id}&pid={$pid}&entrance_type={$list.entrance_type}" class="blue">查看</a>
+                        ｜<a href="__URL__/edit_extent?extent_id={$list.extent_id}" class="blue thickbox">编辑</a>
+                        ｜<a href="__URL__/delete_extent?extent_id={$list.extent_id}" class="blue" onClick="return confirm('确认删除？')">删除</a></td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>

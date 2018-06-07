@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title><!--{if $out.typeid}--><!--{$out.result[0]['name']}--><!--{else}-->福利<!--{/if}--></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/welfare/css/common.css?v3"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<!--{if $out['is_share'] == 1}-->
+<script type="text/javascript" src="/js/anzhi.js"></script>
+<!--{/if}-->
+<script type="text/javascript">
+(function (doc, win) {
+	var docEl = doc.documentElement,
+    resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+    recalc = function () {
+        var clientWidth = docEl.clientWidth;
+        if (!clientWidth) return;
+        if(clientWidth>=640){
+			docEl.style.fontSize = '100px';
+		}else{
+			docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+		}
+    };
+    // Abort if browser does not support addEventListener
+    if (!doc.addEventListener) return;
+    win.addEventListener(resizeEvt, recalc, false);
+    doc.addEventListener('DOMContentLoaded', recalc, false);
+   //以640像素设计图为准 ，1rem代表100像素
+})(document, window);
+
+var var_activity = parseInt('-99999');
+var var_soft_status = 0;
+var interval_arr = new Array();
+var ajax_status = new Array();
+<!--{if $out['is_weixin'] == 1}-->
+var is_weixin = true;
+<!--{else}-->
+var is_weixin = false;
+<!--{/if}-->
+
+$(function(){
+<!--{foreach from=$out.result item=val key=key}-->
+<!--{if $val.pkg_info}-->
+	<!--{foreach from=$val.pkg_info item=v key=k}-->
+	interval_arr[<!--{$val['welfare'][$k]['id']}-->] = 0;
+	ajax_status[<!--{$v.ID}-->] = 0;
+	$('.download_<!--{$v.ID}-->').unbind('click');
+	$('.download_<!--{$v.ID}-->').bind('click', function(){down(<!--{$v.ID}-->,'<!--{$val['welfare'][$k]['package']}-->','<!--{$v.SOFT_NAME}-->',<!--{$v.SOFT_VERSION_CODE}-->,<!--{$v.SOFT_SIZE}-->,'<!--{$val['welfare'][$k]['name']}-->',<!--{$val['welfare'][$k]['id']}-->)});
+	if(typeof(window.AnzhiActivitys) != "undefined"){
+		window.AnzhiActivitys.registerDownloadObserver(<!--{$v.ID}-->);
+		status(<!--{$v.ID}-->,'<!--{$val['welfare'][$k]['package']}-->','<!--{$v.SOFT_NAME}-->',<!--{$v.SOFT_VERSION_CODE}-->,<!--{$v.SOFT_SIZE}-->,<!--{$val['welfare'][$k]['id']}-->,'<!--{$val['welfare'][$k]['name']}-->');
+	}
+	<!--{/foreach}-->
+<!--{/if}-->
+<!--{/foreach}-->
+});
+
+function status(SOFT_ID,pkg,SOFT_NAME,SOFT_VERSION_CODE,SOFT_SIZE,welfare_id,welfare_name){
+	if(interval_arr[welfare_id] != 0){
+		window.clearInterval(interval_arr[welfare_id]);
+	}
+	interval_arr[welfare_id] = window.setInterval("status("+SOFT_ID+",'"+pkg+"','"+SOFT_NAME+"',"+SOFT_VERSION_CODE+","+SOFT_SIZE+","+welfare_id+",'"+welfare_name+"')", 2000);
+	var var_a = $('.download_'+SOFT_ID);
+	var_a.unbind('click');
+	if(ajax_status[SOFT_ID] != 1){
+		var var_soft_status = window.AnzhiActivitys.getDownloadStateForActivity(SOFT_ID);	
+		if(var_soft_status == 1){ //下载中
+			var_a.html('下载中');			
+			var_a.bind('click', function(){pause(SOFT_ID)});
+		}else if(var_soft_status == 2){ //等待中
+			var_a.html('继续');
+			var_a.bind('click', function(){restart(SOFT_ID)});
+		}else if(var_soft_status == 3){ //暂停
+			var_a.html('继续');
+			var_a.bind('click', function(){restart(SOFT_ID)});
+		}else if(var_soft_status == 4){ //失败
+			var_a.html('失败');
+			var_a.bind('click', function(){down(SOFT_ID,pkg,SOFT_NAME,SOFT_VERSION_CODE,SOFT_SIZE,welfare_name,welfare_id)});
+		}else if(var_soft_status == 5){ //完成
+			var_a.html('安装');
+			var_a.bind('click', function(){install(SOFT_ID, pkg, welfare_name,welfare_id)});
+		}else if(var_soft_status == 6){ //安装完成
+			var_a.html('领取');
+			$('#receive_'+welfare_id).attr('onclick', "open('"+pkg+"', "+SOFT_ID+", "+welfare_id+",'"+welfare_name+"')");
+		}else if(var_soft_status == 8){ //待校验
+			var_a.html('下载中');
+		}else if(var_soft_status == 9){ //校验中
+			var_a.html('下载中');
+		}else if(var_soft_status == 10){ //不可安装
+			var_a.html('已下载');
+		}else if(var_soft_status == -1){
+			var var_soft_other_status = window.AnzhiActivitys.isInstalledApp(pkg, SOFT_VERSION_CODE);
+			if(var_soft_other_status == -2){ //未安装
+				var_a.html('下载领取');
+				var_a.bind('click', function(){down(SOFT_ID,pkg,SOFT_NAME,SOFT_VERSION_CODE,SOFT_SIZE,welfare_name,welfare_id)});
+			}else if(var_soft_other_status == -1){ //已安装版本低
+				var_a.html('更新');
+				var_a.bind('click', function(){down(SOFT_ID,pkg,SOFT_NAME,SOFT_VERSION_CODE,SOFT_SIZE,welfare_name,welfare_id)});
+			}else if(var_soft_other_status == 0){ //版本相等
+				var_a.html('领取');
+				$('#receive_'+welfare_id).attr('onclick', "open('"+pkg+"', "+SOFT_ID+", "+welfare_id+",'"+welfare_name+"')");
+			}else if(var_soft_other_status == 1){ //已安装版本高
+				var_a.html('领取');
+				$('#receive_'+welfare_id).attr('onclick', "open('"+pkg+"', "+SOFT_ID+", "+welfare_id+",'"+welfare_name+"')");
+			}
+		}
+	}
+}
+
+function down(soft_id,pkg,SOFT_NAME,SOFT_VERSION_CODE,SOFT_SIZE,welfare_name,welfare_id){
+	if(is_weixin == true){
+		showOpenBox('.share_01');
+		return false;
+	}
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		alert('请先安装安智市场');
+		return false;
+	}
+	$('.download_'+soft_id).html("下载中");
+	$('.download_'+soft_id).unbind("click");
+	ajax_status[soft_id] = 1;
+	$.ajax({
+		url:'/lottery/welfare/write_log.php',
+		data:'from=index&pkg='+pkg+'&soft_id='+soft_id+'&type=1&welfare_name='+welfare_name+'&welfare_id='+welfare_id,
+		type:'post',
+		success:function(){
+			ajax_status[soft_id] = 0;
+			window.AnzhiActivitys.downloadForActivity(var_activity, soft_id, pkg, SOFT_NAME, SOFT_VERSION_CODE, SOFT_SIZE, 0);
+		}
+	});
+}
+
+function install(soft_id,pkg,welfare_name,welfare_id){
+	if(is_weixin == true){
+		showOpenBox('.share_01');
+		return false;
+	}
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		alert('请先安装安智市场');
+		return false;
+	}
+	$('.download_'+soft_id).html("安装中");
+	$('.download_'+soft_id).unbind("click");
+	ajax_status[soft_id] = 1;
+	$.ajax({
+		url:'/lottery/welfare/write_log.php',
+		data:'from=index&pkg='+pkg+'&soft_id='+soft_id+'&type=2&welfare_name='+welfare_name+'&welfare_id='+welfare_id,
+		type:'post',
+		success:function(){
+			ajax_status[soft_id] = 0;
+			window.AnzhiActivitys.installAppForActivity(soft_id);
+		}
+	});
+}
+
+function open(pkg,soft_id,welfare_id,welfare_name){
+	if(is_weixin == true){
+		showOpenBox('.share_01');
+		return false;
+	}
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		alert('请先安装安智市场');
+		return false;
+	}
+	ajax_status[soft_id] = 1;
+	$.ajax({
+		url:'/lottery/welfare/write_log.php',
+		data:'from=index&pkg='+pkg+'&soft_id='+soft_id+'&type=3&welfare_id='+welfare_id+'&welfare_name='+welfare_name,
+		type:'post',
+		success:function(num){
+			ajax_status[soft_id] = 0;
+			$('#click_num_'+welfare_id).text(num+'人已领');
+			var welfare_draw_url = $('#receive_'+welfare_id).siblings('input[type=hidden]').val();
+			if(welfare_draw_url == ''){
+				window.AnzhiActivitys.openAppForActivity(pkg, [var_activity, soft_id]);
+			}else{
+				window.location.href = welfare_draw_url;
+			}
+		}
+	});
+}
+
+function pause(soft_id){
+	if(is_weixin == true){
+		showOpenBox('.share_01');
+		return false;
+	}
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		alert('请先安装安智市场');
+		return false;
+	}
+	$('.download_'+soft_id).html("继续");
+	window.AnzhiActivitys.pauseDownloadForActivity(soft_id);
+}
+
+function restart(soft_id){
+	if(is_weixin == true){
+		showOpenBox('.share_01');
+		return false;
+	}
+	if(typeof(window.AnzhiActivitys) == "undefined"){
+		alert('请先安装安智市场');
+		return false;
+	}
+	$('.download_'+soft_id).html("下载中");
+	window.AnzhiActivitys.resumeDownloadForActivity(soft_id);
+}
+<!--{if $out['is_share'] == 1}-->
+var js_param = {type:'launch', id:5108, callback:invite_callback};
+var php_param = {type:'launch', id:5108};
+$(document).ready(function(){
+	share_download(js_param, php_param);
+});
+<!--{/if}-->
+
+function invite_callback(){
+    if(typeof(arguments[0]) != 'undefined'){
+        var magic = arguments[0];
+        var version = parseInt(arguments[1]);
+        var firmware = arguments[2];
+        var flag = arguments[3];
+        if(version >= 6200){
+            js_param = {type:'launch', id:5108, callback:null};
+            Azfd.lock = false;
+            share_download(js_param, php_param);
+        }else{
+            setTimeout(function(){
+                var php_url = 'fast.php?';
+                for(var i in php_param){
+                    php_url += '&' + i + '=' + php_param[i];
+                }
+                window.location.href = php_url;
+            }, 1000);
+        }
+    }else{
+        setTimeout(function(){
+            var php_url = 'fast.php?';
+            for(var i in php_param){
+                php_url += '&' + i + '=' + php_param[i];
+            }
+            window.location.href = php_url;
+        }, 1000);
+    }
+}
+</script>
+</head>
+<body <!--{if $out.count eq 0}-->style="background:#fff"<!--{/if}--> >
+<div class="main">
+<!--{if $out.result}-->
+<!--{foreach from=$out.result item=val key=key}-->
+	<div class="category">
+	<!--{if $out.count eq 2}-->
+		<!--{if $val.img_position eq 2 && $val.image}-->
+		<div class="banner">
+			<img src="<!--{$out.imgurl}--><!--{$val['image']}-->">
+		</div>
+		<!--{/if}-->
+		<div class="title_top" <!--{if $val.img_position neq 3}-->style="border-bottom: 1px solid #e6e6e6;"<!--{/if}--> >
+			<h3><!--{$val.name}--></h3>
+			<a href="/lottery/welfare/index.php?typeid=<!--{$val.id}-->">更多</a>
+		</div>
+		<!--{if $val.img_position eq 3 && $val.image}-->
+		<div class="banner">
+			<img src="<!--{$out.imgurl}--><!--{$val['image']}-->">
+		</div>
+		<!--{/if}-->
+	<!--{/if}-->
+	<!--{foreach from=$val.welfare item=v key=k}-->
+	<!--{if $v.list_pic_type eq 1 }-->
+		<div class="list">
+			<div class="list_title" onclick="window.location.href='/lottery/welfare/detail.php?welfare_id=<!--{$v.id}-->'">
+				<h3><!--{$v.name}--></h3>
+				<span id='click_num_<!--{$v.id}-->'><!--{$v.click_num}-->人已领</span>
+			</div>
+			<div class="list_app">
+				<div class="list_app_img" onclick="window.location.href='/lottery/welfare/detail.php?welfare_id=<!--{$v.id}-->'">
+					<img src="<!--{$out.imgurl}--><!--{$val['pkg_info'][$k]['iconurl_72']}-->"/>
+				</div>
+				<div class="list_app_txt" onclick="window.location.href='/lottery/welfare/detail.php?welfare_id=<!--{$v.id}-->'">
+					<h3><!--{$v.softname}--></h3>
+					<p><!--{$val['pkg_info'][$k]['desc']}--></p>
+				</div>
+				<a class="download_<!--{$val['pkg_info'][$k]['ID']}-->" id="receive_<!--{$v.id}-->">下载领取</a>
+				<input type='hidden' value="<!--{$v.welfare_draw_url}-->" />
+			</div>
+		</div>
+	<!--{elseif $v.list_pic_type eq 2 }-->
+		<div class="list">
+			<div class="list_img" onclick="window.location.href='/lottery/welfare/detail.php?welfare_id=<!--{$v.id}-->'">
+				<img src="<!--{$out.imgurl}--><!--{$v.list_pic.list_pic}-->">
+			</div>
+			<div class="list_txt" onclick="window.location.href='/lottery/welfare/detail.php?welfare_id=<!--{$v.id}-->'">
+				<h3><!--{$v.name}--></h3>
+				<p id='click_num_<!--{$v.id}-->'><!--{$v.click_num}-->人已领</p>
+			</div>
+			<div class="clear"></div>
+			<div class="list_app">
+				<div class="list_app_img" onclick="window.location.href='/lottery/welfare/detail.php?welfare_id=<!--{$v.id}-->'">
+					<img src="<!--{$out.imgurl}--><!--{$val['pkg_info'][$k]['iconurl_72']}-->"/>
+				</div>
+				<div class="list_app_txt" onclick="window.location.href='/lottery/welfare/detail.php?welfare_id=<!--{$v.id}-->'">
+					<h3><!--{$v.softname}--></h3>
+					<p><!--{$val['pkg_info'][$k]['desc']}--></p>
+				</div>
+				<a class="download_<!--{$val['pkg_info'][$k]['ID']}-->" id="receive_<!--{$v.id}-->">下载领取</a>
+				<input type='hidden' value="<!--{$v.welfare_draw_url}-->" />
+			</div>
+		</div>
+	<!--{elseif $v.list_pic_type eq 3 }-->
+		<div class="list">
+			<div class="list_title" onclick="window.location.href='/lottery/welfare/detail.php?welfare_id=<!--{$v.id}-->'">
+				<h3><!--{$v.name}--></h3>
+				<span id='click_num_<!--{$v.id}-->'><!--{$v.click_num}-->人已领</span>
+			</div>
+			<ul class="list_img3" onclick="window.location.href='/lottery/welfare/detail.php?welfare_id=<!--{$v.id}-->'">
+			<!--{if $v.list_pic.list_pic }-->
+				<li><img src="<!--{$out.imgurl}--><!--{$v.list_pic.list_pic}-->"></li>
+			<!--{/if}-->
+			<!--{if $v.list_pic.list_pic2 }-->
+				<li><img src="<!--{$out.imgurl}--><!--{$v.list_pic.list_pic2}-->"></li>
+			<!--{/if}-->
+			<!--{if $v.list_pic.list_pic3 }-->
+				<li><img src="<!--{$out.imgurl}--><!--{$v.list_pic.list_pic3}-->"></li>
+			<!--{/if}-->
+				<div class="clear"></div>
+			</ul>
+			<div class="list_app">
+				<div class="list_app_img" onclick="window.location.href='/lottery/welfare/detail.php?welfare_id=<!--{$v.id}-->'">
+					<img src="<!--{$out.imgurl}--><!--{$val['pkg_info'][$k]['iconurl_72']}-->"/>
+				</div>
+				<div class="list_app_txt" onclick="window.location.href='/lottery/welfare/detail.php?welfare_id=<!--{$v.id}-->'">
+					<h3><!--{$v.softname}--></h3>
+					<p><!--{$val['pkg_info'][$k]['desc']}--></p>
+				</div>
+				<a class="download_<!--{$val['pkg_info'][$k]['ID']}-->" id="receive_<!--{$v.id}-->">下载领取</a>
+				<input type='hidden' value="<!--{$v.welfare_draw_url}-->" />
+			</div>
+		</div>
+	<!--{/if}-->
+	<!--{/foreach}-->
+	</div>
+<!--{/foreach}-->
+<!--{else}-->
+	<div class="end">
+		<img src="<!--{$out.new_static_url}-->/activity/welfare/images/icon_01.png" />
+		<p>福利已被领取完,下期敬请期待</p>
+	</div>
+<!--{/if}-->
+</div>
+<section>
+	<div id="body-bg" style="display: none;"></div>
+	<div class="share_01"><img src="<!--{$out.new_static_url}-->/activity/welfare/images/share_01.png"/></div>
+</section>
+<script type="text/javascript">
+var flags={canMove:true};
+function showOpenBox(obj){
+    var bg_h=$(window).height() + $(document).scrollTop(),
+        top_h= $(obj).height()/ 2 - $(document).scrollTop();
+    $(obj).css("margin-top",-top_h+"px").show();
+    $("#body-bg").css("height",bg_h+"px").show();
+    flags.canMove=false;
+	window.onresize = function(){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+            top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$('#body-bg').css("height",bg_h+"px");
+		$(obj).css("margin-top",-top_h+"px");	
+	}
+}
+$(function(){          
+	$("body").bind('touchmove', function (e) {
+        if(!flags.canMove){
+            e.preventDefault();	
+        }
+    });
+})
+</script>
+</body>
+</html>

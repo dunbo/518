@@ -1,0 +1,68 @@
+<style>
+    .inp_width{width:160px}
+    .cl_bt{background-color:gray}
+</style>
+<body>
+    <form name='fml' action='__URL__/add_update_soft' method='post'>
+    <div style='margin-left: 20px'>
+        <input type="hidden" id="edit" name="edit" value="{$edit}">
+        <table>
+            <tr>
+                <td>软件名称：</td><td><input type='text' name='softname' id='softname' class='inp_width' value='{$update_soft.softname}'></td>
+            </tr>
+            <tr>
+                <td>应用包名：</td><td><input type='text' name='package' id='package' class='inp_width' value='{$update_soft.package}'></td>
+            </tr>
+            <tr>
+                <td>开始时间：</td><td><input type='text' name='start_tm' id='start_tm' class='inp_width Wdate' value="<if condition='$update_soft'>{$update_soft.start_tm|date='Y-m-d H:i:s',###}</if>" onClick='WdatePicker({startDate:"%y-%M-%d ",el:"start_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'></td>
+            </tr>
+            <tr>
+                <td>结束时间：</td><td><input type='text' name='end_tm' id='end_tm' class='inp_width Wdate' value="<if condition='$update_soft'>{$update_soft.end_tm|date='Y-m-d H:i:s',###}</if>" onClick='WdatePicker({startDate:"%y-%M-%d ",dateFmt:"yyyy-MM-dd HH:mm:ss"})'>                
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style='text-align: center'><input type='button' value='确定' style='width:80px' onclick='return chk()'></td>
+            </tr>
+        </table>
+    </div>   
+</body>
+
+<script type='text/javascript'>
+    $("#package").blur(function(){
+        var package = $('#package').val();
+        if(package ==''){
+            alert('包名不能为空');
+        }else{
+            $.post(
+                    "__URL__/getSoftnameByPackage",
+                    {package:package},
+                    function(data){
+                        console.log(data);
+                        $('#softname').val(data.softname);
+                    },"json"
+            );
+        }
+        
+    })
+    
+    function chk(){
+        var package = $('#package').val();
+        var start_tm = $('#start_tm').val();
+        var end_tm = $('#end_tm').val();
+        if(package ==''){
+            alert('包名不能为空');
+            return false;
+        }
+//        if(start_tm == ''){
+//            alert('开始时间不能为空');
+//            return false;
+//        }
+//        if(end_tm == ''){
+//            alert('结束时间不能为空');
+//            return false;
+//        }
+        window.fml.submit();
+        return true;
+    }
+    
+</script>

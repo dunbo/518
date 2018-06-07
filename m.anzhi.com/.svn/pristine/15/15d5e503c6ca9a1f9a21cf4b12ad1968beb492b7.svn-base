@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>填写邮寄地址</title>
+<link type="text/css" rel="stylesheet" href="/css/vacation_third_common.css?v1"/>
+<script type="text/javascript" src="/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="/js/vacation_third_common.js"></script>
+</head>
+<script>
+	var sid = '<!--{$out.sid}-->',award='<!--{$out.award}-->',user='<!--{$out.user}-->';
+	function get_telphone(){
+		var telphone = $('#telphone').val();
+		var name = $('#name').val();
+		var address = $('#address').val();
+		name = name.replace(/\s+/g,"");
+		if(name.length > 10){
+			$('#my_error').css('display','');
+			$('#error_text').html("请输入10个字以内的姓名");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+	
+		if(!name || name == ''){
+			$('#my_error').css('display','');
+			$('#error_text').html("请输入收货人姓名");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		
+		if(!telphone || telphone == '手机号'){
+			$('#my_error').css('display','');
+			$('#error_text').html('请输入手机号');
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		
+		if(address.length > 30){
+			$('#my_error').css('display','');
+			$('#error_text').html("请输入30个字以内的收货地址");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		if(!address){
+			$('#my_error').css('display','');
+			$('#error_text').html("请输入收货地址");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		
+		$.ajax({
+			url: '/lottery/vacation_third_get_info.php',
+			data: 'telphone='+telphone+'&name='+name+'&address='+address+'&sid='+sid+'&user='+user+'&award='+award,
+			type: 'get',
+			success: function(data){
+				if(data){
+					data = eval(''+data+'');
+					if(data == 500){
+						$('#my_error').css('display','');
+						$('#error_text').html('请输入正确的手机号');
+					}else if(data == 300){
+						$('#my_error').css('display','');
+						$('#error_text').html('参数错误');
+					}else if(data == 200){
+						$('#my_error').css('display','');
+						$('#error_text').html('提交成功');
+						setTimeout(function(){go_lottery(sid)},1000);
+					}
+				}
+			}
+		});
+	}
+	
+	function go_lottery(sid){
+		window.location.href="http://promotion.anzhi.com/lottery/vacation_third_lottery.php?sid="+sid;
+	}
+</script>
+<body>
+<section>
+    <div class="banner" id="top">
+        <a href="javascript:;"><img src="/images/vacation_third_images/cam_banner.jpg"/></a>
+    </div>
+    <div class="end-wrap">
+        <div class="wth">
+            <div class="prompt2">请您填写如下信息，以便于我们将奖品邮寄给您！</div>
+            <div class="part">
+                <div class="form-item clear">
+                    <label>收&nbsp;&nbsp;货&nbsp;&nbsp;人：</label>
+                    <div class="textbox"><input id="name" type="text"/> </div>
+                </div>
+            </div>
+            <div class="part">
+                <div class="form-item clear">
+                    <label>手&nbsp;&nbsp;机&nbsp;&nbsp;号：</label>
+                    <div class="textbox"><input id="telphone" type="text"/> </div>
+                </div>
+            </div>
+            <div class="part">
+                <div class="form-item clear">
+                    <label>邮寄地址：</label>
+                    <div class="textbox"><input id="address" type="text"/> </div>
+                </div>
+            </div>
+			<br />
+			<div id="my_error" style="display:none;">
+				<span style="color:red;" id="error_text"></span>
+			</div>
+        </div>
+        <div style="height: 73px;">
+            <div class="formitem-btn">
+                <a href="javascript:;" ontouchend="get_telphone();"><img src="/images/vacation_third_images/fromitem_btn.png"/></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

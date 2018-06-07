@@ -1,0 +1,339 @@
+<!--{include file="header.html"}-->
+<script type="text/javascript">
+<!--{if $out.is_softid_info eq 1}-->
+    window.location.href="<!--{url2static_url}-->detail.php?id=<!--{$out.intro['ID']}--><!--{/url2static_url}-->";
+<!--{/if}-->
+	var userName = "";
+	var min_firmware = <!--{$out.intro.min_firmware}-->;
+	var softid = <!--{$out.intro.ID}-->;
+	var SOFT_NAME="<!--{$out.intro['SOFT_NAME']}-->";
+	var ICON="<!--{$out.intro['ICON']}-->";
+    var soft_size = '<!--{$out.soft_size_push}-->';
+	var SOFT_SIZE1="<!--{$out.intro['SOFT_SIZE']}-->";
+</script>
+<script type="text/javascript">
+        function get_history() {
+
+        var softids = $("input[name='version_old_title']:checked").val();
+        if (softids) {
+            window.location = "/history_dl.php?s=" + softids + "&amp;n=5";
+        } else {
+           window.location = "/history_dl.php?s=" + softid + "&amp;n=5";
+        }
+    }
+</script>
+
+<script type="text/javascript">
+var soft_data = null;
+function tencent_yj(softid) {
+	$.ajax({
+		url: 'write_log.php?tencent_softid=' + softid + '',
+		type: 'get',
+		dataType: 'json',
+		success: function(data) {
+
+}
+	});
+}
+function wdj_yj(softid) {
+	$.ajax({
+		url: 'write_log.php?wdj_softid=' + softid + '',
+		type: 'get',
+		dataType: 'json',
+		success: function(data) {
+
+}
+	});
+}
+
+function show_jpg() {
+
+	var show = document.getElementById("jpg");
+	show.style.display = 'block';
+}
+function hidden_jpg() {
+	var show = document.getElementById("jpg");
+	show.style.display = 'none';
+}
+
+function show_jpg1() {
+
+	var show = document.getElementById("jpg1");
+	show.style.display = 'block';
+}
+function hidden_jpg1() {
+	var show = document.getElementById("jpg1");
+	show.style.display = 'none';
+}
+
+function show_history(){
+	$.ajax({
+		url :'/get_history.php?history_softid=' + softid,
+		type : 'get',
+		dataType : 'json',
+		success: function(data){
+			if(data[0]){
+				var history_str = '';
+				var history_vcs = '';
+				var history_vc = '';
+				for(i=0;i<data[0].length;i++){
+					if(data[0][i][5].length > 11){
+						history_vcs = data[0][i][5].substr(0,11);
+						history_vc = history_vcs + '...';
+					}else{
+						history_vc = data[0][i][5];
+					}
+					history_str += '<p><input type="radio" name="version_old_title" class="version_old_title" value="'+data[0][i][0]+'"/><label for="">'+history_vc+'</label><span>'+data[0][i][4]+'</span></p>';
+				}
+				$('#version_old').html('<div class="open_title"><h6>'+SOFT_NAME+'历史版本下载</h6><span id="close_btn2"></span></div><div class="version_old_cnt"><div class="open_title2">共'+data[1]+'个版本</div><div class="version_old_list">'+history_str+'<div class="clear"></div></div><div class="open_btn" style="padding-left:0"><a onclick="get_history()" href="#" class="submit_btn1" style="float:none; display:block; width:220px; margin:0 auto;">立即下载</a></div></div>');
+			}else{
+				$('#version_old').html('<div class="open_title"><h6>'+SOFT_NAME+'历史版本下载</h6><span id="close_btn2"></span></div><div class="version_old_cnt"><div class="open_title2">该软件的历史版本暂未收录，请下载当前版本。</div><div class="open_btn" style="padding-left:0"><a onclick="get_history()" href="#" class="submit_btn1" style="float:none; display:block; width:220px; margin:0 auto;">立即下载</a></div></div>');
+			}
+			showOpen('version_old','cancel2','close_btn2');
+		}
+	});
+
+
+
+
+}
+
+var getParam = function (name) {
+	var search = document.location.search;
+	
+	var pattern = new RegExp("[?&]" + name + "\=([^&]+)", "g");
+	var matcher = pattern.exec(search);
+	var items = null;
+	if (null != matcher) {
+		try {
+			items = decodeURIComponent(decodeURIComponent(matcher[1]));
+		} catch (e) {
+			try {
+				items = decodeURIComponent(matcher[1]);
+			} catch (e) {
+				items = matcher[1];
+			}
+		}
+	}
+	return items;
+};
+$(function(){
+　　var vcode_source = getParam('vcode');
+	var from_package = "<!--{$out.intro['PACKAGENAME']}-->";
+	if (vcode_source=='zhiyoo'){
+		var href_str='<a href="http://m.anzhi.com/dl_ptn.php?package='+from_package+'&vcode='+vcode_source+'"  title="下载到电脑">下载到电脑</a>';
+		$('.detail_down').html(href_str);
+		$('.detail_down a')[0].click();
+	}
+}); 
+
+</script>
+<div class="content">
+	<div class="content_left">
+		<div class="title">
+			<h2><a href="/sort_<!--{$out.intro['category_id']}-->_1_hot.html"><!--{$out.intro['category_name']}--></a></h2><span class="space">&gt;</span><h3><!--{$out.intro['SOFT_NAME']}--></h3>
+		</div>
+		<div class="border_three">
+			<div class="app_detail">
+				<div class="detail_icon">
+					<img src="<!--{imgurltrans}--><!--{$out.intro['ICON']}--><!--{/imgurltrans}-->" alt="<!--{$out.intro['SOFT_NAME']}-->" />
+					<ul>
+						<!--{if $out.intro['update_from'] > 0}--><li><a href="javascript:void(0)" onclick="show_history();">历史版本</a></li><!--{else}--><li></li><!--{/if}-->
+						<li><a href="<!--{url2static_url}-->/author_list.php?auth=<!--{$out.intro['DEVELOPER']}-->&package=<!--{$out.intro['PACKAGENAME']}--><!--{/url2static_url}-->">相同作者</a></li>
+					</ul>
+				</div>
+				<div class="detail_description">
+					<div class="detail_line">
+						<h3><!--{$out.intro['SOFT_NAME']}--></h3>
+						<span class="app_detail_version">(<!--{$out.intro['SOFT_VERSION']}-->)</span>
+						<div class="clear"></div>
+					</div>
+					<div class="detail_line">
+						<div id="stars_detail" class="stars center" style="background-position:0 <!--{-15*$out.intro['SOFT_STAR']}-->px;"></div>
+						<ul id="safe_icon">
+							<!--{if $out.intro['OFFICIAL_ICON']}--><li class="official_icon"><span></span></li><!--{/if}-->
+							<!--{if $out.intro['SAFE_ICON']}--><li id="safe_icon1">安全认证</li><!--{/if}-->
+							<li <!--{if $out.intro['IS_DISPLAY_AD']}-->id="safe_icon3"<!--{else if $out.intro['ADS_TEXT']}-->id="safe_icon2"<!--{/if}-->><!--{$out.intro['ADS_TEXT']}--></li>
+							<!--{if !empty($out.intro['white'])}--><li id="safe_icon4" onmouseout="hidden_jpg()" style="position:relative; overflow:visible; width:20px;" onmouseover="show_jpg()">
+							<div id="jpg" style="display: none; position: absolute; left: -100px; top: 18px;">
+							  <img src="/images/detil_white_note.jpg" style="display:block; width:247px; height:102px; ">
+							</div></li><!--{/if}-->
+							<!--{if !empty($out.intro['v_dev'])}-->
+							<li id="safe_icon5" onmouseout="hidden_jpg1(1)" style="position:relative; overflow:visible; width:20px;" onmouseover="show_jpg1(1)">
+							<div id="jpg1" style="display: none; position: absolute; left: -114px; top: 18px;">
+							  <img src="/images/ca.png" style="display:block; width:247px; height:102px; ">
+							</div></li>
+							<!--{/if}-->
+						
+						</ul>
+						<div class="clear"></div>
+					</div>
+					<ul id="detail_line_ul">
+						<li>分类：<!--{$out.intro['category_name']}--></li>
+						<li><span class="spaceleft"><!--{if $out.intro['category_id'] != 55}-->下载：<!--{$out.intro['SOFT_DOWNLOAD_REGION']}--><!--{/if}--></span></li>
+						<li>时间：<!--{$out.intro['SOFT_PROMULGATE_TIME']}--></li>
+						<li><span class="spaceleft">大小：<!--{$out.intro['SOFT_SIZE']}--></span></li>
+						<li>系统：<!--{$out.intro['system']}--></li>
+						<li><span class="spaceleft">资费：<!--{$out.intro['costs']}--></span></li>
+						<li>作者：<!--{$out.intro['DEVELOPER']}--></li>
+						<li>软件语言：简体中文</li>
+                        <!--{if $out.intro['SOFT_ARTICLE_FROM'] && $out.intro['parentid'] == 3}--><li><span class="spaceleft">来源：<!--{$out.intro['SOFT_ARTICLE_FROM']}--></span></li><!--{/if}-->
+					</ul>
+					<div class="clear"></div>
+				</div>
+				<div class="detail_other">
+					<div class="i_code">
+						<!--{if $out.qrimg != null}--><!--{$out.qrimg}--><!--{else}-->		
+						<script>
+							draw_qrcode("gomarket://details?id=<!--{$out.soft_intro.package}-->");
+						</script>
+						<!--{/if}-->
+						<span>使用<a href="http://www.anzhi.com/soft_<!--{$out.newanzhi.ID}-->.html">安智</a>扫描二维码</span>
+					</div>
+					<!--{if $out.intro['category_name']!="破解游戏"}-->
+					<div class="detail_down">
+						<a href="#" onclick="opendown(<!--{$out.intro['ID']}-->);" title="下载到电脑">下载到电脑</a>
+					</div>
+					<!--{/if}-->
+				</div>
+				<div class="clear"></div>
+			</div>
+			<!--统计flash-->
+			<div id="photo"></div>
+			<!--统计flash end-->
+			<div class="clear" style="height:1px; overflow:hidden"></div>
+			<div class="app_detail_list">
+				<div class="app_detail_title">简介：</div>
+				<div class="app_detail_infor">
+					<p>
+						<!--{$out.intro['intro']|nl2br}-->
+						本站提供手机版<!--{$out.intro['SOFT_NAME']}-->下载
+					</p>
+				</div>
+				<div class="morecontent"><span></span></div>
+			</div>
+            <div class="clearfix"></div>
+			<!--{if $out.intro['update_content'] != ""}-->
+            <div class="app_detail_list">
+                <div class="app_detail_title">更新说明：</div>
+                <div class="app_detail_infor">
+                    <p>
+                        <!--{$out.intro['update_content']|nl2br}-->
+                    </p>
+                </div>
+                <div class="morecontent"><span></span></div>
+            </div>
+			<!--{/if}-->
+            <div class="clearfix"></div>
+			<div class="app_detail_list">
+				<div class="app_detail_title">软件截图：</div>
+                <div class="section-container screenshots">
+                    <div class="section-body">
+                        <div class="screenshot-container" >
+                            <ul>
+                                <!--{section name=vo loop=$out.intro['SOFT_SCREENSHOT_URL'] }-->
+                                <li><img src="<!--{imgurltrans}--><!--{$out.intro['SOFT_SCREENSHOT_URL'][vo]}--><!--{/imgurltrans}-->" alt="<!--{$out.intro['SOFT_NAME']}-->" /></li>
+                                <!--{/section}-->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+			</div>
+			<!--{if $out.content_info}-->
+            <div class="app_detail_list">
+                <div class="app_detail_title">精彩内容：</div>
+                <div class="app_detail_infor">
+                    <p>
+                    	<!--{section name=vo loop=$out.content_info}-->
+                        <a href="/news/content_<!--{$out.content_info[vo].id}-->.html"><!--{$out.content_info[vo].title|truncate:33:"..."}--></a><br>
+                    	<!--{/section}-->
+                    </p>
+                </div>
+                <div class="morecontent"><span></span></div>
+            </div>
+			<!--{/if}-->
+			<div id="comment_div"></div>
+			<script type="text/javascript">
+				$('#comment_div').loadAPK("<!--{$out.check_html}-->");
+			</script>
+		</div>
+	</div>
+	<div class="sides">
+		<!--{if $out.top_ad['pic_url'] != ''}-->
+		<div class="advlist margin_bom">
+			<!--{if $out.top_ad.link != ''}--><a href="<!--{$out.top_ad['link']}-->"><!--{/if}--><img src="<!--{$out.GOAPK_IMG_HOST}--><!--{$out.top_ad['pic_url']}-->" alt="<!--{$out.top_ad['title']}-->" /><!--{if $out.top_ad.link != ''}--></a><!--{/if}-->
+		</div>
+		<!--{/if}-->
+		<div class="user_downs">
+			<div class="title2"><h2>用户还下载了</h2></div>
+			<div class="border_three">
+				<ul class="recommend2 hotlist" id="hotlist1" style="display:block">
+					<!--{section name=vo loop=$out.like}-->
+					<li>
+						<a href="<!--{url2static_url}-->detail.php?id=<!--{$out.like[vo].3}--><!--{/url2static_url}-->" class="recommend2_icon"><img src="<!--{imgurltrans}--><!--{$out.like[vo].1}--><!--{/imgurltrans}-->" alt='<!--{$out.like[vo].2}-->'/></a>
+						<a href="<!--{url2static_url}-->detail.php?id=<!--{$out.like[vo].3}--><!--{/url2static_url}-->" class="recommend2_name" title="<!--{$out.like[vo].2}-->"><!--{$out.like[vo].2|sub_str:6|escape:html}--></a>
+						<!--{if $out.like[vo].6 != 55}--><div class="down_num"><!--{$out.like[vo].4}--></div><!--{/if}-->
+						<div class="recommend2_down"><span onclick="opendown(<!--{$out.like[vo].3}-->);">下载</span></div>
+					</li>
+					<!--{/section}-->
+					<div class="clear"></div>
+				</ul>
+			</div>
+		</div>
+		<!--{if $out.bottom_ad['pic_url'] != ''}-->
+		<div class="advlist">
+			<!--{if $out.bottom_ad.link != ''}--><a href="<!--{$out.bottom_ad['link']}-->"><!--{/if}--><img src="<!--{$out.GOAPK_IMG_HOST}--><!--{$out.bottom_ad['pic_url']}-->" alt="<!--{$out.bottom_ad['title']}-->" /><!--{if $out.bottom_ad.link != ''}--></a><!--{/if}-->
+		</div>
+		<!--{/if}-->
+		<div id='app_hot' class="user_downs">
+			<div class="title2"><h2><!--{$out.intro['category_name']}-->最近更新</h2></div>
+			<div class="border_three">
+				<ul class="recommend2" id="newlist">
+				</ul>
+			</div>
+		<script>
+			$('#newlist').loadAPK('<!--{url2static_url}-->widget_sort.php?id=<!--{$out.intro['category_id']}-->&order=0<!--{/url2static_url}-->');
+		</script>
+		</div>	
+		<div id='app_hot' class="user_downs">
+			<div class="title2"><h2><!--{$out.intro['category_name']}-->最热排行</h2></div>
+			<div class="border_three">
+				<ul class="recommend2" id="hotlist">
+				</ul>
+			</div>
+		<script>
+			$('#hotlist').loadAPK('<!--{url2static_url}-->widget_sort.php?id=<!--{$out.intro['category_id']}-->&order=1<!--{/url2static_url}-->');
+		</script>
+		</div>		
+  </div>
+	<div class="clear"></div>
+</div>
+
+<div class="openbox" id="version_old">
+</div>
+	
+
+<script>
+$.ajaxSetup({async: false});
+$.getScript("/showPhoto.php?callback=showDataByUser&softid=<!--{$out.intro['ID']}-->");
+!function() {
+    $(".section-container.screenshots img").size() ? $(".screenshot-container").screenshots(200, 330, 27, 654, 3) : $(".section-container.screenshots").hide();
+}();
+
+</script>
+<div id="report_soft" class="openbox">
+	<div class="open_title">
+		<h6>举报该软件</h6>
+		<span id="close_btn1"></span>
+	</div>
+	<form action="" method="post" name="report_feedback">
+		<div class="report_cnt">	
+			<textarea name="report_content"></textarea>
+			<div class="open_btn" style="padding-left:0">
+				<a onclick='' class="submit_btn1" style="cursor:pointer; float:none; display:block; width:220px; margin:0 auto;">举 报</a>	
+			</div>
+		</div>
+	</form>
+</div>
+<!--{include file="footer.html"}-->
+

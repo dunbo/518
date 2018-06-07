@@ -1,0 +1,78 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+ function change_rank(rank,id){
+	$.ajax({
+		url: '__URL__/change_feedback_rank/id/'+id+'/rank/'+rank,
+		type: 'get',
+		DataTypa: 'json',
+		success:function(data){
+			if(data == 2){
+				alert("编辑失败");
+			}else{
+				location.href="/index.php/Sj/Feedbackreport/feedback_list";
+			}
+		}
+	});
+ }
+
+</script>
+<body>
+<div style="margin:20px;">
+	<div>
+	<ul class="tab_title margin_top">
+	<li class="current"><a href="__URL__/feedback_list">反馈问题</a></li>&nbsp;&nbsp;<li><a href="__URL__/report_list">举报原因</a></li>
+	</ul>
+	</div>
+	<div style="margin:20px;">
+	<a href="__URL__/add_feedback_show/" class="search_btn thickbox">新增</a>
+	</div>
+	<form action="__URL__/feedback_list" method="get">
+	<table width="99%" cellpadding="0" cellspacing="0">
+		<tr>
+			<td>
+				来源：
+			  <select name="pid" id="pid" style="width:80px;height:25px;font-size:12px;">
+			  <?php foreach($product as $k => $v){ ?>
+			  <option value="<?php echo $k?>" <?php if( $k == $pid ) { echo "selected='selected'"; } ?> ><?php echo $v['0']; ?></option>
+			  <?php } ?>
+			  </select>
+			  <input type="submit" value="搜索">
+			</td>
+		</tr>
+	</table>
+	</form>	
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="table_list">
+		<thead>
+			<tr>
+				<th>排序</th>
+				<th>问题</th>
+				<th>提问建议</th>
+				<th>添加时间</th>
+				<th>操作&nbsp;&nbsp;</th>
+			</tr>
+		</thead>
+		<?php foreach($result as $key => $val){ ?>
+		<tr>
+			<td>
+			<select name="rank" onchange="change_rank(this.value,{$val.id});">
+			<?php foreach($rank as $k => $v){ ?>
+			<option value="{$v}" <?php if($v == $val['rank']){ ?>selected<?php } ?>>{$v}</option>
+			<?php } ?>
+			</select>
+			</td>
+			<td>{$val.question}</td>
+			<td>{$val.suggest}</td>
+			<td><?php echo date('Y-m-d H:i:s',$val['create_tm']); ?></td>
+			<td><a href="__URL__/edit_feedback_show/id/{$val.id}/" class="thickbox blue">编辑</a>&nbsp;&nbsp;<a href="__URL__/del_feedback/id/{$val.id}" onclick="return checkit();" class="blue">删除</a></td>
+		</tr>
+		<?php } ?>
+	</table>
+</div>
+</body>
+</html>

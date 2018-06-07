@@ -1,0 +1,1002 @@
+<include file="../../Public/header" />
+<script src="/Public/js/thickbox-compressed.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link media="screen" type="text/css" href="/Public/css/tablelist.css" rel="stylesheet">
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+{//时间插件结束}
+<script type="text/javascript">
+
+	function submitChannel()
+	{
+		tb_remove();
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		$.cookie('cids', '', {path: '/'});
+
+	}
+	function onclikChannel()
+	{
+		$('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	
+	var options;
+	jQuery(function(){
+		options = {
+			serviceUrl:'/index.php/Sj/Activity/addActivity_show',
+			minChars:1,
+			width: '300px',
+			deferRequestBy: 0,
+			onSelect: function(value, data){
+			}
+		};
+	  $('#pre_desc').autocomplete(options);
+	  $('#bgn_desc').autocomplete(options);
+	  $('#end_desc').autocomplete(options);
+	});
+	
+	var options_co;
+	jQuery(function(){
+		options_co = {
+			serviceUrl:'/index.php/Sj/Activity/showActivityList/ap_type/1',
+			minChars:1,
+			width: '300px',
+			deferRequestBy: 0,
+			onSelect: function(value, data){
+			}
+		};
+	  $('#pre_coactivity').autocomplete(options_co);
+	});
+	var activity_type_bank = "<?php echo $result[0]['activity_type_bank'] ?>";
+	if(activity_type_bank > 1){	
+		jQuery(function(){
+			options_co = {
+				serviceUrl:'/index.php/Sj/Activity/showActivityList/ap_type/2/activity_type_bank/'+activity_type_bank,
+				minChars:1,
+				width: '300px',
+				deferRequestBy: 0,
+				onSelect: function(value, data){
+				}
+			};
+		  $('#bgn_coactivity').autocomplete(options_co);
+		});
+		jQuery(function(){
+			options_co = {
+				serviceUrl:'/index.php/Sj/Activity/showActivityList/ap_type/3/activity_type_bank/'+activity_type_bank,
+				minChars:1,
+				width: '300px',
+				deferRequestBy: 0,
+				onSelect: function(value, data){
+				}
+			};
+		  $('#end_coactivity').autocomplete(options_co);
+		});
+	}
+	$(document).ready(function(){
+		var activity_type = $('#activity_type').val();
+		var activity_type_bank = $('#activity_type_bank').val();
+		if(activity_type == 1 && activity_type_bank == 2){
+			$('#pre_name').css('display','');
+			$('#bgn_name').css('display','');
+			$('#end_name').css('display','');
+		}
+		if($('#sdk_select').attr('checked') == 'checked' && $('#sdk_type').val() == 1){
+			$('#select_package').css('display','');
+			$('#ignore_package').css('display','');
+			$('#ignore_package_show').css('display','');
+			$('#select_package_show').css('display','');
+			$('#explode').css('display','');
+			$('#user').css('display','');
+			$('#user_show').css('display','');
+		}else{
+			$('#select_package').css('display','none');
+			$('#ignore_package').css('display','none');
+			$('#ignore_package_show').css('display','none');
+			$('#select_package_show').css('display','none');
+			$('#explode').css('display','none');
+			$('#user').css('display','none');
+			$('#user_show').css('display','none');
+		}
+		if($('#sdk_select').attr('checked') == 'checked'){
+			$('#sdk_ac_type_tr').show();
+			// $('#sdk_ac_rank_tr').show();
+		}else{
+			$('#sdk_ac_type_tr').hide();
+			// $('#sdk_ac_rank_tr').hide();
+		}
+		
+		if($('#select_package_type').val() == 1  && $('#sdk_select').attr('checked') == 'checked' && $('#sdk_type').val() == 1){
+			$('#select_file').css('display','');
+			$('#ignore_package').css('display','none');
+			$('#ignore_package_show').css('display','none');
+		}else if($('#select_package_type').val() != 1  && $('#sdk_select').attr('checked') == 'checked' && $('#sdk_type').val() == 1){
+			$('#ignore_package').css('display','');
+			$('#ignore_package_show').css('display','');
+			$('#select_file').css('display','none');
+		}
+		if($('#select_user_type').val() == 1){
+			$('#user_text').html("");
+			$('#user_file').css('display','');
+			$('#select_user_type_ext').css('display','none');
+		}else if($('#select_user_type').val() == 2){
+			$('#user_text').html("老用户");
+			$('#user_file').css('display','none');
+			$('#select_user_type_ext').css('display','');
+		}else{
+			$('#user_text').html("");
+			$('#user_file').css('display','none');
+		}
+		
+		var old_select_package = $('#all_select').val();
+		var old_ignore_package = $('#all_ignore').val();
+		var user_count = $('#user_count').val();
+		sessionStorage.select_package = old_select_package;
+		sessionStorage.ignore_package = old_ignore_package;
+		sessionStorage.user_count = user_count;
+        
+        change_cover_user();
+	});
+	
+	function get_checked(){
+		if($('#sdk_select').attr('checked') == 'checked' && $('#sdk_type').val() == 1){
+			$('#select_package').css('display','');
+			$('#ignore_package').css('display','');
+			$('#ignore_package_show').css('display','');
+			$('#select_package_show').css('display','');
+			$('#explode').css('display','');
+			$('#user').css('display','');
+			$('#user_show').css('display','');
+		}else{
+			$('#select_package').css('display','none');
+			$('#ignore_package').css('display','none');
+			$('#ignore_package_show').css('display','none');
+			$('#select_package_show').css('display','none');
+			$('#explode').css('display','none');
+			$('#user').css('display','none');
+			$('#user_show').css('display','none');
+			$('#sdk_type').val(1);
+		}
+		if($('#sdk_select').attr('checked') == 'checked'){
+			$('#sdk_ac_type_tr').show();
+			// $('#sdk_ac_rank_tr').show();
+		}else{
+			$('#sdk_ac_type_tr').hide();
+			// $('#sdk_ac_rank_tr').hide();
+		}
+		if($('#sdk_select').is(':checked') == true && $('#shichang_select').is(':checked') == false && $('#zdy_select').is(':checked') == false) {
+			<?php if($result[0]['activity_type_bank'] == 1){ ?>$('.member').show();<?php } ?>
+			// $('.member').show();
+		}else {
+			$('.member').hide();
+		}
+	}
+
+	function shichang_checked(obj)
+	{
+		if($('#sdk_select').attr('checked') == 'checked'){
+			$('#sdk_ac_type_tr').show();
+			// $('#sdk_ac_rank_tr').show();
+		}else{
+			$('#sdk_ac_type_tr').hide();
+			// $('#sdk_ac_rank_tr').hide();
+		}
+		if($('#sdk_select').is(':checked') == true && $('#shichang_select').is(':checked') == false && $('#zdy_select').is(':checked') == false ) {
+			// $('.member').show();
+			<?php if($result[0]['activity_type_bank'] == 1){ ?>$('.member').show();<?php } ?>
+		}else {
+			$('#sdk_type').val(1);
+			$('.member').hide();
+		}
+	}
+	
+	function select_sdk(){
+		var sdk_type =  $('#sdk_type').val();
+		if($('#sdk_select').attr('checked') == 'checked' && sdk_type == 1){
+			$('#select_package').css('display','');
+			$('#ignore_package').css('display','');
+			$('#ignore_package_show').css('display','');
+			$('#select_package_show').css('display','');
+			$('#explode').css('display','');
+			$('#user').css('display','');
+			$('#user_show').css('display','');
+			$('#vip_jump_tr').css('display','none');
+		}else{
+			if(sdk_type == 3||sdk_type == 4){
+				$('#vip_jump_tr').css('display','');
+			}else{
+				$('#vip_jump_tr').css('display','none');
+			}	
+			$('#select_package').css('display','none');
+			$('#ignore_package').css('display','none');
+			$('#ignore_package_show').css('display','none');
+			$('#select_package_show').css('display','none');
+			$('#explode').css('display','none');
+			$('#user').css('display','none');
+			$('#user_show').css('display','none');
+		}
+	}
+
+	function select_package(){
+		if($('#select_package_type').val() == 1){
+			$('#select_file').css('display','');
+			$('#ignore_package').css('display','none');
+			$('#ignore_package_show').css('display','none');
+		}else{
+			$('#select_file').css('display','none');
+			$('#ignore_package').css('display','');
+			$('#ignore_package_show').css('display','');
+			if($('#select_package_type').val() == 2){
+				$('#select_text').html('全部游戏');
+				sessionStorage.select_package = '全部游戏';
+			}else if($('#select_package_type').val() == 3){
+				$('#select_text').html('网络游戏');
+				sessionStorage.select_package = '网络游戏';
+			}else if($('#select_package_type').val() == 4){
+				$('#select_text').html('棋牌游戏');
+				sessionStorage.select_package = '棋牌游戏';
+			}else if($('#select_package_type').val() == 5){
+				$('#select_text').html('单机游戏');
+				sessionStorage.select_package = '单机游戏';
+			}else if($('#select_package_type').val() == 0){
+				$('#select_text').html('');
+				sessionStorage.select_package = '';
+			}
+		}
+	}
+	
+	function select_user(){
+		if($('#select_user_type').val() == 1){
+			$('#user_text').html("");
+			$('#user_file').css('display','');
+			$('#select_user_type_ext').css('display','none');
+		}else if($('#select_user_type').val() == 2){
+			$('#user_text').html("老用户");
+			$('#user_file').css('display','none');
+			$('#select_user_type_ext').css('display','');
+		}else{
+			$('#user_text').html("");
+			$('#user_file').css('display','none');
+			$('#select_user_type_ext').css('display','none');
+		}
+	}
+	
+	function get_select(){
+		if($("#the_package").val().length==0) {
+			alert('请上传文件');
+			return;
+		}
+		$.ajaxFileUpload({
+			url:'/index.php/Sj/Activity/get_package',
+			type:'POST',
+			files:[$('#the_package')],
+			secureuri:false,
+			dataType:'json',
+			success:function(data){
+				if(data == 2){
+					alert('上传文件格式错误');
+					return false;
+				}else if(data == 3){
+					alert('上传包名大于200个');
+					return false;
+				}else if(data[0] == 4){
+					alert('上传包名'+data[1]+'不存在');
+					return false;
+				}else{
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.select_package = package_strs;
+					$('#all_select').val(package_strs);
+					$('#select_text').html(need_str);
+				}
+			}
+		});
+	}
+	
+	function get_ignore(){
+		if($("#the_ignore_package").val().length==0) {
+			alert('请上传文件');
+			return;
+		}
+		$.ajaxFileUpload({
+			url:'/index.php/Sj/Activity/get_ignore',
+			type:'POST',
+			files:[$('#the_ignore_package')],
+			secureuri:false,
+			dataType:'json',
+			success:function(data){
+				if(data == 2){
+					alert('上传文件格式错误');
+					return false;
+				}else if(data == 3){
+					alert('上传包名大于200个');
+					return false;
+				}else if(data[0] == 4){
+					alert('上传包名'+data[1]+'不存在');
+					return false;
+				}else{
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.ignore_package = package_strs;
+					$('#all_ignore').val(package_strs);
+					$('#ignore_text').html(need_str);
+				}
+			}
+		});
+	}
+	
+	function add_ignore(){
+		if($("#ignore_package_add").val().length==0) {
+			alert('请填写包名');
+			return;
+		}
+		var new_package = $("#ignore_package_add").val();
+		var old_package = sessionStorage.ignore_package;
+		$.ajax({
+			url:'/index.php/Sj/Activity/add_ignore',
+			data: 'old_package='+old_package+'&new_package='+new_package,
+			type: 'get',
+			success: function(data){
+				var data = eval(''+data+'');
+				if(data[0] == 4){
+					alert("添加包名不存在");
+					return false;
+				}else if(data == 5){
+					alert("该包名已添加，请勿重复添加");
+					return false;
+				}else{
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.ignore_package = package_strs;
+					$('#all_ignore').val(package_strs);
+					$('#ignore_text').html(need_str);
+				}
+			}
+		});
+	}
+	
+	function del_select(obj){
+		var no_package = obj;
+		var old_package = sessionStorage.select_package;
+		$.ajax({
+			url:'/index.php/Sj/Activity/del_select',
+			data: 'old_package='+old_package+'&no_package='+no_package,
+			type: 'get',
+			success: function(data){
+				if(data != 204){
+					var data = eval(''+data+'');
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.select_package = package_strs;
+					$('#all_select').val(package_strs);
+					$('#select_text').html(need_str);
+				}else{
+					sessionStorage.select_package = '';
+					$('#select_text').html('');
+					$('#all_select').val('');
+				}
+			}
+		});
+	}
+	
+	function del_ignore(obj){
+		var no_package = obj;
+		var old_package = sessionStorage.ignore_package;
+		$.ajax({
+			url:'/index.php/Sj/Activity/del_select',
+			data: 'old_package='+old_package+'&no_package='+no_package,
+			type: 'get',
+			success: function(data){
+				if(data != 204){
+					var data = eval(''+data+'');
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.ignore_package = package_strs;
+					$('#all_ignore').val(package_strs);
+					$('#ignore_text').html(need_str);
+				}else{
+					sessionStorage.ignore_package = '';
+					$('#ignore_text').html('');
+					$('#all_ignore').val('');
+				}
+			}
+		});
+	}
+	
+	function upload_user(){
+		if($('#user_path').val().length == 0){
+			alert("请上传用户名文件");
+			return false;
+		}
+		$.ajaxFileUpload({
+			url:'/index.php/Sj/Activity/get_user',
+			type:'POST',
+			files:[$('#user_path')],
+			secureuri:false,
+			dataType:'json',
+			success:function(data){
+				if(data == 2){
+					alert('上传文件格式错误');
+					return false;
+				}else{
+					var str = '已上传<span style="color:red;">'+data[0]+'</span>个用户名';
+					$('#user_text').html(str);
+					$('#user_save').val(data[1]);
+					sessionStorage.user_count = data[0];
+				}
+			}
+		});
+	}
+	function check_form(){
+		var enable=true;
+		var activity_type_bank = "<?php echo $result[0]['activity_type_bank'] ?>";
+		if(activity_type_bank == 5 || activity_type_bank == 7 || activity_type_bank == 8){
+			var edit_start_tm = $("#edit_start_tm").val();
+			var time = new Date(edit_start_tm).getTime();
+			var time_sec  = Math.floor(time/1000);
+			var old_start_tm = "<?php echo $result[0]['start_tm'] ?>";
+			if(time_sec>old_start_tm){
+				if(confirm('活动开始时间调整，会清除已有的用户数据!请谨慎操作。')) {
+					return true;
+				}else{
+					return false;
+				}
+			}
+			if(activity_type_bank == 5){
+				var edit_end_tm = $("#edit_end_tm").val();
+				var end_time = new Date(edit_end_tm).getTime();
+				var dates = Math.abs((time - end_time))/(1000*60*60*24);
+				if(dates > 10){
+					alert('活动时间不可超过10天');
+					return false;
+				}
+			}	
+		}
+		var type = $("input[name='cover_user_type']:checked").val();
+		var a_start = $("#activation_date_start").val();
+		var a_end = $("#activation_date_end").val();
+		if(type==2&&!a_start&&!a_end){
+			alert('激活时间需要填写开始时间及结束时间');
+			return false;
+		}
+		if((a_start&&!a_end)||(!a_start&&a_end)){
+			alert('激活时间需要填写开始时间及结束时间');
+			return false;
+		}
+		var pkg = $("#package").val();
+		if(pkg){
+			$.ajax({
+				url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+				type: 'get',
+				async:false,
+				success: function(data){
+					if(data){
+						if(!confirm(data)){
+							enable = false;
+						}else{
+							enable = true;
+						}
+					}
+				}
+			});
+		}
+		if(!enable){
+			return false;
+		}else{
+		//	return form_chk();
+		}
+	}
+    
+    function change_cover_user(){
+		var type = $("input[name='cover_user_type']:checked").val();
+		if(type == 2){
+			$('.direct_user').css('display','');
+		}else{
+			$('.direct_user').css('display','none');
+		}
+	}
+</script>
+<!-- 编辑活动 -->
+<div>
+	<form name="form_edit" method="post" action="/index.php/Sj/Activity/editActivity" id="_form_edit" onsubmit="return check_form()" enctype="multipart/form-data">
+	<input type="hidden" id="editid" name="editid" value="{$result[0]['id']}"/>
+	<input type="hidden" id="old_imgurl_444_150" name="old_imgurl_444_150" value="{$result[0]['low_image_url']}"/>
+	<input type="hidden" id="old_imgurl_604_204" name="old_imgurl_604_204" value="{$result[0]['high_image_url']}"/>
+	<input type="hidden" name="url_subff" value="{$url_subff}"/>
+	<table border="0" cellspacing="10" cellpadding="2" style="width:100%;height:100%;" class="tb_add">
+		<tr>
+			<th class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;background-color:#F7F789;">编辑活动：<input type="hidden" name="p" value="{$p}" /><input type="hidden" name="lr" value="{$lr}" /></th>
+		</tr>
+		<tr>
+			<td class="td1" align="right">活动名称：</td><td align="left" style="padding-left:10px;"><input type="text" value="{$result[0]['name']}" name="act_name" id="edit_name" /></td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">活动分类：</td>
+			<td align="left" style="padding-left:10px;">
+				<?php if($result[0]['activity_category'] == 1){ ?>游戏活动<?php }elseif($result[0]['activity_category'] == 2){ ?>应用活动<?php } ?>
+			</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">活动类型</td>
+			<td align="left" style="padding-left:10px;">
+				<?php 
+					if($result[0]['activity_type'] == 1){
+						echo "多软件活动";
+					}elseif($result[0]['activity_type'] == 2){
+						echo "单软件活动";
+					}elseif($result[0]['activity_type'] == 3){
+						echo "无软件活动";
+					}elseif($result[0]['activity_type'] == 4){
+						echo "预下载活动";
+					}
+				?>
+			</td>
+		</tr>
+		<?php if($result[0]['activity_type'] == 1){ ?>
+		<tr>
+			<td class="td1" align="right">多软件活动类型</td>
+			<td align="left" style="padding-left:10px;">
+				<?php if($result[0]['activity_type_bank'] == 1){ ?>定制活动
+				<?php }elseif($result[0]['activity_type_bank'] == 2){ ?>通用场景活动
+				<?php }elseif($result[0]['activity_type_bank'] == 3){ ?>集赞活动
+				<?php }elseif($result[0]['activity_type_bank'] == 4){ ?>常规返利活动
+				<?php }elseif($result[0]['activity_type_bank'] == 5){ ?>充值消费类活动
+				<?php }elseif($result[0]['activity_type_bank'] == 6){ ?>新预约活动
+				<?php }elseif($result[0]['activity_type_bank'] == 7){ ?>运营预下载活动
+				<?php }elseif($result[0]['activity_type_bank'] == 8){ ?>签到模板
+				<?php }elseif($result[0]['activity_type_bank'] == 9){ ?>评论可回复模板
+				<?php }elseif($result[0]['activity_type_bank'] == 10){ ?>会员折扣活动
+				<?php }elseif($result[0]['activity_type_bank'] == 11){ ?>流量签到活动
+				<?php } ?>
+			</td>
+		</tr>
+		<?php } ?>
+		<tr>
+			<td class="td1" align="right">筛选标签：</td>
+			<td align="left" style="padding-left:10px;">
+				<select name="filter_label_id" id="filter_label_id" style='width:136px;' <?php if(empty($labels)){echo "disabled='disabled'";}?>>
+					<option value="0" <?php if($result[0]['filter_label_id']==0){echo "selected='selected'";}?>>无</option>
+				<volist name="labels" id="label">
+					<option value="{$label.id}" <?php if($label['id']==$result[0]['filter_label_id']){echo "selected=''selected";}?>>{$label.label_name}</option>
+				</volist>
+				</select>
+			</td>
+		</tr>
+        <?php if($result[0]['activity_type'] == 2){ ?>
+        <tr>
+			<td class="td1" align="right">软件包名：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="text" value="{$result[0]['package']}" name="package" id="package" />&nbsp;&nbsp;
+			</td>        
+		</tr>
+        <?php } ?>
+                
+		<?php if($result[0]['activity_type'] == 1 || $result[0]['activity_type'] == 4){ ?>
+		<tr>
+		<?php if($result[0]['package'] == "cn.goapk.market" ){ ?>
+			<td class="td1" align="right">软件包名：</td>
+			<td align="left" style="padding-left:10px;">
+			<input type="text"  name="package" id="package" />&nbsp;&nbsp;
+			<?php if( $result[0]['activity_type'] == 1){ ?>
+			<span ><input type='checkbox' name='checkpackage' id="checkpackage" checked=""  value="cn.goapk.market">使用安智图标</span>
+			<?php } ?>
+			</td>
+		 <?php }else{ ?>
+			<td class="td1" align="right">软件包名：</td>
+			<td align="left" style="padding-left:10px;">
+			<input type="text" value="{$result[0]['package']}" name="package" id="package" />&nbsp;&nbsp;
+			<?php if( $result[0]['activity_type'] == 1 || $result[0]['activity_type'] == 4){ ?>
+			<span >
+			<input type='checkbox' name='checkpackage' id="checkpackage"   value="cn.goapk.market">使用安智图标</span>
+			<?php } ?>
+			</td>
+		 <?php }?>      
+		</tr>
+		<?php } ?>
+		<tr>
+			<td class="td1" align="right">奖品介绍：</td><td align="left" style="padding-left:10px;"><input type="text" value="{$result[0]['intro']}" name="intro" id="intro" />&nbsp;不得大于20个汉字</td>
+		</tr>
+		<tr>
+		     <td class="td1" align="right">排序：</td>
+			 <td align="left" style="padding-left:10px;"><input type="text" value="<?php echo $result[0]['pos'] ? $result[0]['pos'] : ''; ?>" name="pos" id="pos" /></td>
+		</tr>		
+		<tr>
+			<td class="td1" align="right">图片：</td><td align="left" style="padding-left:10px;"><input type="file" name="act_img" id="edit_img" />{$image_width}X{$image_height}</td>
+		</tr>
+		<tr>	
+			<td class="td1" align="right">6.0高分图片：</td><td align="left" style="padding-left:10px;"><input type="file" name="act_img_604_204" id="act_img_604_204" />{$image_width_high}x{$image_height_high}</td>
+		</tr>	
+		<tr>	
+			<td class="td1" align="right">6.0低分图片：</td><td align="left" style="padding-left:10px;"><input type="file" name="act_img_444_150" id="act_img_444_150" />{$image_width_low}x{$image_height_low}</td>
+		</tr>		
+		<tr>
+			<td class="td1" align="right">渠道：</td>
+			<td align="left" style="padding-left:10px;"><a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox">请选择渠道</a>
+			<div id="channel_div">
+			<volist id="chl_list_vo" name="my_channels" >
+			<?php if($chl_list_vo['cid']){ ?>
+			&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+			<?php } ?>
+			</volist>
+			</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">
+					 市场版本：
+			</td>
+		</tr>
+		<tr>
+		    <td></td>
+			<td class="td1" align="left">
+				 <input id="ver_big" type='radio' name='type' <?php if($result[0]['version_type']=="1") echo  "checked='checked'";?> value='1'>大于等于
+			     <input id="ver_big_input" type='text' name='version_code1' value="<?php if($result[0]['version_type']=="1") echo $result[0]['version_code'];?>"/>
+			</td>
+		</tr>
+		<tr>
+		    <td></td>
+			<td class="td1" align="left" >
+			     <input id="ver_small" type='radio' <?php if($result[0]['version_type']=="2") echo "checked='checked'";?> name='type' value='2'>小于等于
+			     <input id="ver_small_input" type='text' name='version_code2' value="<?php if($result[0]['version_type']=="2") echo $result[0]['version_code'];?>"/>
+			</td>
+		</tr>
+		<tr>
+		    <td></td>
+			<td class="td1" align="left" >
+			     <input id="ver_eq" type='radio' <?php if($result[0]['version_type']=="3") echo "checked='checked'";?>" name='type' value='3'>等于
+				<a href="__APP__/Public/showVersion?append_id=selected_versions" class="thickbox">请选择安智市场版本</a>
+				<div id="selected_versions">
+				   <input name="force_update_version" id="force_update_version" type="hidden" value="<?php if($result[0]['version_type']=="3") echo $result[0]['version_code'];?>"/><label><?php if($result[0]['version_type']=="3") echo substr($result[0]['version_code'],1,strlen($result[0]['version_code'])-2);?></label>
+			    </div>
+			</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">
+				<input type="checkbox" id="url_list" name="url_list"  onclick='open_url(this);' >
+			</td>
+			<td align="left" style="padding-left:10px;">
+			活动未开始不展示
+			</td>
+		</tr>
+		<?php if(($result[0]['activity_type'] != 1 && $result[0]['activity_type'] != 4) || ($result[0]['activity_type'] == 1 && $result[0]['activity_type_bank'] == 1)){ ?>
+		<tr>
+			<td class="td1" align="right">页面id</td><td align="left" style="padding-left:10px;"><input type="text" value="{$result[0]['activity_page_id']}" name="page_id" id="page_id" /></td>
+		</tr>
+
+		<tr>
+			<td class="td1" align="right">预告网址：</td><td align="left" style="padding-left:10px;"><input type="text" value="{$result[0]['pre_url']}" name="act_pre_url" id="act_pre_url" /></td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">活动网址：</td><td align="left" style="padding-left:10px;"><input type="text" value="{$result[0]['url']}" name="act_url" id="edit_url" /></td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">结束网址：</td><td align="left" style="padding-left:10px;"><input type="text" value="{$result[0]['end_url']}" name="act_end_url" id="edit_end_url" /></td>
+		</tr>
+		<?php } ?>
+		<?php 
+			$arr = array(2,3,4,5,6,7,8,9,10,11);
+			if($result[0]['activity_type'] == 1 && in_array($result[0]['activity_type_bank'],$arr)){ 
+		?>
+		<tr id="pre_name">
+			<td class="td1" align="right">预告页名称：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="text" name="pre_coactivity" id="pre_coactivity" value="{$result[0]['pre_name']}" />
+			</td>
+		</tr>
+		<tr id="bgn_name">
+			<td class="td1" align="right">活动页名称：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="text" name="bgn_coactivity" id="bgn_coactivity" value="{$result[0]['bgn_name']}" />
+			</td>
+		</tr>
+		<tr id="end_name">
+			<td class="td1" align="right">结束页名称：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="text" name="end_coactivity" id="end_coactivity" value="{$result[0]['end_name']}" />
+			</td>
+		</tr>
+		<?php }else if($result[0]['activity_type'] == 4){ ?>
+		<tr id="pre_name_desc">
+			<td class="td1" align="right">预告页名称：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="text" name="pre_desc" id="pre_desc" value="{$result[0]['pre_name']}" />
+			</td>
+		</tr>
+		<tr id="bgn_name_desc">
+			<td class="td1" align="right">活动页名称：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="text" name="bgn_desc" id="bgn_desc" value="{$result[0]['bgn_name']}" />
+			</td>
+		</tr>
+		<tr id="end_name_desc">
+			<td class="td1" align="right">结束页名称：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="text" name="end_desc" id="end_desc" value="{$result[0]['end_name']}" />
+			</td>
+		</tr>
+		<?php } ?>
+		<tr>
+			<td class="td1" align="right">活动开始时间：</td>
+            <input type="hidden" name="old_start_tm" value="{$result[0]['start_tm']}" />
+			<td align="left" style="padding-left:10px;">
+				<input type="text" value="<?php echo date('Y-m-d H:i:s',$result[0]['start_tm']); ?>" name="act_start_tm" id="edit_start_tm" /><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"edit_start_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;"/>
+			</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">活动结束时间：</td>
+            <input type="hidden" name="old_end_tm" value="{$result[0]['end_tm']}" />
+			<td align="left" style="padding-left:10px;">
+				<input type="text" value="<?php echo date('Y-m-d H:i:s',$result[0]['end_tm']); ?>" name="act_end_tm" id="edit_end_tm" /><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"edit_end_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;"/>
+			</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">选择投放平台：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="checkbox" value="1" name="platform[]" id="shichang_select" onclick="shichang_checked(this)" <?php if(in_array(1,$platform_arr)){ ?>checked<?php } ?> />&nbsp;安智市场&nbsp;&nbsp;&nbsp;
+				<input type="checkbox" value="20" name="platform[]" id="zdy_select" onclick="shichang_checked(this)" <?php if(in_array(20,$platform_arr)){ ?>checked<?php } ?> />&nbsp;什么值得玩&nbsp;&nbsp;&nbsp;
+				<input type="checkbox" value="13" name="platform[]" id="sdk_select" onclick="get_checked();" <?php if(in_array(13,$platform_arr)){ ?>checked<?php } ?> />&nbsp;SDK&nbsp;&nbsp;
+				<select name="sdk_type" id="sdk_type" onchange="select_sdk();">
+					<option value="1" <?php if($result[0]['sdk_type'] == 1){ ?>selected<?php } ?>>普通活动</option>
+					<option value="2" <?php if($result[0]['sdk_type'] == 2){ ?>selected<?php } ?>>VIP活动</option>
+					<option value="3" <?php if($result[0]['sdk_type'] == 3){ ?>selected<?php } ?> class="member" <?php if(in_array(1,$platform_arr) || $result[0]['activity_type_bank'] != 1){ ?>style="display:none"<?php } ?>  >金牌会员活动</option>
+					<option value="4" <?php if($result[0]['sdk_type'] == 4){ ?>selected<?php } ?> class="member" <?php if(in_array(1,$platform_arr) || $result[0]['activity_type_bank'] != 1){ ?>style="display:none"<?php } ?>  >银牌会员活动</option>
+				</select>
+			</td>
+		</tr>
+
+		<tr id='sdk_ac_type_tr' style="display: none;" >
+			<td class="td1" align="right">
+				活动性质：
+			</td>
+			<td align="left" style="padding-left:10px;">
+				 <input id="sdk_ac_type" type='radio' name='sdk_ac_type' value='1' <?php if($result[0]['sdk_ac_type']=="1") echo  "checked='checked'";?>>福利活动
+				 <input id="sdk_ac_type" type='radio' name='sdk_ac_type' value='2'  <?php if($result[0]['sdk_ac_type']=="2") echo  "checked='checked'";?>>预约活动
+			</td>
+		</tr>	
+		<!-- <tr id='sdk_ac_rank_tr' style="display: none;">
+		     <td class="td1" align="right">优先级：</td>
+			 <td align="left" style="padding-left:10px;"><input type="text" name="sdk_ac_rank" id="sdk_ac_rank" value="<?php echo $result[0]['sdk_ac_rank']?$result[0]['sdk_ac_rank']:'';?>" /><span style="color:red;">注:必填项,优先级仅对sdk活动有效,排序规则由小到大</span></td>
+		</tr> -->
+
+		<tr id='vip_jump_tr'  <?php if($result[0]['sdk_type'] != 3&&$result[0]['sdk_type'] != 4){ ?>style="display: none;"<?php } ?>>
+			<td class="td1" align="right">
+				是否判断会员身份：
+			</td>
+			<td align="left" style="padding-left:10px;">
+				 <input id="vip_jump" type='radio' name='vip_jump' <?php if($result[0]['vip_jump']=="1") echo  "checked='checked'";?> value='1'>是
+				 <input id="vip_jump" type='radio' name='vip_jump' <?php if($result[0]['vip_jump']=="0") echo  "checked='checked'";?> value='0'>否
+			</td>
+		</tr>			
+		<tr id="select_package">
+			<td class="td1" align="right">游戏范围：</td>
+			<td align="left" style="padding-left:10px;">
+				<select name="select_package_type" id="select_package_type" onchange="select_package();">
+				<option value="0">空</option>
+				<option value="1" <?php if($result[0]['select_package_type'] == 1){ ?>selected<?php } ?>>手动上传</option>
+				<option value="2" <?php if($result[0]['select_package_type'] == 2){ ?>selected<?php } ?>>全部游戏</option>
+				<option value="3" <?php if($result[0]['select_package_type'] == 3){ ?>selected<?php } ?>>网络游戏</option>
+				<option value="4" <?php if($result[0]['select_package_type'] == 4){ ?>selected<?php } ?>>棋牌游戏</option>
+				<option value="5" <?php if($result[0]['select_package_type'] == 5){ ?>selected<?php } ?>>单机游戏</option>
+				</select>
+				<span id="select_file"><br /><br />
+				<input type="file" name="the_package" id="the_package" />&nbsp;&nbsp;点击<input type="button" value="上传" onclick="get_select();">游戏包名
+				</span>
+			</td>
+		</tr>
+		<tr id="ignore_package">
+			<td class="td1" align="right">屏蔽游戏：</td>
+			<td align="left" style="padding-left:10px;"><input type="text" name="ignore_package_add" id="ignore_package_add" />&nbsp;&nbsp;<input type="button" value="添加" onclick="add_ignore();" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="file" name="the_ignore_package" id="the_ignore_package" />&nbsp;&nbsp;点击<input type="button" onclick="get_ignore();" value="上传">屏蔽游戏包名</td>
+		</tr>
+		<tr id="ignore_package_show">
+			<td class="td1" align="right">已屏蔽游戏：</td>
+			<td align="left" style="padding-left:10px;">
+				<span id="ignore_text">
+				<?php if($ignore_package){ ?>
+					<?php foreach($ignore_package as $key => $val){ ?>
+						<?php echo $val[1]; ?>
+						<a href="javascript:;" onclick="del_ignore('<?php echo $val[0]; ?>')"><img src="/Public/images/delete_icon.png" /></a>
+						<?php if(($key + 1)%9 == 0){ ?><br /><br /><?php } ?>&nbsp;&nbsp;
+					<?php } ?>
+				<?php } ?>
+				</span>
+				<input type="hidden" name="all_ignore" id="all_ignore" value="{$result[0]['ignore_package_list']}" />
+			</td>
+		</tr>
+		<tr id="select_package_show">
+			<td class="td1" align="right">已选择游戏：</td>
+			<td align="left" style="padding-left:10px;"><span id="select_text"><?php if($result[0]['select_package_type'] == 2){ ?>全部游戏<?php }elseif($result[0]['select_package_type'] == 3){ ?>网络游戏<?php }elseif($result[0]['select_package_type'] == 4){ ?>棋牌游戏<?php }elseif($result[0]['select_package_type'] == 5){ ?>单机游戏<?php }else{ ?><?php if($select_package){ ?><?php foreach($select_package as $key => $val){ ?><?php echo $val[1]; ?><a href="javascript:;" onclick="del_select('<?php echo $val[0]; ?>')"><img src="/Public/images/delete_icon.png" /></a><?php if(($key + 1)%9 == 0){ ?><br /><br /><?php } ?>&nbsp;&nbsp;<?php } ?><?php } ?><?php } ?></span><input type="hidden" name="all_select" id="all_select" value="{$result[0]['select_package_list']}" /></td>
+		</tr>
+		<tr id="user">
+			<td class="td1" align="right">用户名：</td>
+			<td  align="left" style="padding-left:10px;"><select name="select_user_type" id="select_user_type" onchange="select_user();"><option value="0">请选择用户名</option><option value="1" <?php if($result[0]['select_user_type'] == 1){ ?>selected<?php } ?>>手动上传</option><option value="2" <?php if($result[0]['select_user_type'] == 2){ ?>selected<?php } ?>>老用户</option></select>
+			<span id="user_file">
+			<br /><br />
+			<input type="file" name="user_path" id="user_path" />&nbsp;&nbsp;点击<input type="button" value="上传" onclick="upload_user();" />用户名</span>
+			<br /><br />
+			<div id="select_user_type_ext"><input type="checkbox" name="select_user_type_ext[]" value="2" <?php if(in_array(2,$select_user_type_ext_arr)){ ?>checked<?php } ?> />2日未登录用户&nbsp;&nbsp;<input type="checkbox" name="select_user_type_ext[]" value="7" <?php if(in_array(7,$select_user_type_ext_arr)){ ?>checked<?php } ?> />1周未登录用户&nbsp;&nbsp;<input type="checkbox" name="select_user_type_ext[]" value="14" <?php if(in_array(14,$select_user_type_ext_arr)){ ?>checked<?php } ?> />2周未登录用户&nbsp;&nbsp;<input type="checkbox" name="select_user_type_ext[]" value="21" <?php if(in_array(21,$select_user_type_ext_arr)){ ?>checked<?php } ?> />3周未登录用户&nbsp;&nbsp;<input type="checkbox" name="select_user_type_ext[]" value="30" <?php if(in_array(30,$select_user_type_ext_arr)){ ?>checked<?php } ?> />1月未登录用户&nbsp;&nbsp;</div>
+			</td>
+		</tr>
+		<tr id="user_show">
+			<td class="td1" align="right">已选择用户：</td>
+			<td align="left" style="padding-left:10px;"><span id="user_text"><?php if($user_count){ ?>已上传<span style="color:red;">{$user_count}</span>个用户名<?php } ?></span><input type="hidden" name="user_save" id="user_save" value="{$result[0]['select_user_file_path']}" /><input type="hidden" id="user_count" value="{$user_count}" /></td>
+		</tr>	
+		<!--
+		<tr>
+			<td class="td1" align="right">专区展示开始时间：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="text" value="" name="act_show_start_tm" id="edit_show_start_tm" /><img src="/Public/js/calendar.gif" onclick="return showCalendar('edit_show_start_tm', 'y-m-d');" style="border:1px solid #000;"/>
+			</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">专区展示结束时间：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="text" value="" name="act_show_end_tm" id="edit_show_end_tm" /><img src="/Public/js/calendar.gif" onclick="return showCalendar('edit_show_end_tm', 'y-m-d');" style="border:1px solid #000;"/>
+			</td>
+		</tr>
+		-->
+		<tr>
+			<td class="td1" align="right">合作形式：</td>
+			<td align="left" style="padding-left:10px;">
+				<SELECT name='co_type'>
+					<?php foreach($typelist as $key => $val): ?>
+						<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+					<?php endforeach; ?>				
+				</SELECT>
+			</td>
+		</tr>
+        <tr>
+            <td class="td1" align="right">覆盖用户类型：</td>
+            <td align="left" style="padding-left:10px;">
+                <label><input type="radio" name="cover_user_type" value="0" <?php if(!$result[0]['cover_user_type']||$result[0]['cover_user_type']==0){echo 'checked';}?> onchange="change_cover_user()">全部</label>
+                <label><input type="radio" name="cover_user_type" value="1" <?php if($result[0]['cover_user_type'] == 1){echo 'checked';} ?> onchange="change_cover_user()">新用户</label>
+                <label><input type="radio" name="cover_user_type" value="2" <?php if($result[0]['cover_user_type'] == 2){echo 'checked';} ?> onchange="change_cover_user()">定向用户</label>
+            </td>
+            <td></td>
+        </tr>
+        <tr class="direct_user">
+            <td class="td1" align="right">激活时间：</td>
+            <td align="left" style="padding-left:10px;">
+                开始时间 <input id="activation_date_start" name="activation_date_start" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value="<?php if($result[0]['activation_date_start'] != '0'){ ?>{$result[0].activation_date_start|date='Y-m-d H:i:s',###}<?php } ?>"/>
+                <br>
+                结束时间 <input id="activation_date_end" name="activation_date_end" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" value="<?php if($result[0]['activation_date_end'] != '0'){ ?>{$result[0].activation_date_end|date='Y-m-d H:i:s',###}<?php } ?>"/>
+            </td>
+            <td>
+
+            </td>
+        </tr>
+
+		<tr>
+			<td colspan="2" style="text-align:center;height:30px;line-height:30px;"><button style="margin-right:15px;" type="submit">确定</button><button type="button" onclick="javascript:history.go(-1);">取消</button></td>
+		</tr>
+	</table>
+	</form>
+</div>
+
+<script>
+$(document).ready(function(){
+	var url_list = <?php echo $result[0]['url_list']; ?>;
+	if(url_list == 1){
+		$('#url_list').attr('checked',true);
+		$('#act_pre_url').css({color:'#bcbcbc',background:'#ececec'});
+		$('#act_pre_url').attr({disabled:'disabled'});
+		$('#pre_coactivity').css({color:'#bcbcbc',background:'#ececec'});
+		$('#pre_desc').css({color:'#bcbcbc',background:'#ececec'});
+		$('#pre_coactivity').attr({disabled:'disabled'});
+		$('#pre_desc').attr({disabled:'disabled'});
+	}
+});
+function open_url(obj){
+	if($(obj).is(':checked')) {
+		$('#act_pre_url').css({color:'#bcbcbc',background:'#ececec'});
+		$('#pre_coactivity').css({color:'#bcbcbc',background:'#ececec'});
+		$('#pre_desc').css({color:'#bcbcbc',background:'#ececec'});
+		$('#act_pre_url').attr({disabled:'disabled'});
+		$('#pre_coactivity').attr({disabled:'disabled'});
+		$('#pre_desc').attr({disabled:'disabled'});
+	}else{
+		$('#act_pre_url').css({color:'',background:''});
+		$('#pre_coactivity').css({color:'',background:''});
+		$('#pre_desc').css({color:'',background:''});
+		$('#act_pre_url').attr('disabled',false);
+		$('#pre_coactivity').attr('disabled',false);
+		$('#pre_desc').attr('disabled',false);
+	}
+}
+(function(){
+   
+    var _checkpackage = $('input[name=checkpackage]'),_package= $("input[name=package]");
+    $("input[name=package]").attr('disabled',(_checkpackage.is(":checked")?true:false));
+
+
+    $("select[name=activity_type]").bind('change',function(){
+         var obj = $(this).val();
+         if(obj == 1){
+                 $('#my_package').css('display','');
+                 $('#select_package_2').css('display','');
+
+                 _package.attr('disabled',(_checkpackage.is(":checked")?true:false));
+                 
+               
+                 
+         }else if(obj == 2){
+                 $('#my_package').css('display','');
+                 $('#select_package_2').css('display','none');
+         }else if(obj == 3){
+                 $('#my_package').css('display','none');
+         }
+
+
+    }).trigger('change');
+    
+    _checkpackage.bind('click',function(){
+         _package.attr('disabled',($(this).is(":checked")?true:false));
+         
+    });
+            
+})();    
+    
+</script>

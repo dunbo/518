@@ -1,0 +1,291 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<style>
+.move{width:50px; border:1px solid #ccc; text-align:center; height:17px; line-height:17px; border-radius:5px;}
+</style>
+<script>
+	function checkit(){
+		if(confirm("软件删除后不可恢复，并且直接影响线上数据，是否确认删除"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	function select_all(){
+		if($("#select_all").attr('checked') == 'checked'){
+			$('input[id^=soft_]').attr('checked','checked');
+		}
+		
+		if($('#select_all').attr('checked') != 'checked'){
+			$('input[id^=soft_]').attr('checked',false);
+		}
+	
+	}
+	
+	function select_no(id){
+		if($('#soft_'+id+'').attr('checked') != 'checked'){
+			$('#select_all').attr('checked',false);
+		}
+	
+	}
+</script>
+<body>
+<div style="padding:20px;">
+	<div class="currentNav_r" style="float:right;">
+		<a href="__URL__/add_soft_show/category_id/{$category_id}?mm"  class="thickbox recBtn_bg">添加软件</a>
+                <input type="hidden" id="category_id" value="{$category_id}">
+		<?php if($category_result[0]['filter_been'] == 1 && $category_result[0]['bei_soft'] == 0){ ?><a href="__URL__/bei_soft_list/id/{$category_id}"  class="recBtn_bg">备选库</a><?php } ?>
+		<a class="recBtn_bg <?php if($time_status == 2){ ?>currentSel<?php } ?>" href="__URL__/show_soft_list/time_status/2/id/{$category_id}">过期</a>&nbsp;&nbsp;<a class="recBtn_bg <?php if($time_status == 1 || !$time_status){ ?>currentSel<?php } ?>" href="__URL__/show_soft_list/time_status/1/id/{$category_id}">当前</a>&nbsp;&nbsp;<a class="recBtn_bg <?php if($time_status == 3){ ?>currentSel<?php } ?>" href="__URL__/show_soft_list/time_status/3/id/{$category_id}">未开始</a>
+	</div>
+	<br />
+	<!-- <a href="__URL__/import_lading/from/1/"  class="search_btn" style="margin-left:7px;">批量添加软件</a> -->
+	<table cellspacing="0" cellpadding="0" border="0" class="table_list">
+		<thead>
+			<tr>
+				<th width="7%"><input type="checkbox" name="soft_allSelect" onclick="$('input[name^=ids]').attr('checked', $(this).attr('checked')=='checked')"/></th>
+				<th width="16%">软件名称</th>
+				<th width="16%">包名</th>
+				<th width="14%">开始时间</th>
+				<th width="14%">结束时间</th>
+                <th width="5%">排序</th>
+				<th width="10%">合作形式</th>
+				<th width="10%">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach($soft_result as $key => $val){ ?>
+		<tr>
+			<td><input name="ids[]" value="<?php echo $val['id'] ?>" type="checkbox"/></td>
+			<td>{$val.softname}</td>
+			<td>{$val.package}</td>
+			<td><?php echo date('Y-m-d H:i:s',$val['start_tm']); ?></td>
+			<td><?php echo date('Y-m-d H:i:s',$val['end_tm']); ?></td>
+			<td width="5%">
+				<input type="text" name="rank" id="rank_{$val.id}" value="{$val.rank}" onblur="change_orders({$val.id});" />
+			</td>
+			<TD>
+				<?php if ($val['type'] !=0) { echo $val['types'] ; }else{ echo "-";} ?>
+			</TD>
+			<td><a href="__URL__/edit_soft_show/id/{$val.id}/category_id/{$val.category_id}" class="thickbox">编辑</a>&nbsp;&nbsp;<a href="__URL__/delete_soft/id/{$val.id}" onClick="return checkit();">删除</a></td>
+		</tr>
+		<?php } ?>
+		</tbody>
+	</table>
+	<div class="soft_btnr">
+		<a class="recBtn_bg move" style="width:60px" href="javascript:" onclick="batch_del_soft()">批量删除</a>
+		<a class="recBtn_bg move" style="width:75px" href="javascript:" onclick="batch_edit_soft()">批量修改时间</a>
+		<a class="recBtn_bg move" href="javascript:" onclick="selectCategory('myOnPageContent', <?php echo $category_id?>)">移动</a>
+		<a href="__URL__/ladingmanage_list/cids/{$cid}">返回</a>
+	</div>
+</div>
+<div id="myOnPageContent" style="display:none">
+	<form method="post" action="/index.php/Sj/Ladingmanage/move_soft">
+		<select name="category_id" style="margin-top:10px; height:25px; line-height:25px;">
+			<?php foreach($category_select as $k => $v): ?>
+			<option value="<?php echo $k?>"><?php echo $v?></option>
+			<?php endforeach; ?>
+		</select>
+		<input type="hidden" value="" class="selected_ids" name="selected_ids"/>
+		<input style="height:25px; line-height:20px; border-radius:5px;" type="submit" value="提交"/>
+	</form>
+</div>
+
+<div id="batch_edit_soft" style="display:none">
+	<input type="hidden" id="ids" value=""/>
+	<table>
+		<tr>
+			<td>共选择软件：</td>
+			<td><span id="count">23</span>个</td>
+		</tr>
+		<tr>
+			<td>开始时间：<input type="hidden" name="cid" value="{$cid}" id="cid" /></td>
+			<td><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+			<input id="start_tm_batch" name="start_tm_batch"
+			style="border: 0px none black; width: 100px;" value=""
+			size="15" type="text" ><img src="/Public/js/calendar.gif"
+            class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_tm_batch",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px" >
+		</span></td>
+		</tr>
+		<tr>
+			<td>结束时间：</td>
+			<td><span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="end_tm_batch" name="end_tm_batch"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="" size="15" type="text" ><img
+			src="/Public/js/calendar.gif"
+            class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_tm_batch",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px" ></span></td>
+		</tr>
+		<tr>
+			<td>未填写项不进行修改</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td><input type="button" onclick="bh_submit()" value="确定" /></td>
+			<td><input type="button" value="取消" onclick="tb_remove();" /></td>
+		</tr>
+	</table>
+</div>
+
+<div id="show_result" style="display:none">
+	<table>
+	<thead>
+		<tr>
+			<th width="20%"></th>
+			<th width="80%"></th>
+		</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>成功修改软件：</td>
+				<td><span id="success">0</span>个</td>
+			</tr>
+			<tr>
+				<td>修改失败软件：</td>
+				<td><span id="fail">0</span>个</td>
+			</tr>
+			<tr>
+				<td>失败包名：</td>
+				<td><span id="fail_msg"></span></td>
+			</tr>
+			<tr>
+				<td><input type="button" onclick="location.reload();" value="确定" /></td>
+				<td><input type="button" value="取消" onclick="location.reload();" /></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<script>
+function change_orders(id){
+	var category_id = $('#category_id').val();
+	var rank = $('#rank_'+id+'').val();
+	$.ajax({
+		url:'/index.php/Sj/Ladingmanage/change_orders/id/'+id+'/rank/'+rank+'/category_id/'+category_id,
+		type: 'get',
+		success:function(data){
+			if(data == 2){
+				alter("修改排序失败");
+			}
+		}
+	});
+}
+
+function selectCategory(c, category_id)
+{
+	var str = new Array();
+	$($('input[name^=ids]:checked')).each(function()
+	{
+		str.push($(this).val());
+	});
+	if (str.length > 0) 
+	{
+		$('#' + c + ' .selected_ids').val(str.join(','));
+		tb_show(null,'#TB_inline?height=150&width=400&inlineId=myOnPageContent',false)
+	} 
+	else 
+	{
+		alert('请选择要移动的软件');
+	}
+}
+
+var cid = "<?php echo $category_id?>";
+function batch_del_soft()
+{
+	var ids = '';
+	var erro = '';
+	var cfm_notice = '确定要批量删除';
+	$('input[name^=ids]:checked').each(function(){
+	    if($(this).prop("checked")){
+	      	var id_num = $(this).val();
+	      	ids += id_num+',';
+	    }
+	});
+	ids = ids.substr(0, ids.length-1);  
+	if(ids == ''){
+		alert('请选择软件');
+		return false;
+	}
+	if(confirm(cfm_notice)){
+		window.location.href="/index.php/Sj/Ladingmanage/batch_del_soft/cid/"+cid+"/ids/"+ids;
+	}
+}
+
+function batch_edit_soft()
+{
+	var ids = '';
+	var i = 0;
+	$('input[name^=ids]:checked').each(function(){
+	    if($(this).prop("checked")){
+	      	var id_num = $(this).val();
+	      	ids += id_num+',';
+	      	i++;
+	    }
+	});
+	ids = ids.substr(0, ids.length-1);  
+	if(ids == ''){
+		alert('请选择软件');
+		return false;
+	}
+	$("#ids").val(ids)
+	$("#count").text(i)
+	tb_show(null,'#TB_inline?height=200&width=400&inlineId=batch_edit_soft',false)
+}
+
+function bh_submit(){
+	var ids = $("#ids").val()
+	var start_tm = $("input[name=start_tm_batch]").val()
+	var end_tm = $("input[name=end_tm_batch]").val()
+	if(ids == "") {
+		alert('请先选择软件')
+		return false
+	}
+	if(start_tm == '' && end_tm == '') {
+		alert('未填写项不进行修改')
+		return false
+	}
+	$.ajax({ 
+		type:'post', 
+		url:'/index.php/Sj/Ladingmanage/batch_edit_soft', 
+		data:{ids:ids,start_tm:start_tm,end_tm:end_tm}, 
+		cache:false, 
+		dataType:'json', 
+		success:function(data){ 
+			if(data.code == 1){
+				alert("成功修改"+data.success+'个');
+				location.reload();
+			}else if(data.code == 2){
+				$("#success").text(data.success)
+				$("#fail").text(data.fail)
+				$("#fail_msg").text(data.msg)
+				tb_remove();
+				setTimeout(function(){
+					 tb_show(null,'#TB_inline?height=300&width=700&inlineId=show_result',false)
+			     },1000);
+			}else{
+				alert(data.msg)
+			}
+		} 
+	}); 
+}
+</script>
+	
+	
+</body>
+</html>

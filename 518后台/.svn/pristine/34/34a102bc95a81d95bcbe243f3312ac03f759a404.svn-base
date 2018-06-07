@@ -1,0 +1,132 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src="/index.php/Sj/Extent/pub_get_address?1"></script>
+<script>
+function checkPost()
+{
+	if (!g.checkValue()) {
+		alert('投放区域设置有问题');
+		return false;		
+	}
+	if ($('input[name=prob]').val() > 100) {
+		alert('概率不能大于100');
+		return false;
+	}
+	if ($('select[name=type]').val() == 0) {
+		alert('合作形式为必填项');
+		return false;
+	}
+	if ($('input[name=prob]').val() == '') {
+		alert('请填写概率');
+		return false;
+	}
+	
+	if ($('#start_at').val() == '') {
+		alert('请填写开始时间');
+		return false;
+	}
+	if ($('#end_at').val() == '') {
+		alert('请填写结束时间');
+		return false;
+	}
+	
+	if (Date.parse($('#start_at').val()) > Date.parse($('#end_at').val()) ) {
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+	
+	var enable = true;
+	$.getJSON('/index.php/Sj/Extent/index/act/checkProp/extent_id/<?php echo $soft['extent_id']?>/id/<?php echo $soft['id']?>', function(data){
+		var total = parseInt(data.total)
+		var max = parseInt(data.max)
+		var now = parseInt($('#prob').val());
+	
+		if (total + now > max) {
+			alert('概率总和不能大于区间(位置数*100)');
+			enable = false;
+		}
+	});
+	return enable;
+}
+</script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+<FORM method="POST" action="/index.php/Sj/Extent/edit_soft" onsubmit="return checkPost();">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td>包名</td>
+		<td><input name='package' type='text' value='<?php echo $soft['package'];?>'  readonly /></td>
+	</tr>
+	<tr class="sub_tr" id="depot_limit_tr">
+		<td>投 放 区 域：</td>
+		<td><span id="top_area"></span></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>显示概率</td>
+		<td><input id="prob" name='prob' type='text' value='<?php echo $soft['prob'];?>'/></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>开始时间</td>
+		<td><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+		<input id="start_at" name="start_at"
+			style="border: 0px none black; width: 100px;" value="<?php echo date('Y-m-d',$soft['start_at'])?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			onclick="return showCalendar('start_at', 'y-mm-dd');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>结束时间</td>
+		<td><span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="end_at" name="end_at"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="<?php echo date('Y-m-d',$soft['end_at'])?>" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			onclick="return showCalendar('end_at', 'y-mm-dd');"
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='type'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="2"> <input type='hidden' name="extent_id" value='<?php echo $soft['extent_id']?>'/> <input type='hidden' name="id" value='<?php echo $soft['id']?>'/><input type='submit'/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;"></td>
+	</tr>
+</table>
+</FORM>	
+<script>
+var g = new GoAddress();
+
+<?php 
+if(!$address_edit_able) {
+	echo "g.disabled = true;\n";
+}
+if(!empty($soft['location'])) {
+	$location = explode(';', $soft['location']);
+	foreach($location as $val){
+		list($p, $c) = explode(',', $val);
+		echo "g.addTopArea('$p', '$c');\n";
+	}
+} else {
+	echo "g.addTopArea();\n";
+}
+?>
+</script>

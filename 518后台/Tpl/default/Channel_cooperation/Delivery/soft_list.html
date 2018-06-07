@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>渠道软件管理</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script>
+function del_batch(url){
+	if(confirm("是否批量删除？"))
+	{
+		var chks=$("input[alt='del']:checked");
+		var ids="";
+		var i=0;
+		$(chks).each(function(){
+			ids+=','+this.value;
+			i++;
+		});
+		var biaoshi=0;
+		if(i==0){
+			alert('请选择要批量删除的软件');
+			return;
+		}
+		$('#tmp_form')[0].action = url;
+		$('#referer').val(location.href);
+		$('#ids').val(ids);
+		$('#tmp_form').submit();
+		if(window.ActiveXObject) window.event.returnValue = false;
+	}
+}
+
+function edit_batch_price(obj,url)
+{
+	var chks=$("input[alt='del']:checked");
+	var ids="";
+	var i=0;
+	$(chks).each(function(){
+		ids+=','+this.value;
+		i++;
+	});
+	var biaoshi=0;
+	if(i==0){
+		alert('请选择要批量修改单价的软件');
+		return false;
+	}
+	var newUrl = url+"&id="+ids;
+	tb_show("批量修改单价", newUrl, false);
+}
+</script>
+</head>
+
+<body>
+<div class="main_r">
+	<form action="__URL__/soft_list" method="get">
+	<table width="100%">
+		<tr>
+			<td>
+				渠道名称：
+				<select name="channel_id" id="channel_id" style="width:80px">
+					<?php 
+						$str .= "<option value='0'>全部</option>";
+						foreach($channel_list as $v) {
+						if( $v['id'] == $channel_id ) {
+							$checked = "selected";
+						}else {
+							$checked = "";
+						}
+						$str .= "<option ".$checked." value='".$v['id']."' >".$v['name']."</option>";
+						}
+						echo $str;
+					?>
+				</select>
+			</td>
+			<td>
+				软件名称：<input type="text" class="search_item_text" style="width:150px" name="soft_name" id="soft_name" value="<?php echo $soft_name?>">
+			</td>
+			<td>
+				软件包名：<input type="text" class="search_item_text" style="width:150px" name="package" id="package" value="<?php echo $package?>">
+			</td>
+			<td>投放时间：<span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 154px;">
+		<input id="start_at2" name="start_time"
+			style="border: 0px none black; width: 130px;" value="<?php echo $start_time?$start_time:''?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span> 
+			至 <span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 154px;">
+		<input id="end_at2" name="end_time"
+			style="border: 0px none black; width: 130px;" value="<?php echo $end_time?$end_time:''?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span>
+			<input type="submit" value="搜索" style="width:100px;" />
+			</td>
+		</tr>
+	</table>
+	</form>
+	<table width="100%">
+		<tr>
+			<td style="width:10px">
+			<a class="thickbox" href="__URL__/soft_add?"><button class="btn btn-sm btn-default yahei" style="margin:10px;">添加软件</button></a>
+			<a class="thickbox" href="__URL__/soft_import?"><button class="btn btn-sm btn-default yahei" style="margin:10px;">批量导入软件</button></a>
+			<a href="/Public/sample10.csv" style="color:blue;">下载模板</a>
+			<?php if($time_type == 'lt') :?>
+			<a onclick="edit_batch_price(this,'__URL__/soft_price_batch?')"><button class="btn btn-sm btn-default yahei" style="margin:10px;" >批量修改单价</button></a>
+			<?php endif;?>
+			</td>
+		</tr>
+	</table>
+
+	<div class="currentNav">
+		<div class="currentNav_r">
+		<a class="recBtn_bg<?php if ($time_type == 'gt'):?> currentSel<?php endif;?>" href="__URL__/soft_list/time_type/gt<?php echo $soft_name?'/soft_name/'.$soft_name:''?><?php echo $package?'/package/'.$package:''?><?php echo $channel_id?'/channel_id/'.$channel_id:''?> ">过期</a>
+		<a class="recBtn_bg<?php if ($time_type == 'eq'):?> currentSel<?php endif;?>" href="__URL__/soft_list/time_type/eq<?php echo $soft_name?'/soft_name/'.$soft_name:''?><?php echo $package?'/package/'.$package:''?><?php echo $channel_id?'/channel_id/'.$channel_id:''?> ">当前</a>
+		<a class="recBtn_bg<?php if ($time_type == 'lt'):?> currentSel<?php endif;?>" href="__URL__/soft_list/time_type/lt<?php echo $soft_name?'/soft_name/'.$soft_name:''?><?php echo $package?'/package/'.$package:''?><?php echo $channel_id?'/channel_id/'.$channel_id:''?> ">未开始</a>
+		</div>
+	</div>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="softlist_tab">
+		<thead>
+			<tr>
+				<td width="3%"><input type="checkbox" name="soft_allSelect" onclick="$('input[name^=ids]').attr('checked', $(this).attr('checked')=='checked')"  /></td>
+				<td width="8%">渠道名称</td>
+				<td width="13%">软件名称</td>
+				<td width="7%">软件包名</td>
+				<td width="5%">单价</td>
+				<td width="11%">banner图</td>
+				<td width="13%">简介</td>
+				<td width="10%">投放日期</td>
+				<td width="13%">更新时间</td>
+				<td width="7%">操作人</td>
+				<td width="10%">操作</td>
+			</tr>
+		</thead>
+		<tbody>
+<?php foreach($list as $val) :?>
+	<tr>
+		<td><input name="ids[]" value="<?php echo $val['id'] ?>" type="checkbox" alt="del"/></td>
+		<td><?php echo $val['channel_name'] ?></td>
+		<td><?php echo $val['softname'] ?></td>
+		<td><?php echo $val['package'] ?></td>
+		<td><?php echo number_format($val['price'],2) ?></td>
+		<td><?php if($val['banner']){echo "<img src='".$IMGATT_HOST.$val['banner']."' width='100px' height='50px' />";} ?></td>
+		<td><?php echo $val['introduce'] ?></td>
+		<td><?php echo $val['tf_date'] ?></td>
+		<td><?php echo date('Y-m-d H:i:s', $val['update_tm']); ?></td>
+		<td><?php echo $val['os_user'] ?></td>
+		
+		<?php if( $time_type == 'lt' ) :?>
+			<td>
+				<a href="__URL__/soft_edit?id=<?php echo $val['id']?>" class="thickbox">编辑</a>  |  
+				<a href="__URL__/soft_delete?id=<?php echo $val['id']?>" onclick="javascript:return checkit()">删除</a>
+			</td>
+		<?php elseif( $time_type == 'eq' ) :?>
+			<td>
+				<a style="color:blue" href="__URL__/soft_delete/type/1/id/<?php echo $val['id']?>"  onclick="javascript:return checkit()">结束</a>
+				|
+				<a style="color:blue" href="__URL__/soft_update?id=<?php echo $val['id']?>" class="thickbox">更新</a>
+			</td>
+		<?php elseif( $time_type == 'gt' ) :?>
+			<td>
+			<a href='javascript:;' style="color: #d6d6d6">已结束</a>
+			</td>
+		<?php else :?>
+			<?php if( $val['tf_date'] > date('Y-m-d', time()) ) :?>
+				<td>
+					<a href="__URL__/soft_edit?id=<?php echo $val['id']?>" class="thickbox">编辑</a>  |  
+					<a href="__URL__/soft_delete?id=<?php echo $val['id']?>" onclick="javascript:return checkit()">删除</a>
+				</td>
+			<?php elseif( $val['tf_date'] <= date('Y-m-d', time()) && $val['type'] == 0 ) :?>
+				<td>
+					<a style="color:blue" href="__URL__/soft_delete/type/1/id/<?php echo $val['id']?>"  onclick="javascript:return checkit()">结束</a>
+					|
+				<a style="color:blue" href="__URL__/soft_update?id=<?php echo $val['id']?>" class="thickbox">更新</a>
+				</td>
+			<?php elseif( $val['type'] == 1 ) :?>
+				<td>
+					<a href='javascript:;' style="color: #d6d6d6">已结束</a>
+				</td>
+			<?php endif;?>
+		<?php endif;?>
+	</tr>
+<?php endforeach;?>
+	
+	<?php if( $time_type == 'lt' ) :?>
+	<tr class="softbtn">
+		<td colspan="9">
+			<div class="soft_all">
+				<input type="button" value='批量删除' style="width:100px;" onclick="del_batch('__URL__/soft_delete?')"/>
+			</div>
+		</td>
+	</tr>
+	<?php endif;?>
+
+		</tbody>
+	</table>
+{$page}
+</div>
+<!-- 删除 -->
+<form method='post' action='' id='tmp_form'>
+<input type='hidden' name='referer' id='referer' value='' />
+<input type='hidden' name='id' id='ids' value='' />
+</form>
+</body>
+</html>

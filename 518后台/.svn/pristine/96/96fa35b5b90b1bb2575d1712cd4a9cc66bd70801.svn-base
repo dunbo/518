@@ -1,0 +1,177 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<style type="text/css">
+.fixlong {
+  table-layout: fixed;
+}
+.fixlong td {
+  word-break: break-all;
+}
+.intb td {
+border-right:none;
+border-bottom: none;
+}
+</style>
+{//时间插件开始}
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<div id="append_parent"></div>
+<div class="main" >
+<div class="content">
+<center>
+<table width="100%"  border="0" cellpadding="0" cellspacing="0" class="tb">
+	<tr height="35">
+		<td align="center" <?php if($status==1) { ?>style="background:#FFCC66"<?php } ?>><a href="/index.php/Dev/MonitoringSoft/monitor_white"><font style="color:#000; font-weight:bold">可疑IP列表</font></a></td>
+<!-- 		<td align="center" <?php if($status==3) { ?>style="background:#FFCC66"<?php } ?>><a href="/index.php/Dev/MonitoringSoft/monitor_black"><font style="color:#000; font-weight:bold">IP黑名单列表</font></a></td> --> 
+		<td align="center" <?php if($status==4) { ?>style="background:#FFCC66"<?php } ?>><a href="/index.php/Dev/MonitoringSoft/monitor_config"><font style="color:#000; font-weight:bold">IP规则配置</font></a></td>
+	</tr>
+</table>
+<form>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+  <tr>
+    <td>适用范围:</td><td colspan="2">&nbsp&nbsp<label><input type="checkbox" name="type" value="1">&nbsp软件提交</label>&nbsp&nbsp&nbsp&nbsp<label><input type="checkbox" name="type" value="2">&nbsp注册提交</label></td>
+  </tr>
+  <tr>
+    <td colspan="3">提交上限>=：<input type="text" id="day_num_soft" name="day_num_soft" />（个/天）</td>
+    
+  </tr>
+   <tr>
+    <td colspan="3">提交频次>=：<input type="text" id="num_soft" name="num_soft" />个<input type="text" id="second_num_soft" name="second_num_soft" />秒</td>
+    
+  </tr>
+  <tr>
+    <td colspan="3" align="center" style="height:35px;"><input type="button" value="添加" id="sub_soft" />&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<input type="reset" value="重置" />
+    </td>
+  </tr>
+</table>
+</form>
+<br />
+<div style="float:left">{$count}条记录</div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+<thead>
+<tr>
+<td bgcolor="#e3e2fe" align="center" height="30"><font style="color:#000; font-weight:bold">序号</font></td>
+<td bgcolor="#e3e2fe" align="center" height="30"><font style="color:#000; font-weight:bold">提交上限（个/天）</font></td>
+<td bgcolor="#e3e2fe" align="center" height="30"><font style="color:#000; font-weight:bold">提交频次</font></td>
+<td bgcolor="#e3e2fe" align="center" height="30"><font style="color:#000; font-weight:bold">适用范围</font></td>
+<td bgcolor="#e3e2fe" align="center" height="30"><font style="color:#000; font-weight:bold">规则启用时间</font></td>
+<td bgcolor="#e3e2fe" align="center" height="30"><font style="color:#000; font-weight:bold">状态</font></td>
+<td bgcolor="#e3e2fe" align="center" height="30"><font style="color:#000; font-weight:bold">操作</font></td>
+</tr>
+</thead>
+<tbody>
+<?php $rank=1;?>
+<volist name="list" id="vo">
+<tr>
+<td><?php echo $rank?></td>
+<td>{$vo.day_num}</td> 
+<td>{$vo.num}个/{$vo.second}秒</td> 
+<td>
+<if condition="($vo.type eq 1)"> 
+软件提交
+<elseif condition="$vo.type eq 2"/>
+注册提交
+<else />
+评论提交
+</if>
+</td> 
+<td>{$vo.add_time|date="Y-m-d H:i:s",###}</td>
+<td>
+<if condition="$vo.status eq 1 ">
+<font color="#66CC66">已启用</font>
+<else /> 已停用
+ </if>
+</td>
+<td align="center"><if condition="$vo.status eq 1 ">
+<a href="javascript:;" rel="{$vo.id}" status="{$vo.status}" types="{$vo.type}" class="off_on">[停用]</font>
+<else /> <a href="javascript:;" rel="{$vo.id}" status="{$vo.status}" types="1" class="off_on">[启用]</font>
+<a href="/index.php/Dev/MonitoringSoft/monitor_config_del/id/{$vo.id}" >[删除]</a>
+ </if>
+</td>  
+<?php $rank++;?>    
+  </tr>
+</volist>
+</tbody>
+</table>
+</center>
+</div>
+</div>
+<script type="text/javascript">
+$('.off_on').click(function(){
+	var status = $.trim($(this).attr('status'));
+	var msg = status==1?'确定要停用吗？':'确定要启用吗？';
+	if(window.confirm(msg)){
+		var id = $.trim($(this).attr('rel'));
+		var types = $.trim($(this).attr('types'));
+		var url = '__URL__/monitor_config_oper';
+	    var data = '&status='+status+'&id='+id+'&types='+types;
+	    $.ajax({
+			url: url,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function(data){
+					if(!!data && data.success){ 
+						alert(data.msg);
+						setTimeout(function(){
+							window.location.reload();
+						},800);
+					}else{
+						alert(data.msg);
+						setTimeout(function(){
+							window.location.reload();
+						},800);
+					}
+			},
+		    error: function(){
+		    	
+		    	      alert('对不起，服务器错误，请联系管理员！');
+		    }
+	     });
+	}
+});
+$('#sub_soft').click(function(){
+	var day_num = $.trim($('#day_num_soft').val());
+	var time_num = $.trim($('#num_soft').val());
+	var second_num = $.trim($('#second_num_soft').val());
+	var soft_num = $.trim($('#soft_num_soft').val());
+	var type = '';
+	$('input[name=type]:checked').each(function(){
+		type+=$(this).val()+',';
+	});
+	add_data(type,day_num,time_num,second_num,soft_num);
+});
+function add_data(type,day_num,time_num,second_num,soft_num){
+	if(window.confirm('确定要添加吗？')){
+	var url = '__URL__/monitor_config_add';
+    var data = '&type='+type+'&day_num='+day_num+'&num='+time_num+'&soft_num='+soft_num+'&second='+second_num;
+    $.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		success: function(data){
+				if(!!data && data.success){ 
+					alert(data.msg);
+					setTimeout(function(){
+						window.location.reload();
+					},800);
+				}else{
+					alert(data.msg);
+				}
+		},
+	    error: function(){
+	    	
+	    	      alert('对不起，服务器错误，请联系管理员！');
+	    }
+     });
+	}
+}
+
+</script>
+</body>
+</html>

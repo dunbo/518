@@ -1,0 +1,564 @@
+{// 加载头部公共文件 }
+<include file="../Public/header" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+
+<link rel="stylesheet" href="__PUBLIC__/school/css/common.css" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+
+<script>
+function setOnlySearch(radio, softid)
+{
+	$.ajax({
+		url: '__URL__/setOnlySearch/softid/' + softid + '/value/' + radio.value,
+		type: 'GET',
+		dataType: 'json',
+		success: function(d){
+			alert(d.info)
+		}
+	});
+}
+function openw(softid){
+	//alert("openw_"+softid);
+	$("#openw_"+softid).zxxbox();  
+}
+function setOfficial(radio,packagename)
+{
+	var stat = radio.value;
+	var cls = radio.className;
+	$.ajax({
+		url: '__URL__/setOfficial/package/' + encodeURI(packagename) + '/value/' + stat,
+		type: 'GET',
+		dataType: 'json',
+		success: function(d){
+			$("." + cls).each(function(){
+				if (this.value == stat)
+					this.checked = true;
+			});
+			alert(d.info);
+			location.reload();
+		}
+	});
+}
+
+
+function setOfficials(radio,softid,packagename)
+{	
+	var start_tm = document.getElementById("begintime_"+softid).value;
+	var end_tm = document.getElementById("endtime_"+softid).value;
+	if ( start_tm == '') {
+		alert('请填写开始时间');
+		return false;
+	}
+	if (end_tm == '') {
+		alert('请填写结束时间');
+		return false;
+	}
+	
+	if (start_tm > end_tm ) {
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+	document.getElementById("openw_"+softid).style.display = "none";
+	document.getElementById("wrapOut").style.display = "none";
+	//alert(".official_" + softid + packagename);
+	//alert(radio)
+	if(radio == 1){
+		var stat = 1;
+		var cls = radio.className;
+	}else if(radio == 2){
+		var stat = 2;
+		var cls = radio.className;
+	}
+	$.ajax({
+		url: '__URL__/setOfficial/package/' + encodeURI(packagename) + '/value/' + stat + '/start_time/'+start_tm +'/terminal_time/'+ end_tm,
+		type: 'GET',
+		dataType: 'json',
+		success: function(d){			
+			alert(d.info);
+			location.reload();
+		}
+	});
+}
+
+
+function postDeny(softid)
+{
+	var denymsg = document.getElementById(softid + '_txt').value;
+	if(denymsg == ''||denymsg==null){
+		alert('请填写原因');
+		return false;
+	}
+	disNoneDiv(softid);
+	$.ajax({
+		type: 'GET',
+		url: "__URL__/soft_undercarriage/softid/" + softid + "/deny_msg/" +denymsg,
+		dataType: 'json',
+		success:function(res){
+			if(res.status == 1){
+				var newid = '#tr' + softid;
+				var aid = '#tr' + softid + ' a';
+				var iid = '#tr' + softid + ' input';
+				$(newid + ' td').removeAttr('bgcolor');
+				$(newid).css({ color: "#bcbcbc", background: "#ececec" });
+				$(aid).css('color', '#bcbcbc');
+				$(aid).removeAttr('href');
+				$(aid).removeAttr('onclick');
+				$(iid).attr({disabled:'disabled', name:'disabled'});
+				$(iid).attr('checked',false);
+			} else {
+				alert(res.info);
+			}
+		}
+	});
+	//window.location = "__URL__/soft_deny/softid/" + softid+"/denymsg/"+denymsg+"/type/<?php echo $type;?>/p/<?php echo $p; ?>/";
+	return false;
+}
+</script>
+<style type="text/css">
+<!--
+body,td,th {
+	font-size: 12px;
+
+}
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666; table-layout:fixed;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666; word-wrap:break-word;}
+.reject{width:350px; height:75px; padding:0 9px; background:#fff; position:absolute; left:-385px; top:-51px; border:1px solid #000}
+.reject p{height:30px; padding:0; margin:0; font-size:14px; line-height:32px; text-align:left; overflow:hidden;}
+.reject form input{width:340px; height:30px; background:#e9ffe3; border:1px solid #000; line-height:30px;}
+.arrow{width:24px; height:19px; background:url('__PUBLIC__/images/arrow_bg.png') no-repeat top left; position:absolute; top:16px; left:-26px;}
+.closebtn{width:14px; height:14px; background:url('__PUBLIC__/images/close.gif') no-repeat; cursor:pointer; position:absolute; right:5px; top:5px;}
+-->
+</style>
+<div class="main" >
+<div class="content">
+<center>
+<form id="upload" method='get' action="__URL__/soft_list" >
+<table width="100%" height="89" border="0" cellpadding="0" cellspacing="0" class="tb">
+	<tr>
+		<td colspan="7">软件列表-搜索软件：</td>
+	</tr>
+	<tr>
+		<td width="30%" align="center" >ID：</td>
+		<td width="80" ><input type="text" name="softid" id="softid" value="{$softid}"/></td>
+		<td width="30%" align="center">软件名称：</td>
+		<td width="80"><input type="text" name="softname" id="softname" value="{$softname}"/></td>
+		<td width="30%" align="center">软件包名</td>
+		<td width="80"><input  type="text" name="package" id="package" value="{$package}"/></td>
+		<td width="80" align="center" rowspan="3"><input type="submit" name="button" id="button" value="搜索" /></td>
+	</tr>
+	<tr>
+		<td align="center" width="30%">软件类别：</td>
+		<td width="80px" >{$conflist}</td>
+		<td align="center">运营商隐藏：</td>
+		<td>
+			<select name="operatorhide" id="operatorhide">
+				<option value="999" <if condition="$operatorhide eq 999">selected</if>>全部</option>
+				<option value="0" <if condition="$operatorhide eq 0">selected</if>>不隐藏</option>
+				<volist name='operatinglist' id='operatingvo'>
+					<option value="{$operatingvo.oid}">{$operatingvo.mname}</option>
+				</volist>
+			</select>
+		</td>
+		<td align="center">开发者名称:</td>
+		<td><input size="19" type="text" name="dev_name" id="dev_name" value="{$dev_name}"/></td>
+	</tr>
+	<tr>
+		<td align="center">软件简介：</td>
+		<td><input type="text" name="softinfo" id="softinfo" value="{$softinfo}"/></td>
+		<td align="center">仅搜索显示：</td>
+		<td>
+			<select name="only_search" id="only_search">
+				<option value="">选择</option>
+				<option value="y" <if condition="$only_search eq 'y'">selected</if>>是</option>
+				<option value="n" <if condition="$only_search eq 'n'">selected</if>>否</option>
+			</select>
+		</td>
+		<td align="center">广告选择</td>
+		<td>
+			<select name="advertisement" id="advertisement">
+				<option value="0" selected>请选择...</option>
+				<?php
+					foreach($adlist as $key => $info){
+						$str .= "<option value='".$key."'";
+							if($advertisement == $key ){
+								$str .= "selected";
+							}
+						$str .=">".$info."</option>";
+					}
+					echo $str;
+				?>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td align="center">排序字段：</td>
+		<td><select name="field">
+			<option value="">请选择...</option>
+			<option value="total_downloaded" <if condition="$field eq 'total_downloaded'">selected</if> >下载量</option>
+			<option value="last_refresh" <if condition="$field eq 'last_refresh'">selected</if>>最后更新时间</option>
+		</select></td>
+		<td align="center">排序方式：</td><td><select name="order">
+			<option value="">请选择...</option>
+			<option value="desc" <if condition="$order eq 'desc'">selected</if>>降序</option>
+			<option value="asc" <if condition="$order eq 'asc'">selected</if>>升序</option>
+		</select></td>
+		<td align="center" colspan="1">软件状态</td>
+		<td>
+			<select name="soft_type">
+				<option value="-1" <?php if($soft_type == '-1'){ ?>selected<?php }?> >请选择...</option>
+				<option value="0" <?php if($soft_type == 0){ ?>selected<?php } ?> >普通</option>
+				<?php foreach($list as $key => $val){ ?>
+				<option value="<?php echo $val['id'];?>" <?php if($soft_type == $val['id']){ ?>selected<?php } ?> ><?php echo $val['name'];?></option>
+				<?php } ?>
+			</select>
+		</td>
+	</tr>
+	<tr>
+<!-- 		<td colspan="1">开始时间:</td><td><input id="begintime" name="begintime"
+				style="cursor: hand; width: 100px; border: none 0px black;"
+				value="{$begintime}" size="15" type="text"><img
+				src="/Public/js/calendar.gif"
+				onclick="return showCalendar('begintime', 'y-m-d');"
+				style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+				height="15px"></td>
+		<td colspan="1">结束时间:</td><td><input id="endtime" name="endtime"
+				style="border: 0px none black; width: 100px;" value="{$endtime}"
+				size="15" type="text"><img src="/Public/js/calendar.gif"
+				onclick="return showCalendar('endtime', 'y-m-d');"
+				style="margin: 1px;" width="16px" align="absmiddle" height="15px"></td> -->
+		<td align="center">开发者邮箱</td><td><input type="dever_email" name="dever_email" value="{$dever_email}">
+		</td>
+		<td align="center">官方认证</td>
+		<td>
+			<select name="Official" id="Official ">
+				<option value="">选择</option>
+				<option value="1" <if condition="$Official  eq '1'">selected</if>>是</option>
+				<option value="2" <if condition="$Official  eq '2'">selected</if>>否</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td align="center">平台:</td>
+		<td>
+			<select name="terrace">
+				<option value="all" <?php if($terrace == 'all'){ ?>selected<?php } ?>>全部</option>
+				<option value="all" <?php if($terrace == 'all'){ ?>selected<?php } ?>>手机</option>
+				<option value="1" <?php if($terrace == '1'){ ?>selected<?php } ?>>TV</option>
+			</select>
+		</td>
+		<td><a href="__APP__/Sj/Soft/exportExcel">导出列表</a></td>
+	</tr>
+</table>
+</form>
+<br />
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+	<tr>
+		<th>选?</th>
+		<th>ID</th>
+		<th>软件名称</th>
+		<th>版本</th>
+		<th>abi</th>
+		<th>软件类别</th>
+		<th>软件状态</th>
+		<th>开发者信息</th>
+		<th>开发者类别</th>
+		<th>下载量</th>
+		<th>评分</th>
+		<th>介绍</th>
+		<th>关键词</th>
+		<th>备注</th>
+		<th>官方认证</th>
+		<th>广告</th>
+		<th width="2%">广告1</th>
+		<th width="5%">平台</th>
+		<th>权限</th>
+		<th>运营商</th>
+		<th>最后更新时间</th>
+		<th bgcolor="#6666FF" width="80px">审核操作</th>
+		<th bgcolor="#BAC5D9">软件编辑</th>
+		<th >上传归属</th>
+		<th >只在搜索时显示</th>
+		<th >查看软件历史</th>
+		<th >安全扫描结果</th>
+	</tr>
+
+	<volist name='softlist' id='softvo'>
+		<tr id='tr{$softvo.softid}' <?php if(in_array(strip_tags($softvo['package']),$soft_white)) {echo "style='background:yellow;'";} ?>>
+			<td><input type="checkbox" name="id[]" value="{$softvo.softid}" /></td>
+			<td>{$softvo.softid}<br /><img src="<?php echo IMGATT_HOST;?>{$softvo.iconurl}" width="32" height="32" alt="图标" /></td>
+			<td><a target='_blank' href='http://www.anzhi.com/soft_{$softvo.softid}.html'>{$softvo.softname}</a><br />{$softvo.package|default='&nbsp;'}</td>
+			<td>{$softvo.version|default='&nbsp;'}</td>
+			<td><volist name="softvo.abis" id="abi">{$abi}</volist>&nbsp;</td>
+			<td>{$softvo.category|default='&nbsp;'}</td>
+		
+			<td><?php if($softvo['type'] == 0){echo '普通';}else{ echo $softvo['type_name'];}?>&nbsp;</td>
+			<td>
+				<if condition="$softvo.auth eq 0"><span  style="color:red;" >[未授权]</span>
+				<else/><span  style="color:green;" >[已授权]</span>
+				</if>
+				<if condition="$softvo.dev_id eq 0"><span  style="color:red;" >[未认领]</span>
+				<else/><span  style="color:green;" >[已认领]</span><a href="__URL__/soft_update_claim/softid/{$softvo.softid}{$p}" onclick="javascript:return checkit()">[撤销认领]</a><a target='_blank' href='__APP__/Admin/User/userlists/dev_id/{$softvo.dev_id}'>
+				</if>
+				{$softvo.dev_name}</a><br />{$softvo.dever_email|default='&nbsp;'}
+			</td>
+			<td><?php if($softvo['dev_type'] == 0 && $softvo['dev_type'] != '') {echo '公司';} elseif($softvo['dev_type'] == 1){echo '个人';} elseif($softvo['dev_type'] == 2){echo '团队';} else{ echo "&nbsp";} ?><?php if($softvo['approve'] == 'Y') { ?><span style="color: red">(已认证)</span><?php } ?></td>
+			<td>总下载量{$softvo.total_downloaded}<br />扣量{$softvo.total_downloaded_detain}<br />
+			增量{$softvo.total_downloaded_add}<br />剩余量{$softvo.detain}</td>
+			<td>{$softvo.score|default=''|default='&nbsp;'}</td>
+			<td valign="top">
+			<div style="WIDTH:100%; HEIGHT:150px; overflow-x: auto; overflow-y: auto; scrollbar-face-color: #FDDEE8; scrollbar-shadow-color: #FDDEE8; scrollbar-highlight-color: #ffffff; scrollbar-3dlight-color: #FDCFDD; scrollbar-darkshadow-color: #FDCFDD; scrollbar-track-color: FFF6F9; scrollbar-arrow-color: #FEA6C0">
+			{$softvo.intro|default=''|default='&nbsp;'}
+			</div>
+			</td>
+			<td><textarea rows='10' style="width:98%; height:100%; padding:0; margin:0" onblur="saveTage({$softvo.softid}, this.value);">{$softvo.tags}</textarea></td>
+			<td>{$softvo.note|default='&nbsp;'}</td>
+			<td>
+				<input onclick="openw({$softvo.softid})" class="{$softvo.packageclass}" name="official_{$softvo.softid}" value="1" type="radio" <if condition="$Off eq 1 or $softvo.official eq 1" >checked="true"</if>/>是<input onclick="setOfficial(this, '{$softvo.package}')" class="{$softvo.packageclass}" name="official_{$softvo.softid}" value="2" type="radio" <if condition="$softvo.official eq 2 or $Off eq 2">checked="true"</if>/>否
+			</td>
+	<div id="openw_{$softvo.softid}" style="padding:50px; display:none;">
+		<h2>认证为官方</h2>
+		<p><font color="red">注：官方认证若有时间限制，请设置具体时间，若无时间限制，按默认时间</font></p>
+		开始时间:<input id="begintime_{$softvo.softid}" name="begintime_{$softvo.softid}"
+				style="cursor: hand; width: 100px; border: none 0px black;"
+				value="{$softvo.start_time}" size="15" type="text"><img
+				src="/Public/js/calendar.gif"
+				onclick="return showCalendar('begintime_{$softvo.softid}', 'y-m-d');"
+				style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+				height="15px"></br>
+		结束时间:<input id="endtime_{$softvo.softid}" name="endtime_{$softvo.softid}"
+				style="border: 0px none black; width: 100px;" value="{$softvo.terminal_time}"
+				size="15" type="text"><img src="/Public/js/calendar.gif"
+				onclick="return showCalendar('endtime_{$softvo.softid}', 'y-m-d');"
+				style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		<p><button id="cancelBtn" onclick="setOfficials(1,'{$softvo.softid}','{$softvo.package}');" >提交</button></p>	
+	</div>
+			<td><span style="color:red;">{$softvo.advertisement|default='&nbsp;'|default=''}</span></td>
+			<td valign="top">
+			<div style="WIDTH:100%; HEIGHT:150px; overflow-x: auto; overflow-y: auto; scrollbar-face-color: #FDDEE8; scrollbar-shadow-color: #FDDEE8; scrollbar-highlight-color: #ffffff; scrollbar-3dlight-color: #FDCFDD; scrollbar-darkshadow-color: #FDCFDD; scrollbar-track-color: FFF6F9; scrollbar-arrow-color: #FEA6C0">
+			<?php if(!empty($softvo['scan'])){ ?>{$softvo.scan|default='&nbsp;'}<br />(来自安全管家)<?php } if(!empty($softvo['scan1'])){ ?> {$softvo.scan1|default='&nbsp;'}<?php } ?>&nbsp;
+			</div>
+			</td>
+			<td><font color="red">手机</font><br /><?php if($softvo['terrace_status'] == 1 ){ ?><font color="red">TV</font><?php } ?></td>
+			<td><font color="red">{$softvo.permission_desc|default='&nbsp;'}</font></td>
+			<td valign="top">
+			<div style="WIDTH:100%; HEIGHT:150px; overflow-x: auto; overflow-y: auto; scrollbar-face-color: #FDDEE8; scrollbar-shadow-color: #FDDEE8; scrollbar-highlight-color: #ffffff; scrollbar-3dlight-color: #FDCFDD; scrollbar-darkshadow-color: #FDCFDD; scrollbar-track-color: FFF6F9; scrollbar-arrow-color: #FEA6C0">
+			{$softvo.operatorhides|default=''|default='&nbsp;'}
+			</div>
+			</td>
+			<td>{$softvo.last_refresh|date='Y-m-d H:i:s',###|default='&nbsp;'}</td>
+			<td bgcolor="#6666FF" style="position:relative; display:block; height:55px; text-align:center; vertical-align:top"><a href='javascript:void(0)' onclick="softback('__URL__/soft_back/softid/{$softvo.softid}', 'tr{$softvo.softid}')">软件撤销</a><br /><a href="javascript::void(0);" onclick="javascript:disDeny({$softvo.softid})">软件下架</a>
+				<div id="{$softvo.softid}" style="display:none">
+					<div class="reject">
+						<p>下架原因：(输入原因直接回车)</p>
+						<form action="javascript::void(0)" method="get" onsubmit="return postDeny({$softvo.softid});">
+							<input type="text" id="{$softvo.softid}_txt" value="" name="{$softvo.softid}_txt" onkeydown="return checkKey(this);">
+						</form>
+						<div class="closebtn" onclick="disNoneDiv({$softvo.softid})"></div>
+					</div>
+					<div class="arrow"></div>
+				</div><br />
+			<a href="__URL__/soft_terrace/softid/{$softvo.softid}/width/100/height/100" class="thickbox">TV认证</a>
+			</td>
+			<td width="6%" bgcolor="#BAC5D9"><a href='__URL__/soft_edit/softid/{$softvo.softid}'>编辑</a>/<br /><a href='__URL__/soft_update/softid/{$softvo.softid}'>更新</a></td>
+			<td><if condition="$softvo.update_type eq 0">开发者</if><if condition="$softvo.update_type eq 1">开发者</if><if condition="$softvo.update_type eq 2">开发者</if><if condition="$softvo.update_type eq 3">开发者</if><if condition="$softvo.update_type eq 4">开发者</if></td>
+			<td>
+				<input onclick="setOnlySearch(this, {$softvo.softid})" name="only_search{$softvo.softid}" value="1" type="radio" <if condition="$softvo.only_search eq 1">checked="true"</if>/>是<input onclick="setOnlySearch(this, {$softvo.softid})" name="only_search{$softvo.softid}" value="0" type="radio" <if condition="$softvo.only_search eq 0">checked="true"</if>/>否
+			</td>
+			<td>
+				<a href="__URL__/soft_history_view/package/{$softvo.package}/p/{$p}" title="查看软件历史">查看软件历史</a>
+			</td>
+			<td valign="top">
+			<div style="WIDTH:100%; HEIGHT:150px; overflow-x: auto; overflow-y: auto; scrollbar-face-color: #FDDEE8; scrollbar-shadow-color: #FDDEE8; scrollbar-highlight-color: #ffffff; scrollbar-3dlight-color: #FDCFDD; scrollbar-darkshadow-color: #FDCFDD; scrollbar-track-color: FFF6F9; scrollbar-arrow-color: #FEA6C0">
+				<volist name="softvo.scan_result_list" id="scan_res">
+					<if condition="$scan_res.provider eq 1">
+							1.QQ安全管家<br/>
+							扫描时间：{$scan_res.time_req|date='Y/m/d H:i:s',###|default='&nbsp;'}<br/>
+							<if condition="$scan_res.time_rep neq 0 ">
+								反馈时间：{$scan_res.time_rep|date='Y/m/d H:i:s',###}<br/>
+							</if>
+							<if condition="$scan_res.time_rep eq 0 ">
+								反馈时间：暂无反馈<br/>
+							</if>
+					</if>
+					<if condition="$scan_res.provider eq 2">
+							  2.安全管家<br/>
+							  扫描时间：{$scan_res.time_req|date='Y/m/d H:i:s',###|default='&nbsp;'}<br/>
+							  <if condition="$scan_res.time_rep neq 0 ">
+							  反馈时间：{$scan_res.time_rep|date='Y/m/d H:i:s',###}<br/>
+							  </if>
+							  <if condition="$scan_res.time_rep eq 0 ">
+							  反馈时间：暂无反馈<br/>
+							  </if>
+					</if>
+					<if condition="$scan_res.provider eq 3">
+							  3.网秦<br/>
+							  扫描时间：{$scan_res.time_req|date='Y/m/d H:i:s',###|default='&nbsp;'}<br/>
+							  <if condition="$scan_res.time_rep neq 0 ">
+							  反馈时间：{$scan_res.time_rep|date='Y/m/d H:i:s',###}<br/>
+							  </if>
+							  <if condition="$scan_res.time_rep eq 0 ">
+							  反馈时间：暂无反馈<br/>
+							  </if>
+					</if>
+					<if condition="$scan_res.provider eq 4">
+							  4.金山<br/>
+							  扫描时间：{$scan_res.time_req|date='Y/m/d H:i:s',###|default='&nbsp;'}<br/>
+							  <if condition="$scan_res.time_rep neq 0 ">
+							  反馈时间：{$scan_res.time_rep|date='Y/m/d H:i:s',###}<br/>
+							  </if>
+							  <if condition="$scan_res.time_rep eq 0 ">
+							  反馈时间：暂无反馈<br/>
+							  </if>
+					</if>
+					<if condition="$scan_res.provider eq 5">
+							  5.360<br/>
+							  扫描时间：{$scan_res.time_req|date='Y/m/d H:i:s',###|default='&nbsp;'}<br/>
+							  <if condition="$scan_res.time_rep neq 0 ">
+							  反馈时间：{$scan_res.time_rep|date='Y/m/d H:i:s',###}<br/>
+							  </if>
+							  <if condition="$scan_res.time_rep eq 0 ">
+							  反馈时间：暂无反馈<br/>
+							  </if>
+					</if>
+				</volist>
+				&nbsp;
+				</div>
+			</td>
+		</tr>
+	</volist>
+	<tr>
+		<td colspan="17"><input type="button" id="selectAll" name="selectAll" value="全选"  onclick="SelectAll(this)" /> |<!-- <input type="button" id="delete" value="批量下架" onclick="" />| -->批量下架原因：<input id="msg" type="text" name="allde" value="" /><input type="button" value="下架提交" onclick="msg_Lotdo();" />
+		</td>
+	</tr>
+</table>
+{$page}
+</center>
+</div>
+</div>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+
+<script>
+function disDeny(id){
+	document.getElementById(id).style.display="block";
+	document.getElementById(id+"_txt").focus();
+}
+function disNoneDiv(id){
+	document.getElementById(id).style.display="none";
+}
+function checkKey(obj){
+	var oEvent = arguments.callee.caller.arguments[0] || event;
+	 if(oEvent.keyCode==13){
+			  var val = obj.value
+				if(val.length == 0 || trim(val) == ''||trim(val)==null){
+					alert("请您输入下架原因！！");
+					return false;
+				 }
+		}
+}
+function msg_Lotdo(){
+	var msg = $("#msg").val();
+	if(trim(msg) == "" || trim(msg) == null || trim(msg).length == 0){
+		alert("请您输入下架原因！！");
+		return false;
+	}
+	Lotdo1('/index.php/Sj/Soft/soft_undercarriage',msg);
+}
+//批量操作 /路由传值
+function Lotdo1( url ,returnurl) {
+
+	var sid = document.getElementsByName("id[]");
+	var id = "";
+	var is_select = false;
+	for ( i = 0 ; i < sid.length ; i++ ) {
+		if ( sid[i].checked == true ) {
+			id += "," + sid[i].value;
+			is_select = true;
+		} else {
+
+		}
+	}
+	if ( is_select ) {
+		if ( confirm("该操作将不可逆！\n您确定要执行该操作吗？")) {
+			window.location = url + "/softid/" + id +"/deny_msg/"+returnurl;
+		} else {
+			return false;
+		}
+	} else {
+		alert( "请至少选择一个条目，才能进行操作" );
+		return false;
+	}
+}
+function softback(u, id){
+	var r=confirm("你确认执行此操作！");
+	if (r==true){
+		$.ajax({
+			type: 'GET',
+			url: u,
+			dataType: 'json',
+			success:function(res){
+				if(res.status == 1){
+					var newid = '#' + id ;
+					var aid = '#' + id + ' a';
+					var iid = '#' + id + ' input';
+					$(newid + ' td').removeAttr('bgcolor');
+					$(newid).css({ color: "#bcbcbc", background: "#ececec" });
+					$(aid).css('color', '#bcbcbc');
+					$(aid).removeAttr('href');
+					$(aid).removeAttr('onclick');
+					$(iid).attr({disabled:'disabled', name:'disabled'});
+					$(iid).attr('checked', false);
+				} else {
+					alert(res.info);
+				}
+			}
+		});
+		}
+}
+function SelectAll(obj) {
+	var sid = document.getElementsByName("id[]");
+	if ( obj.value == "全选" ) {
+		obj.value = "反选";
+		Select( sid , true );
+	} else {
+		obj.value = "全选";
+		Select( sid , false );
+	}
+}
+function Select( obj , check ) {
+	for ( i = 0 ; i < obj.length ; i++ ) {
+		if(obj[i].disabled == '')
+		{
+			obj[i].checked = check;
+		}
+
+	}
+	return;
+}
+function saveTage(id, val){
+	if(!isNaN(id)){
+		var words = val.split(',');
+		var n = words.length-1;
+		if(n > 5){
+			alert('最多5个关键词！');
+		} else {
+			$.ajax({
+				type:'POST',
+				url:'__URL__/soft_edit_keywords',
+				data:"saveTags=1&softid="+id+"&tags="+trim(val),
+				dataType: 'json',
+				success: function(res){
+					if(res.info != '对不起,权限不足!')
+						alert(res.info);
+				}
+			});
+		}
+	}
+}
+</script>

@@ -1,0 +1,81 @@
+<link rel="stylesheet" type="text/css" href="/Public/zoom/zoom.css" />
+<script src="/Public/zoom/zoom.js"></script> 
+<script>
+function show_tid()
+{
+	var tid=$("#tid").val();
+	$.ajax({
+			url: '__URL__/get_tid_detail',
+			data: 'tid='+tid,
+			type: 'get',
+			success: function(data){
+				if(data != 2)
+				{
+					$("#show_div").css('display','');
+					$("#tid_note").css('display','none');
+					var val = eval("("+data+")");
+					document.getElementById('title').innerHTML=val.title;
+					document.getElementById('author').innerHTML=val.author;
+					document.getElementById('thread_url').href=val.thread_url;
+					document.getElementById('thread_url').innerHTML=val.thread_url;
+				}
+				else
+				{
+					$("#tid_note").css('display','block');
+					$("#show_div").css('display','none');
+					return false;
+				}
+			}
+		});
+}
+</script>
+ <div>
+<form action="__URL__/edit_pic_detail" method="post" enctype="multipart/form-data">
+<table>
+<tr>
+	<td>宣传标题：</td>
+	<td><input type="text" name="recomment_title" value="{$result.recomment_title}" />
+	<input type="hidden" name="id" value="{$result.id}" />
+	<input type="hidden" name="lr" value="{$lr}" />
+	<input type="hidden" name="p" value="{$p}" />
+	</td>
+</tr>
+<tr>
+	<td>TID：</td>
+	<td><input type="text" name="tid" id="tid"  onblur="show_tid()" value="{$result.tid}" /><span id="tid_note" style="color:red; display:none;"><font >*</font>tid不存在</span></td>
+</tr>
+<tr>
+	<td>宣传图片：<br/>(308*166)</td>
+	<td><input type="file" name="my_pic" />&nbsp;&nbsp;</td>
+</tr>
+<tr>
+	<td></td>
+	<td><img src="<?php echo IMGATT_HOST;?>{$result.pic_url}" zoomfile="<?php echo IMGATT_HOST;?>{$result.pic_url}" file="<?php echo IMGATT_HOST;?>{$result.pic_url}" class="zoom" width="200" height="108" inpost="1" onclick="_zoom(this, this.src)"/></td>
+</tr>
+<tr id="show_div" style="">
+	<td colspan="2">
+		<table>
+			<tr><h3>TID预览</h3><hr/></tr>
+			<tr>
+				<td style="width:100px;">TID标题</td>
+				<td id="title" style="width:200px; word-break:break-all;"><?php echo  $tid_detail[0]['subject'] ?></td>
+			</tr>
+			<tr>
+				<td style="width:100px;">作者</td>
+				<td id="author" style="width:200px; word-break:break-all;"><?php echo $tid_detail[0]['author'] ?></td>
+			</tr>
+			<tr>
+				<td style="width:100px;">链接</td>
+				<td style="width:200px; word-break:break-all;"><a id="thread_url" target="_blank" href="<?php echo $tid_detail[0]['thread_url'] ?>"><?php echo $tid_detail[0]['thread_url'] ?></a></td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td><input type="submit" value="确定" class="search_btn" /></td>
+	<td><input type="button" value="取消" class="search_btn" onclick="tb_remove();" /></td>
+</tr>
+</table>
+</form>
+</div>
+<div id="append_parent"></div>

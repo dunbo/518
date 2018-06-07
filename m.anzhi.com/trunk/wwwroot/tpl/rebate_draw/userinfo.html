@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <meta content="telephone=no" name="format-detection">
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <title>清凉夏日 热辣返利</title>
+	<link type="text/css" rel="stylesheet" href="/css/rebate_common.css"/>
+	<script type="text/javascript"  src="/js/jquery-1.8.0.min.js?v1"></script>
+	<script type="text/javascript" src="/js/TouchSlide.1.1.js"></script>
+	<script type="text/javascript" src="/js/jQueryRotate.js"></script>
+	<script type="text/javascript" src="/js/jquery.easing.min.js"></script>
+</head>
+<script>
+var sid='<!--{$out.sid}-->';
+function save(){
+
+                function isMobel(value)  {  
+                        if(/^13\d{9}$/g.test(value)||(/^14\d{9}$/g.test(value))||(/^15\d{9}$/g.test(value))||(/^18\d{9}$/g.test(value))){    
+                                return true;  
+                        }else{
+                                return false;  
+                        }
+                }
+
+                var name = $("#name").val();
+                if(name == "") {
+                        $("#name").css("borderColor", "#f00");
+                        $("#notice1").html('联系人姓名不能为空');
+                        $("#notice2").html('');
+                        $("#notice3").html('');
+                        $("#name").focus();
+                        return false;
+                 }
+
+                var mobile = $("#mobile").val();
+                if(mobile == "") {
+                        $("#mobile").css("borderColor", "#f00");
+                        $("#notice2").html('联系人手机号码不能为空');
+                        $("#notice1").html('');
+                        $("#notice3").html('');
+                        $("#mobile").focus();
+                        return false;
+                 }
+
+                 if(mobile !="" && !isMobel(mobile)) {
+                        $("#notice2").html('手机号格式不正确');
+                        $("#notice1").html('');
+                        $("#notice3").html('');
+                        $("#mobile").focus();
+                        return false;
+                 }
+
+
+                var address = $("#address").val(); 
+                if(address == "") {
+                        $("#address").css("borderColor", "#f00");
+                        $("#notice3").html('邮寄地址不能为空');
+                        $("#notice2").html('');
+                        $("#notice1").html('');
+                        $("#address").focus();
+                        return false;
+                 }
+
+                $.ajax({
+                        url: '/lottery/rebate_draw_userinfo.php',
+                        data:"&action=1&sid="+sid+"&name="+name+"&mobile="+mobile+"&address="+address,
+                        type:"post",
+                        success:function(data) {
+                            if(data==1){
+                                window.location.href= '/lottery/rebate_draw.php?sid='+sid;
+                            }
+                        },
+                });
+}
+</script>
+<body>
+<section>
+    <div class="banner"><img src="/images/rebate_draw/banner.jpg"/></div>
+    <div class="main">
+        <div class="mod" style="margin-bottom: 0px;">
+        <!--{if $out.action == 2}-->
+        <div class="mod_hd cnt">【我的奖品】</div>
+            <ul class="my_prize_list2">
+            <!--{foreach from=$out.prize item=v key=k}-->
+	            <!--{if $v.pid > 4}-->
+	            	<li><p>恭喜您已获得《<!--{$v.prizename.softname}-->》游戏礼包一份；</p>
+	                    <p>礼包码：<!--{$v.prizename.gift_number}--></p></li>
+	            <!--{else}-->
+	             <li>恭喜您获得《<!--{$v.prizename}-->》</li>
+	             <!--{/if}-->
+             <!--{/foreach}-->
+            <!--{if $out['is_empty'] == 1}-->
+                <li>很遗憾，您暂未获奖;</li>
+            <!--{/if}-->
+            </ul>
+            <div class="split"><img src="/images/rebate_draw/split2.png"/> </div>
+         <!--{elseif $out.action == 3}-->  
+            <ul class="my_prize_list">
+                <li>恭喜您获得<!--{$out.prizename}--></li>
+            </ul>
+            <div class="split"><img src="/images/rebate_draw/split2.png"/> </div>
+         <!--{/if}-->   
+            <div class="prompt">请您填写如下信息，以便于我们将奖品邮寄给您</div>
+            <ul class="form-items">
+                <li><label>联系人姓名：</label>
+                <span><input name="name" id="name" type="text" value="<!--{$out.userinfo.name}-->"/></span>
+                </li>
+                <li class="error" id="notice1"></li>
+                <li><label>联系人手机号码：</label>
+                <span><input name="mobile" id="mobile" type="text" value="<!--{$out.userinfo.mobile}-->"/></span>
+                </li>
+                <li class="error" id="notice2"></li>
+                <li><label>邮寄地址：</label>
+                <span><input name="address" id="address" type="text" value="<!--{$out.userinfo.address}-->"/></span>
+                </li>
+                <li class="error" id="notice3"></li>
+            </ul>
+            <div class="btn_submit"><a href="javascript:void(0);" onclick="save()">提交</a></div>
+        </div>
+    </div>
+    <div class="footer">
+        <img src="/images/rebate_draw/ft_bg.jpg"/>
+        <img src="/images/rebate_draw/ft_bg1.jpg"/>
+    </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>无标题文档</title>
+	<style type="text/css">
+		body, td, th {
+			font-size: 12px;
+		}
+	</style>
+        <script type="text/javascript">
+        function stop(h_id,status_v){
+            if(status_v==1)
+            {
+                mess = '启用';
+            }else if(status_v==0)
+            {
+                mess = '停用';
+            }
+            if(confirm("确定要"+mess+"该配置嘛?")){
+                var param = {
+                    h_id : h_id,
+                    status_v: status_v
+                };
+                $.ajax({
+                    url:'__URL__/update_status_mail',
+                    type:'POST',
+                    data:param,
+                    dataType:'json',
+                    success:function(data){
+                       alert('操作成功');
+                       location.reload();
+                    }
+                });
+            }
+            else return false;
+        };
+    </script>
+</head>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<body>
+	<table cellpadding="1" cellspacing="1" style="margin-top:10px;" border ="1" class="">
+		<thead>
+			<tr align="center">
+				<th width="5%" bgcolor="#E3E2FE"><strong>序号</strong></th>
+				<th width="10%" bgcolor="#E3E2FE"><strong>项目名称</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>规则说明</strong></th>
+				<th width="15%" bgcolor="#E3E2FE"><strong>内部邮件通知列表</strong></th>
+				<th width="10%" bgcolor="#E3E2FE"><strong>最近一次编辑时间</strong></th>
+				<th width="5%" bgcolor="#E3E2FE"><strong>操作人</strong></th>
+				<th width="5%" bgcolor="#E3E2FE"><strong>状态</strong></th>
+				<th width="8%" bgcolor="#E3E2FE"><strong>操作</strong></th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="list">
+				<tr>
+                                    <td height="20" align="center">{$list.id}</td>
+					<td height="20" align="center">{$list.config_name}</td>
+					<td height="20" align="center"> {$list.rule_note}</td>
+                                        <td><b>发送:</b><br>{$list.send_mails}<br><b>抄送:</b><br>{$list.cc_mails}</td>
+					<td height="20" align="center"> {$list.update_tm|date="Y-m-d H:i:s",###}</td>
+					<td height="20" align="center"> {$list.os_username}</td>
+					<td height="20" align="center"> <if condition="($list.status eq 1)">已启用</if><if condition="($list.status eq 0)">已停用</if></td>
+                                        <td height="20" align="center"><a href="__URL__/edit_mail?width=600&height=570&modal=true&id={$list.id}" class="thickbox blue">编辑</a> | <if condition="($list.status eq 1)"><a href="#" onclick="stop({$list.id},0)" class="blue">停用</a></if><if condition="($list.status eq 0)"><a href="#" onclick="stop({$list.id},1)" class="blue">启用</a></if></td>
+				</tr>
+			</volist>
+		</tbody>
+	</table>
+	<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>
+</html>

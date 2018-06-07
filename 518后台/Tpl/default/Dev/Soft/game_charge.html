@@ -1,0 +1,80 @@
+
+<div id="game_charge_tab" class="zxx_test_list" style="padding:0px; width:300px; height:300px;   display:none;">
+	<table>
+	<tr><td align='left' colspan= '2'  ><h2>游戏付费标识：</td></h2></tr>
+	<tr>
+		<td colspan= '4' align='left'>选择后，将在软件详情页和搜索页面中显示该标识</td>
+	</tr>
+	<tr><td colspan= '2' align='left'>	
+		当前状态：
+		<input type="radio"  name="charge" value="0" checked />普通
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type="radio"  name="charge" value="1" />游戏内付费
+	</td></tr>	
+
+	<table id="charge_tm" style="display:none;">
+		<tr>
+			<td colspan= '4' align='left'>
+				开始时间:<input id="game_charge_start_time" name="game_charge_start_time" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})"style="border: 0px none black; width: 150px;" value="{$start_at}" size="15" type="text">
+			</td>
+		</tr>
+		<tr>
+			<td colspan= '4' align='left'>
+				结束时间:<input id="game_charge_end_time" name="game_charge_end_time" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="border: 0px none black; width: 150px;" value="{$end_at}"	size="15" type="text">
+			</td>
+		</tr>
+		<tr><td><p>&nbsp;</p></td></tr>
+	</table>
+	<tr>	
+	<td><button id="cancelBtn" onclick="game_charge_add();" >提交</button></td>
+	<td style="padding-left: 100px;">
+	<button id="cancelBtn1" onclick="zxxbox_hide();" >取消</button></td></tr>
+	</table>
+</div>
+<script>
+$("[name='charge']").click(function(){
+	$("[name='charge']").each(function(){
+		if($(this).is(':checked')) {
+			var charge = $(this).val();
+			if(charge == 0){
+				$('#charge_tm').hide();
+			}else{
+				$('#charge_tm').show();
+			}
+		}
+	});
+});	
+//提交
+function game_charge_add() {
+	$("[name='charge']").each(function(){
+		if($(this).is(':checked')) {
+			charge = $(this).val();
+		}
+	});
+	var game_charge_start_time = $('#game_charge_start_time').val();
+	var game_charge_end_time = $('#game_charge_end_time').val();
+	var id_str = $('#tmp').val();
+	$.ajax({
+		url: '/index.php/Dev/Soft/game_charge/id/'+id_str+'/charge/'+charge+'/start_tm/'+game_charge_start_time+'/end_tm/'+game_charge_end_time,
+		type: 'get',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				return false;
+			} else if(ret['code']==1) {	//成功
+				zxxbox_hide();
+				gray_processing(ret['msg']);			
+			}
+		}
+	});
+}
+//游戏内付费
+function game_charge(){
+	id_str = Selected_check();
+	if(id_str){
+		$("#game_charge_tab").zxxbox();  
+		$('#tmp').val(id_str);
+	}
+}
+</script>	

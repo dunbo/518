@@ -1,0 +1,120 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<body>
+<script>
+	var i = 0;
+	var j = 0;
+	function add_about(id,new_id){
+		if(i == 0){
+			i = id;
+		}
+		if(j == 0){
+			j = new_id;
+		}
+		$("#about_"+i+"").after('<div style="border:1px solid #999;width:280px;height:70px;margin-top:10px;" id="about_'+j+'"><table style="margin-top:8px;"><tr><td>关联文章名称：<input type="text" name="about_name[]" /><input type="hidden" name="about_id[]" value="'+j+'" /></td></tr><tr><td>关联文章地址：<input type="text" name="about_link[]" /></td><td><input type="button" value="删除" onclick="del_about('+j+');"  /></td></tr></table></div>');
+		i = j;
+		j = i + 1;
+	}
+	
+	function del_about(id){
+		$("#about_"+id+"").html('');
+		$("#about_"+id+"").css('display','none');
+	}
+	
+	function del_about_true(id){
+		$("#about_"+id+"").html('');
+		$("#about_"+id+"").css('display','none');
+		$.ajax({
+			url: '__URL__/del_about_true',
+			data: 'id='+id,
+			type: 'get',
+			success: function(data){
+				if(data == 2){
+					alert("编辑失败");
+				}
+			}
+		});
+	}
+	
+	
+	function check(){
+		var news_title = $('#news_title').val();
+		if(news_title.length < 1 || news_title.length > 40){
+			alert("请输入1-40字以内的文章标题");
+			return false;
+		}
+		var news_link = $('#news_link').val();
+		if(news_link.length < 1 || news_link.length > 255){
+			alert("请输入1-225字以内的文章地址");
+			return false;
+		}
+		var rank = $('#rank').val();
+		if(rank < 1){
+			alert("排序值错误");
+			return false;
+		}
+		var title_str = document.getElementsByName("about_name[]");
+		var link_str = document.getElementsByName("about_link[]");
+		for(i=0;i<title_str.length;i++){
+			if((title_str[i].value && !link_str[i].value) || (!title_str[i].value && link_str[i].value)){
+				alert("关联文章标题与地址，若已填写一项则另一项必填");
+				return false;
+			}
+		}
+	}
+</script>
+<div style="margin-top:20px;margin-left:50px;">
+<h3>编辑推荐新闻</h3>
+<br />
+<form action="__URL__/edit_news_do" method="post">
+<table>
+	<tr>
+		<td>文章标题：</td>
+		<td><input type="text" name="news_title" id="news_title" value="{$result.news_title}" />
+		<input type="hidden" name="id" value="{$result.id}" />
+		<input type="hidden" name="news_titles" value="{$news_title}" />
+		<input type="hidden" name="start_tm" value="{$start_tm}" />
+		<input type="hidden" name="end_tm" value="{$end_tm}" />
+		<input type="hidden" name="lr" value="{$lr}" />
+		<input type="hidden" name="p" value="{$p}" />
+		</td>
+	</tr>
+	<tr>
+		<td>文章地址：</td>
+		<td><input type="text" name="news_link" id="news_link" value="{$result.news_link}" /></td>
+	</tr>
+	<tr>
+		<td>排序：</td>
+		<td><input type="text" name="rank" id="rank" value="{$result.rank}" /></td>
+	</tr>
+</table>
+<?php if($about_result){ ?>
+<?php foreach($about_result as $key => $val){ ?>
+<div style="border:1px solid #999;width:280px;height:70px;margin-top:10px;" id="about_{$val.id}">
+	<table style="margin-top:8px;">
+		<tr>
+			<td>关联文章名称：<input type="text" name="about_name[]" value="{$val.news_title}" /><input type="hidden" name="about_id[]" value="{$val.id}" /></td>
+		</tr>
+		<tr>
+			<td>关联文章地址：<input type="text" name="about_link[]" value="{$val.news_link}" /></td>
+			<td><input type="button" value="删除" onclick="del_about_true({$val.id});"  /></td>
+		</tr>
+	</table>
+</div>
+<?php } ?>
+<?php }else{ ?>
+<div style="display:none;" id="about_0"></div>
+<?php } ?>
+<div style="margin-top:10px;">
+	<input type="button" class="search_btn" value="增加关联文章" onclick="add_about(<?php if($about_result[$about_count]['id']){ ?>{$about_result[$about_count]['id']}<?php }else{ ?>0<?php } ?>,{$all_about});" />
+</div>
+<table style="margin-top:30px;">
+	<tr>
+		<td><input type="submit" value="添加" class="search_btn" onclick="return check();" /></td>
+		<td><a href="javascript:history.go(-1);" class="search_btn">取消</a></td>
+	</tr>
+</table>
+</form>
+</div>
+</body>
+</html>

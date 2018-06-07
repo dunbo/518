@@ -1,0 +1,260 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style type="text/css">
+.tbspan{font-size:15px;margin:20px 6px;font-weight: bold;height:30px;background: #cdd;}
+.radiotype{margin:3px;}
+.table_list img{max-width:200px}
+</style>
+<script type="text/javascript">
+
+function checkline(name){
+	var obj = document.getElementsByName(name);
+	for(var i = 0;i<obj.length ;i++){
+		if(obj[i].checked == true) return true;
+	}
+	return false;
+}
+
+function checkstatus(self,name){
+	var obj = document.getElementsByClassName('radiotype');
+	document.getElementById('pstate').value = 1;
+	for(var i = 0;i<obj.length ;i++){
+		obj[i].checked = false;
+	}
+}
+
+var num = 1;
+function checkjpurl(){
+	var picsrc = document.getElementsByTagName('img');
+    if(!picsrc.length || picsrc[0].src == ''){
+        var picobj = document.getElementById('pic');
+        if(picobj.value == '') {
+            alert('必须上传图片');
+            return false;
+        }
+    }
+	if(document.getElementById('s1').checked || document.getElementById('s2').checked){
+	
+		var txtobj = document.getElementById('txt1');
+		txtobj.value = txtobj.value.replace(/(^\\s*)|(\\s*$)/g, "");
+		if(txtobj.value == '') {
+			alert('必须填写通知栏顶部文案');
+			return false;
+		}
+		var txtobj = document.getElementById('txt2');
+		txtobj.value = txtobj.value.replace(/(^\\s*)|(\\s*$)/g, "");
+		if(txtobj.value == '') {
+			alert('必须填写主标题文案');
+			return false;
+		}
+		var txtobj = document.getElementById('txt3');
+		txtobj.value = txtobj.value.replace(/(^\\s*)|(\\s*$)/g, "");
+		if(txtobj.value == '') {
+			alert('必须填写副标题文案');
+			return false;
+		}
+		if(document.getElementById('s2').checked){
+			var txtobj = document.getElementById('txt4');
+			txtobj.value = txtobj.value.replace(/(^\\s*)|(\\s*$)/g, "");
+			if(txtobj.value == '') {
+				alert('必须填写按钮文案');
+				return false;
+			}
+		}
+	}
+	
+	if(document.getElementById('cat11').checked == true && document.getElementById('outerurl').value==""){
+		alert('请填写外部链接');
+		return false;
+	}
+	if(document.getElementById('cat10').checked == true && document.getElementById('innerurl').value==""){
+		alert('请填写内部链接');
+		return false;
+	}
+	if(document.getElementById('cat8').checked == true && document.getElementById('newfid').value=="0"){
+		alert('请选择版块');
+		return false;
+	}
+	if(document.getElementById('cat9').checked == true && document.getElementById('newtid').value=="0"){
+		alert('请选择主题');
+		return false;
+	}
+	
+	if(document.getElementById('cat0').checked == true && !checkline('op_type')){
+		alert('请选择客户端跳转位置');
+		return false;
+	}
+	
+	if(document.getElementById('cat1').checked == true && !checkline('cid')){
+		alert('请选择栏目');
+		return false;
+	}
+	if(document.getElementById('cat12').checked == true && !checkline('pid')){
+		alert('请选择专题');
+		return false;
+	}
+
+
+	num ++;
+	if(num>2) return false;
+	return true;
+}
+
+
+function changparent(obj,parent){
+	var cobj = document.getElementsByClassName('radiotype');
+	for(var i = 0;i<cobj.length ;i++){
+		cobj[i].checked = false;
+	}
+	obj.checked= true;
+	var pobj = document.getElementById(parent);
+	pobj.checked = true;
+	document.getElementById('pstate').value =1;
+	document.getElementById('cstate').value = 1;
+	
+}
+</script>
+</head>
+<body>
+
+<h3><?php if($add) echo "添加"; else echo "编辑"; ?>PUSH运营位</h3>
+<div style="float:right;margin: 5px;">
+<a href="__URL__/push_list/" class="search_btn">push 列表</a>
+</div>
+
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+<form method="post" action="__URL__/dopushedit/" enctype="multipart/form-data">
+<tr>
+	<td>主标题文案</td>
+	<td style="text-align:left">
+	<input type="text" id="txt2" name="subject" style="width:400px" value="<if condition="$info['subject']">{$info.subject}</if>" >
+	</td>
+</tr>
+<tr>
+	<td>副标题文案</td>
+	<td style="text-align:left">
+	<input type="text" id="txt3" name="subject_desc" style="width:400px" value="<if condition="$info_push['subject_desc']">{$info_push.subject_desc}</if>" >
+	</td>
+</tr>
+<tr>
+	<td>按钮文案</td>
+	<td style="text-align:left">
+	<input type="text" id="txt4" name="subject_btn" style="width:400px" value="<if condition="$info_push['subject_btn']">{$info_push.subject_btn}</if>" >
+	</td>
+</tr>
+<tr>
+	<td>展示样式</td>
+	<td style="text-align:left">
+	<label><input type="radio" id="s1" name="showclass" value="6"<if condition="$info['display_type'] eq 6 or $add"> checked="checked"</if>/> <span>图+文</span></label>
+	<label><input type="radio" id="s2" name="showclass" value="7"<if condition="$info['display_type'] eq 7"> checked="checked"</if> /> <span>图+文+按钮</span></label>
+	<label><input type="radio" id="s3" name="showclass" value="8"<if condition="$info['display_type'] eq 8"> checked="checked"</if> /> <span>图</span></label>
+	</td>
+</tr>
+<tr id="imgline">
+	<td>宣传图片上传：<br/>图片参考大小：100k以下</td>
+	<td style="text-align:left">
+	<if condition="$info['pic_path']"><img src="{$Think.const.IMGATT_HOST}/{$info.pic_path}"></if>
+	<br/>
+	<span ><input type="file" name="img" id="pic"></span></td>
+</tr>
+<tr>
+	<td ><input type="radio" value="0" name="cat" onclick="checkstatus(this,'op_type')" id="cat0"<if condition="$info['cat'] eq 0 ">checked</if>> 客户端</td>
+	<td style="text-align:left">
+	<volist name="jump" id="vo" mod='6'>
+	<input class="radiotype" type="radio" value="{$vo.operation_type}" onclick="changparent(this,'cat0')" name="op_type"  <if condition="($info['operation_type'] eq $vo['operation_type']) AND ($info['cat'] == 0 )">checked</if>>
+	<span style="margin-right:15px;">{$vo.name}</span>
+	<eq name= "mod" value= "0" ><br/></eq> 
+	</volist>
+	</td>
+</tr>	
+<tr>
+	<td><input type="radio" value="1" name="cat" onclick="checkstatus(this,'cid')" id="cat1"<if condition="$info.cat eq 1">checked</if>> 栏目</td>
+	<td style="text-align:left">
+	<volist name="column" id="vo" mod='6'>
+	<input type="radio" value="{$vo.cid}" name="cid" class="radiotype" onclick="changparent(this,'cat1')" <if condition="$info['cid'] eq $vo['cid']"> checked</if>>
+	<span style="margin-right:15px;">{$vo.name}</span>
+	<eq name= "mod" value= "0" ><br/></eq> 
+	</volist>
+	</td>
+</tr>
+<tr>
+	<td><input type="radio" value="12" name="cat" onclick="checkstatus(this,'pid')" id="cat12"<if condition="$info.cat eq 12">checked</if>> 内容专题</td>
+	<td style="text-align:left">
+	<volist name="pref" id="vo" mod='6'>
+	<input type="radio" value="{$vo.cid}" name="pid" class="radiotype" onclick="changparent(this,'cat12')" <if condition="$info['pid'] eq $vo['cid']"> checked</if>>
+	<span style="margin-right:15px;">{$vo.name} </span>
+	<eq name= "mod" value= "0" ><br/></eq> 
+	</volist>
+	</td>
+</tr>	
+
+<tr>
+	<td><input type="radio" value="8" name="cat" onclick="checkstatus(this,'fid')" id="cat8"<if condition="$info.cat eq 8">checked</if>> 版块</td>
+	<td style="text-align:left">
+	<input id="newfid" type="hidden" name="fid" value="<if condition="$info['fid']">{$info.fid}<else />0</if>">
+	<span id="forumlist" style="margin-right: 20px;">{$fname}</span><a id="furl" href='__URL__/forum_list/<if condition="$info['fid']">fid/{$info.fid}/</if>' onclick="changparent(this,'cat8')" class="thickbox" style="text-decoration: underline;color: red;">选择版块
+	</td>
+	
+</tr>
+<tr>
+	<td><input type="radio" value="9" name="cat" onclick="checkstatus(this,'tid')" id="cat9"<if condition="in_array($info['cat'],array(9,18))">checked</if>> 帖子</td>
+	<td style="text-align:left" >
+	<input id="newtid" type="hidden" name="tid" value="<if condition="$info['tid']">{$info.tid}<else />0</if>">
+	<span id="thread" style="margin-right: 20px;"><if condition="$info['tid']"><a href="http://bbs.zhiyoo.com/forum.php?mod=viewthread&tid={$info.tid}" style="color:blue;" target="_blank">{$title}</a></if></span><a id="tdurl" href="__URL__/add_thread/" class="thickbox"  onclick="changparent(this,'cat9')" style="text-decoration: underline;color: red;">编辑
+	</td>
+</tr>
+<tr>
+	<td><input type="radio" value="10" name="cat" onclick="checkstatus(this,'innerurl')" id="cat10"<if condition="$info.cat eq 10">checked</if>> 内部链接地址</td>
+	<td style="text-align:left" >
+	<input type="text" name="innerurl" style="width:400px" id="innerurl"  onclick="changparent(this,'cat10')" value="<if condition="$info.operation_type eq 10">{$info.url}</if>">
+	</td>
+</tr>
+<tr>
+	<td><input type="radio" value="11" name="cat" onclick="checkstatus(this,'outerurl')" id="cat11"<if condition="$info.cat eq 11">checked</if>> 外部链接地址</td>
+	<td style="text-align:left" >
+	<input type="text" name="outerurl" style="width:400px" id="outerurl" onclick="changparent(this,'cat11')" value="<if condition="$info.operation_type eq 11">{$info.url}</if>">
+	</td>
+</tr>	
+<tr>
+	<td>推送时间</td>
+	<td style="text-align:left" >
+	<if condition="$canedittime == 1">
+		<input id="starttime" name="starttime" value="<?php echo date("Y-m-d H:i:s",$info['start_tm']);?>" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px" />至
+	  <input id="endtime" name="endtime" value="<?php echo date("Y-m-d H:i:s",$info['end_tm']);?>" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"/>
+	<else />
+	<?php echo date("Y-m-d H:i:s",$info['start_tm']);?> 至 <?php echo date("Y-m-d H:i:s",$info['end_tm']);?>
+	</if>
+	</td>
+</tr>
+<tr>
+	<td>推送每日推送频率</td>
+	<td style="text-align:left" >
+	<if condition="$canedittime == 1">
+		<input type="text" name="step_starttm" value="<?php echo $info_push['step_tm'][0];?>" size="5"> -- <input type="text" name="step_endtm" value="<?php echo $info_push['step_tm'][1];?>" size="5"> <font size="1" color="red">"输入每天推送时间段 00--24 不填为全日"</font>
+	<else />
+		<?php echo $info_push['step_tm'][0];?> -- <?php echo $info_push['step_tm'][1];?>
+	</if>
+	</td>
+	</td>
+</tr>
+<tr>
+	<td>推送范围</td>
+	<td style="text-align:left" >
+		<span><font size="2" color="red">默认为全部设备</font></span>
+		<br>
+		<br>
+		<span>指定设备</span><input type="text" name="pushuser" size="50" value="{$info_push.pushuser}"><font size="1" color="red">"输入IMEI 多个以','隔开,系统将推送到指定设备"</font>
+	</td>
+</tr>
+<input type="hidden" value="{$add}" name="add">
+<input type="hidden" value="{$aid}" name="aid">
+<input type="hidden" value="0" name="pstate" id="pstate">
+<input type="hidden" value="0" name="cstate" id="cstate">
+<tr><td></td><td><input type="submit"  onclick="return checkjpurl()" value="提交推送配置"></td></tr>
+</form>
+</table>
+</body>
+</html>

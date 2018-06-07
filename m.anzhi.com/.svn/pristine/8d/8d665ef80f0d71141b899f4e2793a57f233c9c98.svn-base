@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title><!--{$out.feature_main.name}--></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/feature/css/feature_new_common.css?v8"/>
+<script type="text/javascript" src="/js/zepto.min.js"></script>
+<script type="text/javascript" src="/js/TouchSlide.1.1.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js?v2"></script>
+<script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="/js/underscore.js"></script>
+<script type="text/javascript" src="/js/anzhi-fd-min.js"></script>
+</head>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.feature_id}-->',p=0,soft_lists_go = [],flags={canMove:true};
+var curr_type = 0; curr_index = 0; page=0;
+var version_code = '<!--{$out.version_code}-->';
+var share = '<!--{$out.share}-->';
+var share_common_jump_id = '<!--{$out.share_common_jump_id}-->';
+var from_w = '<!--{$out.from}-->';
+var comment_count = 0;
+function bytesToSize(bytes) {  
+	   if (bytes === 0) return '0 B';  
+		var k = 1024;  
+		sizes = ['B','KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];  
+		i = Math.floor(Math.log(bytes) / Math.log(k));  
+		return (bytes / Math.pow(k, i)).toPrecision(3)  + ' ' + sizes[i];   
+	   //toPrecision(3) 后面保留一位小数，如1.0GB                                                                        //return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];  
+}  
+function click_more(id)
+{
+    if(id)
+    {
+//      var php_param = {type:'launch', id:id};
+//      var js_param = {type:'launch', id:id};
+//      Azfd.share_download(js_param, php_param);
+
+        $.getJSON('/phone.php?act=getJumpInfo&id=' + id + '&version_code=' + version_code, function(data) {
+            window.AnzhiActivitys.launch(json2str(data['INFO']), id);
+        })
+    }
+}
+
+function json2str(o) {
+    var arr = [];
+    var fmt = function(s) {
+        if (typeof s == 'object' && s != null) return json2str(s);
+        return /^(string|number)$/.test(typeof s) ? "'" + s + "'" : s;
+    }
+    for (var i in o) arr.push("'" + i + "':" + fmt(o[i]));
+    return '{' + arr.join(',') + '}';
+}
+
+function download_all(section)
+{
+	var soft_json ="[";
+	$('#main'+section+' a').each(function () {
+		var t= $(this).attr("onclick");
+		if(t!=null)
+		{
+			t = t.toString();
+			t = t.replace("function onclick(event) {","");
+			t=t.replace("}","");
+			t=t.replace(/(^\s*)|(\s*$)/g, "");
+			if(t.indexOf('download_apk')==0)//获取下载软件的函数
+			{
+				t = t.replace("download_apk(","");
+				t = t.replace(");","");
+				t = t.replace(/\'/g,"");//替换下载函数的其他字符
+				var obj = t.split(","); //下载函数中的参数分成数组，一个个组装
+				new_str = parseInt(obj[1])+',"'+obj[2]+'","'+obj[3]+'",'+parseInt(obj[4])+','+parseInt(obj[5])+','+parseInt(obj[7])+',"'+obj[8]+','+obj[9]+'"';
+				soft_json += '['+new_str+'],';
+			}	
+		}
+	}); 
+	soft_json = soft_json.substring(0,soft_json.length-1);//去掉最后一个逗号
+	soft_json += "]";
+	window.AnzhiActivitys.downloadAppsForActivity(0,aid,soft_json);
+}
+function go_share()
+{
+	var share_text='<!--{$out.feature_main.name}-->';
+	$.ajax({
+		url: '/lottery/feature_log.php?type=share',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'post',
+		async:false,
+		success:function(data){
+		}
+	});
+
+	var share_json = '{"TEXT":"'+share_text+'","URL":"http://img4.anzhi.com/data2/icon/201605/05/d418dc4f4080e289f61c44fb4d68529d_20810600.jpg","ACTIONURL":"<!--{$out.pre_url}-->","URLWEIXIN":"http://img4.anzhi.com/data2/icon/201605/05/d418dc4f4080e289f61c44fb4d68529d_20810600.jpg"}';
+	
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+
+//下载软件
+function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag,noflux,firmware,status)
+{
+	window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+	setTimeout(function(){download_go(softid,pkgname,softname)},3000);
+}
+
+function download_go(softid,pkgname,softname)
+{
+	$.ajax({
+		url: '/lottery/feature_log.php?type=download',
+		data: 'softid='+softid+'&sid='+sid+'&pkgname='+pkgname+'&aid='+aid,
+        type: 'post',
+		success: function(data){
+		}
+	});
+}
+
+function installApp(softid)
+{
+	for(i=0;i < soft_lists_go.length;i++)
+	{
+		if(soft_lists_go[i][0] == softid)
+		{
+			pkgname = soft_lists_go[i][7];
+		}
+	}
+	$.ajax({
+		url: '/lottery/feature_log.php?type=install',
+		data: 'softid='+softid+'&sid='+sid+'&pkgname='+pkgname+'&aid='+aid,
+		type: 'post',
+		success: function(data){
+			window.AnzhiActivitys.installAppForActivity(parseInt(softid));
+		}
+	});
+}
+function openApp(pkg,softid,aid,sid){
+	the_soft = [softid];
+	$.ajax({
+		url: '/lottery/feature_log.php?type=open',
+		data: 'softid='+softid+'&sid='+sid+'&pkgname='+pkg+'&aid='+aid,
+		type: 'post',
+		success: function(data){
+			window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+		}
+	});
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		$('#'+softid+'').html("下载中");
+	}else if(newState == 2){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 3){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 4){
+		$('#'+softid+'').html("重试");
+	}else if(newState == 5){
+		$('#'+softid+'').removeAttr("onclick");
+		$('#'+softid+'').html("安装");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				$('#'+softid+'').bind('click',function(){	
+					installApp(parseInt(softid));
+				});
+			}
+		}
+	}else if(newState == 6){
+		$('#'+softid+'').unbind('click').removeAttr("onclick");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				var a = soft_lists_go[i][7];
+				$('#'+softid+'').bind('click',function(){
+					openApp(a,softid,aid,sid);
+				});
+			}
+		}
+		
+		$('#'+softid+'').html("打开");
+	}else if(newState == 8){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 9){
+		$('#'+softid+'').html("检查中");
+	}
+}
+
+function wapSubDetailCommentOK() {
+	curr_type = 0; curr_index = 0; page=0;
+	var json_data =	window.AnzhiActivitys.getSubjectCommentList(0,20);
+	var cmd = 'var data=' + json_data;
+	eval(cmd);
+	$('#comment_wrap').html(_.template($('#comment_tpl').html(),data));
+
+	comment_count += 1;
+	$("#show_comments_count a").html("评论("+comment_count+")");
+	if(comment_count>20)
+	{
+		$('#applist_more').css('display','')
+	}
+	var url = location.href;
+	var re = /#for_comment/;
+	if (!re.test(url)) {
+		window.location.hash = '';
+		window.location.hash = '#for_comment';
+	}
+
+	return;
+
+	var randnum = new Date().getTime();
+	//window.location.href = url;
+	window.location.refresh();
+
+}
+function wapSubDetailPraiseOK()
+{
+	location.reload();
+}
+
+$(document).ready(function(){
+	setTimeout('lazy_load()', 50);
+});
+
+
+function lazy_load()
+{
+	var json_data =	window.AnzhiActivitys.getSubjectDetail(0,20);
+	var cmd = 'var data1=' + json_data;
+	eval(cmd);
+	$('#main_content').html(_.template($('#main_tpl').html(),data1));
+	for(var m = 0; m < data1.DATA.length; m++) { 
+		var data3 = data1.DATA[m];
+		if(data3.TYPE==2)
+		{
+			var foucus = $("#focus_02"+data3.SECTION_ID).length;
+			var foucus1 = $("#focus_01"+data3.SECTION_ID).length;
+			var dotted = $("#focus_dotted_02"+data3.SECTION_ID).length;
+			var dotted1 = $("#focus_dotted_01"+data3.SECTION_ID).length;
+			if(foucus>0&&dotted>0)
+			{
+				/*var str_1="";
+				str_1 +='<script type="text/javascript">';
+				str_1 +='TouchSlide({ ';
+				str_1 +='slideCell:"#focus_02'+data3.SECTION_ID+'",';
+				str_1 +='titCell:"#focus_dotted_02'+data3.SECTION_ID+' ul",';
+				str_1 +='mainCell:"#focus_bd'+data3.SECTION_ID+'",';
+				str_1 +='autoPage:true,';
+				str_1 +='pnLoop:"false",';
+				str_1 +='autoPlay:true';
+				str_1 +='});';
+				str_1 +='</scr'+'ipt>';
+				$("#focus_02"+data3.SECTION_ID).append(str_1);*/
+				
+				TouchSlide({ 
+				slideCell:"#focus_02"+data3.SECTION_ID,
+				titCell:"#focus_dotted_02"+data3.SECTION_ID+" ul", //开启自动分页 autoPage:true ，此时设置 titCell 为导航元素包裹层
+				mainCell:"#focus_bd"+data3.SECTION_ID, 
+				autoPage:true, //自动分页
+				pnLoop:"false",
+				autoPlay:true
+				}); 
+			}
+			else if(foucus1>0&&dotted1>0)
+			{
+				/*var str_2="";
+				str_2 +='<script type="text/javascript">';
+				str_2 +='TouchSlide({ ';
+				str_2 +='slideCell:"#focus_01'+data3.SECTION_ID+'",';
+				str_2 +='titCell:"#focus_dotted_01'+data3.SECTION_ID+' ul",';
+				str_2 +='mainCell:"#focus_bd2'+data3.SECTION_ID+' ul",';
+				str_2 +='autoPage:true,';
+				str_2 +='pnLoop:"false",';
+				str_2 +='autoPlay:true';
+				str_2 +='});';
+				str_2 +='</scr'+'ipt>';
+				$("#focus_01"+data3.SECTION_ID).after(str_2);*/
+				
+				TouchSlide({ 
+				slideCell:"#focus_01"+data3.SECTION_ID,
+				titCell:"#focus_dotted_01"+data3.SECTION_ID+" ul", //开启自动分页 autoPage:true ，此时设置 titCell 为导航元素包裹层
+				mainCell:"#focus_bd2"+data3.SECTION_ID+" ul", 
+				autoPage:true, //自动分页
+				pnLoop:"false",
+				autoPlay:true
+				});
+			}
+			var recommend_foucus = $("#recommend_focus_01"+data3.SECTION_ID).length;
+			var recommend_foucus1 = $("#recommend_focus_02"+data3.SECTION_ID).length;
+			var recommend_dotted = $("#recommend_focus_dotted_01"+data3.SECTION_ID).length;
+			var recommend_dotted1 = $("#recommend_focus_dotted_02"+data3.SECTION_ID).length;
+			if(recommend_foucus>0&&recommend_dotted>0)
+			{
+				TouchSlide({ 
+					slideCell:"#recommend_focus_01"+data3.SECTION_ID,
+					titCell:"#recommend_focus_dotted_01"+data3.SECTION_ID+" ul", //开启自动分页 autoPage:true ，此时设置 titCell 为导航元素包裹层
+					mainCell:"#recommend_focus_bd2"+data3.SECTION_ID+" ul", 
+					autoPage:true, //自动分页
+					pnLoop:"false",
+					autoPlay:true
+				});
+			}
+			else if(recommend_foucus1>0&&recommend_dotted1>0)
+			{
+				TouchSlide({ 
+					slideCell:"#recommend_focus_02"+data3.SECTION_ID,
+					titCell:"#recommend_focus_dotted_02"+data3.SECTION_ID+" ul", //开启自动分页 autoPage:true ，此时设置 titCell 为导航元素包裹层
+					mainCell:"#recommend_focus_bd"+data3.SECTION_ID, 
+					autoPage:true, //自动分页
+					pnLoop:"false",
+					autoPlay:true
+				});
+			}
+		}
+	}
+	//评论6.2版本之后才能用
+	if(version_code>=6200)
+	{
+		var json_data =	window.AnzhiActivitys.getSubjectCommentList(0,20);
+		var cmd = 'var data=' + json_data;
+		eval(cmd);
+		$('#comment_wrap').html(_.template($('#comment_tpl').html(),data));
+	
+		comment_count=data1['COMMENT_CNT'];
+		$("#show_comments_count a").html("评论("+comment_count+")");
+		if(comment_count>20)
+		{
+			$('#applist_more').css('display','')
+		}
+	}
+	//来自端外的跳转
+	if(from_w==1)
+	{
+		var php_param = {type:'launch', id:share_common_jump_id};
+		var js_param = {type:'launch', id:share_common_jump_id};
+		Azfd.share_download(js_param, php_param);
+	}
+	//评论 跳转到评论处
+	var re = /&r=\d+/;
+	if (re.test(location.href)) {
+		window.location.hash = '';
+		window.location.hash = '#for_comment';
+	}
+}
+
+function add_praise(obj,comment,counts)
+{
+	if(window.AnzhiActivitys.isSubjectCommentPraised(comment)==false)
+	{
+		$(obj).find('i').attr("class","comment_icon comment_act"); 
+		$(obj).find('font').addClass('comment_num_act');
+		window.AnzhiActivitys.addSubjectCommentPraise(comment,counts);
+		//setTimeout(function(){location.replace(location.href);},2000);
+		setTimeout(function(){location.reload();},2000);
+	}
+}
+</script>
+<body style="background:<!--{$out.feature_main.feature_page_bg}-->;position:relative;">
+	<!--{if $out.version_code gte 6200}-->
+	<div class="banner_txt" id="show_comments_count" style="border-radius:0 15px 15px 0;z-index:1; background:<!--{$out.feature_main.feature_comment_share_label_color}-->;"><a href="#comment_wrap" style="color:<!--{$out.feature_main.feature_comment_share_text_color}-->"></a></div>
+	<!--{/if}-->
+	<!--{if $out.version_code gte 6300}-->
+	<div class="share_btn" id="show_share_count" style="border-radius:15px 0px 0px 15px;z-index:1; background:<!--{$out.feature_main.feature_comment_share_label_color}-->;"><a href="javascript:;" onclick="go_share()" style="color:<!--{$out.feature_main.feature_comment_share_text_color}-->">分享</a></div>
+	<!--{/if}-->
+	<div id="main_content">
+	</div>
+<script type="text/template" id="main_tpl">
+	<% for(var i = 0; i < DATA.length; i++) { %>
+		<% var data = DATA[i];%>
+		<% if(data.TYPE == 2){ %>
+<!--{foreach from=$out.feature item=v name=a key=main_k}-->
+<% if(data.SECTION_ID == <!--{$main_k}-->) { %>
+<!--{if $v.is_header eq 1}-->
+	<!--{if $v.header_type eq 1}-->
+		<!--{if $v.header_content_arr1 neq ''}-->
+			<div class="focus" id="focus_01<!--{$main_k}-->">
+				<div class="focus_bd2">
+					<ul>
+					<!--{foreach from=$v.header_content_arr1 item=v1 name=a}-->
+						<!--{if $v1.img neq ''}-->
+							<li><a href="javascript:click_more(<!--{$v1.common_jump_id}-->)"><img src="<!--{$out.imgurl}--><!--{$v1.img}-->"/></a></li>
+						<!--{/if}-->
+					<!--{/foreach}-->
+					</ul>
+				</div>
+			</div>
+		<!--{/if}-->
+	<!--{elseif $v.header_type eq 2}-->
+		<!--{if $v.header_content_arr2 neq ''}-->
+			<div class="focus" id="focus_02<!--{$main_k}-->">
+				<div class="focus_bd">
+					<ul>
+					<!--{foreach from=$v.header_content_arr2 item=v2 key=k_v}-->
+						<!--{if $v2.img neq ''}-->
+							<li><a href="javascript:click_more(<!--{$v2.common_jump_id}-->)"><img src="<!--{$out.imgurl}--><!--{$v2.img}-->"/></a></li>
+						<!--{/if}-->
+					<!--{/foreach}-->
+					</ul>
+				</div>
+			</div>
+		<!--{/if}-->
+	<!--{elseif $v.header_type eq 3}-->
+		<!--{if $v.header_content_arr3 neq ''}-->
+			<div class="focus" id="focus_01<!--{$main_k}-->">
+				<div class="focus_bd2" id="focus_bd2<!--{$main_k}-->">
+					<ul>
+					<!--{foreach from=$v.header_content_arr3 item=v3 name=a}-->
+						<!--{if $v3.img neq ''}-->
+							<li><a href="javascript:click_more(<!--{$v3.common_jump_id}-->)"><img src="<!--{$out.imgurl}--><!--{$v3.img}-->"/></a></li>
+						<!--{/if}-->
+					<!--{/foreach}-->
+					</ul>
+				</div>
+				<div class="focus_dotted" id="focus_dotted_01<!--{$main_k}-->">
+					<ul></ul>
+				</div>
+			</div>
+		<!--{/if}-->
+	<!--{elseif $v.header_type eq 4}-->
+		<!--{if $v.header_content_arr4 neq ''}-->
+				<div class="focus" style="margin:6px 1% 0 0" id="focus_02<!--{$main_k}-->">
+					<div class="focus_bd" id="focus_bd<!--{$main_k}-->">
+						<ul style="width:99%">
+						<!--{foreach from=$v.header_content_arr4 item=v4 name=a key=k4}-->
+							<!--{if $v4.img neq '' && $k4%2==0}-->
+							<li><a href="javascript:click_more(<!--{$v4.common_jump_id}-->)"><img src="<!--{$out.imgurl}--><!--{$v4.img}-->"/></a>
+							</li>
+							</ul>
+								<!--{if $v.header_content_arr4[$k4+1]['img'] neq ''}-->
+									<ul>
+								<!--{/if}-->
+							<!--{else}-->
+								<!--{if $v4.img neq ''}-->
+								<li><a href="javascript:click_more(<!--{$v4.common_jump_id}-->)"><img src="<!--{$out.imgurl}--><!--{$v4.img}-->"/></a></li>
+								<!--{/if}-->
+							<!--{/if}-->
+						<!--{/foreach}-->
+					</div>
+					<div class="focus_dotted" id="focus_dotted_02<!--{$main_k}-->">
+						<ul></ul>
+					</div>
+				</div>
+		<!--{/if}-->
+	<!--{/if}-->
+<!--{/if}-->
+<div class="main" id="main<!--{$main_k}-->">
+	<!--{if $v.is_title eq 1}-->
+		<!--{if $v.title_type eq 1}-->
+			<div class="title" style="background:<!--{if $v.title_bg_type eq 1}-->none;<!--{elseif $v.title_bg_type eq 2 }--><!--{$v.title_bg_content}-->;<!--{elseif $v.title_bg_type eq 3 }-->url(<!--{$out.imgurl}--><!--{$v.title_bg_content}-->) no-repeat;background-size:100% 100%;<!--{/if}-->">
+				<a href="javascript:click_more(<!--{$v.title_common_jump_id}-->)"><h2 style="text-align:<!--{if $v.title_alignment_type eq 1}-->left<!--{elseif $v.title_alignment_type eq 2}-->center<!--{elseif $v.title_alignment_type eq 3}-->right<!--{/if}-->;font-size:<!--{$v.title_font_size}-->px;color:<!--{$v.title_font_color}-->;"><!--{$v.title_content}--></h2></a>
+			</div>
+		<!--{elseif $v.title_type eq 2}-->
+			<div class="title clear" style="background:<!--{if $v.title_bg_type eq 1}-->none;<!--{elseif $v.title_bg_type eq 2 }--><!--{$v.title_bg_content}-->;<!--{elseif $v.title_bg_type eq 3 }-->url(<!--{$out.imgurl}--><!--{$v.title_bg_content}-->) no-repeat;background-size:100% 100%;<!--{/if}-->">
+				<h2 style=""><img style="height:48px;<!--{if $v.title_alignment_type eq 1}-->float:left<!--{elseif $v.title_alignment_type eq 2}-->margin:0 auto<!--{elseif $v.title_alignment_type eq 3}-->float:right<!--{/if}-->" src="<!--{$out.imgurl}--><!--{$v.title_img}-->"/></h2>
+			</div>
+		<!--{/if}-->
+	<!--{/if}-->
+	<div class="mod">
+		<div class="mod_t" <!--{if $v.is_top eq 1}-->style="background:<!--{if $v.top_type eq 1}-->url('<!--{$out.new_static_url}-->/feature/images/top_type1.png') no-repeat;background-size:100% 100%;<!--{elseif $v.top_type eq 2}-->url('<!--{$out.new_static_url}-->/feature/images/long_line.png') no-repeat;background-size:100% 100%;<!--{elseif $v.top_type eq 3}-->url('<!--{$out.new_static_url}-->/feature/images/short_line.png')no-repeat;background-size:98% 98%;background-position:center;<!--{elseif $v.top_type eq 4}-->url('<!--{$out.imgurl}--><!--{$v.top_content}-->')no-repeat;background-size:100% 100%;<!--{/if}-->"<!--{/if}-->></div>
+		<div class="mod_m" <!--{if $v.is_bg eq 1}-->style="background:<!--{if $v.bg_type eq 1}--><!--{$v.bg_content}-->;<!--{elseif $v.bg_type eq 2 }-->url(<!--{$out.imgurl}--><!--{$v.bg_content}-->) no-repeat;background-size:100% 100%;<!--{/if}-->"<!--{/if}-->> 
+			<div class="description" id="description2">
+				<!--{if $v.is_label eq 1}-->
+					<div class="title2 <!--{if $v.label_bg_type eq 2}-->padding0<!--{/if}-->" style="background:<!--{if $v.label_bg_type eq 1}--><!--{$v.label_bg_content}--><!--{/if}-->;">
+					<!--{if $v.label_bg_type eq 2}-->
+						<img src="<!--{$out.imgurl}--><!--{$v.label_bg_content}-->"/>
+					<!--{/if}-->
+					<!--{if $v.label_type eq 1}-->
+						<h3 <!--{if $v.label_bg_type eq 2}-->class="h3_img"<!--{/if}--> style="background:url('<!--{$out.new_static_url}-->/feature/images/label_type1.png') no-repeat;background-size:100% 100%;"><!--{$v.label_pre_words}--></h3>
+					<!--{elseif $v.label_type eq 2}-->
+						<h3 <!--{if $v.label_bg_type eq 2}-->class="h3_img"<!--{/if}-->  style="background:url('<!--{$out.new_static_url}-->/feature/images/label_type2.png') no-repeat;background-size:100% 100%;"><!--{$v.label_pre_words}--></h3>
+					<!--{elseif $v.label_type eq 3}-->
+						<h3 <!--{if $v.label_bg_type eq 2}-->class="h3_img"<!--{/if}-->  style="background:url('<!--{$out.new_static_url}-->/feature/images/label_type3.png') no-repeat;background-size:100% 100%;"><!--{$v.label_pre_words}--></h3>
+					<!--{elseif $v.label_type eq 6}-->
+						<h3 <!--{if $v.label_bg_type eq 2}-->class="h3_img"<!--{/if}-->  style="background:url('<!--{$out.new_static_url}-->/feature/images/label_type4.png') no-repeat;background-size:100% 100%;"><!--{$v.label_pre_words}--></h3>
+					<!--{elseif $v.label_type eq 7}-->
+						<h3 <!--{if $v.label_bg_type eq 2}-->class="h3_img"<!--{/if}-->  style="background:url('<!--{$out.new_static_url}-->/feature/images/label_type5.png') no-repeat;background-size:100% 100%;"><!--{$v.label_pre_words}--></h3>
+					<!--{elseif $v.label_type eq 4}-->
+						<h3 <!--{if $v.label_bg_type eq 2}-->class="h3_img"<!--{/if}-->  style="font-size:<!--{$v.label_type_text_size}-->px;color:<!--{$v.label_type_text_color}-->"><!--{$v.label_type_text}--></h3>
+					<!--{elseif $v.label_type eq 5}-->
+						<img style="max-width:100%;<!--{if $v.label_bg_type eq 2}-->height:40px;position:absolute;left:0;top:50%;margin-top:-20px;<!--{/if}--> " src="<!--{$out.imgurl}--><!--{$v.label_type_img}-->"/>
+					<!--{/if}-->
+					<!--{if $v.is_one_download eq 1}-->
+					<a class="btns" style="background:<!--{$v.label_one_download_button_color}-->;color:<!--{$v.label_one_download_font_color}-->;border:1px solid <!--{$v.label_one_download_frame_color}-->;<!--{if $out.version_code lt 6300}-->display:none;<!--{/if}-->" href="javascript:" onclick="download_all(<!--{$main_k}-->)">一键下载</a>
+					<!--{/if}-->
+					</div>
+				<!--{/if}-->
+				<p><!--{$v.content}--></p>
+			</div>
+			<% var h=i+1; if(h<DATA.length) { var data2 = DATA[h]; if(data.SECTION_ID == data2.SECTION_ID) { %>
+			<!--{if $v.is_soft eq 1}-->
+				<!--{if $v.soft_type eq 1}-->
+					<!--{if $v.soft_split_line_type eq 1}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/long_line.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 2}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/soft_split2.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 3}-->
+					<div class="line"><img src="<!--{$out.imgurl}--><!--{$v.soft_split_line_custom_pic}-->"/></div>
+					<!--{/if}-->
+					
+						<% 
+						if(DATA[h])
+						{
+							var item = DATA[h];
+							if(item.TYPE == 1)
+							{
+								for(var j = 0; j < item['INFO'].length; j++) 
+								{
+									var val = item['INFO'][j];
+									soft_lists_go.push(item['INFO'][j]);
+									var length = item['INFO'][j].length;%>
+									<div class="app1">
+										<div class="app_icon">
+											<img onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val[1]%>" alt="<%=val[2]%>" />
+										</div>
+										<div class="app_txt">
+											<div class="app_name" style="color:<!--{$v.soft_info_color}-->"><% if(val[length-3]) { %><%=val[length-3]%><% } else { %><%=val[2]%><% }%></div>
+											<div class="app_inro" style="color:<!--{$v.soft_info_color}-->"><span><%=bytesToSize(val[9])%></span>&nbsp&nbsp&nbsp<em><%=val[11]%>次下载</em></div>
+											<div class="app_des" style="color:<!--{$v.soft_info_color}-->"><%=val[23]%></div>
+											<% var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(item['INFO'][j][0]));
+											var cmd = 'var soft_status=' + json_datas;
+											eval(cmd);
+											window.AnzhiActivitys.registerDownloadObserver(parseInt(item['INFO'][j][0]));//注册下载状态监听 软件id
+											window.AnzhiActivitys.registerInstallObserver(item['INFO'][j][7]);//注册安装状态监听 包名
+											if(soft_status == 1){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载中</a>
+											<% }else if(soft_status == 2){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 3){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 4){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+											<% }else if(soft_status == 5){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="installApp('<%=val[0]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">安装</a>
+											<% }else if(soft_status == 6){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="openApp('<%=val[7]%>','<%=val[0]%>','<%=aid%>','<%=sid%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+											<% }else if(soft_status == 8){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 9){%>
+												<a href="javascript:" value="校验中" id="<%=val[0]%>" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">校验中</a>
+											<% }else if(soft_status == 10){%>
+												<a href="javascript:" id="<%=val[0]%>" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+											<% }else if(soft_status == -1){%>
+												<% var soft_other_status = window.AnzhiActivitys.isInstalledApp(item['INFO'][j][7],parseInt(item['INFO'][j][13]));
+												if(soft_other_status == -2){%>
+													<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+												<% }else if(soft_other_status == -1){%>
+													<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">更新</a>
+												<% }else if(soft_other_status == 0){%>
+													<a href="javascript:" id="<%=val[0]%>" onclick="openApp('<%=val[7]%>','<%=val[0]%>','<%=aid%>','<%=sid%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+												<% }else if(soft_other_status == 1){ %>
+													<a href="javascript:" id="<%=val[0]%>" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+												<% }
+											}
+											%>
+										</div>
+									</div>
+								<%}
+							}
+						}%>
+					
+					<!--{if $v.soft_split_line_type eq 1}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/long_line.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 2}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/soft_split2.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 3}-->
+					<div class="line"><img src="<!--{$out.imgurl}--><!--{$v.soft_split_line_custom_pic}-->"/></div>
+					<!--{/if}-->
+				<!--{elseif $v.soft_type eq 2}-->
+					<!--{if $v.soft_split_line_type eq 1}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/long_line.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 2}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/soft_split2.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 3}-->
+					<div class="line"><img src="<!--{$out.imgurl}--><!--{$v.soft_split_line_custom_pic}-->"/></div>
+					<!--{/if}-->
+					
+						<% 
+						
+						if(DATA[h])
+						{
+							var item = DATA[h];
+							if(item.TYPE == 1)
+							{
+								for(var j = 0; j < item['INFO'].length; j++) 
+								{
+									var val = item['INFO'][j]; 
+									soft_lists_go.push(item['INFO'][j]);
+									var length = item['INFO'][j].length;%>
+									<div class="app1">
+										<div class="app_icon">
+											<img onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val[1]%>" alt="<%=val[2]%>" />
+										</div>
+										<div class="app_txt2">
+											<div class="app_name" style="background:
+												<!--{if $v.soft_label_type eq 1}-->
+												url('<!--{$out.new_static_url}-->/feature/images/soft_label1.png')
+												<!--{elseif $v.soft_label_type eq 2 }--> url('<!--{$out.new_static_url}-->/feature/images/soft_label2.png')
+												<!--{elseif $v.soft_label_type eq 3}-->
+												url('<!--{$out.new_static_url}-->/feature/images/soft_label3.png')
+												<!--{elseif $v.soft_label_type eq 4 }-->
+												url('<!--{$out.new_static_url}-->/feature/images/soft_label4.png')
+												<!--{elseif $v.soft_label_type eq 5 }-->
+												url('<!--{$out.new_static_url}-->/feature/images/soft_label5.png')
+												<!--{/if}-->;background-size:100% 100%;"> <% if(val[length-3]) { %><%=val[length-3]%><% } else { %><%=val[2]%><% }%>
+											</div>
+											<div class="app_des" style="color:<!--{$v.soft_recommend_info_color}-->"><%=val[length-2]%></div>
+											<div class="app_des" style="color:<!--{$v.soft_recommend_people_color}-->"><%=val[length-1]%></div>
+											<% var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(item['INFO'][j][0]));
+											var cmd = 'var soft_status=' + json_datas;
+											eval(cmd);
+											window.AnzhiActivitys.registerDownloadObserver(parseInt(item['INFO'][j][0]));//注册下载状态监听 软件id
+											window.AnzhiActivitys.registerInstallObserver(item['INFO'][j][7]);//注册安装状态监听 包名
+											if(soft_status == 1){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载中</a>
+											<% }else if(soft_status == 2){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 3){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 4){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+											<% }else if(soft_status == 5){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="installApp('<%=val[0]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">安装</a>
+											<% }else if(soft_status == 6){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="openApp('<%=val[7]%>','<%=val[0]%>','<%=aid%>','<%=sid%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+											<% }else if(soft_status == 8){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 9){%>
+												<a href="javascript:" id="<%=val[0]%>" value="校验中" id="<%=val[0]%>" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">校验中</a>
+											<% }else if(soft_status == 10){%>
+												<a href="javascript:" id="<%=val[0]%>" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+											<% }else if(soft_status == -1){%>
+												<% var soft_other_status = window.AnzhiActivitys.isInstalledApp(item['INFO'][j][7],parseInt(item['INFO'][j][13]));
+												if(soft_other_status == -2){%>
+													<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+												<% }else if(soft_other_status == -1){%>
+													<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">更新</a>
+												<% }else if(soft_other_status == 0){%>
+													<a href="javascript:" id="<%=val[0]%>" onclick="openApp('<%=val[7]%>','<%=val[0]%>','<%=aid%>','<%=sid%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+												<% }else if(soft_other_status == 1){ %>
+													<a href="javascript:" id="<%=val[0]%>" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+												<% }
+											}
+											%>
+										</div>
+									</div>
+								<%}
+							}
+						}%>
+					
+					<!--{if $v.soft_split_line_type eq 1}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/long_line.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 2}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/soft_split2.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 3}-->
+					<div class="line"><img src="<!--{$out.imgurl}--><!--{$v.soft_split_line_custom_pic}-->"/></div>
+					<!--{/if}-->
+				<!--{elseif $v.soft_type eq 3}-->
+					<!--{if $v.soft_split_line_type eq 1}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/long_line.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 2}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/soft_split2.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 3}-->
+					<div class="line"><img src="<!--{$out.imgurl}--><!--{$v.soft_split_line_custom_pic}-->"/></div>
+					<!--{/if}-->
+					
+						<% 
+						
+						if(DATA[h])
+						{
+							var item = DATA[h];
+							if(item.TYPE == 1)
+							{%>
+								<div class="list">
+									<ul class="list_app4">
+										<%for(var j = 0; j < item['INFO'].length; j++) 
+										{
+											if(item['INFO'][j])
+											{
+												var val = item['INFO'][j]; 
+												soft_lists_go.push(item['INFO'][j]);
+												var length = item['INFO'][j].length;%>
+												<li>
+													<img onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val[1]%>" alt="<%=val[2]%>" />
+													<p class="app_name" style="color:<!--{$v.soft_info_color}-->"><% if(val[length-3]) { %><%=val[length-3]%><% } else { %><%=val[2]%><% }%></p>
+													
+													<% var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(item['INFO'][j][0]));
+													var cmd = 'var soft_status=' + json_datas;
+													eval(cmd);
+													window.AnzhiActivitys.registerDownloadObserver(parseInt(item['INFO'][j][0]));//注册下载状态监听 软件id
+													window.AnzhiActivitys.registerInstallObserver(item['INFO'][j][7]);//注册安装状态监听 包名
+													if(soft_status == 1){%>
+														<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载中</a>
+													<% }else if(soft_status == 2){%>
+														<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+													<% }else if(soft_status == 3){%>
+														<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+													<% }else if(soft_status == 4){%>
+														<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+													<% }else if(soft_status == 5){%>
+														<a href="javascript:" id="<%=val[0]%>" onclick="installApp('<%=val[0]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">安装</a>
+													<% }else if(soft_status == 6){%>
+														<a href="javascript:" id="<%=val[0]%>" onclick="openApp('<%=val[7]%>','<%=val[0]%>','<%=aid%>','<%=sid%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+													<% }else if(soft_status == 8){%>
+														<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+													<% }else if(soft_status == 9){%>
+														<a href="javascript:" id="<%=val[0]%>" value="校验中" id="<%=val[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">校验中</a>
+													<% }else if(soft_status == 10){%>
+														<a href="javascript:" id="<%=val[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+													<% }else if(soft_status == -1){%>
+														<% var soft_other_status = window.AnzhiActivitys.isInstalledApp(item['INFO'][j][7],parseInt(item['INFO'][j][13]));
+														if(soft_other_status == -2){%>
+															<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+														<% }else if(soft_other_status == -1){%>
+															<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">更新</a>
+														<% }else if(soft_other_status == 0){%>
+															<a href="javascript:" id="<%=val[0]%>" onclick="openApp('<%=val[7]%>','<%=val[0]%>','<%=aid%>','<%=sid%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+														<% }else if(soft_other_status == 1){ %>
+															<a href="javascript:" id="<%=val[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+														<% }
+													}
+													%>
+
+													<p class="app_des" style="color:<!--{$v.soft_recommend_info_color}-->"><%=val[length-2]%></p>
+												</li>
+											<% }
+										}%>
+										<div class="clear"></div>
+									</ul>
+									<div class="clear"></div>
+								</div>
+							<%}
+						}%>
+					
+					<!--{if $v.soft_split_line_type eq 1}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/long_line.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 2}-->
+					<div class="line"><img src="<!--{$out.new_static_url}-->/feature/images/soft_split2.png"/></div>
+					<!--{elseif $v.soft_split_line_type eq 3}-->
+					<div class="line"><img src="<!--{$out.imgurl}--><!--{$v.soft_split_line_custom_pic}-->"/></div>
+					<!--{/if}-->
+				<!--{elseif $v.soft_type eq 4}-->
+				<div class="list clear" style="background:<!--{$v.soft_recommend_info_bg}-->">
+					<div class="list_des">
+						<h4 style="color:<!--{$v.soft_title_color}-->;font-size:<!--{$v.soft_title_size}-->px"><!--{$v.soft_title}--></h4>
+						<p style="color:<!--{$v.soft_abstract_color}-->;font-size:<!--{$v.soft_abstract_size}-->px"><!--{$v.soft_abstract}--></p>
+						<a href="javascript:" onclick="download_all(<!--{$main_k}-->)" class="btns2" style="background:url('<!--{$out.imgurl}--><!--{$v.soft_specila_one_download_pic}-->') no-repeat;background-size:100% 100%;width:100px;height:30px;<!--{if $out.version_code lt 6300}-->display:none;<!--{/if}-->"></a>
+					</div>
+					
+						<% 
+						
+						if(DATA[h])
+						{
+							var item = DATA[h];
+							if(item.TYPE == 1)
+							{
+								var val = item['INFO'][0];
+								soft_lists_go.push(item['INFO'][0]);
+								var length = item['INFO'][0].length;%> 
+								<ul class="list_app">
+									<% if(val[0]) { %>
+									<li style="background:<!--{$v.soft1_bg_color}-->">
+										<img onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val[1]%>" alt="<%=val[2]%>"/>
+										<p class="app_name"><% if(val[length-3]) { %><%=val[length-3]%><% } else { %><%=val[2]%><% }%></p>
+										<p class="app_size"><%=bytesToSize(val[9])%> </p>
+										
+										<% var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(item['INFO'][0][0]));
+										var cmd = 'var soft_status=' + json_datas;
+										eval(cmd);
+										window.AnzhiActivitys.registerDownloadObserver(parseInt(item['INFO'][0][0]));//注册下载状态监听 软件id
+										window.AnzhiActivitys.registerInstallObserver(item['INFO'][0][7]);//注册安装状态监听 包名
+										if(soft_status == 1){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载中</a>
+										<% }else if(soft_status == 2){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+										<% }else if(soft_status == 3){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+										<% }else if(soft_status == 4){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+										<% }else if(soft_status == 5){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="installApp('<%=val[0]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">安装</a>
+										<% }else if(soft_status == 6){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="openApp('<%=val[7]%>','<%=val[0]%>','<%=aid%>','<%=sid%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+										<% }else if(soft_status == 8){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+										<% }else if(soft_status == 9){%>
+											<a href="javascript:" id="<%=val[0]%>" value="校验中" id="<%=val[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">校验中</a>
+										<% }else if(soft_status == 10){%>
+											<a href="javascript:" id="<%=val[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+										<% }else if(soft_status == -1){%>
+											<% var soft_other_status = window.AnzhiActivitys.isInstalledApp(item['INFO'][0][7],parseInt(item['INFO'][0][13]));
+											if(soft_other_status == -2){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+											<% }else if(soft_other_status == -1){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">更新</a>
+											<% }else if(soft_other_status == 0){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="openApp('<%=val[7]%>','<%=val[0]%>','<%=aid%>','<%=sid%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+											<% }else if(soft_other_status == 1){ %>
+												<a href="javascript:" id="<%=val[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+											<% }
+										}
+										%>
+
+									</li>
+									<% }
+									if(item['INFO'][1])
+									{
+										var val1 = item['INFO'][1]; 
+										soft_lists_go.push(item['INFO'][1]);
+										var length1 = item['INFO'][1].length; 
+										if(val1[0]) { %>
+											<li style="background:<!--{$v.soft2_bg_color}-->">
+											<img onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val1[1]%>" alt="<%=val1[2]%>"/>
+											<p class="app_name"><% if(val1[length1-3]) { %><%=val1[length1-3]%><% } else { %><%=val1[2]%><% }%></p>
+											<p class="app_size"> <%=bytesToSize(val1[9])%> </p>
+											
+											<% var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(item['INFO'][1][0]));
+											var cmd = 'var soft_status=' + json_datas;
+											eval(cmd);
+											window.AnzhiActivitys.registerDownloadObserver(parseInt(item['INFO'][1][0]));//注册下载状态监听 软件id
+											window.AnzhiActivitys.registerInstallObserver(item['INFO'][1][7]);//注册安装状态监听 包名
+											if(soft_status == 1){%>
+												<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载中</a>
+											<% }else if(soft_status == 2){%>
+												<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 3){%>
+												<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 4){%>
+												<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+											<% }else if(soft_status == 5){%>
+												<a href="javascript:" id="<%=val1[0]%>" onclick="installApp('<%=val1[0]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">安装</a>
+											<% }else if(soft_status == 6){%>
+												<a href="javascript:" id="<%=val1[0]%>" onclick="openApp('<%=val1[7]%>','<%=val1[0]%>','<%=aid%>','<%=sid%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+											<% }else if(soft_status == 8){%>
+												<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 9){%>
+												<a href="javascript:" id="<%=val1[0]%>" value="校验中" id="<%=val1[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">校验中</a>
+											<% }else if(soft_status == 10){%>
+												<a href="javascript:" id="<%=val1[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+											<% }else if(soft_status == -1){%>
+												<% var soft_other_status = window.AnzhiActivitys.isInstalledApp(item['INFO'][1][7],parseInt(item['INFO'][1][13]));
+												if(soft_other_status == -2){%>
+													<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+												<% }else if(soft_other_status == -1){%>
+													<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">更新</a>
+												<% }else if(soft_other_status == 0){%>
+													<a href="javascript:" id="<%=val1[0]%>" onclick="openApp('<%=val1[7]%>','<%=val1[0]%>','<%=aid%>','<%=sid%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+												<% }else if(soft_other_status == 1){ %>
+													<a href="javascript:" id="<%=val1[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+												<% }
+											}
+											%>
+										
+										</li>
+										<% } 
+									}%>
+									<div class="clear"></div>
+								</ul>
+								<% 
+								if(item['INFO'][2])
+								{
+									var val2 = item['INFO'][2]; 
+									soft_lists_go.push(item['INFO'][2]);
+									var length2 = item['INFO'][2].length;
+									if(val2[0]) { %>
+										<div class="list_app2" style="background:<!--{$v.soft3_bg_color}-->">
+											<img onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val2[1]%>" alt="<%=val2[2]%>"/>
+											<div class="list_app2_txt">
+												<p class="app_name"><% if(val2[length2-3]) { %><%=val2[length2-3]%><% } else { %><%=val2[2]%><% }%></p>
+												<p class="app_size"><%=bytesToSize(val2[9])%> </p>
+											</div>
+											
+											<% var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(item['INFO'][2][0]));
+											var cmd = 'var soft_status=' + json_datas;
+											eval(cmd);
+											window.AnzhiActivitys.registerDownloadObserver(parseInt(item['INFO'][2][0]));//注册下载状态监听 软件id
+											window.AnzhiActivitys.registerInstallObserver(item['INFO'][2][7]);//注册安装状态监听 包名
+											if(soft_status == 1){%>
+												<a href="javascript:" id="<%=val2[0]%>" onclick="download_apk('<%=aid%>','<%=val2[0]%>','<%=val2[7]%>','<%=val2[2]%>','<%=val2[13]%>','<%=val2[9]%>',0,0,'<%=val2[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载中</a>
+											<% }else if(soft_status == 2){%>
+												<a href="javascript:" id="<%=val2[0]%>" onclick="download_apk('<%=aid%>','<%=val2[0]%>','<%=val2[7]%>','<%=val2[2]%>','<%=val2[13]%>','<%=val2[9]%>',0,0,'<%=val2[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 3){%>
+												<a href="javascript:" id="<%=val2[0]%>" onclick="download_apk('<%=aid%>','<%=val2[0]%>','<%=val2[7]%>','<%=val2[2]%>','<%=val2[13]%>','<%=val2[9]%>',0,0,'<%=val2[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 4){%>
+												<a href="javascript:" id="<%=val2[0]%>" onclick="download_apk('<%=aid%>','<%=val2[0]%>','<%=val2[7]%>','<%=val2[2]%>','<%=val2[13]%>','<%=val2[9]%>',0,0,'<%=val2[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+											<% }else if(soft_status == 5){%>
+												<a href="javascript:" id="<%=val2[0]%>" onclick="installApp('<%=val2[0]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">安装</a>
+											<% }else if(soft_status == 6){%>
+												<a href="javascript:" id="<%=val2[0]%>" onclick="openApp('<%=val2[7]%>','<%=val2[0]%>','<%=aid%>','<%=sid%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+											<% }else if(soft_status == 8){%>
+												<a href="javascript:" id="<%=val2[0]%>" onclick="download_apk('<%=aid%>','<%=val2[0]%>','<%=val2[7]%>','<%=val2[2]%>','<%=val2[13]%>','<%=val2[9]%>',0,0,'<%=val2[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+											<% }else if(soft_status == 9){%>
+												<a href="javascript:" id="<%=val2[0]%>" value="校验中" id="<%=val2[0]%>" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">校验中</a>
+											<% }else if(soft_status == 10){%>
+												<a href="javascript:" id="<%=val2[0]%>" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+											<% }else if(soft_status == -1){%>
+												<% var soft_other_status = window.AnzhiActivitys.isInstalledApp(item['INFO'][2][7],parseInt(item['INFO'][2][13]));
+												if(soft_other_status == -2){%>
+													<a href="javascript:" id="<%=val2[0]%>" onclick="download_apk('<%=aid%>','<%=val2[0]%>','<%=val2[7]%>','<%=val2[2]%>','<%=val2[13]%>','<%=val2[9]%>',0,0,'<%=val2[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+												<% }else if(soft_other_status == -1){%>
+													<a href="javascript:" id="<%=val2[0]%>" onclick="download_apk('<%=aid%>','<%=val2[0]%>','<%=val2[7]%>','<%=val2[2]%>','<%=val2[13]%>','<%=val2[9]%>',0,0,'<%=val2[27]%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">更新</a>
+												<% }else if(soft_other_status == 0){%>
+													<a href="javascript:" id="<%=val2[0]%>" onclick="openApp('<%=val2[7]%>','<%=val2[0]%>','<%=aid%>','<%=sid%>');" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+												<% }else if(soft_other_status == 1){ %>
+													<a href="javascript:" id="<%=val2[0]%>" class="app_btn" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+												<% }
+											}
+											%>
+
+										</div>
+										<div class="clear"></div>
+									<% }
+								}
+							}
+						}%>
+					
+				</div>
+				<!--{elseif $v.soft_type eq 5}-->
+				<div class="list" style="background:<!--{$v.soft_recommend_info_bg}-->">
+					<div class="list_des" style="background:<!--{$v.soft_all_bg}-->">
+						<h4 style="color:<!--{$v.soft_title_color}-->;font-size:<!--{$v.soft_title_size}-->px"><!--{$v.soft_title}--></h4>
+						<p style="color:<!--{$v.soft_abstract_color}-->;font-size:<!--{$v.soft_abstract_size}-->px"><!--{$v.soft_abstract}--></p>
+						<a href="javascript:" onclick="download_all(<!--{$main_k}-->)" class="btns2" style="background:url('<!--{$out.imgurl}--><!--{$v.soft_specila_one_download_pic}-->') no-repeat;background-size:100% 100%;width:100px;height:30px;<!--{if $out.version_code lt 6300}-->display:none;<!--{/if}-->"></a>
+					</div>
+					
+						<% 
+						
+						if(DATA[h])
+						{
+							var item = DATA[h];
+							if(item.TYPE == 1)
+							{
+								var val = item['INFO'][0];
+								soft_lists_go.push(item['INFO'][0]);
+								var length = item['INFO'][0].length;%> 
+								<ul class="list_app list_app3">
+									<% if(val[0]) { %>
+									<li>
+										<img onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val[1]%>" alt="<%=val[2]%>"/>
+										<p class="app_name"><% if(val[length-3]) { %><%=val[length-3]%><% } else { %><%=val[2]%><% }%></p>
+										<p class="app_size" style="color:<!--{$v.soft_recommend_info_color}-->"><%=val[length-2]%></p>
+										
+										<% var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(item['INFO'][0][0]));
+										var cmd = 'var soft_status=' + json_datas;
+										eval(cmd);
+										window.AnzhiActivitys.registerDownloadObserver(parseInt(item['INFO'][0][0]));//注册下载状态监听 软件id
+										window.AnzhiActivitys.registerInstallObserver(item['INFO'][0][7]);//注册安装状态监听 包名
+										if(soft_status == 1){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载中</a>
+										<% }else if(soft_status == 2){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+										<% }else if(soft_status == 3){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+										<% }else if(soft_status == 4){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+										<% }else if(soft_status == 5){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="installApp('<%=val[0]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">安装</a>
+										<% }else if(soft_status == 6){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="openApp('<%=val[7]%>','<%=val[0]%>','<%=aid%>','<%=sid%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+										<% }else if(soft_status == 8){%>
+											<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+										<% }else if(soft_status == 9){%>
+											<a href="javascript:" id="<%=val[0]%>" value="校验中" id="<%=val[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">校验中</a>
+										<% }else if(soft_status == 10){%>
+											<a href="javascript:" id="<%=val[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+										<% }else if(soft_status == -1){%>
+											<% var soft_other_status = window.AnzhiActivitys.isInstalledApp(item['INFO'][0][7],parseInt(item['INFO'][0][13]));
+											if(soft_other_status == -2){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+											<% }else if(soft_other_status == -1){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="download_apk('<%=aid%>','<%=val[0]%>','<%=val[7]%>','<%=val[2]%>','<%=val[13]%>','<%=val[9]%>',0,0,'<%=val[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">更新</a>
+											<% }else if(soft_other_status == 0){%>
+												<a href="javascript:" id="<%=val[0]%>" onclick="openApp('<%=val[7]%>','<%=val[0]%>','<%=aid%>','<%=sid%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+											<% }else if(soft_other_status == 1){ %>
+												<a href="javascript:" id="<%=val[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+											<% }
+										}
+										%>
+										
+									</li>
+									<% }
+									if(item['INFO'][1])
+									{
+										var val1 = item['INFO'][1]; 
+										soft_lists_go.push(item['INFO'][1]);
+										var length1 = item['INFO'][1].length;
+										if(val1[0]) { %>
+											<li>
+												<img onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val1[1]%>" alt="<%=val1[2]%>"/>
+												<p class="app_name"><% if(val1[length1-3]) { %><%=val1[length1-3]%><% } else { %><%=val1[2]%><% }%></p>
+												<p class="app_size" style="color:<!--{$v.soft_recommend_info_color}-->"><%=val1[length1-2]%></p>
+												
+												<% var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(item['INFO'][1][0]));
+												var cmd = 'var soft_status=' + json_datas;
+												eval(cmd);
+												window.AnzhiActivitys.registerDownloadObserver(parseInt(item['INFO'][1][0]));//注册下载状态监听 软件id
+												window.AnzhiActivitys.registerInstallObserver(item['INFO'][1][7]);//注册安装状态监听 包名
+												if(soft_status == 1){%>
+													<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载中</a>
+												<% }else if(soft_status == 2){%>
+													<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+												<% }else if(soft_status == 3){%>
+													<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+												<% }else if(soft_status == 4){%>
+													<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+												<% }else if(soft_status == 5){%>
+													<a href="javascript:" id="<%=val1[0]%>" onclick="installApp('<%=val1[0]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">安装</a>
+												<% }else if(soft_status == 6){%>
+													<a href="javascript:" id="<%=val1[0]%>" onclick="openApp('<%=val1[7]%>','<%=val1[0]%>','<%=aid%>','<%=sid%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+												<% }else if(soft_status == 8){%>
+													<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">继续</a>
+												<% }else if(soft_status == 9){%>
+													<a href="javascript:" id="<%=val1[0]%>" value="校验中" id="<%=val1[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">校验中</a>
+												<% }else if(soft_status == 10){%>
+													<a href="javascript:" id="<%=val1[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+												<% }else if(soft_status == -1){%>
+													<% var soft_other_status = window.AnzhiActivitys.isInstalledApp(item['INFO'][1][7],parseInt(item['INFO'][1][13]));
+													if(soft_other_status == -2){%>
+														<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">下载</a>
+													<% }else if(soft_other_status == -1){%>
+														<a href="javascript:" id="<%=val1[0]%>" onclick="download_apk('<%=aid%>','<%=val1[0]%>','<%=val1[7]%>','<%=val1[2]%>','<%=val1[13]%>','<%=val1[9]%>',0,0,'<%=val1[27]%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">更新</a>
+													<% }else if(soft_other_status == 0){%>
+														<a href="javascript:" id="<%=val1[0]%>" onclick="openApp('<%=val1[7]%>','<%=val1[0]%>','<%=aid%>','<%=sid%>');" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">打开</a>
+													<% }else if(soft_other_status == 1){ %>
+														<a href="javascript:" id="<%=val1[0]%>" class="btns2" style="background:<!--{$v.soft_download_button_color}-->;color:<!--{$v.soft_download_font_color}-->;border:1px solid <!--{$v.soft_download_frame_color}-->">已下载</a>
+													<% }
+												}
+												%>
+	
+											</li>
+										<% } 
+									}%>
+									<div class="clear"></div>
+								</ul>
+								<% 
+							}
+						}%>
+					
+					<div class="clear"></div>
+				</div>
+				<!--{/if}-->
+			<!--{/if}-->
+			<% } } %>
+			<!--{if $v.is_recommend eq 1}-->
+				<!--{if $v.recommend_type eq 1}-->
+					<!--{if $v.recommend_content_arr1 neq ''}-->
+						<div class="focus" id="recommend_focus_01<!--{$main_k}-->">
+							<div class="focus_bd2" id="recommend_focus_bd2<!--{$main_k}-->">
+								<ul>
+								<!--{foreach from=$v.recommend_content_arr1 item=f1 name=a}-->
+									<!--{if $f1.img neq ''}-->
+										<li><a href="javascript:click_more(<!--{$f1.common_jump_id}-->)"><img src="<!--{$out.imgurl}--><!--{$f1.img}-->"/></a></li>
+									<!--{/if}-->
+								<!--{/foreach}-->
+								</ul>
+							</div>
+						</div>
+					<!--{/if}-->
+				<!--{elseif $v.recommend_type eq 2}-->
+					<!--{if $v.recommend_content_arr2 neq ''}-->
+						<div class="focus" id="recommend_focus_02<!--{$main_k}-->">
+							<div class="focus_bd" id="recommend_focus_bd<!--{$main_k}-->">
+								<ul>
+								<!--{foreach from=$v.recommend_content_arr2 item=f2 name=a}-->
+									<!--{if $f2.img neq ''}-->
+										<li><a href="javascript:click_more(<!--{$f2.common_jump_id}-->)"><img src="<!--{$out.imgurl}--><!--{$f2.img}-->"/></a></li>
+									<!--{/if}-->
+								<!--{/foreach}-->
+								</ul>
+							</div>
+						</div>
+					<!--{/if}-->
+				<!--{elseif $v.recommend_type eq 3}-->
+					<!--{if $v.recommend_content_arr3 neq ''}-->
+						<div class="focus" id="recommend_focus_01<!--{$main_k}-->">
+							<div class="focus_bd2" id="recommend_focus_bd2<!--{$main_k}-->">
+							<ul>
+								<!--{foreach from=$v.recommend_content_arr3 item=f3 name=a}-->
+									<!--{if $f3.img neq ''}-->
+										<li><a href="javascript:click_more(<!--{$f3.common_jump_id}-->)"><img src="<!--{$out.imgurl}--><!--{$f3.img}-->"/></a></li>
+									<!--{/if}-->
+								<!--{/foreach}-->
+							</ul>
+							</div>
+							<div class="focus_dotted" id="recommend_focus_dotted_01<!--{$main_k}-->">
+								<ul></ul>
+							</div>
+						</div>
+					<!--{/if}-->
+				<!--{elseif $v.recommend_type eq 4}-->
+					<!--{if $v.recommend_content_arr4 neq ''}-->
+							<div class="focus" id="recommend_focus_02<!--{$main_k}-->">
+								<div class="focus_bd" id="recommend_focus_bd<!--{$main_k}-->">
+									<ul>
+									<!--{foreach from=$v.recommend_content_arr4 item=f4 name=a key=kf4}-->
+										<!--{if $f4.img neq '' && $kf4%2==0}-->
+										<li><a href="javascript:click_more(<!--{$f4.common_jump_id}-->)"><img src="<!--{$out.imgurl}--><!--{$f4.img}-->"/></a></li>
+										</ul>
+											<!--{if $v.recommend_content_arr4[$kf4+1]['img'] neq ''}-->
+												<ul>
+											<!--{/if}-->
+										<!--{else}-->
+										<!--{if $f4.img neq ''}-->
+										<li><a href="javascript:click_more(<!--{$f4.common_jump_id}-->)"><img src="<!--{$out.imgurl}--><!--{$f4.img}-->"/></a></li>
+										<!--{/if}-->
+										<!--{/if}-->
+									<!--{/foreach}-->
+								</div>
+								<div class="focus_dotted" id="recommend_focus_dotted_02<!--{$main_k}-->">
+									<ul></ul>
+								</div>
+							</div>
+					<!--{/if}-->
+				<!--{/if}-->
+			<!--{/if}-->
+		</div>
+		<div class="mod_b" <!--{if $v.is_ending eq 1}-->style="background:<!--{if $v.ending_type eq 1}-->url('<!--{$out.new_static_url}-->/feature/images/end_type1.png') no-repeat; background-size:100% 100%;<!--{elseif $v.ending_type eq 2}-->url('<!--{$out.new_static_url}-->/feature/images/long_line.png') no-repeat; background-size:100% 100%; <!--{elseif $v.ending_type eq 3}-->url('<!--{$out.new_static_url}-->/feature/images/short_line.png') no-repeat; background-size:98% 98%;background-position:center;<!--{elseif $v.ending_type eq 4}-->url('<!--{$out.imgurl}--><!--{$v.ending_content}-->') no-repeat; background-size:100% 100%;<!--{/if}-->"<!--{/if}-->></div>
+	</div>
+</div>
+<% } %>
+<!--{/foreach}-->
+<% } } %>
+</script>
+<script type="text/template" id="comment_tpl">
+<% 	 var add_ul  = page;
+	for(var i = 0; i < DATA.COMMENTS.length; i++) { 
+		var val = DATA.COMMENTS[i];
+		if(val.TYPE != curr_type) { 
+		if(curr_type > 0) { %>
+			</ul>
+		<% } %>	
+		<div class="comment_title"><%=DATA.GROUP_INFO[curr_index][1]%></div>
+		<% curr_type = val.TYPE; curr_index++; %>
+		<ul class="comment_list">
+	<% } if(add_ul >0) { %><ul class="comment_list"><% add_ul=0; } %>
+	<li>
+		<img class="comment_img" onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val['USER'][2]%>">
+		<div class="comment_r">
+			<div class="comment_name clear">
+				<p><%=val['USER'][1]%></p>
+				<span><%=val['COMMENT'][3]%></span>
+			</div>
+			<p class="comment_cnt"><%=val['COMMENT'][1]%></p>
+			<div class="comment_info">
+				<p class="phone_verson"><%=val['COMMENT'][6]%></p>
+				<div class="comment_infor">
+					<a href="javascript:" onclick="window.AnzhiActivitys.startSubjectCommentDetail(<%=val['COMMENT'][0]%>);"><span class="comment_infor2">(<%=val['COMMENT'][4]%>)</span></a>
+					<a href="javascript:"  onclick="add_praise(this,<%=val['COMMENT'][0]%>,<%=val['COMMENT'][5]%>)">
+						<span class="comment_num">
+						<%  var comment_id = parseInt(val['COMMENT'][0]);
+							if(window.AnzhiActivitys.isSubjectCommentPraised(comment_id)==true)
+							{%>
+								<i class="comment_icon  comment_act"></i>
+							<%} 
+							else {%>
+								<i class="comment_icon"></i><font>+1</font>
+							<%}
+						%>
+							(<%=val['COMMENT'][5]%>)
+						</span>
+					</a>
+					<em <% if(val.REPLAY.length<1) { %> style="background:none;"<% } %>></em>
+				</div>
+				<div class="clear"></div>
+			</div>
+		</div>
+		<% if(val.REPLAY.length>0) { %>
+		<ul class="replay_list">
+			<%for(var j = 0; j < val.REPLAY.length; j++) { 
+				var re_val = val.REPLAY[j]; %>
+				<li>
+					<img class="comment_img" onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=re_val[2]%>">
+					<div class="comment_r">
+						<div class="comment_name clear">
+							<p><%=re_val[1]%></p>
+							<span><%=re_val[6]%></span>
+						</div>
+						<p class="comment_cnt"><%=re_val[7]%><% if(re_val[8]==3) { %>//@<%=re_val[9]%>:<%=re_val[11]%><% }%></p>
+						<div class="comment_info">
+							<p class="phone_verson"><%=re_val[5]%></p>
+						</div>
+					</div>
+				</li>
+			<%} %>
+			<div class="clear"></div>
+		</ul>
+		<% } %>
+	</li>
+<%}
+	if(curr_type > 0) { %>
+	</ul>
+<% } %>	
+</script>
+<!--{if $out.version_code gt 6110}-->
+<a name="for_comment"></a>
+<div class="comment_wrap" id="comment_wrap" style="background: rgb(255, 255, 255) none repeat scroll 0% 0%; padding: 10px 0px;">
+</div>
+<div id="applist_more" style="background:#fff; padding: 0 0 10px;  overflow: hidden;display:none;">
+	<div class="applist_more" >
+		<a href="javascript:" onclick="add_more_comment();">点击加载更多</a>
+	</div>
+</div>
+<!--{/if}-->
+
+<script type="text/javascript">
+	function add_more_comment()
+	{
+		var is_have = window.AnzhiActivitys.getSubjectCommentList(0,20);
+		if(is_have) 
+		{
+			page++;
+		}
+		var size = 20;
+		var start = page*size;
+		var json_data =	window.AnzhiActivitys.getSubjectCommentList(start,size);
+		
+		var cmd = 'var data=' + json_data;
+		eval(cmd);
+		if(data.DATA.COMMENTS.length>0)
+		{
+			$('#comment_wrap').append(_.template($('#comment_tpl').html(),data));
+			if(data.DATA.COMMENTS.length<size)
+			{
+				$('#applist_more').css('display','none');
+			}
+		}
+	}		
+</script>
+</body>
+</html>

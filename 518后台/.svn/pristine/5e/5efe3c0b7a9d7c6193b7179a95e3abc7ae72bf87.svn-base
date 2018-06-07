@@ -1,0 +1,206 @@
+<include file="../Public/header" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script>
+var lastid = 0;
+function editTime(id)
+{
+	if (lastid > 0) {
+		$('#begin' + lastid).hide();
+		$('#beginc' + lastid).show();
+		$('#end' + lastid).hide();
+		$('#endc' + lastid).show();
+		$('#btn2_' + lastid).show();
+		$('#btn1_' + lastid).hide();
+	}
+	$('#begin' + id).show();
+	$('#beginc' + id).hide();
+	$('#end' + id).show();
+	$('#endc' + id).hide();
+	$('#btn2_' + id).hide();
+	$('#btn1_' + id).show();
+	lastid = id;
+}
+
+function submitEdit(id)
+{
+	var data = {begintime: $('#begintime'+id).val(), endtime:$('#endtime'+id).val()}
+	$.ajax({
+	  type: "post",
+	  url: "__URL__/recommend_new/editid/"+id,
+	  data: data,
+	  success: function(){
+	  	$('#begin' + id).hide();
+		
+		$('#beginc' + id).html($('#begintime'+id).val())
+		$('#beginc' + id).show();
+		
+		$('#end' + id).hide();
+		
+		$('#endc' + id).html($('#endtime'+id).val())
+		$('#endc' + id).show();
+		
+		$('#btn2_' + id).show();
+		$('#btn1_' + id).hide();
+		lastid = 0;
+	  }
+	})
+
+}
+
+function cancelEdit(id)
+{
+	$('#begin' + id).hide();
+	
+	$('#beginc' + id).html($('#begintime'+id).val())
+	$('#beginc' + id).show();
+	
+	$('#end' + id).hide();
+	
+	$('#endc' + id).html($('#endtime'+id).val())
+	$('#endc' + id).show();
+	
+	$('#btn2_' + id).show();
+	$('#btn1_' + id).hide();
+	lastid = 0;
+}
+</script>
+
+<body>
+<table width="100%" border="0" cellspacing="0" padding="0" class="tb" align= "center">
+<span>推荐软件库(最新软件列表用)：</span><br />
+<tr>
+<td>添加软件</td>
+<td>
+<form action="" method="post">
+<span>ID:<input type="text" name="sosoid" value="">包名：<input type="text" name="soso" value=""><input type="submit" value="搜索软件" /> 按照ID查询，请输入准确id。按照包名查询最少输入两个字符。</span>
+</form>
+</td>
+</tr>
+<tr>
+	<if condition="$select eq 1">
+    <td>添加到列表：</td>
+    <td>
+		<form action="" method="post">
+		<br />
+		<select name="softid" >
+			<volist name="ret" id="vo">
+			<option value="{$vo.softid}">{$vo.package}</option>
+			</volist>
+		</select>
+		
+
+    开始时间(*)：<input id="begintime" name="begintime"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			onclick="return showCalendar('begintime', 'y-m-d');"
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px">
+    结束时间(*)：<input id="endtime" name="endtime"
+			style="border: 0px none black; width: 100px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			onclick="return showCalendar('endtime', 'y-m-d');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		<input type="submit" value="添加">
+        </td>
+		</form>
+	</if>
+</tr>
+<tr>
+<td>搜索软件：</td>
+<td>
+		<form action="" method="post">
+        软件ID：<input type="text" name="srch_id" id="srch_id" value="{$srch_id}"/>
+        软件名：<input type="text" name="srch_name" id="srch_name" value="{$srch_name}"/>
+        包名：<input type="text" name="srch_pkg" id="srch_pkg" value="{$srch_pkg}"/>
+		<input type="submit" value="搜索推荐库" onclick="return chksub()"/>
+		</form>
+</td>
+</tr>
+</table>
+<table width="100%" border="0" cellspacing="0" padding="0" class="tb" align= "center">
+<tr>
+	<td<?php if ($srch_type == 'e'):?> style="background-color:red"<?php endif;?>><a href="__URL__/recommend_new/srch_type/e">过期</a></td>
+	<td<?php if ($srch_type == 'n'):?> style="background-color:red"<?php endif;?>><a href="__URL__/recommend_new/srch_type/n">当前</a></td>
+	<td<?php if ($srch_type == 'f'):?> style="background-color:red"<?php endif;?>><a href="__URL__/recommend_new/srch_type/f">未开始</a></td></tr>
+</table>
+<table width="100%" border="0" cellspacing="0" padding="0" class="tb" align= "center">
+	<tr>
+		<td width="5%" align="center">ID</td>
+		<td align="center">包名</td>
+		<td align="center">开始时间</td>
+		<td align="center">结束时间</td>
+		<td align="center">操作</td>
+	</tr>
+	<volist name="list" id="voi">
+	<tr>
+		<td width="5%" align="center">{$voi.soft_id|default='&nbsp;'}</td>
+		<td align="center">{$voi.softname|default='&nbsp;'}({$voi.package|default='&nbsp;'})</td>
+		<td align="center">
+			<span id="beginc{$voi.id}">
+			{$voi.begintime|date='Y-m-d',###|default='&nbsp;'}
+			</span>
+			<span style="display:none" id="begin{$voi.id}">
+			<input id="begintime{$voi.id}" name="begintime"
+			style="border: 0px none black; width: 100px;" value="{$voi.begintime|date='Y-m-d',###|default='&nbsp;'}"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			onclick="return showCalendar('begintime{$voi.id}', 'y-m-d');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+</span>
+		</td>
+		<td align="center">
+			<span id="endc{$voi.id}">
+			{$voi.endtime|date='Y-m-d',###|default='&nbsp;'}
+			</span>
+			<span style="display:none" id="end{$voi.id}">
+			<input id="endtime{$voi.id}" name="endtime"
+			style="border: 0px none black; width: 100px;" value="{$voi.endtime|date='Y-m-d',###|default='&nbsp;'}"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			onclick="return showCalendar('endtime{$voi.id}', 'y-m-d');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			</span>
+		</td>
+		<td align="center">
+		<span style="display:none" id="btn1_{$voi.id}">
+		<a href="#" onClick="javascript:submitEdit({$voi.id});return false" > 提交</a>
+		<a href="#" onClick="javascript:cancelEdit({$voi.id});return false" > 取消</a>
+		</span>
+		<span id="btn2_{$voi.id}">
+		<a href="#" onClick="javascript:editTime({$voi.id});return false" > 编辑</a>
+		<a href="__URL__/recommend_new/delsoftid/{$voi.id}" onClick="javascript:return checkit()" >删除</a></td>
+		</span>
+	</tr>
+	</volist>
+</table>
+{$page}
+</body>
+<script>
+function chksub(){
+    var id_val = getObj("srch_id").value;
+    var name_val = getObj("srch_name").value;
+    var pkg = getObj("srch_pkg").value;
+    var sum = 0
+    if(id_val){
+       sum +=1;
+    }else if(name_val){
+      sum += 1;
+    }else if(pkg){
+      sum +=1
+    }
+    if(sum == 0){
+      alert("请填写至少一个搜索条件！！");
+       return false;
+    }
+    return true;
+}
+function getObj(id){
+    return document.getElementById(id);
+}
+</script>
+<html>

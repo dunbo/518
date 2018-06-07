@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>妈妈的秘密</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0,user-scalable=no" />
+    <link href="<!--{$out.new_static_url}-->/activity/momsecret/css/style.css" rel="stylesheet" />
+	<script type="text/javascript"  src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+    <script type="text/javascript">
+        var firstOpenAudio = true;//设置第一次打开时声音是否开启
+        var totalPage=9;//共多少页
+        $(function () {
+            Loading();
+        });
+        function Loading() {
+            var imglist = ["image/next.png","image/off.png","image/on.png","image/p1.jpg","image/p1_icon.png","image/p2_icon.png","image/p3_icon.png","image/p4_icon.png","image/p5_icon.png","image/p6_icon.png","image/p7_icon.png","image/p8_icon.png","image/p9_icon.png","image/btn_share.png","image/btn_again.png","image/logo.png"];
+            Loading.complete = 0;
+            Loading.count = imglist.length;
+            for (var i = 0; i < Loading.count; i++) {
+                var img = new Image();
+                img.onload = function () {
+                    Loading.complete++;
+                    if (Loading.complete == Loading.count) {
+                        $("#loading").hide();
+                        $("#p1").show();
+                        $("#next").show();
+                        $("#logo").show();
+                        $("#bgm_btn").show();
+                        setTimeout(function () {
+                           $("#p1").addClass("current");//第一页动画
+                        });
+                        //控制声音
+                        if (firstOpenAudio) {
+                            $("#bgm")[0].play();
+                            $("#bgm_btn")[0].className = "on";
+                            $(document.body).on("touchstart",function(){
+                                $("#bgm")[0].play();
+                            });
+                        }else{
+                            $("#bgm")[0].pause();
+                            $("#bgm_btn")[0].className = "off";
+                        }
+                        $("#bgm_btn").on("click", function () {
+                            if ($(this).hasClass("off")) {
+                                this.className = "on";
+                                $("#bgm")[0].play();
+                            } else {
+                                this.className = "off";
+                                $("#bgm")[0].pause();
+                            }
+                        });
+                        //再来一遍
+                        $("#btn_again").on("click",function(){
+							window.location.reload();
+                        });
+                        //分享
+                        $('#btn_share').on('click',function(){
+                            $('#share_mark').show();
+                        })
+                        $('#share_mark').on('click',function(){
+                            $(this).hide();
+                        })
+
+                        $(document.body).on("touchstart", TouchStart);
+                        $(document.body).on("touchmove", TouchMove);
+                    }
+                };
+                img.src = '<!--{$out.new_static_url}-->/activity/momsecret/' + imglist[i];
+            }
+        }
+
+        var point;
+        var start = false;
+        function TouchStart() {
+            start = true;
+            //标记触屏坐标
+            point = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+        }
+        var index = 1;
+        var runing = false;
+        function TouchMove() {
+            event.preventDefault();
+            if (!runing && start) {
+                var _point = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+                if (point.y - _point.y > 30) {
+                    //下一页
+                    Next();
+                    if (index == totalPage) {
+                        $("#next").hide();
+                    }
+                }
+            }
+        }
+        function Next() {
+            if (index < totalPage) {
+                start = false;
+                runing = true;
+                var current = $(".current");
+                index++;
+                current.next().css({ "transform": "translate3d(0,100%,0)" }).show();
+                setTimeout(function () {
+                    current.next().addClass("current");
+                    current.removeClass("current");
+                    setTimeout(function () {
+                        current.next().css({ "transform": "translate3d(0,0,0)" });
+                        current.css({ "transform": "translate3d(0,-100%,0)" });
+                    }, 10);
+                    setTimeout(function () {
+                        runing = false;
+                    }, 1000);
+                }, 10);
+            }
+        }
+    </script>
+</head>
+<div style="height:0; overflow:hidden;">
+	<img src="<!--{$out.new_static_url}-->/activity/momsecret/image/share.jpg">
+</div>
+<body>
+<audio id="bgm" loop="loop"><source src="<!--{$out.new_static_url}-->/activity/momsecret/audio/bg.mp3" type="audio/mpeg" /></audio>
+<div id="show">
+    <div class="page" id="p1">
+        <div class="p1_icon"></div>
+    </div>
+    <div class="page" id="p2">
+        <div class="p2_icon"></div>
+    </div>
+    <div class="page" id="p3">
+        <div class="p3_icon"></div>
+    </div>
+    <div class="page" id="p4">
+        <div class="p4_icon"></div>
+    </div>
+    <div class="page" id="p5">
+        <div class="p5_icon"></div>
+    </div>
+    <div class="page" id="p6">
+        <div class="p6_icon"></div>
+    </div>
+    <div class="page" id="p7">
+        <div class="p7_icon"></div>
+    </div>
+    <div class="page" id="p8">
+        <div class="p8_icon"></div>
+    </div>
+    <div class="page" id="p9">
+        <div class="p9_icon"></div>
+        <div class="btns">
+            <div id="btn_again" class="fl"><img src="<!--{$out.new_static_url}-->/activity/momsecret/image/btn_again.png"/></div>
+            <div id="btn_share" class="fr"><img src="<!--{$out.new_static_url}-->/activity/momsecret/image/btn_share.png"/></div>
+        </div>
+    </div>
+    <div id="bgm_btn" class="on"></div>
+    <div id="next"></div>
+    <div id="logo"><img src="<!--{$out.new_static_url}-->/activity/momsecret/image/logo.png"/></div>
+    <div id="share_mark"><img src="<!--{$out.new_static_url}-->/activity/momsecret/image/share.png"/></div>
+</div>
+<div id="loading">
+    <div class="center">
+        <div class="loading_icon"></div>
+        <div class="loading_text"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript"  src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script type="text/javascript">
+var debug_mode = false;
+var wx_share_config = <!--{$out.wx_share_config}-->;
+var share_title = '<!--{$out.share_title}-->';
+var share_desc = '<!--{$out.share_desc}-->';
+var share_url = '<!--{$out.share_url}-->';
+var share_img = '<!--{$out.new_static_url}-->/activity/momsecret/image/share.jpg';
+
+if (wx_share_config != false) {
+	wx.config({
+		debug: debug_mode, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+		appId: wx_share_config.appId, // 必填，公众号的唯一标识
+		timestamp: wx_share_config.timestamp, // 必填，生成签名的时间戳
+		nonceStr: wx_share_config.nonceStr, // 必填，生成签名的随机串
+		signature: wx_share_config.signature,// 必填，签名，见附录1
+		jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','onMenuShareQQ','onMenuShareWeibo','onMenuShareQZone'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+	});
+	wx.ready(function(){
+		// 分享到朋友圈
+		wx.onMenuShareTimeline({
+			title: share_title, // 分享标题
+			link: share_url, // 分享链接
+			imgUrl: share_img, // 分享图标
+			success: function () { 
+				// 用户确认分享后执行的回调函数
+			},
+			cancel: function () { 
+				// 用户取消分享后执行的回调函数
+			}
+		});
+		// 分享给朋友
+		wx.onMenuShareAppMessage({
+			title: share_title, // 分享标题
+			desc: share_desc, // 分享描述
+			link: share_url, // 分享链接
+			imgUrl: share_img, // 分享图标
+			type: '', // 分享类型,music、video或link，不填默认为link
+			dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+			success: function () { 
+				// 用户确认分享后执行的回调函数
+			},
+			cancel: function () { 
+				// 用户取消分享后执行的回调函数
+			}
+		});
+		// 分享到QQ
+		wx.onMenuShareQQ({
+			title: share_title, // 分享标题
+			desc: share_desc, // 分享描述
+			link: share_url, // 分享链接
+			imgUrl: share_img, // 分享图标
+			success: function () { 
+			   // 用户确认分享后执行的回调函数
+			},
+			cancel: function () { 
+			   // 用户取消分享后执行的回调函数
+			}
+		});
+		// 分享到腾讯微博
+		wx.onMenuShareWeibo({
+			title: share_title, // 分享标题
+			desc: share_desc, // 分享描述
+			link: share_url, // 分享链接
+			imgUrl: share_img, // 分享图标
+			success: function () { 
+			   // 用户确认分享后执行的回调函数
+			},
+			cancel: function () { 
+				// 用户取消分享后执行的回调函数
+			}
+		});
+		// 分享到QQ空间
+		wx.onMenuShareQZone({
+			title: share_title, // 分享标题
+			desc: share_desc, // 分享描述
+			link: share_url, // 分享链接
+			imgUrl: share_img, // 分享图标
+			success: function () { 
+			   // 用户确认分享后执行的回调函数
+			},
+			cancel: function () { 
+				// 用户取消分享后执行的回调函数
+			}
+		});
+	});
+}
+</script>
+</html>

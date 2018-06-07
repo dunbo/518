@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/school/js/jquery.zxxbox.3.0.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+{//时间插件结束}
+	<script type="text/javascript">
+		var id_arr = new Array();
+		var pkg_arr = new Array();
+		function choose_id(){
+			var i = 0;
+			$('input[name^=video_]').each(function(){
+				if($(this).is(':checked')&&$(this).attr('name')!='id_all') {
+					id_arr[i] = $(this).val();
+					var pkg = $(this).attr('pkg')
+					if(pkg) {
+						pkg_arr[i] = $(this).attr('pkg');
+					}
+					i++;
+				}
+			});
+
+			if(id_arr.length == 0) {
+				alert('请选择要操作的对象！');
+				return false;
+			}else{
+				return id_arr;
+			}
+		}
+		
+		function change_status_more(type){
+			if(choose_id()){
+				var check_status = type;
+				if(check_status==1){
+					if(pkg_arr.length != id_arr.length) {
+						alert('有视频信息不完整');
+						return false;
+					}
+					//var href = "__URL__/change_status/check_status/"+check_status+"/sid/"+id_arr+"/cont/1";
+					window.location.href = "__URL__/change_status/check_status/"+check_status+"/sid/"+id_arr;
+					//tb_show('',href,'thickbox');
+				}else{
+					window.location.href = "__URL__/change_status/check_status/"+check_status+"/sid/"+id_arr;
+				}
+			}
+		}
+		
+		function selectAll()
+		{
+			$("input[name^=video_]").each(function(){
+				if(this.checked != true){
+					this.checked = true;
+				}
+			})
+		}
+
+		function selectRev()
+		{
+			$("input[name^=video_]").each(function(){
+				this.checked = !$(this).attr("checked");
+			})
+		}
+
+		function open_intro(id){	
+			$("#intro_"+id).zxxbox();
+		}
+	</script>
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<h3 style="margin-left:20px;margin-top:20px;margin-bottom:-20px;">采集视频管理</h3>
+<table style='margin-top:30px;float:left;' width="100%" cellspacing="0" cellpadding="0" class="search_table">
+	<tbody>
+	<form method='get' action="__URL__/video_list" >
+		<tr>
+			<td width="20%">软件包名：<input style="width:100px;" type="text"  value="{$s_package}" id="s_package" name="s_package"></td>
+			<td width="20%">软件名称：<input style="width:100px;" type="text"  value="{$s_softname}" id="s_softname" name="s_softname"></td>
+			<td width="20%">视频名称：<input style="width:100px;"type="text"  value="{$video_name}" id="s_video_name" name="s_video_name"></td>
+			<td width="20%">来源：
+				<select name="video_source" id="video_source">
+					<option value="">全部</option>
+					<option value="dangleVideo" <if condition="$video_source eq 'dangleVideo' ">selected</if>>当乐网</option>
+					<option value="baijiahaoVideo" <if condition="$video_source eq 'baijiahaoVideo' ">selected</if>>百家号</option>
+					<option value="com18touchVideo" <if condition="$video_source eq 'com18touchVideo' ">selected</if>>超好玩</option>
+				</select>
+			</td>
+			<td width="15%">
+				<input type="hidden" name="check_status" value="{$check_status}">
+				<input type="submit" class="search_btn" value="搜索">
+			</td>
+		</tr>
+		<?php if($check_status ==0 || $check_status ==1 || $check_status ==2){ ?>	
+		<tr>
+			<td >内容性质:{$content_xz}</td>
+			<td >内容质量:{$content_zl}</td>
+			<td >内容栏目:
+				<select name="s_content_column" id="s_content_column">
+					<option value="0" selected>全部</option>
+					<volist name='column_list' id='columnlist'>
+					<option value="{$columnlist.cont_id}" <?php if($s_content_column == $columnlist['cont_id']) echo "selected"; ?> >{$columnlist.name}</option>
+				    </volist>
+				</select>  
+			</td>
+			<td >内容来源:{$con_source}</td>
+			<td>标签状态：<select name="s_status_tag" id="s_status_tag">
+							<option value="">全部</option>
+							<option value="0" <?php if($s_status_tag === '0') echo "selected"; ?> >否</option>
+							<option value="1" <?php if($s_status_tag == 1) echo "selected"; ?> >是</option>
+						  </select>
+			</td>
+		</tr>
+		<tr>
+			<td>用户倾向:{$user_tend}</td>
+		</tr>
+		<?php } ?>		
+	</form>
+	 </tbody>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+	<if condition="$check_status == 0">
+		<span style="color:red;margin-left:20px">未通过审核的视频将无法配置至市场运营位中，通过并同步的视频可直接进入资源库</span>
+	</if>
+	<tr height="35">
+		<td align="center" style=<?php if($check_status == 0){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/video_list/check_status/0"><font style="color:#000; font-weight:bold">待审核</font></a>
+		</td>
+		<td align="center" style=<?php if($check_status == 1){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/video_list/check_status/1"><font style="color:#000; font-weight:bold">已通过</font></a>
+		</td>
+		<td align="center" style=<?php if($check_status == 2){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/video_list/check_status/2"><font style="color:#000; font-weight:bold">未通过</font></a>
+		</td>
+	</tr>
+</table>
+<div style="clear: both"></div>
+<div style="margin-top: 10px">
+	<if condition="$check_status neq 1">
+	<a href="javascript:void(0);" onclick="selectAll()" class="search_btn" style="float: left">全选</a>&nbsp;
+	<a href="javascript:void(0);" onclick="selectRev()" class="search_btn" style="float: left">反选</a>
+	</if>
+	<if condition="$check_status eq 0">
+	<a href="javascript:void(0);" onclick="change_status_more(2)" class="search_btn" style="float: right;margin-right: 10px">批量驳回</a>
+	<a href="javascript:void(0);" onclick="change_status_more(1)" class="search_btn" style="float: right;margin-right: 10px">批量通过</a>
+	</if>
+	<if condition="$check_status eq 2">
+	<a href="javascript:void(0);" onclick="change_status_more(0)" class="search_btn" style="float: right;margin-right: 10px">批量撤销</a>
+	</if>
+</div>
+
+<table style='float:left;' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="5%"></th>
+			<th width="5%">视频id</th>
+			<th width="10%">视频名称</th>
+			<th width="10%">视频默认图</th>
+			<th width="7%">软件包名</th>
+			<th width="8%">软件名称</th>
+			<th width="15%">视频描述</th>
+			<th width="5%">来源</th>
+			<th width="8%" onclick="window.location.href='__URL__/video_list?<?php echo $o_param?>'">采集时间<?php echo $order?'↓':'↑'?></th>
+			<th width="10%">内容属性</th>
+			<th width="10%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='list' id='videolist'>
+		<tr>
+			<td><input type="checkbox" value="{$videolist.sid}" pkg="{$videolist.package}" id="video_{$videolist.sid}" name="video_{$videolist.sid}"></td>
+			<td align='left'>
+				{$videolist.sid|default=''}
+			</td>
+			<td>
+				<?php echo $videolist['title_2']?$videolist['title_2']:$videolist['title'] ?>
+			</td>
+			<td><img src="<?php echo IMGATT_HOST; ?><?php if($videolist['video_pic_2']){ echo $videolist['video_pic_2']; }else{ echo '/thirdall'.$videolist['video_pic']; }   ?>" width='120px' height="60px" /></td>
+			<td>{$videolist.package}</td>
+			<td>{$videolist.softname}</td>
+			<td>
+				<a href="javascript:;" onclick="open_intro('{$videolist.sid}');">
+					{$videolist.summary_substr}
+				</a>
+			<div id="intro_{$videolist.sid}" class="intro_str" style="padding:20px; width:330px; height:240px;display:none; word-break:break-all; word-wrap:break-word;overflow-y:scroll">
+				{$videolist.summary}
+			</div>
+			</td>	
+	</td>
+	</div>	
+
+			<td>
+				<?php if($videolist['taskname'] =='dangleVideo' ){ ?>
+					当乐网
+				<?php }elseif($videolist['taskname'] == 'baijiahaoVideo' ){ ?>
+					百家号
+				<?php }elseif($videolist['taskname'] == 'com18touchVideo' ){ ?>
+					超好玩
+				<?php } ?>
+			</td>
+			<td><?php if(!empty($videolist['source_createtime'])){echo date("Y-m-d H:i:s",$videolist['source_createtime']);}?></td>
+			<td> {$videolist.content_select}</td>
+			<td align='center' >	
+				<?php if($videolist['video_local_path']){ ?>
+					<a href="__URL__/video_edit?sid={$videolist.sid}&show_video=1&width=540&height=420" class="thickbox">预览视频</a> 
+				<?php } ?>
+				
+				<?php if($check_status==0){ ?>
+				| <a href="__URL__/change_status/check_status/1/sid/{$videolist.sid}/cont/1" <?php echo !$videolist['package']?'class="thickbox"':''; ?> >通过</a> 
+				| <a href="__URL__/change_status/check_status/1/sid/{$videolist.sid}/sysc/1/cont/1" <?php echo !$videolist['package']?'class="thickbox"':''; ?> >通过并同步</a> 
+				| <a href="__URL__/change_status/check_status/2/sid/{$videolist.sid}">驳回</a>
+				| <a href="__URL__/video_edit?sid={$videolist.sid}&width=700&hieght=400" class="thickbox blue" >编辑</a>
+				<?php }elseif($check_status==2){ ?>
+				| <a href="__URL__/change_status/check_status/0/sid/{$videolist.sid}">撤销</a>
+				<?php } ?>
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='12'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+
+</html>

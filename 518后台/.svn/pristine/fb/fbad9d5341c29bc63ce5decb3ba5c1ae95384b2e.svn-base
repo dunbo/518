@@ -1,0 +1,198 @@
+<include file="../../Public/header" />
+<script src="/Public/js/thickbox-compressed.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link media="screen" type="text/css" href="/Public/css/tablelist.css" rel="stylesheet"/> 
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+<script type="text/javascript">
+	function check_form(){
+		var order_name=$('#order_name').val();
+		if(!order_name){
+			alert('预约名称不能为空');
+			return false;
+		}
+		var msg=$('#msg').val();
+		if(!msg){
+			alert('消息文案不能为空');
+			return false;
+		}
+		var len=order_name.length;
+		if(len<2 || len>50){
+			alert('预约名称2-50字符');
+			return false;
+		}
+		var biaoshi=0;
+		$.ajax({
+			'url': '/index.php/Sj/GameSubscribe/change_rank',
+			'type': 'get',
+			'data' : 'order_name='+encodeURIComponent(order_name)+'&bs=2',
+			'dataType': 'json',
+			'async':false,
+			'success': function(data){
+				biaoshi=data;
+			}
+		});	
+		if(biaoshi!=1){
+			alert('预约名称已存在');
+			return false;
+		}
+		var rank=$('#rank').val();
+		if(!rank){
+    		alert('排序值不能为空'); 
+    		return false;
+    	}
+    	var reg = /^[1-9]{1}[0-9]*$/;   
+        var r = rank.match(reg); 
+    	if(r==null){    
+            alert('排序值必须为大于0的整数!'); 
+        	return false;
+        }
+		var activity_id=$('#activity_id').val();
+		if(!activity_id){
+    		alert('活动id不能为空'); 
+    		return false;
+    	}
+    	// var image=$('#image').val();
+    	// if(!image){
+    	// 	alert('图片不能为空'); 
+    	// 	return false;
+    	// }
+    	var high_image=$('#high_image').val();
+    	if(!high_image){
+    		alert('高分图片不能为空'); 
+    		return false;
+    	}
+    	var low_image=$('#low_image').val();
+    	if(!low_image){
+    		alert('低分图片不能为空'); 
+    		return false;
+    	}
+    	var start_tm=$('#start_tm').val();
+    	var end_tm=$('#end_tm').val();
+    	if(!start_tm){
+    		alert('预约开始时间不能为空'); 
+    		return false;
+    	}
+    	if(!end_tm){
+    		alert('预约结束时间不能为空'); 
+    		return false;
+    	}
+    	var start_tm=get_unix_time(start_tm);
+    	var end_tm=get_unix_time(end_tm);
+    	if(start_tm>end_tm){
+    		alert('结束时间必须大于开始时间');
+    		return false;
+    	}
+    	// var platform=$('#platform').val();
+    	// if(!platform){
+    	// 	alert('请选择投放平台');
+    	// 	return false;
+    	// }
+    	return true;
+	}
+	function get_unix_time(dateStr)
+    {
+        var newstr = dateStr.replace(/-/g,'/'); 
+        var date =  new Date(newstr); 
+        var time_str = date.getTime().toString();
+        return time_str.substr(0, 10);
+    }
+	function get_actname(){
+		var activity_id=$('#activity_id').val();
+		if(!activity_id){
+			$('#activity_id').val('');
+			$('#act_name').val('');
+			$('#show_error').html('');
+			alert('活动id不能为空');
+		}else{
+			$.ajax({
+			'url': '/index.php/Sj/GameSubscribe/change_rank',
+			'type': 'get',
+			'data' : 'id='+activity_id+'&bs=1',
+			'dataType': 'json',
+			'success': function(data){
+				if(data){
+					$('#act_name').val(data);
+					// location.reload(true);//加载页面
+					$('#show_error').html('<img src="/Public/images/right_icon.png">');
+				}else{
+					$('#activity_id').val('');
+					$('#act_name').val('');
+					$('#show_error').html('');
+					alert('活动id不存在');
+					// return false;
+				}
+			}
+		});	
+		}
+	}
+</script>
+
+<form name="form_add" method="post" action="/index.php/Sj/GameSubscribe/addGameorder" id="_form_edit"  onsubmit="return check_form()" enctype="multipart/form-data">
+	<input type="hidden" value="{$url_subff}" name="url_subff"/>
+	<table border="0" cellspacing="10" cellpadding="2" style="width:100%;height:100%;" class="tb_add">
+		<tr>
+			<th class="thickbox td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;background-color:#F7F789;">添加游戏预约：</th>
+		</tr>
+		<tr>
+			<td class="td1" align="right">预约名称：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="order_name" id="order_name" style="width:203px;height:25px;"/></td>
+		</tr>
+		<tr>
+		     <td class="td1" align="right">排序：</td>
+			 <td align="left" style="padding-left:10px;"><input type="text" value="" name="rank" id="rank" style="height:25px;"/></td>
+		</tr>
+		<tr>
+		     <td class="td1" align="right">活动ID：</td>
+			 <td align="left" style="padding-left:10px;"><input type="text" value="" name="activity_id" id="activity_id" style="height:25px;" onblur="get_actname()" /><span id='show_error' style='margin-left:15px;'></span></td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">活动名称：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="act_name" id="act_name" style="width:203px;height:25px;background:#f5f5f5;" disabled="disabled"/></td>
+		</tr>
+		<!-- <tr>
+			<td class="td1" align="right">图片：</td><td align="left" style="padding-left:10px;"><input type="file" name="image" id="image" />{$image_width}X{$image_height}</td>
+		</tr> -->
+		<tr>	
+			<td class="td1" align="right">高分图片：</td><td align="left" style="padding-left:10px;"><input type="file" name="high_image" id="high_image" />{$image_width_high}x{$image_height_high}</td>
+		</tr>	
+		<tr>	
+			<td class="td1" align="right">低分图片：</td><td align="left" style="padding-left:10px;"><input type="file" name="low_image" id="low_image" />{$image_width_low}x{$image_height_low}</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">消息文案：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="msg" style="width:203px;height:25px;" id='msg'/></td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">活动开始时间：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="text" value="" name="start_tm" id="start_tm" style="width:203px;height:25px;"/><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;"/>
+			</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">活动结束时间：</td>
+			<td align="left" style="padding-left:10px;">
+				<input type="text" value="" name="end_tm" id="end_tm" style="width:203px;height:25px;"/><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;"/>
+			</td>
+		</tr>
+		<!-- <tr>
+			<td class="td1" align="right">选择投放平台：</td>
+			<td align="left" style="padding-left:10px;"><input type="checkbox" value="1" name="platform[]" />&nbsp;安智市场&nbsp;&nbsp;&nbsp;<input type="checkbox" value="13" name="platform[]" id="sdk_select" onclick="get_checked();" />&nbsp;SDK&nbsp;&nbsp;<select name="sdk_type" id="sdk_type" onchange="select_sdk();"><option value="1">普通活动</option><option value="2">VIP活动</option></select></td>
+		</tr> -->
+		<tr>
+			<td class="td1" align="right">合作形式：</td>
+			<td align="left" style="padding-left:10px;">
+				<SELECT name='co_type'>
+					<?php foreach($typelist as $key => $val): ?>
+						<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+					<?php endforeach; ?>				
+				</SELECT>
+			</td>
+		</tr>
+		<tr><td>&nbsp;</td>
+			<td colspan="2" style="text-align:left;height:30px;line-height:30px;"><button style="margin-right:15px;width:80px;" type="submit">确定</button><button type="button" onclick="javascript:history.go(-1);" style="width:80px;">取消</button></td>
+		</tr>
+	</table>
+	</form>
+

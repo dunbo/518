@@ -1,0 +1,279 @@
+<style>.is_hide{display:none}</style>
+<span>桌面红包内容</span>
+<table width="600" height="30" border="1">
+<tr>
+	<td><font color="red">*</font>弹窗图片({$desk_red_pop_width}*{$desk_red_pop_height}):</td>
+	<td><input type="file" name="desk_red_pop" accept="image/jpeg,image/jpg,image/png" /></td>
+</tr>
+<tr>
+	<td><font color="red">*</font>高分图片({$desk_red_high_width}*{$desk_red_high_height}):</td>
+	<td><input type="file" name="desk_red_high" accept="image/jpeg,image/jpg,image/png" /></td>
+</tr>
+<tr>
+	<td><font color="red">*</font>低分图片({$desk_red_low_width}*{$desk_red_low_height}):</td>
+	<td><input type="file" name="desk_red_low" accept="image/jpeg,image/jpg,image/png" /></td>
+</tr>
+<tr>
+	<td><font color="red">*</font>桌面红包描述标题:</td>
+	<td><input type="text" name="desk_red_des_title" value="{$red_detail_arr.desk_red_des_title}" /><span>限制{$desk_red_des_title_limit}字以内</span></td>
+</tr>
+<tr>
+	<td><font color="red">*</font>桌面红包描述副标题：</td>
+	<td><input type="text" name="desk_red_des_subtitle"  value="{$red_detail_arr.desk_red_des_subtitle}"/><span>限制{$desk_red_des_subtitle_limit}字以内</span></td>
+</tr>
+<tr>
+	<td><font color="red">*</font>红包结果弹窗描述标题：</td>
+	<td><input type="text" name="red_result_pop_des" value="{$red_detail_arr.red_result_pop_des}" /><span>限制{$red_result_pop_des_limit}字以内</span></td>
+</tr>
+<tr>
+	<td><font color="red">*</font>安智icon：</td>
+	<td>
+		<input name="is_show_anzhi_icon"  type="radio" value="1" <?php if($red_detail_arr['is_show_anzhi_icon']==1){echo 'checked';}?> />展示
+		<input name="is_show_anzhi_icon"  type="radio" value="2" <?php if($red_detail_arr['is_show_anzhi_icon']==2||!$red_detail_arr['is_show_anzhi_icon']){echo 'checked';}?> />不展示
+	</td>
+</tr>
+<tr>
+	<td><font color="red">*</font>选择红包类型：</td>
+	<td>
+		<SELECT name='red_type' id="red_type" >
+			<option value='1' <?php echo $red_detail_arr['red_type']==1?"selected":'' ?> >红包</option>
+			<option value='2' <?php echo $red_detail_arr['red_type']==2?"selected":'' ?> >红包任务</option>			
+		</SELECT>
+	</td>
+</tr>
+<tr class="red_id_block <?php echo !$red_detail_arr['red_type'] || $red_detail_arr['red_type']==1 ?'':'is_hide' ?>" >
+	<td><font color="red">*</font>选择红包：</td>
+	<td>
+		<select name="red_id"  class="red_id" onchange="select_change()">
+			<if condition=" (!$red_package || $red_detail_arr['red_type']==2) && $red_package_list ">
+					<option value="0">请选择</option>
+			</if>
+			<if condition=" $red_package && $red_detail_arr['red_type']==1 ">
+					<option value="{$red_package['id']}" selected >{$red_package['pname']}</option>
+			</if>
+			<if condition="$red_package_list">
+				<?php foreach($red_package_list as $val) :?>
+					<option value="{$val['id']}">{$val['pname']}</option>
+				<?php endforeach;?>
+			</if>
+			<if condition="!$red_package && !$red_package_list">
+				<option value="0">-未配置红包-</option>
+			</if>
+		</select>
+	</td>
+</tr>
+<tr class="red_task_block <?php echo $red_detail_arr['red_type']==2?'':'is_hide' ?>" >
+	<td><font color="red">*</font>软件包名：</td>
+	<td>
+		<input type="text" name="red_soft_pkg" id="red_soft_pkg"  value="{$red_detail_arr.red_soft_pkg}"/>
+	</td>
+</tr>
+
+<tr class="red_task_block <?php echo $red_detail_arr['red_type']==2?'':'is_hide' ?>" >
+	<td><font color="red">*</font>任务时间段：</td>
+	<td class="date_select_div">
+		<select name="task_id" id="task_id" onchange="select_change()" >
+			<if condition="$task_list">
+				<option data="{$task_list['task_type']}" time="{$task_list['task_constraint']}" value="{$task_list['task_id']}" selected >{$task_list['start_tm']}至{$task_list['end_tm']}</option>
+			<else />
+				<option value="0">无数据</option>
+			</if>
+		</select>
+	</td>
+</tr>
+
+<!-- 红包块 start-->
+<tr>
+	<td><font color="red">*</font>红包ID：</td>
+	<td>
+		<input type="text" disabled='disabled' id="red_package_id" value="{$red_package['id']}"/>
+		<br/>
+	</td>
+</tr>
+<tr>
+	<td><font color="red">*</font>红包名称：</td>
+	<td>
+		<span id="red_pname">{$red_package['pname']}</span>
+	</td>
+</tr>
+<tr>
+	<td><font color="red">*</font>红包总数：</td>
+	<td>
+		<input type="text" disabled='disabled' id="red_totalnum" value="{$red_package['totalnum']}"/>
+	</td>
+</tr>
+<tr>
+	<td><font color="red">*</font>红包总额：</td>
+	<td>
+		<input type="text" disabled='disabled' id="red_totalmon" value="{$red_package['totalmon']}"/>
+	</td>
+</tr>
+<tr>
+	<td><font color="red">*</font>红包真实随机范围：</td>
+	<td>
+		<input type="text" disabled='disabled' id="red_rand" value="<?php echo $red_package['minrand']?$red_package['minrand'].'~'.$red_package['maxrand']:'' ?>"/>
+	</td>
+</tr>
+<tr>
+	<td><font color="red">*</font>红包发放类型：</td>
+	<td>
+		<SELECT disabled='disabled' id="red_givetype" >
+			<option value='1' <?php echo $red_package['givetype']==1?"selected":'' ?> >一次性</option>
+			<option value='2' <?php echo $red_package['givetype']==2?"selected":'' ?> >整点发放</option>
+			<option value='3' <?php echo $red_package['givetype']==3?"selected":'' ?> >自定义</option>	
+		</SELECT>
+	</td>
+</tr>
+<!-- 红包块 end-->
+
+<tr class="red_task_block <?php echo $red_detail_arr['red_type']==2?'':'is_hide' ?>" >
+	<td><font color="red">*</font>任务文案1：</td>
+	<td>
+		<input type="text" name="red_task_content1" id="red_task_content1" value="{$red_detail_arr.red_task_content1}"/>
+		<span>限制14字以内</span>
+	</td>
+</tr>
+<tr class="red_task_block  <?php echo $red_detail_arr['red_type']==2?'':'is_hide' ?>" ">
+	<td><font color="red">*</font>任务文案2：</td>
+	<td>
+		<input type="text" name="red_task_content2" id="red_task_content2" value="<?php echo $red_detail_arr['red_task_content2']?$red_detail_arr['red_task_content2']:'请1小时内完成，否则可能被抢' ?>" />
+		<span>限制14字以内</span>
+	</td>
+</tr>
+
+<tr>
+	<td><font color="red">*</font>弹窗展示时间：</td>
+	<td>
+		<input name="red_pop_show_time"  type="radio" value="1" <?php if($red_detail_arr['red_pop_show_time'] == 1){ ?>checked<?php } ?> />无倒计时
+		<input name="red_pop_show_time"  type="radio" value="2" <?php if($red_detail_arr['red_pop_show_time'] == 2 ||!$red_detail_arr['red_pop_show_time']){ ?>checked<?php } ?> />倒计时<input name="red_pop_show_times" value="<?php echo $red_detail_arr['red_pop_show_time']=2&&$red_detail_arr['red_pop_show_times']?$red_detail_arr['red_pop_show_times']:10 ?>" />秒
+	</td>
+</tr>
+</table><br />
+
+<script>
+$(function(){
+	$('#red_type').change(function(){
+		var type = $(this).val();
+		if(type == 1 ) {
+			$('.red_id_block').show();
+			$('.red_task_block').hide();
+			//显示市场内页面类型
+			$('#cpm_type').css("display","block");
+			$('#page_content_div').css("display","");
+			
+			//定制推送  显示推荐内容
+			$("#recommend_content_tr").css('display','');
+			if( $('.red_id').val() != 0 ) {
+				select_change();
+			}else {
+				$('#red_package_id').val('');
+	        	$('#red_pname').text('');
+	        	$('#red_totalmon').val('');
+	        	$('#red_totalnum').val('');
+	        	$('#red_rand').val('');
+	        	$('#red_givetype').val('');
+			}
+		}else if(type == 2) {
+			$('.red_id_block').hide();
+			$('.red_task_block').show();
+			
+			//显示市场内页面类型
+			$('#cpm_type').css("display","none");
+			$('#page_content_div').css("display","none");
+			
+			//定制推送 不显示推荐内容
+			$("#recommend_content_tr").css('display','none');
+			if( $('#task_id').val() != 0 ) {
+				select_change();
+			}else {
+				$('#red_package_id').val('');
+	        	$('#red_pname').text('');
+	        	$('#red_totalmon').val('');
+	        	$('#red_totalnum').val('');
+	        	$('#red_rand').val('');
+	        	$('#red_givetype').val('');
+			}
+		}
+	});
+
+	$('#red_soft_pkg').change(function(){
+		 var pkg = $(this).val();
+		 var url = "/index.php/Public/pub_red_soft_list";
+		$.ajax({
+		    type: "POST",
+		    url: url,
+		    data:{pkg:pkg},
+		    success: function(data) {
+		        var data = eval("("+data+")");
+		        if(data['code']==1) {
+		        	var str = "<select name='task_id' id='task_id' onchange='select_change()'>";
+		        	$.each(data['data'],function(k,v){
+		        		str += "<option data='"+v.task_type+"' time='"+v.task_constraint+"' value='"+v.task_id+"'>"+v.start_tm+' 至 '+v.end_tm+"</option>";
+		        	});
+		        	str += "</select>";
+		        	$('.date_select_div').empty().append(str);
+		        	select_change();
+		        }else {
+		        	alert('该包名下没有红包任务');
+		        	$('#red_package_id').val('');
+		        	$('#red_pname').text('');
+		        	$('#red_totalmon').val('');
+		        	$('#red_totalnum').val('');
+		        	$('#red_rand').val('');
+		        	$('#red_givetype').val('');
+		        	$('.date_select_div').empty().append('<select name="task_id" id="task_id" onchange="select_change()"><option value="0">无数据</option></select>');
+		        }
+		    }
+		});
+	});
+})
+
+function select_change(){
+		var red_type	=	$('#red_type').val();
+		var pkg			=	$('#red_soft_pkg').val();
+		var red_id		=	$('.red_id').val();
+		var task_id		=	$('#task_id').val();
+		var url = "/index.php/Public/pub_red_info";
+		var data = new Object();
+		if( red_type == 1) {
+			data = {red_type:red_type,red_id:red_id};	
+		}else if(red_type == 2 ) {
+			var red_task_content1 = $('#red_task_content1').val();
+			//if( !red_task_content1 || red_task_content1 == "" ) {
+				var task_desc = '';
+				var cur_obj = $("#task_id").find("option:selected");
+				var task_type	=	cur_obj.attr('data');
+				if( task_type == 'T51' ) {
+					task_desc = '首次下载并打开后，需回来领取';
+				}else if( task_type == 'T52' ) {
+					task_desc = '首次安装并登录后，需回来领取';
+				}else if( task_type == 'T53' ) {
+					var online_time = cur_obj.attr('time');
+					task_desc = '首次安装体验'+online_time+'秒回来领取';
+				}
+				$('#red_task_content1').val(task_desc);
+			//}
+			data = {red_type:red_type,pkg:pkg,task_id,task_id};
+		}else {
+			return 
+		}
+		$.ajax({
+		    type: "POST",
+		    url: url,
+		    data:data,
+		    success: function(data) {
+		        var data = eval("("+data+")");
+		        if(data['code']==1) {
+		        	$('#red_package_id').val(data['red_info']['id']);
+		        	$('#red_pname').text(data['red_info']['pname']);
+		        	$('#red_totalmon').val(data['red_info']['totalmon']);
+		        	$('#red_totalnum').val(data['red_info']['totalnum']);
+		        	$('#red_rand').val(data['red_info']['minrand']+'~'+data['red_info']['maxrand']);
+		        	$('#red_givetype').val(data['red_info']['givetype']);
+		        }else {
+		        	alert(data['msg']);
+		        }
+		    }
+		});
+}
+</script>

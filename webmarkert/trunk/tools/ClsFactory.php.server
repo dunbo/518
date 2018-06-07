@@ -1,0 +1,713 @@
+<?php
+/**
+ *
+ * @author liruqi <liruqi@gmail.com>
+ */
+class ClsFactory{
+	/**
+	 * 创建一个模型层实例
+	 *
+	 * @param string $classname 类名，例如$obj = ClsFactory::Create("mabc");如果位于二级目录，例如model/abc/mdef.class.php，则写成$obj = ClsFactory::Create("abc::mdef")，通过该方法，在创建模型层的时候，会自动返回一个代理层的实例。
+	 * @return object $obj,返回实例。
+	 */
+	public static function Create($str){
+		$ar = explode("::", $str);
+		$class = array_pop($ar);
+		$path = SERVER_ROOT . implode('/', $ar) . '/' . $class . '.php';
+		if (!class_exists($class)){
+			require_once $path;
+		}
+		$var_key = "GO_CLASS_$class";
+		if (!array_key_exists($var_key, $GLOBALS)){
+			$GLOBALS[$var_key] = new $class;
+		}
+		return $GLOBALS[$var_key];
+	}
+}
+
+/**
+ * POST 请求封装
+ * $url: 请求地址
+ * $data: POST 参数
+ * $timeout: 超时时间
+ */
+function requestPost($url, $data = array(), $timeout = 4){
+	if (!is_array($data) or empty($data)) return false;
+	$str = "";
+	foreach ($data as $k => $v){
+		$nv = rawurlencode($v);
+		if ($nv === null){
+			continue;
+		}
+		if (empty($str)) $str = $k . "=" . $nv;
+		else $str .= "&" . $k . "=" . $nv;
+	}
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_POST, 1);
+	if ($str) curl_setopt($ch, CURLOPT_POSTFIELDS, $str);
+	curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+	$result = curl_exec($ch);
+	curl_close($ch);
+	return $result;
+}
+
+/**
+ * GET 请求封装
+ * $url: 请求地址
+ * $data: GET 参数
+ * $timeout: 超时时间
+ */
+function requestGet($url, $data = array(), $timeout = 4){
+	if (!is_array($data) or empty($data)) return false;
+	$str = "";
+	foreach ($data as $k => $v){
+		$nv = rawurlencode($v);
+		if ($nv === null){
+			continue;
+		}
+		if (empty($str)) $str = $k . "=" . $nv;
+		else $str .= "&" . $k . "=" . $nv;
+	}
+	if ($str) $url .= "?" . $str;
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_POST, 1);
+	curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+	$result = curl_exec($ch);
+	curl_close($ch);
+	return $result;
+}
+/**
+ * 通过论坛接口，做用户验证。
+ */
+function do_login_request($data, $update_user_info = false){
+	$username = $data['username'];
+	$password = $data['password'];
+	$_SESSION['USER_NAME'] = $username;
+	$_SESSION['USER_IMEI'] = $data['imei'];
+	$_SESSION['VERSION_CODE'] = $data['version_code'];
+	$_SESSION['FIRMWARE'] = $data['firmware'];
+	$_SESSION['CHANNEL_ID'] = $data['channel'];
+	$_SESSION['MODEL_NO'] = $data['phone_model'];
+	$_SESSION['ip'] = isset($_SERVER["REMOTE_ADDR"])?$_SERVER["REMOTE_ADDR"]:"";
+	$softObj = ClsFactory :: Create('model::mSoft');
+	if (array_key_exists('imei', $data)){ # 手机用户，记录设备信息
+		$exists = count($softObj -> getDataList('device', array('where' => array('imei' => $_SESSION['USER_IMEI']))));
+		$phone_model = $data['phone_model'];
+		if (array_key_exists('real_model', $data)){
+			$phone_model = $data['real_model'];
+		}
+		if ($exists){
+			$softObj -> update('device', array('imei' => $_SESSION['USER_IMEI']), array('firmware' => $_SESSION['FIRMWARE'], 'phone_model' => $phone_model, 'submit_tm' => date('Y-m-d H:i:s', time()), 'ip' => $_SERVER["REMOTE_ADDR"]));
+		}else{
+			$softObj -> addToTable('device', array('imei' => $_SESSION['USER_IMEI'], 'firmware' => $_SESSION['FIRMWARE'], 'phone_model' => $phone_model, 'ip' => $_SERVER["REMOTE_ADDR"]));
+		}
+		// 渠道imei有效验证
+		$db = gomarket_select_db();
+		$pid = ($db=='market')?1:4;
+		$channel_data = $softObj -> getDataList('channel_first', array('where' => array('imei' => $_SESSION['USER_IMEI'], 'pid' => $pid)));
+		$imei_pid_exists = count($channel_data);
+
+		$channel_data_status = isset($channel_data[0]['status'])?$channel_data[0]['status']:0;
+
+		if(!$imei_pid_exists || $channel_data_status == 0){
+			//             $_SESSION['sign'] = $channel_data[0]['sign'];
+			$_SESSION['channel_verify'] = 0;
+			$_SESSION['pid'] = $pid;
+		}
+		// end渠道imei验证
+	}
+	if ($username == "GOAPKGFUSER_@#!"){ # 匿名用户，无须验证
+		$_SESSION['USER_ID'] = GO_UID_DEFAULT;
+		return GO_UID_DEFAULT;
+	}
+	$discuz_api = "http://bbs.goapk.com/api/user.php?action=login";
+	$error = 0;
+	$local = $softObj -> getDataList("user", array("where" => array("name" => $username))); #首先尝试查数据库
+	if (count($local) == 0){
+		$error = 1; //no account in db
+
+
+
+
+	}else{
+		$local = $local[0];
+		if ($local["password"] != $password) $error = 2; //bad password
+
+
+
+
+	}
+	if ($error){
+		$postdata = array('username' => mb_convert_encoding($username, 'GBK', 'utf-8'), 'password' => $password,);
+		$result = requestPost($discuz_api, $postdata);
+	}else{
+		$result = $local['userid'];
+	}
+	# addlog('error.info', "toos::ClsFactory $error - $result - ".count($local) );
+	if ($result > 0){ # 登录成功，$result 为用户的论坛uid
+		$_SESSION['USER_ID'] = $result;
+		if ($error == 1){ // no account in database
+			$info = array('userid' => $result, 'name' => $username, 'password' => $password,);
+			$data['imei'] ? $info['imei'] = $data['imei'] : 0;
+			$data['version_code'] ? $info['version_code'] = $data['version_code'] : 0;
+			$softObj -> addToTable('user', $info);
+		}else if ($update_user_info or $error == 2){ // password updated
+			$info = array('password' => $password);
+			$data['imei'] ? $info['imei'] = $data['imei'] : 0;
+			$data['version_code'] ? $info['version_code'] = $data['version_code'] : 0;
+			$data['firmware'] ? $info['firmware'] = $data['firmware'] : 0;
+			$data['phone_model'] ? $info['phone_model'] = $data['phone_model'] : 0;
+			$softObj -> update('user', array('userid' => $result), $info);
+		}
+	}
+	return $result;
+}
+/**
+ * 敏感词替换为“文明用语”
+ */
+function hexie($str){
+	$line = file_get_contents(SERVER_ROOT . "/data/filter.txt");
+	$good = preg_split('/\n/', $line);
+	if (strlen($good[count($good) - 1]) == 0) unset($good[count($good) - 1]);
+	$repl = '文明用语';
+	return str_replace($good, $repl, $str);
+}
+/**
+ * 繁体转简体。某些环境下出错，暂时禁用。
+ */
+function twToCn($str){
+	return $str;
+	/**
+	 * exec("echo \"".$str."\" | ".SERVER_ROOT."config/gnu/cconv -f UTF8 -t UTF8-CN", $res, $rc);
+	 * if($rc == 0)
+	 * return $res[0];
+	 * return $str;
+	 */
+}
+/**
+ * 根据参数获取缓存key
+ */
+function getCacheKey($method, $option = ""){
+	$option = str_replace(array("/", " "), "_", $option);
+	return strtoupper($method) . $option;
+}
+/**
+ * 写缓存，入库
+ */
+function writeCache($ctime, $value, $method, $option = ""){
+	$key = getCacheKey($method, $option);
+	print "generating $key($method, $option) ...\n";
+	if (!$key){
+		addlog("error.info", "writeCache failed: $method $option maps to no key!");
+		return false;
+	}
+	$softObj = ClsFactory :: Create('model::mSoft');
+	$softObj -> addToTable('cache', array('key' => $key, 'value' => json_encode($value), '_ACTION' => "REPLACE"));
+}
+/**
+ * 获取缓存数据
+ */
+function getCacheData($item, $option = ""){
+	$key = getCacheKey($item, $option);
+	$var_key = "GO_CACHE_" . $key;
+	if (!array_key_exists($var_key, $GLOBALS)){
+		# $bgn = gettimeofday();
+		$value = false;
+
+		$softObj = ClsFactory :: Create('model::mSoft');
+		$pair = $softObj -> getDataList('cache', array('where' => array('key' => $key), 'index' => "key"));
+		if (empty($pair)){
+			addlog('error.info', "getCacheData failed: invalid key: $key, db key: $key");
+		}
+		$value = json_decode($pair[$key]["value"], true);
+		$GLOBALS[$var_key] = $value;
+		# $end = gettimeofday();
+		# $tm = $end['usec'] - $bgn['usec'] + 1000000 * ($end['sec'] - $bgn['sec']);
+		# addlog('error.info', "getCacheData - $cache_type - $abs_filename - TIME: " . $tm);
+	}
+	return $GLOBALS[$var_key];
+}
+/**
+ * 获取软件的最新 id。之前为解决软件更新后，无法根据id 查找软件的问题。现在改为把软件存储到 soft_history 的方式解决。这种方法应该逐步弃用。
+ */
+function getId($softid){
+	$softObj = ClsFactory :: Create('model::mSoft');
+	$id_map = $softObj -> getDataList('softid_map', array('index' => 'old'));
+	while (array_key_exists($softid, $id_map)){
+		addlog("error.info", "getSoftListByMethod: Jump from $softid to {$id_map[$softid]}");
+		$softid = $id_map[$softid];
+	}
+	return $softid;
+}
+/**
+ * 改dns时，用于禁止编辑、开发者上传。需要把期望的ip地址定义在 GO_SERVER_IP,参数 $ip 为当前服务器ip
+ */
+function restrictIp($ip = "118.194.24.5"){
+	if (!defined("GO_SERVER_IP")) return;
+	$server = GO_SERVER_IP;
+	if ($server != $ip){
+		echo "Server has been migrated to 118.194.24.5, DNS record not refreshed yet, please retry later";
+		exit;
+	}
+}
+/**
+ * 检查用户是否为开发者
+ */
+function check_if_user_is_dev(){
+	$devObj = ClsFactory :: Create('model::nSoft');
+	$devInfo = $devObj -> getDataList("pu_developer", array("where" => array('dev_id' => $_SESSION['USER_ID'])));
+	if (count($devInfo) == 0){
+		exitOnError('请先完善开发者资料！', '/devjoin.php');
+	}
+	$info = $devInfo[0];
+	if (intval($info['status']) == 2){
+		exitOnError("您的资料审核未通过，原因：{$info['message']}。请重新完善开发者资料！", '/devjoin.php');
+	}
+	return $devInfo[0];
+}
+/**
+ * 获取当天的日期，格式为：1987-07-19
+ */
+function get_date_string($ts = 0){
+	if (!$ts) $ts = time();
+	$dt = getdate($ts);
+	return $dt['year'] . '-' . sprintf("%02d", $dt['mon']) . '-' . sprintf("%02d", $dt['mday']);
+}
+/**
+ * 用python 脚本提取apk 文件信息
+ */
+function get_apk_info($path){
+	$cmd = APKINFO_CMD . " \"${path}\"";
+	$result = shell_exec($cmd);
+	if (!$result){
+		$filename = "/tmp/" . time() . ".apk";
+		copy($apkfiles['tmp_name'], $filename);
+		addlog('error.info', "get_apk_info failed: $cmd => $filename");
+		exitOnError("get_apk_info failed: $cmd, apk is moved to tmp dir: $filename", "/");
+	}
+	return json_decode($result, true);
+     }
+     /**
+      * 宫士敏写的分页代码
+      */
+     function pagenation($page, $totalRows, $limit, $targetpage, $adjacents){
+     	/**
+     	 * Now we apply our rules and draw the pagination object.
+     	 * We're actually saving the code to a variable in case we want to draw it more than once.
+     	 */
+     	$lastpage = ceil($totalRows / $limit);
+     	$prev = $page - 1; //previous page is page - 1
+     	$next = $page + 1; //next page is page + 1
+     	$lpm1 = $lastpage - 1;
+     	$pagination = "";
+     	if (strpos($targetpage, '?')){
+     		$target_arr = explode('?', $targetpage);
+     		$targetpage = $target_arr[0] . '?' . $target_arr[1] . '&';
+     	}else{
+     		$targetpage = $targetpage . '?';
+     	}
+     	$style = "<style>div.pagination {
+    padding: 3px;
+    margin: 3px;
+}
+div.pagination a {
+    padding: 2px 5px 2px 5px;
+    margin: 2px;
+    border: 1px solid #AAAADD;
+    text-decoration: none; /* no underline */
+    color: #000099;
+}
+div.pagination a:hover, div.pagination a:active {
+    border: 1px solid #000099;
+    color: #000;
+}
+div.pagination span.current {
+    padding: 2px 5px 2px 5px;
+    margin: 2px;
+    border: 1px solid #000099;
+
+    font-weight: bold;
+    background-color: #000099;
+    color: #FFF;
+}
+div.pagination span.disabled {
+    padding: 2px 5px 2px 5px;
+    margin: 2px;
+    border: 1px solid #EEE;
+    color: #DDD;
+}</style>";
+     	if ($lastpage > 1){
+     		$pagination .= "<div class=\"pagination\">";
+     		// previous button
+     		if ($page > 1) $pagination .= "<a href=\"$targetpage" . "page=$prev\">« previous</a>";
+     		else $pagination .= "<span class=\"disabled\">« previous</span>";
+     		// pages
+     		if ($lastpage < 7 + ($adjacents * 2)){ // not enough pages to bother breaking it up
+     			for ($counter = 1;$counter <= $lastpage;$counter++){
+     				if ($counter == $page) $pagination .= "<span class=\"current\">$counter</span>";
+     				else $pagination .= "<a href=\"$targetpage" . "page=$counter\">$counter</a>";
+     			}
+     		}elseif ($lastpage > 5 + ($adjacents * 2)){ // enough pages to hide some
+     			// close to beginning; only hide later pages
+     			if ($page < 1 + ($adjacents * 2)){
+     				for ($counter = 1;$counter < 4 + ($adjacents * 2);$counter++){
+     					if ($counter == $page) $pagination .= "<span class=\"current\">$counter</span>";
+     					else $pagination .= "<a href=\"$targetpage" . "page=$counter\">$counter</a>";
+     				}
+     				$pagination .= "...";
+     				$pagination .= "<a href=\"$targetpage" . "page=$lpm1\">$lpm1</a>";
+     				$pagination .= "<a href=\"$targetpage" . "page=$lastpage\">$lastpage</a>";
+     			}
+     			// in middle; hide some front and some back
+     			elseif ($lastpage - ($adjacents * 2) > $page && $page > ($adjacents * 2)){
+     				$pagination .= "<a href=\"$targetpage" . "page=1\">1</a>";
+     				$pagination .= "<a href=\"$targetpage" . "page=2\">2</a>";
+     				$pagination .= "...";
+     				for ($counter = $page - $adjacents;$counter <= $page + $adjacents;$counter++){
+     					if ($counter == $page) $pagination .= "<span class=\"current\">$counter</span>";
+     					else $pagination .= "<a href=\"$targetpage" . "page=$counter\">$counter</a>";
+     				}
+     				$pagination .= "...";
+     				$pagination .= "<a href=\"$targetpage" . "page=$lpm1\">$lpm1</a>";
+     				$pagination .= "<a href=\"$targetpage" . "page=$lastpage\">$lastpage</a>";
+     			}
+     			// close to end; only hide early pages
+     			else{
+     				$pagination .= "<a href=\"$targetpage" . "page=1\">1</a>";
+     				$pagination .= "<a href=\"$targetpage" . "page=2\">2</a>";
+     				$pagination .= "...";
+     				for ($counter = $lastpage - (2 + ($adjacents * 2));$counter <= $lastpage;$counter++){
+     					if ($counter == $page) $pagination .= "<span class=\"current\">$counter</span>";
+     					else $pagination .= "<a href=\"$targetpage" . "page=$counter\">$counter</a>";
+     				}
+     			}
+     		}
+     		// next button
+     		if ($page < $counter - 1) $pagination .= "<a href=\"$targetpage" . "page=$next\">next »</a>";
+     		else $pagination .= "<span class=\"disabled\">next »</span>";
+     		$pagination .= "</div>\n";
+     	}
+     	return $style . $pagination;
+     }
+     function is_addlog(){
+     	if ($GLOBALS["GO_ENV"] == GO_ENV_DEV)
+     	return true;
+     	return isset($_SESSION["USER_NAME"]) and ($_SESSION["USER_NAME"] === "liruqi");
+     }
+     function gomarket_select_db(){
+     	// TODO: for admin, from $_POST, or $_GET
+     	if (array_key_exists('USENEW', $_REQUEST)){
+     		$flag = $_REQUEST['USENEW'];
+    		if ($flag){
+     			# addlog('dbselect.log', $_SERVER['REQUEST_URI'] . ': use markethc as requested');
+     			return 'newgomarket';
+     		}
+        }
+     	if (array_key_exists('USEHC', $_REQUEST)){
+     		$flag = $_REQUEST['USEHC'];
+     		if ($flag){
+     			# addlog('dbselect.log', $_SERVER['REQUEST_URI'] . ': use markethc as requested');
+     			return 'markethc';
+     		}
+     		else{
+     			# addlog('dbselect.log', $_SERVER['REQUEST_URI'] . ': use market as requested');
+     			return 'market';
+     		}
+     	}
+     	if ($_SERVER && array_key_exists('HTTP_HOST', $_SERVER)){
+     		$host = $_SERVER['HTTP_HOST'];
+     		if (stristr($host, 'gomarket.goapk.com')){
+     			// addlog('dbselect.log', $_SERVER['REQUEST_URI'] . ': use market for gomarket');
+     			return 'market';
+     		}
+     		// if (stristr($host, 'pad.goapk.com') || stristr($host, '192.168.')) {//平板测试时候用
+     		if (stristr($host, 'pad.goapk.com')){ // 手机测试时候用
+     			// addlog('dbselect.log', $_SERVER['REQUEST_URI'] . ': use markethc for hcmarket');
+     			return 'markethc';
+     		}
+     	}
+     	# addlog('dbselect.log', $_SERVER['REQUEST_URI'] . ': use market by default');
+     	return 'market';
+     }
+     function filter_needed(){
+     	$softObj = ClsFactory :: Create("model::mSoft");
+     	$all_channels = $softObj -> getDataList('operator', array(
+            "index" => "chl"
+            ));
+            $my_channel = $_SESSION['CHANNEL_ID'];
+            $strict = array_key_exists($my_channel, $all_channels) ? intval($all_channels[$my_channel]['strict']) : 0;
+            if ($strict > 0){
+            	# addlog('filter.log', $my_channel . ' is a strict channel');
+            }
+            return $strict;
+     }
+     function filter_hide($soft = array()){
+     	foreach ($soft as $idx => $val){
+     		if ($val['hide'] >= GO_HIDE_LOOSE){
+     			# addlog('filter.log', $idx . ' by hide ' . $val['hide'] . ' >= ' . GO_HIDE_LOOSE );
+     			unset($soft[$idx]);
+     		}
+     	}
+     	return $soft;
+     }
+     function filter_auth($soft = array()){
+     	$id_to_auth = getCacheData('id_to_autho');
+     	foreach ($soft as $idx => $val){
+     		if (!$id_to_auth[$val['softid']]){
+     			# addlog('filter.log', $idx . ' by auth');
+     			unset($soft[$idx]);
+     		}
+     	}
+     	return $soft;
+     }
+     function filter_model($soft = array()){
+     	$softObj = ClsFactory :: Create("model::mSoft");
+     	$my_model = $_SESSION['MODEL_NO'];
+     	$all_models = $softObj -> getDataList('phone_model_alias', array(
+            'where' => array('phone_model' => $my_model)
+     	));
+     	if (count($all_models) > 0 && strlen($all_models[0]['alias']) > 0)
+     	$my_model = $all_models[0]['alias'];
+     	$bad_packages = $softObj -> getDataList('model_adapter', array(
+            'where' => array(
+                'phone_model' => $my_model,
+                 'status' => 2
+     	) ,
+             'index' => 'package'
+             ));
+             foreach ($soft as $idx => $val){
+             	if (array_key_exists($val['package'], $bad_packages)){
+             		# addlog('filter.log', $idx . ' by model');
+             		unset($soft[$idx]);
+             	}
+             }
+             return $soft;
+     }
+     function filter_firmware($soft = array()){
+     	# return $soft;
+     	$my_firmware = $_SESSION['FIRMWARE'];
+     	foreach ($soft as $idx => $val){
+     		if ($my_firmware < $val['firmware']){
+     			# addlog('filter.log', $idx . ' by firmware ' . $my_firmware . ' < ' . $val['firmware']);
+     			unset($soft[$idx]);
+     		}
+     	}
+     	return $soft;
+     }
+
+     /**
+      * 对CSV进行处理
+      *
+      * @param resource $ handle
+      * @param int $ length
+      * @param string $ delimiter
+      * @param string $ enclosure
+      * @return 文件内容或FALSE。
+      */
+     function mygetcsv(& $handle, $length = null, $d = ',', $e = '"'){
+     	$d = preg_quote($d);
+     	$e = preg_quote($e);
+     	$_line = "";
+     	$eof = false;
+     	while ($eof != true){
+     		$_line .= (empty ($length) ? fgets($handle) : fgets($handle, $length));
+     		$itemcnt = preg_match_all('/' . $e . '/', $_line, $dummy);
+     		if ($itemcnt % 2 == 0)
+     		$eof = true;
+     	}
+     	$_csv_line = preg_replace('/(?: |[ ])?$/', $d, trim($_line));
+     	$_csv_pattern = '/(' . $e . '[^' . $e . ']*(?:' . $e . $e . '[^' . $e . ']*)*' . $e . '|[^' . $d . ']*)' . $d . '/';
+     	preg_match_all($_csv_pattern, $_csv_line, $_csv_matches);
+     	$_csv_data = $_csv_matches[1];
+     	for ($_csv_i = 0; $_csv_i < count($_csv_data); $_csv_i++){
+     		$_csv_data[$_csv_i] = preg_replace('/^' . $e . '(.*)' . $e . '$/s', '$1', $_csv_data[$_csv_i]);
+     		$_csv_data[$_csv_i] = str_replace($e . $e, $e, $_csv_data[$_csv_i]);
+     	}
+     	return empty ($_line) ? false : $_csv_data;
+     }
+
+     function http_post($vals = array(), $files = array()){
+     	$host = $GLOBALS["GO_ENV"] == GO_ENV_PRODUCT ? '192.168.1.118' : '9.admin.goapk.com';
+     	$res = curl_init();
+     	curl_setopt($res, CURLOPT_URL, "http://${host}/service.php");
+     	curl_setopt($res, CURLOPT_POST, true);
+     	curl_setopt($res, CURLOPT_RETURNTRANSFER, true);
+     	foreach ($files as $idx => $val){
+     		$vals["file_${idx}"] = "@${val}";
+         }
+         file_put_contents('/tmp/httppost.log', var_export($vals, true), FILE_APPEND);
+         curl_setopt($res, CURLOPT_POSTFIELDS, $vals);
+         $result = curl_exec($res);
+         if (!$result){
+         	file_put_contents('/tmp/httppost.log', var_export(curl_getinfo($res), true), FILE_APPEND);
+         }
+         curl_close($res);
+         return $result;
+     }
+     # go_upload('apkfile', 'a.apk', '/x/y/z.apk');
+     # will upload to /tmp/${session}/apkfile/a.apk
+     function go_upload($path = "", $name = "", $file){
+     	$vals = array(
+        'do' => 'save',
+         'id' => md5($_SESSION['USER_NAME']),
+         'path' => $path,
+         'name' => $name,
+     	);
+     	$files = array($file);
+     	return http_post($vals, $files);
+     }
+     # go_move('jtf0', 'a.png', '/data/att/m.goapk.com');
+     # will move /tmp/${session}/jtf0/a.png to /data/att/m.goapk.com/jtf0/a.png
+     function go_move($path, $name, $dst, $fn = ''){
+     	$vals = array(
+        'do' => 'move',
+         'id' => md5($_SESSION['USER_NAME']),
+         'path' => $path,
+         'name' => $name,
+         'dst' => $dst,
+         'fn' => $fn
+     	);
+     	$result = http_post($vals);
+     	if (!$result)
+     	return FALSE;
+     	$json = json_decode($result, true);
+     	return $json['status'] == 'ok' ? TRUE : FALSE;
+     }
+     # go_apkinfo('/x/y/z.apk');
+     # return an array as before
+     function go_apkinfo($file){
+     	$dir = "apkfile";
+     	$res = go_upload($dir, basename($file), $file);
+     	if (!$res){
+     		# echo "upload";
+     		return false;
+     	}
+     	$vals = array(
+        'do' => 'apkinfo',
+         'id' => md5($_SESSION['USER_NAME']),
+         'path' => $dir,
+         'name' => basename($file)
+     	);
+     	$res = http_post($vals);
+     	if (!$res){
+     		# echo "apkinfo";
+     		return false;
+     	}
+     	$json = json_decode($res, true);
+     	if ($json['status'] != 'ok'){
+     		var_dump($json);
+     		return false;
+     	}
+     	$info = $json['data']['apkinfo'];
+     	return json_decode($info, true);
+     }
+
+     function go_filesize($path, $name){
+     	$vals = array(
+        'do' => 'filesize',
+         'id' => md5($_SESSION['USER_NAME']),
+         'path' => $path,
+         'name' => $name,
+     	);
+     	$result = http_post($vals);
+     	if (!$result)
+     	return FALSE;
+     	$json = json_decode($result, true);
+     	return $json['status'] == 'ok' ? intval($json['data']['filesize']) : -1;
+     }
+
+     /**
+	 * 切割函数
+	 * Enter description here ...
+	 * @param $fn 源文件路径
+	 * @param $out_dir 输出文件路径
+	 * @param $bs 块大小
+	 * @param $dir_name_num 截取的名字长度
+	 */
+	function splitfile($fn, $out_dir, $bs = 524288, $dir_name_num = 2) {
+	    if (!is_file($fn)) {
+	        return false;
+	    }
+	    $file = realpath($fn);
+	    $dir = dirname($file);
+	    $name = basename($fn);
+	    $dir1 = substr($name,0,$dir_name_num);
+	    $fs = filesize($fn);
+//	    if ($fs > $bs)
+//	        return 1;
+	    $n = 0;
+	    $out_dir = "${out_dir}/${dir1}";
+	    for ($i = 0; $i < $fs; $i += $bs) {
+	        $out = sprintf("${out_dir}/${name}.%04d", $n);
+//	        echo "${file} => ${out}\n";
+	        if ($fs <= $bs){
+	        	$cmd = "mkdir -p ${out_dir} && cp ${file} ${out}";
+	        }else{
+	        	$cmd = "mkdir -p ${out_dir} && dd if=\"${file}\" of=\"${out}\" bs=${bs} skip=${n} count=1 2>&1  >> /tmp/splitfile.log";
+	        }
+	        shell_exec($cmd);
+	        $n += 1;
+	    }
+	    return $n;
+	}
+
+	function splitfiles($dir, $filter, $out_dir, $bs = 524288, $dir_name_num = 2) {
+	    global $real_filter;
+	    if (!is_array($real_filter)) {
+	        if (is_array($filter)) {
+	            foreach ($filter as $f) {
+	                $real_filter[] = strtolower($f);
+	            }
+	        }
+	        else
+	            $real_filter[] = strtolower($filter);
+	    }
+	    if (is_array($dir)) {
+	        foreach ($dir as $d) {
+	            splitfiles($d, $filter, $out_dir, $bs, $dir_name_num);
+	        }
+	        return;
+	    }
+	    if (is_dir($dir)) {
+	        $d = opendir($dir);
+	        if ($d) {
+	            while ($f = readdir($d)) {
+	                if ($f == "." || $f == "..") {
+	                    continue;
+	                }
+	                splitfiles("${dir}/$f", $filter, $out_dir, $bs, $dir_name_num);
+	            }
+	            closedir($d);
+	        }
+	        return;
+	    }
+	    if (is_file($dir)) {
+	        $path = realpath($dir);
+	        $index = strrpos($path, ".");
+	        $extension = $index >= 0 ? strtolower(substr($path, $index)) : "";
+	        if (in_array($extension, $real_filter)) {
+	            splitfile($dir, $out_dir, $bs, $dir_name_num);
+	        }
+	    }
+	}
+
+    function go_split($path, $name) {
+     	$vals = array(
+        'do' => 'split',
+         'id' => md5($_SESSION['USER_NAME']),
+         'path' => $path,
+         'name' => $name,
+     	);
+     	$result = http_post($vals);
+     	if (!$result)
+     	return FALSE;
+     	$json = json_decode($result, true);
+     	return $json['status'] == 'ok' ? intval($json['data']['result']) : -1;
+    }
+

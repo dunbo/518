@@ -1,0 +1,350 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+<link rel="stylesheet" type="text/css" href="/Public/img/common.css" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='__PUBLIC__/js/sensitive.js'></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<style>
+<!--
+
+table.words td{width:180px;height:22px;padding-left:10px;word-wrap : break-word ;word-break:break-all;}
+#abcd,#abcd a{margin-left:10px;margin-right:10px;font-size:16px;}
+-->
+</style>
+<script>
+var flag = false;
+function selectAll(){
+	if(!flag){
+		$("[name='check_id']").each(function(){
+			$(this).attr('checked',true);
+		});
+		flag = true;
+		return;
+	}
+	if(flag){
+		$("[name='check_id']").each(function(){
+			$(this).attr('checked',false);
+		});
+		flag = false;
+		return;
+	}	
+}
+</script>
+<div class="main" >
+<div class="content">
+<center>
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="tb">
+<tr>
+<td align='left'>
+<form id="upload" method='post' action="__URL__/soft_shieldpackagename_list" >
+敏感词：<input size='19' type="text" name="word"  value="" /> <input type="submit" name="button" id="button" value="&nbsp;搜 索&nbsp;"  />
+&nbsp;&nbsp;&nbsp;&nbsp;
+ <input type="button" id="add" value="&nbsp;批量导入_添加&nbsp;"  />&nbsp;&nbsp;
+ <input type="button" id="del" value="&nbsp;批量导入_删除&nbsp;"  />&nbsp;&nbsp;
+ <a href='__PUBLIC__/sample.csv'>下载csv模版</a>
+</form>
+</td>
+</tr>
+<br />
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr style="background-color:#ccc;">
+    <td align='left' width="10%" height="30"> <font style="color:#000; font-weight:bold">&nbsp&nbsp当前索引</font>&nbsp&nbsp<font style="color:#F00; font-weight:bold">(<if condition="$abc eq ''" > 全部<elseif condition="$abc eq '1'" />其他<else/> {$abc} </if>)</font></td>
+    <td align='left' height="30" >
+	<a href="__URL__/soft_shieldpackagename_list/" <if condition="$abc eq ''" > style="color:#f00" </if> >全部<br/>{$count}</a> 
+	</td>
+	<volist name='abc_arr' id='v'>
+<td align='center'>	
+		<a href="__URL__/soft_shieldpackagename_list/abc/{$v}" <if condition="$abc eq $v" > style="color:#f00" </if> ><if condition="$v eq '1'" >其它<else/>{$v}</if><br/>{$abc_count.$v}</a>
+</td>
+	</volist>
+  </tr>
+ </table> 
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">  
+  </tr>
+  <tr>
+    <td align='left' width="15%" height="30">&nbsp&nbsp&nbsp<input type="checkbox" value="全选" onclick="selectAll();"> <input type="button" id="del_all" value="&nbsp;批量删除&nbsp;"  /></td>
+    <td align='center' width="75%" height="30" ><div align='left'>&nbsp&nbsp{$page}</div></td>
+  </tr>
+   <tr>
+   <td colspan="2">
+	<table width="100%" height="60" border="0" cellpadding="0" cellspacing="0" class="tb words">
+	<tr>
+	<?php $i=1;foreach($list as $v) :?>
+	<td>
+		<input type="checkbox" name="check_id" value="<?php  echo $v['id']; ?>" ><?php  echo $v['word']; ?>
+	</td>
+	<if condition="($i%5) eq 0" > </tr></if>
+	<?php $i++;endforeach;?>
+	</tr>
+	</table>
+	</td>
+   </tr>
+   </table>
+	</td>
+   </tr>
+</table>
+</center>
+</div>
+</div>
+<div id="open" style="padding:10px; width:300px; height:300px;   display:none;">
+		<h2>添加敏感词</h2>
+		<form  method="POST" action="__URL__/import_csv/types/2" enctype="multipart/form-data" >
+   		<input type="file" id="add_csv" name="add_csv" value="导入文件" onchange="onFileChange(this,'add_sub')" />
+		<span id='file_csv_a' ></span> 
+	  	</form><br />
+		<textarea style="height:180px;width:100%;" id="words" rel="1">输入敏感词，每个敏感词换行输入，单个字符不允许添加</textarea>	<br />
+		<input type='button'  id='sub_add' value="确定" />
+</div>
+<div id="open_del" style="padding:10px; width:300px; height:300px;   display:none;">
+		<h2>删除敏感词</h2>
+		<form  method="POST" action="__URL__/import_csv/types/2" enctype="multipart/form-data" >
+		<input type="file" id="del_csv" name="del_csv" value="导入文件" onchange="onFileChange(this,'del_sub')"  />		
+		<span id='file_csv_d' ></span>
+  
+   </form><br />
+		<textarea style="height:180px;width:100%;" id="words_del" rel="1">输入敏感词，每个敏感词换行输入，单个字符不允许添加</textarea>	<br />
+		<input type='button'  id='sub_del' value="确定" />
+		
+</div>
+<div id="edit_box" style="padding:10px; width:300px; height:300px;   display:none;">
+		<h2>编辑敏感词</h2>
+		<textarea style="height:250px;width:100%;" id="edit_words"></textarea>	<br />
+		<input type='button'  id='sub_edit' value="确定" />
+</div>
+<script type="text/javascript">
+$(document).ready(function() {
+$('#words ,#words_del').focusin(function(){
+	var rel = $(this).attr('rel');
+	if(rel==1){
+		$(this).val('');
+		$(this).attr('rel',2);
+	}
+	
+});
+$('#del_all').click(function(){
+	if(window.confirm('确定批量删除吗？')){
+	var str = '';
+    $("[name='check_id']").each(function(){
+    	if($(this).attr('checked')){
+    		str+=$(this).val()+',';
+    	}
+	});
+    var id = str=str.substring(0,str.length-1);
+    if(id.length<1){
+    	alert('请选择要删除的敏感词！');
+    	return false;
+    	
+    }
+    var url = '__URL__/del_sensitive/type/2';
+    var data = '&id='+id;
+    $.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		success: function(data){
+				if(!!data && data.success){ 
+					alert(data.msg);
+					window.location.href="/index.php/Dev/Sensitive/soft_shieldpackagename_list";
+					setTimeout(function(){
+						//window.location.reload();
+					},800);
+				}else{
+					alert(data.msg);
+					window.location.href="/index.php/Dev/Sensitive/soft_shieldpackagename_list";
+					setTimeout(function(){
+						//window.location.reload();
+					},800);
+				}
+		},
+	    error: function(){
+	    		  alert('对不起，服务器错误，请联系管理员！');
+	    	      setTimeout(function(){
+						window.location.reload();
+						
+					},800);
+	    }
+     })
+	}
+  
+});
+$('#words ,#words_del').focusout(function(){
+	var rel = $(this).attr('rel');
+	if(rel==2 && $(this).val()==''){
+		$(this).val('输入敏感词，每个敏感词换行输入，单个字符不允许添加');
+		$(this).attr('rel',1);
+	}
+	
+});
+//弹出批量添加层
+$('#add').click(function(){
+	$("#open").zxxbox();
+	
+});
+
+$('#del').click(function(){
+	$("#open_del").zxxbox();
+	
+});
+$('input.edit_list').click(function(){
+	var str = $.trim($(this).closest('tr').find('td').eq(1).text());
+	var abc = $.trim($(this).attr('rel'));
+	var arr = str.replace(/\s+/g,'\n');
+	$('#edit_words').val(arr);
+
+	$("#edit_box").zxxbox();
+	$('#sub_edit').click(function(){
+		var url = '__URL__/oper_sensitive/type/2';
+	    var word = $('#edit_words').val();
+	    var data = '&word='+encodeURIComponent(word)+'&edit='+abc;
+		if(word=='' || word==undefined){
+			if(window.confirm('为空将删除此分类下数据，确定批量删除吗？')){
+	             
+	    $.ajax({
+			url: url,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function(data){
+					if(data['code']==0) {	//失败
+						alert(data['msg']);
+						return false;
+					} 
+					if(!!data && data.success){ 
+						alert(data.msg);
+						window.location.href="/index.php/Dev/Sensitive/soft_shieldpackagename_list";
+						closes();
+						setTimeout(function(){
+							//window.location.reload();
+							
+						},800);
+					}else{
+						alert(data.msg);
+						window.location.href="/index.php/Dev/Sensitive/soft_shieldpackagename_list";
+						closes();
+					}
+			},
+		    error: function(){
+		    	
+		    	      alert('对不起，服务器错误，请联系管理员！');
+		    }
+	     });
+			}
+	    
+		
+		  }else{
+		  	$.ajax({
+			url: url,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function(data){
+					if(data['code']==0) {	//失败
+						alert(data['msg']);
+						return false;
+					} 
+					if(!!data && data.success){ 
+						alert(data.msg);
+						closes();
+						window.location.href="/index.php/Dev/Sensitive/soft_shieldpackagename_list";
+						setTimeout(function(){
+							//window.location.reload();
+							
+						},800);
+					}else{
+						alert(data.msg);
+						closes();
+					}
+			},
+		    error: function(){
+		    	
+		    	      alert('对不起，服务器错误，请联系管理员！');
+		    }
+	     });
+		  }
+	    
+	});
+});
+$('#sub_del').click(function(){
+	if(window.confirm('确定批量删除吗？')){
+		var str = $.trim($('#words_del').val());
+	    //var word = str.replace(/\n\r+/g,',');
+		var data = '&word='+encodeURIComponent(str);
+		var url = '__URL__/del_sensitive/type/2';
+		//console.log(data); return false;
+	$.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		success: function(data){
+				if(data['code']==0) {	//失败
+					alert(data['msg']);
+					return false;
+				} 
+				if(!!data && data.success){ 
+					alert(data.msg);
+					window.location.href="/index.php/Dev/Sensitive/soft_shieldpackagename_list";
+					setTimeout(function(){
+						//window.location.reload();
+						
+					},800);
+				}else{
+					alert(data.msg);
+					window.location.href="/index.php/Dev/Sensitive/soft_shieldpackagename_list";
+					setTimeout(function(){
+						//window.location.reload();
+						
+					},800);
+				}
+		},
+	    error: function(){
+	    	
+	    	      alert('对不起，服务器错误，请联系管理员！');
+	    }
+     })
+	}
+})
+$('#sub_add').click(function(){
+	
+    var url = '__URL__/oper_sensitive/type/2';
+    var word = $('#words').val();
+    var data = '&word='+encodeURIComponent(word);
+    $.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		success: function(data){
+				if(data['code']==0) {	//失败
+					alert(data['msg']);
+					return false;
+				} 
+				if(!!data && data.success){ 
+					alert(data.msg);
+					closes();
+					window.location.href="/index.php/Dev/Sensitive/soft_shieldpackagename_list";
+					setTimeout(function(){
+						//window.location.reload();
+						
+					},800);
+				}else{
+					
+					alert(data.msg);
+					window.location.href="/index.php/Dev/Sensitive/soft_shieldpackagename_list";
+					closes();
+				}
+		},
+	    error: function(){
+	    	
+	    	      alert('对不起1，服务器错误，请联系管理员！');
+	    }
+     })
+})
+})
+//关闭弹出层
+function closes(){
+	$.zxxbox.hide();
+}
+</script>

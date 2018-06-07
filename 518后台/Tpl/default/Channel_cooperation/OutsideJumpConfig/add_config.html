@@ -1,0 +1,215 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+<FORM method="POST" action="__URL__/add_config" onsubmit="return checkPost()"  enctype="multipart/form-data">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td>选择渠道</td>
+		<td width="300" align="left">
+			<a class="thickbox" href="/index.php/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel">
+			<font color="blue">选择指定渠道</font>
+			</a>
+			<br>
+			<div id="channel_div"></div>
+			<input type="hidden" id="cids"/>
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td style="width: 15%">跳转位置：</td>
+		<td>
+			<input name='type' type='radio' value="1"  onclick="show_type(1)"/>市场外投专用首页&nbsp;&nbsp;
+			<input name='type' type='radio' value="2" onclick="show_type(2)" />推荐内容
+		</td>
+		<td></td>
+	</tr>
+	
+	<tr class="sub_tr type_two">
+		<td style="width: 15%">添加推荐内容：</td>
+		<td>
+			<a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+			<div id="content_type_div"></div>
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr type_one">
+		<td style="width: 15%">软件包名：</td>
+		<td><input type="text" name="package_new" id="package_new" onblur="get_info()"></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr type_one">
+		<td style="width: 15%">软件名称：</td>
+		<td><input type="text" name="softname" id="softname" disabled></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr type_one">
+		<td>推荐内容标题：</td>
+		<td id="flexible_id_str">
+			<SELECT name='flexible_id' id="flexible_id">
+				<option value='' selected>无</option>				
+			</SELECT>
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr type_one">
+		<td style="width: 15%">是否展示提示：</td>
+		<td>
+			<!-- <input name='is_show_tip' type='radio' checked="checked" value="1"  />是&nbsp;&nbsp; -->
+			<input name='is_show_tip' type='radio' value="1"  />是&nbsp;&nbsp;
+			<input name='is_show_tip' type='radio' value="0"  />否
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr type_one">
+		<td>推荐视频软件：</td>
+		<td id="video_id_str">
+			<SELECT name='video_id' id="video_id">
+				<option value='' selected>无</option>			
+			</SELECT>
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr type_one">
+		<td style="width: 15%">多排推荐标题：</td>
+		<td><input type="text" name="rows_title" id="rows_title" style="width:200px;"></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="3"><input type='submit' value="&nbsp;&nbsp;提交&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;"></td>
+	</tr>
+</table>
+</FORM>	
+<script>
+function checkPost()
+{
+
+	if ($('#cids').val() == '') {
+		alert('请选择渠道');
+		return false;
+	}
+	
+	if ($("input[name='type']:checked").val()== 1) {
+		if(!$('#package_new').val()){
+			alert('请填写包名');
+			return false;
+		}
+		if(!$('#softname').val()){
+			alert('包名不存在');
+			return false;
+		}
+		if(!$('#rows_title').val()){
+			alert('多排推荐标题必须填写');
+			return false;
+		}
+		if($("input[name='is_show_tip']:checked").val()!=1 && $("input[name='is_show_tip']:checked").val()!=0){
+			alert('是否展示提示必须选择');
+			return false;
+		}
+		if(!$('#flexible_id').val()){
+			alert('推荐内容标题必须选择');
+			return false;
+		}
+		// if(!$('#video_id').val()){
+		// 	alert('推荐视频软件必须选择');
+		// 	return false;
+		// }
+	}else if($("input[name='type']:checked").val()== 2){
+		if(!$('#content_type_div').html()){
+			alert('请填写推荐内容');
+			return false;
+		}
+	}else{
+		alert('请填写跳转位置');
+		return false;
+	}
+	
+	return true;
+}
+$(function() {
+	var href_1 = generate_content_type_href('content_type_div','1,2,3,4,5,6,7,8,9,10','','');
+	$("#content_type_a").attr("href", href_1);
+	$('.type_one').hide();
+	$('.type_two').hide();
+})	
+function submitChannel()
+{
+	var cids = '';
+	$('#channel_div').html('');
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		$('#channel_div').append(item);
+	})
+	$.cookie('cids', '', {path: '/'});
+	tb_remove();
+}
+	
+//主层动态变化数据
+function onclikChannel()
+{	
+	
+	$('#channel_div').html('');
+	var cids="";
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		$('#channel_div').append(item);
+		cids+=','+this.value;
+		// select_channels.submit();
+	})
+	$('#cids').val(cids);
+	//$.cookie('cids', '', {path: '/'});
+}
+
+function check_arr()
+{
+	$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+}
+
+function show_type(type){
+	if(type==2){
+		$('.type_two').show();
+		$('.type_one').hide();
+	}else{
+		$('.type_two').hide();
+		$('.type_one').show();
+	}
+}
+function get_info(){
+	var package=$('#package_new').val();
+	if(package==''){
+		alert("包名必须填写");
+		return;
+	}
+	$.ajax({
+			url: '__URL__/add_config/bs/1/package/'+package+'/1/1',
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					data=eval("("+data+")"); 
+					$('#rows_title').val(data.rows_title);
+					$('#softname').val(data.softname);
+					$('#video_id_str').html(data.video_id_str);
+					$('#flexible_id_str').html(data.flexible_id_str);
+				}else{
+					alert("包名不存在");
+					return;
+				}
+			}
+		});
+}
+</script>

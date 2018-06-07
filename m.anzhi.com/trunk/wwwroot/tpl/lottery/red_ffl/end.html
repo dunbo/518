@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>红包翻翻乐抽奖</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/<!--{$out.prefix}-->/css/common.css?v1"/>
+</head>
+<body>
+<!--{if $out.activity.imgurl }-->
+<div class="banner"><img style="height:248px;" src="<!--{$out.img_url}--><!--{$out.activity['imgurl']}-->"/></div>
+<!--{else}-->
+<div class="banner"><img style="height:248px;" src="<!--{$out.new_static_url}-->/red_ffl/images/banner.png"/></div>
+<!--{/if}-->
+<div class="main main2">
+	<div class="tips_p">
+		<div class="tips_img">
+			<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/tip_hd_02.png" style="width:96px; height:70px">
+		</div>
+		<p class="txt_spec">活动已经结束了，下次再来吧</p>
+		<p class="txt_spec2">活动时间<br/><!--{$out.activity.start_tm|date_format:'%Y-%m-%d %H:%M'}-->至<!--{$out.activity.end_tm|date_format:'%Y-%m-%d %H:%M'}--></p>
+	</div>
+		
+	<!--{if $out.is_login eq 1 && $out.award_list }-->
+	<div class="lottery_list magtop12">
+		<ul>
+			<!--{foreach from=$out.award_list item='val' key='k'}-->
+			<li><p>中奖红包未领取　<!--{$val.time|date_format:'%m-%d %H:%M'}--> <a href="javascript:open_red_do(<!--{$k}-->);">立刻领取</a></p></li>
+			<!--{/foreach}-->
+			<li class="list_spec"><p>请尽快领取，红包将在1小时后过期</p></li>
+		</ul>
+	</div>
+	<!--{/if}-->
+	
+	<div class="rules">
+		<h3>规则说明：</h3>
+		<ul>
+			<li>1.每日签到会获得1金币奖励，连续签到每日多获得八金币金币数量可以到“安智钱包－金币”查看</li>
+			<li>2.每日签到后可以获得一次抽奖机会，点击日历日期可以查看每天奖品。</li>
+		</ul>
+	</div>
+</div>
+<script type="text/javascript" src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script>
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+function open_red(param){
+	window.AnzhiActivitys.openRedPack(param);
+}
+function open_red_do(inserId)
+{
+	if( !inserId ) {
+		alert('领取失败')
+	}
+	$.ajax({
+		url: '/lottery/<!--{$out.prefix}-->/soft_task.php',
+		data:'type='+5+'&sid='+sid+'&aid='+aid+'&inserId='+inserId,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if( data.code == 1 ) {
+				open_red(data.data)
+			}else {
+				alert(data.msg);
+			}
+		},			
+	});	
+}
+
+function reportPacketResult(json){
+    var data = JSON.parse(json);
+    if(data.type==2){
+    	if(data.result==2||data.error==-5){
+            //将未领取干掉
+            $.ajax({
+                    url: '/lottery/red_package/index.php',
+                    data:'sid='+sid+'&aid='+aid+'&orderid='+data.orderId,
+                    type: 'post',
+                    dataType: 'json',	
+                    success:function(res){
+                        location.reload();
+                    }
+            });
+        }else{
+            location.reload();
+        }
+    }
+}
+</script>
+</body>
+</html>

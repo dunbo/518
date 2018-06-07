@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>2015奇葩心愿大逆袭</title>
+<link type="text/css" rel="stylesheet" href="/css/christmas_common.css?v1"/>
+<script type="text/javascript"  src="/js/jquery-1.8.0.min.js?v1"></script>
+<script type="text/javascript"  src="/js/jquery.SuperSlide.js"></script>
+<script type="text/javascript">
+	var share= '<!--{$out.share}-->',sid = '<!--{$out.sid}-->',img_url = '<!--{$out.img_url}-->',version_status='<!--{$out.version_status}-->';
+	var stopNum = '',proid_arr = getArgs(),aid = 179,skinvc=proid_arr.skinvc,flags={canMove:true};
+	var share_num = 0,share_test = '',share_id=0;
+	var actsid=<!--{$out.actsid}-->;
+	var aid = <!--{$out.aid}-->;
+	function getArgs() {
+		var args = {};
+		var query = location.search.substring(1);
+		var pairs = query.split("&");
+		for(var i = 0; i < pairs.length; i++) {
+			var pos = pairs[i].indexOf('=');
+			if (pos == -1) continue;
+			var argname = pairs[i].substring(0,pos);
+			var value = pairs[i].substring(pos+1);
+			value = decodeURIComponent(value);
+			args[argname] = value;
+		}
+		return args;
+	}
+	
+    $(function(){
+       var slideLi= $("#slideBox .bd ul li"),
+           _html="<div class='seal'></div>";
+        slideLi.each(function(){
+            $(this).click(function(){
+                slideLi.find(".seal").remove();
+                $(this).append(_html).fadeIn();
+				share_id = this .id;
+				if(share_id == 1){
+					share_test = '有钱又任性';
+				}else if(share_id == 2){
+					share_test = '冰冰当女友';
+				}else if(share_id == 3){
+					share_test = '消灭直男癌';
+				}else if(share_id == 4){
+					share_test = '打败心机婊';
+				}else if(share_id == 5){
+					share_test = '上天拍太空';
+				}else if(share_id == 6){
+					share_test = '下地嫁思聪';
+				}else if(share_id == 7){
+					share_test = '顿顿茶叶蛋';
+				}else if(share_id == 8){
+					share_test = '辣条吃不完';
+				}else if(share_id == 9){
+					share_test = '吃货不长肉';
+				}else if(share_id == 10){
+					share_test = '逗逼有节操';
+				}else if(share_id == 11){
+					share_test = '考试不挂科';
+				}else if(share_id == 12){
+					share_test = '泡妞不花钱';
+				}
+				
+				setTimeout('give_share()',1000);
+            })
+        })
+    })
+	
+	function give_share(){
+		$("#share").removeClass("btn-share-gray").addClass("btn-share");
+		$('#share').live("click",function(){
+			go_share();
+		});
+	}
+	
+	//下载软件
+	function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag,noflux,firmware,status){
+
+		if(status != 1){
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(softid));
+		}
+		if(skinvc >= 5400){
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag,0,firmware);
+		}else{
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+		}
+	}
+	
+	$(document).ready(function () {
+	
+		$("body").bind('touchmove', function (e) {
+			if(!flags.canMove){
+				e.preventDefault();
+			}
+		});
+		
+		$('#shared').attr('onclick',false);
+		if(share == 1){
+			share_download();
+		}
+	
+		if(version_status == 200){
+			showOpenNew('view_deta_version');
+		}
+		
+	});
+	
+	
+	
+	function go_share(){
+		$.ajax({
+			url: '/lottery/christmas_share_num.php',
+			data: 'sid='+sid+'&aid='+aid+'&share_id='+share_id,
+			type: 'get',
+			async:false,
+			success:function(data){
+				share_num = data;
+			}
+		});
+	
+		var share_json = '{"TEXT":"2015年我的奇葩心愿是'+share_test+'，已经有'+share_num+'人和我选择了一样的愿望","URL":"http://promotion.anzhi.com/images/christmas_images/christmas_share.jpg","ACTIONURL":"http://promotion.anzhi.com/lottery/christmas_share.php?share=1","URLWEIXIN":"http://promotion.anzhi.com/images/christmas_images/christmas_share.jpg"}';
+		
+		$.ajax({
+			url: '/lottery/christmas_share_log.php',
+			data: 'sid='+sid+'&aid='+aid,
+			type: 'get',
+			success:function(data){
+				if(data == 200){
+					$("#shared").removeClass("btn-shared-gray").addClass("btn-shared");
+					$('#shared').live("click",function(){
+						window.location.href= '/lottery/christmas_lottery.php?sid='+sid;
+					});
+				}else{
+					alert("分享失败");
+				}
+			}
+		});
+		window.AnzhiActivitys.getShareDialog(share_json);
+	}
+	
+	function showOpenNew(obj){
+		var bg_h=$("#body-bg").height()+$(document).scrollTop();
+		var top_h= $('#'+obj).height()/ 2-$(document).scrollTop();
+		$('#'+obj).css("margin-top",-top_h+"px").show();
+		$("#body-bg").css("height",bg_h+"px").show();
+		$('#'+obj).show();
+        flags.canMove=false;
+    }
+	function closeBtn(obj){
+        $('#'+obj).hide();
+		$("#body-bg").hide();
+        flags.canMove=true;
+    }
+	
+	
+	var port_arr = [12345, 23456, 34567, 45678, 56789, 612345];
+	var listen_failed_max = port_arr.length;
+	var listen_failed_count = 0;
+	var market_installed = false;
+	
+	function share_download() {
+		market_installed = false;
+		listen_failed_count = 0;
+		document.getElementById("az_spirit").innerHTML = "";
+		if (!port_arr) {
+			return;
+		}
+		var arr_len = port_arr.length;
+		for (var i = 0; i < arr_len; i++) {
+			add_async_download_listen_script(port_arr[i]);
+		}
+		return;
+	}
+	
+	function add_async_download_listen_script(port) {
+		var m = document.createElement("script");
+		m.type = 'text/javascript';
+		var url = 'http://127.0.0.1:' + port + '/query?type=action&id='+aid+'&callback=change_install_status&r=' + Math.floor(Math.random() * ( 1000000000 + 1));
+		m.src = url;
+		m.async = "async";
+		m.onload = function() {
+			listen_failed_count++;
+            if (listen_failed_count >= listen_failed_max) {
+                window.location.href= 'http://m.anzhi.com/info_1979088.html';
+            }
+		};
+		m.onerror = function() {
+			listen_failed_count++;
+			if (listen_failed_count >= listen_failed_max) {
+				 window.location.href= 'http://m.anzhi.com/info_1979088.html';
+			}
+		};
+		document.getElementById("az_spirit").appendChild(m);
+	}
+	
+	function change_install_status() {
+		market_installed = true;
+	}
+	
+	$(function(){
+		$("body").bind('touchmove', function (e) {
+			if(!flags.canMove){
+				e.preventDefault();
+			}
+		});
+    })
+</script>
+</head>
+<body>
+<section>
+	<div style="display:none;" id="az_spirit"></div>
+	<div id="body-bg" <!--{if $out.version_status != 200}-->style="display:none;"<!--{/if}-->></div>
+    <div class="notice clear" style="margin-top: 0px;">
+        <div class="notice-icon"></div>
+        <div class="notice-list">
+            <marquee scrollamount="2" scrolldelay="90" direction="left">
+            <!--{if $out.all_award_count}-->
+			<!--{foreach from=$out.all_award_result item=v key=k}-->
+			<span><!--{$v.telphone}--> &nbsp;获得<!--{$v.award}--><em><!--{$v.the_time}--></em></span>
+			<!--{/foreach}-->
+			<!--{else}-->
+			<span>奖品已经洗白白在等你了</span>
+			<!--{/if}-->
+            </marquee>
+        </div>
+    </div>
+	<!--{if $out.channel_status != 100 && $out.channel_status != 200 && $out.status != 100}-->
+    <div class="mod-con ptb clear"><img class="diamond-icon" src="/images/christmas_images/diamond.png" width="21" height="18"/><span class="diamond-txt">猛戳许愿牌许愿~</span><a href="/lottery/christmas_rules.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->" class="rule">活动规则</a></div>
+	<!--{/if}-->
+    <div class="trees-bg">
+        <div class="white-wrap" style='width:98%'>
+		<a href="/lottery/christmas_lottery_end.php?actsid=<!--{$out.actsid}-->&sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->">抽奖结束</a>
+			<!--{if $out.channel_status == 200}-->
+			<div class="update-tip">
+				很抱歉，您的安智市场版本过低，请升级后参与活动。升级方式：在[管理-设置]中检查更新。
+			</div>
+			<!--{else if $out.channel_status == 100}-->
+			<div class="update-tip">
+				<p>很抱歉，您的安智市场版本过低，请升级后参与活动。</p>
+			</div>
+			<!--{/if}-->
+			<!--{if $out.status == 100}-->
+			<div class="update-tip">
+				<p style="color:red;">请先插入SIM卡，重启安智市场参与本活动</p>
+			</div>
+			<!--{/if}-->
+            <div class="slideBox <!--{if $out.channel_status == 100 || $out.channel_status == 200 || $out.status == 100}-->pbottom<!--{/if}-->" id="slideBox">
+                <a href="javascript:;" class="next"></a>
+                <a href="javascript:;" class="prev"></a>
+                <div class="bd">
+                    <ul>
+                        <li id="1">
+                            <div class="pic"><img src="/images/christmas_images/slider_img01.png" /></div>
+                            <div class="title">有钱又任性</div>
+                        </li>
+                        <li id="2">
+                            <div class="pic"><img src="/images/christmas_images/slider_img02.png" /></div>
+                            <div class="title">冰冰当女友</div>
+                        </li>
+					</ul>
+					<ul>
+                        <li id="3">
+                            <div class="pic"><img src="/images/christmas_images/slider_img03.png" /></div>
+                            <div class="title">消灭直男癌</div>
+                        </li>
+                        <li id="4">
+                            <div class="pic"><img src="/images/christmas_images/slider_img04.png" /></div>
+                            <div class="title">打败心机婊</div>
+                        </li>
+					</ul>
+					<ul>
+                        <li id="5">
+                            <div class="pic"><img src="/images/christmas_images/slider_img05.png" /></div>
+                            <div class="title">上天拍太空</div>
+                        </li>
+                        <li id="6">
+                            <div class="pic"><img src="/images/christmas_images/slider_img06.png" /></div>
+                            <div class="title">下地嫁思聪</div>
+                        </li>
+					</ul>
+					<ul>
+                        <li id="7">
+                            <div class="pic"><img src="/images/christmas_images/slider_img07.png" /></div>
+                            <div class="title">顿顿茶叶蛋</div>
+                        </li>
+                        <li id="8">
+                            <div class="pic"><img src="/images/christmas_images/slider_img08.png" /></div>
+                            <div class="title">辣条吃不完</div>
+                        </li>
+					</ul>
+					<ul>
+                        <li id="9">
+                            <div class="pic"><img src="/images/christmas_images/slider_img09.png" /></div>
+                            <div class="title">吃货不长肉</div>
+                        </li>
+                        <li id="10">
+                            <div class="pic"><img src="/images/christmas_images/slider_img10.png" /></div>
+                            <div class="title">逗逼有节操</div>
+                        </li>
+					</ul>
+					<ul>
+                        <li id="11">
+                            <div class="pic"><img src="/images/christmas_images/slider_img11.png" /></div>
+                            <div class="title">考试不挂科</div>
+                        </li>
+                        <li id="12">
+                            <div class="pic"><img src="/images/christmas_images/slider_img12.png" /></div>
+                            <div class="title">泡妞不花钱</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+			<!--{if $out.status != 100 && $out.channel_status != 200 && $out.channel_status != 100}-->
+            <div class="btns pbottom">
+                <a href="javascript:;" id="share" class="long-btn btn-share-gray">我要分享</a>
+                <!--{if $out.share_status == 100}-->
+				<a href="/lottery/christmas_lottery.php?sid=<!--{$out.sid}-->" id="shared" class="long-btn btn-shared" style="margin-top: 15px;">已分享，去抽奖</a>
+				<!--{else}-->
+				<a href="javascript:;" id="shared" class="long-btn btn-shared-gray" style="margin-top: 15px;">已分享，去抽奖</a>
+				<!--{/if}-->
+            </div>
+			<!--{/if}-->
+        </div>
+    </div>
+	
+	<div class="tip-box trees-bg" id="view_deta_version" <!--{if $out.version_status != 200}-->style="display: none;"<!--{/if}-->>
+        <h4>活动提示</h4>
+        <div class="tip-con">
+            <p>您的安智市场版本太低啦，马上升级参与活动赢大奖吧~(<!--{$out.intro_result.soft_sizes}-->)</p>
+            <div class="btns mtop">
+                <a href="javascript:;" class="short-btn btn_upgrade" onClick="download_apk('',<!--{$out.intro_result.softid}-->,'cn.goapk.market','<!--{$out.intro_result.softname}-->','<!--{$out.intro_result.version_code}-->','<!--{$out.intro_result.soft_size}-->',1,0,'0,0',1);">马上升级</a>
+            </div>
+        </div>
+    </div>
+</section>
+<script type="text/javascript">
+    jQuery(".slideBox").slide({mainCell:".bd",effect:"leftLoop",autoPlay:false,vis:1,scroll:1,autoPage:true});
+</script>
+</body>
+</html>

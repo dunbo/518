@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>猎艳爽翻天，嗨玩无极限！</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/beauty_puzzle/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/beauty_puzzle/js/soft_category_list.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+</head>
+<body>
+<div class="main">
+	<div class="txt_top">
+		<img src="<!--{$out.new_static_url}-->/beauty_puzzle/images/boy_txt_02.png" />
+	</div>
+	<div class="banner banner2">
+		<img src="<!--{$out.new_static_url}-->/beauty_puzzle/images/boy_02.jpg" />
+	</div>
+	<div class="app_wrap">
+		<p class="app_txt">*下载1款软件就能一睹真容！</p>
+		<ul class="soft-list clear" id="soft-list">
+		</ul>
+		<a href="javascript:change_soft('<!--{$out.aid}-->','<!--{$out.sid}-->',8,2)" class="change_btn">换一批</a>
+		<div class="clear"></div>
+	</div>
+	<!--{if $out['down_num'] eq 1}-->
+		<a class="locked unlock" id="locked" href="javascript:unlock();">解锁</a>
+	<!--{else}-->
+		<a class="locked" id="locked" href="javascript:unlock();">解锁</a>
+	<!--{/if}-->
+</div>
+</body>
+<script>
+	var aid = '<!--{$out.aid}-->';
+	var sid = '<!--{$out.sid}-->';
+	var cat_id = '<!--{$out.category}-->';
+	var opt = '<!--{$out.opt}-->';
+	var step = '<!--{$out.step}-->';
+	var ulock = '<!--{$out.down_num}-->';
+	var soft_arr = new Array();
+	setTimeout(function(){
+		my_soft(aid,sid,8,2,cat_id);
+	}, 500);
+	function go_softinfo_down(softid,my_package,softname,versioncode,size,aid,sid,details){
+		var is_ex = contains(softid);
+		if( is_ex ) {
+			return false;
+		}else {
+			soft_arr.push(softid);
+		}	
+		$.ajax({
+				url: '/lottery/beauty_puzzle/download.php',  //supwater  点击详情 点击下载
+				data:"opt="+opt+"&step="+step+"&softid="+softid+"&sid="+sid+"&aid="+aid+"&pkgname="+my_package, 
+				type:"post",
+				success:function(data) {
+					if(data == 1){
+						if( !$('#locked').hasClass('unlock') ) {
+							$('#locked').addClass('unlock');
+							ulock = 1;
+						}
+					}
+					window.AnzhiActivitys.downloadForActivity(parseInt(aid),softid,my_package,softname,versioncode,size,details);
+				},
+			});
+	}
+	
+	function unlock() {
+		if( parseInt(ulock) != 0 ) {
+			$.ajax({
+				url: '/lottery/beauty_puzzle/unlock.php',
+				data:"opt="+opt+"&step="+step+"&sid="+sid+"&aid="+aid,
+				type:"post",
+				success:function(data) {
+					if(data == 1) {
+						location.href='/lottery/beauty_puzzle/step.php?aid='+aid+'&sid='+sid+'&opt=2&step=2&cbm=1';
+					}else {
+						alert('解锁失败')
+					}
+				},
+			});
+		}
+	}
+	
+	function contains(obj) {
+		var i = soft_arr.length;
+		while (i--) {
+			if (soft_arr[i] === obj) {
+				return true;
+			}
+		}
+		return false;
+	}
+</script>
+</html>

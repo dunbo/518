@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>修改密码</title>
+<load href='__PUBLIC__/css/style.css' />
+<load href="__PUBLIC__/js/Base.js" />
+<load href="__PUBLIC__/js/prototype.js" />
+<load href="__PUBLIC__/js/mootools.js" />
+<load href="__PUBLIC__/js/Ajax/ThinkAjax.js" />
+<load href="__PUBLIC__/js/Form/CheckForm.js" />
+<load href="__PUBLIC__/js/common.js" />
+<load href="__PUBLIC__/js/jquery.js" />
+<script language="JavaScript">
+function isPassword(psw) {
+   var count = 0;
+   if(psw.length >= 8 && psw.length <= 16){
+	 count +=2;
+	 //return false;
+	}
+
+   if(/[0-9]/.test(psw)){
+	 count +=4; //6
+   }
+   if((/[a-z]/.test(psw)) || (/[A-Z]/.test(psw))){
+     count +=5; //11
+   }
+    //count++;
+   if(/[~!@#$%^&*()_+]/.test(psw)){
+     count += 8; //20
+   }
+   return count;
+}	
+function checkPassword(){
+var pwd = document.getElementById('admin_user_password').value;
+var user = document.getElementById('admin_user_name').value;
+var gurp = document.getElementById('admin_group').value;
+var chkpwd = document.getElementById('editpassword');
+var ischeck = false;
+if(user.length == 0){
+  alert('请输入用户名');
+  return  false;
+}
+if(chkpwd.checked){
+    if(pwd.length == 0){
+      alert('请输入密码');
+      return  false;
+    }
+	ischeck = true;
+}
+if(parseInt(gurp)==0){
+  alert('请选择分组');
+  return  false;
+}
+
+if(ischeck){
+ if(pwd.length > 0){
+	checkcode = isPassword(pwd);
+	switch(checkcode){   
+	  case 19: return true;
+	  case 17: alert('你的密码长度要在8-16位之间！'); return false;
+	  case 15: alert('你的密码必须要有数字！');return false;
+	  case 14: alert('你的密码必须要有大写或小写字母！');return false;
+	  case 11: alert('你的密码必须要有特殊字符！');return false;
+	  default : alert("你要设置的密码必须要有字母数字特殊字符长度在8-16！");return false;
+	}
+ }else{
+	alert('请输入密码！');
+	return false;
+ }
+}
+ return true;
+}
+function pub_rand_password(){
+	$.ajax({
+		url: '__URL__/pub_rand_password/',
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			$('#admin_user_password').val(ret['msg']);
+		}
+	});
+
+} 
+</script>
+</head>
+<body>
+<div class="main" >
+<div class="content">
+
+<form id="upload" method='post' action="__URL__/adminedit_edit/uid/{$adminlist.admin_user_id}" enctype="multipart/form-data" onsubmit="if(document.getElementById('admin_user_nowpassword').value=='') {alert('需填写密码后，才能进行信息修改！');return false;}else{return true;}">
+<center>
+<table width="944" border="1">
+  <tr>
+    <td colspan="3">会员基本信息修改：</td>
+  </tr>
+  <tr>
+    <td width="239">用户名：</td>
+    <td width="382" align="left" ><input name="admin_user_name" type="text"  id="admin_user_name" value="{$adminlist.admin_user_name}" readonly="readonly"/></td>
+    <td width="301"></td>
+  </tr>
+  <tr>
+    <td>密码：</td>
+    <td align="left" ><input type="password" name="_login_password" id="_login_password" value=""/></td>
+    <td  ><span style="color:red;">*必填。</span>请填写<span style="color:red;">{$Think.session.admin.admin_user_name}</span>的登录密码</td>
+  </tr>
+  <tr>
+    <td>新密码：</td>
+    <td align="left" ><input type="text" name="admin_user_password" id="admin_user_password" value=""/>
+	<input type="button" onclick="pub_rand_password()" value="生成"/>
+	</td>
+    <td  ><input type="checkbox" name="editpassword" id="editpassword"  value="1" />修改密码</td>
+  </tr>
+    <tr>
+      <td width="30%" height="25" align="right">管理员状态：</td>
+      <td height="25" align="left"><label>
+        <select name="admin_state" id="admin_state">
+          <option value="0" <if condition='$adminlist.admin_state eq 0'> selected </if> >禁用</option>
+          <option value='1' <if condition='$adminlist.admin_state eq 1'> selected </if> >启用</option>
+        </select>
+      </label></td>
+    </tr>
+    <tr> 
+    <td width="30%" height="25" align="right">用户归属：</td>  
+    <td height="25" align="left" >       
+     <select name="admin_group" id="admin_group" >
+      <option value="0" <if condition="$adminlist['admin_group'] eq 0"> selected </if> >----无归属人----</option> 
+      <volist name='list' id='vo'>
+           <option value="{$vo.group_id}" <if condition="$vo['group_id'] eq $adminlist.admin_group "> selected </if>>{$vo.group_name}</option> 
+      </volist>
+      </select>
+      </tr>
+    <tr>
+      <td width="30%" height="25" align="right">备注：</td>
+      <td height="25" align="left"><textarea id="note" name="note" rows="5" cols="50">{$adminlist.note}</textarea></td>
+    </tr>
+  <tr>
+    <td width="239">用户邮箱：</td>
+    <td width="382" align="left" ><input name="admin_user_email" type="text"  id="admin_user_email" value="{$adminlist.admin_user_email}" /></td>
+    <td width="301"></td>
+  </tr>
+  <tr>
+    <td colspan="3" ><input type="submit" onclick="return checkPassword()" value='提交'/><input type="button" value='取消' onclick=" window.history.go(-1); "/></td>
+ </tr>
+</table>
+</form>
+</div>
+</div> 
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+ 

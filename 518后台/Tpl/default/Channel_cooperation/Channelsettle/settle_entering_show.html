@@ -1,0 +1,104 @@
+
+<script>
+	id_arr = [];
+/*
+	 $(document).ready(function(){
+		var amount_pay = $('#amount_pay').val();
+		var amount_paid = $('#amount_paid').val();
+		var my_salvations = (amount_pay - amount_paid).toFixed(2);
+		$('#the_salvation').html(my_salvations);
+		$('#my_salvation').val(my_salvations);
+	 
+	 });
+*/	
+	function my_salvations(id){	
+		var amount_pay = $('#amount_pay_'+id).val();
+		var amount_paid = $('#amount_paid_'+id).val();
+		var my_salvations = (amount_pay - amount_paid).toFixed(2);
+		$('#the_salvation_'+id).html(my_salvations);
+		$('#my_salvation_'+id).val(my_salvations);
+		var bill_amount = 0 ;
+		 for (var i in id_arr){
+			 bill_amount = parseFloat(bill_amount) + parseFloat($('#amount_paid_'+id_arr[i]).val());
+		 }
+		$('#bill_amount').val(bill_amount);
+	}
+
+	<?php foreach($settle_result as $key => $val){ ?>
+		id_arr.push({$val.id});
+	<?php } ?>
+
+	$(function(){
+		<?php foreach($settle_result as $key => $val){ ?>
+		my_salvations({$val.id});
+		<?php } ?>
+	});
+
+</script>
+<div >
+	<form action="__URL__/settle_entering" method="POST" style='width:450px; margin:0 auto'>
+				<input type="hidden" name="client_name" value="{$client_name}" />
+				<input type="hidden" name="start_tm" value="{$start_tm}" />
+				<input type="hidden" name="end_tm" value="{$end_tm}" />
+				<input type="hidden" name="p" value="{$p}" />
+				<input type="hidden" name="my_status" value="{$my_status}" />
+				<input type="hidden" name="lr" value="{$lr}" />
+				<input type="hidden" name="my_client" value="{$client_id}" />
+				<input type="hidden" name="month" value="{$month}" />
+				<input type="hidden" name="settle_entity" value="{$settle_entity}" />
+				<input type="hidden" name="chname" value="{$chname}" />
+		<table>
+		<?php foreach($settle_result as $key => $val){ ?>
+			<tr>
+				<?php if ($settle_entity == '2') { ?>
+				<td>客户名称：</td>
+				<td>{$now_client_name}</td>
+				<?php }else{ ?>
+				<td>渠道名称：</td>
+				<td>{$c_result[$val['cid']]}</td>
+				<?php } ?>
+			</tr>
+			<tr><td>&nbsp;</td><td></td></tr>
+			<tr>
+				<td>应付金额：</td>
+				<td>{$val.amount_pay}元<input type="hidden" id="amount_pay_{$val.id}" value="{$val.amount_pay}" /></td>	
+			</tr>
+			<tr><td>&nbsp;</td></td>
+			<tr>
+				<td>*付款金额：</td>
+				<td><input type="text" value="{$val.amount_pay}" name="amount_paid[{$val.id}]" id="amount_paid_{$val.id}" onblur="my_salvations({$val.id});" onFocus="if(this.value=='<?php echo $val.amount_pay; ?>'){this.value=''}">元</td>
+			</tr>
+			<tr><td>&nbsp;</td></td>
+			<tr>
+				<td>*差额补齐：</td>
+				<td><span id="the_salvation_{$val.id}"></span><input type="hidden" id="my_salvation_{$val.id}" name="my_salvation[{$val.id}]"/>元</td>
+			</tr>
+			<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+			<tr><td colspan = '2'><hr></td></tr>
+
+			<?php } ?>
+
+			<tr><td>&nbsp;</td></td>
+			<tr>
+				<td>发票金额：</td>
+				<td><input type="text" value="{$amount_pay}" id="bill_amount"  name="bill_amount" onblur='if(this.value==''){this.value='<?php echo $amount_pay; ?>'}' onFocus="if(this.value=='<?php echo $amount_pay; ?>'){this.value=''}">元</td>
+			</tr>			
+			<tr><td>&nbsp;</td></td>
+			<tr>
+				<td>收票日期：</td>
+				<td><input id="invoice_tm" name="invoice_tm" value="{$invoice_tm}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd'})"></td>
+			</tr>
+			<tr><td>&nbsp;</td></td>
+			<tr>
+				<td>*付款日期：</td>
+				<td><input id="paid_tm" name="paid_tm" value="{$paid_tm}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd'})"></td>
+			</tr>
+		</table>
+		<table style="margin-top:20px;">
+			<tr>
+				<td><input type="submit" value="确定" class="search_btn" /></td>
+				<td><input type="button" value="取消" class="search_btn" onclick="tb_remove();" /></td>
+			</tr>
+		</table>
+	</form>
+<div>

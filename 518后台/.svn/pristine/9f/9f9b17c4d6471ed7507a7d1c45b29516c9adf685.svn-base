@@ -1,0 +1,522 @@
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+
+
+<script type="text/javascript" src="/Public/js/js/jquery.media.js"></script>  
+<div class="main" >
+<div class="content">
+<center>
+
+<div class="search_box" style="width:100%">
+	<form method="get" action="">
+		<table cellspacing="0" cellpadding="0" width="100%" class="search_table" style="margin-left: 0px">
+			<tbody>
+				<tr>                 
+					<td style="width:20%">游戏名称
+						<input type="text"  value="{$softname}" name="softname" id="softname" class="search_item_text" style="width:140px">
+					</td>
+					<td style="width:20%" >游戏包名
+						<input type="text" name="package" id="package" value="{$package}" class="search_item_text" style="width:140px">
+					</td>
+					<td style="width:20%">公司名称
+						<input type="text"  value="{$s_company}" name="s_company" id="s_company" class="search_item_text" style="width:140px">
+					</td>
+					<td style="width:15%" >游戏类型
+						<select name='game_type' id='game_type'>
+							<option >全部</option>
+							<option <if condition="($game_type eq 1)"> selected="selected" </if> value='1'>单机</option>
+							<option <if condition="($game_type eq 2)"> selected="selected" </if> value='2'>网游</option>
+							<option <if condition="($game_type eq 3)"> selected="selected" </if> value='3'>棋牌</option>
+						</select>						
+					</td>
+					<td style="width:20%">合同负责人
+						<input type="text"  value="{$s_fuzeren}" name="s_fuzeren" id="s_fuzeren" class="search_item_text" style="width:140px">
+					</td>
+					</tr>
+					<tr>
+						<td >合同联运状态
+							<select name='status' id='status'>
+								<option value='5'>全部</option>
+								<option <if condition="($status eq '0')"> selected="selected" </if> value='0'>待提交</option>
+								<option <if condition="($status eq '1')"> selected="selected" </if> value='1'>已通过</option>
+								<option <if condition="($status eq '2')"> selected="selected" </if> value='2'>待审核</option>
+								<!-- 							<option <if condition="($status eq '3')"> selected="selected" </if> value='3'>已忽略</option> -->
+								<option <if condition="($status eq '4')"> selected="selected" </if> value='4'>未通过</option>
+							</select>
+						</td>
+						<td>合同财务状态
+							<select name='c_status' id='c_status'>
+								<option value=''>全部</option>
+								<option <if condition="($c_status eq '0')"> selected="selected" </if> value='0'>未录入</option>
+								<option <if condition="($c_status eq '1')"> selected="selected" </if> value='1'>已录入</option>
+							</select>
+						</td>
+					<td>
+						<input type="button" onclick="search_game()" value="查询" style="float:left; height:30px;" class="search_btn">
+					</td>
+					</tr>
+			</tbody></table>
+			</form>
+</div>
+	<div style="margin-top:10px">
+		<a href="javascript:void(0)" style="float:left;"  class="search_btn" onclick="export_data()">导出</a>
+		<a href="javascript:void(0)" style="float:left;margin-left: 10px" title="修改合同负责人"  onclick='edit_fuzeren()' class=" search_btn">修改合同负责人</a>
+		<a href="javascript:void(0)" style="float:left;margin-left: 10px;width:120px;" title="修改合同财务状态"  onclick='edit_c_status()' class=" search_btn">修改合同财务状态</a>
+	</div>
+
+<div style="margin-top:60px;width:100%">
+	<table style="width:100%" border="0" cellpadding="0" cellspacing="0" class="table_list">
+	  <tr>
+		<td align='center' width="2%" height="30" bgcolor="#e3e2fe" > <font style="color:#000; font-weight:bold"><input type="checkbox" value="全选" onclick="selectAll();"></font></td>
+		<td align='center' width="7%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">更新日期</font></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">签约游戏</font></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">公司名称</font></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">合同信息</font></td>
+		<td align='center' width="8%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">发票/税率</font></td>
+		  <td align='center' width="10%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">结算</font></td>
+		<td align='center' width="5%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">合同联运状态</font></td>
+		  <td align='center' width="5%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">合同财务状态</font></td>
+		<td align='center' width="4%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">查看</font></td>
+		<td align='center' width="5%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">备注</font></td>
+		<td align='center' width="4%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">操作</font></td>
+	  </tr>
+	  <?php foreach($list as $k=>$v): ?>
+		<tr>
+			<td><input type="checkbox" name="id[]" id="{$v.id}" value="{$v.id}" ></td>
+			<td><?php echo date("Y-m-d",$v['update_tm']); ?></td>
+			<td style="text-align:left">名称：<?php echo $v['softname']?><br>
+				包名：<?php echo $v['package']?><br>
+				类型：
+					<?php if($v['game_type']==1){
+						echo '单机';
+					}elseif($v['game_type']==2){
+						echo '网游';
+					}elseif($v['game_type']==3){
+						echo '棋牌';
+					} ?>
+			</td>
+			<td style="text-align:left">
+				公司名称：<?php echo $r_company[$v['package']]['company'];?><br>
+				开户姓名：<?php echo $r_company[$v['package']]['company_account'];?>
+			</td>
+			<td style="text-align:left">
+				合同负责人：<?php echo $r_company[$v['package']]['fuzeren'];?><br>
+				合同编号：<?php echo $v['contract_num']?><br>
+				开始时间：<?php if(!empty($v['start_tm'])){echo date("Y-m-d ",$v['start_tm']);} ?><br>
+				结束时间：<?php if(!empty($v['start_tm'])&&!empty($v['end_tm'])){echo date("Y-m-d ",$v['end_tm']);} ?>
+			</td>
+			<td style="text-align:left">
+				发票：
+				<?php if($r_company[$v['package']]['company_rate']==1||$r_company[$v['package']]['company_rate']==2){
+					echo '专用发票';
+				}else if($r_company[$v['package']]['company_rate']==3){
+					echo '普通发票';
+				}?><br>
+				税点：
+				<?php if($r_company[$v['package']]['company_rate']==1){
+					echo '6%';
+				}else if($r_company[$v['package']]['company_rate']==2){
+					echo '3%';
+				}else if($r_company[$v['package']]['company_rate']==3){
+					echo '';
+				}?>
+				<br>
+				安智扣税：
+				<?php if($r_company[$v['package']]['company_rate']==1){
+					echo '0%';
+				}else if($r_company[$v['package']]['company_rate']==2){
+					echo '3.72%';
+				}else if($r_company[$v['package']]['company_rate']==3){
+					echo '6.72%';
+				}?>
+			</td>
+			<td style="text-align:left">
+				分成比例：
+				<?php
+					if($v['contract_rate']!=3){
+						if($v['game_type']==1||$v['game_type']==2){
+							echo '50:50';
+						}elseif($v['game_type']==3){
+							if($v['contract_rate']==1){
+								echo '80:20';
+							}elseif($v['contract_rate']==2){
+								echo '50:50';
+							}
+						}
+					}else{
+						echo $v['proportion'];
+					}
+				?><br>
+				结算方式：
+				<?php
+					if($v['game_type']==1||$v['game_type']==2){
+							echo '先减后分';
+						}elseif($v['game_type']==3){
+							if($v['contract_rate']==1){
+								echo '先减后分';
+							}elseif($v['contract_rate']==2){
+								echo '先分后减';
+							}elseif($v['contract_rate']==3){
+								if($v['bill_method']==1){
+									echo '先分后减';
+								}elseif($v['bill_method']==2){
+									echo '先减后分';
+								}
+							}
+						}
+				?>
+				<br>
+				通道费率：
+				<?php
+					if($v['contract_rate']==1){
+						echo $old_rate;
+					}elseif($v['contract_rate']==2){
+						echo $new_rate;
+					}elseif($v['contract_rate']==3){
+						echo $v['rate'];
+					}
+				?>
+			</td>
+			<td> <?php if($v['status']=='0'){ ?>
+						待提交	
+				<?php }elseif($v['status']==2){ ?>
+						待审核		 
+				<?php	}elseif($v['status']==3){ ?>
+						已忽略
+				<?php	}elseif($v['status']==4){ ?>
+						未通过
+				<?php	}elseif($v['status']==1){ ?>
+						已通过
+					<?php	} ?>
+			</td>
+			<td>
+				<?php if($v['c_status']==1){
+					echo '已录入';
+				}else{
+					echo '未录入';
+				}?>
+			</td>
+			<td>
+			<if condition ="$v['contract_path'] neq ''">
+			<a href="__URL__/viewpdf?id=<?php echo $v['id']?>&type=1" target="_blank">查看</a><br>
+			<a href="<?php echo IMGATT_HOST;?><?php echo $v['contract_path']?>" target="_blank">下载</a>
+			</if>
+			</td>
+			<td>
+			<?php if($v['remarks']): ?>
+			<span style='width:10px;overflow: hidden;' id="remarks_<?php echo $v['id']?>" onclick="open_msg(<?php echo $v['id']?>)" str_remarks="<?php echo $v['remarks']?>">
+			{$v.remarks|msubstr=###,0,13}
+			</span>
+			<?php endif; ?>
+			</td>			
+			<td> 
+			<?php
+				if($v['status']==0||$v['status']==2||$v['status']==1||$v['status']==4){
+					?>
+						<a style="cursor:pointer;color:#174b73" href="__URL__/edit_contract/id/<?php echo $v['id']?>">编辑</a>
+						<br>
+						
+					<?php
+				}		
+				if($v['status']==0||$v['status']==2||$v['status']==4){
+					?>
+						<span style="cursor:pointer;color:#174b73" onclick="open_upload(<?php echo $v['id']?>)">上传</span>
+						<br>
+					<?php
+				}				
+				if($v['status']==2){
+					?>
+						<span style="cursor:pointer;color:#174b73" onclick="pass(1,<?php echo $v['id']?>)">通过</span>
+						<br>
+					<?php
+				}
+				if($v['status']==1||$v['status']==4){
+					?>
+						<span style="cursor:pointer;color:#174b73" onclick="pass(5,<?php echo $v['id']?>)">撤销</span>
+						<br>
+					<?php
+				}
+				if($v['status']==2){
+					?>	
+					<span style="cursor:pointer;color:#174b73" onclick="pass(4,<?php echo $v['id']?>)">驳回</span>
+					<br>
+			<?php
+				}
+			?>
+			</td>
+		</tr>
+	 <?php endforeach; ?>
+	  
+	</table>
+</div>
+</center>
+<div  align='left'><?php echo $page; ?></div>
+</div>
+</div>
+	<div id="remarks_div" style="padding:20px; width:250px; word-break:break-all; word-wrap:break-word; display:none;">
+		
+	</div>
+<div id="edit_fu" style="display: none;width:300px;height:100px" class="search_table">
+	<form name="fml1" action="__URL__/pub_edit_fuzeren" method="post">
+	<div style="margin:10px" >
+		<label>合同负责人：</label>
+		<select name="fuzeren" id="fuzeren">
+			<option value="">--请选择--</option>
+			<?php
+					foreach($fuzeren as $k=>$v){
+			?>
+			<option value="<?php echo $v;?>"><?php echo $v;?></option>
+			<?php
+					}
+				?>
+		</select>
+	</div>
+	<input type="hidden" name="ids" id="ids">
+	<div style="float: left;margin-left: 10px">
+		<input type="button" value="确定" class=" search_btn" onclick="return check()">
+	</div>
+	<div style="float: left;margin-left: 10px">
+		<input type="button" value="取消" class=" search_btn" onclick="$.zxxbox.hide();">
+	</div>
+	</form>
+</div>
+
+<div id="edit_c_status" style="display: none;width:300px;height:100px" class="search_table">
+	<form name="cstatusform" action="__URL__/pub_edit_c_status" method="post">
+		<div style="margin:10px" >
+			<label>合同财务状态：</label>
+			<select name="e_c_status" id="e_c_status">
+				<option value="">请选择</option>
+				<option value="0">未录入</option>
+				<option value="1">已录入</option>
+			</select>
+		</div>
+		<input type="hidden" name="e_ids" id="e_ids">
+		<div style="float: left;margin-left: 10px">
+			<input type="button" value="确定" class=" search_btn" onclick="return e_check()">
+		</div>
+		<div style="float: left;margin-left: 10px">
+			<input type="button" value="取消" class=" search_btn" onclick="$.zxxbox.hide();">
+		</div>
+	</form>
+</div>
+<script type="text/javascript">
+	function check(){
+		var fuzeren = $("#fuzeren").val();
+		if(!fuzeren){
+			alert('请选择负责人');
+			return false;
+		}
+		window.fml1.submit();
+	}
+function open_upload(id){
+	$("#contract_id").val(id);
+	$("#upload_contract").zxxbox();
+}
+function open_msg(id){		
+	var str = $("#remarks_"+id).attr('str_remarks');
+	$("#remarks_div").html(str);
+	$("#remarks_div").zxxbox();
+}
+function search_game(){
+	var status = $("#status").val();
+	var softname = $("#softname").val();
+	var package = $("#package").val();
+	var game_type = $("#game_type").val();
+	var endtime = $("#endtime").val();
+	var s_fuzeren = $("#s_fuzeren").val();
+	var s_company = $("#s_company").val();
+	var c_status = $("#c_status").val();
+	window.location.href = '__URL__/index?status='+status+'&softname='+softname+'&package='+package+'&game_type='+game_type+'&s_fuzeren='+s_fuzeren+'&s_company='+s_company+'&c_status='+c_status;
+}
+
+function checkAll(obj)
+{
+	var flag = $(obj).attr('checked') == 'checked';
+	$('input[name^=id_]').attr('checked', flag);
+}
+
+function pass(type,id){	
+	if(type == 1){ //通过
+		var str = '确认通过审核？';
+		if(confirm(str)){
+			window.location.href = '__URL__/edit_status?type=1&id='+id;
+		}
+	}else if(type == 3){ //忽略
+		var str = '确认要忽略吗？';
+		if(confirm(str)){
+			window.location.href = '__URL__/edit_status?type=3&id='+id;
+		}		
+	}else if(type == 4){ //未通过
+		 popup('nopass_div');
+		 $('#id').val(id);
+	}else if(type == 5){ //撤销
+		var str = '确认撤销回"待审核"？';
+		if(confirm(str)){
+			window.location.href = '__URL__/edit_status?type=2&id='+id;
+		}
+	}
+	
+}
+
+function popup(id) {
+	$("#bgdiv").css("display", "block");
+			$("#bgdiv").css({width:$(document).width() + "px", height:$(document).height() + "px"});
+			$(".intervclass").eq(0).attr("checked", 'checked');
+			$(".runclass").css("display", "none");
+			$("#" + id).css({display:"block", position:"absolute", zIndex:"10001"});
+			$("#" + id).css("top", ($(window).height() - $("#" + id)[0].offsetHeight) / 2 + $(document).scrollTop() + "px");
+			$("#" + id).css("left", ($(window).width() - $("#" + id)[0].offsetWidth) / 2 + $(document).scrollLeft() + "px");
+	}
+
+function popclose(id) {
+	$(".intervclass[value=0]").attr("checked", 'checked');
+			$(".runclass").css("display", "none");
+			$("#" + id).css({display:"none"});
+			$("#bgdiv").css({display:"none"});
+	}
+</script>
+
+		<div id="nopass_div" style="position:absolute;top:150px;left:350px;display:none;background:#EEEEEE;width:450px;height:220px;border:1px solid #000;font-size:14px;">
+		<div style="margin-left:20px;margin-top:10px">
+		确认驳回审核？<br><br>
+		
+		<form method="get" name="rejectform" action="__URL__/edit_status">
+			<input type='hidden' name='type'  value='4' >
+			<input type='hidden' name='id' id='id'  value='' >
+			<textarea name='remarks' id="remarks" style="width:400px;height:120px;"> </textarea>
+			<br><br>
+				<div style="float:left;margin-left:95px"><button style="margin-right:15px;" onclick="return chk()" class="search_btn">确定</button></div>
+				<div style="float:left"><button type="button" onclick="popclose('nopass_div')" class="search_btn">取消</button><div>
+			<br>
+		</form>
+		</div>
+		</div>
+		
+    <div id="upload_contract" style="width:500px;display:none;" >
+		<form action="__URL__/upload_contract" method="post" name="fml" enctype="multipart/form-data"> 
+		<input type="hidden" id="contract_id" name="contract_id" value="">
+		<div>
+			<div>
+			上传合同：<input type = "file" id="contract" name="contract" value=""  class="search_item_text" style="width:200px">&nbsp;&nbsp;		
+
+			<div style="margin-left:180px;margin-top:50px" id="confirm_game">
+
+				<div style="float:left;"><input type="submit" value="确定" class="search_btn" onclick="return save_sign()"></div>
+				<div style="float:left;margin-left:20px"><input type="button" value="取消" class="search_btn " onclick="javascript:$.zxxbox.hide();"></div>
+			</div>
+		</div>	
+		</form>
+	</div>
+<script type="text/javascript">
+	function save_sign(){
+		var contract = $("#contract").val();
+		if(contract==''){
+			alert("请上传合同");
+			return false;
+		}
+		window.fml.submit();
+	}
+	
+	function chk(){
+		var re = $("#remarks").val();
+		if(re==' '){
+			alert("请填写驳回原因");
+			return false;
+		}
+		window.rejectform.submit();
+	}
+
+	function e_check(){
+		var e_c_status = $("#e_c_status").val();
+		if(e_c_status==''){
+			alert("请选择财务合同状态");
+			return false;
+		}
+		window.cstatusform.submit();
+	}
+	var flag = false;
+	function selectAll()
+	{
+		if (!flag){
+			$("[name='id[]']").each(function(){
+				$(this).attr('checked', true);
+			});
+			flag = true;
+			return;
+		}
+		if (flag){
+			$("[name='id[]']").each(function(){
+				$(this).attr('checked', false);
+			});
+			flag = false;
+			return;
+		}
+	}
+
+	function export_data(){
+		var count = 0;
+		var id = new Array();
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+			{
+				id[count] = checkall[i].id;
+				count++;
+			}
+		}
+		if (id == ''){
+			alert('请选择要导出的合同！');
+			return false;
+		}
+		var lr = '<?php echo $lr;?>';
+		var url = encodeURI(JSON.stringify(id));
+		url = "/index.php/Sendnum/Contract/index/id/" + url;
+		if(lr) url += '/lr/'+lr;
+		window.location = url;
+	}
+
+	function get_c_id(){
+		var count = 0;
+		var id = new Array();
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+			{
+				id[count] = checkall[i].id;
+				count++;
+			}
+		}
+		if (id == ''){
+			alert('请选择要修改的合同！');
+			return false;
+		}
+		id = JSON.stringify(id);
+		return id;
+	}
+	function edit_fuzeren(){
+		var id = get_c_id();
+		if(id){
+			$("#ids").val(id);
+			$("#edit_fu").zxxbox();
+		}
+
+	}
+
+	function edit_c_status(){
+		var id = get_c_id();
+		if(id) {
+			$("#e_ids").val(id);
+			$("#edit_c_status").zxxbox();
+		}
+	}
+</script>

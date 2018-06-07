@@ -1,0 +1,177 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/zhiyoo/common.js"></script>
+<style>
+table{border: 0px;}
+table{font:14px Tahoma,Verdana,Helvetica,Arial,sans-serif}
+.search_c{margin:10px;border:1px solid #000; padding:0px;height:120px;line-height:60px;}
+.Search{float:left; margin-left:20px; }
+.Search input {height:20px;line-height:20px;}
+.Search select{width:120px;}
+.Search #tj {width:98px;height:28px;cursor:pointer;line-height:20px;margin-top:18px;}
+.Wdate{width:150px;}
+.Search span{font-size:14px;}
+.Search_r input{float:right;width:98px;height:28px;cursor:pointer;line-height:20px;margin-top:18px;margin-right:20px;}
+.noData{color:red;font-size:14px;}
+.theme_c{font-size:16px;}
+.exl_c a{float:right;cursor:pointer;margin-top:18px;margin-right:30px;}
+.clear{ clear:both; float:none;}
+h2{margin:10px;}
+</style>
+
+<body>
+<h2>当前位置：产品管理  > {$threadfind['subject']} > 申请管理</h2>
+<div class="search_c">
+<form method='post' action="__URL__/applyList/tid/{$tid}/pnum/{$pnum}/" >
+	<div class="Search">
+		<span>用户名：</span><input type="text" name="username" id="username" value="{$username}" />
+	</div>
+	<div class="Search">
+		<span>IP地址：</span><input type="text" name="addr_ip" id="addr_ip" value="{$addr_ip}" />
+	</div>
+	<div class="Search">
+		<span>手机号：</span><input type="text" name="tel" id="tel" value="{$tel}" />
+	</div>
+	<div class="Search">
+		<span>申请时间：</span>
+		<input type="text" name="begintime" id="begintime" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="{$begintime}" />~
+		<input type="text" name="endtime" id="endtime" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="{$endtime}" />
+	</div>
+	<!-- 
+	<div class="Search">
+		<span>评测：</span>
+		<input type="text" name="tel" id="tel" size='4' />~
+		<input type="text" name="tel" id="tel" size='4' />
+	</div>
+	 -->
+	<div class="clear"></div>
+	<div class="Search">
+		<span>状态：</span>
+		<select name="p_status" id="p_status">
+			 <option value="">全部</option>
+			 <option value="0">申请中</option>
+			 <option value="1">待核准</option>
+			 <option value="-1">已驳回</option>
+			 <option value="2">已通过</option>
+		</select>
+	</div>
+
+	<div class="Search_r">
+		<input type="submit" id="ss" value="搜  索" class="search_btn" />
+	</div>
+</form>
+	
+</div>
+<div class="clear"></div>
+<form method='post' action="__URL__/batchCheck/tid/{$tid}/" onsubmit="return clickConfirm('确定保存该更改吗？');">
+<input type="hidden" name="action" value="batchCheck" />
+<div class="Search" style="margin:0px 10px 10px;">
+	<input type="submit" id="tj" name="dotype" value="批量审核" class="search_btn" />
+</div>
+<div class="Search" style="margin:0px 10px 10px;">
+	<input type="submit" id="tj" name="dotype" value="批量驳回" class="search_btn" />
+</div>
+<div style="margin-top:28px;" class="Search"><p>通过用户数：{$pt_num} / {$pnum}</p></div>
+<div class="exl_c">
+	<a href="__URL__/awardShow/tid/{$tid}/" class="search_btn" style="display:inline-block;">管理获奖名单</a>
+	<a href="__URL__/applyList/tid/{$tid}/export/1/" class="search_btn" style="display:inline-block;">导出报表</a>
+	<if condition="$_GET['applyAdd']"><a href="__URL__/applyAdd/tid/{$tid}/pnum/{$pnum}/" class="search_btn" style="display:inline-block;">添加申请用户</a></if>
+</div>
+<div class="clear"></div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+	<tr>
+		<th width="30"><input type="checkbox" id="checkid" /></th>
+		<!-- 
+		<th width="50">ID</th>
+		<th width="50">TID</th>
+		 -->
+		<th width="50">申请id</th>
+		<th width="60">用户ID</th>
+		<th width="130">用户名/姓名</th>
+		<th width="150">手机号/QQ号</th>
+		<th width="150">智豆/金币</th>
+		<th width="80">评测</th>
+		<th width="80">地址/晒物链接</th>
+		<th>申请描述</th>
+		<th width="110">IP</th>
+		<th width="60">状态</th>
+		<th width="90">创建时间</th>
+		<th width="80">操作</th>
+	</tr>
+	</thead>
+	<if condition="$applylist neq ''">
+	<volist name="applylist" id="val">
+	<tr class="tr">
+		<td>
+		<if condition="$val.status eq '0'" >
+			<input type="checkbox" name="checkname[{$val.id}]" class="c_heck" value="{$val.id}" />
+		</if>
+		</td>
+		
+		<td>{$val.id}</td>
+		<!-- <td>{$val.tid}</td>
+		 -->
+		<td>{$val.uid}</td>
+		<td>
+			用户名：<a href="http://bbs.zhiyoo.com/space-uid-{$val.uid}.html" target="_blank">{$val.username}</a><br />
+			姓名：{$val.names}
+		</td>
+		<td>
+			手机号：{$val.tel}<br />
+			QQ：{$val.qq}
+		</td>
+		<td>
+			智豆：{$val.Chibeans}<br />
+			金币：{$val.Gold}
+		</td>
+		<td>
+			<if condition="$val.themecount neq 0">
+			<a href="__URL__/themeList/id/{$val.id}/mark/apply/" class="theme_c">{$val.themecount}</a>
+			<else />0</if>
+		</td>
+		<td><a href="__URL__/viewContent/id/{$val.id}/field/address/" class="thickbox">查看详情</a></td>
+		<td><a href="__URL__/viewContent/id/{$val.id}/field/content/" class="thickbox">查看描述</a></td>
+		<td><a href="__URL__/applyList/tid/{$tid}/addr_ip/{$val.addr_ip}/" >{$val.addr_ip}</a></td>
+		<td>
+			<if condition="$val.status eq '2'"><span style="color:red;">已通过</span>
+			<elseif condition="$val.status eq '0'" />申请中
+			<elseif condition="$val.status eq '1'" />待核准
+			<else />已驳回</if>
+		
+		</td>
+		<td><?php echo date('Y-m-d H:i:s',$val['createdate']); ?></td>
+		<td>
+			<if condition="$val.status eq '0'" >
+			<a href="__URL__/updateStart/tid/{$tid}/id/{$val.id}/status/1/" onclick="return clickConfirm('确定要更改状态吗？');" >审核</a> 
+			<a href="__URL__/applyReject/tid/{$tid}/id/{$val.id}/" class="thickbox">驳回</a>
+			<elseif condition="$val.status eq '1'" />
+			<a href="__URL__/updateStart/tid/{$tid}/id/{$val.id}/status/2/" onclick="return clickConfirm('确定要更改状态吗？');" >通过</a> 
+			<a href="__URL__/applyReject/tid/{$tid}/id/{$val.id}/" class="thickbox">驳回</a>
+			<elseif condition="$val.status eq '-1' && $val.reject neq ''" />
+			<a href="__URL__/viewContent/tid/{$tid}/id/{$val.id}/field/reject/" class="thickbox">查看驳回原因</a>
+			</if>
+			<!-- <a href="__URL__/updateStart/id/{$val.id}/status/-1/" onclick="return clickConfirm('确定要更改状态吗？');" >驳回</a> -->
+		</td>
+	</tr>
+	</volist>
+	<else />
+	<tr>
+		<td colspan="15" class="noData">暂无数据！</td>
+	</tr>
+	</if>
+</table>
+</form>
+<div class="navgition">
+	{$pageList|default='&nbsp;'}
+</div>
+<script type="text/javascript">
+$(function(){
+	 $("#p_status").find("option[value='{$p_status}']").attr("selected",true);
+});
+</script>
+</body>
+</html>

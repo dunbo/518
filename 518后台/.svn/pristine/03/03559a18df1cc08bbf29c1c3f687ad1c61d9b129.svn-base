@@ -1,0 +1,78 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+	function change_config(obj){
+		if(confirm("是否确定修改？"))	{
+			$.ajax({
+				url:'/index.php/Sj/Installrecommend/edit_config/config/'+obj,
+				type:'get',
+				dataType:'json',
+				success:function(data){
+					if(data == -1){
+						alert("编辑失败！");
+					}else{
+						alert("编辑成功！");
+					}
+				}
+			});
+			return true;
+		}else{
+			window.location.href="/index.php/Sj/Installrecommend/recommend_list";			
+			return false;
+		}
+	}
+	
+	function checkit(){
+		if(confirm("删除后不可恢复，并且直接影响线上数据，是否确认删除")){
+			return true;
+		}
+		return false;
+	}
+
+</script>
+<body>
+	<div style="margin:20px;">
+	推荐范围：<input type="radio" name="config" value="1" <?php if($config_result['configcontent'] == 1){ ?>checked<?php } ?> onclick="return change_config(1);" />全部安装成功页&nbsp;&nbsp;<input type="radio" name="config" <?php if($config_result['configcontent'] == 2){ ?>checked<?php } ?> value="2" onclick="return change_config(2);" />指定软件安装成功页&nbsp;&nbsp;<input type="radio" name="config" value="0" <?php if($config_result['configcontent'] == 0){ ?>checked<?php } ?> onclick="return change_config(0);" />关闭
+	<a href="__URL__/import_softs/p/{$p}/lr/{$lr}<?php if($soft_name){ ?>/soft_name/{$soft_name}<?php } ?><?php if($package){ ?>/package/{$package}<?php } ?>" class="search_btn" style="float:right;margin-right:200px;margin-bottom:20px;">批量添加软件</a>
+	<a href="__URL__/edit_recommend/p/{$p}/lr/{$lr}<?php if($soft_name){ ?>/soft_name/{$soft_name}<?php } ?><?php if($package){ ?>/package/{$package}<?php } ?>" class="search_btn" style="float:right;margin-right:20px;margin-bottom:20px;">添加软件</a>
+	<div class="clear"></div>
+	</div>
+	<div>
+	<form action="__URL__/recommend_list" method="get">
+	<table>
+	<tr>
+		<td>软件名称：</td>
+		<td><input type="text" name="soft_name" value="{$soft_name}" />&nbsp;&nbsp;</td>
+		<td>软件包名：</td>
+		<td><input type="text" name="package" value="{$package}" />&nbsp;&nbsp;</td>
+		<td><input type="submit" value="搜索" class="search_btn" /></td>
+	</tr>
+	</table>
+	</form>
+	</div>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="table_list" >
+		<thead>
+		<tr>
+			<th width="20%">软件名称</th>
+			<th width="20%">软件包名</th>
+			<th width="20%">渠道</th>
+			<th width="18%">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr>
+		<td>{$val.soft_name}</td>
+		<td>{$val.package}</td>
+		<td><?php if($val['chname']){ ?>{$val.chname}<?php } else{ ?>不限制<?php } ?></td>
+		<td><a href="__URL__/edit_recommend/id/{$val.id}/p/{$p}/lr/{$lr}<?php if($soft_name){ ?>/soft_name/{$soft_name}<?php } ?><?php if($package){ ?>/package/{$package}<?php } ?>" class="blue">编辑</a>&nbsp;&nbsp;<a href="__URL__/del_recommend/id/{$val.id}/p/{$p}/lr/{$lr}<?php if($soft_name){ ?>/soft_name/{$soft_name}<?php } ?><?php if($package){ ?>/package/{$package}<?php } ?>" class="blue" onclick="return checkit();">删除</a></td> 
+	</tr>
+	<?php } ?>
+	</table>
+</body>
+{$page}
+</html>

@@ -1,0 +1,52 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script>
+function send_notify(id)
+{
+	$.get('/index.php/Admin/Tool/pub_notify/id/' + id, function(){
+		location.reload();
+	});
+}
+</script>
+<?php if ($refresh):?>
+<!-- <meta http-equiv='Refresh' content='3'> -->
+<?php endif;?>
+<div class="main" >
+<div class="content">
+<center>
+<?php foreach($config as $id => $val):?>
+<input type="button" onclick="send_notify(<?php echo $id;?>)" value="<?php echo $val[0];?>" /><br/>
+<?php endforeach;?>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+  <tr>
+	<td align='center' width="55%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">内容</font></td>
+	<td align='center' width="10%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">ip</font></td>
+	<td align='center' width="15%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">触发时间</font></td>
+	<td align='center' width="15%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">更新时间</font></td>
+	<td align='center' width="5%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">执行结果</font></td>
+  </tr>
+  <volist name='list' id='vo'>
+  <tr id='tr{$vo.dev_id}' >
+		<td>{$vo.actionexp}</td>
+		<td>{$vo.fromip}</td>
+		<td>{$vo.log_time|date='Y-m-d H:i:s',###|default=''|default='&nbsp;'}</td>
+		<td>{$vo.update_time|date='Y-m-d H:i:s',###|default=''|default='&nbsp;'}</td>
+		<td>
+		<?php if ($vo['execution_status'] == 0) :?>
+		未执行<img src="/Public/images/loading.gif"/>
+		<?php elseif ($vo['execution_status'] == 1) :?>
+		执行成功
+		<?php elseif ($vo['execution_status'] == 2) :?>
+		执行失败
+		<?php elseif ($vo['execution_status'] == 3) :?>
+		执行中<img src="/Public/images/loading.gif"/>
+		<?php endif;?>
+		</td>
+  </tr>
+  </volist>
+</table>
+<div  align='left'>{$page}</div>
+</center>
+</div>
+</div>

@@ -1,0 +1,249 @@
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type='text/javascript'>
+    function import_out(count){
+        var start_tm = $('#start_tm').val();
+        var end_tm = $('#end_tm').val();
+		var package = $('#package').val();
+		var softname = $('#softname').val();
+		var str = '&start_tm='+start_tm+'&end_tm='+end_tm+'&package='+package+'&softname='+softname;
+		if(count==1){
+			str += '&count=1';
+		}
+        window.location.href = '__URL__/index?import_out=1'+str;
+    }
+	
+	function show_info(id){
+		$("#soft_info").html($(id).html());
+		$("#soft_info").zxxbox();
+	}
+	
+	function ques_count(){
+		$("#ques").zxxbox();
+	}
+</script>
+<div class="main" >
+    <div class="content">
+        <div style="float:left">
+            <a href='__URL__/add_record?width=300&amp;height=240' style="float:left;" title="添加已处理记录" class="thickbox search_btn">添加已处理记录</a>
+        </div>
+        <div style='margin-left:10px;float:left'>
+            <a href="javascript:void(0)" class="search_btn" onclick="ques_count()">问题类型统计</a>
+        </div>
+        <div style="float:right">
+            <a href='javascript:void(0)' onclick='import_out()' style="float:left;" class="search_btn">导出当前数据</a>
+        </div>
+        <div style="margin-top:50px;height: 37px" class="search_box">
+            <form action='__URL__/index' method='get'>
+                <table cellspacing="0" cellpadding="0" width="99%" class="search_table">
+                    <tbody>
+                        <tr>
+                            <td width="34%">
+                                时间：<input type="text" class="search_item_text Wdate" value="{$start_tm}" id="start_tm" name="start_tm"  onclick="WdatePicker({startDate:&quot;%y-%M-%d&quot;,dateFmt:&quot;yyyy-MM-dd&quot;})" style="width:140px"> ----
+                                  <input type="text" class="search_item_text Wdate" value="{$end_tm}" id="end_tm" name="end_tm"  onclick="WdatePicker({startDate:&quot;%y-%M-%d&quot;,dateFmt:&quot;yyyy-MM-dd&quot;})" style="width:140px">
+                            </td>                    
+                            <td width="19%">软件包名
+                                <input type="text" class="search_item_text"  id="package" name="package" value="{$package}"style="width:140px">
+                            </td>
+                            <td width='19%'>软件名称
+                                <input type="text" class="search_item_text" value="{$softname}" id="softname" name="softname" style="width:140px">
+
+                            </td>
+                            <td><input type="button" style="float:left;" onclick="open_soft(1)" class="search_btn" value="从列表中选择"></td>
+                            <td>
+                                <input type="submit" class="search_btn" style="float:left; height:30px;" value="搜索" onclick="">
+                            </td>
+                        </tr>
+
+                    </tbody></table>
+            </form>
+        </div>
+		<div style="margin-top:50px;width:auto;overflow:visible;">
+		<table class="table_list" >
+		<tr >
+			<td colspan='3' style="min-width:300px;">反馈渠道</td>
+			<?php
+				foreach($feed as $k=>$v){
+				?>
+					<td colspan='<?php echo count($v['son']);?>'><?php echo $v['c_name'];?></td>
+				<?php
+				}
+			?>
+			<td rowspan='4' style="min-width:25px;">操作</td>
+		</tr>
+		<tr>
+			<td colspan='3'>问题类型</td>
+			<?php 
+				foreach($feed as $k=>$v){
+					if($v['son']){					
+						foreach($v['son'] as $key=>$val){
+							?>
+								<td style="min-width:48px;"><?php echo $val['c_name'];?></td>
+							<?php
+						}
+					}else{ ?>
+						<td>&nbsp;</td>
+					<?php }
+				}
+			?>
+		</tr>
+		<tr>
+			<td colspan='3'>处理数量</td>
+			<?php 
+				foreach($feed as $k=>$v){
+					if($v['son']){					
+						foreach($v['son'] as $key=>$val){
+							?>
+								<td><?php echo $val['num'];?></td>
+							<?php
+						}
+					}else{ ?>
+						<td>&nbsp;</td>
+					<?php }
+				}
+			?>
+		</tr>
+		<tr>
+		<td>软件包名</td><td>软件名称</td><td min-width='100px'>合计</td>
+		<?php
+			foreach($feed as $k=>$v){
+			?>
+				<td colspan='<?php echo count($v['son']);?>'><?php if($v['c_name']=='open后台'){echo $v['feed_hejii'];}else{echo $v['feed_heji'];} ?></td>
+			<?php
+			}
+		?>
+		</tr>
+		<?php 
+			foreach($list['last'] as $k=>$v){ ?>
+				<tr>
+				<td ><div  style="width:100px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;" onclick='show_info(this)'><?php echo $k;?></div></td>
+				<?php 
+					foreach($v as $r_k=>$r_v){ if($r_k=='softname'){ ?>
+						<td><a target='_blank' href='<?php if($r_v!='非合作游戏'){foreach($list['softid'] as $id_k=>$id_v){if($id_v['package']==$k){echo 'http://www.anzhi.com/soft_'.$id_v['softid'].'.html';}}}else{echo 'javascript:void(0)';}?>'><div  style="width:100px;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;"><?php echo $r_v;?></div></td>
+					<?php }else{ ?>
+						<td><?php echo $r_v;?></td>
+					<?php }}
+				?>
+				<td><a href="__URL__/del_log?package=<?php echo $k;?>&start_tm={$start_tm}&end_tm={$end_tm}">删除</td>	
+				</tr>
+			<?php }
+		?>
+		</table>
+		</div>
+		<div>
+		{$page}
+		</div>
+    </div>
+</div>
+<div id="ques" style="display:none;width:1000px;padding:10px">
+	<div>
+		<a href="javascript:void(0)" onclick='import_out(1)' class="search_btn">导出</a>
+	</div>
+	<div>
+		<table class="table_list">
+			<tr>
+				<th rowspan='2'>分类</th><th rowspan='2'>项目</th><th colspan='5'>问题来源与数量</th><th rowspan='2' colspan='2' width='25%'>合计</th>
+			</tr>
+			<tr>
+				<volist id='vo' name='qudao'>
+					<td>{$vo}</td>
+				</volist>
+			</tr>
+			<tr>
+				<td>游戏</td><td>游戏内容</td>
+				<volist id='vo' name='qudao'>
+				<td>{$ques_count[1][$vo]|default='0'}</td>
+				</volist>
+				<td>{$ques_count[1]['xiaoji']}</td><td>{$ques_count[1]['xiaoji']}</td>
+			</tr>
+			<tr>
+				<td rowspan='3'>账号</td><td>找回账号或密码</td>
+				<volist id='vo' name='qudao'>
+				<td>{$ques_count[2][$vo]|default='0'}</td>
+				</volist>
+				<td>{$ques_count[2]['xiaoji']}</td><td rowspan='3'>{$ques_count[2]['xiaoji']+$ques_count[3]['xiaoji']+$ques_count[4]['xiaoji']}</td>
+			</tr>
+			<tr>
+				<td>解绑手机或邮箱</td>
+				<volist id='vo' name='qudao'>
+				<td>{$ques_count[3][$vo]|default='0'}</td>
+				</volist>
+				<td>{$ques_count[3]['xiaoji']}</td>
+			</tr>
+			<tr>
+				<td>登录问题</td>
+				<volist id='vo' name='qudao'>
+				<td>{$ques_count[4][$vo]|default='0'}</td>
+				</volist>
+				<td>{$ques_count[4]['xiaoji']}</td>
+			</tr>
+			<tr>
+				<td>充值</td><td>充值问题</td>
+				<volist id='vo' name='qudao'>
+				<td>{$ques_count[5][$vo]|default='0'}</td>
+				</volist>
+				<td>{$ques_count[5]['xiaoji']}</td><td>{$ques_count[5]['xiaoji']}</td>
+			</tr>
+			<tr>
+				<td rowspan='3'>其他</td><td>VIP返利</td>
+				<volist id='vo' name='qudao'>
+				<td>{$ques_count[6][$vo]|default='0'}</td>
+				</volist>
+				<td>{$ques_count[6]['xiaoji']}</td><td rowspan='3'>{$ques_count[6]['xiaoji']+$ques_count[7]['xiaoji']+$ques_count[8]['xiaoji']}</td>
+			</tr>
+			<tr>
+				<td>活动/礼包</td>
+				<volist id='vo' name='qudao'>
+				<td>{$ques_count[7][$vo]|default='0'}</td>
+				</volist>
+				<td>{$ques_count[7]['xiaoji']}</td>
+			</tr>
+			<tr>
+				<td>其他问题</td>
+				<volist id='vo' name='qudao'>
+				<td>{$ques_count[8][$vo]|default='0'}</td>
+				</volist>
+				<td>{$ques_count[8]['xiaoji']}</td>
+			</tr>
+			<tr>
+				<td>合计</td>
+				<td>		
+				</td>
+				<?php
+					foreach($qudao as $v){
+					?>
+						<td>
+						<?php
+							$n = 0;
+							foreach($ques_count as $k=>$val){
+								$n +=  $val[$v];
+							}
+							echo $n;
+						?>
+						</td>
+					<?php
+					}
+				?>
+				<td colspan='2' style='font-weight:bold'>
+				<?php 
+					$num = 0;
+					foreach($ques_count as $k=>$v){
+						$num += $v['xiaoji'];
+					}
+					echo $num;
+				?>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+<include file="../../Public/feed_soft" />
+<div id='soft_info'>
+</div>

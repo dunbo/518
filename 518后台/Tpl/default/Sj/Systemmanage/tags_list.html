@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>无标题文档</title>
+</head>
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+        <script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+		 <script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript">
+$(function(){
+document.onkeydown = function(e){
+    var ev = document.all ? window.event : e;
+    if(ev.keyCode==13) {
+        search();
+     }
+}
+});
+        function del(tag_id){
+            if(confirm("删除不可恢复！确定要删除此条记录?")){
+                var param = {
+                    tag_id : tag_id
+                };
+                $.ajax({
+                    url:'__URL__/deletetag',
+                    type:'POST',
+                    data:param,
+                    dataType:'json',
+                    success:function(data){
+                        if(data==1)
+                        {
+                            location.reload();
+                            //location.href ="/index.php/Sj/Systemmanage/tags_list";
+                        }
+                    }
+                });
+            }
+        };
+
+        function search(){
+
+            var bsoftnum = $("#bsoftnum").val();
+            var esoftnum = $("#esoftnum").val();
+            var bclick_num = $("#bclick_num").val();
+            var eclick_num = $("#eclick_num").val();
+            var bdown_num = $("#bdown_num").val();
+            var edown_num = $("#edown_num").val();
+            if((bsoftnum.length>0&&esoftnum.length==0)||(bsoftnum.length==0&&esoftnum.length>0))
+            {
+                alert('软件个数请输入完整的区间');
+                return;
+            }
+
+            if((bclick_num.length>0&&eclick_num.length==0)||(bclick_num.length==0&&eclick_num.length>0))
+            {
+                alert('标签点击数请输入完整的区间');
+                return;
+            }
+
+            if((bdown_num.length>0&&edown_num.length==0)||(bdown_num.length==0&&edown_num.length>0))
+            {
+                alert('标签下载数请输入完整的区间');
+                return;
+            }
+
+            $("#search").submit();
+        };
+
+    </script>
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+<body>
+        <div class="currentNav_r" style="float:right;">
+		<a class="recBtn_bg"  href="__URL__/tags_softlist">有标签软件</a>&nbsp;&nbsp;<a class="recBtn_bg" href="__URL__/notags_softlist">无标签软件</a>
+	</div>
+        <br>
+        <br>
+	<form action="/index.php/Sj/Systemmanage/tags_list" method="get" id="search">
+		<div class="search_box">
+			<table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                                <tr>
+									<td width="16%">标签名称：<input type="text" name="tag_name" id="tag_name" value="{.tag_name}" class="search_item_text"></td>
+									<td colspan="2">软件个数
+									<input type="text" name="bsoftnum" id="bsoftnum" value="{.bsoftnum}" class="search_item_text">至<input type="text" name="esoftnum" id="esoftnum" value="{.esoftnum}" class="search_item_text"></td>
+                            </tr>
+                            <tr>
+								<td colspan="2">标签点击数
+                                                                    <input type="text" name="bclick_num" id="bclick_num" value="{.bclick_num}" class="search_item_text">至<input type="text" name="eclick_num" id="eclick_num" value="{.eclick_num}" class="search_item_text"></td><td>标签下载数
+									<input type="text" name="bdown_num" id="bdown_num" value="{.bdown_num}" class="search_item_text">至<input type="text" name="edown_num" id="edown_num" value="{.edown_num}" class="search_item_text"></td>
+                                <td colspan="1"><input class="search_btn" style="float:left; height:30px;" type="button" value="搜索" onclick="search()"></td>
+                            </tr>
+                            <tr>
+                                <td width ="20%" colspan="1">共有{$size}个标签</td><td width="10%"><a href="__URL__/add_tag?width=200&height=140&modal=true" style="float:left" class="search_btn thickbox">添加标签</a></td>
+								<td><a href="__URL__/import_tags" style="float:left" class="search_btn">批量运营</a></td>
+                            </tr>
+                </table>
+		</div>
+	</form>
+
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="6%">标签名称</th>
+                                <th width="7%"><if condition="($order eq 1)"><a href="?order=2">软件个数↓</a></if><if condition="($order neq 1)"><a href="?order=1">软件个数↑</a></if></th>
+                                <th width="8%"><if condition="($order eq 3)"><a href="?order=4">标签点击数↓</a></if><if condition="($order neq 3)"><a href="?order=3">标签点击数↑</a></if></th>
+                                <th width="7%"><if condition="($order eq 5)"><a href="?order=6">标签下载数↓</a></if><if condition="($order neq 5)"><a href="?order=5">标签下载数↑</a></if></th>
+				<th width="7%">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="list">
+				<tr>
+					<td height="20" align="center"> {$list.tag_name}</td>
+                                        <td height="20" align="center"> <if condition="($list.soft_num neq 0)"><a href="__URL__/tags_softlist/tags/{$list.tag_name}">{$list.soft_num}</a></if><if condition="($list.soft_num eq 0)">{$list.soft_num}</if></td>
+					<td height="20" align="center"> {$list.click_num}</td>
+					<td height="20" align="center"> {$list.down_num}</td>
+                                        <td height="20" align="center"><a href="__URL__/add_tag?width=200&height=140&modal=true&tag_id={$list.tag_id}&tag_name={$list.tag_name}" class="thickbox blue">修改标签</a><br><a href="#{$list.id}" onclick="del({$list.tag_id})" class="blue">删除</a></td>
+				</tr>
+			</volist>
+		</tbody>
+	</table>
+	<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>
+</html>

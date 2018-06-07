@@ -1,0 +1,114 @@
+<include file="../../Public/new_header" />
+<link rel="stylesheet" type="text/css" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<style type="text/css">
+.white_content{display:none;position:absolute;top:10%;left:25%;width:50%;min-height:30%;padding:16px;background-color:#FBFBFC;z-index:1002;border:2px solid #9DA0A0;overflow:auto;word-wrap:break-word}.white_content p{height:20px;margin:0}.white_content a{float:right;text-decoration:none}
+</style>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>     
+<body>
+<div style="font-weight: bold;font-size: 20px">批量添加软件</div>
+<div style="margin-top: 15px">
+        <div  style="float:right;">
+            <a style="margin-left:10px;margin-top: -5px" href="__URL__/task_soft_import?" class="thickbox search_btn">重新导入</a>
+        </div>
+        <div  style="float:right;">
+            <a  style="margin-left:10px;margin-top: -5px" onclick="return check()"  class="search_btn">批量添加</a>
+        </div>
+        <input type="hidden" name="aid" id="aid" value="{$aid}" />
+        <input type="hidden" name="atp" id="atp" value="{$atp}" />
+        <input type="hidden" name="j_info" id="j_info" value="<?php echo $j_info;?>">
+        <div style="clear: both"></div>
+    <div id='export_hide_table'>
+    <table class="table_list" >
+        <th><input type="checkbox" name="chk_all" onclick="checkAll(this)"></th>
+        <th>软件名</th>
+        <th>包名</th>
+        <?php
+            foreach($info as $k=>$v){
+                ?>
+                <tr>
+                    <td><input type="checkbox" name="id_<?php echo $k;?>" value="<?php echo $k;?>"></td>
+                    <td><?php echo $v['softname'];?></td>
+                    <td><?php echo $v['package'];?></td>
+                </tr>
+                <?php
+            }
+        ?>
+    </table>
+    </div>
+</div>
+<div id='export_error'>
+<div style="margin-left: 10px">
+    <?php
+        if($num > 0){
+            echo "成功导入软件：".$num."个";
+        }
+    ?>
+</div>
+
+<div style="margin-left: 10px;margin-top: 10px">
+    <?php
+        if(count($not_found_pack) > 0){
+            echo "未找到软件：".count($not_found_pack)."个<br>";
+            foreach($not_found_pack as $v){
+                echo $v."<br>";
+            }
+        }
+    ?>
+</div>
+
+</div>
+    
+<!-- 弹层 -->
+<div id="light" class="white_content">
+<p><a href="#" onClick="closeWindow()">关闭</a></p>
+</div>
+
+</body>
+</html>
+<script type="text/javascript">
+    function check(){
+    	var aid = $("#aid").val();
+    	var atp = $("#atp").val();
+        var info = $("#j_info").val();
+        var ids ='';
+        $('input[name^=id_]').each(function(i){
+            if($(this).attr('checked') == 'checked'){
+            	ids += $(this).val()+',';
+            }
+        });
+        if(ids==''){
+            alert('请选择软件');
+            return false;
+        }
+        var url = "__URL__/task_soft_import_up";
+        $.ajax({
+            type: "POST",
+            url: url,
+            data:"id=" + ids+"&aid="+aid+"&info="+info+"&atp="+atp,
+            success: function(data) {
+                var data = eval("("+data+")");
+                if(data['code']==1){
+                    alert(data['msg']);
+                    window.location.href = "__URL__/task_soft_list?aid="+aid+"&atp="+atp;
+                }else{ 
+                     $('#light').show().append(data['msg']);
+                }
+            }
+        });
+    }
+    function checkAll(obj)
+    {
+        var flag = $(obj).attr('checked') == 'checked';
+        $('input[name^=id_]').attr('checked', flag);
+    }
+
+    function closeWindow(){
+    	var aid = $("#aid").val();
+    	var atp = $("#atp").val();
+        document.getElementById('light').style.display='none';
+        window.location.href = "__URL__/task_soft_list?aid="+aid+"&atp="+atp;
+    }
+</script>

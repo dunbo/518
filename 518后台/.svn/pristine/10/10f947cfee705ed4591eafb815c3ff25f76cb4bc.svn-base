@@ -1,0 +1,500 @@
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+<script>
+function count() {
+        $.ajaxFileUpload({
+            url:'__URL__/pub_csv_count',
+            type:'POST',
+			fileElementId:'upload_file',
+			dataType: 'json',
+            secureuri:false,
+            dataType:'json',
+            success:function(data)
+			{
+			    if(data.error1==-1)
+				{
+					alert("请选择导入的CSV文件!");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+					return false;
+				}
+				else if(data.error2==-2)
+				{
+					alert("请上传CSV格式文件！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else if(data.error2==-3)
+				{
+					alert("CSV文件格式不正确,请您参考下载模板！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else
+				{
+					document.getElementById("csv_url").value=data.csv_url;
+					document.getElementById("csv_count").value=data.out_count;
+					document.getElementById("pre_dl_count").value="有效用户数"+data.out_count;
+                }				
+            }
+        });
+    }
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		var len = $('.TB_ajaxContent').length;
+		if(len>0)
+		{
+			$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+				var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+				item.find('input').attr('checked', 'true');
+				$('#channel_div').append(item);
+			})
+		}
+		else
+		{
+			$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+				var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+				item.find('input').attr('checked', 'true');
+				$('#channel_div').append(item);
+			})
+		}
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{
+		var len = $('.TB_ajaxContent').length;
+		if(len>0)
+		{
+			$('#channel_div').html($('.TB_ajaxContent #channel_selected').html());
+		}
+		else
+		{
+			$('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+		}
+	}
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		var len = $('.TB_ajaxContent').length;
+		if(len>0)
+		{
+			$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+			$('#channel_div input:checked').each(function(){
+				$('.TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+			});
+		}
+		else
+		{
+			$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+			$('#channel_div input:checked').each(function(){
+				$('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+			});
+		}
+	}
+	function onclikDevice()
+	{
+		var len = $('.TB_ajaxContent').length;
+		if(len>0)
+		{
+			$('#device_div').html($('.TB_ajaxContent #c_device_res').html());
+		}
+		else
+		{
+			$('#device_div').html($('#TB_ajaxContent #c_device_res').html());
+		}
+	}
+
+	function check_arrs()
+	{
+		var len = $('.TB_ajaxContent').length;
+		if(len>0)
+		{
+			$('.TB_ajaxContent #c_device_res').html($('#device_div').html());
+
+			$('#device_div input:checked').each(function(){
+				$('.TB_ajaxContent .l_did_' + this.value).find('input').attr('checked', 'true');
+			});
+		}
+		else
+		{
+			$('#TB_ajaxContent #c_device_res').html($('#device_div').html());
+
+			$('#device_div input:checked').each(function(){
+				$('#TB_ajaxContent .l_did_' + this.value).find('input').attr('checked', 'true');
+			});
+		}
+	}
+	
+	function submitDevice()
+	{
+		var cids = '';
+		$('#device_div').html('');
+		var len = $('.TB_ajaxContent').length;
+		if(len>0)
+		{
+			$(".TB_ajaxContent #c_device_res input:checked").each(function(){
+				var item = $('<label>' + $('#c_device_res .l_did_' + this.value).html() + '</label>');
+				item.find('input').attr('checked', 'true');
+				item.find('input').click(function(){
+					$(this).parent().remove();
+				});
+				$('#device_div').append(item);
+			})
+		}
+		else
+		{
+			$("#TB_ajaxContent #c_device_res input:checked").each(function(){
+				var item = $('<label>' + $('#c_device_res .l_did_' + this.value).html() + '</label>');
+				item.find('input').attr('checked', 'true');
+				item.find('input').click(function(){
+					$(this).parent().remove();
+				});
+				$('#device_div').append(item);
+			})
+		}
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function check_area()
+	{
+		//推送区域的字符串
+		var area=document.getElementById("area_value").value;
+		//排除区域的字符串
+		var paichu_area=document.getElementById("paichu_area_value").value;
+		//推送和排除区域的字符串
+		var areas = area+";"+paichu_area;
+		
+		var area_arr=new Array;
+		var paichu_area_arr=new Array;
+		var areas_arr = new Array;
+		area_arr=area.split(";");//推送区域的数组
+		paichu_area_arr=paichu_area.split(";");//排除区域的数组
+		areas_arr = areas.split(";");//推送和排除区域的总数组
+		
+		//推送、排除和一起的字符串
+		var s = area_arr.join(";")+";";
+		var p = paichu_area_arr.join(";")+";";
+		var all_str = areas+";";
+		
+		//推送区域本身判断
+		if(area)
+		{
+			for(i=0;i<area_arr.length;i++)
+			{
+				if(area_arr[i].split(",")[1]=="")//推送区域有省没市
+				{
+					var pro=area_arr[i].split(",")[0];//省
+					for(j=0;j<area_arr.length;j++)
+					{
+						if(area_arr[j].split(",")[0]==pro&&j!=i)
+						{
+							alert("您选择的有冲突，请重新选择");
+							return false;
+						}
+					}
+				}
+				else if(s.replace(area_arr[i]+";","").indexOf(area_arr[i]+";")>-1)//推送区域有省也有市
+				{
+					alert("您选择了重复的省市，请重新选择");
+					return false;
+				}
+			}
+		}
+		//排除区域本身判断
+		if(paichu_area)
+		{
+			for(i=0;i<paichu_area_arr.length;i++)
+			{
+				if(paichu_area_arr[i].split(",")[1]=="")//推送区域有省没市
+				{
+					var pro=paichu_area_arr[i].split(",")[0];//省
+					for(j=0;j<paichu_area_arr.length;j++)
+					{
+						if(paichu_area_arr[j].split(",")[0]==pro&&j!=i)
+						{
+							alert("您选择的有冲突，请重新选择");
+							return false;
+						}
+					}
+				}
+				else if(p.replace(paichu_area_arr[i]+";","").indexOf(paichu_area_arr[i]+";")>-1)//推送区域有省也有市
+				{
+					alert("您选择了重复的省市，请重新选择");
+					return false;
+				}
+			}
+		}
+		//判断推送区域和排除区域是否重复
+		if(area&&paichu_area)
+		{
+			for(i=0;i<areas_arr.length;i++)
+			{
+				if(all_str.replace(areas_arr[i]+";","").indexOf(areas_arr[i]+";")>-1)//不管有没有市，字符串有重复的报错			
+				{
+					alert("您推送区域和排除区域有冲突，请重新选择");
+					return false;
+				}
+				else 
+				{   //特殊情况的
+					var pro=areas_arr[i].split(",")[0];//省
+					for(j=i+1;j<areas_arr.length;j++)
+					{
+						if(areas_arr[j].split(",")[0]==pro)
+						{		//如果有省一样的，肯定有一个是推送区域一个是排除区域
+							if((areas_arr[i].split(",")[1]!==""&&areas_arr[j].split(",")[1]=="")||(areas_arr[j].split(",")[0]=="北京")||(areas_arr[j].split(",")[0]=="天津")||(areas_arr[j].split(",")[0]=="上海")||(areas_arr[j].split(",")[0]=="重庆"))//直辖市下面就一个市不能重复
+							{
+								alert("您推送区域和排除区域有冲突，请重新选择");
+								return false;
+							}
+						}
+					}
+				}	
+			}
+		}
+	}
+
+	function delItem(obj) {
+	$(obj).parent().remove();
+	//  var fatie = $("#channel_div");
+	//	fatie.remove();
+
+	}
+	function addItem() 
+	{
+		var channel_select = $("#device_div");
+		channel_select.clone().appendTo("#device_td");
+	}
+
+	var area_num = 1;
+	function addArea(type)
+	{
+		if(type ==1)//推送区域
+		{
+			var html = '<div id="area_div_' + area_num + '">';
+			html += '<select name="push_area[]" id="push_area_'+area_num+'" class="push_area" onchange="showSubArea(this,1)">';
+			html += '<option value="">请选择</option>';
+			for(var i in area_list){
+				if (i == 990000) continue ;//海外排除
+				var item = area_list[i]['name'].split("\t");
+				html += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+			}
+			html += '</select>';
+			html += '<span class="sub_area"></span>';
+			html += '<input type="button" value="删除" onclick="delArea(this,1)" class="act_btn"/>';
+			html += '</div>';
+			$('#push_td').append(html);
+			var obj = $('#push_area_' + area_num);
+		}
+		if(type == 2)
+		{
+			var html = '<div id="paichu_div_' + area_num + '">';
+			html += '<select name="paichu_area[]" id="paichu_area_'+area_num+'" class="paichu_area" onchange="showSubArea(this,2)">';
+			html += '<option value="">请选择</option>';
+			for(var i in area_list){
+				if (i == 990000) continue ;//海外排除
+				var item = area_list[i]['name'].split("\t");
+				html += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+			}
+			html += '</select>';
+			html += '<span class="paichu_sub_area"></span>';
+			html += '<input type="button" value="删除" onclick="delArea(this,2)" class="act_btn"/>';
+			html += '</div>';
+			$('#paichu_td').append(html);
+			var obj = $('#paichu_area_' + area_num);
+		}
+		area_num++;
+		return obj;
+	}
+	function delArea(obj,type)
+	{
+		$(obj).parent().remove();
+		refreshArea(type);
+	}
+
+	function showSubArea(obj,type)
+	{
+		if(type == 1)
+		{
+			var sub_id = $(obj).attr('id').replace('push_area_', 'push_city_');
+			var sub_select = "<select name='push_city[]' id='"+sub_id+"' onchange='refreshArea(1)'><option value=''>请选择</option>";
+			var value = $(obj).children('option:selected').val();
+			var arr = value.split(':');
+			var code = arr[0];
+			if (typeof(area_list[code]) == 'undefined') {
+				$(obj).parent().find('.sub_area').html('');
+				return false;
+			}
+			var sub_area = area_list[code]['sub'];
+			for(var i in sub_area){
+				var item = sub_area[i].split("\t");
+				sub_select += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+			}
+			sub_select += "</select>";
+			$(obj).parent().find('.sub_area').html(sub_select);
+			refreshArea(1);
+		}
+		if(type == 2)
+		{
+			var sub_id = $(obj).attr('id').replace('paichu_area_', 'paichu_city_');
+			var sub_select = "<select name='paichu_city[]' id='"+sub_id+"' onchange='refreshArea(2)'><option value=''>请选择</option>";
+			var value = $(obj).children('option:selected').val();
+			var arr = value.split(':');
+			var code = arr[0];
+			if (typeof(area_list[code]) == 'undefined') {
+				$(obj).parent().find('.paichu_sub_area').html('');
+				return false;
+			}
+			var sub_area = area_list[code]['sub'];
+			for(var i in sub_area){
+				var item = sub_area[i].split("\t");
+				sub_select += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+			}
+			sub_select += "</select>";
+			$(obj).parent().find('.paichu_sub_area').html(sub_select);
+			refreshArea(2);
+		}
+	}
+
+	function refreshArea(type)
+	{
+		var area_value = '';
+		if(type == 1 )
+		{
+			$('.push_area').each(function(){
+				var sub_id = $(this).attr('id').replace('push_area_', 'push_city_');
+				if ($(this).val() !='') {
+					area_value += $(this).find('option:selected').html() + ',';
+					if ($('#' + sub_id).val() !='') {
+						area_value += $('#' + sub_id).find('option:selected').html();
+					}
+					area_value += ';';
+				}
+			});
+			area_value = area_value.replace(/;$/, '');
+			$('#area_value').val(area_value);
+		}
+		if(type==2)
+		{
+			$('.paichu_area').each(function(){
+				var sub_id = $(this).attr('id').replace('paichu_area_', 'paichu_city_');
+				if ($(this).val() !='') {
+					area_value += $(this).find('option:selected').html() + ',';
+					if ($('#' + sub_id).val() !='') {
+						area_value += $('#' + sub_id).find('option:selected').html();
+					}
+					area_value += ';';
+				}
+			});
+			area_value = area_value.replace(/;$/, '');
+			$('#paichu_area_value').val(area_value);
+		}	
+	}
+</script>
+<table width="450" height="30" border="1">
+<tr id="tr_csv">
+	<td>覆盖用户：</td> 
+	<td style="height:70px;">
+	<a href="__APP__/Public/down_moban" class="blue" style="text-decoration:none;font-size:14px; color:blue">下载csv模板</a><br>
+	<input type="file" id="upload_file" name="upload_file" style="background:none; border:none; width:170px;"/><input type="button" value="上传" onclick="count()"/><br>
+	<input type="text" id="pre_dl_count" name="pre_dl_count" style="border:none;background:none; color:red;" readonly value=""/>
+	<input type='hidden' name='csv_url' id='csv_url' value="">
+	<input type='hidden' name='csv_count' id='csv_count' value="">
+	</td>
+	<div id="error_show_div">
+    </div>
+</tr>
+<tr class="sub_tr">
+<td>选择渠道可见</td>
+<td align="left" width="300">
+<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+	<div id="channel_div"></div>
+</td>
+</tr>
+<tr class="sub_tr">
+	<td>机型可见</td>
+		<td><a href="__APP__/Public/showDevice?callback=submitDevice&ready=check_arrs&type=checkbox&reset_device=1" class="thickbox"><font color="blue">选择机型<font></a>
+		<div id="device_div">
+		</div>
+		</td>
+</tr>
+<tr class="sub_tr" id="push_area" style="display:none;">
+	<td>推送区域</td>
+	<td align="left" id="push_td">
+	<input type="button" value="添加" onclick="addArea(1)" class="act_btn"/>
+	<input type="hidden" value="" name="area_value" id="area_value"/>
+	</td>
+</tr>
+<tr class="sub_tr" id="paichu_area" style="display:none;">
+	<td>排除区域</td>
+	<td align="left" id="paichu_td">
+	<input type="button" value="添加" onclick="addArea(2)" class="act_btn"/>
+	<input type="hidden" value="" name="paichu_area_value" id="paichu_area_value"/>
+	</td>
+</tr>
+<tr class="sub_tr">
+  <td>运营商</td>
+  <td id="operator_td">
+    <div id="operator_div">
+        <?php foreach($operator_list as $k => $v): ?>
+		<label><input name="oid[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+        <?php endforeach; ?>
+      <br/>
+    </div>
+  </td>
+  </tr>
+<tr class="sub_tr">
+  <td>固件版本</td>
+  <td id="channel_td">
+    <div id="abi_div">
+        <?php foreach($firmwarelist as $k => $v): ?>
+		<label><input name="firmware[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+        <?php endforeach; ?>
+    </div>
+  </td>
+</tr>
+<tr class="sub_tr" id="push_abi" style="display:none">
+  <td>ABI</td>
+  <td id="channel_td">
+    <div id="abi_div">
+        <?php foreach($abilist as $k => $v): ?>
+		<label><input name="abi[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+        <?php endforeach; ?>
+    </div>
+  </td>
+</tr>
+<tr class="sub_tr">
+  <td>市场版本</td>
+  <td id="channel_td">
+    <div id="abi_div_ver">
+        <?php foreach($version_list as $k => $v): ?>
+				<label>
+					<input name="version_code[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> >
+					<?php echo $v[0]; ?>
+				</label> <br>
+        <?php endforeach; ?>
+    </div>
+	<div id="abi_div_big" style="display:none;">
+		<?php foreach($version_list as $k => $v): ?>
+			<?php if($k>=6000) { ?>
+				<label>
+					<input name="version_code[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> >
+					<?php echo $v[0]; ?>
+				</label> <br>
+			<?php } ?> 
+		<?php endforeach; ?>
+	</div>
+  </td>
+</tr>
+</table>

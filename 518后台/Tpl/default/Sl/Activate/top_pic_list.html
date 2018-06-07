@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="/Public/css/style.css" />
+<script type="text/javascript" src="/Public/js/Base.js"></script>
+<script type="text/javascript" src="/Public/js/Form/CheckForm.js"></script>
+<script type="text/javascript" src="/Public/js/common.js"></script>
+<script type="text/javascript" src="/Public/js/Util/ImageLoader.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/default.js'></script>
+<script type="text/javascript" src='/Public/js/rcalendar.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<script type="text/javascript">
+	function get_category(type){
+		if(type == 1){
+			document.getElementById("category").value = 1;
+		}
+		if(type == 2){
+			document.getElementById("category").value = 2;
+		}
+	}
+</script>
+<body>
+	<form action="__URL__/search_top_pic" method="get">
+	<table>
+		<tr>
+			<td>
+			活动期:<select name="activate_times">
+				<option value="no">无</option>
+				<volist name="activate_category" id="vo">
+				<option value="{$vo.id}" <?php if($vo['id'] == $activate_times){ ?> selected <?php }?> >{$vo.id}</option>
+				</volist>
+			</select>
+			</td>
+			<td>名称:<input type="text" name="pic_name" value="<?php echo $pic_name; ?>" /></td>
+			<td>URL:<input type="text" name="pic_url" value="<?php echo $pic_url; ?>" /></td>
+			<td><input type="hidden" name="fromjs" value="1"><input type="submit" name="submit" value="搜索"></td>
+		</tr>
+	</form>
+	<form action="__URL__/top_pic_list" method="get">
+		<tr>
+		<td>
+		<input type="submit" value="正常状态" onclick="get_category(1)" />
+		<input type="submit" value="停用状态" onclick="get_category(2)" />
+		<input type="hidden" name="category" id="category" />
+		</td>
+	</form>
+		<td colspan="8"></td>
+		<td>
+		<a href="__URL__/add_top_pic">添加</a>
+		</td>
+		</tr>
+	</table>
+	<table border="1" width="80%" cellpadding="0" cellspacing="0">
+		<tr>
+			<td>排序</td>
+			<td>ID</td>
+			<td>名称</td>
+			<td>宣传图片超链</td>
+			<td>图片</td>
+			<td>说明</td>
+			<td>操作</td>
+		</tr>
+		<volist name="pic_list" id="info">
+		<form action="__URL__/top_rank_manage" method="get">
+		<tr>
+			<?php if($category != 2){ ?>
+			<td>
+				<select name="rank" id="rank" onchange="this.form.submit()">
+					<?php foreach($all_rank as $key => $val){ ?>
+					<option value="<?php echo $val; ?>" <?php if($info['rank'] == $val){ ?>selected<?php } ?> ><?php echo $val; ?></option>
+					<?php } ?>
+				</select>
+			</td>
+		<?php }else if($category == 2){ ?>
+			<td>{$info.rank}</td>
+		<?php } ?>
+			<td><input type="hidden" name="id" value="{$info.id}" />{$info.id}</td>
+			<td>{$info.pic_name}</td>
+			<td>{$info.pic_link}</td>
+			<td><img src="<?php echo IMGATT_HOST;?>{$info.pic_url}" width="32" height="32" alt="图样" /></td>
+			<td>{$info.note}</td>
+			<?php if($info['status'] ==1){ ?>
+			<td><a href="__URL__/editor_top_pic_go/id/{$info.id}">编辑</a>&nbsp;|&nbsp;<a href="__URL__/editor_top_pic/id/{$info.id}/status/2" onclick="return checkit();">停用</a></td>
+			<?php }else if($info['status'] == 2){ ?>
+			<td><a href="__URL__/editor_top_pic/id/{$info.id}/status/1" onclick="return checkit();">启用</a>&nbsp;|&nbsp;<a href="__URL__/editor_top_pic/id/{$info.id}/status/0" onclick="return checkit();">删除</a></td>
+			<?php } ?>
+		</tr>
+		</form>
+		</volist>
+	</table>
+	{$page}
+</body>
+</html>
+
+

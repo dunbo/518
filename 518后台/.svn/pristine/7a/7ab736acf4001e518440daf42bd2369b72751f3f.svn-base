@@ -1,0 +1,93 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+	function my_update(){
+		$('.normal').css('display','none');
+		$('.update').css('display','block');
+		$('.update_show').css('display','block');
+	}
+	
+	function no_update(){
+		$('.normal').css('display','block');
+		$('.update').css('display','none');
+		$('.update_show').css('display','none');
+	}
+	
+	function checkit(){
+		if(confirm("确认删除?"))
+		{
+			return true;
+		}
+		return false;
+	}
+</script>
+<br />
+<span>
+<label>请选择要操作的产品：</label>
+<form action="#" method="get" name="showproductlist">
+<select name='product_id' id="productlist"  onchange="javascript:showproductlist.submit();">
+	<option value="0">选择产品</option>
+	<volist name="product_list" id="product" key="k">
+	<option value="{$product.pid}"  <if condition="($product.pid eq $product_id)"> selected = "selected" </if> >{$product.pname}</option>
+	</volist>
+</select>
+</form>
+</span>
+<div style="padding:20px;">
+&nbsp;&nbsp;<a href="__URL__/add_thinkkeywords_to_show?width=600" class="thickbox search_btn" style="float:left; margin:0 10px 0 6px; display:inline">新增</a><a  class="search_btn" href="__URL__/searchkeywords_out_show" style="float:right; margin:0 10px 0 6px; display:inline">已过期</a>
+<div class="clear"></div>
+<form action="__URL__/update_searchkeywords" method="post">
+<table width="99%" cellpadding="0" cellspacing="0" border="1" class="table_list">
+	<thead>
+		<tr>
+			<!--<th>ID</th>-->
+			<th>软件名</th>
+			<th>软件包名</th>
+			<th>排序值</th>
+			<th>搜索词</th>
+			<th>开始时间</th>
+			<th>结束时间</th>
+			<th>合作形式</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach($list as $key => $val){ ?>
+		<tr <?php if($val['starts_tm'] > time()){ ?>style="background-color:#ccc;"<?php } ?>>
+			<!--<td>
+				<span>{$val['id']}</span>
+			</td>-->
+			<td>
+				<span>{$val['soft_name']}</span>
+			</td>
+			<td><span class="normal">{$val.package}</span></td>
+			<td>
+				<span>{$val['soft_rank']}</span>
+			</td>
+			<td>{$val.search_words}</td>
+			<td>
+			<?php if($val['start_time']){ ?>{:date('Y-m-d H:i:s',$val[start_time])}<?php } ?>
+			</td>
+			<td><?php if($val['end_time']){ ?>{:date('Y-m-d H:i:s',$val[end_time])}<?php } ?>
+			</td>
+			<TD><?php if ($val['type'] !=0) { echo $val['types'] ; }else{ echo "-";} ?></TD>
+			<td>
+			<a href="__URL__/update_searchkeywords_show/id/{$val.id}/" class="thickbox">编辑</a>
+			<a href="__URL__/delete_searchkeywords/id/{$val.id}/" onclick="return checkit();">删除</a></td>
+		</tr>
+		<?php } ?>
+	</tbody>
+</table>
+{$page}
+<div class="update_show" style="display:none;">
+	<input type="submit" value="确认" />　
+	<input type="reset" value="取消" onclick="no_update();" />
+</div>
+</form>
+</div>
+</body>
+</html>

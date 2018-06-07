@@ -1,0 +1,185 @@
+<include file="../../Public/header"/>
+<link type="text/css" href="__PUBLIC__/school/css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet" />	
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script>
+	function checkinput()
+	{
+		var related_keys = $("#related_keys").val();
+		var guide_page = $("#guide_page").val();
+		var rank = $("#rank").val();
+		var start_tm = $("#start_tm").val();
+		var end_tm = $("#end_tm").val();
+		
+		if(!related_keys)
+		{
+			alert("相关词不能为空！");
+			return false;
+		}
+		if(guide_page==2)
+		{
+			var pkg = $("#package").val();
+			if(pkg == "")
+			{
+				alert("包名不能为空！");
+				return false;
+			}
+		}
+		
+		if(start_tm == "")
+		{
+			alert("开始时间不能为空！");
+			return false;
+		}
+		if(end_tm == "")
+		{
+			alert("结束时间不能为空！");
+			return false;
+		}
+		if(start_tm>=end_tm)
+		{
+			alert("开始时间不能大于等于结束时间！");
+			return false;
+		}
+		if(rank =="")
+		{
+			alert("排序不能为空！");
+			return false;
+		}
+		if(rank <= 0||rank>20)
+		{
+			alert("排序必须为1到20");
+			return false;
+		}
+		var pkg=$('input[name=package]').val();
+		if(pkg){
+			$.ajax({
+				url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+				type: 'get',
+				async:false,
+				success: function(data){
+					if(data){
+						if(!confirm(data)){
+							return false;
+						}
+					}
+				}
+			});
+		}
+		$("#editform").submit();				
+	}
+	function package_check(){
+		var soft_package = $('#package').val();
+		$.ajax({
+			url: '__APP__/Public/package_check/soft_package/'+soft_package,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){
+				if(data == 1){
+					$('#soft_name').html('');
+					alert("该软件包名不存在！");
+				}else{
+					$('#soft_name').html(data);
+				}
+			}
+		});
+	}
+	$(function()
+	{
+		
+		var guide_page = $("#guide_page").val();
+		show_package(guide_page);
+		if(guide_page==2)
+		{
+			var soft_packages = $('#package').val();
+			$.ajax({
+				url: '__APP__/Public/package_check/soft_package/'+soft_packages,
+				type: 'get',
+				dataType: 'json',
+				success: function(data){
+					if(data == 1){
+						$('#soft_name').val('');
+						alert("该软件包名不存在！");
+					}else{
+						$('#soft_name').html(data);
+					}
+				}
+			});
+		}
+	});
+	function show_package(val)
+	{
+		if(val==2)
+		{
+			$("#package_div").css('display','inline-block');
+		}
+		else
+		{
+			$("#package_div").css('display','none');
+		}
+	}
+</script>
+<style type="text/css">
+.tb{ border-top:1px solid #DCDCDC;border-left:1px solid #DCDCDC;}
+.tb th,.tb td{border-right:1px solid #DCDCDC; padding:5px 10px; border-bottom:1px solid #DCDCDC;}
+</style>
+<center>
+<p>软件修改</p>
+<form id="editform" action="__URL__/search_related_content_update_do" method="POST">
+	<table cellspacing="0" cellpadding="0" border=0 class="tb" width="52%">
+		<tr>
+			<td colspan="2">
+				关键词:{$srh_key}
+				<input type="hidden" id="srh_key" name="srh_key" value="{$srh_key}">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				相关词：
+				<input type="text" name="related_keys" id="related_keys" value="{$pkginfo['related_keys']}"/><br/>
+			</td>
+			<td>
+				导向页面：
+				<select name="guide_page" onchange="show_package($(this).val())" id="guide_page">
+					<option value="1" <?php if($pkginfo['guide_page']==1) { echo "selected"; } ?>>搜索结果页</option>
+					<option value="2" <?php if($pkginfo['guide_page']==2) { echo "selected"; } ?>>软件详情页</option>
+				</select>
+				<div id="package_div" style="display:none; vertical-align:middle;">
+					<input type="text" name="package" id="package" style="height:15px; line-height:15px;vertical-align:middle;" onblur="package_check()" value="{$pkginfo.package}"/><br/>
+					<span style="display:inline-block;" id="soft_name" ></span>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>开始时间:
+				<input type="text" id="datepicker" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"datepicker",dateFmt:"yyyy-MM-dd HH:mm:ss"})' name="start_tm" size="30" value="<?php echo date('Y-m-d H:i:s',$pkginfo['start_tm']);?>"/>
+			</td>
+			<td>结束时间:
+				<input type="text" id="datepicker1" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"datepicker1",dateFmt:"yyyy-MM-dd HH:mm:ss"})' name="end_tm" size="30" value="<?php echo date('Y-m-d H:i:s',$pkginfo['end_tm']);?>"/>
+				<input type="hidden" id="kid" name="kid" value="<?php echo $pkginfo['kid']?>"/>
+				<input type="hidden" id="id" name="id" value="<?php echo $pkginfo['id']?>"/>
+			</td>
+		</tr>
+		<tr>
+			<td>排序:
+				<input type="text" id="rank" name="rank" size="20" value="{$pkginfo['rank']}" />
+			</td>
+			<td>
+				合作形式
+				<SELECT name='co_type'>
+					<?php foreach($typelist as $key => $val): ?>
+						<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+					<?php endforeach; ?>				
+				</SELECT>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><input type="button" value="修改" onclick="checkinput();"></td>
+		</tr>
+	</table>
+</form>
+</center>

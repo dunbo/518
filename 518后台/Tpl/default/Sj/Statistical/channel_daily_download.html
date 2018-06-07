@@ -1,0 +1,169 @@
+<include file="../Public/header" /><body>
+<link rel="stylesheet" type="text/css" media="all"
+	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="__PUBLIC__/js/calendar_bak.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-zh.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-setup.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/result.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/js/action.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/Util/swfobject.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+/*function submitChannel()
+{
+	var cids = '';
+	$('#channel_div').html('');
+	$("input:checked").each(function(){
+		var item = $('<label>' + $('#l_cid_' + this.value).html() + '</label>');
+		
+		item.find('input').attr('checked', 'true');
+		$('#channel_div').append(item);
+	})
+	$.cookie('cids', '', {path: '/'});
+	tb_remove();
+}*/
+function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{	
+		$('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{	
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+
+
+function get_params(){
+	//var checkbox=document.getElementsByName("cid[]"); 
+	//var qqq = new Array();
+    //for(var i=0;i<checkbox.length;i++){
+       //  if(checkbox[i].checked){
+			//qqq[i]=checkbox[i].value;
+      // }
+	//}
+	//var cid = qqq.join(","); 
+	var cid=document.getElementById("zh_cid_str").value;
+	var url='__URL__/channel_daily_download';
+	if(cid){
+		url=url + "/cid/"+cid; 
+	}
+	var fromdate=document.getElementById("fromdate").value;
+	if(fromdate){
+		url=url + "/fromdate/"+fromdate; 
+	}
+	var todate=document.getElementById("todate").value;
+	if(todate){
+		url=url + "/todate/"+todate; 
+	}
+	//var obj = document.getElementById("categoryid[]");
+	//alert(obj);
+	//var txt = obj.options[obj.selectedIndex].value;
+	var txt=document.getElementById("category_array").value;
+	if(txt){
+		url=url + "/categoryid/"+txt; 
+	}
+	document.form1.action=url;
+	return true;
+}
+</script>
+<div id="titletable">
+<center>
+<form method="post" action="__URL__/channel_daily_download">
+<table width="800" border="1"> 
+	<tr>
+		<td width="20%">
+		渠道名：</td><td colspan="4"><span>
+		<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox">选择指定渠道</a><br />
+
+	<div id="channel_div">
+			<volist id="chl_list_vo" name="cid_array" >
+			&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+			</volist>
+	</div>
+	</span>
+		</td>
+	</tr>
+	<tr height="20">
+	<td width="20%">选择查看日期(双击日期确定)：</td><td width="50%"> <span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="fromdate" name="fromdate"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="{$from_value}" size="15" type="text"><img
+			src="__PUBLIC__/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"fromdate",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span> <span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+		<input id="todate" name="todate"
+			style="border: 0px none black; width: 100px;" value="{$to_value}"
+			size="15" type="text"><img src="__PUBLIC__/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"todate",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span>
+		</td>
+		<td width="10%">选择分类:</td>
+		<td>{$conflist}</td>
+		<td>
+		<input type="hidden" value="{$categoryid}" name="category_array" id="category_array">
+		<input type="hidden" value="{$zh_cid_str}" name="zh_cid_str" id="zh_cid_str">
+		<input type="hidden" name="is_submit" value="1"><input type="submit" name="submit" value="确定"
+			style="height: 22px; vertical-align: middle;" />
+		</td>
+	</tr>
+</table>
+</form>
+</center>
+<hr>
+<center>
+<table style="width:768px; border:1px solid #000; border-left:none; border-top:none;" cellpadding=0; cellspacing=0>
+<tr><th width="33%">渠道名</th><th  width="33%">分类名</th><th  width="33%">下载总量</th></tr>
+<volist name="download_result" id="voresult">
+      <tr>
+     <td style="padding-left:15px; height:22px; border-left:1px solid #000; border-top:1px solid #000;">
+		<?php
+			if($categoryid && $categoryid!=0){
+		?>
+	 <a href="__URL__/channel_daily_download_one/cid/{$voresult.channel_id}/date/{$from_value}+{$to_value}/category_id/{$categoryid}" class="thickbox">{$voresult.chname} | {$voresult.channel_id}</a>
+	 <?php
+		}else{
+	 ?>
+	 <a href="__URL__/channel_daily_download_one/cid/{$voresult.channel_id}/date/{$from_value}+{$to_value}/category_id/" class="thickbox">{$voresult.chname} | {$voresult.channel_id}</a>
+	 <?php
+		}
+	 ?>
+	 </td>
+	  <td style="padding-left:15px; height:22px; border-left:1px solid #000; border-top:1px solid #000; color:red;"><?php if($categoryid && $categoryid!=0){ echo $request_category_name;}else{ echo "所有分类";}?></td>
+      <td style="padding-left:15px; height:22px; border-left:1px solid #000; border-top:1px solid #000;"> {$voresult.zong}</td>
+      </tr>
+</volist>
+</table>
+{$page}
+</center>
+</div>
+<br>
+</body>

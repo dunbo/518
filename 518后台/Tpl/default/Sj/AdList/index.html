@@ -1,0 +1,241 @@
+<include file="../../Public/header" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<style>
+	table{
+		border-collapse:collapse;
+		border-spacing:0;
+		table-layout:fixed;
+	}
+
+	th,td{
+		padding:0;
+	}
+	table thead th{
+		color:#000000;
+		height:50px;
+		background-color:#CCCCCC;
+		background-image:url();
+		border-collapse:collapse;
+		border:1px solid black;
+	}
+
+	table tbody td{
+		height:26px;
+		border:1px solid #000000;
+		border-collapse:collapse;
+	}
+
+	table.search tbody td{
+		border:0px none white;
+	}
+
+	td.date{
+		text-align:center;
+
+	}
+	table td{
+		overflow:hidden;
+		white-space:nowrap;
+	}
+
+	td.schedule > table td{
+		height:13px;
+		border:0px none white;
+	}
+
+	td.full > table td{
+		background-color:lime;
+	}
+
+	td.part > table td.bottom{
+		background-color:lime;
+	}
+
+	td.content{
+		text-align:center;
+	}
+
+	div.switch{
+		margin:4px 2px 0px 2px;
+		width:11px;
+		height:11px;
+		float:left;
+	}
+	div.on{
+		cursor:pointer;
+		background:url(/Public/images/jian_bg.gif) no-repeat;
+	}
+	div.off{
+		cursor:pointer;
+		background:url(/Public/images/add_bg.gif) no-repeat;
+	}
+	div.first{
+		padding:0px 0px 0px 0px;
+	}
+	div.second{
+		padding:0px 0px 0px 20px;
+	}
+	div.third{
+		padding:0px 0px 0px 40px;
+	}
+
+</style>
+</head>
+
+<body>
+	<form action="/index.php/Sj/AdList/index/" method="get">
+	<table class="search" width="100%" height="50px">
+		<tbody>
+			<tr style="text-align:center">
+				<td width="20%">广告平台：
+					<select  name="pid" onChange="$('form').submit();">
+						<option value="1" <if condition="$pid eq 1">selected="selected"</if>>安智市场</option>
+						<option value="5" <if condition="$pid eq 5">selected="selected"</if>>安卓游戏</option>
+					</select>
+				</td>
+				<td width="20%">状态：
+					<select name="status" onChange="$('form').submit();">
+						<option value="3" <if condition="$status eq 3">selected="selected"</if>>全部</option>
+						<option value="2" <if condition="$status eq 2">selected="selected"</if>>全部投放</option>
+						<option value="1" <if condition="$status eq 1">selected="selected"</if>>部分投放</option>
+						<option value="0" <if condition="$status eq 0">selected="selected"</if>>闲置</option>
+					</select>
+				</td>
+				<td width="20%"><input name="search_key" type="text" value="{$search_key}">&nbsp;<input type="submit" value="搜索"></td>
+				<td width="40%"></td>
+			</tr>
+		</tbody>
+	</table>
+	</form>
+	<table width="100%" class="table_list" cellpadding="0" cellspacing="0" style="margin-top:0">
+		<thead height="40px">
+			<th width="30%">广告位名称</th>
+			<th width="13%">状态</th>
+			<th width="13%">
+				<div style="line-height:40px;width:85%;align:center;">
+					正在投放
+					<img src="/Public/images/question.png" alt="指当前正在投放中的广告" title="指当前正在投放中的广告" style="width:15px;height:15px;margin:14px 10px 0 -50px;float:right;"/>
+				</div>
+			</th>
+			<th width="13%">闲置个数</th>
+			<th width="13%">已暂停</th>
+			<th width="18%">操作</th>
+		</thead>
+		<tbody>
+			<foreach name="extentlist" item="extent" key="k">
+			<if condition="$extent.parent eq ''">
+				<tr ad_id="{$k}">
+					<td>
+						<div class="first">
+							<div id="switch_{$k}" <if condition="count($extentlist[$k]['children']) neq 0">class="switch off" onClick="change_expand('{$k}')"<else />class="switch"</if>></div>
+							<div style="font-weight:bold"><if condition="$datalist[$k]['jumpurl'] neq ''"><a href="{$datalist[$k]['jumpurl']}">{$datalist[$k]['name']}</a><else />{$datalist[$k]['name']}</if></div>
+						</div>
+					</td>
+					<td class="content">
+						<switch name="datalist[$k].status">
+							<case value="0">闲置</case>
+							<case value="1">部分投放</case>
+							<case value="2">全部投放</case>
+						</switch>
+					</td>
+					<td class="content"><if condition="$datalist[$k]['jumpurl'] neq ''"><a href="{$datalist[$k]['jumpurl']}">{$datalist[$k]['available']}</a><else />{$datalist[$k]['available']}</if></td>
+					<td class="content">{$datalist[$k]['empty']}</td>
+					<td class="content">{$datalist[$k]['paused']}</td>
+					<td class="content"><if condition="$datalist[$k]['url'] neq ''"><a href="{$datalist[$k]['url']}" class="blue">批量投放广告</a><else />&nbsp;</if></td>
+				</tr>
+				<if condition="count($extent['children']) neq 0">
+				<volist name="extent.children" id="voson">
+					<tr ad_id="{$voson}" class="child_{$k}" style="display:none">
+						<td>
+							<div class="second">
+								<div id="switch_{$voson}" <if condition="count($extentlist[$voson]['children']) neq 0" >class="switch off" onClick="change_expand('{$voson}')"<else />class="switch"</if>></div>
+								<div><if condition="$datalist[$voson]['jumpurl'] neq ''"><a href="{$datalist[$voson]['jumpurl']}">{$datalist[$voson]['name']}</a><else />{$datalist[$voson]['name']}</if></div>
+							</div>
+						</td>
+						<td class="content">
+							<switch name="datalist[$voson].status">
+								<case value="0">闲置</case>
+								<case value="1">部分投放</case>
+								<case value="2">全部投放</case>
+							</switch>
+						</td>
+						<td class="content"><if condition="$datalist[$voson]['jumpurl'] neq ''"><a href="{$datalist[$voson]['jumpurl']}">{$datalist[$voson]['available']}</a><else />{$datalist[$voson]['available']}</if></td>
+						<td class="content">{$datalist[$voson]['empty']}</td>
+						<td class="content">{$datalist[$voson]['paused']}</td>
+						<td class="content"><if condition="$datalist[$voson]['url'] neq ''"><a href="{$datalist[$voson]['url']}" class="blue">批量投放广告</a><else />&nbsp;</if></td>
+					</tr>
+					<if condition="count($extentlist[$voson]['children']) neq 0" >
+					<volist name="extentlist[$voson].children" id="vochild">
+						<tr ad_id="{$vochild}" class="child_{$voson}" style="display:none">
+							<td>
+								<div class="third">
+									<div id="switch_{$vochild}" class="switch"></div>
+									<div><if condition="$datalist[$vochild]['jumpurl'] neq ''"><a href="{$datalist[$vochild]['jumpurl']}">{$datalist[$vochild]['name']}</a><else />{$datalist[$vochild]['name']}</if></div>
+								</div>
+							</td>
+							<td class="content">
+								<switch name="datalist[$vochild].status">
+									<case value="0">闲置</case>
+									<case value="1">部分投放</case>
+									<case value="2">全部投放</case>
+								</switch>
+							</td>
+							<td class="content"><if condition="$datalist[$vochild]['jumpurl'] neq ''"><a href="{$datalist[$vochild]['jumpurl']}">{$datalist[$vochild]['available']}</a><else />{$datalist[$vochild]['available']}</if></td>
+							<td class="content">{$datalist[$vochild]['empty']}</td>
+							<td class="content">{$datalist[$vochild]['paused']}</td>
+							<td class="content">&nbsp;</td>
+						</tr>
+					</volist>
+					</if>
+				</volist>
+				</if>
+			</if>
+			</foreach>
+			<tr >
+				<td>
+					<div class="first">
+						<div style="font-weight:bold">关键词自动补全</div>
+					</div>
+				</td>
+				<td class="content">-</td>
+				<td class="content">-</td>
+				<td class="content">-</td>
+				<td class="content">0</td>
+				<td class="content"><a href="/index.php/Sj/KeywordAuto/import_keyword" class="blue">批量投放广告</a></td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+<script>
+	function change_expand(ad_id) {
+		objSwitch = $("#switch_"+ad_id);
+		if (objSwitch.hasClass('on'))
+		{
+			objSwitch.removeClass('on');
+			objSwitch.addClass('off');
+			//$(".child_"+ad_id).css('display', 'none');
+			$(".child_"+ad_id).each(function(){
+				$(this).css('display', 'none');
+				childSwitch = $("#switch_"+$(this).attr('ad_id'));
+				if (childSwitch.hasClass('on'))
+				{
+					childSwitch.click();
+				}
+			});
+		}
+		else if (objSwitch.hasClass('off'))
+		{
+			objSwitch.removeClass('off');
+			objSwitch.addClass('on');
+			$(".child_"+ad_id).css('display', '');
+		}
+	}
+	<neq name="search_key" value="">
+	$(".switch").click();
+	</neq>
+</script>
+
+</html>

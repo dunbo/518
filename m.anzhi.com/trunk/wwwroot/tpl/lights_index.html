@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>关灯，办正事</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/lights/css/common.css?v1"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/zepto.min.js"></script>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/TouchSlide.1.1.js"></script>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+</head>
+<body>
+<div class="banner">
+	<img alt="" src="<!--{$out.static_url}-->/lights/images/banner.png">
+	<div class="stars"></div>
+	<div class="lamp"></div>
+	<div class="banner_txt"></div>
+</div>
+
+<!--{if $out.channel_status == 100 || $out.channel_status == 200 || $out.version_status == 200}-->
+<!--{if $out.version_status == 200}-->
+<div class="main">
+	<div class="update_txt">
+		<p>少年，你的安智市场版本过低哦，快去升级再来关灯办正事吧！</p>
+	</div>
+	<div class="btns" id="btns_03">
+		<a href="javascript:;" alt="马上升级" onClick="download_apk('',<!--{$out.intro_result.softid}-->,'cn.goapk.market','<!--{$out.intro_result.softname}-->','<!--{$out.intro_result.version_code}-->','<!--{$out.intro_result.soft_size}-->',1);"></a>
+	</div>
+</div>
+<!--{else if $out.channel_status == 100}-->
+<div class="main">
+	<div class="update_txt">
+		<p>少年，你的安智市场版本过低哦，快去升级再来关灯办正事吧！</p>
+	</div>
+</div>
+<!--{else if $out.channel_status == 200}-->
+<div class="main">
+	<div class="update_txt">
+		<p>少年，你的安智市场版本过低哦，快去升级再来关灯办正事吧！</p>
+		<p>升级方式：在[管理-设置]中检查更新。</p>
+	</div>
+</div>
+<!--{/if}-->
+<!--{else}-->
+
+<div class="main">
+	<div class="theme">
+		<p>关灯一小时可节约0.02度电，这相当于减少了15.7克二氧化碳的排放呢！如果将这个数字乘以地球人口72亿……3月28日20:30~21:30，关灯阻止全球变暖！而且关灯可以早睡觉、数星星、还能想女神啪啪啪……~严肃点，办正事呢！
+</p>
+	</div>
+	<div class="focus_wrap">
+		<div class="focus_title">
+			<p>关灯之后你会选择：</p>
+		</div>
+		<div class="focus" id="focus_01">
+			<div id="focus_slide">
+				<ul>
+					<li id="1">
+						<img src="<!--{$out.static_url}-->/lights/images/focus_011.png" />
+					</li>
+					<li id="2">
+						<img src="<!--{$out.static_url}-->/lights/images/focus_02.png" />
+					</li>
+					<li id="3">
+						<img src="<!--{$out.static_url}-->/lights/images/focus_03.png" />
+					</li>
+					<li id="4">
+						<img src="<!--{$out.static_url}-->/lights/images/focus_044.png" />
+					</li>
+					<li id="5">
+						<img src="<!--{$out.static_url}-->/lights/images/focus_05.png" />
+					</li>
+				</ul>
+			</div>
+			<div class="focus_dotted">
+				<ul></ul>
+			</div>
+			<span class="next"></span>
+			<span class="prev"></span>
+		</div>
+		
+	</div>
+	<div class="btns" id="btns_01">
+		<a href="javascript:;" id="my_button" class="disabled" alt="选好了">选好了，办正事</a>
+	</div>
+</div>
+<!--{/if}-->
+<div style="display:none;" id="az_spirit"></div>
+<script type="text/javascript">
+var share_id = '',sid='<!--{$out.sid}-->';
+var share = '<!--{$out.share}-->',aid=200;
+TouchSlide({
+	slideCell:"#focus_01",
+	titCell:".focus_dotted ul", //开启自动分页 autoPage:true ，此时设置 titCell 为导航元素包裹层
+	mainCell:"#focus_slide ul", 
+	autoPage:true, //自动分页
+	pnLoop:"false"
+});
+</script>
+<script type="text/javascript">
+ $(function(){
+       var slideLi= $("#focus_slide ul li"),
+           _html="<div class='select_card'></div>";
+        slideLi.each(function(index){
+            $(this).click(function(){
+                slideLi.find(".select_card").remove();
+                $(this).append(_html);
+				$('#btns_01 a').removeClass('disabled');
+                                share_id = this .id;
+				$("#my_button").live("click",function(){
+					location.href="/lottery/lights_share.php?sid="+sid+"&share_id="+share_id;
+				});
+            })
+        })
+    })
+
+var port_arr = [12345, 23456, 34567, 45678, 56789, 612345];
+	var listen_failed_max = port_arr.length;
+	var listen_failed_count = 0;
+	var market_installed = false;
+	
+	function share_download() {
+		market_installed = false;
+		listen_failed_count = 0;
+		document.getElementById("az_spirit").innerHTML = "";
+		if (!port_arr) {
+			return;
+		}
+		var arr_len = port_arr.length;
+		for (var i = 0; i < arr_len; i++) {
+			add_async_download_listen_script(port_arr[i]);
+		}
+		return;
+	}
+	
+	function add_async_download_listen_script(port) {
+		var m = document.createElement("script");
+		m.type = 'text/javascript';
+		var url = 'http://127.0.0.1:' + port + '/query?type=action&id='+aid+'&callback=change_install_status&r=' + Math.floor(Math.random() * ( 1000000000 + 1));
+		m.src = url;
+		m.async = "async";
+		m.onload = function() {
+			listen_failed_count++;
+            if (listen_failed_count >= listen_failed_max) {
+                window.location.href= 'http://m.anzhi.com/info_1979088.html';
+            }
+		};
+		m.onerror = function() {
+			listen_failed_count++;
+			if (listen_failed_count >= listen_failed_max) {
+				 window.location.href= 'http://m.anzhi.com/info_1979088.html';
+			}
+		};
+		document.getElementById("az_spirit").appendChild(m);
+	}
+	
+	function change_install_status() {
+		market_installed = true;
+	}
+	
+	$(document).ready(function () {
+		if(share == 1){
+			share_download();
+		}
+	});
+	
+		//下载软件
+	function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag){
+		window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+	}
+</script>
+</body>
+</html>

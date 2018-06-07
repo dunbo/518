@@ -1,0 +1,78 @@
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+
+<script>
+    function search_softname(async) {
+        var package = $.trim($("#package").val());
+        if (package == '') {
+            $("#softname").val('');
+            return 0;
+        }
+        var param = {
+            package : package
+        }
+        var ret = 0;
+        $.ajax({
+            url:'__URL__/search_softname',
+            type:'POST',
+            async:async,
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data) {
+                if (data.status == 1) {
+                    var info = data.info;
+                    $("#softname").val(info['softname']);
+                }
+                ret = data.status;
+            }
+        });
+        return ret;
+    }
+    
+    function pass() {
+        var package = $.trim($("#package").val());
+        if (package == '') {
+            alert("包名不能为空！");
+            $("#package")[0].focus();
+            return false;
+        }
+        // 检查包名
+        var exists = search_softname(false);
+        if (!exists) {
+            alert("包名不存在，请重新填写！");
+            $("#package")[0].focus();
+            return false;
+        }
+        $("#pass").submit();
+    }
+    
+    
+</script>
+
+<div>
+    <br/><h2>通过资讯</h2><br/>
+    <hr size="1" color="#ffffff" noshade><br/><br/>
+    <form method="post" action="__URL__/pass" id="pass">
+        <div>
+            <label><font color="red">* </font>游戏包名：</label>
+            <input type="text" id="package" name="package" onblur="search_softname(true)" value="{$info.package}" style="width:200px"/>
+        </div>
+        <br/><br/>
+        <div>
+            <label><font color="red">* </font>游戏名称：</label>
+            <input type="text" id="softname" name="softname" disabled="disabled" value="{$info.softname}" style="width:200px"/>
+        </div>
+        <br/><br/>
+        <div>
+            <label>注：资讯通过后，将移至【未发布】列表。</label>
+        </div>
+        <input type="hidden" name="id" id="id" value="{$info.id}"/>
+        <div class="clear"></div>
+        <br/><br/>
+        <div class="form_btns_box">
+            <a href="javascript:void(0)" onclick="pass()">提交</a>
+            <a href="javascript:void(0)" onclick="tb_remove()">取消</a>
+        </div>
+        <div class="clear"></div>
+    </form>
+</div>

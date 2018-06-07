@@ -1,0 +1,83 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+function ok(data)
+{
+    if(confirm(data))
+        return true;
+    else
+        return false
+  }
+  
+  function chickrank(){
+	var status = true;
+	$(".rankbox").each(function(){
+		if(isNaN($(this).val().trim()) || $(this).val().trim() < 1){
+			status = false;
+			alert('排序值必须是正整数');
+			return false;
+		}
+	})
+	return status;
+}
+</script>
+
+<body>
+<div style="position:relative;margin:5px;"><h2>搜索默认词配置</h2></div>
+<form action="__URL__/editrank/" method="post">
+<div style="margin:10px;">
+	<a href="__URL__/show_word/type/1/"  class="search_btn" style="display:inline-block;margin-right:40px;<if condition="$type eq 1">background:white;color: red;</if>">首页搜索</a>
+	<a href="__URL__/show_word/type/2"  class="search_btn" style="display:inline-block;margin-right:40px;<if condition="$type eq 2">background:white;color: red;</if>">众测产品搜索</a>
+		<div style="float:right;">
+		<if condition="!$editrank">
+		<a href="__URL__/show_word/editrank/1/type/{$type}"  class="search_btn" style="display:inline-block;margin-right:40px">编辑优先级</a>
+		<a href="__URL__/add/type/{$type}/"  class="thickbox search_btn" style="display:inline-block;margin-right:40px">添加</a></if>
+		
+		<if condition="$editrank"><input type="submit"  class="search_btn" style="display:inline-block;width:135px;margin-right:40px" value="保存优先级" onclick="return chickrank()"><a href="__URL__/show_word/type/{$type}"  class="search_btn" style="display:inline-block;width:135px;">取消优先级</a></if>
+		</div>
+</div>
+    <input type="hidden" name="type" value="{$type}" >
+<br/>
+<br/>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th style="width: 120px;">排序</th>
+			<th style="width: 120px;">搜索框默认文案</th>
+			<th style="width: 120px;">搜索词</th>
+			<th style="width: 80px;">操作</th>
+		</tr>
+	</thead>
+	
+	<volist name='keywords' id='word'>
+	<tr>
+
+	<td>
+	<if condition="$editrank"><input class="rankbox" type="text" name="order[{$word.id}]" value="{$word.rank}"><else />{$word.rank}</if><br/>
+	</td>
+	<td>
+	{$word.description}<br/>
+	</td>
+	<td>
+	{$word.name}<br/>
+	</td>
+	<td>
+	<a href="__URL__/edit/id/{$word.id}/" style="color:blue" class="thickbox">编辑</a>
+	<a href="__URL__/del/id/{$word.id}/" onclick="return ok('确定要删除数据吗？');" style="color:blue">| 删除</a>
+	</td>
+	</tr>
+	</volist>
+	
+	
+			
+
+</table>
+</form>
+<div class="navgition">
+	{$page|default='&nbsp;'}
+</div>
+</body>
+</html>

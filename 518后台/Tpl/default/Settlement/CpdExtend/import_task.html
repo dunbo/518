@@ -1,0 +1,87 @@
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+<script type="text/javascript">
+    function upload() {
+
+        if ($("#uploadFile1").val().length == 0)
+        {
+            alert('请上传文件');
+            return;
+        }
+        var param = {
+            is_status: 1
+        };
+        $("#upload").val('上传中').attr('disabled',true);
+        $.ajaxFileUpload({
+            url: '__URL__/import_task',
+            type: 'POST',
+            data: param,
+            files: [$('#uploadFile1')],
+            secureuri: false,
+            dataType: 'json',
+            success: function(data) {
+                $("#upload").val('上传').attr('disabled',false);
+                if(data.data.msg) alert(data.data.msg);
+                if(data.data.code!=0) {
+                    if (data.data.code == 2) {
+                        window.location.href = '__URL__/task_list';
+                    } else {
+                        $("#im_fail").html('错误数据' + data.data[0] + '条');
+                        $('#fail_num').val(data.data[0]);
+                        $('#fail_soft').val(data.data[1]);
+                        $('#result').css('display', '');
+                        $('#st').css('display', 'none');
+                        $('#TB_closeWindowButton').bind("click", function () {
+                            window.location.href = '__URL__/task_list';
+                        });
+                        $('#TB_overlay').bind("click", function () {
+                            window.location.href = '__URL__/task_list';
+                        });
+                    }
+                }
+            }
+        });
+    }
+    ;
+
+    function out_fail() {
+        if ($('#fail_num').val() != '' && $('#fail_num').val() > 0) {
+            window.fml.submit();
+            tb_remove();
+            window.setInterval("refresh()", 1000);
+        }
+    }
+    function refresh() {
+        window.location.href = '__URL__/task_list';
+    }
+    function get_val() {
+        var file = $("#uploadFile1").val();
+        $('#file_name').val(file);
+    }
+</script>
+
+<body>
+    <div style="display:none;" id="result">
+        <input type="hidden" id="fail_num">
+        <table>
+            <tr><td><p id="im_succ"></p></td><td style="width:40px"></td>
+                <td rowspan="2"><input type="button" value="导出失败明细" style="width:100px;height: 50px" onclick="out_fail()"></td>
+            </tr>
+            <tr><td><p id="im_fail" style="color: red;"></p></td><td></td></tr>
+        </table>
+        <form method="post" name="fml" action="__URL__/import_task">
+            <input type="hidden" id="fail_soft" name="fail_soft">
+            <input type="hidden" id="type" name="type" value="1">
+        </form>
+    </div>
+    <div  id="st" style="display:block;">
+        <div style='margin-left: 20px;width:300px'>
+            请按照上传模板的要求添加内容（<a href="__PUBLIC__/cpd_task.csv" style="color:blue">下载批量导入模板</a>）
+            <div style="float:left;"><input type="text" name="file_name" id="file_name" style="height: 22px;width:200px"></div>
+            <div style="margin-left:10px;float:left;"><input type="file" id="uploadFile1" style="width:56px" name="upload" onchange="get_val()"></div>
+        </div>   
+        <div style="margin-top: 40px;margin-left: 180px;">
+            <div style="float:left;"><input type="button" id="upload" value="上传" onclick="upload()" style="width:50px"></div>
+                <div style="margin-left:10px;float:left;"><input type="button" value="取消" onclick="tb_remove();" style="width:50px"></div>
+        </div>
+    </div>
+</body>

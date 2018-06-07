@@ -1,0 +1,121 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox1.css" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script>
+    $(function() {
+        document.onkeydown = function(e) {
+            var ev = document.all ? window.event : e;
+            if(ev.keyCode==13) {
+                search();
+             }
+        }
+    });
+    function search() {
+        $("#index").submit();
+    }
+    
+</script>
+
+<body>
+    <br/>
+    <div class="search_box">
+        <form method="get" action="__URL__/sdk_access_list" name="index" id="index">
+                        <label>软件ID：</label>
+                        <input type="text" class="search_item_text" style="width:100px" name="softid" id="softid" value="{$softid}"/>
+
+                        <label>软件包名：</label>
+                        <input type="text" class="search_item_text" style="width:100px" name="package" id="package" value="{$package}"/>
+
+                        <label>返回结果时间：</label>
+                        <input type="text" name="begintime" id="begintime" value="{$begintime}" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>~
+                        <span><input id="endtime" name="endtime" style="cursor: hand; width: 150px;"
+                            value="{$endtime}" size="15" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>
+
+                        <label>接入SDK类型：</label>
+                         <SELECT name='is_official' style='width:100px;'>
+                                <option value="" selected="selected" >全部</option>
+                                <option value="1"<if condition="$is_official eq '1'">selected="selected"</if>>官方SDK</option>
+                                <option value="2"<if condition="$is_official eq '2'">selected="selected"</if>>第三方SDK</option>
+                        </SELECT>
+
+                    <input type="button" style="width:50px;margin-left:20px;" value="搜索" onclick="search()"/>
+
+        </form>
+    </div>
+    <div class="search_box" style="border:1px solid #ccc;margin:5px 5px;">
+            <span>{$total}条记录</span>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list" width="100%">
+            <thead>
+                <tr>
+                    <th width="5%">
+                    <input type="checkbox" />
+                    软件信息</th>
+                    <th width="10%">开发者</th>
+                    <th width="10%">返回结果时间</th>
+                    <th width="10%">接入的SDK名称</th>
+                    
+                </tr>
+            </thead>
+            <tbody id="list_box">
+                <volist name="sdk_access_list" id="sdk_access_list">
+                <tr>
+                    <td width="30%">
+                        <div style="float:left;text-align:left;">
+                            <input type="checkbox" />
+                            <br>
+                            <img src='<?php echo IMGATT_HOST.$icon_list[$sdk_access_list["softid"]]['iconurl_72'];?>' width="96" height="96"/> 
+                        </div>
+                        <div style="float:right;text-align:left;width:180px;">
+                            {$sdk_access_list.softid}<span style='color:blue;margin-left:10px;'>{$sdk_access_list.softname}</span><br>
+                            
+                            {$sdk_access_list.package}<br>
+                            <if condition="$sdk_access_list.is_official eq 1"><font style="color:red">官方SDK</font><elseif condition="$sdk_access_list.is_official eq 2 " /><font style="color:red">该软件接入的是第三方SDK</font></if><br>
+                            <?php echo $category_list[$sdk_access_list['category_id']]['name']?> | <if condition="$sdk_access_list.language eq 1">中文<elseif condition="$sdk_access_list.language eq 2 " />英文 <else /> 其他 </if><br>
+                            版本号：{$sdk_access_list.version_code} | 版本名：{$sdk_access_list.version}<br>
+
+
+                        </div>
+                        
+
+                    </td>
+                    <td width="25%" >
+                        <div style="text-align:left;">
+                            <span style='color:blue;'> {$sdk_access_list.dev_name}</span><br><br>
+                            <?php 
+                                if($dev_list[$sdk_access_list['dev_id']]['type']==1){
+                                    echo "个人";
+                                }else if($dev_list[$sdk_access_list['dev_id']]['type']==2){
+                                    echo "团队";
+                                }else{
+                                     echo "公司";
+                                }
+
+                            ?><br><br>
+                            <span style='color:blue;'><?php echo $dev_list[$sdk_access_list['dev_id']]['email'];?></span><br>
+
+                        </div>
+                       
+                    </td>
+
+                    <td width="25%">
+                        <?php echo date('Y-m-d H:i:s',$sdk_access_list["create_tm"])?>
+                    </td>
+
+
+                    <td width="20%">{$sdk_access_list.sdk_msg}</td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+    
+</body>

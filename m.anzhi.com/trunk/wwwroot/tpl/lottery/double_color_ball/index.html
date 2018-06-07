@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>玩转球球 奖上有奖</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/<!--{$out.prefix}-->/css/common.css?v2"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/soft_list_v2.js?v2"></script>
+<script type="text/javascript" src="http://img4.anzhi.com/static/public/js/activity_public3.js?v4"></script>
+<!--{if $out['is_share'] == 1}-->
+<script type="text/javascript" src="/js/anzhi.js"></script>
+<!--{/if}-->
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+<script type="text/javascript">
+$(function(){
+	$('.egglist li').click(function(){
+		var $crack = $(this).find('.crack');
+		var $hammer = $(this).find('.hammer');
+		var $egg = $(this).find('.egg');
+		$(this).addClass("active");
+		setTimeout(function(){
+			window.location.href = 'info.html'
+		},800)
+	})
+})
+</script>
+</head>
+<body>
+<div class="main">
+	<div class="banner">
+		<img src="<!--{$out.new_static_url}-->/<!--{$out.prefix}-->/images/banner.png"/>
+		<div class="notice">
+			<div class="notice_list">
+				<marquee scrollamount="5" scrolldelay="90" direction="left">
+						<!--{if $out['has_lamp'] == 1}-->
+				<!--{foreach from=$out.lamp item=v}-->
+					<span>恭喜<!--{$v.username}-->在<!--{$v.issue}-->期双色球获得<!--{$v.prizelevel_name}-->！</span>
+				<!--{/foreach}-->
+						<!--{else}-->
+				<span>球球大作战，大奖翻倍拿~~</span>
+						<!--{/if}-->	
+				</marquee>
+			</div>
+		</div>
+	</div>
+    <div class="wrap user_wrap">
+    <!--{if $out['is_login'] == 1}-->
+    	<div class="user_info">
+			<ul>
+				<li><i><!--{$out.username}--></i><div class="clear"></div></li>
+				<li>安智币数量：<span><!--{$out.azb}--></span></li>
+			</ul>
+			<a href="/lottery/double_color_ball/myprize.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->&page=kai" class="btns">购买记录</a>
+		</div>
+		<!--{else}-->
+		<div class="user_info user_info2">
+			<ul>
+				<li>请登录</li>
+				<li>安智币数量：<span>0个</span></li>
+			</ul>
+			<a href="#" class="btns" onclick="login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');">登录</a>
+		</div>
+		<!--{/if}-->	
+	</div>
+	<div class="wrap ball_wrap">
+		<div class="titles">
+			<span>第<!--{$out.issue}-->期</span>
+		</div>
+		<div class="ball_info ball_info2">
+		    <!--{if $out['last_jackpot'] != 0}-->
+			<p>上期奖池：<span><!--{$out.last_jackpot}--></span>　安智额外送：<span><!--{$out.last_jackpot}--></span></p>
+			<p>上期中奖结果：</p>
+			<ul>
+				<!--{foreach from=$out.last_kai_number item=v}--><li><!--{$v}--></li><!--{/foreach}-->
+			</ul>
+			<!--{/if}-->
+		</div>
+		<div class="ball_select">
+			<img src="<!--{$out.new_static_url}-->/<!--{$out.prefix}-->/images/ball_body.png" />
+			<!--{if $out['isover'] == 1}-->
+			<a href="javascript:;" class="begin" onclick="toast('活动马上开始，敬请期待~');">立即投注</a>
+			<!--{else}-->
+				    <!--{if $out['is_login'] == 1}-->
+
+			<a href="/lottery/double_color_ball/buy.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->&rand_number_json=<!--{$out.rand_number_json}-->" class="begin" id="liji">立即投注</a>
+					<!--{else}-->
+			<a href="javascript:;" onclick="login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');" class="begin">立即投注</a>
+					<!--{/if}-->
+			<!--{/if}-->	
+			<a href="javascript:;" class="refresh" onclick="get_new_number()">刷新</a>
+			<span class="absolute_bg1"></span>
+		</div>
+		<div class="ball_info ball_info2">
+			<p>本期奖池：<span><!--{$out.jackpot}--></span>　安智额外送：<span><!--{$out.jackpot}--></span></p>
+			<ul id="rand_number">
+			    <!--{foreach from=$out.rand_number item=v}--><li><!--{$v}--></li><!--{/foreach}-->
+			</ul>
+		</div>
+	</div>
+	<div class="wrap soft_wrap">
+		<div class="titles">
+			<span>推荐游戏</span>
+		</div>
+			<a href="javascript:;" class="change_btn" onclick="change_soft('<!--{$out.aid}-->','<!--{$out.sid}-->',4,2);">换一换</a>
+				<ul class="soft_list clear" id="soft-list">
+		</ul>
+
+	</div>
+	<div class="wrap rule_wrap">
+		<div class="titles">
+			<span>活动介绍</span>
+		</div>
+		<ul class="detail_ctn">
+			<li>
+				<p>1、用户可在活动页面使用20安智币购买一注或多注球球</p>
+			</li>
+			<li>
+				<p>2、参与方式<br/>第一步：用户登录<br/>第二步：进入指定页面，选择立即投注或换一换，出现随机双色球一注，点击下一步进入是否加注
+页面（可手选号码添加，也可随机），显示总花费安智金额后可进入付款面页面，付款后可在页面我的购买记录中查看购买记录，未开奖及已中
+奖情况。<br/>第三步：等待开奖结果，开奖时间每周二，周四及周日开奖。<br/>
+<a href="/lottery/double_color_ball/index.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->&page=detail">点击查看详情</a></p>
+			</li>
+			<div class="clear"></div>
+		</ul>
+		    <!--{if $out['is_market'] == 1}-->
+		<a href="javascript:;" class=" btns2 share_btn" onclick="go_share()">分享给朋友</a>
+		    <!--{/if}-->
+	</div>
+	
+</div>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->',open_num=0;
+var aid = '<!--{$out.aid}-->',p=0,soft_lists_go = [],open_pkg_arr = [];
+var prefix = "<!--{$out.prefix}-->";
+	
+$(document).ready(function () {
+	setTimeout(function(){
+		//go_from 1排行榜（无软件名称、状态按钮） 2抽奖页面（有软件名称、和状态按钮）
+		var go_from =2;
+		my_soft(aid,sid,4,go_from);
+	}, 500);
+});
+function onLoginComplete(sid,tip){
+	sid_str = sid.replace("PHPSESSID=", "");
+	location.href="/lottery/"+prefix+"/index.php?sid="+sid_str+"&aid=<!--{$out.aid}-->";
+}
+
+
+
+function get_new_number(){
+	$.ajax({
+		url: '/lottery/'+prefix+'/index.php',
+		data: 'type=1'+'&aid='+aid,
+		type: 'post',
+		async:false,
+		dataType: 'json',
+		success:function(data){
+			//alert(data);
+			$("#rand_number").html(data.number_str);
+			$("#liji").attr('href','/lottery/double_color_ball/buy.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->&rand_number_json='+data.rand_number_json);
+		}
+	});
+}
+
+//分享
+function go_share(){
+/*	$.ajax({
+		url: '/lottery/my_name_MT3_new/share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+		}
+	});*/
+	var share_text='玩转球球 ，奖金翻倍拿~现金拿到你手软!';	
+	var share_url='http://promotion.anzhi.com/lottery/'+prefix+'/index.php?is_share=1&aid='+aid;//todo
+	var share_json = '{"TEXT":"'+share_text+'","URL":"http://img3.anzhi.com/static/double_color_ball/images/share.png","ACTIONURL":"'+share_url+'","URLWEIXIN":"http://img3.anzhi.com/static/double_color_ball/images/share.png"}';
+
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+
+<!--{if $out['is_share'] == 1}-->
+var js_param = {type:'action', id:aid, callback:invite_callback};
+var php_param = {type:'action', aid:aid};
+$(document).ready(function () {
+	share_download(js_param, php_param);
+});	
+<!--{/if}-->	
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6200){
+			js_param = {type:'action', id:aid, callback:null};
+			Azfd.lock = false;
+			share_download(js_param, php_param);			
+		}else {
+			setTimeout(function(){
+				var php_url = 'fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;			
+			},1000);		
+		} 
+	}else{
+		setTimeout(function(){
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;			
+		},1000);		
+	}
+}
+function is_null(){}
+</script>
+</body>
+</html>

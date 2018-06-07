@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>充值抽大奖，100%中奖！不忘初心问道十年</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/ask/ask_lottery/css/common.css?v6"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/soft_list_v1.js?v1"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v4"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/ask/js/jquery.easing-1.3.min.js"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/ask/js/jQueryRotate-2.3.js"></script>
+<!--{if $out['is_share'] == 1}-->
+<script type="text/javascript" src="/js/anzhi.js"></script>
+<!--{/if}-->
+</head>
+<body>
+<div class="banner"><img src="<!--{$out.static_url}-->/ask/ask_lottery/images/banner.png"/></div>
+<div class="main">
+	<div class="wrap">
+		<div class="rule" style="margin-top:-60px">
+			<p class="rule_title">活动时间</p>
+			<p>7月21日00:00-7月23日23:59</p>
+			<p class="rule_title">活动范围</p>
+			<p>问道</p>
+			<p class="rule_title">活动说明</p>
+			<p>活动期间，用户在【问道】充值6元以上（包括6元）即可获得一次抽奖机会，每充值一次获得一次抽奖机会，单日通过充值获取的抽奖次数上限为3次，充值增加的抽奖次数每15分钟刷新一次。单次充值金额越高，获取实物奖励的几率就越高哦；活动结束时，抽奖次数清零！</p>
+		</div>
+	</div>
+	<div class="wrap wrap2">
+		<div class="wrap_inner">
+			<!--{if $out['is_login'] == 1}-->
+			<div class="logined">
+				<div class="logined_l">
+					<p>用户名：<!--{$out.username}--></p>
+					<p>充值一次即可获得一次抽奖机会！</p>
+				</div>
+				<div class="logined_r">
+					<a class="btns" href="/lottery/ask/ask_userinfo.php?types=3&sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->">个人信息</a> 
+				</div>
+			</div>				
+			<!--{else}-->
+			<div class="login logined">
+				<div class="logined_l">
+					<p>登录可查看个人信息</p>
+					<p>充值一次即可获得一次抽奖机会！</p>
+				</div>
+				<div class="logined_r">
+					<a href="javascript:;" class="btns" onclick="login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');" >登 录</a>
+				</div>
+			</div>				
+			<!--{/if}-->			
+		</div>
+	</div>
+	<div class="notice">
+		<div class="notice_list">
+			<marquee scrollamount="2" scrolldelay="90" direction="left">
+					<!--{if $out.award_all}-->
+					<!--{foreach from=$out.award_all item=v}-->
+					<span>恭喜用户<!--{$v.username}-->，好运爆表，抽奖获得<!--{$v.prizename}--></span>
+					<!--{/foreach}-->
+					<!--{else}-->
+					<span>活动已开始，快来充值领奖！~</span>
+					<!--{/if}-->					
+			</marquee>
+		</div>
+	</div>
+	<div class="wrap lottery_wrap">
+		<div class="lottery_info clear">
+			<p>剩余抽奖次数：<span id='lottery_num' ><!--{$out.lottery_num}--></span></p>
+			<a href="javascript:;" class="fr btns" onclick='my_prize();' >我的奖品</a>
+		</div>
+		<div class="rotate">
+			<div class="rotate-con">
+				<img src="<!--{$out.static_url}-->/ask/ask_lottery/images/disk.png" width="100%"/>
+				<div <!--{if $out.lottery_num > 0}-->class="rotate-pointer" id='lottery_but' onclick='lottery_click()' <!--{else}-->class="rotate-pointer pointer-disabled" id='lottery_but' <!--{/if}-->  ></div>
+				<i class="l"></i>
+				<i class="r"></i>
+			</div>  
+		</div>
+	</div>
+	<div class="wrap soft_wrap">
+		<div class="soft">
+			<div class="titles"></div>
+				<ul class="soft_list clear" id="soft-list">
+				</ul>	
+		</div>
+		<i class="l"></i>
+		<i class="r"></i>
+	</div>
+	<a href="javascript:;"  onclick="go_share()" class="share_btn">分&nbsp;享</a>
+</div>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box"  style="display: none;">
+         <div class="wrap">
+			<div class="tip-con">
+				<p id='notice'>您暂时没有抽奖记录！</p>
+				<a href="javascript:;" onclick="cloBox('#tip-box')" class="btns_false btns" id="btns_03">返回</a>
+			</div>
+		</div>
+    </div>
+</section>
+<div class="footer">
+	<p>活动解释权归安智所有</p>
+</div>
+<script type="text/javascript">
+ var sid = '<!--{$out.sid}-->',open_num=0;
+var aid = '<!--{$out.aid}-->',p=0,soft_lists_go = [],open_pkg_arr = [];
+var is_user_winning = "<!--{$out.is_user_winning}-->";
+var lottery_num = "<!--{$out.lottery_num}-->";
+var is_sing = "<!--{$out.is_sing}-->";
+var prefix = "<!--{$out.prefix}-->";
+	
+$(document).ready(function () {
+	setTimeout(function(){
+		//go_from 1排行榜（无软件名称、状态按钮） 2抽奖页面（有软件名称、和状态按钮）
+		var go_from =2;
+		my_soft(aid,sid,1,go_from);
+	}, 500);
+});
+function onLoginComplete(sid,tip){
+	sid_str = sid.replace("PHPSESSID=", "");
+	location.href="/lottery/"+prefix+"/"+prefix+"_index.php?sid="+sid_str+"&aid=<!--{$out.aid}-->";
+}
+
+function my_prize(){
+	if(is_user_winning == 2){
+		pop_tips("我的奖品","您暂时没有抽奖记录！","",1);	
+	}else{
+	<!--{if $out['is_login'] == 1}-->
+		location.href="/lottery/"+prefix+"/"+prefix+"_userinfo.php?types=1&sid="+sid+"&aid="+aid;
+	<!--{else}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+	<!--{/if}-->
+	}
+}
+
+//抽奖
+function lottery_click(){
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	var pkg_str = open_pkg_arr.join(";");
+	if(parseInt(lottery_num) <= 0 ){
+		$('#lottery_but').attr('class', 'rotate-pointer pointer-disabled');
+		pop_tips("","剩余抽奖次数不足！","",1);			
+		return false;	
+	}
+	$('#lottery_but').attr('onclick', '');
+	$.ajax({
+		url: '/lottery/'+prefix+'/'+prefix+'_lottery.php',
+		data: 'sid='+sid+'&aid='+aid+'&pkg='+pkg_str,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+			if(data.code == 1){
+				lottery_num = lottery_num-1;
+				$('#lottery_num').html(lottery_num);
+				if(data.pid != 5 && data.pid != -1){
+					is_user_winning =1;
+					setTimeout(
+						function(){
+							location.href="/lottery/"+prefix+"/"+prefix+"_userinfo.php?types=2&sid="+sid+"&aid="+aid+"&prizename="+data.prizename;
+						},4000
+					);
+					var a = runzp_new(data.pid,8);	
+				}else if(data.pid == -1){
+					var a = runzp_new(8,8);
+				}else{
+					is_user_winning =1;
+					setTimeout(
+						function(){		
+							location.href="/lottery/"+prefix+"/"+prefix+"_userinfo.php?types=2&sid="+sid+"&aid="+aid+"&softname="+data.softname+'&gift_num='+data.gift_num+'&package='+data.package;
+						},2000
+					);	
+					var a = runzp_new(data.pid,8);	
+				}				
+				if(lottery_num > 0){
+					setTimeout(function(){
+						$('#lottery_but').attr('class', 'rotate-pointer');
+						$('#lottery_but').attr('onclick', 'lottery_click();');
+						if(data.pid == -1){
+							pop_tips(data.title,data.msg,"",1);		
+						}
+					}, 3000);					
+				}else{
+					setTimeout(function(){
+						if(data.pid == -1){
+							pop_tips(data.title,data.msg,"",1);		
+						}
+						$('#lottery_but').attr('class', 'rotate-pointer pointer-disabled');
+					}, 3000);
+				}				
+			}else if(data.code == 2){
+				location.href=data.url+"?sid="+sid+"&aid="+aid;
+			}else{
+				pop_tips("",data.msg,"",1);			
+			}
+		}
+	});
+}
+//分享
+function go_share(){
+	$.ajax({
+		url: '/lottery/my_name_MT3_new/share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+		}
+	});
+	var share_text='【不忘初心，问道十年】充值抽大奖，100%中奖！';	
+	var share_url='http://promotion.anzhi.com/lottery/ask/ask_index.php?is_share=1&aid='+aid;	
+	var share_json = '{"TEXT":"'+share_text+'","URL":"<!--{$out.new_static_url}-->/activity/scuffle_journey/images/app_icon3.png","ACTIONURL":"'+share_url+'","URLWEIXIN":"<!--{$out.new_static_url}-->/activity/scuffle_journey/images/app_icon3.png"}';
+
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+
+<!--{if $out['is_share'] == 1}-->
+var js_param = {type:'action', id:aid, callback:invite_callback};
+var php_param = {type:'action', aid:aid};
+$(document).ready(function () {
+	share_download(js_param, php_param);
+});	
+<!--{/if}-->	
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6200){
+			js_param = {type:'action', id:aid, callback:null};
+			Azfd.lock = false;
+			share_download(js_param, php_param);			
+		}else {
+			setTimeout(function(){
+				var php_url = 'fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;			
+			},1000);		
+		} 
+	}else{
+		setTimeout(function(){
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;			
+		},1000);		
+	}
+}
+function is_null(){}
+</script>
+</body>
+</html>

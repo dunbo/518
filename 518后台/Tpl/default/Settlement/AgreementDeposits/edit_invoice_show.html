@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<style>
+td{padding:5px;text-align:left !important;font-size:14px;}
+.red{color:red;}
+.green{color:green;}
+input{height:31px !important;width:250px;}
+.myradio{display:inline;height:auto !important;width:auto;}
+.justfy{width:124px;}
+</style>
+</head>
+<body>
+<h4 class="yahei" style="padding-left:25px;">录入收款</h4>
+<form action="/index.php/Settlement/AgreementDeposits/edit_invoice_do" id="" method="post" class="uform">
+<input type="hidden" name="agreement_id" value="{$data.agreement_id}" />
+<input type="hidden" name="id" value="{$data.id}" />
+<input type="hidden" name="url_suffix" value="{$url_suffix}"/>
+	<table class="yahei">
+		<tr>
+			<td class="justfy">&nbsp;协议编号：</td>
+			<td>{$data.agreement_code}</td>
+		</tr>
+		<tr>
+			<td class="justfy">&nbsp;客户名称：</td>
+			<td>{$data.client_name}</td>
+		</tr>
+		<tr>
+			<td class="justfy">&nbsp;票据类型：</td>
+			<td class="yahei">
+				<input type="radio" name="invoice_type" value="1" class="myradio" <?php if($data['invoice_type'] == "1") echo "checked"; ?> >发票&nbsp;&nbsp;&nbsp;
+				<input type="radio" name="invoice_type" value="2" class="myradio" <?php if($data['invoice_type'] == "2") echo "checked"; ?>>收据
+			</td>
+		</tr>
+	</table>
+	<table id="addable_table" class="yahei">
+		<tbody id="invoice_main_0" border='1'>
+			<tr>
+				<td class="justfy"><font color=red>*</font><span class="single_desc"><?php if($data['invoice_cash'] == 1) echo "单张发票金额：";else echo "单张收据金额：";?></span></td>
+				<td><input type="text" name="invoice_cash" value="{$data.invoice_cash}" class="" id="invoice_cash" required>元</td>
+				<td style="color:red;"></td>
+
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red>*</font>开票日期：</td>
+				<td><input type="text" name="invoicing_date" value="{$data.invoicing_date}" class="Wdate" id="invoicing_date" required onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"></td>
+				<td style="color:red;"></td>
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red>*</font><span class="invoice_desc">发票号：</span></td>
+				<td>
+					<input type="text" name="invoice_code" id="invoice_code" value="{$data.invoice_code}">
+				</td>
+				<td style="color:red;"></td>
+			</tr>
+		</tbody>
+	</table>
+	<table class="yahei">
+		<tr>
+			<td class="justfy">&nbsp;备&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注：</td>
+			<td><textarea style="width:250px;height:100px;" name="remark">{$data.remark}</textarea></td>
+			<td style="color:red;"></td>
+		</tr>
+
+	</table>
+	<div style="margin:10px auto;padding:0px 30px;">
+	<button class=" btn btn-sm btn-success yahei"  style="padding-left:30px;padding-right:30px;margin-left:40px;" type="submit" onclick="javascript:return checkBeforeSubmit();">保存</button>
+	<button class=" btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;margin-left:40px;" type="button" onClick="javascript:tb_remove();">取消</button>
+	</div>
+</form>
+<script>
+function checkBeforeSubmit()
+{
+	var i= 1;
+	if($("#invoice_cash").val().length == 0 || $("#invoice_cash").val() == "")
+	{
+		$("#invoice_cash").css("border","1px solid red").focus().parent().next().text("请先填写单张发票金额！");
+		var i = 0;
+	}else if(isNaN($("#invoice_cash").val()))
+	{
+		$("#invoice_cash").css("border","1px solid red").focus().parent().next().text("发票金额必须是数字！");
+		var i = 0;
+	}
+	if($("#invoicing_date").val().length == 0 || $("#invoicing_date").val() == "")
+	{
+		$("#invoicing_date").css("border","1px solid red").focus().parent().next().text("请先填写开票日期！");
+		var i = 0;
+	}
+	if($("#invoice_code").val().length == 0 || $("#invoice_code").val() == "")
+	{
+		$("#invoice_code").css("border","1px solid red").focus().parent().next().text("请先填写发票号！");
+		var i = 0;
+	}
+	if(i == 0)
+	{
+		return false;
+	}else{
+		return true;
+	}
+}
+var invoices_count = 1;
+function add_new_invoices()
+{
+
+}
+function check_before_add()
+{
+
+}
+$(function(){
+	$("input[type='text'],textarea[name='invoice_code']").focusout(function(){
+		if($(this).val().length == 0)
+		{
+			$(this).css("border","1px solid red").parent().next().text("不可为空！");
+		}else{
+
+			$(this).css("border","1px solid lightgray").parent().next().text("");
+		}
+	});
+	$("input[type='radio']").change(function(){
+		if($(this).val() == "1")
+		{
+			$(".invoice_desc").text("发票号：");
+			$(".single_desc").text("单张发票金额");
+		}else if($(this).val() == "2")
+		{
+			$(".invoice_desc").text("收据号：");
+			$(".single_desc").text("单张收据金额");
+		}
+	});
+})
+</script>
+
+<!-- 主页面结束 -->
+</body>
+</html>

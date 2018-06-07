@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>11.11给你一个脱单的机会</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/common.css"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+
+</head>
+<body>
+<div class="banner"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/banner.png"/></div>
+<div class="notice">
+	<div class="notice_list">
+		<marquee scrollamount="2" scrolldelay="90" direction="left">
+	<!--{if $out.lottery_prize}-->
+		<!--{foreach from=$out.lottery_prize item='val' key='k'}-->
+			<span ><!--{$val}--></span >
+		<!--{/foreach}-->
+	<!--{else}-->		
+			<span >少年，要加油才能拿大奖喔！</span>
+	<!--{/if}-->					
+		</marquee>
+	</div>
+</div>
+<div class="main">
+	<div class="main_inner" style="background-size: 100% 100%;">
+		<div class="lottery_wrap">
+			<div class="gift">
+				<div class="txt1">还有<span id='lottery_num'><!--{$out.lottery_num}--></span>次开宝箱机会</div>
+				<a href="javascript:;" class="lottery_btn1" onclick="my_prize()">我的奖品</a>	
+				<div class="gift_img">
+					<!--{if $out.lottery_num gt 0}-->
+					<div class="gift_box"></div>
+					<!--{else}-->
+					<div class="gift_box gift_box_disabled"></div>
+					<!--{/if}-->
+					<div class="gift_box2"></div>
+					<div class="gift_box4"></div>
+					<div class="light"></div>
+				</div>
+				<a class="btns" id='lottery_id' onclick="click_lottery()">我要抽奖</a>
+			</div>
+		</div>
+		<div class="soft_wrap">
+			<div class="txt2">偷偷告诉你,下载APP增加抽奖机会哦～</div>
+			<div class="soft">
+				<span class="icon"></span>
+				<ul class="soft-list clear">
+				<!--{foreach from=$out.soft_info item='val' key='k'}-->
+					<li class="<!--{$val.softid}-->_btn">
+						<p class="soft-icon">
+							<img id='<!--{$val.softid}-->_pic' src="<!--{$val.iconurl}-->"  />
+						</p>
+						<p class="soft-name"><!--{$val.softname}--></p>
+						<p><a href="javascript:;" class="download open_btn">下载</a></p>
+					</li>
+				<!--{/foreach}-->		
+				</ul>
+				<ul class="soft-list clear"  id="soft-list">
+				</ul>
+				<!-- <a  onclick="change_soft(4);" href="javascript:;" class="lottery_btn3">换一批</a> -->
+			</div>
+		</div>
+		<a class="btns" href="/lottery/<!--{$out.prefix}-->/index.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->">返回首页</a>
+		<a href="/lottery/<!--{$out.prefix}-->/my_prize.php?is_rule=1&aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->" class="rule_btn">【活动规则】</a>		
+	</div>
+</div>
+<div class="footer">
+	<p>＊本次活动最终解释权归安智所有</p>
+</div>
+</body>
+
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box wrap" id="tip-box"  style="display: none;">
+    	<span class="icon"></span>
+		<div class="tip-mid">
+			<div class="tip-con" style="padding-bottom: 0;">
+				<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tips_02.png" />
+				<p id='msg'>少年姿势不对，再试一次~</p>
+			</div>
+		</div>
+		<div class="tip_hd">
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box')">关闭</a></div>
+		</div>
+		<a href="javascript:;"  id='btn' onclick="click_lottery()"  class="btns_orange">再来一次</a>
+    </div>
+    <div class="tip-box wrap" id="tip-box2"  style="display: none;">
+    	<span class="icon"></span>
+		<div class="tip-mid">
+			<div class="tip-con" style="padding-bottom: 0;">
+				<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tips_01.png" />
+				<p >抽奖机会用完啦！下载软件还可以增加抽奖机会哦~</p>
+			</div>
+		</div>
+		<div class="tip_hd">
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box2')">关闭</a></div>
+		</div>
+		<a href="javascript:;"  id='btn' onclick="go_down();"  class="btns_orange">去下载</a>
+    </div>
+	
+	<div class="tip-box wrap" id="tip-box1"  style="display: none; height:260px">
+		<span class="icon"></span>
+		<div class="prompt1" id='msg1'>恭喜获得一等奖Iphone6s</div>
+		<div class="prompt2">快填写个人信息领奖吧!</div>
+		<div class="form-item clear">
+			<label for="username">姓名：</label>
+			<div class="textbox">
+				<input id='lxname_r' type="text" placeholder="姓名" />
+			</div>
+		</div>
+		<div class="form-item clear">
+			<label for="telephone">手机：</label>
+			<div class="textbox">
+				<input id='mobile_r'  maxlength='11' type="tel"  placeholder="手机号" />
+			</div>
+		</div>
+		<div class="form-item clear">
+			<label for="telephone">地址：</label>
+			<div class="textbox">
+				<input id='address_r' type="text" placeholder="收货地址" />
+			</div>
+		</div>
+		<div class="prompt3" id='userinfo_err'></div>
+
+		 <div class="tip_hd">
+            <div class="clo"></div>
+        </div>
+		<div class="btns2">
+			<input id='award_id' type="hidden" value='432' />
+			<a class="btns_orange" href="javascript:;" style="margin-top:22px" onclick="resubmit_do();" >提交</a>
+			<a class="btns_orange fr" style="margin-top:-42px" href="javascript:;" onclick="cloBox('#tip-box1')">取消</a>
+			<div class="clear"></div>
+		</div>		
+	</div>	
+</html>
+<script>
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var prefix = '<!--{$out.prefix}-->';
+var lottery_num = '<!--{$out.lottery_num}-->';
+var open_pkg_arr = [];
+$(document).ready(function () {
+	setTimeout(function(){
+		<!--{foreach from=$out.soft_info item='val' key='k'}-->
+			my_soft("<!--{$k}-->",<!--{$val.softid}-->,"<!--{$val.softname}-->","<!--{$val.version_code}-->","<!--{$val.filesize}-->","<!--{$val.iconurl}-->","<!--{$val.total_downloaded}-->");
+		<!--{/foreach}-->
+	
+		my_soft2();
+	}, 500);
+});
+var soft_lists_go = [];
+var limit = 4,p=0;
+var proid_arr = getArgs();
+var skinvc = proid_arr.skinvc;
+function getArgs() {
+	var args = {};
+	var query = location.search.substring(1);
+	var pairs = query.split("&");
+	for(var i = 0; i < pairs.length; i++) {
+			var pos = pairs[i].indexOf('=');
+			if (pos == -1) continue;
+			var argname = pairs[i].substring(0,pos);
+			var value = pairs[i].substring(pos+1);
+			value = decodeURIComponent(value);
+			args[argname] = value;
+	}
+	return args;
+}
+function my_soft2() {
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	var soft_lists = soft_list.DATA;
+	var open_list = [];
+	var install_list = [];
+	var down_list = [];
+	for(j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var json_data =  window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(json_data == 0 || json_data == 1 ){
+			open_list.push(soft_lists[j]);
+			open_pkg_arr.push(soft_lists[j][7]);
+		}
+		if(json_data == -2 && soft_status_gos == 5){
+			install_list.push(soft_lists[j]);
+		}
+		if((json_data == -2 && soft_status_gos != 5 ) || json_data == -1){
+			down_list.push(soft_lists[j]);
+		}
+	}    
+	if(j<=4){
+		//软件小于等于4个不显示换一换按钮
+		$(".soft_title").css('display','none');
+	}		
+  	for(var ii in open_list) {
+		soft_lists_go.push(open_list[ii]);
+	}  
+  	for(var ii in install_list) {
+		soft_lists_go.push(install_list[ii]);
+	}
+  	for(var ii in down_list) {
+		soft_lists_go.push(down_list[ii]);
+	}
+	get_soft();
+}
+
+
+function get_soft(){
+	var pagemax= Math.floor(soft_lists_go.length/limit);
+	if(soft_lists_go.length%limit==0){
+		pagemax = pagemax-1;
+	}
+	var data = soft_lists_go.slice(p*limit,limit*(p+1));
+	if(data.length == 0){
+		p = 0;
+		data = soft_lists_go.slice(p*limit,limit*(p+1));
+	}
+
+	var str = '';
+	for(i = 0; i < data.length; i++) {
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);		
+		if(data[i][data[i].length-1] != ''){
+			var size = data[i][data[i].length-1];
+		}else{
+			var size = data[i][27];
+		}			
+
+		if(data[i][2].length > 4){
+			var softname = data[i][2].substring(0,3)+'...';
+		}else{
+			var softname = data[i][2];
+		}		
+		str += get_soft_li(soft_status,parseInt(data[i][0]),data[i][7],softname,parseInt(data[i][13]),size,data[i][1]);
+
+	}
+	$('#soft-list').html(str);
+	if(p==pagemax){
+		p=0;
+	}else{
+		p=p+1;
+	}
+}
+
+function my_soft(pkg,softid,softname,version_code,file_size,iconurl,total_downloaded) {
+	window.AnzhiActivitys.registerDownloadObserver(softid);
+	window.AnzhiActivitys.registerInstallObserver(pkg);
+	var json_data =  window.AnzhiActivitys.isInstalledApp(pkg,total_downloaded);
+	var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(softid);
+	var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(softid);
+	get_soft_one(soft_status_gos,softid,pkg,softname,version_code,file_size,iconurl);	
+}
+
+function get_soft_one(soft_status,softid,my_package,softname,versioncode,size,src){
+	var str = '';
+	if(soft_status == 1){
+		str = '下载中';
+	}else if(soft_status == 2 || soft_status == 3 || soft_status == 8){
+		$("."+softid+"_btn").attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')');
+		str = '继续';
+	}else if(soft_status == 4){
+		$("."+softid+"_btn").attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')');
+		str = '下载';
+	}else if(soft_status == 5){
+		$("."+softid+"_btn").attr("onclick",'installApp('+softid+',\''+my_package+'\')');	
+		str = '安装';
+	}else if(soft_status == 6){
+		$("."+softid+"_btn").attr("onclick",'openApp(\''+my_package+'\','+softid+')');	
+		str = '打开';		
+	}else if(soft_status == 9){
+		$("."+softid+"_btn").attr("onclick",'installApp('+softid+',\''+my_package+'\')');
+		str = '校验中';
+	}else if(soft_status == 10){
+		$("."+softid+"_btn").attr("onclick","");	
+		str = '已下载';
+	}else if(soft_status == -1){
+		var soft_other_status = window.AnzhiActivitys.isInstalledApp(my_package,parseInt(versioncode));
+		if(soft_other_status == -2){
+			$("."+softid+"_btn").attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')');
+			str = '下载';	
+		}else if(soft_other_status == -1){
+			$("."+softid+"_btn").attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')');	
+			str = '更新';			
+		}else if(soft_other_status == 0){
+			$("."+softid+"_btn").attr("onclick",'openApp(\''+my_package+'\','+softid+')');	
+			str = '打开';		
+		}else if(soft_other_status == 1){
+			$("."+softid+"_btn").attr("onclick","");
+			str = '已下载';
+		}
+	}
+	$("."+softid+"_btn").find('a').html(str);
+
+}
+function get_soft_li(soft_status,softid,my_package,softname,versioncode,size,src){
+	if(soft_status == 1){
+		var soft_li = '<li id="li_'+softid+'" ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn"><a href="javascript:;" class="download" >下载中</a></p></li>';
+	}else if(soft_status == 2 || soft_status == 3 || soft_status == 8){
+		var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="download" >继续</a></p></li>';
+	}else if(soft_status == 4){
+		var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="download"  >下载</a></p></li>';
+	}else if(soft_status == 5){
+		var soft_li = '<li onclick="installApp('+softid+',\''+my_package+'\')" ><p class="soft-icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn"><a href="javascript:;" class="download" >安装</a></p></li>';
+	}else if(soft_status == 6){
+		var soft_li = '<li onclick="openApp(\''+my_package+'\','+softid+')" ><p class="soft-icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a href="javascript:;" class="download"  >打开</a></p></li>';
+	}else if(soft_status == 9){
+		var soft_li = '<li onclick="installApp('+softid+',\''+my_package+'\')" ><p class="soft-icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a href="javascript:;" class="download"  >校验中</a></p></li>';
+	}else if(soft_status == 10){
+		var soft_li = '<li><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="download" >已下载</a></p></li>';
+	}else if(soft_status == -1){
+		var soft_other_status = window.AnzhiActivitys.isInstalledApp(my_package,parseInt(versioncode));
+		if(soft_other_status == -2){
+			var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="download"  >下载</a></p></li>';
+		}else if(soft_other_status == -1){
+			var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="download"  >更新</a></p></li>';
+		}else if(soft_other_status == 0){
+			var soft_li = '<li onclick="openApp(\''+my_package+'\','+softid+')" ><p class="soft-icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a href="javascript:;" class="download"  >打开</a></p></li>';
+		}else if(soft_other_status == 1){
+			var soft_li = '<li ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn"><a id="'+softid+'" href="javascript:;" class="download" >已下载</a></p></li>';
+		}
+	}
+	return soft_li;
+}
+function openApp(pkg,softid){
+	the_soft = [softid];
+	$.ajax({
+		url: '/lottery/vacation_gift_open.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkg+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+		}
+	});
+}
+
+
+function go_softinfo_down(softid,my_package,softname,versioncode,size){
+	$.ajax({
+		url: '/lottery/'+prefix+'/lottery.php',  //supwater  点击详情 点击下载
+		data:"is_down_num=1&sid="+sid+"&aid="+aid+"&pkg="+my_package, 
+		type:"get",
+		success:function(data) {
+			if(data){
+				lottery_num = parseInt(data);
+				if(lottery_num > 0){
+					$("#lottery_id").attr("onclick","click_lottery();");
+					$(".gift_box").attr("class","gift_box");
+				}else{
+					$(".gift_box").attr("class","gift_box gift_box_disabled");
+				}
+				$('#lottery_num').html(lottery_num);
+			}
+		},
+	});		
+	$("."+softid+"_btn").removeAttr("onclick");
+	$("."+softid).removeAttr("onclick");
+	$.ajax({
+		url: '/lottery/year_feedback_download.php',  //supwater  点击详情 点击下载
+		data:"softid="+softid+"&sid="+sid+"&aid="+aid+"&pkgname="+my_package, 
+		type:"post",
+		success:function(data) {
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),softid,my_package,softname,versioncode,size,0);
+		},
+	});
+}
+function installApp(softid,pkgname){
+	$.ajax({
+		url: '/lottery/vacation_third_install.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+		type: 'post',
+		success: function(data){
+			window.AnzhiActivitys.installAppForActivity(softid);
+		}
+	});
+}
+
+function onDownloadStateChanged(softid,newState){
+	<!--{foreach from=$out.soft_info item='val' key='k'}-->
+		var softids = "<!--{$val['softid']}-->";
+		if(softids == softid){
+			var softname = "<!--{$val.softname}-->";
+			var pkg = "<!--{$k}-->";
+			var file_size = parseInt("<!--{$val.filesize}-->");
+			var version_code = "<!--{$val.version_code}-->";
+			<!--{ break; }-->
+		}
+	<!--{/foreach}-->
+	if(newState == 1){
+		var str = "下载中";
+		$('#'+softid+'').html("下载中");
+	}else if(newState == 2 || newState == 3 || newState == 8){
+		$("."+softid+"_btn").attr('onclick',"go_softinfo_down("+parseInt(softid)+",'"+pkg+"','"+softname+"','"+version_code+"','"+file_size+"')");	
+		var str = "继续";
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				if(soft_lists_go[i][2].length > 4){
+					var softname = soft_lists_go[i][2].substring(0,3)+'...';
+				}else{
+					var softname = soft_lists_go[i][2];
+				}				
+				$('#li_'+softid+'').attr('onclick',"go_softinfo_down("+parseInt(softid)+",'"+soft_lists_go[i][7]+"','"+softname+"','"+soft_lists_go[i][13]+"','"+soft_lists_go[i][soft_lists_go[i].length-1]+"')");
+				
+			}
+		}		
+	}else if(newState == 4){
+		var str = "重试";
+	}else if(newState == 5){		
+		var str = "安装";
+		$("."+softid+"_btn").attr('onclick',"installApp("+parseInt(softid)+",'"+pkg+"')");	
+		$('#li_'+softid+'').removeAttr("onclick");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				$('#li_'+softid+'').attr('onclick',"installApp("+parseInt(softid)+",'"+soft_lists_go[i][7]+"')");
+
+
+			}
+		}		
+	}else if(newState == 6){
+		var str = "打开";
+		$("."+softid+"_btn").attr('onclick',"openApp('"+pkg+"',"+parseInt(softid)+")");		
+		$('#li_'+softid+'').removeAttr("onclick");
+		for(var i=0;i < soft_lists_go.length;i++){		
+			if(soft_lists_go[i][0] == softid){
+				$('#li_'+softid).attr('onclick',"openApp('"+soft_lists_go[i][7]+"',"+parseInt(softid)+")");
+
+                break;
+			}
+		}		
+	}else if(newState == 9){
+		var str = "检查中";		
+	}
+	$("."+softid+"_btn").find('a').html(str);
+	$('#'+softid+'').html(str);
+}
+
+function change_soft(){
+	$('#soft-list').html('');
+	get_soft();
+}
+var arr = ["没中奖不要紧！看成败人生豪迈，大不了从头再来。","少年姿势不对，再试一次~","默念三遍我一定会中，再试下~","少年你离奖品就差一步，再试试嘛~","说好的奖品呢，连辣条都不给我啊喂！","继续攒人品，下次一定RP大爆发！","少年别灰心，安智君相信下次你就能中~","天灵灵，地灵灵，下次中奖一定灵~","奖品是个磨人的小妖精，看我再试一次定会抓住你~" 
+]; 
+function click_lottery(){
+	cloBox('#tip-box');
+	cloBox('#tip-box1');
+	if(lottery_num <= 0 ){
+		showOpenBox('#tip-box2');	
+		return false;
+	}
+	$("#lottery_id").removeAttr("onclick");
+	$('.gift_img').find('.gift_box ').css('display','none');
+	$('.gift_img').find('.gift_box2').addClass('open');
+	setTimeout(function(){
+		$('.gift_img').find('.gift_box4').addClass('open');
+		$('.gift_img').find('.light').addClass('light_open');
+	},500)
+	lottery_num = parseInt(lottery_num-1);
+	$("#lottery_num").html(lottery_num);
+	$.ajax({
+		url: '/lottery/'+prefix+'/lottery.php',  //supwater  点击详情 点击下载
+		data:"sid="+sid+"&aid="+aid, 
+		type:"post",
+		dataType: 'json',	
+		success:function(data) {
+			$("#lottery_id").attr("onclick","click_lottery();");
+			setTimeout(function(){
+				$('.gift_img').find('.gift_box2').attr("class","gift_box2");
+				$('.gift_img').find('.gift_box4').attr("class","gift_box4");
+				$('.gift_img').find('.light').attr("class","light");				
+				if(lottery_num <= 0 ){
+					$('.gift_img').find('.gift_box').attr("class","gift_box gift_box_disabled").css('display','block');
+				}else{
+					$('.gift_img').find('.gift_box').attr("class","gift_box").css('display','block');
+				}
+				if(data.code == 1){
+					$("#msg1").html("恭喜获得 "+data.prizename);
+					$("#award_id").val(data.award_id);
+					showOpenBox('#tip-box1');	
+					return false;
+				}else{
+					if(lottery_num > 0 ){
+						var index = Math.floor((Math.random()*arr.length)); 
+						$("#msg").html(arr[index]);
+						showOpenBox('#tip-box');	
+						return false;
+					}
+				}
+			},2000)
+			if(data.code == 0 && lottery_num == 0 ){
+				showOpenBox('#tip-box2');	
+				return false;
+			}
+		},
+	});		
+}
+
+var flags={canMove:true};
+function showOpenBox(obj){
+	setTimeout(function(){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+		top_h=  $(obj).height()/2 - $(document).scrollTop();
+		$(obj).css("margin-top",-top_h+"px").show();
+		$('#body-bg').css("height",bg_h+"px").show();
+		flags.canMove=false;
+		if($('.tip-con').height()>=150){
+			flags.canMove = true;
+		}
+		window.onresize = function(){
+			var bg_h=$(window).height() + $(document).scrollTop(),
+				top_h=  $(obj).height()/2 - $(document).scrollTop();
+			$('#body-bg').css("height",bg_h+"px");
+			$(obj).css("margin-top",-top_h+"px");	
+		}
+	},200)
+}
+function cloBox(obj){
+	$(obj).hide(); 
+	$('#body-bg').hide();
+	flags.canMove=true;
+}
+$(function(){
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+})
+
+function resubmit_do(){
+	var lxname = $("#lxname_r").val();
+	if(lxname == "") {
+		$('#userinfo_err').html('联系人姓名不能为空');
+		return false;
+	}
+	var name_len = lxname.length;
+	if(name_len > 10){
+		$('#userinfo_err').html('联系人姓名不能超过10个字');
+		return false;	
+	}
+	var mobile_phone = $("#mobile_r").val();
+	if(mobile_phone == "") {
+		$('#userinfo_err').html('联系人手机号码不能为空');
+		return false;
+	 }
+	var  re = /^(13|14|15|17|18)\d{9}$/
+	if (!re.test(mobile_phone)){
+		$('#userinfo_err').html('请输入正确手机号');
+		return false;
+	}
+	var address = $("#address_r").val();
+	if(address == "") {
+		$('#userinfo_err').html('邮寄地址不能为空');
+		return false;
+	 }
+	var address_len = address.length;
+	if(address_len > 30){
+		$('#userinfo_err').html('邮寄地址不能超过30个字');
+		return false;	
+	}	 
+	$('#userinfo_err').html('');
+	var award_id = $("#award_id").val();
+	//cloBox('#tip-box1');	
+	$.ajax({
+			url: "/lottery/"+prefix+"/my_prize.php",
+			data:"is_address=1&aid="+aid+"&sid="+sid+"&lxname="+lxname+"&mobile_phone="+mobile_phone+"&address="+address+'&id='+award_id,
+			type:"post",
+			dataType: 'json',
+			success:function(data) {
+				if(data.code == 1){
+					$('#userinfo_err').html(data.msg);
+					setTimeout(function(){
+						cloBox('#tip-box1');
+					},2000)					
+				}else{
+					$('#userinfo_err').html(data.msg);
+					return false;
+				}
+			},
+	});	
+}
+function my_prize(){
+	location.href="/lottery/"+prefix+"/my_prize.php?aid="+aid+"&sid="+sid;
+}
+
+function go_down(){
+	cloBox('#tip-box2');
+	//滚动到位置 100,500：
+	window.scrollTo(100,500);
+}
+</script>

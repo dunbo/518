@@ -1,0 +1,432 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<script type="text/javascript">
+var shengfen = '{$userlist.address_sf}';
+var diqu = '{$userlist.address_area}';
+function form_chk() {
+    //账号名称
+    var username = $.trim($('#username').val());
+    var username_old = $.trim($('#username_old').val());
+    if (username == '') {
+        alert('账号名称不能为空');
+        return false;
+    }
+    var username_len = GetCharLength(username);
+    var username_length = username.length;
+    if (username_length < 2) {
+        alert('账号名称过短');
+        return false;
+    }
+    if (username_len > 10) {
+        alert('账号名称长度应在2~5个中文或2~10个英文字符以内');
+        return false;
+    }
+    if(!/^[\u4E00-\u9FA50-9a-zA-Z_]+$/.test(username)){
+        alert('账号名称包含非法字符');
+        return false ;
+    }
+    var username_status = 0;
+    if(username != username_old){
+        $.ajax({
+            url: '__URL__/user_edit/check/username',
+            data: 'username=' + username,
+            type: 'POST',
+            async: false,
+            dataType: 'json',
+            success: function(res) {
+                username_status = res['code'];           
+            }
+        });
+    }
+    if(username_status==1){
+        alert('账号名称已存在');
+        return false;
+    }
+
+    //账号简介
+    var info = $.trim($('#info').val());
+    if (info == '') {
+        alert('账号简介不能为空');
+        return false;
+    }
+    var info_len = GetCharLength(info);
+    var info_length = info.length;
+    if (info_length < 10) {
+        alert('账号简介过短');
+        return false;
+    }
+    if (info_length > 30) {
+        alert('账号简介10~30个字符之间');
+        return false;
+    }
+    if(!/^[\u4E00-\u9FA50-9a-zA-Z]+$/.test(info)){
+        alert('账号简介包含非法字符');
+        return false ;
+    }
+
+    //账号头像
+    var userpic = $.trim($('#userpic').val());
+    var userpic_old = $.trim($('#userpic_old').val());
+    if(!userpic && !userpic_old){
+        alert('请上传账号头像');
+        return false;
+    }
+
+    //联系人
+    var truename = $.trim($('#truename').val());
+    if (truename == '') {
+        alert('联系人不能为空');
+        return false;
+    }
+    var info_len = GetCharLength(truename);
+    var info_length = truename.length;
+    if (info_length < 2) {
+        alert('联系人过短');
+        return false;
+    }
+    if (info_length > 15) {
+        alert('联系人2~15个字之间');
+        return false;
+    }
+
+    //手机号
+    var phone = $.trim($('#phone').val());
+    if (phone == '') {
+        alert('手机号不能为空');
+        return false;
+    }
+    if(!/^1[34578][\d]{9}$/.test(phone)){
+        alert('手机号格式不正确');
+        return false ;
+    }
+
+    //邮箱
+    var mail = $.trim($('#mail').val());
+    if (mail == '') {
+        alert('邮箱不能为空');
+        return false;
+    }
+    mail = mail.replace(/&nbsp;| /g, "");
+    if(!(mail.length > 6 && /^([A-Za-z0-9\-_.+]+)@([A-Za-z0-9\-]+[.][A-Za-z0-9\-.]+)$/.test(mail))){
+        alert('邮箱格式不正确');
+        return false ;
+    }
+
+    //身份证号
+    $('#cardnumber_error').html('');
+    var cardnumber = $.trim($('#cardnumber').val());
+    if (cardnumber == '') {
+        alert('身份证号不能为空');
+        return false;
+    }
+    if(!/^[0-9]{18}$/.test(cardnumber) && !/^[0-9]{17}[xX]{1}$/.test(cardnumber)){
+        alert('身份证号格式不正确');
+        return false ;
+    }
+
+    //身份证正面照
+    var cardpic1 = $.trim($('#cardpic1').val());
+    var cardpic1_old = $.trim($('#cardpic1_old').val());
+    if(!cardpic1 && !cardpic1_old){
+        alert('请上传身份证正面照');
+        return false;
+    }
+    //身份证反面照
+    var cardpic2 = $.trim($('#cardpic2').val());
+    var cardpic2_old = $.trim($('#cardpic2_old').val());
+    if(!cardpic2 && !cardpic2_old){
+        alert('请上传身份证反面照');
+        return false;
+    }
+    //手持身份证照
+    var cardpic_hand = $.trim($('#cardpic_hand').val());
+    var cardpic_hand_old = $.trim($('#cardpic_hand_old').val());
+    if(!cardpic_hand && !cardpic_hand_old){
+        alert('请上传手持身份证照');
+        return false;
+    }
+}
+
+$(document).ready(function(){
+    var province_index = init();
+    changeSelect(province_index);
+})
+
+function GetCharLength(str){
+    var iLength = 0;  //记录字符的字节数
+    for(i=0; i<str.length; i++){  //遍历字符串中的每个字符
+        if(str.charCodeAt(i) > 255){  //如果当前字符的编码大于255
+            iLength += 2;  //所占字节数加2
+        }else{
+            iLength += 1;  //否则所占字节数加1
+        }
+    }
+    return iLength;  //返回字符所占字节数
+}
+
+function onUploadImgChange(obj, width, height){
+    var img = $(obj).attr('id');
+    $('input[name='+img+'_old]').val('');
+    if(!obj.value){
+        remove_file(img);
+        return false;
+    }
+    // 图片名称后缀判断
+    if(!obj.value.match(/.jpg|.png/i) ){
+        alert('图片格式无效！');
+        remove_file(img);
+        return false;
+    }
+    var imgSrc = check_img(obj);
+    var newimg = new Image();
+    newimg.src = imgSrc;
+    // 加载完成执行
+    newimg.onload = function(){
+        var w = newimg.width;
+        var h = newimg.height;
+        if( w!=width&&width!=0 || h!=height&&height!=0 ){
+            alert('图片尺寸不符合要求');
+            remove_file(img);
+            return false;
+        }
+        var objPreview = document.getElementById(img+'_div');
+        if( obj.files && obj.files[0] ){
+            objPreview.style.display = 'block';
+            //objPreview.style.width = 'auto';
+            //objPreview.style.height = 'auto';
+            objPreview.src = imgSrc;
+        }
+    }   
+}
+function test(file_name){
+    var result = /\.[^\.]+/.exec(file_name);
+    return result;
+}
+function remove_file(file){
+    //$('input[name='+file+'_old]').val('');
+    $('#'+file+'_div').removeAttr('src');
+    var file = $("#"+file);
+    file.val('');
+    return false;
+}
+function check_img(obj){
+    var imgSrc = '';
+    if( obj.files && obj.files[0] ){
+        if(getOs() == 'Chrome'){
+            imgSrc = window.webkitURL.createObjectURL(obj.files[0]);
+        }else{
+            imgSrc = window.URL.createObjectURL(obj.files[0]);
+        }
+    }else{
+        //IE下，使用滤镜
+        obj.select();
+        //解决IE9下document.selection拒绝访问的错误
+        if( navigator.appName == "Microsoft Internet Explorer" && navigator.appVersion.match(/9./i) == "9." ){
+            obj.blur();
+        }
+        var imgSrc = document.selection.createRange().text;
+        document.selection.empty();
+    }
+    return imgSrc;
+}
+function getOs(){ 
+    var OsObject = ""; 
+    if(isIE = navigator.userAgent.indexOf("MSIE") != -1){ 
+        return "MSIE"; 
+    }
+    if(isFirefox = navigator.userAgent.indexOf("Firefox") != -1){ 
+        return "Firefox";
+    }
+    if(isChrome = navigator.userAgent.indexOf("Chrome") != -1){
+        return "Chrome";
+    }
+    if(isSafari = navigator.userAgent.indexOf("Safari") != -1){
+        return "Safari"; 
+    }
+    if(isOpera = navigator.userAgent.indexOf("Opera") != -1){
+        return "Opera";
+    } 
+}
+
+var arr_province = ["请选择","安徽","北京",'重庆','福建','甘肃','广东','广西','贵州','海南','河北','黑龙江','河南','湖北','湖南','内蒙古','江苏','江西','吉林','辽宁','宁夏','青海','山西','山东','上海','四川','天津','西藏','新疆','云南','浙江','陕西','台湾','香港','澳门','海外'];
+var arr_city = [
+    ["请选择"],
+    ["合肥","芜湖","蚌埠",'淮南','马鞍山','淮北','铜陵','安庆','黄山','滁州','阜阳','宿州','巢湖','六安','亳州','池州','宜城'],
+    ["东城区","西城区","崇文区","宣武区","朝阳区","丰台区",'石景山区',"海淀区","门头沟区","房山区","通州区","顺义区","昌平区","大兴区",'怀柔区',"平谷区",'密云县','延庆县'],
+    ['万州区','涪陵区','渝中区','大渡口区','江北区','沙坪坝区','九龙坡区','南岸区','北碚区','万盛区','双桥区','渝北区','巴南区','黔江区','长寿区','綦江县','潼南县','铜梁县','大足县','荣昌县','璧山县','梁平县','城口县','丰都县','垫江县','武隆县','忠县','开县','云阳县','奉节县','巫山县','巫溪县','石柱土家族自治县','秀山土家族苗族自治县','酉阳土家族苗族自治县','彭水苗族土家族自治县','江津市','合川市','永川区','南川市'],
+    ['福州','厦门','莆田','三明','泉州','漳州','南平','龙岩','宁德'],
+    ['兰州','嘉峪关','金昌','白银','天水','武威','张掖','平凉','酒泉','庆阳','定西','陇南','临夏','甘南'],
+    ['广州','韶关','深圳','珠海','汕头','佛山','江门','湛江','茂名','肇庆','惠州','梅州','汕尾','河源','阳江','清远','东莞','中山','潮州','揭阳','云浮'],
+    ['南宁','柳州','桂林','梧州','北海','防城港','钦州','贵港','玉林','百色','贺州','河池'],
+    ['贵阳','六盘水','遵义','安顺','铜仁','黔西南','毕节','黔东南','黔南'],
+    ['海口','三亚','其他'],
+    ['石家庄','唐山','秦皇岛','邯郸','邢台','保定','张家口','承德','沧州','廊坊','衡水'],
+    ['哈尔滨','齐齐哈尔','鸡西','鹤岗','双鸭山','大庆','伊春','佳木斯','七台河','牡丹江','黑河','绥化','大兴安岭'],
+    ['郑州','开封','洛阳','平顶山','安阳','鹤壁','新乡','焦作','濮阳','许昌','漯河','三门峡','南阳','商丘','信阳','周口','驻马店'],
+    ['武汉','黄石','十堰','宜昌','襄阳','鄂州','荆门','孝感','荆州','黄冈','咸宁','随州','恩施土家族苗族自治州'],
+    ['长沙','株洲','湘潭','衡阳','邵阳','岳阳','常德','张家界','益阳','郴州','永州','怀化','娄底','湘西土家族苗族自治州'],
+    ['呼和浩特','包头','乌海','赤峰','通辽','鄂尔多斯','呼伦贝尔','兴安盟','锡林郭勒盟','乌兰察布盟','巴彦淖尔盟','阿拉善盟'],
+    ['南京','无锡','徐州','常州','苏州','南通','连云港','淮安','盐城','扬州','镇江','泰州','宿迁'],
+    ['南昌','景德镇','萍乡','九江','新余','鹰潭','赣州','吉安','宜春','抚州','上饶'],
+    ['长春','吉林','四平','辽源','通化','白山','松原','白城','延边朝鲜族自治州'],
+    ['沈阳','大连','鞍山','抚顺','本溪','丹东','锦州','营口','阜新','辽阳','盘锦','铁岭','朝阳','葫芦岛'],
+    ['银川','石嘴山','吴忠','固原'],
+    ['西宁','海东','海北','黄南','海南','果洛','玉树','海西'],
+    ['太原','大同','阳泉','长治','晋城','朔州','晋中','运城','忻州','临汾','吕梁'],
+    ['济南','青岛','淄博','枣庄','东营','烟台','潍坊','济宁','泰安','威海','日照','莱芜','临沂','德州','聊城','滨州','菏泽'],
+    ['黄浦区','卢湾区','徐汇区','长宁区','静安区','普陀区','闸北区','虹口区','杨浦区','闵行区','宝山区','嘉定区','浦东新区','金山区','松江区','青浦区','南汇区','奉贤区','崇明县'],
+    ['成都','自贡','攀枝花','泸州','德阳','绵阳','广元','遂宁','内江','乐山','南充','眉山','宜宾','广安','达州','雅安','巴中','资阳','阿坝','甘孜','凉山'],
+    ['和平区','河东区','河西区','南开区','河北区','红桥区','塘沽区','汉沽区','大港区','东丽区','西青区','津南区','北辰区','武清区','宝坻区','宁河县','静海县','蓟县'],
+    ['拉萨','昌都','山南','日喀则','那曲','阿里','林芝'],
+    ['乌鲁木齐','克拉玛依','吐鲁番','哈密','昌吉','博尔塔拉','巴音郭楞','阿克苏','克孜勒苏','喀什','和田','伊犁','塔城','阿勒泰','石河子'],
+    ['昆明','曲靖','玉溪','保山','昭通','楚雄','红河','文山','思茅','西双版纳','大理','德宏','丽江','怒江','迪庆','临沧'],
+    ['杭州','宁波','温州','嘉兴','湖州','绍兴','金华','衢州','舟山','台州','丽水'],
+    ['西安','铜川','宝鸡','咸阳','渭南','延安','汉中','榆林','安康','商洛'],
+    ['台北','高雄','基隆'],
+    ['香港'],
+    ['澳门'],
+    ['美国','英国','法国','俄罗斯','加拿大','巴西','澳大利亚','印尼','泰国','马来西亚','新加坡','菲律宾','越南','印度','日本','新西兰','其他']
+];
+
+function init(){
+    var province = document.getElementById('province');
+    var index = 0;
+    province.length = arr_province.length;
+    for(var i=0;i<arr_province.length;i++){
+        province.options[i].text = arr_province[i];
+        if(i==0){
+            province.options[i].value = ' ';
+        }else{
+            province.options[i].value = arr_province[i];
+        }
+        if(arr_province[i]==shengfen){
+            index = i;
+        }
+    }
+    province.selectedIndex = index;
+    return index;
+}
+function changeSelect(index){
+    $('#city').css('display', '');
+    var city_index = 0;
+    var city = document.getElementById('city');
+    city.length = arr_city[index].length;
+    for (var j = 0; j<arr_city[index].length;j++) {
+        city.options[j].text = arr_city[index][j];
+        if(index==0){
+            city.options[j].value = ' ';
+        }else{
+            city.options[j].value = arr_city[index][j];
+        }
+        if(arr_city[index][j]==diqu){
+            city_index = j;
+        }
+    }
+    city.selectedIndex = city_index;
+}
+</script>
+<style type="text/css">
+<!--
+body,td,th {
+	font-size: 12px;
+}
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+.tb tr {height:35px;}
+.inpt {width:250px;height:20px;}
+-->
+</style>
+<div class="main" >
+<div class="content">
+
+<form method='post' action="__URL__/user_edit/userid/{$list.userid}" enctype="multipart/form-data" onsubmit="return form_chk();">
+<input type='hidden' name='userid' value='{$userid}' />
+<center>
+<table width="944" border="0" cellpadding="0" cellspacing="0" class="tb">
+    <tr>
+        <td colspan="3" align='left'><b><h2>账号信息：</h2></b></td>
+    </tr>
+    <tr>
+        <td width="239" align='left'>账号ID：</td>
+        <td width="382" align='left'>{$userlist['userid']}</td>
+        <td width="301" align="left"></td>
+    </tr>
+    <tr>
+        <td width="239" align='left'><font color='red'>*</font>账号类型：</td>
+        <td width="382" align='left'><input type="radio" name="shuxing" id="shuxing" value="1" <?php if($userlist['type']==1){echo 'checked'; } ?> />个人</td>
+        <td width="301" align="left"></td>
+    </tr>
+    <tr>
+        <td width="239" align='left'><font color='red'>*</font>账号名称：</td>
+        <td width="382" align='left'><input type="hidden" name='username_old' id="username_old" value="{$userlist.username}"/><input name="username" type="text" id="username" value="{$userlist.username}" /></td>
+        <td width="301" align="left">由2-10个字组成，支持汉字、字母、数字及下划线。请勿使用含特殊符号或含有明显营销推广意图的媒体名称。</td>
+    </tr>
+    <tr>
+        <td width="239" align='left'><font color='red'>*</font>账号简介：</td>
+        <td width="382" align='left'>
+            <textarea name="info" id="info" cols='60' rows='3'>{$userlist.info}</textarea>
+        </td>
+        <td width="301" align="left">10-30个字，要求内容完整通顺，无特殊符号，请勿添加任何联系方式如：手机号、QQ号、微信号、微博号等</td>
+    </tr>
+    <tr>
+        <td width="239" align='left'><font color='red'>*</font>账号头像：</td>
+        <td width="382" align='left'>
+            <input type="hidden" name="userpic_old" id="userpic_old" value="{$userlist.userpic}" />
+            <input type="file" name="userpic" id="userpic" onchange="onUploadImgChange(this,200,200);" />
+        </td>
+        <td width="301" align="left"><img id="userpic_div" width='100' height="100" src="<?php echo IMGATT_HOST; ?>{$userlist.userpic}" />图片要求清晰、健康。请勿使用二维码，最大1M，200*200像素</td>
+    </tr>
+    <tr>
+        <td width="239" align='left'>所在地：</td>
+        <td width="382" align='left'><select name="province" id="province" onchange="changeSelect(this.selectedIndex)"></select><select name="city" id="city" style="display:none"></select></td>
+        <td width="301" align="left"></td>
+    </tr>
+    <tr>
+        <td width="239" align='left'><font color='red'>*</font>联系人：</td>
+        <td width="382" align='left'><input name="truename" type="text" id="truename" value="{$userlist.truename}" /></td>
+        <td width="301" align="left"></td>
+    </tr>
+    <tr>
+        <td width="239" align='left'><font color='red'>*</font>手机号：</td>
+        <td width="382" align='left'><input name="phone" type="text" id="phone" value="{$userlist.phone}" /></td>
+        <td width="301" align="left"></td>
+    </tr>
+    <tr>
+        <td width="239" align='left'><font color='red'>*</font>联系邮箱：</td>
+        <td width="382" align='left'><input name="mail" type="text" id="mail" value="{$userlist.mail}" /></td>
+        <td width="301" align="left"></td>
+    </tr>
+    <tr>
+        <td width="239" align='left'><font color='red'>*</font>身份证号：</td>
+        <td width="382" align='left'><input name="cardnumber" type="text" id="cardnumber" value="{$userlist.cardnumber}" /></td>
+        <td width="301" align="left"></td>
+    </tr>
+    <tr>
+        <td width="239" align='left'><font color='red'>*</font>证件扫描：</td>
+        <td width="382" align='left'>
+            <input type="hidden" name="cardpic1_old" id="cardpic1_old" value="{$userlist.cardpic1}" />
+            <input type="file" name="cardpic1" id="cardpic1" onchange="onUploadImgChange(this,0,0);" />
+            
+            <input type="hidden" name="cardpic2_old" id="cardpic2_old" value="{$userlist.cardpic2}" />
+            <input type="file" name="cardpic2" id="cardpic2" onchange="onUploadImgChange(this,0,0);" />
+            
+            <input type="hidden" name="cardpic_hand_old" id="cardpic_hand_old" value="{$userlist.cardpic_hand}" />
+            <input type="file" name="cardpic_hand" id="cardpic_hand" onchange="onUploadImgChange(this,0,0);" />
+        </td>
+        <td width="301" align="left">
+            <img id="cardpic1_div" width='100' height="100" src="<?php echo IMGATT_HOST; ?>{$userlist.cardpic1}" />
+            <img id="cardpic2_div" width='100' height="100" src="<?php echo IMGATT_HOST; ?>{$userlist.cardpic2}" />
+            <img id="cardpic_hand_div" width='100' height="100" src="<?php echo IMGATT_HOST; ?>{$userlist.cardpic_hand}" />
+            图片大小不超过2M，支持jpg、png格式
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3" align='left'><input type="submit" value='提交'/>&nbsp;&nbsp;<input type="button" value='取消' onclick=" window.history.go(-1); "/></td>
+    </tr>
+</table>
+</form>
+</div>
+</div>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+ 

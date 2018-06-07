@@ -1,0 +1,52 @@
+<include file="../../Public/header"/>
+
+<link type="text/css" href="__PUBLIC__/school/css/ui-lightness/jquery-ui-1.8.16.custom.css" rel="stylesheet" />	
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+
+<center>
+<form action="__URL__/search_list" method="GET">
+<table border=1 width="600">
+<tr>
+<td colspan="3"><font color="red">*开始时间和结束时间为空时查找的是当前周的搜索排行</font></td>
+</tr>
+<tr>
+<td>开始时间：<input type="text" id="begintime" name="start_tm" value="{$start_tm}"class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"begintime",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  /></td>
+<td>结束时间：<input type="text" id="endtime" name="stop_tm" value="{$stop_tm}" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"endtime",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  /></td>
+<td>关键词：<input type="text" id="key" name="key" value="{$key}" /></td>
+<td><input type="submit" value="搜索"/></td>
+</tr>
+</table>
+</form>
+<if condition="$zh_key eq 1">
+<table border=1 width="600">
+<tr><th>关键字</th><th>搜索次数</th><th>日期</th></tr>
+<?php foreach($key_list as $info){ ?>
+<tr><td width="50%"><?php echo $info['serch_key'];?></td><td width="20%"><?php echo $info['zong'];?></td><td width="30%"><?php echo date("Y-m-d H:i:s", $info['serch_time']);?></td></tr>
+<?php } ?>
+</table>
+<else/>
+<table border=1 width="600">
+<tr><th>序号</th><th>关键字</th><th>搜索次数</th></tr>
+<?php
+	$num=1;
+foreach($key_list as $info){ ?>
+<tr><td><?php
+	if($_GET['p']==""){
+		$p=1;
+	}else{
+		$p=$_GET['p'];
+	}
+	echo ($p-1)*10+$num;
+?></td><td width="70%"><a href="__URL__/serch_key/start_tm/{$start_tm}/stop_tm/{$stop_tm}/serch_key/<?php echo $info['serch_key'];?>/key/{$key}" ><?php echo $info['serch_key'];?></a></td><td width="30%"><?php echo $info['zong'];?></td></tr>
+<?php 
+	$num++;
+	}
+ ?>
+</table>
+</if>
+<p>{$page}</p>
+</center>

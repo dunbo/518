@@ -1,0 +1,357 @@
+<include file="../Public/header" />
+</head>
+<style type="text/css">
+#mark_ad{ position:absolute; left:0; top:0; background:#000000; filter:alpha(opacity=50); opacity:0.5; z-index:100}
+#mark_game{ position:absolute; left:0; top:0; background:#000000; filter:alpha(opacity=50); opacity:0.5; z-index:100}
+.ad_div{width:550px; min-height:200px; padding:20px; background:#eee;z-index:1000;display:none; position:absolute; left:200px; top:50px;}
+.game_div{width:480px; min-height:200px; padding:20px; background:#eee;z-index:1000;display:none; position:absolute; left:200px; top:50px;}
+.change_a.positive:hover{text-decoration:underline;color:#529214;}
+.change_a{cursor:pointer;}
+.change_a{padding:0px;}
+</style>
+<script>
+$(document).ready(function(){
+	$("div[id^=ad_div_]").attr('class', 'ad_div');
+	$("div[id^=game_div_]").attr('class', 'game_div');
+	}
+);
+
+
+function viewWidth(){
+	return document.documentElement.clientWidth;
+}
+function viewHeight(){
+	return document.documentElement.clientHeight;
+}
+function scrollY(){
+	return document.documentElement.scrollTop || document.body.scrollTop;
+}
+function documentHeight(){
+	return Math.max(document.documentElement.scrollHeight || document.body.scrollHeight,document.documentElement.clientHeight);
+}
+function show_ad(id){
+	$("#ad_id").val(id);
+	var oMark = document.createElement('div');
+	oMark.id = 'mark_ad';
+	document.body.appendChild(oMark);
+	oMark.style.width = viewWidth() + 'px';
+	oMark.style.height = documentHeight() + 'px';
+	var oDiv = document.getElementById("ad_div_"+id+"");
+	oDiv.style.display = 'block';
+	oDiv.style.top = (viewHeight() - oDiv.offsetHeight)/2 + scrollY() + 'px';
+	oDiv.style.left = (viewWidth() - oDiv.offsetWidth)/2 + 'px';
+	window.onresize = window.onscroll = function(){
+		oDiv.style.top = (viewHeight() - oDiv.offsetHeight)/2 + scrollY() + 'px';
+		oDiv.style.left = (viewWidth() - oDiv.offsetWidth)/2 + 'px';
+		oMark.style.width = viewWidth() + 'px';
+		oMark.style.height = documentHeight() + 'px';
+	}
+}
+
+function show_game(id){
+	$("#game_id").val(id);
+	var oMark = document.createElement('div');
+	oMark.id = 'mark_game';
+	$('#id').val(id);
+	document.body.appendChild(oMark);
+	oMark.style.width = viewWidth() + 'px';
+	oMark.style.height = documentHeight() + 'px';
+	var oDiv = document.getElementById("game_div_"+id+"");
+	oDiv.style.display = 'block';
+	oDiv.style.top = (viewHeight() - oDiv.offsetHeight)/2 + scrollY() + 'px';
+	oDiv.style.left = (viewWidth() - oDiv.offsetWidth)/2 + 'px';
+	window.onresize = window.onscroll = function(){
+		oDiv.style.top = (viewHeight() - oDiv.offsetHeight)/2 + scrollY() + 'px';
+		oDiv.style.left = (viewWidth() - oDiv.offsetWidth)/2 + 'px';
+		oMark.style.width = viewWidth() + 'px';
+		oMark.style.height = documentHeight() + 'px';
+	}
+}
+
+function closeWin_ad(cid){
+	var oDiv = document.getElementById("ad_div_"+cid+"");
+	var oMark = document.getElementById("mark_ad");
+	ad_price = $("#ad_price_"+cid+"").val();
+	max_down = $("#max_down_"+cid+"").val();
+	ad_cut_pre = $("#ad_cut_pre_"+cid+"").val();
+	$("#ad_price1_"+cid+"").val(ad_price);
+	$("#max_down1_"+cid+"").val(max_down);
+	$("#ad_cut_pre1_"+cid+"").val(ad_cut_pre);
+	oDiv.style.display = 'none';
+	document.body.removeChild(oMark);
+}
+
+function closeWin_game(cid){
+	var oDiv = document.getElementById("game_div_"+cid+"");
+	var oMark = document.getElementById("mark_game");
+	var game_cut_pre = $("#game_cut_pre_"+cid+"").val();
+	$("#game_cut_pre1_"+cid+"").val(game_cut_pre);
+	oDiv.style.display = 'none';
+	document.body.removeChild(oMark);
+}
+
+function save_ad(cid){
+	var ad_price = $("#ad_price1_"+cid+"").val();
+	var max_down = $("#max_down1_"+cid+"").val();
+	var ad_cut_pre = $("#ad_cut_pre1_"+cid+"").val();
+	var r   = "^[0-9]*[0-9][0-9]*$";
+	var re   =   new   RegExp(r); 	
+	
+	if(ad_price > 10 || ad_price<0 || isNaN(ad_price) || !ad_price || ad_price.substring(ad_price.indexOf("."),ad_price.length).length>5){
+		$("#ad_price1_"+cid+"").css("border","#ff0000 1px solid");
+		ad_not = 1;
+	}else{
+		ad_not = 2;
+		$("#ad_price1_"+cid+"").css("border","");
+	}
+	
+	if(max_down>100 || max_down<0 || isNaN(max_down) || !max_down || !max_down.match(re)){
+		$("#max_down1_"+cid+"").css("border","#ff0000 1px solid");
+		max_not = 1;
+	}else{
+		max_not = 2;
+		$("#max_down1_"+cid+"").css("border","");
+	}
+	if(ad_cut_pre>100 || ad_cut_pre<0 || isNaN(ad_cut_pre) || !ad_cut_pre || ad_cut_pre.substring(ad_cut_pre.indexOf("."),ad_cut_pre.length).length>3){
+
+		$("#ad_cut_pre1_"+cid+"").css("border","#ff0000 1px solid");
+		cut_not = 1
+	}else{
+		cut_not = 2;
+		$("#ad_cut_pre1_"+cid+"").css("border","");
+	}
+	if(ad_not == 1 || max_not == 1 || cut_not == 1){
+		return false;
+	}
+	$("#ad_price_"+cid+"").val(ad_price);
+	$("#max_down_"+cid+"").val(max_down);
+	$("#ad_cut_pre_"+cid+"").val(ad_cut_pre);
+	var oDiv = document.getElementById("ad_div_"+cid+"");
+	var oMark = document.getElementById("mark_ad");
+	oDiv.style.display = 'none';
+	document.body.removeChild(oMark);
+}
+
+function save_game(cid){
+	var game_cut_pre = $("#game_cut_pre1_"+cid+"").val();
+	if(game_cut_pre > 100 || game_cut_pre<0 || isNaN(game_cut_pre) || !game_cut_pre || game_cut_pre.substring(game_cut_pre.indexOf("."),game_cut_pre.length).length>3){
+		$("#game_cut_pre1_"+cid+"").css("border","#ff0000 1px solid");
+		return false;
+	}else{
+		$("#game_cut_pre1_"+cid+"").css("border","");
+	}
+	$("#game_cut_pre_"+cid+"").val(game_cut_pre);
+	var oDiv = document.getElementById("game_div_"+cid+"");
+	var oMark = document.getElementById("mark_game");
+	oDiv.style.display = 'none';
+	document.body.removeChild(oMark);
+}
+
+function Select( obj , check ) {
+	for ( i = 0 ; i < obj.length ; i++ ) {
+		if(obj[i].disabled == '')
+		{
+			obj[i].checked = check;
+		}
+
+	}
+	return;
+}
+
+function SelectAll_mark() {
+	var sid = document.getElementsByName("active_switch[]");
+	if ($("#marks").attr("checked") == "checked") {
+		Select( sid , true );
+		$("input[id^=active_price_]").css("border","#ff0000 1px solid");
+	} else {
+		Select( sid , false );
+		$("input[id^=active_price_]").css("border","");
+	}
+}
+
+function SelectAll_ad() {
+	var sid = document.getElementsByName("ad_switch[]");
+	if ( $("#ads").attr("checked") == "checked" ) {
+		Select( sid , true );
+	} else {
+		Select( sid , false );
+	}
+}
+
+function SelectAll_game() {
+	var sid = document.getElementsByName("game_switch[]");
+	if ( $("#games").attr("checked") == "checked" ) {
+		Select( sid , true );
+	} else {
+		Select( sid , false );
+	}
+}
+
+function checked_go(id){
+	var active_price = $("#active_price_"+id+"").val();
+	
+	if(active_price != 0){
+		$("#submit_go").attr("disabled",false);
+		$("#active_price_"+id+"").css("border","");
+	}
+	
+	if(active_price < 0 || active_price > 10 || active_price.substring(active_price.indexOf("."),active_price.length).length>5 || isNaN(active_price)){
+		$("#submit_go").attr("disabled",true);
+		$("#active_price_"+id+"").css("border","#ff0000 1px solid");
+	}
+}
+
+function checkit()
+{
+    if(confirm("确定要这么执行该操作吗？"))
+    {
+        return true;
+    }
+    return false;
+}
+
+
+function checkits()
+{
+    if(confirm("确定要这么执行该操作吗？"))
+    {
+		$("input[id^=active_switch_]").attr('checked', false);
+        return true;
+		
+	}
+    return false;
+}
+
+function change_check(id){
+	var active_price = $("#active_price_"+id+"").val();
+	if($("#active_switch_"+id+"").attr("checked") == "checked" && !active_price){
+		$("#active_price_"+id+"").css("border","#ff0000 1px solid");
+		$("#submit_go").attr("disabled",true);
+	}else{
+		$("#active_price_"+id+"").css("border","");
+		$("#submit_go").attr("disabled",false);
+	}
+	
+	if($("#active_switch_"+id+"").attr("checked") != "checked"){
+		$("#marks").attr("checked",false);
+	}
+}
+
+
+function checks(){
+	var cid = document.getElementsByName("cid[]");
+	var flag = true;
+	for ( i =  0; i < cid.length ; i++ ) {
+		var active_switch = document.getElementById("active_switch_"+cid[i].value+"").checked;
+		var ad_switch = document.getElementById("ad_switch_"+cid[i].value+"").checked;
+		var game_switch = document.getElementById("game_switch_"+cid[i].value+"").checked;
+		if(!active_switch && !ad_switch && !game_switch){
+			$("#tr_"+cid[i].value+"").css("background","red");
+			flag = false;
+		}else{
+			$("#tr_"+cid[i].value+"").css("background","");
+		}
+	}
+	return flag;
+}
+
+function ad_ncheck(cid){
+	if($("#ad_switch_"+cid+"").attr("checked") != "checked"){
+		$("#ads").attr("checked",false);
+	}
+}
+
+function game_ncheck(cid){
+	if($("#game_switch_"+cid+"").attr("checked") != "checked"){
+		$("#games").attr("checked",false);
+	}
+}
+</script>
+<body>
+<div  style="padding-left:50px">
+<form action="__URL__/add_channel_config" method="post">
+
+<h2>添加渠道配置</h2>&nbsp;&nbsp;所属账号：<span>{$username}<input type="hidden" name="uid" value="{$uid}"></span>
+<table border="1" cellpadding="1" cellspacing="0">
+	<tr>
+		<td>渠道ID</td>
+		<td>渠道名</td>
+		<td><input type="checkbox" name="mark" id="marks" onclick="SelectAll_mark();"/>安智市场激活分成</td>
+		<td>安智市场激活单价</td>
+		<td><input type="checkbox" name="ad" id="ads" onclick="SelectAll_ad();"/>广告分成</td>
+		<td>广告分成默认值</td>
+		<td><input type="checkbox" name="game" id="games" onclick="SelectAll_game();"/>游戏分成</td>
+		<td>游戏分成默认值</td>
+	</tr/>
+	<?php foreach($channel_arr as $key => $val){ ?>
+	<tr id="tr_{$val['cid']}">
+		<td>{$val['cid']}</td>	
+		<td>{$val['chname']}<input type="hidden" name="cid[]" value="{$val['cid']}" /></td>
+		<td style="text-align:center;"><input type="checkbox" id="active_switch_{$val['cid']}" name="active_switch[]" value="{$val['cid']}" onclick="change_check({$val['cid']});" /></td>
+		<td><input type="text" name="active_price[]" id="active_price_{$val['cid']}" onchange="checked_go({$val['cid']});" /><input type="hidden" id="checks_go_{$val['cid']}" name="checks_go">元</td>
+		<td style="text-align:center;"><input type="checkbox" name="ad_switch[]" id="ad_switch_{$val['cid']}"  value="{$val['cid']}" onclick="ad_ncheck({$val['cid']});" /></td>
+		<td><a href="#" onclick="show_ad({$val['cid']});">修改默认值</a>
+		<input type="hidden" name="ad_price[]" id="ad_price_{$val['cid']}" value="{$configs['ad_price']['coefficient_value']}" />
+		<input type="hidden" name="max_down[]" id="max_down_{$val['cid']}" value="{$configs['max_down']['coefficient_value']}" />
+		<input type="hidden" name="ad_cut_pre[]" id="ad_cut_pre_{$val['cid']}" value="{$configs['ad_cut_pre']['coefficient_value']}" /></td>
+		<td style="text-align:center;"><input type="checkbox" name="game_switch[]" onclick="game_ncheck({$val['cid']});" id="game_switch_{$val['cid']}" value="{$val['cid']}" /></td>
+		<td><a href="javascript:;" onclick="show_game({$val['cid']});">修改默认值</a>
+		<input type="hidden" name="game_cut_pre[]" id="game_cut_pre_{$val['cid']}" value="{$configs['game_cut_pre']['coefficient_value']}" />
+		</td>
+	</tr>
+	<?php } ?>
+</table>
+	<span style="color:red;">输入数据范围(无需输入单位)：</span><br />
+	<span style="color:red;">安智市场激活单价：0-10之间数值，保留四位小数，若勾选对应分成类型则必须输入</span></span>
+	<br />
+	<input type="submit" class="change_a" value="提交" onclick="return checks();" id="submit_go" style="border:0px; background:transparent;color:#324450;border-bottom:1px dashed #7c7a7b" />&nbsp;&nbsp;&nbsp;&nbsp;<a href="__URL__/select_channel/uid/{$uid}/from/{$from}">返回上一步</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="<?php if($status == 2){ ?>__URL__/give_up/uid/{$uid}<?php }elseif($status == 3){ ?>__URL__/give_up_edit/uid/{$uid}<?php } ?>" onclick="return checkit();">放弃</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="__URL__/channel_config/uid/{$uid}/from/{$from}" onclick="return checkit();">重置</a>
+
+</form>
+<?php foreach($channel_arr as $key => $val){ ?>
+<div id="ad_div_{$val['cid']}" width="600px">
+编辑广告分成类别默认值:<br />
+<table width="100%">
+	<tr>
+		<td>单个软件下载单价：<input type="hidden" id="ad_id_{$val['cid']}" /></td>
+		<td><input type="text" name="ad_price1_{$val['cid']}" id="ad_price1_{$val['cid']}" value="{$configs['ad_price']['coefficient_value']}" />
+		</td>
+		<td>元</td>
+		<td><span style="color:red;">0-10之间数值,保留四位小数</span></td>
+	</tr>
+	<tr>
+		<td>防刷量值：</td>
+		<td><input type="text" name="max_down1_{$val['cid']}" id="max_down1_{$val['cid']}" value="{$configs['max_down']['coefficient_value']}" /></td>
+		<td>个</td>
+		<td><span style="color:red;">0-100之间整数</span></td>
+	</tr>
+	<tr>
+		<td>广告分成扣量比例：</td>
+		<td><input type="text" name="ad_cut_pre1_{$val['cid']}" id="ad_cut_pre1_{$val['cid']}" value="{$configs['ad_cut_pre']['coefficient_value']}" /></td>
+		<td>%</td>
+		<td><span style="color:red;">百分比，保留两位小数</span></td>
+	</tr>
+	<tr><td colspan="2"><span style="color:red;">注：以上内容均为必填项</span></td></tr>
+	<tr>
+		<td><button onclick="save_ad({$val['cid']});">保存</button>&nbsp;&nbsp;<button onclick="closeWin_ad({$val['cid']});">放弃</button></td>
+	</tr>
+</table>
+</div>
+<div id="game_div_{$val['cid']}">
+编辑游戏分成类别默认值：
+<table>
+	<tr>
+		<td>游戏分成扣量比例：<input type="hidden" id="game_id_{$val['cid']}" /></td>
+		<td><input type="text" name="game_cut_pre1_{$val['cid']}" id="game_cut_pre1_{$val['cid']}" value="{$configs['game_cut_pre']['coefficient_value']}"/></td>
+		<td>%</td>
+		<td><span style="color:red;">百分比，保留两位小数</span></td>
+	<tr>
+	<tr><td colspan="2"><span style="color:red;">注：以上内容均为必填项</span></td></tr>
+	<tr>
+		<td><button onclick="save_game({$val['cid']});">保存</button>&nbsp;&nbsp;<button onclick="closeWin_game({$val['cid']});">放弃</button></td>
+	</tr>
+</table>
+</div>
+<?php } ?>
+</div>
+</body>
+</html>

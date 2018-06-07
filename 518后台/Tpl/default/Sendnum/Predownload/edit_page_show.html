@@ -1,0 +1,332 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+</head>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<script>
+function onUploadImgChange(sender,img,obj){  
+    if( !sender.value.match( /.jpg|.gif|.png|.bmp|.jpeg/i) ){        
+        alert('图片格式无效！');   
+        return false;       
+    }                    
+    var objPreview = document.getElementById(obj);        
+    var file=document.getElementById(img);
+    if( sender.files &&  sender.files[0] ){ 
+        objPreview.style.display = 'block';        
+        objPreview.style.width = 'auto';        
+        objPreview.style.height = 'auto';
+		objPreview.src = window.URL.createObjectURL(file.files[0]);
+    }       
+}        
+
+function onPreviewLoad(sender){
+    autoSizePreview( sender, sender.offsetWidth, sender.offsetHeight );      
+}
+
+function autoSizePreview( objPre, originalWidth, originalHeight ){     
+    var zoomParam = clacImgZoomParam( 300, 300, originalWidth, originalHeight );        
+    objPre.style.width = zoomParam.width + 'px';        
+    objPre.style.height = zoomParam.height + 'px';        
+    objPre.style.marginTop = zoomParam.top + 'px';        
+    objPre.style.marginLeft = zoomParam.left + 'px';        
+}        
+
+function clacImgZoomParam( maxWidth, maxHeight, width, height ){        
+    var param = { width:width, height:height, top:0, left:0 };        
+    if( width>maxWidth || height>maxHeight ){        
+        rateWidth = width / maxWidth;        
+        rateHeight = height / maxHeight;        
+        if( rateWidth > rateHeight ){        
+            param.width =  maxWidth;        
+            param.height = height / rateWidth;        
+        }else{        
+            param.width = width / rateHeight;        
+            param.height = maxHeight;        
+        }        
+    }        
+    param.left = (maxWidth - param.width) / 2;        
+    param.top = (maxHeight - param.height) / 2;              
+    return param;        
+}
+
+function del_img(obj,div){
+	if(confirm("确定要删除此图片？"))
+	{
+		$('#'+obj+'').val('');
+		objPreview = document.getElementById(div);
+		objPreview.style.display = 'none';
+	}else{
+		return false;
+	}
+}
+
+$(function(){
+	$('#page_color').colorPicker();
+	$('#first_bg_color').colorPicker();
+	$('#second_bg_color').colorPicker();
+	$('#third_bg_color').colorPicker();
+});
+
+function get_soft(){
+	var package = $('#package').val();
+	$.ajax({
+		url:"__URL__/get_soft", 
+		data: 'package='+package,
+		type: 'get',
+		success:function(data) {
+			$('#softname').val(data);
+		}
+	});	
+}
+
+function select_download_one(obj){
+	$('#download_1').attr('src','/Public/images/activity/downloads'+obj+'.png');
+}
+
+function select_bbs(obj){
+	$('#bbs_1').attr('src','/Public/images/activity/bbs'+obj+'.png');
+}
+
+function select_download_two(obj){
+	$('#download_2').attr('src','/Public/images/activity/download'+obj+'.png');
+}
+
+function del_img_obj(obj,div,id,objs){
+	if(confirm("确定要删除此图片？"))
+	{	
+		$.ajax({
+			url:"__URL__/del_img", 
+			data: 'id='+id+'&obj='+objs,
+			type: 'get',
+			success:function(data) {
+				if(data == 200){
+					$('#'+obj+'').val('');
+					objPreview = document.getElementById(div);
+					objPreview.style.display = 'none';
+				}
+			}
+		});
+	}else{
+		return false;
+	}
+}
+
+function get_first_focus(obj){
+	if(obj == 3){
+		$('#first_focus_pic').css('display','');
+	}else{
+		$('#first_focus_pic').css('display','none');
+	}
+}
+
+function get_second_focus(obj){
+	if(obj == 3){
+		$('#second_focus_pic').css('display','');
+	}else{
+		$('#second_focus_pic').css('display','none');
+	}
+}
+
+function get_third_focus(obj){
+	if(obj == 3){
+		$('#third_focus_pic').css('display','');
+	}else{
+		$('#third_focus_pic').css('display','none');
+	}
+}
+
+</script>
+<body>
+
+<form action="__URL__/edit_page_do" method="post" enctype="multipart/form-data">
+<div style="margin:20px;">
+<a href="__URL__/page_list" class="search_btn">返回</a>
+<table border="1" cellpadding="0" cellspacing="0" style="margin-top:40px;margin-left:40px;">
+<tr>
+	<td><span style="font-size:16px;">活动名称：</span></td>
+	<td><input type="text" name="activity_name" id="activity_name" value="{$result[0]['activity_name']}" /><input type="hidden" name="id" value="{$result[0]['id']}" /></td>
+</tr>
+<tr>
+	<td><span style="font-size:16px;">活动页面：</span></td>
+	<td>
+	<select name="module">
+		<option value="1" <?php if($result[0]['module'] == 1){ ?>selected<?php } ?>>活动模板-1</option>
+		<option value="2" <?php if($result[0]['module'] == 2){ ?>selected<?php } ?>>活动模板-2</option>
+		<option value="3" <?php if($result[0]['module'] == 3){ ?>selected<?php } ?>>活动模板-3</option>
+	</select>
+	</td>
+</tr>
+<!--
+<tr>
+	<td><span style="font-size:16px;">软件包名：</span></td>
+	<td><input type="text" name="package" id="package" onblur="get_soft();" value="{$result[0]['package']}" /></td>
+</tr>
+<tr>
+	<td><span style="font-size:16px;">软件名称：</span></td>
+	<td><input type="text" name="softname" id="softname" value="{$result[0]['softname']}"  /></td>
+</tr>
+-->
+<tr>
+	<td><span style="font-size:16px;">宣传头图：</span></td>
+	<td><input type="file" id="banner_img" name="banner_img" onchange="onUploadImgChange(this,'banner_img','preview1');" /><div><img id="preview1" <?php if($result[0]['banner_img']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['banner_img']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('banner_img','preview1');" /></td>
+</tr>
+<tr>
+	<td><span style="font-size:16px;">手机号：</span></td>
+	<td><input type="radio" name="is_telephone" value="0" <?php if($result[0]['is_telephone'] == 0){ ?>checked<?php } ?> />&nbsp;&nbsp;不收集手机号&nbsp;&nbsp;<input type="radio" name="is_telephone" value="1" <?php if($result[0]['is_telephone'] == 1){ ?>checked<?php } ?> />&nbsp;&nbsp;收集手机号&nbsp;&nbsp;文本框文案&nbsp;&nbsp;<input type="text" name="telephone_text" id="telephone_text" id="telephone_text" value="{$result[0]['telephone_text']}" />&nbsp;&nbsp;</td>
+</tr>
+<tr>
+	<td><span style="font-size:16px;">下载按钮：</span></td>
+	<td>
+		<input type="radio" name="download_one" value="1" <?php if($result[0]['download_one_btn']){ ?>checked<?php } ?> />&nbsp;&nbsp;选择模板样式&nbsp;&nbsp;&nbsp;<select name="download_one_btn" onchange="select_download_one(this.value);"><option value="1" <?php if($result[0]['download_one_btn'] == 1){ ?>selected<?php } ?>>下载按钮-1</option><option value="2" <?php if($result[0]['download_one_btn'] == 2){ ?>selected<?php } ?>>下载按钮-2</option><option value="3" <?php if($result[0]['download_one_btn'] == 3){ ?>selected<?php } ?>>下载按钮-3</option><option value="4" <?php if($result[0]['download_one_btn'] == 4){ ?>selected<?php } ?>>下载按钮-4</option></select><br /><?php if($result[0]['download_one_btn']){ ?><img id="download_1" src="/Public/images/activity/downloads{$result[0]['download_one_btn']}.png" /><?php }else{ ?><img id="download_1" src="/Public/images/activity/downloads1.png" /><?php } ?><br />
+		<input type="radio" name="download_one" value="2" <?php if($result[0]['download_one_img']){ ?>checked<?php } ?> />&nbsp;&nbsp;选择自定义样式&nbsp;&nbsp;&nbsp;<input type="file" name="download_one_pic" id="download_one_pic" onchange="onUploadImgChange(this,'download_one_pic','preview2');" /><div><img id="preview2" <?php if($result[0]['download_one_img']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['download_one_img']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('download_one_pic','preview2');" />
+		<br /><br />
+		背景图&nbsp;&nbsp;&nbsp;<input type="file" name="download_one_bg" id="download_one_bg" onchange="onUploadImgChange(this,'download_one_bg','preview9');" /><div><img id="preview9" <?php if($result[0]['download_one_bg']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['download_one_bg']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img_obj('download_one_bg','preview9',{$result[0]['id']},1);" />
+	</td>
+</tr>
+<tr>
+	<td><span style="font-size:16px;">模块1：</span></td>
+	<td>
+		<input type="radio" name="first_type" value="1" onclick="get_first_focus(this.value);" <?php if($result[0]['first_img']){ ?>checked<?php } ?> />&nbsp;&nbsp;图片样式&nbsp;&nbsp;<input type="file" name="first_img" id="first_img" onchange="onUploadImgChange(this,'first_img','preview3');" /><div><img id="preview3" <?php if($result[0]['first_img']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['first_img']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('first_img','preview3');" /><br /><br />
+		<input type="radio" name="first_type" value="2" onclick="get_first_focus(this.value);" <?php if($result[0]['first_text']){ ?>checked<?php } ?> />&nbsp;&nbsp;文本样式&nbsp;&nbsp;<br /><br />背景色：<input type="text" <?php if($result[0]['first_bg_color']){ ?>value="{$result[0]['first_bg_colors']}"<?php } ?> name="first_bg_color" id="first_bg_color" /><textarea style="width:390px;height:100px;" name="first_text" id="first_editor"><?php if($result[0]['first_text']){ ?>{$result[0]['first_text']}<?php } ?></textarea>
+		<br /><br />
+		<input type="radio" name="first_type" value="3" onclick="get_first_focus(this.value);" <?php if($result[0]['first_focus_pic']){ ?>checked<?php } ?> />&nbsp;&nbsp;轮播样式<br /><br />
+		<div <?php if($result[0]['first_focus_pic']){ ?>style="display:block;"<?php }else{ ?>style="display:none;"<?php } ?> id="first_focus_pic">
+			背景图<br /><br /><input type="file" name="first_focus_bg" id="first_focus_bg"  onchange="onUploadImgChange(this,'first_focus_bg','preview12');" /><div><img id="preview12"  <?php if($result[0]['first_focus_bg']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['first_focus_bg']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('first_focus_bg','preview12');" /><br /><br />
+			轮播图宽度&nbsp;&nbsp;<input type="text" name="first_focus_width" value="{$result[0]['first_focus_width']}" />&nbsp;&nbsp;%&nbsp;&nbsp;轮播图宽度页面中的百分比，若不填写，默认为85%<br /><br />
+			<table>
+				<tr>
+					<td>轮播图1<br /><input type="file" name="first_focus_pic1" id="first_focus_pic1"  onchange="onUploadImgChange(this,'first_focus_pic1','preview13');" /><div><img id="preview13" <?php if($first_focus_pic_arr[0]){ ?>src="<?php echo IMGATT_HOST; ?>{$first_focus_pic_arr[0]}"<?php } ?>  onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('first_focus_pic1','preview13');" /></td>
+					<td>轮播图2<br /><input type="file" name="first_focus_pic2" id="first_focus_pic2"  onchange="onUploadImgChange(this,'first_focus_pic2','preview14');" /><div><img id="preview14" <?php if($first_focus_pic_arr[1]){ ?>src="<?php echo IMGATT_HOST; ?>{$first_focus_pic_arr[1]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('first_focus_pic2','preview14');" /></td>
+					<td>轮播图3<br /><input type="file" name="first_focus_pic3" id="first_focus_pic3"  onchange="onUploadImgChange(this,'first_focus_pic3','preview15');" /><div><img id="preview15" <?php if($first_focus_pic_arr[2]){ ?>src="<?php echo IMGATT_HOST; ?>{$first_focus_pic_arr[2]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('first_focus_pic3','preview15');" /></td>
+				</tr>
+				<tr>
+					<td>轮播图4<br /><input type="file" name="first_focus_pic4" id="first_focus_pic4"  onchange="onUploadImgChange(this,'first_focus_pic4','preview16');" /><div><img id="preview16" <?php if($first_focus_pic_arr[3]){ ?>src="<?php echo IMGATT_HOST; ?>{$first_focus_pic_arr[3]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('first_focus_pic4','preview16');" /></td>
+					<td>轮播图5<br /><input type="file" name="first_focus_pic5" id="first_focus_pic5"  onchange="onUploadImgChange(this,'first_focus_pic5','preview17');" /><div><img id="preview17" <?php if($first_focus_pic_arr[4]){ ?>src="<?php echo IMGATT_HOST; ?>{$first_focus_pic_arr[4]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('first_focus_pic5','preview17');" /></td>
+					<td>轮播图6<br /><input type="file" name="first_focus_pic6" id="first_focus_pic6"  onchange="onUploadImgChange(this,'first_focus_pic6','preview18');" /><div><img id="preview18" <?php if($first_focus_pic_arr[5]){ ?>src="<?php echo IMGATT_HOST; ?>{$first_focus_pic_arr[5]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('first_focus_pic6','preview18');" /></td>
+				</tr>
+			</table>
+		</div>
+	</td>
+</tr>
+<tr>
+	<td><span style="font-size:16px;">论坛入口：</span></td>
+	<td>
+		论坛地址：<input type="text" name="bbs_address" value="{$result[0]['bbs_address']}" /><br /><br />
+		<input type="radio" name="bbs_type" value="1" <?php if($result[0]['bbs_btn']){ ?>checked<?php } ?> />&nbsp;&nbsp;选择模板样式&nbsp;&nbsp;&nbsp;<select name="bbs_btn" onchange="select_bbs(this.value);"><option value="1" <?php if($result[0]['bbs_btn'] == 1){ ?>selected<?php } ?>>论坛按钮-1</option><option value="2" <?php if($result[0]['bbs_btn'] == 2){ ?>selected<?php } ?>>论坛按钮-2</option><option value="3" <?php if($result[0]['bbs_btn'] == 3){ ?>selected<?php } ?>>论坛按钮-3</option><option value="4" <?php if($result[0]['bbs_btn'] == 4){ ?>selected<?php } ?>>论坛按钮-4</option></select><br /><?php if($result[0]['bbs_btn']){ ?><img id="bbs_1" src="/Public/images/activity/bbs{$result[0]['bbs_btn']}.png" /><?php }else{ ?><img id="bbs_1" src="/Public/images/activity/bbs1.png" /><?php } ?><br />
+		<input type="radio" name="bbs_type" value="2" <?php if($result[0]['bbs_img']){ ?>checked<?php } ?> />&nbsp;&nbsp;选择自定义样式&nbsp;&nbsp;&nbsp;<input type="file" name="bbs_img" id="bbs_img" onchange="onUploadImgChange(this,'bbs_img','preview4');" /><div><img id="preview4" <?php if($result[0]['bbs_img']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['bbs_img']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('bbs_img','preview4');" />
+		<br /><br />
+		背景图&nbsp;&nbsp;&nbsp;<input type="file" name="bbs_bg" id="bbs_bg" onchange="onUploadImgChange(this,'bbs_bg','preview10');" /><div><img id="preview10" <?php if($result[0]['bbs_bg']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['bbs_bg']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img_obj('bbs_bg','preview10',{$result[0]['id']},2);" />
+	</td>
+</tr>
+<tr>
+	<td><span style="font-size:16px;">模块2：</span></td>
+	<td>
+		<input type="radio" name="second_type" value="1" onclick="get_second_focus(this.value);" <?php if($result[0]['second_img']){ ?>checked<?php } ?> />&nbsp;&nbsp;图片样式&nbsp;&nbsp;<input type="file" name="second_img" id="second_img" onchange="onUploadImgChange(this,'second_img','preview5');" /><div><img id="preview5" <?php if($result[0]['second_img']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['second_img']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('second_img','preview5');" /><br /><br />
+		<input type="radio" name="second_type" value="2" onclick="get_second_focus(this.value);" <?php if($result[0]['second_text']){ ?>checked<?php } ?> />&nbsp;&nbsp;文本样式&nbsp;&nbsp;<br /><br />背景色：<input type="text" <?php if($result[0]['second_bg_color']){ ?>value="{$result[0]['second_bg_colors']}"<?php } ?> name="second_bg_color" id="second_bg_color" /><textarea style="width:390px;height:100px;" name="second_text" id="second_editor">{$result[0]['second_text']}</textarea>
+		<br /><br />
+		<input type="radio" name="second_type" value="3" onclick="get_second_focus(this.value);" <?php if($result[0]['second_focus_pic']){ ?>checked<?php } ?> />&nbsp;&nbsp;轮播样式<br /><br />
+		<div <?php if($result[0]['second_focus_pic']){ ?>style="display:block;"<?php }else{ ?>style="display:none;"<?php } ?> id="second_focus_pic">
+			背景图<br /><br /><input type="file" name="second_focus_bg" id="second_focus_bg"  onchange="onUploadImgChange(this,'second_focus_bg','preview19');" /><div><img id="preview19"  <?php if($result[0]['second_focus_bg']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['second_focus_bg']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('second_focus_bg','preview19');" /><br /><br />
+			轮播图宽度&nbsp;&nbsp;<input type="text" name="second_focus_width" value="{$result[0]['second_focus_width']}" />&nbsp;&nbsp;%&nbsp;&nbsp;轮播图宽度页面中的百分比，若不填写，默认为85%<br /><br />
+			<table>
+				<tr>
+					<td>轮播图1<br /><input type="file" name="second_focus_pic1" id="second_focus_pic1"  onchange="onUploadImgChange(this,'second_focus_pic1','preview20');" /><div><img id="preview20" <?php if($second_focus_pic_arr[0]){ ?>src="<?php echo IMGATT_HOST; ?>{$second_focus_pic_arr[0]}"<?php } ?>  onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('second_focus_pic1','preview20');" /></td>
+					<td>轮播图2<br /><input type="file" name="second_focus_pic2" id="second_focus_pic2"  onchange="onUploadImgChange(this,'second_focus_pic2','preview21');" /><div><img id="preview21" <?php if($second_focus_pic_arr[1]){ ?>src="<?php echo IMGATT_HOST; ?>{$second_focus_pic_arr[1]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('second_focus_pic2','preview21');" /></td>
+					<td>轮播图3<br /><input type="file" name="second_focus_pic3" id="second_focus_pic3"  onchange="onUploadImgChange(this,'second_focus_pic3','preview22');" /><div><img id="preview22" <?php if($second_focus_pic_arr[2]){ ?>src="<?php echo IMGATT_HOST; ?>{$second_focus_pic_arr[2]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('second_focus_pic3','preview22');" /></td>
+				</tr>
+				<tr>
+					<td>轮播图4<br /><input type="file" name="second_focus_pic4" id="second_focus_pic4"  onchange="onUploadImgChange(this,'second_focus_pic4','preview23');" /><div><img id="preview23" <?php if($second_focus_pic_arr[3]){ ?>src="<?php echo IMGATT_HOST; ?>{$second_focus_pic_arr[3]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('second_focus_pic4','preview23');" /></td>
+					<td>轮播图5<br /><input type="file" name="second_focus_pic5" id="second_focus_pic5"  onchange="onUploadImgChange(this,'second_focus_pic5','preview24');" /><div><img id="preview24" <?php if($second_focus_pic_arr[4]){ ?>src="<?php echo IMGATT_HOST; ?>{$second_focus_pic_arr[4]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('second_focus_pic5','preview24');" /></td>
+					<td>轮播图6<br /><input type="file" name="second_focus_pic6" id="second_focus_pic6"  onchange="onUploadImgChange(this,'second_focus_pic6','preview25');" /><div><img id="preview25" <?php if($second_focus_pic_arr[5]){ ?>src="<?php echo IMGATT_HOST; ?>{$second_focus_pic_arr[5]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('second_focus_pic6','preview25');" /></td>
+				</tr>
+			</table>
+		</div>
+	</td>
+</tr>
+<tr>
+	<td><span style="font-size:16px;">下载按钮(不含手机号)：</span></td>
+	<td>
+		<input type="radio" name="download_two" value="1" <?php if($result[0]['download_two_btn']){ ?>checked<?php } ?> />&nbsp;&nbsp;选择模板样式&nbsp;&nbsp;&nbsp;<select name="download_two_btn"  onchange="select_download_two(this.value);"><option value="1" <?php if($result[0]['download_two_btn'] == 1){ ?>selected<?php } ?>>下载按钮-1</option><option value="2" <?php if($result[0]['download_two_btn'] == 2){ ?>selected<?php } ?>>下载按钮-2</option><option value="3" <?php if($result[0]['download_two_btn'] == 3){ ?>selected<?php } ?>>下载按钮-3</option><option value="4" <?php if($result[0]['download_two_btn'] == 4){ ?>selected<?php } ?>>下载按钮-4</option></select><br /><?php if($result[0]['download_two_btn']){ ?><img id="download_2" src="/Public/images/activity/download{$result[0]['download_two_btn']}.png" /><?php }else{ ?><img id="download_2" src="/Public/images/activity/download1.png" /><?php } ?><br />
+		<input type="radio" name="download_two" value="2" <?php if($result[0]['download_two_img']){ ?>checked<?php } ?> />&nbsp;&nbsp;选择自定义样式&nbsp;&nbsp;&nbsp;<input type="file" name="download_two_pic" id="download_two_pic" onchange="onUploadImgChange(this,'download_two_pic','preview6');" /><div><img id="preview6" <?php if($result[0]['download_two_img']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['download_two_img']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('download_two_pic','preview6');" />
+		<br /><br />
+		背景图&nbsp;&nbsp;&nbsp;<input type="file" name="download_two_bg" id="download_two_bg" onchange="onUploadImgChange(this,'download_two_bg','preview11');" /><div><img id="preview11"  <?php if($result[0]['download_two_bg']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['download_two_bg']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img_obj('download_two_bg','preview11',{$result[0]['id']},3);" />
+	</td>
+</tr>
+<tr>
+	<td><span style="font-size:16px;">模块3：</span></td>
+	<td>
+		<input type="radio" name="third_type" value="1" onclick="get_third_focus(this.value);" <?php if($result[0]['third_img']){ ?>checked<?php } ?> />&nbsp;&nbsp;图片样式&nbsp;&nbsp;<input type="file" name="third_img" id="third_img" onchange="onUploadImgChange(this,'third_img','preview7');" /><div><img id="preview7"  <?php if($result[0]['third_img']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['third_img']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('third_img','preview7');" /><br /><br />
+		<input type="radio" name="third_type" value="2" onclick="get_third_focus(this.value);" <?php if($result[0]['third_text']){ ?>checked<?php } ?> />&nbsp;&nbsp;文本样式&nbsp;&nbsp;<br /><br />背景色：<input type="text" <?php if($result[0]['third_bg_color']){ ?>value="{$result[0]['third_bg_colors']}"<?php } ?> name="third_bg_color" id="third_bg_color" /><textarea style="width:390px;height:100px;" name="third_text" id="third_editor">{$result[0]['third_text']}</textarea>
+		<br /><br />
+		<input type="radio" name="third_type" value="3" onclick="get_third_focus(this.value);" <?php if($result[0]['third_focus_pic']){ ?>checked<?php } ?> />&nbsp;&nbsp;轮播样式<br /><br />
+		<div <?php if($result[0]['third_focus_pic']){ ?>style="display:block;"<?php }else{ ?>style="display:none;"<?php } ?> id="third_focus_pic">
+			背景图<br /><br /><input type="file" name="third_focus_bg" id="third_focus_bg"  onchange="onUploadImgChange(this,'third_focus_bg','preview19');" /><div><img id="preview19"  <?php if($result[0]['third_focus_bg']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['third_focus_bg']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('third_focus_bg','preview19');" /><br /><br />
+			轮播图宽度&nbsp;&nbsp;<input type="text" name="third_focus_width" value="{$result[0]['third_focus_width']}" />&nbsp;&nbsp;%&nbsp;&nbsp;轮播图宽度页面中的百分比，若不填写，默认为85%<br /><br />
+			<table>
+				<tr>
+					<td>轮播图1<br /><input type="file" name="third_focus_pic1" id="third_focus_pic1"  onchange="onUploadImgChange(this,'third_focus_pic1','preview26');" /><div><img id="preview26" <?php if($third_focus_pic_arr[0]){ ?>src="<?php echo IMGATT_HOST; ?>{$third_focus_pic_arr[0]}"<?php } ?>  onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('third_focus_pic1','preview26');" /></td>
+					<td>轮播图2<br /><input type="file" name="third_focus_pic2" id="third_focus_pic2"  onchange="onUploadImgChange(this,'third_focus_pic2','preview27');" /><div><img id="preview27" <?php if($third_focus_pic_arr[1]){ ?>src="<?php echo IMGATT_HOST; ?>{$third_focus_pic_arr[1]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('third_focus_pic2','preview27');" /></td>
+					<td>轮播图3<br /><input type="file" name="third_focus_pic3" id="third_focus_pic3"  onchange="onUploadImgChange(this,'third_focus_pic3','preview28');" /><div><img id="preview28" <?php if($third_focus_pic_arr[2]){ ?>src="<?php echo IMGATT_HOST; ?>{$third_focus_pic_arr[2]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('third_focus_pic3','preview28');" /></td>
+				</tr>
+				<tr>
+					<td>轮播图4<br /><input type="file" name="third_focus_pic4" id="third_focus_pic4"  onchange="onUploadImgChange(this,'third_focus_pic4','preview29');" /><div><img id="preview29" <?php if($third_focus_pic_arr[3]){ ?>src="<?php echo IMGATT_HOST; ?>{$third_focus_pic_arr[3]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('third_focus_pic4','preview29');" /></td>
+					<td>轮播图5<br /><input type="file" name="third_focus_pic5" id="third_focus_pic5"  onchange="onUploadImgChange(this,'third_focus_pic5','preview30');" /><div><img id="preview30" <?php if($third_focus_pic_arr[4]){ ?>src="<?php echo IMGATT_HOST; ?>{$third_focus_pic_arr[4]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('third_focus_pic5','preview24');" /></td>
+					<td>轮播图6<br /><input type="file" name="third_focus_pic6" id="third_focus_pic6"  onchange="onUploadImgChange(this,'third_focus_pic6','preview31');" /><div><img id="preview31" <?php if($third_focus_pic_arr[5]){ ?>src="<?php echo IMGATT_HOST; ?>{$third_focus_pic_arr[5]}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('third_focus_pic6','preview31');" /></td>
+				</tr>
+			</table>
+		</div>
+	</td>
+</tr>
+<tr>
+	<td><span style="font-size:16px;">背景图片：</span></td>
+	<td>
+		<input type="radio" name="page_type" value="1" <?php if($result[0]['page_color']){ ?>checked<?php } ?> />&nbsp;&nbsp;选择颜色样式&nbsp;&nbsp;&nbsp;<br /><br /><input type="text" name="page_color" id="page_color" <?php if($result[0]['page_colors']){ ?>value="{$result[0]['page_colors']}"<?php } ?> /><br /><br />
+		<input type="radio" name="page_type" value="2" <?php if($result[0]['page_img']){ ?>checked<?php } ?> />&nbsp;&nbsp;选择自定义样式&nbsp;&nbsp;&nbsp;<input type="file" name="page_img" id="page_img" onchange="onUploadImgChange(this,'page_img','preview8');" /><div><img id="preview8" <?php if($result[0]['page_img']){ ?>src="<?php echo IMGATT_HOST; ?>{$result[0]['page_img']}"<?php } ?> onload="onPreviewLoad(this)"/></div><input type="button" value="删除" onclick="del_img('page_img','preview8');" />
+	</td>
+</tr>
+</table>
+</div>
+<div style="margin-top:20px;margin-left:100px;">
+	<table>
+		<tr>
+			<td><input type="submit" class="search_btn" value="确定" /></td>
+			<td><a href="javascript:;" onclick="javascript:history.go(-1);" class="search_btn" >取消</a></td>
+		</tr>
+	</table>
+</div>
+</form>
+</body>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script>
+KindEditor.ready(function(K) {
+		window.editor = K.create('#first_editor',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'forecolor'
+			]
+		});
+		window.editor = K.create('#second_editor',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'forecolor'
+			]
+		});
+		window.editor = K.create('#third_editor',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'forecolor'
+			]
+		});
+});
+KindEditor.options.cssData = 'body { font-size: 14px; }';
+</script>
+</html>

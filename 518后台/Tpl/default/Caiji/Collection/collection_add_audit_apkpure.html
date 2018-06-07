@@ -1,0 +1,331 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen"/>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/soft.js?v3'></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<style>
+.border tr td{ border-bottom:none;border-right:none}
+</style>
+<div class="main">
+    <div class="content">
+        <center>
+            <form id="upload" method='get' action="__URL__/collection_add_audit_apkpure">
+                <div class="search_box">
+                <table cellpadding="0" cellspacing="0" class="tb2" style="margin-top: 10px;">
+                    <tr>
+                        <td width="60" align='right'>软件名称：</td>
+                        <td width="122"><input type="text" size='15' name="softname" id="softname" value="{$softname}"/>
+                        </td>
+                        <td align='right' width="80">包名：</td>
+                        <td width="130"><input size='15' type="text" name="package" id="package" value="{$package}"/>
+                        </td>
+                        <td width="70" align='right'>抓取时间:</td>
+                        <td width="330"><?php showDatePicker('begintime','endtime', $_GET['begintime'],$_GET['endtime']);?></td>
+						<td align='center' width="100" rowspan="3"><input type="submit" name="button" id="button" class="search_btn"
+                        value="&nbsp;搜 索&nbsp;"/></td>
+                    </tr>
+                    <tr>
+                        <td width="70" align='right'>运营风险：</td>
+                        <td>
+                            <select id="run_risk" name="run_risk">
+                                <option value='' >全部</option>
+                                <option value='0' <?php if(isset($run_risk) && $run_risk == 0) echo "selected"; ?>>无</option>
+                                <option value='1' <?php if($run_risk == 1) echo "selected"; ?>>有</option>
+                            </select>
+                        </td>
+                        <td width="70" align='right'>安全：</td>
+                        <td style="width:122px;">
+                            <select id="is_safe" name="is_safe">
+                                <option value='3' <?php if(isset($is_safe) && $is_safe == 3) echo "selected"; ?> >全部</option>
+								<option value='0' <?php if(isset($is_safe) && $is_safe == 0) echo "selected"; ?>>无安全标记</option>
+                                <option value='1' <?php if(isset($is_safe) && $is_safe == 1) echo "selected"; ?>>安全/无病毒</option>
+                                <option value='2' <?php if($is_safe == 2) echo "selected"; ?>>不安全/有病毒</option>  
+                            </select>
+                        </td>
+                        <td align='right' width="60">下载量:</td>
+                        <td><input type="text" name="down_str" value="{$down_str}" > - <input type="text" name="down_end" value="{$down_end}">万</td>
+                    </tr>
+					<tr>
+
+                        <td width="70" align='right'>官方：</td>
+                        <td>
+                            <select id="is_office" name="is_office">
+                                <option value='' >全部</option>
+                                <option value='0' <?php if(isset($is_office) && $is_office == 0) echo "selected"; ?>>无</option>
+                                <option value='1' <?php if($is_office == 1) echo "selected"; ?>>是</option>
+                                <option value='2' <?php if($is_office == 2) echo "selected"; ?>>否</option>
+                            </select>
+                        </td>
+                        <td width="70" align='right'>软件类型：</td>
+                        <td>
+                            <select id="soft_type" name="soft_type">
+                                <option value='' >全部</option>
+                                <option value='0' <?php if(isset($soft_type) && $soft_type == 0) echo "selected"; ?>>无</option>
+                                <option value='1' <?php if($soft_type == 1) echo "selected"; ?>>应用</option>
+                                <option value='2' <?php if($soft_type == 2) echo "selected"; ?>>游戏</option>
+                            </select>
+                        </td>
+                        <td align='right' width="60">更新时间:</td>
+						<td width="330">
+							<span><input type='text' name='updatetime' id='updatetime' value='{$updatetime}' style='cursor: hand; width: 150px;' class='Wdate' onClick="WdatePicker({startDate:'%y-%M-%d ',dateFmt:'yyyy-MM-dd'})" /></span>~
+							<span><input type='text' name='updatetotime' id='updatetotime' value='{$updatetotime}' style='cursor: hand; width: 150px;' class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",dateFmt:"yyyy-MM-dd"})' /></span>
+						</td>					
+					</tr>
+					<tr>
+						<td width="70" align='right'>MD5验证：</td>
+                        <td>
+                            <select id="is_md5_same" name="is_md5_same">
+								<option value=''>全部</option>
+								<option value='0' <?php if(isset($is_md5_same) && $is_md5_same == 0)  echo "selected"; ?>>不一致</option>
+                                <option value='1' <?php if($is_md5_same == 1) echo "selected"; ?>>一致</option>
+                               
+                            </select>
+                        </td>		
+
+					</tr>
+                </table>
+                </div>
+            </form>
+            <br/>
+
+            <table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+                <tr>
+                    <td align='center' width="6%" height="30" bgcolor="#e3e2fe">
+						<input type="checkbox" id="id_all[]" name="id_all[]" onclick="selectAlls();">
+					</td>
+                    <td align='center' width="10%" height="30" bgcolor="#e3e2fe">
+						<font style="color:#000; font-weight:bold">软件名称</font>
+					</td>
+                    <td align='center' width="10%" height="30" bgcolor="#e3e2fe">
+						<font style="color:#000; font-weight:bold">包名</font>
+					</td>
+                    <td align='center' width="10%" height="30" bgcolor="#e3e2fe">
+						<font style="color:#000; font-weight:bold">采集软件信息</font>
+					</td>
+					<td align='center' width="10%" height="30" bgcolor="#e3e2fe">
+						<a href='__URL__/collection_add_audit_apkpure/orderby/website_update_time/order/<?php if(!$order){ echo 'd'; }else{ echo $order; } ?>/?{$param}'>
+                            <font style="color:#000; font-weight:bold">最近更新日期
+                                <if condition="$orderby == 'website_update_time'">
+                                    <if condition="$order eq 'd'">&uarr;<else/>&darr;</if>
+                                </if>
+                            </font>
+                        </a>
+					</td>
+                    <td align='center' width="10%" height="30" bgcolor="#e3e2fe">
+						<font style="color:#000; font-weight:bold">APK包</font>
+					</td>
+                    <td align='center' width="10%" height="30" bgcolor="#e3e2fe">
+						<font style="color:#000; font-weight:bold">来源网站</font>
+					</td>
+                    <td align='center' width="10%" height="30" bgcolor="#e3e2fe">
+					   <font style="color:#000; font-weight:bold">bi聚合query</font>
+                    </td>
+                    <td align='center' width="10%" height="30" bgcolor="#e3e2fe">
+                        <a href='__URL__/collection_add_audit_apkpure/orderby/bi_query_num/order/<?php if(!$order){ echo 'd'; }else{ echo $order; } ?>/?{$param}'>
+                            <font style="color:#000; font-weight:bold">bi聚合检索量
+                                <if condition="$orderby == 'bi_query_num'">
+                                    <if condition="$order eq 'd'">&uarr;<else/>&darr;</if>
+                                </if>
+                            </font>
+                        </a>
+                    </td>
+                    <td align='center' width="10%" height="30" bgcolor="#e3e2fe">
+                        <a href='__URL__/collection_add_audit_apkpure/orderby/download_count/order/<?php if(!$order){ echo 'd'; }else{ echo $order; } ?>/?{$param}'>
+                            <font style="color:#000; font-weight:bold">第三方下载量
+                                <if condition="$orderby == 'download_count'">
+                                    <if condition="$order eq 'd'">&uarr;<else/>&darr;</if>
+                                </if>
+                            </font>
+                        </a>
+                    </td>
+                    <td align='center' width="10%" height="30" bgcolor="#e3e2fe">
+                        <a href='__URL__/collection_add_audit_apkpure/orderby/time/order/<?php if(!$order){ echo 'd'; }else{ echo $order; } ?>/?{$param}'>
+                            <font style="color:#000; font-weight:bold">抓取时间
+                                <if condition="$orderby != 'download_count'">
+                                    <if condition="$order eq 'd'">&darr;<else/>&uarr;</if>
+                                </if>
+                            </font>
+                        </a>
+                    </td>
+                    <td align='center' width="10%" height="30" bgcolor="#e3e2fe">
+						<font style="color:#000; font-weight:bold">操作</font>
+					</td>
+                </tr>
+            <volist name='list' id='vo'>
+                <tr id='tr{$vo.id}'>
+                    <td align='left'><input type="checkbox" name="id[]" value="{$vo.id}"/><br/><br/>
+						<img src='<?php echo CAIJI_ATTACHMENT_HOST;?>{$vo.icon_path}' width="48" height="48"/>
+					</td>
+					<td align='left'>{$vo.softname}<br/>
+						<!--------------盗版提醒---------------------->
+						<div id="sim_soft_{$vo.pkg_str}" style="position:absolute;margin-left:80px;margin-top:10px; left:159;background-color:#e6e6e6; display:none; z-index:1000 "	 class="hide_soft">
+							<table border="0" cellpadding="0" cellspacing="0" width="200px" style=" background:#eaeaea;" class="intb">
+								<if condition="$vo.Pirate neq ''">
+									<volist name='vo.Pirate' id='vv'>
+										<tr>
+											<td width="30%">
+												<a target='_blank' href='/index.php/Dev/Soft/softlist/package/{$vv.apk_package}'>
+													<img src='<?php echo IMGATT_HOST;?>{$vv.apk_icon}' width="48" height="48"/>
+												</a>
+											</td>
+											<td>
+												<a target='_blank'  href='/index.php/Dev/Soft/softlist/package/{$vv.apk_package}'>{$vv.softname}</a>
+											</td>
+										</tr>
+									</volist>
+								</if>
+							</table>
+						</div>
+						<!--------------运营提醒---------------------->
+						<div id="oper_soft_{$vo.pkg_str}"
+							 style="position:absolute;margin-left:80px;margin-top:10px; left:159;background-color:#e6e6e6; display:none; z-index:1000 "
+							 class="hide_soft">
+							<table border="0" cellpadding="0" cellspacing="0" 
+								   style=" background:#eaeaea;">
+							</table>
+						</div>
+						<!--------------MD5验证---------------------->
+						<div id="md5_soft_{$vo.pkg_str}"
+							 style="position:absolute;margin-left:80px;margin-top:10px; left:159;background-color:#e6e6e6; display:none; z-index:1000 "
+							 class="hide_soft">
+							<table  class="border" border="0" cellpadding="0" cellspacing="0" style=" background:#eaeaea;">
+								<tr>
+									<td>当前:</td>
+									<td>{$vo.current_md5}</td>
+								</tr>
+								<tr>
+									<td>百度:</td>
+									<td>{$vo.baidu_md5}</td>
+								</tr>
+								<tr>
+									<td>360:</td>
+									<td>{$vo.360_md5}</td>
+								</tr>
+								<tr>
+									<td>豌豆荚:</td>
+									<td>{$vo.wandoujia_md5}</td>
+								</tr>
+							</table>
+						</div>
+					<!----------------提醒结束---------------------->
+					<span id="cp_soft_{$vo.pkg_str}">
+					<if condition="$vo.Pirate neq ''">
+						<button onclick="Similar_soft('{$vo.pkg_str}')"
+								style="background:#f59409; border:0; color:#fff; cursor:pointer;">盗版风险
+						</button>
+					</if>
+					</span>
+					<span id="cp_soft_oper_{$vo.pkg_str}">	</span>
+					<div id="cp_md5_{$vo.pkg_str}">
+					<if condition="$vo.is_md5_same eq 0">
+						<if condition="$vo.no_package neq 1">
+							<a onclick="Md5_dif('{$vo.pkg_str}')"
+								style="font-size:11px;color:blue;cursor:pointer;">MD5不一致
+							</a>
+						</if>
+						<if condition="$vo.no_package eq 1">
+							<span 
+								style="font-size:11px;">MD5不一致
+							</span>
+						</if>
+					</if>
+						<if condition="$vo.is_md5_same eq 1">
+							<span 
+								style="font-size:11px;">MD5一致
+							</span>
+						</if>
+					</div>
+					</td>
+                        <td>
+                            <?php if($pkg_g[$vo['package']]){ ?>
+                            <font style='color:#ff0000'>{$vo.package}</font>
+                            <?php }else{ ?>
+                            {$vo.package}
+                            <?php } ?>
+                        </td>
+                        <td>
+                            {$vo.version_code}（{$vo.version_name}）<br/>
+                            {$vo.soft_type_name}{$vo.category_name}<br/>
+							<if condition="$vo.is_ignore eq '1'">
+								<input type="button" value="已有忽略" onclick="window.open('/index.php/Caiji/Collection/collection_add_ignored/package/{$vo.package}')"  />
+							</if>
+							
+                            <if condition="$vo.is_office eq '1'">
+                                官方&nbsp;|
+                            </if>
+                            <if condition="$vo.is_safe eq '1'">
+                                安全&nbsp;|
+                                <elseif condition="$vo.is_safe eq '2'"/>
+                                不安全&nbsp;|
+                            </if>
+                            <if condition="$vo.is_ad eq '1'">
+                                无广告&nbsp;|
+                                <elseif condition="$vo.is_ad eq '2'"/>
+                                有广告&nbsp;|
+                            </if>
+                        </td>
+						<td align='center'>{$vo.website_up_tm}</td>
+                        <td align='center'><a href='<?php echo CAIJI_ATTACHMENT_HOST;?>{$vo.apk_path}'><b>立即下载</b></a></td>
+                        <td><a target='_blank'  href="{$vo.detail_url}">{$vo.appfrom}</a>
+                            <?php if($vo['toal'] > 1){ ?>
+                            <a href='javascript:;' onclick="open_appfrom('{$vo.pkg_str}');">
+                                <img src="/Public/images/u495.png" id="img_{$vo.pkg_str}" tabindex="0"
+                                     style="outline: medium none;">
+                            </a>
+                            <?php } ?>
+                        </td>
+                        <td>
+							<?php 
+								if($vo['bi_query']){
+									echo "<a href='javascript:;' onclick='open_alert(\"bi_query_div_".$vo['id']."\")'>".mb_substr($vo['bi_query'],0,8,"utf8")."...</a>";
+								} 
+							?>
+						</td>
+                        <td>{$vo.bi_query_num}</td>
+                        <td>{$vo.download_count}</td>
+                        <td align='center'>
+                            <div style="width:70px;">{$vo.create_time}</div>
+                        </td>
+                        <td align='center'><a target='_blank' href='__URL__/collection_add_pass/id/{$vo.id}/from/apk_pure'>入库</a>
+                            <!--<td align='center'><a href='__URL__/collection_add_pass/id/{$vo.id}'>入库</a>-->
+						<p style="padding-bottom: 8px;"></p>
+						<a href="javascript:;" onclick="ignored('{$vo.id}');">忽略</a>
+                        </td>
+                    </tr>
+                    <?php if($vo['toal'] > 1){ ?>
+                    <tr>
+                        <td colspan='10'>
+                            <table id='from_{$vo.pkg_str}' rel='0' style="display:none;width:100%">
+                            </table>
+                        </td>
+                    </tr>
+                    <?php } ?>
+                </volist>
+                <tr height='50px'>
+                    <td align='left' colspan='13'>
+					<input type="checkbox" id="id_all[]" name="id_all[]" onclick="selectAlls();" />
+                    <button onclick="ignored_arr()">批量忽略</button>
+					<button class="thickbox" onclick="batch_download();">批量下载</button>
+					</td>
+                </tr>
+            </table>
+            <div align='left'>{$page}</div>
+        </center>
+    </div>
+</div>
+<volist name='list' id='vo'>
+	<?php if($vo['bi_query']){ ?>
+	<div id='bi_query_div_{$vo.id}' style="padding:20px; width:250px; display:none; word-break:break-all; word-wrap:break-word;">
+		{$vo.bi_query}<br>
+	</div>
+	<?php } ?>
+</volist>	
+<script type="text/javascript">
+    var cj_type = 'add';
+</script>
+<include file="./collection_foot"/>

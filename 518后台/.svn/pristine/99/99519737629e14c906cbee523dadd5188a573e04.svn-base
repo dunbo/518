@@ -1,0 +1,175 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/soft.js?30'></script>
+<script>
+function showoffComment(str)
+{
+	if (confirm("是否忽略此条评论信息？")) {
+    location.href = '__URL__/showoff/id/'+str
+  }
+}
+
+function batchShowoffComment()
+{
+  if (confirm("是否批量忽略评论信息？")) {
+    var input = new Array();
+    var has = false;
+    $('input[name^=id_]').each(function(){
+      if (this.name != 'id_all' && this.checked) {
+        input.push(this.value);
+        has = true;
+      }
+    });
+    if (has) {
+      location.href = '__URL__/showoff/ids/'+ input.join(',');
+    } else {
+      alert('请选择需要进行忽略的评论信息');
+    }
+  }
+}
+
+function checkAll(obj)
+{
+  var flag = $(obj).attr('checked') == 'checked';
+  $('input[name^=id_]').attr('checked', flag);
+}
+
+function shelves_str() {
+	var id_arr = new Array();
+	var i = 0;
+	$('input[name^=id_]').each(function(){
+		if($(this).is(':checked')) {
+			id_arr[i] = $(this).val();
+			i++;
+		}
+	});
+	var id_str = id_arr.join(',');
+	if(id_str=='') {
+		alert('请选择要操作的对象！');
+		return false;
+	} else {
+		tb_show('批量删除','/index.php/Dev/Message/delete/callback/batchDeleteComment?ids='+id_str,false);
+	}
+}
+</script>
+
+<div class="main" >
+<div class="content">
+<center>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+<tr height="35">
+     <td align="center"><a href="__URL__/cooper_soft"><font style="color:#000; font-weight:bold">合作软件</font></a></td>
+  <td align="center"><a href="__URL__/message_soft"><font style="color:#000; font-weight:bold">评论信息列表</font></a></td>
+  <td align="center" style=<?php if($from == 'own'){ echo "background:#FFCC66" ;}?> ><a href="__URL__/own_soft"><font style="color:#000; font-weight:bold">自有产品评论</font></a></td>
+  <td align="center" style="background:#FFCC66"><a href="__URL__/message_soft_unshow"><font style="color:#000; font-weight:bold">忽略记录列表</font></a></td>
+  <td align="center"><a href="__URL__/listBadFilter"><font style="color:#000; font-weight:bold">用户屏蔽列表</font></a></td>
+  <td align="center"><a href="__URL__/del_soft_list"><font style="color:#000; font-weight:bold">已删除列表</font></a></td>
+</tr>
+</table>
+<form id="upload" method='get' action="__URL__/message_soft_unshow" onsubmit="return checkinput();">
+  <table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="searchbar tb">
+	<tr>
+    <td>软件ID:</td>
+	<td><input size='13' type="text" name="softid" value="<?php echo $softid;?>" /></td>
+    <td>软件包名</td>
+	<td><input size='13' type="text" name="package" value="<?php echo $package;?>"/></td>
+	<td>用户名</td>
+	<td><input size='13' type="text" name="user_name" id="user_name" value="<?php echo $user_name;?>"/></td>	
+	<td>IMEI</td> 
+	<td><input size='13' type="text" name="imei" value="<?php echo $imei;?>" /></td>
+	<td>IP地址</td> 
+	<td><input size='13' type="text" name="ipmsg" value="<?php echo $ipmsg;?>" /></td>
+	<td>评论信息</td>
+	<td><input size='13' type="text" name="content" id="content" value="<?php echo $content;?>"/></td>
+   <td rowspan='2'><input type="submit" value="搜索" /></td>		
+	</tr>
+	<tr>
+    <td>来源</td>
+	<td>
+	  <select name="pid" id="pid" style="width:80px;height:25px;font-size:12px;">
+	  <option value=''>全部</option>
+	  <?php foreach($product as $k => $v){ ?>
+	  <option value="<?php echo $k?>"<?php if( $k == $pid ) { echo "selected='selected'"; } ?>><?php echo $v['0']; ?></option>
+	  <?php } ?>
+	  </select>
+	</td>
+    <td>积分</td> 
+	<td colspan='3'><input size='13' type="text" name="beginscore" value="<?php echo $beginscore;?>"/>~<input size='13' type="text" name="endscore" value="<?php echo $endscore;?>"/></td>
+    <td>起止时间</td>
+    <td width="300" colspan='4'><?php showDatePicker('begintime','endtime', $begintime,$endtime);?></td>  
+  </tr>
+  </table>
+</form>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr align='left' bgcolor="" height='30'>
+  <td><?php echo $total;?>条</td>
+<?php if($total > 0) { ?>
+  <td align='right'><a onclick="export_data('__URL__/soft_message_export/count/{$total}/status/1/admin_show/0/?{$param}');">导出</a></td> 
+<?php } ?> 
+</tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td width="11%" align='center' height="30" bgcolor="#e3e2fe"><label><input type="checkbox" onclick="checkAll(this)" name="id_all"/><b>软件ID</b></label></td>
+    <td width="12%" align='center' height="30" bgcolor="#e3e2fe"><b>软件名称</b></td>
+    <td width="5%" align='center' height="30" bgcolor="#e3e2fe"><b>版本状态</b></td>	
+    <td width="11%" align='center' height="30" bgcolor="#e3e2fe"><b>IMEI</b></td>
+    <td width="8%" align='center' height="30" bgcolor="#e3e2fe"><b>用户名及机型</b></td>
+    <td width="8%" align='center' height="30" bgcolor="#e3e2fe"><b>IP</b></td>
+    <td width="8%" align='center' height="30" bgcolor="#e3e2fe"><b>评论时间</b></td>
+    <td width="4%" align='center' height="30" bgcolor="#e3e2fe"><b>积分</b></td>
+    <td width="6%" align='center' height="30" bgcolor="#e3e2fe"><b>来源</b></td>
+    <td align='center' bgcolor="#e3e2fe" width="20%"><b>评论信息</b></td>
+    <td width="8%" align='center' height="30" bgcolor="#e3e2fe"><b>忽略时间</b></td>
+    <td width="10%" align='center' height="30" bgcolor="#e3e2fe"><b>操作</b></td>
+  </tr>
+  <?php foreach($commentlist as $val): ?>
+  <tr>
+	<td><input type="checkbox" value="<?php echo $val['id']?>" name="id_<?php echo $val['id']?>"/> <a href="/index.php/Dev/Message/message_soft_unshow/softid/<?php echo $val['softid']?>/begintime/{$begintime}/endtime/{$endtime}/"><?php echo $val['softid']?></a></td>
+    <td><a href="/index.php/Dev/Soft/softlist/package/<?php echo $val['package']?>" target="_blank"><img width="48" height="48" alt="" src="<?php echo IMGATT_HOST. $softinfo[$val['softid']]['iconurl']?>"></a>&nbsp; <a href="http://www.anzhi.com/pkg/<?php echo $val['package']?>" target="_blank"><?php echo $softinfo[$val['softid']]['softname']?></a></td>
+	<td><?php  if($softinfo[$val['softid']]['hide'] == 1) { echo "上架"; }elseif($softinfo[$val['softid']]['hide'] == 0) { echo "历史"; }?></td>	
+    <td>&nbsp;<a href="__URL__/message_soft_unshow/imei/<?php echo $val['imei']?>/begintime/{$begintime}/endtime/{$endtime}/"><span id="imei_<?php echo $val['id']?>"><?php echo $val['imei']?></span></a></td>
+    <td>&nbsp; 
+    <span id="user_<?php echo $val['id']?>"><?php echo ($val['userid']==13176) ? '安智网友' : $val['user_name']?></span><br>
+   &nbsp;<?php !empty($val['did']) && print($dinfo[$val['did']]);?><br>
+    </td>
+    <td class="center">&nbsp;<a target="_blank" href="/index.php/Dev/Message/message_soft_unshow/ipmsg/<?php echo $val['ipmsg']?>/begintime/{$begintime}/endtime/{$endtime}/"><span id="ipmsg_<?php echo $val['id']?>"><?php echo $val['ipmsg'];?></a></a></td>
+	<td class="center"><?php echo date('Y-m-d', $val['create_time']);?><br><?php echo date('H:i:s', $val['create_time']);?></td>
+    <td class="center"><?php echo $val['score']?></td>
+    <td class="center">
+		<?php echo $product[$val['pid']]['0']; ?> <br>
+		<?php echo $val['version_code'];?></td>
+    <td>&nbsp;<?php echo $val['content']?></td>
+	<td class="center"><?php if ($val['update_time']):?><?php echo date('Y-m-d', $val['update_time']);?><br><?php echo date('H:i:s', $val['update_time']);?><?php endif;?></td>
+    <td  align='center'>
+<input type="button" value="删除记录 " alt="__URL__/delete?id=<?php echo $val['id']?>" class="thickbox" />
+<!-- <p style="padding-bottom: 5px;"></p>
+<input type="button" value="屏蔽用户" class="thickbox" alt="/index.php/Dev/Message/addCommentBlock?id=<?php echo $val['id']?>"/>
+<p style="padding-bottom: 5px;"></p>
+ <input type="button" value="忽略记录" onclick="showoffComment(<?php echo $val['id']?>)" /><br>  -->
+    </td>
+  </tr>  
+  <?php endforeach; ?>
+</table>
+<table width="100%" border="1" cellpadding="0" cellspacing="0">
+<tr height='50px'>
+  <td align='left' >
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="checkbox"  onclick="checkAll(this)" name="id_all"/> <input  type="button" value="批量删除" onclick="shelves_str()"  />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<!-- <input type="button" value="批量忽略" onclick="batchShowoffComment()"/>  --></td>
+</tr>
+</table>
+<div  align='left'>{$page}</div>
+</center>
+</div>
+</div>
+<!-- 主页面结束 -->
+<include file="../../Public/await" />
+{// 加载尾部公共文件 }
+ 
+ 

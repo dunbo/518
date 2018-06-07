@@ -1,0 +1,100 @@
+﻿<!-- <include file="../Public/header/" />
+ -->
+<include file="../../Public/header" />
+<center>
+	
+	<table  border="1" cellpadding="0" cellspacing="0" width="100%" height="40px">
+	<tr>
+	<td align="center">
+	<a href="__URL__/pictureList" alt="">返回渠道列表</a>
+	<a href="__URL__/passPicList/chl_id/{$zh_cid}" alt="">下线图片</a>
+	<a href="__URL__/scrollPicList_out/chl_id/{$zh_cid}" alt="">未上线图片</a>
+	
+	</td>
+	</tr>
+	</table>
+	<div class="pic_online_list">
+		
+		<table border="1" cellspacing="0" cellpadding="0" class="online_pic" width="100%">
+			<tr>
+				<td colspan="11" align="center"><h2>上线轮播图片列表</h2></td>
+			</tr>
+			<tr>
+				<td>ID</td>
+				<td>标题</td>
+				<td>图片</td>
+				<td>链接类型</td>
+				<td>所属渠道</td>
+				<td>渠道昵称</td>
+				<td>上传时间</td>
+				<td>开始时间</td>
+				<td>结束时间</td>
+				<td>排序</td>
+				<td>操作</td>
+			</tr>
+			<tr>
+			<volist name="pic_list" id="info">
+			<tr>
+			<form  alt="multipart/form-data" action="__URL__/scroll_picList_edit" method="post">
+				<td>{$info.id}</td>
+				<td>{$info.title}</td>
+				<td> <a href="{$info.link}"><img src="<?php echo IMGATT_HOST.$info['picurl'];?>"  width="40px" height="40px" alt="" /></a>
+				</td>
+				<td><if condition="$info.link_type eq 1">内链 </if><if condition="$info.link_type eq 2">外链</if></td>
+				<td>{$info.chlname}</td>
+				<td>{$info.nickname}</td>
+				<td><?php echo date("Y-m-d",$info['upload_tm'])?></td>
+				<td><?php echo date("Y-m-d",$info['start_tm'])?></td>
+				<td><?php echo date("Y-m-d",$info['end_tm'])?></td>
+				<td>
+					
+					<!-- <select name="rank" rel="<?php echo $info['id'] ?>" class="extent_rank">
+							<?php
+							for($i = 1;$i <= $count; $i++){
+								echo "<option value=\"".$i."\"";
+								if($info['rank'] == $i) echo " selected=\"selected\" ";
+								echo ">".$i."</option>";
+							}
+							?>
+					</select> -->
+				<input type="text" name="rank" value="{$info.rank}" size="2" rel="<?php echo $info['id'] ?>" class="extent_rank">
+
+				<input type="hidden" name="id" value="{$info.id}">
+					<input type="hidden" name="chl_id" id='chl_id' value='{$info.chl_id}'>
+					<input type="hidden" name="picid" value="{$info.picid}">
+					<input type="hidden" name="chl_key" value="{$info.chl_key}">
+					<input type="hidden" name="currank" value="{$info.rank}">
+					<input type="hidden" name="start_tm" value="{$info.start_tm}">
+					<input type="hidden" name="end_tm" value="{$info.end_tm}">
+					<input type="hidden" name="log" value='{$info.log}'>
+					<input type="hidden" name="sta" value=1>
+				</td>
+				<td><a href="__URL__/uploadForm_edit/id/{$info.id}/chl_id/{$info.chl_id}/text/1" alt="">编辑<a>|<a href="__URL__/picDelete/id/{$info.id}/chl_key/{$info.chl_key}/rank/{$info.rank}/chl_id/{$info.chl_id}">删除</a></td>
+		</form>
+			</tr>
+			</volist>
+		</tr>
+		</table>
+		
+	</div>
+	<div class="pic_new_list">
+		
+	</div>
+</center>
+<script>
+$('.extent_rank').blur(function(){
+	var chl_id = $('#chl_id').val();
+	var url = "__URL__/edit_rank_to/id/"+$(this).attr('rel')+"/rank/"+$(this).val()+"/chl_id/"+chl_id;
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+
+			var url     = eval("("+response+")");
+			var jumpUrl = "__URL__/scrollPicList/chl_id/"+chl_id;
+			//window.location.reload();
+			window.location.href = jumpUrl;
+		}
+	});
+});
+</script>

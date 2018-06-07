@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>光阴的故事</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/timememory/css/common.css?v1"/>
+<script type="text/javascript" src="<!--{$out.static_url}-->/timememory/js/jquery-1.10.2.min.js?v1"></script>
+</head>
+<body>
+<section>
+    <div class="banner" id="top">
+        <a href="#"><img src="<!--{$out.static_url}-->/timememory/images/banner.jpg"/></a>
+    </div>
+    <div class="notice clear">
+        <div class="notice_icon"></div>
+        <div class="notice_list">
+            <marquee scrollamount="2" scrolldelay="90" direction="left">
+				<!--{if $out.people_award_list}-->
+					<!--{foreach from=$out.people_award_list item=i}-->
+					<span><!--{$i.telephone}-->获得<!--{$i.award_name}--></span>
+					<!--{/foreach}-->
+				<!--{else}-->
+					<span>少年，要加油才能拿大奖喔！</span>
+				<!--{/if}-->
+            </marquee>
+        </div>
+    </div>
+    <div class="wrap">
+        <div class="wrap_hd"><img src="<!--{$out.static_url}-->/timememory/images/wrap_hd.png"/></div>
+        <div class="col clear">
+            <div class="lot_times" style="margin-top:2px;">我还有<!--{$out.now_num}-->次抽奖机会</div>
+            <div class="btns fr mt0"><a href="/lottery/timememory_lottery_award.php?sid=<!--{$out.sid}-->">我的奖品</a></div>
+        </div>
+		<!--{if $out.my_award.award_type != 2}-->
+        <div class="mod">
+            <div class="contact-info">
+                <h4 class="prize_hd"><!--{$out.my_award.award_level_name}--> <!--{$out.my_award.award_name}--></h4>
+                <p class="prize_tip">恭喜少年好手气，填信息去领奖</p>
+                <ul class="form_items">
+                    <li><label>姓名</label><span><input type="text" id="name"/></span></li>
+                    <li><label>手机号</label><span><input type="text" id="telephone"/></span></li>
+                </ul>
+            </div>
+            <div class="btns" style="margin-top: 30px;">
+                <a href="javascript:;" onclick="go_info();"> 提 交</a>
+            </div>
+            <p class="prompt_submit" id="prompt_submit"></p>
+		</div>
+		<!--{else}-->
+		<div class="mod">
+            <div class="contact-info">
+                <h4 class="prize_hd"><!--{$out.my_award.award_level_name}--> <!--{$out.my_award.award_name}--></h4>
+                <p class="prize_tip">恭喜少年好手气，下载APP去兑奖</p>
+                <!--{if $out.my_award.gift_card_no}--><p class="prize_gift"><label>卡号：</label><span><!--{$out.my_award.gift_card_no}--></span></p><!--{/if}-->
+                <!--{if $out.my_award.gift_card_pwd}--><p class="prize_gift"><label>卡密：</label><span><!--{$out.my_award.gift_card_pwd}--></span></p><!--{/if}-->
+                <p class="prize_gift"><label>兑换路径:</label><span>下载玩途自由行-选择所购产品-填写信息-选择“使用优惠券”－购买支付-玩途邮件确认</span></p>
+            </div>
+            <div class="btns" style="margin: 40px 0px 20px;" id="prize">
+            </div>
+		</div>
+		<!--{/if}-->
+        <div class="btn_rule"><a href="/lottery/timememory_lottery_rules.php?sid=<!--{$out.sid}-->">【活动规则】</a></div>
+    </div>
+    <div class="footer"><img src="<!--{$out.static_url}-->/timememory/images/ft_bg.jpg"/></div>
+</section>
+
+</body>
+
+<script type="text/javascript">
+	var sid = '<!--{$out.sid}-->';
+	var award_type = '<!--{$out.my_award.award_type}-->';
+	
+	var soft_lists_go = [];
+	
+	function go_info() {
+		var name = $("#name").val();
+		var telephone = $("#telephone").val();
+		
+		if (name == '') {
+			$("#prompt_submit").html('<font color="red">姓名不能为空</font>');
+			return;
+		}
+		if (telephone == '') {
+			$("#prompt_submit").html('<font color="red">手机号不能为空</font>');
+			return;
+		}
+		$.ajax({
+			url:'/lottery/timememory_get_info.php?sid='+sid,
+			data:'name='+name + '&telephone='+telephone,
+			type:'post',
+			success:function(data) {
+				if (data == 500) {
+					$("#prompt_submit").html('<font color="red">姓名不能为空</font>');
+				} else if (data == 501) {
+					$("#prompt_submit").html('<font color="red">手机号不能为空</font>');
+				} else if (data == 502) {
+					$("#prompt_submit").html('<font color="red">姓名不能超出10个字</font>');
+				} else if (data == 503) {
+					$("#prompt_submit").html('<font color="red">请输入正确的手机号</font>');
+				} else if (data == 300) {
+					$("#prompt_submit").html('<font color="red">参数错误</font>');
+				} else if (data == 400) {
+					$("#prompt_submit").html('<font color="red">没有中奖信息</font>');
+				} else if (data == 200) {
+					$("#prompt_submit").html('<font color="red">提交成功</font>');
+					setTimeout(go_lottery(), 3000);
+				} else {
+					$("#prompt_submit").html('<font color="red">出错了</font>');
+				}
+			}
+		});
+		
+	}
+	
+	function go_lottery() {
+		location.href='/lottery/timememory_lottery.php?sid='+sid;
+	}
+	
+	//下载软件
+    function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag) {
+        window.AnzhiActivitys.downloadForActivity(activity_id,parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+    }
+	
+	// 打开软件
+	function openApp(pkg,softid){
+        var the_soft = [softid];
+        window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+    }
+	
+	// 如果中了礼包，判断该礼包软件是否有安装，如果没有，显示去下载，如果有，显示打开
+	$(function() {
+		if (award_type != 2) {
+			return;
+		}
+		
+		var aid = <!--{$out.aid}-->;
+        var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+        var cmd = 'var soft_list=' + json_data;
+        eval(cmd);
+        var soft_lists = soft_list.DATA;
+		
+        for(j=0;j<soft_lists.length;j++){
+            var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+            var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+            if((soft_status_go == -2 && json_datas_gos== -1) || json_datas_gos == 1 || json_datas_gos == 3){
+                soft_lists_go.push(soft_lists[j]);
+            }
+        }
+        
+        for(j=0;j<soft_lists.length;j++){
+            window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+            window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+            var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+            var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+            if(json_datas_gos == 5 && soft_status_gos == -2){
+                soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+            }
+        }
+        
+        for(j=0;j<soft_lists.length;j++){
+            window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+            window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+            var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+            var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+            if(soft_status_gos != -2){
+                soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+            }
+        }
+		
+		var pkgname = '<!--{$out.my_award.package}-->';
+		var i = 0;
+		for (; i < soft_lists_go.length; i++) {
+			if (pkgname == soft_lists_go[i][7]) {
+				break;
+			}
+		}
+		if (i >= soft_lists_go.length) {
+			// 被过滤掉了
+			return;
+		}
+		var softid = parseInt(soft_lists_go[i][0]);
+		var softname = soft_lists_go[i][2];
+		var versionCode = parseInt(soft_lists_go[i][13]);
+		var soft_size = parseInt(soft_lists_go[i][27]);
+		
+		window.AnzhiActivitys.registerInstallObserver(pkgname);
+		var soft_other_status = window.AnzhiActivitys.isInstalledApp(pkgname, parseInt(versionCode));
+		
+		// 根据软件状态展示按钮与事件
+		var my_soft = '';
+		if (soft_other_status == -2) {
+			my_soft = '<a class="btns" href="javascript:;" id="'+ softid +'" onClick="download_apk(' + aid + ',' + softid + ',\'' + pkgname + '\',\'' + softname + '\',' + versionCode + ',\'' + soft_size + '\',1);">下载去兑奖</a>';
+		} else if (soft_other_status == -1) {
+			my_soft = '<a class="btns" href="javascript:;" id="'+ softid +'" onClick="download_apk(' + aid + ',' + softid + ',\'' + pkgname + '\',\'' + softname + '\',' + versionCode + ',\'' + soft_size + '\',1);">更新去兑奖</a>';
+		} else if (soft_other_status == 0) {
+			my_soft = '<a class="btns" href="javascript:;" id="'+ softid +'" onClick="openApp(\''+ pkgname +'\','+ softid +');">打开去兑奖</a>';
+		} else if (soft_other_status == 1) {
+			my_soft = '<a class="btns" href="javascript:;" id="'+ softid +'">已安装</a>';
+		}
+		$("#prize").append(my_soft);
+		
+	});
+	
+</script>
+
+</html>

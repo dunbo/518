@@ -1,0 +1,601 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+    jQuery(function(){
+        /*
+        ** generate_content_type_href 函数：生成推荐内容的链接
+        ** 第一个参数是要append到的div的id，必填
+        ** 第二个参数是可推荐的内容类型，非必填，默认为'1,2,3,4,5'
+        ** 第三个参数是数组类型，如果要自定义元素名称或者传编辑的值，需要用到此值
+        ** 返回：生成的链接
+        */
+        href = generate_content_type_href('content_type_div','1,2,3,4,5,6,7');
+        $("#content_type_a").attr("href", href);
+    });
+    
+    function checkLen(obj, maxChars, hint_id) {
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);        
+        var left = maxChars - obj.value.length;
+        $("#" + hint_id).html(left + "/" + maxChars);
+    };
+    
+    function checkPost() {
+		var image_type = $("#add_content_form input:radio[name='image_type']:checked").val();
+        var ad_name = $("#add_content_form #ad_name").val();
+        if (!ad_name) {
+			if(image_type == 5){
+				alert("ICON名称不能为空！");
+			}else{
+				alert("广告名称不能为空！");
+			}
+
+            return false;
+        }
+
+		if(image_type!=4&&image_type!=5)
+		{
+			var image_url = $("#add_content_form #image_url").val();
+			if (!image_url) {
+				alert("动画图片不能为空！");
+				return false;
+			}
+		}
+
+		if(image_type==1||image_type==6){
+			var image_url_645 = $("#add_content_form #image_url_645").val();
+			if (!image_url_645) {
+				alert("动画图片6.4.5不能为空！");
+				return false;
+			}
+		}
+
+        if(image_type==5){
+			var icon_url = $("#icon_url").val();
+			if (!icon_url) {
+				alert("ICON图片不能为空！");
+				return false;
+			}
+		}
+        var show_place_elem = $("#add_content_form input[name='show_place[]']");
+        var show_place = 0;
+		var is_have = true;
+        show_place_elem.each(function() {
+            if ($(this).attr("checked") == "checked") {
+				show_place |= $(this).val();
+				if($(this).val()=='2097152')
+				{
+					var coop_channels_elem = $("#add_content_form input[name='coop_channel[]']");
+					var coop_channels=0;
+					coop_channels_elem.each(function() 
+					{
+						if ($(this).attr("checked") == "checked")
+						{
+							coop_channels |= $(this).val();
+						}
+					});
+					if (!coop_channels) 
+					{
+						alert("请选择6.3资讯站点！");
+						is_have = false;
+					}
+				}
+				if($(this).val()=='4194304')
+				{
+					var coop_sites_elem = $("#add_content_form input[name='coop_site[]']");
+					var coop_sites=0;
+					coop_sites_elem.each(function() {
+						if ($(this).attr("checked") == "checked")
+						{
+							coop_sites |= $(this).val();
+						}
+					});
+					if (!coop_sites) {
+						alert("请选择6.3合作站点！");
+						is_have = false;
+					}
+				}
+            }
+        });
+		if(image_type!=4&&image_type!=5&&image_type!=6)
+		{
+			if (!show_place) {
+				alert("页面位置不能为空！");
+				return false;
+			}
+		}
+		if(!is_have)
+		{
+			return false;
+		}
+       
+		var pkg=$('input[name=package]').val();
+		var enable=true;
+		$.ajax({
+			url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					if(!confirm(data)){
+						enable=false;
+					}
+				}
+				
+			}
+		});
+		if(!enable){
+			return enable;
+		}
+        var start_at = $("#add_content_form #start_at").val();
+        if (!start_at) {
+            alert("开始时间不能为空！");
+            return false;
+        }
+        var end_at = $("#add_content_form #end_at").val();
+        if (!end_at) {
+            alert("结束时间不能为空！");
+            return false;
+        }
+        if (start_at > end_at) {
+            alert("开始时间不能大于结束时间！");
+            return false;
+        }
+		//V6.4选择 居中弹窗广告 关闭倒计时选择有  时间必填
+		if(image_type==3)
+		{ 
+			var closed_count_type = $("#add_content_form input:radio[name='closed_count_type']:checked").val();
+			if(closed_count_type==1)
+			{
+				var closed_time = $("#add_content_form #closed_time").val();
+				if(!closed_time)
+				{
+					alert("选择倒计时时间，时间必填");
+					return false;
+				}
+				else
+				{
+					var r=/^[1-9]\d*$/;
+					if(r.test(closed_time) == false)
+					{			
+						alert("关闭倒计时时间请填写正整数！");
+						$("#add_content_form #closed_time").attr("value",'');						
+						return false;		
+					}
+				}
+			}
+		}
+		if(image_type==2||image_type==3)
+		{
+			var image_url_high = $("#add_content_form #image_url_high").val();
+			if (!image_url_high) {
+				alert("高分图片不能为空！");
+				return false;
+			}
+		}
+		 return checkRcontent("#add_content_form");
+    }
+    
+    // 上传图片大小提示变化函数
+    function toggle_image_size_hint(type) {
+        // 动画广告图片大小
+        var image_width = <?php echo $image_width?>;
+        var image_height = <?php echo $image_height?>;
+        // 弹窗广告图片大小
+        var popup_image_width = <?php echo $popup_image_width?>;
+        var popup_image_height = <?php echo $popup_image_height?>;
+        var popup_image_width_high = <?php echo $popup_image_width_high?>;
+        var popup_image_height_high = <?php echo $popup_image_height_high?>;
+		//居中弹窗广告
+		var center_image_width = <?php echo $center_image_width?>;
+		var center_image_height = <?php echo $center_image_height?>;
+		var center_image_width_high = <?php echo $center_image_width_high?>;
+		var center_image_height_high = <?php echo $center_image_height_high?>;
+		$("#ad_error").html('');
+		$('#ad_name').unbind('blur').unbind('keyup');
+        if (type == 1||type == 6) {
+			$("#animation_pic").css("display","");
+
+			$("#close_tr").css('display', '');
+			$("#click_tr").css('display', '');
+            $("td.image_size_hint").html("限制上传" + image_width + "*" + image_height + "的JPG/PNG/GIF图片");
+            // show_place也要发生变化
+            $("#caution_div").css('display', 'none');
+			$("#high_pic").css('display', 'none');
+			$("#closed_time_tr").css('display','none');
+			$("#ad_name").val(""); //广告名
+			//推荐内容也改过来
+			href = generate_content_type_href('content_type_div','1,2,3,4,5,6,7');
+			$("#content_type_a").attr("href", href);
+			$("#content_type_div").text("");
+        } else if (type == 2) {
+			$("#animation_pic").css("display","");
+			$("#close_tr").css('display', '');
+			$("#click_tr").css('display', '');
+            $("td.image_size_hint").html("限制上传" + popup_image_width + "*" + popup_image_height + "的JPG/PNG/GIF图片");
+            $("td.high_image_size_hint").html("限制上传" + popup_image_width_high + "*" + popup_image_height_high + "的JPG/PNG/GIF图片");
+            // show_place也要发生变化
+            $("#caution_div").css('display','');
+			$("#high_pic").css('display', '');
+			$("#closed_time_tr").css('display', 'none');
+			$("#ad_name").val(""); //广告名//推荐内容也改过来
+			href = generate_content_type_href('content_type_div','1,2,3,4,5,6,7');
+			$("#content_type_a").attr("href", href);
+			$("#content_type_div").text("");
+        }
+		else if (type == 3) {
+			$("#animation_pic").css("display","");
+			$("#close_tr").css('display', '');
+			$("#click_tr").css('display', '');
+            $("td.image_size_hint").html("限制上传" + center_image_width + "*" + center_image_height + "的JPG/PNG/GIF图片");
+			$("td.high_image_size_hint").html("限制上传" + center_image_width_high + "*" + center_image_height_high + "的JPG/GIF图片");
+            // show_place也要发生变化
+            $("#caution_div").css('display', 'none');
+			$("#high_pic").css('display', '');
+			$("#closed_time_tr").css('display', '');//V6.4居中弹窗广告 关闭倒计时
+			$("#ad_name").val(""); //广告名
+			//推荐内容也改过来
+			href = generate_content_type_href('content_type_div','1,2,3,4,5,6,7');
+			$("#content_type_a").attr("href", href);
+			$("#content_type_div").text("");
+        }
+		else if (type == 4) {
+            $("#animation_pic").css("display","none");
+			$("#high_pic").css('display', 'none');
+			$("#close_tr").css('display', 'none');
+			$("#closed_time_tr").css('display', 'none');
+			$("#click_tr").css('display', 'none');
+			$("#ad_name").val("手机清理"); //广告名称默认手机清理
+			//推荐内容只有 软件和页面 并且软件只能选腾讯手机管家软件、页面只能选择手机清理
+			href = generate_content_type_href('content_type_div','1,4','','phone_cleaning');
+			$("#content_type_a").attr("href", href);
+			$("#content_type_div").text("");
+        }else if (type == 5) {
+			$("#animation_pic").css("display","none");
+			$("#high_pic").css('display', 'none');
+			$("#close_tr").css('display', 'none');
+			$("#closed_time_tr").css('display', 'none');
+			$("#click_tr").css('display', 'none');
+			$("#ad_name").val("");
+			$("#ad_error").html('2-6字符');
+			$("#ad_name").blur(function(){
+				checkLen(this,6,'ad_error');
+			})
+			$("#ad_name").keyup(function(){
+				checkLen(this,6,'ad_error');
+			})
+			href = generate_content_type_href('content_type_div','1,2,5');
+			$("#content_type_a").attr("href", href);
+			$("#content_type_div").text("");
+		}
+		if(type == 5||type == 6){
+			$(".page_pt").css('display','none');
+		}else{
+			$(".page_pt").css('display','');
+		}
+		if(type== 5){
+			$(".icon").css('display','');
+
+			$(".ad_n").html('<font color="red">*</font>ICON名称');
+			$("#ad_error").html('2-6字符');
+		}else{
+			$(".icon").css('display','none');
+
+			$(".ad_n").html('<font color="red">*</font>广告名称');
+			$("#ad_error").html('');
+		}
+		if(type==1||type==6){
+			$("#animation_pic_645").css("display","");
+		}else{
+			$("#animation_pic_645").css("display","none");
+		}
+
+		if(type== 5 || type== 4 || type == 6){
+			$("#cover_user_type_tr").hide();
+			$("#activation_date").hide();
+		}else{
+			$("#cover_user_type_tr").show();
+			if($("input[name='cover_user_type']:checked").val()==2){
+				$("#activation_date").show();
+			}else{
+				$("#activation_date").hide();
+			}
+		}
+		if(type == 3){
+			$(".high_png").show();
+		}else{
+			$(".high_png").hide();
+		}
+    }
+	//精准投放
+	function choose_condition()
+	{
+		var div_val=$("#choose_div_id").html();
+		if(div_val=="")
+		{
+			$.ajax({
+				url:'/index.php/Public/showContions',
+				type: 'POST',
+				dataType:'html',
+				success: function(data)
+				{
+					$("#choose_div_id").html(data);
+					$("#choose_div_id #think_page_trace").remove();
+					$("#choose_div_id #think_run_time").remove();
+					tb_init('#choose_div_id a.thickbox');//pass where to apply thickbox
+					imgLoader = new Image();// preload image
+					imgLoader.src = tb_pathToImage;
+				}
+			});
+		}
+		else
+		{
+			$("#choose_div_id").toggle();
+		}
+	}
+	function show_zixun_channel()
+	{
+		if(document.getElementById("show_zixun").checked==true)
+		{
+			$("#coop_channel_div").css("display","block");
+		}
+		else
+		{
+			$("#coop_channel_div").css("display","none");
+		}
+	}
+	function show_coop_site()
+	{
+		if(document.getElementById("show_coopsite").checked==true)
+		{
+			$("#coop_site_div").css("display","block");
+		}
+		else
+		{
+			$("#coop_site_div").css("display","none");
+		}
+	}
+	function show_641app_channel()
+	{
+		if(document.getElementById("show_641app").checked==true)
+		{
+			$("#application641_div").css("display","block");
+		}
+		else
+		{
+			$("#application641_div").css("display","none");
+		}
+	}
+	function show_641game_channel()
+	{
+		if(document.getElementById("show_641game").checked==true)
+		{
+			$("#game641_div").css("display","block");
+		}
+		else
+		{
+			$("#game641_div").css("display","none");
+		}
+	}
+	function show_activation_date(num){
+		if(num==2){
+			$('#activation_date').show();
+	    }else{
+	   	    $('#activation_date').hide();
+	    }
+	}
+</script>
+
+<form id="add_content_form" method="POST" action="__URL__/add_content" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr" >
+        <td style="width:90px;"><font color="red">*</font>样式</td>
+        <td style="width:450px;">
+			<input type="radio" name='image_type' id="image_type" value="1" onclick="toggle_image_size_hint(1);" checked />动画广告<span>&nbsp;</span>
+			<input type="radio" name='image_type' id="image_type" value="2" onclick="toggle_image_size_hint(2);"/>图片广告
+			<input type="radio" name='image_type' id="image_type" value="3" onclick="toggle_image_size_hint(3);"/>居中弹窗广告
+			<input type="radio" name='image_type' id="image_type" value="4" onclick="toggle_image_size_hint(4);"/>手机清理
+			<input type="radio" name='image_type' id="image_type" value="5" onclick="toggle_image_size_hint(5);"/>桌面icon
+			<input type="radio" name='image_type' id="image_type" value="6" onclick="toggle_image_size_hint(6);"/>外投专用
+		</td>
+        <td></td>
+    </tr>
+    <tr class="sub_tr">
+        <td class="ad_n"><font color="red">*</font>广告名称</td>
+        <td>
+            <input type="text" name="ad_name" id="ad_name"/>
+        </td>
+        <td id="ad_error"></td>
+    </tr>
+	<tr class="sub_tr icon"  style="display:none">
+		<td><font color="red">*</font>ICON图片</td>
+		<td><input name='icon_url' id="icon_url" type='file'/></td>
+		<td class="icon_size_hint">限制上传{$icon_width}*{$icon_height}的JPG/PNG图片</td>
+	</tr>
+    <tr class="sub_tr" id="animation_pic">
+        <td><font color="red">*</font>动画图片</td>
+        <td><input name='image_url' id="image_url" type='file'/></td>
+        <td class="image_size_hint">限制上传{$image_width}*{$image_height}的JPG/PNG/GIF图片</td>
+    </tr>
+	<tr class="sub_tr" id="animation_pic_645">
+		<td><font color="red">*</font>动画图片6.4.5</td>
+		<td><input name='image_url_645' id="image_url_645" type='file'/></td>
+		<td class="image_size_hint_645">限制上传{$image_width_645}*{$image_height_645}的JPG/PNG/GIF图片</td>
+	</tr>
+	<tr class="sub_tr" id="high_pic" style="display:none">
+        <td><font color="red">*</font>高分图片</td>
+        <td><input name='image_url_high' id="image_url_high" type='file'/></td>
+        <td class="high_image_size_hint">限制上传{$popup_image_width_high}*{$popup_image_height_high}的JPG/PNG/GIF图片</td>
+    </tr>
+	<tr class="sub_tr high_png" style="display: none">
+		<td>高分PNG图片</td>
+		<td><input name='high_png_url' id="high_png_url" type='file'/></td>
+		<td class="high_png_size_hint">限制上传{$center_image_width_high}*{$center_image_height_high}的PNG图片，649以上版本有效</td>
+	</tr>
+    <tr class="sub_tr page_pt">
+        <td><font color="red">*</font>页面位置</td>
+        <td>
+            <input type='checkbox' name='show_place[]' id="512" value='512'><label for="512">游戏-最热</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' id="1024" value='1024'><label for="1024">网游</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' id="2048" value='2048'><label for="2048">单机</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <div id="caution_div" name="caution_div" style="display:none;">
+                <label style="color:red;">以下页面请慎用</label><br/>
+            </div>
+            <input type='checkbox' name='show_place[]' id="4" value='4'><label for="4">首页推荐</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' id="1" value='1'><label for="1">详情页</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' id="2" value='2'><label for="2">可更新页</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <input type='checkbox' name='show_place[]' id="8" value='8'><label for="8">飙升</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' id="16" value='16'><label for="16">首页必备</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <!--<input type='checkbox' name='show_place[]' id="32" value='32'><label for="32">首页尝鲜</label><span>&nbsp;&nbsp;&nbsp;</span>-->
+            <br/>
+            <input type='checkbox' name='show_place[]' id="64" value='64'><label for="64">应用-最热</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' id="128" value='128'><label for="128">应用分类Tab</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <input type='checkbox' name='show_place[]' id="256" value='256'><label for="256">应用日排行</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' id="4096" value='4096'><label for="4096">游戏分类Tab</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' id="8192" value='8192'><label for="8192">管理</label><span>&nbsp;&nbsp;&nbsp;</span><br/>
+			<input type='checkbox' name='show_place[]' id="65536" value='65536'><label for="65536">发现-推荐</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' id="131072" value='131072'><label for="131072">发现-汉化</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' id="262144" value='262144'><label for="262144">发现-专题</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' id="524288" value='524288'><label for="524288">6.0应用排行</label><span>&nbsp;&nbsp;&nbsp;</span><br/>
+			<input type='checkbox' id="show_zixun" name='show_place[]' onclick="show_zixun_channel()" value='2097152' ><label for="show_zixun">6.3资讯站点</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<div id="coop_channel_div" style="display:none;border:1px solid #d6d6d6;padding:5px 10px;">
+				<volist name="channel_list" id="ch">
+					<input  type='checkbox' name='coop_channel[]' id="coop_channel_{$ch.id}" value='{$ch.id}'><label for="coop_channel_{$ch.id}">{$ch.channel_name}</label><span>&nbsp;&nbsp;&nbsp;</span>
+				</volist>
+			</div>
+			<input type='checkbox' id="show_coopsite" name='show_place[]' onclick="show_coop_site()" value='4194304'><label for="show_coopsite">6.3合作站点</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<div id="coop_site_div" style="display:none;border:1px solid #d6d6d6;padding:5px 10px; margin-bottom:5px;">
+				<volist name="coop_site" id="vo">
+					<input alt="{$vo.type}" type='checkbox' name='coop_site[]' id="coop_site_{$vo.id}" value='{$vo.id}'><label for="coop_site_{$vo.id}">{$vo.website_name}</label><span>&nbsp;&nbsp;&nbsp;</span>
+				</volist>
+			</div>
+			<input type='checkbox' name='show_place[]' id="show_641app" onclick="show_641app_channel()" value='8388608'><label for="show_641app">6.4.1应用</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<div id="application641_div" style="display:none;border:1px solid #d6d6d6;padding:5px 10px; margin-bottom:5px;">
+				<volist name="channel_app_list" id="ch_app">
+					<input  type='checkbox' name='coop_app_channel[]' id="coop_app_channel_{$ch_app.id}" value='{$ch_app.id}'><label for="coop_app_channel_{$ch_app.id}">{$ch_app.channel_name}</label><span>&nbsp;&nbsp;&nbsp;</span>
+				</volist>
+			</div>
+			<input type='checkbox' name='show_place[]' id="show_641game" onclick="show_641game_channel()" value='16777216'><label for="show_641game">6.4.1游戏</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<div id="game641_div" style="display:none;border:1px solid #d6d6d6;padding:5px 10px; margin-bottom:5px;">
+				<volist name="channel_game_list" id="ch_game">
+					<input  type='checkbox' name='coop_game_channel[]' id="coop_game_channel_{$ch_game.id}" value='{$ch_game.id}'><label for="coop_game_channel_{$ch_game.id}">{$ch_game.channel_name}</label><span>&nbsp;&nbsp;&nbsp;</span>
+				</volist>
+			</div>
+        </td>
+        
+        <td/>
+    </tr>
+	<tr class="sub_tr" id="close_tr">
+	    <td>关闭：</td>
+		<td>
+		   <select name="close">
+		     <option value="0">关闭后不再显示</option>
+			 <option value="1">下次启动仍显示</option>
+		   </select>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="closed_time_tr" style="display: none;">
+	    <td>关闭倒计时：</td>
+		<td>
+			<input type="radio" name='closed_count_type' value="0" checked="checked" />无
+			<input type="radio" name='closed_count_type' value="1" />有
+			<input type="text" name ="closed_time" id="closed_time"  value=""/>秒<span style="font-size:12px; color:red;">&nbsp&nbsp&nbsp&nbsp输入整数</span>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="click_tr">
+	    <td>点击：</td>
+		<td>
+		 <select name="click">
+		     <option value="0">点击跳转后关闭</option>
+			 <option value="1">点击跳转后不关闭</option>
+			 <option value="2">下次启动再显示</option>
+		   </select>
+		</td>
+	</tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>推荐内容</td>
+        <td>
+            <!--下面a里的href的url会在ready函数里自动生成-->
+            <a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+            <!--下面的content_type_div是选择推荐内容后append的地方-->
+            <div id="content_type_div"/>
+        </td>
+        <td/>
+    </tr>
+    <tr class="sub_tr" id="choose_div_tr">
+		<td>精准投放</td>
+		<td>
+			<a href="#" onclick="choose_condition()"><font color="blue">选择投放条件</font></a><br />
+			<div id="choose_div_id"></div>
+		</td>
+        <td></td>
+	</tr>
+	<tr class="sub_tr" id='cover_user_type_tr'>
+	    <td>覆盖用户类型：</td>
+		<td>
+			<input type="radio" name='cover_user_type' id="cover_user_type" value="0"   onclick="show_activation_date(0)" checked/>全部
+            <span>&nbsp;</span>
+		    <input type="radio" name='cover_user_type' id="cover_user_type" value="1"   onclick="show_activation_date(1)"/>新用户
+            <span>&nbsp;</span>
+            <input type="radio" name='cover_user_type' id="cover_user_type" value="2"  onclick="show_activation_date(2)"/>定向用户
+			<span>&nbsp;</span>
+		</td>
+	</tr>
+	<tr class="sub_tr" id='activation_date' style="display:none;">
+		<td>激活日期</td>
+		<td colspan="2">
+            开始日期<input id="activation_date_start" name="activation_date_start" type="text" class="Wdate"  onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"/>
+            结束日期<input id="activation_date_end" name="activation_date_end" type="text" class="Wdate"  onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})"/>
+        </td>
+	</tr>
+    <tr class="sub_tr">
+		<td><font color="red">*</font>开始时间</td>
+		<td>
+            <input id="start_at" name="start_at" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>结束时间</td>
+		<td>
+            <input id="end_at" name="end_at" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='co_type'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="pid" value='<?php echo $pid?>'/>
+            <input type='hidden' name="extent_id" value='<?php echo $extent_id?>'/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

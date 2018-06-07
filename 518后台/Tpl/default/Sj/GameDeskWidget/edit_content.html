@@ -1,0 +1,132 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+    function submitChannel() {
+        var cids = '';
+        $('#channel_div').html('');
+        $(".TB_ajaxContent #channel_selected input:checked").each(function(){
+            var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+            item.find('input').attr('checked', 'true');
+            $('#channel_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+        tb_remove();
+    }
+    //主层动态变化数据
+    function onclikChannel() {	
+        $('#channel_div').html('');
+        $(".TB_ajaxContent #channel_selected input:checked").each(function(){
+            var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+            item.find('input').attr('checked', 'true');
+            item.find('input').unbind("click");
+            item.find('input').attr("onclick", '');
+            $('#channel_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+    }
+
+    function check_arr() {
+        $('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+    }
+    
+    function checkPost() {
+        var package = $("#edit_content_form #package").val();
+        if (!package) {
+            alert("包名不能为空！");
+            return false;
+        }        
+        var start_at = $("#edit_content_form #start_at").val();
+        if (!start_at) {
+            alert("开始时间不能为空！");
+            return false;
+        }
+        var end_at = $("#edit_content_form #end_at").val();
+        if (!end_at) {
+            alert("结束时间不能为空！");
+            return false;
+        }
+        if (start_at > end_at) {
+            alert("开始时间不能大于结束时间！");
+            return false;
+        }
+    }
+</script>
+
+<form id="edit_content_form" method="POST" action="__URL__/edit_content" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr" name="tr_package" id="tr_package">
+        <td><font color="red">*</font>包名</td>
+        <td>
+            <input type="text" name="package" id="package" value="{$list.package}"/>
+        </td>
+        <td/>
+    </tr>
+    <tr class="sub_tr">
+		<td>运营商</td>
+		<td>
+			<SELECT name='oid'>
+				<option value='0'>不限制</option>
+				<?php foreach($operating_list as $val): ?>
+					<option value='<?php echo $val['oid']?>' <?php if($list['oid'] == $val['oid']) echo "selected"?>><?php echo $val['mname']?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+        <td></td>
+	</tr>
+    <tr class="sub_tr">
+		<td>渠道</td>
+		<td>
+		<a href="__APP__/Public/showChannel?callback=submitChannel&type=radio&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+		<div id="channel_div">
+            <?php if(!empty($list['cid'])): ?>
+			<label class="l_cid_<?php echo $list['cid']?>"><input type="radio" name="cid" checked="checked" value="<?php echo $list['cid']?>"/><?php echo $list['chname']?></label>
+			<?php endif; ?>
+		</div>
+		</td>
+        <td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>进入详情页自动下载</td>
+		<td align='left'>
+			<input name='auto_download' type='radio' value='1' <?php if($list['auto_download'] == 1){ echo 'checked="checked"';} ?> />开启
+			<input name='auto_download' type='radio' value='0' <?php if($list['auto_download'] == 0){ echo 'checked="checked"';} ?> />关闭
+		</td>
+	</tr>
+    <tr class="sub_tr">
+		<td><font color="red">*</font>开始时间</td>
+		<td>
+            <input id="start_at" name="start_at" type="text" class='Wdate' style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value="{$list.start_at|date='Y-m-d H:i:s',###}"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>结束时间</td>
+		<td>
+            <input id="end_at" name="end_at" type="text" class='Wdate' style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" value="{$list.end_at|date='Y-m-d H:i:s',###}"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="id" value='{$list.id}'/>
+			<input type='hidden' name="life"  value="<?php echo $_GET['life']; ?>" />
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

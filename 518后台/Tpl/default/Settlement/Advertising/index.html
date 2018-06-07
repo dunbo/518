@@ -1,0 +1,171 @@
+<include file="../../Public/header"/>
+<link rel="stylesheet" type="text/css" media="all" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link rel="stylesheet" href="__PUBLIC__/css/bootstrap.min.css">
+<script type="text/javascript" src="__PUBLIC__/js/bootstrap.min.js"></script>
+<style>
+input{height:31px !important;}
+</style>
+<body>
+<div style="margin:20px;">
+<form action="__URL__/index/ratecard_id/{$ratecard_id}/" method="get">
+	<table class="yahei " cellspacing="0">
+		<tr>
+			<td>广告位名称关键字：<input type="text" name="q" value="{$q}" />&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td><input type="submit" value="搜索" class="search_btn btn btn-sm btn-success" /></td>
+			<td width="10"></td>
+			<td><input type="button" value="清空" class="search_btn btn btn-sm btn-default" onclick="location.href='__URL__/index/ratecard_id/{$ratecard_id}/'"/></td>
+		</tr>
+	</table>
+</form>
+</div>
+
+
+<table width="100%" style="padding:0 20px;"class="yahei " cellspacing="0" ><tr>
+	<td width="50%"><a href="__APP__/Settlement/RateCard/index">刊例价格列表</a> &gt; {$ratecard_name}</td>
+	<td width="50%" style="text-align:right;">
+		<?php if($ratecard['is_defaulted']){ ?>
+			<a href="__APP__/Settlement/RateCard/set_default/id/{$ratecard_id}"style="color:#000;" class="set_ratecard_default">默认刊例价格</a> | 
+		<?php }else{ ?>
+			<a href="__APP__/Settlement/RateCard/set_default/id/{$ratecard_id}" class="set_ratecard_default">设为默认刊例价格</a> | 
+		<?php } ?>
+		<a href="__URL__/index/ratecard_id/{$ratecard_id}/export/1">下载</a> | 
+		<?php if($ratecard['is_disabled']){ ?>
+			<a href="__APP__/Settlement/RateCard/set_enable/id/{$ratecard_id}" <?php if($ratecard['is_defaulted']){ ?> style="color:gray;" <?php }?>  class="set_ratecard_disable" rel="{$ratecard_id}">启用</a> | 
+		<?php }else{ ?>
+			<a href="__APP__/Settlement/RateCard/set_disable/id/{$ratecard_id}" <?php if($ratecard['is_defaulted']){ ?> style="color:gray;" <?php }?>  class="set_ratecard_disable" rel="{$ratecard_id}">停用</a> | 
+		<?php } ?>
+		<a href="__APP__/Settlement/RateCard/set_delete/id/{$ratecard_id}" <?php if($ratecard['is_defaulted']){ ?> style="color:gray;" <?php }?> class="set_ratecard_delete">删除</a>
+	</td>
+</tr></table>
+
+<div>
+<table width="90%"  border="1" cellspacing="0" cellpadding="0" class="table table-striped table-bordered center middle yahei table-body">
+	<thead>
+	<tr>
+		<th style="text-align:center; " rowspan="2">广告位ID</th>
+		<th style="text-align:center; " rowspan="2">广告位名称</th>
+                <th style="text-align:center; " colspan="2">应用刊例价（元/天）<span title="周末指每周六、日，月初指每月1-5日，周末、月初重叠时，费用不叠加。"><img style="width:20px;height:20px;"  src="__PUBLIC__/images/question.png"/></span></th>
+                <th style="text-align:center; " colspan="2">游戏刊例价（元/天）<span title="周末指每周六、日，月初指每月1-5日，周末、月初重叠时，费用不叠加。"><img style="width:20px;height:20px;"  src="__PUBLIC__/images/question.png"/></span></th>
+                
+		<th style="text-align:center; " rowspan="2">备注</th>
+		<th style="text-align:center; " rowspan="2">操作</th>
+	</tr>
+        <tr>
+            <th style="text-align:center; ">平日</th>
+		<th style="text-align:center; ">周末/月初</th>
+		<th style="text-align:center; ">平日</th>
+		<th style="text-align:center; ">周末/月初</th>
+		
+        </tr>
+	</thead>
+	<volist name="result" id="advert">
+	<tr id="row_{$advert.id}">
+		<td>{$advert.id}</td>
+		<td>{$advert.advertising_name}</td>
+		<td id="app_weekday_price_{$advert.id}">{$advert.app_weekday_price}</td>
+		<td id="app_weekend_price_{$advert.id}">{$advert.app_weekend_price}</td>
+		<td id="game_weekday_price_{$advert.id}">{$advert.game_weekday_price}</td>
+		<td id="game_weekend_price_{$advert.id}">{$advert.game_weekend_price}</td>
+		<td id="remark_{$advert.id}">{$advert.remark}</td>
+		<td><a href="__URL__/edit_advertising_show/id/{$advert.id}" class="thickbox">编辑</a></td>
+	</tr>
+	</volist>
+</table>
+
+</div>
+
+<script>
+$(function(){
+	
+	// 处理默认刊例的设置
+	$('.set_ratecard_default').click(function(){
+		if($(this).html()=='默认刊例价格')
+			return false;
+		
+		var var_el = $(this);
+
+		$.getJSON($(this).attr('href'), function(json){
+			if(json.result_no < 0)
+			{
+				alert(json.result_msg);
+			}
+			else
+			{			
+				var_el.html('默认刊例价格');
+                                location.reload();
+			}
+		});
+		
+		return false;
+	});
+	
+	// 处理刊例停用的相关请求
+	$('.set_ratecard_disable').click(function(){
+		var var_el = $(this);
+		
+		// 2014.9.28 jiwei
+		// 修改启用刊例的逻辑，启用后就不能再停用了
+		if(var_el.html()=='停用'){
+			alert('已启用刊例不能再设为停用');
+			return false;
+		}
+
+		if(var_el.html()=='启用'){
+			if(!confirm('刊例启用后，将不能编辑，请谨慎操作'))
+				return false;
+		}
+		
+		$.getJSON($(this).attr('href'), function(json){
+			if(json.result_no < 0)
+			{
+				
+			}
+			else
+			{
+				if(var_el.html()=='停用')
+				{	
+					var_el.attr('href', "__APP__/Settlement/RateCard/set_disable/id/"+var_el.attr('rel'));
+					var_el.html('启用');
+				}
+				else
+				{	
+					var_el.attr('href', "__APP__/Settlement/RateCard/set_enable/id/"+$(this).attr('rel'));
+					var_el.html('停用');
+				}
+			}
+		});
+		
+		return false;
+	});
+
+	// 处理删除刊例请求
+	$('.set_ratecard_delete').click(function(){
+		var var_id = $(this).attr('rel');
+		
+		
+		
+		$.getJSON($(this).attr('href'), function(json){
+			if(json.result_no == -1)
+			{
+				alert(json.result_msg);
+			}
+                        else if(json.result_no == -2){
+                            
+                        }
+			else
+			{
+                                if(confirm('确认执行此操作？')==false) return false;
+				location.href="__APP__/Settlement/RateCard/index";
+			}
+		});
+		
+		return false;
+	});
+});
+</script>
+
+<include file="../../Public/footer"/>

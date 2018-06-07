@@ -1,0 +1,164 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript">
+var  tagsinfo = <?php echo $taglist_json;?>;
+var tagsgroup = <?php echo $grouplist_json;?>;
+var tagpinfo = <?php echo $tagpinfo_json;?>;
+var checkedparentid = [];
+var urlfrom = "{$_GET['from']}";
+function subtags(dotype){
+	var tagsobj = document.getElementsByName("tags");
+	var taglen = tagsobj.length;
+	var txt = new Array();
+	var checkedtag = [];
+	var checkedtaglist = [];
+	var checkedparent = [];
+	var checkedgroup = [];
+	var checkedtotalcontent = [];
+	//--------线上不能没有标签判断-----------
+	var onlyone='yes';
+	var on_url='';
+	if(onlyone == 'yes'){
+		var on_tag_only = false;
+		for(var i =0;i<taglen;i++){
+			if(tagsobj[i].checked){
+				on_tag_only = true;
+                checkedtag = tagsobj[i];
+				break;
+			}
+		}
+		if(on_tag_only != true){
+			alert('请至少保留一个标签！');
+			return false;
+		}
+		on_url = '/onlyone/yes/';
+	}
+	//---------------END---------------------
+    var tagid = checkedtag.value;
+    var groupid = tagsinfo[tagid].group;
+    var group = tagsgroup[groupid];
+	var txtstr = tagsgroup[groupid] + " : ";
+
+        console.log(tagsinfo[tagid]);
+    if(checkedtag.dataset.pid){
+        checkedparent = tagsinfo[checkedtag.dataset.pid];
+        txtstr += checkedparent.tagname + ' > ';
+    }
+    txtstr += tagsinfo[tagid].tagname;
+	if(dotype == 'edit'){
+		document.getElementById('tagidlist').innerHTML = txtstr;
+		var newtagid = document.getElementById('newtagid');
+		newtagid.value = tagid;
+		return tb_remove();
+	}
+	
+}
+
+var checkedtag = new Array();
+function showchild(parentid){
+    var c = document.getElementsByClassName('tchild');//隐藏其他标签下子标签
+    for(var i=0;i<c.length;i++){
+        c[i].style.display = 'none';
+    }
+	if(typeof(tagpinfo[parentid]) == "undefined") return false;
+	var childobj = document.getElementById('tagparnetid_'+parentid);
+	if(gettagobj('tag_'+parentid).checked == true){
+		childobj.style.display = 'block';	
+	}else{
+		childobj.style.display = 'none';
+		var childs = childobj.getElementsByTagName('input');
+		var cnt = childs.length;
+		for(var i=0;i < cnt; i++){
+			if (childs[i].checked == true) childs[i].checked = false;
+		}	
+	}
+}
+
+function checkparentid(obj,childtagid){
+	var tid = tagsinfo[childtagid].parentid;
+	if(tid == 0) return false;
+	if(obj.checked == true){
+		checkedparentid[tid] = 1;
+	}else{
+		checkedparentid[tid] = 0;
+	}
+}
+
+function gettagobj(id){
+	return document.getElementById(id);	
+}
+
+function createtag(tag){
+	return document.createElement(tag);
+}
+
+</script>
+<div>
+	<h3>筛选标签</h3>
+	
+<?php 
+	foreach($cat as $groupid=>$name){ ?>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+		<tr id="group_{$groupid}"><th>{$name}</th></tr>
+		<?php
+		$i =0;
+		foreach($taginfo[$groupid] as $tag){
+			if($tag['parentid'] != 0){
+				continue;	
+			}
+			$i++;
+			if($i%5==1) echo "<tr>";
+			$checked='';
+			if(in_array($tag['tagid'],$tags)) $checked='checked';
+			?>
+			<td width="100px">
+			<input type="radio" name="tags" id="tag_{$tag.tagid}" class="ck" onclick="showchild({$tag.tagid})" value="{$tag.tagid}" {$checked}/>
+			{$tag['tagname']}
+			</td>
+			<?php
+			if($i%5==0) echo "</tr>";
+		}
+		?>
+		</tr>
+	</table>
+	
+	
+		<?php 
+		//foreach($tagpinfo as $key => $tagslist){
+			foreach($taginfo[$groupid] as $tag){
+				if($tag['parentid'] != 0) continue;	
+				$tagslist = $tagpinfo[$tag['tagid']]; 
+				if(empty($tagslist)) continue;
+				$key = $tag['tagid'];
+				$j =0;
+				if(in_array($key,$tags)) $display='block'; else $display='none';
+				echo "<table id=\"tagparnetid_".$key."\" style=\"display:".$display."\"  class=\"table_list tchild\">";
+				echo "<th>".$taglist[$key]['tagname']."</th>";
+				foreach($tagslist as $info){
+					$j++;
+					if($j%5==1) echo "<tr>";
+					$checked='';
+					if(in_array($info['tagid'],$tags)) $checked='checked';
+					?>
+					<td width="100px"><input type="radio" name="tags" id="tag_{$info['tagid']}" data-pid="{$info['parentid']}" value="{$info['tagid']}" onclick="checkparentid(this,{$info['tagid']})" {$checked}/>{$info['tagname']}</td>
+					
+					<?php
+					
+					if($i%5==0) echo "</tr>";
+				}
+				echo "</table>";
+			
+		}
+	} 
+?>
+<div id="gettags">
+
+</div>
+<div id="getid">
+	
+</div>
+
+<input type="hidden" name="searchtagid" id="searchtagid" value=""/>
+<a href="javascript:;"  class="search_btn" onclick="subtags('edit')" style="display:inline-block;">提交</a>
+<a href="javascript:;"  class="search_btn" style="display:inline-block;" onclick="tb_remove();">取消</a>
+</div>
+

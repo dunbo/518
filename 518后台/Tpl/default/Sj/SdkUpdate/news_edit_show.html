@@ -1,0 +1,606 @@
+<include header="../Public/header"/>
+
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+
+<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+<style type="text/css">
+    .widen {width:500px}
+	.xzgz {
+		color: #F00;
+	}
+</style>
+
+<body>
+    <center>
+    </center>
+    <form method="post" action="__URL__/sdk_edit_do" id="sdk_edit_do" enctype="multipart/form-data">
+    	<input type="hidden" name="id" value="{$_GET['id']}" >
+    	<div id="sdk_hidden"></div>
+        <div class="form_list_one">
+            <label>选择更新版本：</label>
+            <?php
+            	foreach($sdk as $k=>$v){
+            		$checked = '';
+            		foreach($edit_sdk['target_version_code'] as $kk=>$vv){
+	                 	if($v['version_code'] == $vv){
+	                    	$checked = "checked";
+	                    }
+	                 }
+
+            ?>
+
+            <span>
+            <input type="checkbox" name="old_version[]" id="old_version[]" value="<?= $v['version_code'] ?>" sdk_type="<?= $v['sdk_type'] ?>" <?= $checked?> />
+
+        	{$v['version_name']}
+            </span>
+
+            <?php };?>
+         </div>
+	  <div class="form_list_one">
+        <label>选择JAR版本：</label>
+      	 <?php
+             foreach($jar as $k=>$v){
+				$checked = '';
+				foreach($edit_sdk['target_jar_code'] as $kk=>$vv){
+                 	if($v['jar_version'] == $vv){
+                    	$checked = "checked";
+                    }
+                 }
+        ?>
+
+            <span>
+            <input type="checkbox" name="jar_version[]" id="jar_version[]" value="<?= $v['jar_version'] ?>" sdk_type="<?= $v['sdk_type'] ?>" <?= $checked?> />
+            
+            <?= $v['jar_version']?>
+            </span>
+        <?php };?>
+      </div>
+      <div class="form_list_one">
+            <label><font color="red">*</font>SDK类型：</label>
+            <select name="sdk_type" id="sdk_type">
+            
+
+
+            <?php foreach($sdk_types as $v2): ?>
+            
+            <option value="<?= $v2['id']?>" <?= $edit_sdk['sdk_type'] == $v2['id'] ? 'selected':'' ?> ><?= $v2['name']?></option>
+            <?php endforeach; ?>
+            </select>
+      </div>
+   	  <div class="form_list_one">
+       	<label>限制规则：</label>
+          <textarea name="limit_rules" id="limit_rules">{$edit_sdk['limit_rules']}</textarea>&nbsp;&nbsp;&nbsp;&nbsp;(<span class="xzgz">用英文","隔开</span>)
+      </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>游戏范围：</label>
+            <label for="game_ext"></label>
+            <select name="game_ext" id="game_ext">
+              <option value="0">请选择范围</option>
+              <option value="1" <if condition="$edit_sdk['select_package_type'] eq 1">selected="true"</if>>手动上传</option>
+              <option value="2" <if condition="$edit_sdk['select_package_type'] eq 2">selected="true"</if>>全部游戏</option>
+              
+              <!-- 
+              <option value="3" <if condition="$edit_sdk['select_package_type'] eq 3">selected="true"</if>>网络游戏</option>
+              <option value="4" <if condition="$edit_sdk['select_package_type'] eq 4">selected="true"</if>>棋牌游戏</option>
+              <option value="5" <if condition="$edit_sdk['select_package_type'] eq 5">selected="true"</if>>单机游戏</option>
+              -->
+            </select>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one" id="sdsc">
+       	  <label>手动上传：</label>
+          &nbsp;&nbsp; 
+			<input type="file" name="the_package" id="the_package" />  点击
+<input type="button" onClick="get_select();" value="上传">
+游戏包名
+        </div>
+        <div class="clear"></div>
+      <span id="xyyc">
+      <div class="form_list_one" id="pbyx">
+          <label>屏蔽游戏：</label>
+          <input name="ignore_package_add" type="text" class="input_text" id="ignore_package_add"/>
+&nbsp;&nbsp;&nbsp;           <input type="button" onClick="add_ignore();" value="添加">
+&nbsp;&nbsp;&nbsp; 
+<input id="the_ignore_package" type="file" name="the_ignore_package">&nbsp;&nbsp;点击<input type="button" onClick="get_ignore();" value="上传">屏蔽游戏包名</div>
+      <div class="clear"></div>
+        <div class="form_list_one" id="ypbyx">
+          <label>已屏蔽游戏：</label>
+          <?php
+            //echo "<pre>";print_r($ignore_arrs);
+            $select_package_list = $edit_sdk[ignore_package_list];
+            $edit_sdk['ignore_package_list'] = explode(',',$edit_sdk['ignore_package_list']);
+            foreach($edit_sdk['ignore_package_list'] as $k=>$v){
+                if($v != ''){
+                    $ignore_text .= $ignore_arrs[$k][1].'<a href="javascript:;" onclick="del_ignore(\''.$v.'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+                }
+            }
+            
+        ?>
+          <span id="ignore_text">{$ignore_text}</span>
+          <input type="hidden" name="all_ignore" id="all_ignore" value="{$select_package_list}" />
+          <span id="ypbyxz"></span></div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+        	<?php
+                if($edit_sdk['select_package_type'] == 1){
+            		echo '<script>xz()</script>';
+                }else{
+                	echo '<script>xz2()</script>';
+                }
+            	$select_package_list = explode(',',$edit_sdk['select_package_list']);
+            	foreach($select_package_list as $k=>$v){
+                	if($v != ''){
+                    	$select_text .= $package_arrs[$k][1].'<a href="javascript:;" onclick="del_select(\''.$v.'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+                    }
+                }
+            ?>
+            <label>已选择游戏：</label>
+            <span id="select_text">{$select_text}</span>
+            <input type="hidden" name="all_select" id="all_select" value="{$edit_sdk[select_package_list]}" />
+            
+      </div>
+      </span>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>是否强制更新：</label>
+          &nbsp;&nbsp;
+<input type="radio" name="force" id="force" value="1" <if condition="$edit_sdk['force_update'] eq 1">checked</if>>
+          <label for="force"></label>
+          是 
+          &nbsp;&nbsp;&nbsp;&nbsp;
+<input type="radio" name="force" id="force2"  value="0" <if condition="$edit_sdk['force_update'] eq 0">checked</if>>
+          否
+            <label for="force2"></label>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>上传更新包：</label>
+            <input type="text" class="input_text" name="select_package" id="select_package" readonly/>
+           &nbsp;&nbsp;&nbsp;<input type="file" name="file_update" id="file_update"><br>
+        </div>
+        <div class="clear"></div>
+       <div class="form_list_one">
+            <label>备注：</label>
+            <textarea cols="80" rows="10" name="remark" id="remark">{$edit_sdk['remark']}</textarea>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one"></div>
+        <div class="clear"></div>
+        <div class="form_btns_box_one">
+            <input type="hidden" name="url_param" id="url_param" value="{$url_param}"/>
+            <input type="submit" value="确定" onClick="return sdk_edit_do();" style="margin-left:155px" class="form_input_submit" />
+            <a href="__URL__/sdk_update_list">取消</a>
+			<div class="clear"></div>
+        </div>
+    </form>
+</body>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+	  if($("#game_ext option:selected").val() != 1){
+	  	  $("#sdsc").hide();//默认手动上传隐藏
+	  }
+	  if($("#game_ext option:selected").val() == 0){
+		$("#xyyc").hide();
+	  }
+	  $("#sdsc_sub").click(function(){
+	  		$.ajax({
+				url:"__URL__/sdk_upload_sd",
+				type:'POST',
+				async:false,
+				//data:param,
+				secureuri:false,
+				dataType:'json',
+				success:function(data) {
+					var filestr = '';
+					$.each(data,function(idx,item){
+						filestr += item+' ';
+					});
+					var arr = filestr.split(' ');
+					alert("shuzu:"+arr);
+					$("#selected_game").children().remove();
+					for(var i in arr){
+					  if(arr[i] != ''){
+					 	 $("#selected_game").append('<span id="'+arr[i]+'" ><a>'+arr[i]+'</a><img onclick=del_shield_game(this) src="/Public/images/delete_icon.png"></span>&nbsp;&nbsp;');
+					  }
+					}
+					$('#pbyx_hidden').val(arr);
+					//$("#ignore_package_name").val(data);
+				}
+			});
+	  });
+	  //默认显示
+	  var game_ext_val = $("#game_ext option:selected").val();
+	  if(game_ext_val == 2){
+		  $("#select_text").html("全部游戏");
+	  }else if(game_ext_val == 3){
+		  $("#select_text").html("网络游戏");
+	  }else if(game_ext_val == 4){
+		  $("#select_text").html("棋牌游戏");
+	  }else if(game_ext_val == 5){
+		  $("#select_text").html("单机游戏");
+	  }
+	  
+	  $("#game_ext").change(function(){
+		  	var val = $("#game_ext option:selected").val();
+			var html = $("#game_ext option:selected").html();
+			//判断是否隐藏
+			if($("#game_ext option:selected").val() != 0){
+				$("#xyyc").show();
+			}else{
+				$("#xyyc").hide();
+			}
+			//当游戏范围切换时，数据清空
+			$("#ignore_text").html("");
+			$("#all_ignore").val("");
+			
+			if(val == 1){
+				//alert("手动上传");
+				$("#ypbyx").hide();
+				$("#pbyx").hide();
+				$("#sdsc").show();
+				
+				$("#ignore_text").children().remove();
+				$("#ignore_text").html("");
+				$("#all_ignore").val('');
+			}else{
+				$("#ypbyx").show();
+				$("#pbyx").show();
+				$("#sdsc").hide();
+				
+				$("#select_text").children().remove();
+				$("#select_text").html("");
+				$('#all_select').val('');
+			}
+			if($("#game_ext option:selected").val() == 1){
+				$("#select_text").html('');
+			}else{
+				$("#select_text").html(html);
+			}
+	  });
+	  //屏蔽游戏
+	  $("#shield_game").click(function(){
+		  	//var pbyx_hidden =$("#pbyx_hidden").val();//屏蔽游戏hidden
+		    var ignore_package_name = $("#ignore_package_name").val();
+		  	var arr = ignore_package_name.split(' ');
+			for(var i in arr){
+			  $("#pbyx_hidden").val(arr);
+			  $("#ypbyxz").append('<span id="del_'+i+'" ><a>'+arr[i]+'</a><img onclick=del_shield_game(this) src="/Public/images/delete_icon.png"></span>&nbsp;&nbsp;');
+			  $("#sdk_hidden").append('<input type="hidden" value="'+arr[i]+'" name="del_'+i+'_hidden" id="del_'+i+'_hidden">');
+			}
+			
+	  });
+
+
+	  $("#sdk_type").change(function(){
+			//alert(this.value);
+			var sdk_type = this.value;
+			$("input[name='jar_version[]']").each(function (i) {
+				var $p = $(this).parent();
+				if ($(this).attr("sdk_type") == sdk_type) {
+					$p.show();
+					this.disabled = false;
+				} else {
+					$p.hide();
+					this.disabled = true;
+				}
+			});
+
+
+			$("input[name='old_version[]']").each(function (i) {
+				var $p = $(this).parent();
+				if ($(this).attr("sdk_type") == sdk_type) {
+					$p.show();
+					this.disabled = false;
+				} else {
+					$p.hide();
+					this.disabled = true;
+				}
+			});
+
+
+
+
+	  });
+
+	  $("#sdk_type").change();
+
+
+	});
+	//获取手动游戏
+	function get_select(){
+		if($("#the_package").val().length==0) {
+			alert('请上传文件');
+			return;
+		}
+		$.ajaxFileUpload({
+			url:'/index.php/Sj/SdkUpdate/get_package',
+			type:'POST',
+			files:[$('#the_package')],
+			secureuri:false,
+			dataType:'json',
+			success:function(data){
+				if(data == 2){
+					alert('上传文件格式错误');
+					return false;
+				}else if(data == 3){
+					alert('上传包名大于200个');
+					return false;
+				}else if(data[0] == 4){
+					alert('上传包名'+data[1]+'不存在');
+					return false;
+				}else{
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.select_package = package_strs;
+					$('#all_select').val(package_strs);
+					$('#select_text').html(need_str);
+				}
+			}
+		});
+	}
+	//删除手动上传游戏
+	function del_select(obj){
+		var no_package = obj;
+		//var old_package = sessionStorage.select_package;
+		var old_package = $("#all_select").val();
+		$.ajax({
+			url:'/index.php/Sj/SdkUpdate/del_select',
+			data: 'old_package='+old_package+'&no_package='+no_package,
+			type: 'get',
+			success: function(data){
+				if(data != 204){
+					var data = eval(''+data+'');
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.select_package = package_strs;
+					$('#all_select').val(package_strs);
+					$('#select_text').html(need_str);
+				}else{
+					sessionStorage.select_package = '';
+					$('#select_text').html('');
+					$('#all_select').val('');
+				}
+			}
+		});
+	}
+	  //删除屏蔽游戏
+	 function del_ignore(obj){
+		var no_package = obj;
+		//var old_package = sessionStorage.ignore_package;all_ignore
+		var old_package = $("#all_ignore").val();
+		$.ajax({
+			url:'/index.php/Sj/SdkUpdate/del_select',
+			data: 'old_package='+old_package+'&no_package='+no_package,
+			type: 'get',
+			success: function(data){
+				if(data != 204){
+					var data = eval(''+data+'');
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.ignore_package = package_strs;
+					$('#all_ignore').val(package_strs);
+					$('#ignore_text').html(need_str);
+				}else{
+					sessionStorage.ignore_package = '';
+					$('#ignore_text').html('');
+					$('#all_ignore').val('');
+				}
+			}
+		});
+	}
+	//屏蔽游戏
+	function get_ignore(){
+		if($("#the_ignore_package").val().length==0) {
+			alert('请上传文件');
+			return;
+		}
+		$.ajaxFileUpload({
+			url:'/index.php/Sj/SdkUpdate/get_ignore',
+			type:'POST',
+			files:[$('#the_ignore_package')],
+			secureuri:false,
+			dataType:'json',
+			success:function(data){
+				if(data == 2){
+					alert('上传文件格式错误');
+					return false;
+				}else if(data == 3){
+					alert('上传包名大于200个');
+					return false;
+				}else if(data[0] == 4){
+					alert('上传包名'+data[1]+'不存在');
+					return false;
+				}else{
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.ignore_package = package_strs;
+					$('#all_ignore').val(package_strs);
+					$('#ignore_text').html(need_str);
+				}
+			}
+		});
+	}
+
+	
+	
+    function search_softname(async) {
+        var apply_pkg = $.trim($("#apply_pkg").val());
+        if (apply_pkg == '') {
+            $("#softname").val("");
+            return 0;
+        }
+        var param = {
+            package : apply_pkg
+        }
+        var ret = 0;
+        $.ajax({
+            url:'__URL__/search_softname',
+            type:'POST',
+            async:async,
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data) {
+                if (data.status == 1) {
+                    var info = data.info;
+                    $("#softname").val(info['softname']);
+                } else {
+                    $("#softname").val("");
+                }
+                ret = data.status;
+            }
+        });
+        return ret;
+    }
+    
+	//手动上传 隐藏与否
+    function xz(){
+			$("#pbyx").css("display","none");
+			$("#ypbyx").css("display","none");
+			//$("#sdsc").css("display","none");
+    }
+	function xz2(){
+			$("#sdsc").css("display","block");
+    }
+ 	//单独添加屏蔽游戏
+	function add_ignore(){
+		if($("#ignore_package_add").val().length==0) {
+			alert('请填写包名');
+			return;
+		}
+		var new_package = $("#ignore_package_add").val();
+		//var old_package = sessionStorage.ignore_package;
+		var old_package = $("#all_ignore").val();
+		$.ajax({
+			url:'/index.php/Sj/SdkUpdate/add_ignore',
+			data: 'old_package='+old_package+'&new_package='+new_package,
+			type: 'get',
+			success: function(data){
+				var data = eval(''+data+'');
+				if(data[0] == 4){
+					alert("添加包名不存在");
+					return false;
+				}else if(data == 5){
+					alert("该包名已添加，请勿重复添加");
+					return false;
+				}else{
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.ignore_package = package_strs;
+					$('#all_ignore').val(package_strs);
+					$('#ignore_text').html(need_str);
+				}
+			}
+		});
+	}
+	//提交前验证
+ 	function sdk_edit_do(){
+		/*2015.8.28 去除判断
+		var falg = 0;
+		$("input[name='old_version[]']:checkbox").each(function () {
+			if ($(this).attr("checked")) {
+				falg =1;
+				return false;
+			}
+		})
+		if (falg <= 0){
+			alert("请选择更新版本");
+			return false;
+		}*/
+		var falg1 = 0;
+		$("input[name='jar_version[]']:checkbox").each(function () {
+			if ($(this).attr("checked")) {
+				falg1 =1;
+				return false;
+			}
+		})
+		if (falg1 <= 0){
+			alert("请选择JAR版本");
+			return false;
+		}
+		//游戏范围
+		if($("#game_ext option:selected").val() == 0){
+			alert("请选游戏范围");
+			return false;
+		}else if($("#game_ext option:selected").val() == 1){
+			if($("#all_select").val() == '' || $("#select_text").html() == ''){
+				alert("请选择手动上传文件");
+				return false;
+			}
+		}
+		/*else if($("#game_ext option:selected").val() != 0 && $("#game_ext option:selected").val() != 2){
+			if($("#all_ignore").val() == '' || $("#ignore_text").html() == ''){
+				alert("请选择上传或添加屏蔽游戏");
+				return false;
+			}
+		}*/
+		
+		if($("#force").attr("checked")!= true && $("#force2").attr("checked")!= true){
+			alert("请选择是否强制更新");
+			return false;
+		}
+		var file_update = $("#file_update").val();
+		if(file_update != ''){
+			if(file_update.substr(file_update.length-3,3) != 'apk'){
+				alert("请上传APK格式文件");
+				return false
+			}
+		}
+		$("#sdk_add_do").submit();
+
+
+		
+	}
+    
+</script>

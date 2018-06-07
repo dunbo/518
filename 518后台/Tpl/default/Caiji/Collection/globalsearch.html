@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		 <script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript">
+        function del(soft_id){
+            if(confirm("删除不可恢复！确定要删除此条记录?")){
+                var param = {
+                    soft_id : soft_id
+                };
+                $.ajax({
+                    url:'__URL__/deletepro',
+                    type:'POST',
+                    data:param,
+                    dataType:'json',
+                    success:function(data){
+                       location.href ="/index.php/Sendnum/Product/testlist";
+                    }
+                });
+            }
+          };
+    </script>
+</head>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<body>
+	<form action="/index.php/Caiji/Collection/globalsearch" method="get">
+		<div class="search_box margin_top" style="padding-bottom:0">
+			<table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                                <tr>
+									<td width="18%">软件名称：<input type="text" name="softname" value="{$get.softname}" class="search_item_text"></td>
+									<td width="19%">包名：<input type="text" name="package" value="{$get.package}" class="search_item_text"></td>
+                                <td width="44%"><input type="submit" value="搜索" class="search_btn" style="height:30px;"></td>
+                            </tr>
+                </table>
+		</div>
+	</form>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="5%"></th>
+				<th width="28%">软件信息</th>
+				<th width="15%">版本信息</th>
+				<th width="18%">来源信息</th>
+				<th width="10%">软件分类</th>
+				<th width="12%">所属页面</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="list" key="k">
+				<tr>
+                                    <td class="left"><img width="48" height="48" onerror="this.style.display='none'"  src="<?php echo CAIJI_ATTACHMENT_HOST.$list['icon_path'];?>"></img></td>
+                                    <td class="left">{$list.softname}<br><br>{$key}</td>
+                    <td class="left"> 采集版本:&nbsp;{$list.version_code}({$list.version_name})<br><?php if(!empty($list['az_version'])){echo '安智版本:'.$list['az_version_code'].'('.$list['az_version'].')';}?></td>
+					<td class="left"> {$list.appfrom}</td>
+					<td class="left"> {$list.categoryname}</td>
+                                        <td> 
+<?php if(strpos($list['add_status'],'1')!==false)echo '<a target="_blank" href="/index.php/Caiji/Collection/collection_add_audit/package/'.$key.'" class="blue">待审核-新增</a><br>';?>
+<?php if(strpos($list['add_status'],'2')!==false)echo '<a target="_blank" href="/index.php/Caiji/Collection/collection_add_storage/package/'.$key.'" class="blue">已入库-新增</a><br>';?>
+<?php if(strpos($list['add_status'],'3')!==false)echo '<a target="_blank" href="/index.php/Caiji/Collection/collection_add_ignored/package/'.$key.'" class="blue">已忽略-新增</a><br>';?>
+<if condition="($list.black_status eq 1)"><a target='_blank' href="/index.php/Caiji/Config/black_list/ppackage/{$key}" class="blue">黑名单</a><br></if>
+<if condition="($list.coop_status eq 1)"><a target='_blank' href="/index.php/Caiji/Collection/cooperation/package/{$key}" class="blue">合作软件</a><br></if>
+<if condition="($list.fetch_status eq 1)"><a target='_blank' href="/index.php/Caiji/Collection/standbyfetch/package/{$key}" class="blue">版本更新待采集</a><br></if>
+<?php if(strpos($list['update_status'],'1')!==false)echo '<a target="_blank" href="/index.php/Caiji/Collection/collection_update_audit/examine_type/'.$list["examine_type"].'/package/'.$key.'" class="blue">待审核-更新</a><br>';?>
+<?php if(strpos($list['update_status'],'2')!==false)echo '<a target="_blank" href="/index.php/Caiji/Collection/collection_update_storage/package/'.$key.'" class="blue">已入库-更新</a><br>';?>
+<?php if(strpos($list['update_status'],'3')!==false)echo '<a target="_blank" href="/index.php/Caiji/Collection/collection_update_ignored/package/'.$key.'" class="blue">已忽略-更新</a><br>';?>
+</td>
+				</tr>
+			</volist>
+		</tbody>
+	</table>
+	<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>
+</html>

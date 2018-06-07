@@ -1,0 +1,207 @@
+<div id="open_add" style="padding:10px; width:300px;height:180px;display:none;">
+    <h2>取消原因</h2>
+    <br />
+    <form  method="get" action="__URL__/p_market_del"  style="width:100%;height:100%;">
+        <table width="100%" border="0" cellpadding="0" cellspacing="0" >
+            <tr><td><textarea id="del_reason" name="del_reason" style="width: 280px;height:100px"></textarea></td></tr>
+            <tr>
+                <td align="center" colspan="2"><br />
+                    <input type="hidden" name="del_id" id="del_id" value="">
+                    <input type="submit" value="确定" onclick ="return chk_cancel()"/>&nbsp&nbsp
+                    <input type='button'  value="取消" onclick="closes()"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<script>
+var str = 	"<select name='type' id='gift_type' ><option value='0'>全部</option><?php foreach($gift_type as $key => $val){  
+	$selected = '';
+	if($gift_types == $val['id']) $selected = "selected=selected" ;
+	echo "<option value='".$val['id']."'" . $selected  . ">" . $val['gift_type'] . "</option>" ; } 
+?></select>";	
+
+var str1 = 	"<select name='type' id='gift_type_1' ><option value='0'>全部</option><?php foreach($gift_type_1 as $key => $val){  
+	$selected = '';
+	if($gift_types == $val['id']) $selected = "selected=selected" ;
+	echo "<option value='".$val['id']."'" . $selected  . ">" . $val['gift_type'] . "</option>" ; } 
+?></select>";	
+														 
+var str2 = 	"<select name='type' id='gift_type_2' ><option value='0'>全部</option><?php foreach($gift_type_2 as $key => $val){  
+	$selected = '';
+	if($gift_types == $val['id']) $selected = "selected=selected" ;
+	echo "<option value='".$val['id']."'" . $selected  . ">" . $val['gift_type'] . "</option>" ; } 
+?></select>";	
+				
+$(document).ready(function(){                       
+	var obj = $('#gift_category').val();
+	if(obj == 1){
+		$('#gift_type').html(str1);
+	}else if(obj == 2){
+		$('#gift_type').html(str2);
+	}else{
+		$('#gift_type').html(str);
+	}
+});
+function select_category(obj){
+	if(obj == 1){
+		$('#gift_type').html(str1);
+	}else if(obj == 2){
+		$('#gift_type').html(str2);
+	}else{
+		$('#gift_type').html(str);
+	}
+}
+
+$('.extent_rank').blur(function() {
+	var gift_category = $('#gift_category').val();
+	var active_id = $('#active_id').val();
+	var softname = $('#softname').val();
+	var apply_pkg = $('#apply_pkg').val();
+	var start_tm = $('#start_tm').val();
+	var end_tm = $('#end_tm').val();
+	var active_from = $('#active_from').val();
+	var map = '';
+	if(active_id != ''){
+		map += '/active_id/'+active_id;
+	}
+	if(softname != ''){
+		map += '/softname/'+softname;
+	}
+	if(apply_pkg != ''){
+		map += '/apply_pkg/'+apply_pkg;
+	}
+	if(start_tm != ''){
+		map += '/start_tm/'+start_tm;
+	}
+	if(end_tm != ''){
+		map += '/end_tm/'+end_tm;
+	}
+	if(active_from != ''){
+		map += '/active_from/'+active_from;
+	}
+	
+	var jumpUrl = "__URL__/active_gift_list1/gift_category/"+gift_category+map;
+	if(!$(this).val()){
+		alert('排序不能为空');
+		return false;
+	}
+	var url = "__URL__/p_edit_rank/id/" + $(this).attr('rel') + "/rank/" + $(this).val();
+	$.ajax({
+		type: "GET",
+		url: url,
+		success: function(response) {
+			var url = eval("(" + response + ")");
+			//window.location.reload();
+			window.location.href = jumpUrl;
+		}
+	});
+});
+
+function select_checkit() {
+	if (confirm("您是否确认将该条信息配置到网游精选中显示?"))
+	{
+		return true;
+	}
+	return false;
+}
+
+function checkit_no() {
+	if (confirm("您确认要移除该信息在网游精选中的显示？"))
+	{
+		return true;
+	}
+	return false;
+}
+
+function del(id) {
+	$("#del_id").val(id);
+	$("#open_add").zxxbox();
+
+}
+
+function chk_cancel() {
+	if ($("#del_reason").val() == "") {
+		alert("请填写取消原因");
+		return false;
+	} else {
+		if (confirm("确认取消吗？")) {
+			return true;
+		} else {
+			return false;
+		}
+
+	}
+}
+
+//关闭弹出层
+function closes() {
+	$.zxxbox.hide();
+}
+
+
+function chk_del(id) {
+	if (confirm("您是否确认删除此礼包"))
+	{
+		window.location.href = "__URL__/p_del_lastgift/id/" + id;
+		return true;
+	}
+	return false;
+}
+function selectAll() {
+	if ($("#id_all").attr("checked")) {
+		$("[name='check_id']").each(function() {
+			$(this).attr('checked', true);
+		});
+	} else {
+		$("[name='check_id']").each(function() {
+			$(this).attr('checked', false);
+		});
+	}
+}
+function delit() {
+	if (window.confirm('确定批量删除吗？')) {
+		var str = '';
+		$("[name='check_id']").each(function() {
+			if ($(this).attr('checked')) {
+				str += $(this).val() + ',';
+			}
+		});
+		var id = str = str.substring(0, str.length - 1);
+		if (id.length < 1) {
+			alert('请选择要删除的礼包！');
+			return false;
+
+		}
+		window.location.href = "__URL__/p_del_lastgift/id/" + id;
+	}
+}
+
+function batch_revoke() {
+	if (window.confirm('确定批量撤销吗？')) {
+		var str = '';
+		$("[name='check_id']").each(function() {
+			if ($(this).attr('checked')) {
+				str += $(this).val() + ',';
+			}
+		});
+		var id = str = str.substring(0, str.length - 1);
+		if (id.length < 1) {
+			alert('请选择要撤销的礼包！');
+			return false;
+
+		}
+		window.location.href = "__URL__/p_reset_rejectgift/id/" + id;
+	}
+}
+
+function chk_reject(id) {
+	if (confirm("确认将活动移至待审核列表吗？"))
+	{
+		window.location.href = "__URL__/p_reset_rejectgift/id/" + id;
+		return true;
+	}
+	return false;
+}
+</script>

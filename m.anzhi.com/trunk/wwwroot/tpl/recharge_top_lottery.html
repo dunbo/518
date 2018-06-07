@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>充值排行榜-抽奖</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/recharge_top/css/recharge_top_common.css?v2"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">
+var sid='<!--{$out.sid}-->';
+    var flags={canMove:true};
+    function showOpenBox(obj){
+        var bg_h=$(window).height()+$(document).scrollTop(),
+                top_h= $(obj).height()/ 2-$(document).scrollTop();
+        $(obj).css("margin-top",-top_h+"px").show();
+        $("#body-bg").css("height",bg_h+"px").show();
+        flags.canMove=false;
+    }
+    function cloBox(obj){
+        $(obj).hide();
+        $("#body-bg").hide();
+        flags.canMove=true;
+    }
+    $(function(){
+        $("body").bind('touchmove', function (e) {
+            if(!flags.canMove){
+                e.preventDefault();
+            }
+        });
+    })
+
+function lottery(type){
+            $.ajax({
+                    url: '/lottery/recharge_top_lottery.php?sid='+sid,
+                    data:"&type="+type,
+                    type:"post",
+                    dataType: "json",
+                    success:function(data) {
+                        if(data==100){
+                                $("#notice").html('网络忙，请稍候重试！');
+                                showOpenBox('#tip-box2');
+                        }else if(data==300){
+                                $("#notice").html('今日剩余次数已不足10次！');
+                                showOpenBox('#tip-box2');
+                        }else if(data==400){
+                                $("#notice").html('今日抽奖已经达到10次，请明日再来！');
+                                showOpenBox('#tip-box2');
+                        }else if(data==500){
+                                $("#notice").html('您还没有获得抽奖机会哟，请充值后再来尝试，谢谢！');
+                                showOpenBox('#tip-box2');
+                        }else if(data==600){
+                                $("#notice").html('对不起，您的剩余抽奖次数已不足10次！');
+                                showOpenBox('#tip-box2');
+                        }else if(data.no_gift==1){
+                                $("#notice").html('很遗憾，您暂未获奖！');
+                                $("#now_num").html(data.now_num);
+                                showOpenBox('#tip-box2');
+                        }else if(data.lottery_type==1){ //实体
+                            $("#now_num").html(data.now_num);
+                            var prizename = data.prizename;
+                            if(data.is_save==1){
+                                $("#prizename").html(prizename);
+                                showOpenBox('#tip-box');
+                            }else{
+                                location.href="/lottery/recharge_top_lottery_result.php?prizename="+prizename+"&sid="+sid;
+                            }
+                        }else{ //礼包
+                            $("#now_num").html(data.now_num);
+                            $("#gift_softname").html(data.softname);
+                            $("#gift_number").html(data.gift_number);
+                            showOpenBox('#tip-box1');
+                        }
+                    },
+            });
+}
+
+function myprize(){
+        location.href="/lottery/recharge_top_lottery_myprize.php?sid="+sid;
+}
+</script>
+</head>
+<body>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box2" style="display: none;">
+        <div class="prompt4">提示</div>
+        <div class="tip-con">
+            <p><span id="notice"></span></p>
+        </div>
+        <div class="btn_back mtop">
+            <a href="#" onclick="cloBox('#tip-box2')">返回</a>
+        </div>
+    </div>    
+    <div class="tip-box" id="tip-box" style="display: none;">
+        <div class="prompt4">【小资充值抽大奖】</div>
+        <div class="tip-con">
+            <p>恭喜你获得《<span id="prizename"></span>》！</p>
+        </div>
+        <div class="btn_back mtop">
+            <a href="#" onclick="cloBox('#tip-box')">返回</a>
+        </div>
+    </div>
+    <div class="tip-box" id="tip-box1" style="display: none;">
+        <div class="prompt4">【小资充值抽大奖】</div>
+        <div class="tip-con">
+            <p>恭喜你获得《<span id="gift_softname"></span>》最贵礼包一份！</p>
+            <p>礼包码：<span id="gift_number"></span></p>
+        </div>
+        <div class="btn_back mtop">
+            <a href="#" onclick="cloBox('#tip-box1')">返回</a>
+        </div>
+    </div>
+    <div class="main">
+        <div class="notice clear" style="top: 0px;">
+            <div class="notice-icon"></div>
+            <div class="notice-list">
+                <marquee scrollamount="6" scrolldelay="90" direction="left">
+                                                <!--{foreach from=$out.prize item=v key=k}-->
+                    <span>恭喜用户<!--{$v.username}-->，人品爆棚，获得<!--{$v.prizename}-->；</span>
+                                                    <!--{/foreach}-->
+                </marquee>
+            </div>
+        </div>
+        <div class="prompt2">【小资充值抽大奖】</div>
+        <div class="lottery_hd">
+            <h4>已充值：<!--{$out.money}-->元 剩余抽奖次数 ：<span id="now_num"><!--{$out.lottery_num}--></span>次</h4>
+            <a href="javascript:;" onclick="myprize()">我的奖品</a>
+        </div>
+        <div class="prize">
+            <div class="btn_lottery">
+                <!--<a href="javascript:;" class="btn1" onclick="showOpenBox('#tip-box')">抽一次</a>-->
+                <a href="javascript:;" class="btn1" onclick="lottery(1)">抽一次</a>
+                <a href="javascript:;" class="btn2" onclick="lottery(10)">抽十次</a>
+                <div class="icon_bz"><a href="javascript:;" onclick="lottery(10)"><img src="<!--{$out.static_url}-->/recharge_top/images/icon_bz.png"/></a></div>
+            </div>
+            <ul class="prize_list">
+                <li><img src="<!--{$out.static_url}-->/recharge_top/images/prize/prize_01.png"/></li>
+                <li><img src="<!--{$out.static_url}-->/recharge_top/images/prize/prize_02.png"/></li>
+                <li><img src="<!--{$out.static_url}-->/recharge_top/images/prize/prize_03.png"/></li>
+                <li><img src="<!--{$out.static_url}-->/recharge_top/images/prize/prize_04.png"/></li>
+                <li><img src="<!--{$out.static_url}-->/recharge_top/images/prize/prize_05.png"/></li>
+                <li><img src="<!--{$out.static_url}-->/recharge_top/images/prize/prize_06.png"/></li>
+                <li><img src="<!--{$out.static_url}-->/recharge_top/images/prize/prize_07.png"/></li>
+                <li><img src="<!--{$out.static_url}-->/recharge_top/images/prize/prize_08.png"/></li>
+                <li><img src="<!--{$out.static_url}-->/recharge_top/images/prize/prize_09.png"/></li>
+            </ul>
+            <div class="clear"></div>
+            <div class="prompt3">活动期间，累计充值每满100元获得一次抽奖机会， 每个用户每天可用抽奖次数上限为10次哦，每日0点 重置该限制！  </div>
+        </div>
+        <div class="sycee"><img src="<!--{$out.static_url}-->/recharge_top/images/sycee.png"/></div>
+    </div>
+</section>
+</body>
+</html>

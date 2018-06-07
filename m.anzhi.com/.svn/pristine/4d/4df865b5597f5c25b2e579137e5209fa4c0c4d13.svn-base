@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>免费开宝箱，最高得1212元</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/swiper.css"/>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/js/swiper.js"></script>
+<!--{if $out['is_share'] == 1}-->
+<script type="text/javascript" src="/js/anzhi.js"></script>
+<!--{/if}-->
+<script type="text/javascript">
+	(function (doc, win) {
+		var docEl = doc.documentElement,
+	    resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+	    recalc = function () {
+	        var clientWidth = docEl.clientWidth;
+	        if (!clientWidth) return;
+	        if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+	    };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var az_money = '<!--{$out.az_money}-->';
+var lottery_num = <!--{$out.lottery_num}-->;
+var ttl_time = <!--{$out.ttl_time}-->;
+var prefix = "<!--{$out.prefix}-->";
+var isHasPayPwd = "<!--{$out.isHasPayPwd}-->";
+var ttl_time_interval = 0;
+var swiper = null;
+
+//弹窗函数
+var flags={canMove:true};
+function showOpenBox(obj){
+    var bg_h=$(window).height() + $(document).scrollTop(),
+        top_h= $(obj).height()/ 2 - $(document).scrollTop();
+    $(obj).css("margin-top",-top_h+"px").show();
+    $("#body-bg").css("height",bg_h+"px").show();
+    flags.canMove=false;
+	window.onresize = function(){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+            top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$('#body-bg').css("height",bg_h+"px");
+		$(obj).css("margin-top",-top_h+"px");	
+	}
+}
+function cloBox(obj){
+    $(obj).hide();
+    $("#body-bg").hide();
+    flags.canMove=true;
+}
+$(function(){
+	$("body").bind('touchmove', function (e) {
+        if(!flags.canMove){
+            e.preventDefault();	
+        }
+    });
+    go();
+	ttl_time_interval = window.setInterval(go, 1000);
+})
+
+function eggs(from_type){
+	if(from_type==1){
+		from_type = 2;
+	}
+	$('.gift_0'+from_type).find('.gift1').css('display','none');
+	setTimeout(function(){
+		$('.gift_0'+from_type).find('.gift_open1').css('display','block');
+		setTimeout(function(){
+			$('.gift_0'+from_type).find('.gift_open1').css('display','none');
+			$('.gift_0'+from_type).find('.gift_open2').css('display','block');
+			setTimeout(function(){
+				$('.gift_0'+from_type).find('.gift_open2').css('display','none');
+				$('.gift_0'+from_type).find('.gift_open3').css('display','block');
+				setTimeout(function(){
+					$('.gift_0'+from_type).find('.gift_open3').css('display','none');
+					$('.gift_0'+from_type).find('.gift1').css('display','block');
+				},1500)
+			},70)
+		},70)
+	},70)
+}
+
+function go(){
+	if(lottery_num > 0){
+		//有免费抽奖次数
+		if(ttl_time > 0){
+			//在免费倒计时中
+			var m = Math.floor(ttl_time / 60);
+    		var s = Math.floor(ttl_time % 60);
+			$('#box_text1').html(m+':'+s+'后免费');
+			$('#box_text1').parent().addClass('gift_btn_disabled');
+			setTimeout(function(){
+				$('#lottery_2').attr('onclick', "showOpenBox('#tip-box3')");
+			}, 1000);
+			ttl_time--;
+		}else{
+			if(ttl_time_interval != 0){
+				window.clearInterval(ttl_time_interval);
+			}
+			$('#box_text1').html('银宝箱');
+			$('#box_text1').parent().removeClass('gift_btn_disabled');
+			setTimeout(function(){
+				$('#lottery_2').attr('onclick', "lottery_click(1,0)");
+			}, 1000);
+		}
+	}else{
+		//无免费抽奖次数
+		if(ttl_time_interval != 0){
+			window.clearInterval(ttl_time_interval);
+		}
+		$('#box_text1').html('50安智币');
+		$('#box_text1').parent().removeClass('gift_btn_disabled');
+		setTimeout(function(){
+			$('#lottery_2').attr('onclick', "lottery_click(2,50)");
+		}, 1000);
+	}	
+}
+
+//登录函数
+function login(login_url,version_code){
+	if(version_code >= 5700 ){
+		window.AnzhiActivitys.login();
+		javascript:window.history.forward(1);
+	}else{
+		location.href=login_url;
+	}
+}
+function onLoginComplete(sid,tip){
+	sid_str = sid.replace("PHPSESSID=", "");
+	location.href="/lottery/"+prefix+"/index.php?sid="+sid_str+"&aid="+aid;
+}
+
+//抽奖
+function lottery_click(from_type,azb_mount){
+	cloBox('#tip-box3');
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	if( from_type>1 && (az_money<azb_mount) ){
+		$('#openBox_text1').html('您的安智币余额不足，请在电脑端安智用户中心或联运游戏中进行充值');
+		showOpenBox('#tip-box1');			
+		return false;		
+	}
+	if(from_type>1 && isHasPayPwd == 1){
+		$("#azb_pwd").val('');	
+		$("#sub_pwd").attr('onclick', 'lottery_do('+from_type+','+azb_mount+')');
+		showOpenBox('#tip-box4');
+		return false;		
+	}else{
+		lottery_do(from_type,azb_mount);
+	}	
+}
+function lottery_do(from_type,azb_mount){
+	cloBox('#tip-box4');
+	if(isHasPayPwd == 1){
+		var pwd = $("#azb_pwd").val();		
+	}
+	if(from_type==1){
+		$('#lottery_2').attr('onclick', '');
+	}else{
+		$('#lottery_'+from_type).attr('onclick', '');
+	}
+	$.ajax({
+		url: '/lottery/'+prefix+'/lottery.php',
+		data: 'sid='+sid+'&aid='+aid+"&pwd="+pwd+"&from_type="+from_type+"&azb_mount="+azb_mount,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+			if(data.code == 1){
+				//中奖
+				eggs(from_type);
+				az_money = az_money-azb_mount;
+				$('#az_money').html(az_money);
+				if(from_type == 1){
+					lottery_num--;
+					$('#lottery_num').html(lottery_num);
+					ttl_time = 599;
+					go();
+					ttl_time_interval = window.setInterval(go, 1000);
+				}else{
+					setTimeout(function(){
+						$('#lottery_'+from_type).attr('onclick', 'lottery_click('+from_type+','+azb_mount+')');
+					}, 2000);
+				}
+				setTimeout(function(){
+					$('#prizename').html(data.msg);
+					showOpenBox('#tip-box2');
+				}, 1700);
+			}else if(data.code == 2){
+				//未登录
+				location.href = data.url+"?sid="+sid+"&aid="+aid;
+			}else if(data.code == 3){
+				//未中奖
+				eggs(from_type);
+				az_money = az_money-azb_mount;
+				$('#az_money').html(az_money);
+				if(from_type == 1){
+					lottery_num--;
+					$('#lottery_num').html(lottery_num);
+					ttl_time = 599;
+					go();
+					ttl_time_interval = window.setInterval(go, 1000);
+				}else{
+					setTimeout(function(){
+						$('#lottery_'+from_type).attr('onclick', 'lottery_click('+from_type+','+azb_mount+')');
+					}, 2000);
+					
+				}
+				$('#openBox_text1').html(data.msg);
+				showOpenBox('#tip-box1');
+			}else{
+				if(from_type == 1){
+					go();
+					ttl_time_interval = window.setInterval(go, 1000);
+				}else{
+					setTimeout(function(){
+						$('#lottery_'+from_type).attr('onclick', 'lottery_click('+from_type+','+azb_mount+')');
+					}, 2000);
+					
+				}
+				$('#openBox_text1').html(data.msg);
+				showOpenBox('#tip-box1');
+			}
+		}
+	});
+}
+
+function change_tab(obj, num){
+	$(obj).siblings('li').removeClass('current');
+	$(obj).addClass('current');
+	var str = '';
+	if(num==1){
+		str += '<div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_07.png"/><p>200元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_04.png"/><p>30元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_02.png"/><p>5元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_01.png"/><p>3元礼券</p></div>';
+	}else if(num==2){
+		str += '<div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_08.png"/><p>500元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_06.png"/><p>100元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_03.png"/><p>20元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_11.png"/><p>15元礼券</p></div>';
+	}else if(num==3){
+		str += '<div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_09.png"/><p>1212元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_10.png"/><p>300元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_05.png"/><p>50元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_04.png"/><p>30元礼券</p></div>';
+	}
+	$('#tab').html(str);
+	swiper.destroy(false);
+	swiper = new Swiper('.swiper-container', {
+		pagination: '.swiper-pagination',
+		slidesPerView: 3,
+		loop:true,
+		autoplayDisableOnInteraction : false,
+		autoplay: 3000,
+		paginationClickable: true,
+		spaceBetween: 10
+	});
+}
+
+//分享函数
+function go_share(){
+	$.ajax({
+		url: '/lottery/my_name_MT3_new/share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+		}
+	});
+	var share_text='安智正在开启免费开宝箱，千元现金等着你哟！';
+	var share_url='<!--{$out.activity_url}-->/lottery/'+prefix+'/index.php?is_share=1&aid='+aid;
+	var share_json = '{"TEXT":"'+share_text+'","URL":"<!--{$out.activity_url}-->/static/activity/'+prefix+'/images/share_icon.png","ACTIONURL":"'+share_url+'","URLWEIXIN":"<!--{$out.activity_url}-->/static/activity/'+prefix+'/images/share_icon.png"}';
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+<!--{if $out['is_share'] == 1}-->
+var js_param = {type:'action', id:aid, callback:invite_callback};
+var php_param = {type:'action', aid:aid};
+$(document).ready(function () {
+	share_download(js_param, php_param);
+});
+//分享地址为活动页 用的方法
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6200){
+			js_param = {type:'action', id:aid, callback:null};
+			Azfd.lock = false;
+			//share_download(js_param, php_param);			
+		}else {
+			setTimeout(function(){
+				var php_url = '/fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;			
+			},1000);		
+		} 
+	}else{
+		setTimeout(function(){
+			var php_url = '/fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;			
+		},1000);		
+	}
+}
+<!--{/if}-->
+</script>
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/banner.jpg" />
+</div>
+<div class="notice">
+	<div class="notice_list">
+		<marquee scrollamount="2" scrolldelay="90" direction="left">
+		<!--{if $out.award_all}-->
+			<!--{foreach from=$out.award_all item=v}-->
+			<span>恭喜用户<!--{$v.username}-->，开宝箱获得<!--{$v.prizename}-->；</span>
+			<!--{/foreach}-->
+		<!--{else}-->
+			<span>活动已开始，快来充值领奖！~</span>
+		<!--{/if}-->
+		</marquee>
+	</div>
+</div>
+<div class="wrap gift_wrap">
+	<ul class="gift_box">
+		<li>
+			<div class="gift gift_02">
+				<img class="gift1" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/gfit_01.png" />
+				<div class="gift_open1"></div>
+				<div class="gift_open2"></div>
+				<div class="gift_open3"></div>
+			</div>
+			<p>剩余<span id='lottery_num'><!--{$out.lottery_num}--></span>次</p>
+			<a href="javascript:;" class="gift_btn" id='lottery_2'><span id='box_text1'>银宝箱</span></a>
+		</li>
+		<li>
+			<div class="gift gift_03">
+				<div class="light"></div>
+				<img class="gift1" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/gfit_02.png" />
+				<div class="gift_open1"></div>
+				<div class="gift_open2"></div>
+				<div class="gift_open3"></div>
+			</div>
+			<p><span>200</span>安智币</p>
+			<a href="javascript:;" class="gift_btn" id='lottery_3' onclick="lottery_click(3, 200)">金宝箱</a>
+		</li>
+		<li>
+			<div class="gift gift_04">
+				<img class="gift1" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/gfit_03.png" />
+				<div class="gift_open1"></div>
+				<div class="gift_open2"></div>
+				<div class="gift_open3"></div>
+			</div>
+			<p><span>500</span>安智币</p>
+			<a href="javascript:;" class="gift_btn" onclick="lottery_click(4, 500)" id='lottery_4'>钻石宝箱</a>
+		</li>
+		<div class="clear"></div>
+	</ul>
+	<span class="wrap_bg_l"></span>
+	<span class="wrap_bg_r"></span>
+</div>
+<div class="wrap user_wrap">
+	<span class="stars"></span>
+	<span class="stars2"></span>
+	<div class="user_info">
+	<!--{if $out['is_login'] == 1}-->
+		<ul>
+			<li>用户名：<!--{$out.username}--></li>
+			<li>安智币余额：<span id='az_money'><!--{$out.az_money}--></span>个</li>
+		</ul>
+		<a href="/lottery/<!--{$out.prefix}-->/my_prize.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->">获奖记录</a>
+	<!--{else}-->
+		<ul>
+			<li>未登录</li>
+			<li>安智币余额：<span>0</span>个</li>
+		</ul>
+		<a href="javascript:;" onclick="login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');">获奖记录</a>
+	<!--{/if}-->
+	</div>
+	<span class="wrap_bg_l"></span>
+	<span class="wrap_bg_r"></span>
+</div>
+<div class="wrap show_wrap">
+	<span class="stars"></span>
+	<span class="stars2"></span>
+	<h3 class="title">奖品展示</h3>
+	<ul class="show_item">
+		<li onclick="change_tab(this,1)"><span>银宝箱奖品</span></li>
+		<li onclick="change_tab(this,2)"><span>金宝箱奖品</span></li>
+		<li class="current" onclick="change_tab(this,3)"><span>钻石箱奖品</span></li>
+		<div class="clear"></div>
+	</ul>
+	<script type="text/javascript">
+		window.onload = function(){
+			swiper = new Swiper('.swiper-container', {
+				pagination: '.swiper-pagination',
+				slidesPerView: 3,
+				loop:true,
+				autoplayDisableOnInteraction : false,
+				autoplay: 3000,
+				paginationClickable: true,
+				spaceBetween: 10
+			});
+		}
+	</script>
+	<div class="show_cnt">
+		<div class="swiper-container">
+			<div class="swiper-wrapper" id='tab'>
+				<div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_09.png"/><p>1212元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_10.png"/><p>300元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_05.png"/><p>50元礼券</p></div><div class="swiper-slide"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/show_04.png"/><p>30元礼券</p></div>
+			</div>
+		</div>
+	</div>
+	<span class="wrap_bg_l"></span>
+	<span class="wrap_bg_r"></span>
+</div>
+<div class="wrap rule_wrap">
+	<span class="stars"></span>
+	<span class="stars2"></span>
+	<h3 class="title">活动规则</h3>
+	<ul class="rule">
+		<li><span>活动时间：</span>2017年12月11日－12月13日</li>
+		<li><span>活动规则：</span>欢乐开宝箱，每日可免费开启银宝箱3次，每次开启后需等待10分钟可开启下一次 , 冷却期间或次数用光后可支付指定数量安智币开启，金宝箱及钻石宝箱必须支付指定安智币开启，宝箱等级越高，奖品越丰厚哦</li>
+		<li>
+			<span>活动详细规则：</span><br>1.宝箱分为三种，金宝箱、银宝箱、钻石宝箱，每天可免费开启银宝箱3次<br/>2.开宝箱获得的现金奖，会以礼券形式发送到您的帐号，礼券有效期3天，请您收到礼券后尽快使用避免过期<br/>3.礼券不适用于（海岛奇兵，梦幻西游，列王的纷争，大话西游，部落冲突，皇室战争，最终幻想：觉醒，镇魔曲，诛仙，阴阳师，倩女幽魂，剑侠世界，青云志，永恒纪元：戒，问道，率土之滨，大唐无双，火炬之光，王者传奇，仙剑奇侠传3D回合）<br/>4.活动有任何疑问，请联系我们的官方客服，将耐心为您解答！客服QQ：800004609，客服电话：400-8106520<br/>5.由于活动的特殊性，活动期间不予以退款！
+		</li>
+	</ul>
+</div>
+
+<div class="share_wrap">
+<!--{if $out['product'] == 1}-->
+	<a href="javascript:;" onclick="go_share()">分享</a>
+<!--{/if}-->
+</div>
+
+<!--弹窗-->
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box wrap" id="tip-box1" style="display: none;">
+    	<div class="tip_hd">
+    		<h4>温馨提示</h4>
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box1')">关闭</a></div>
+        </div>
+		<div class="tip-mid">
+            <div class="tip-con">
+            	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tips_03.png" />
+                <p id='openBox_text1'>您的安智币余额不足，请在电脑端安智用户中心或联运游戏中进行充值</p>
+            </div>
+       </div>
+		<div class="btns2">
+			<a href="javascript:;" class="fl" onclick="cloBox('#tip-box1')">返回</a>
+			<a href="javascript:;" class="fr" onclick="cloBox('#tip-box1')">确定</a>
+			<div class="clear"></div>
+		</div>
+    </div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box wrap" id="tip-box2" style="display: none;">
+    	<div class="tip_hd">
+    		<h4>温馨提示</h4>
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box2')">关闭</a></div>
+        </div>
+		<div class="tip-mid">
+            <div class="tip-con">
+            	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/gift_open9.png" />
+                <p>恭喜您获得了<span id="prizename">《30元充值卡》</span>一张，礼券有效期为3天，请尽快使用</p>
+            </div>
+       </div>
+		<div class="btns2">
+			<a href="javascript:;" onclick="cloBox('#tip-box2')" class="fl">返回</a>
+			<a href="javascript:;" onclick="cloBox('#tip-box2')" class="fr">确定</a>
+			<div class="clear"></div>
+		</div>
+    </div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box wrap" id="tip-box3" style="display: none;">
+    	<div class="tip_hd">
+    		<h4>温馨提示</h4>
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box3')">关闭</a></div>
+        </div>
+		<div class="tip-mid">
+            <div class="tip-con">
+            	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tips_02.png" />
+                <p>确认花费50安智币？</p>
+            </div>
+       </div>
+		<div class="btns2">
+			<a href="javascript:;" onclick="cloBox('#tip-box3')" class="fl">取消</a>
+			<a href="javascript:;" onclick="lottery_click(2, 50)" class="fr">确定</a>
+			<div class="clear"></div>
+		</div>
+    </div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box wrap" id="tip-box4" style="display: none;">
+    	<div class="tip_hd">
+    		<h4>温馨提示</h4>
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box4')">关闭</a></div>
+        </div>
+		<div class="tip-mid">
+            <div class="tip-con">
+            	<ul class="form-items">
+					<li><input type="password" id='azb_pwd' placeholder="请输入安智币支付密码" /></li>
+				</ul>
+            </div>
+       </div>
+		<div class="btns2">
+			<a href="javascript:;" onclick="cloBox('#tip-box4')" class="fl">取消</a>
+			<a href="javascript:;" class="fr" id='sub_pwd'>确定</a>
+			<div class="clear"></div>
+		</div>
+    </div>
+</section>
+</body>
+</html>

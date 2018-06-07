@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>精品电子书</title>
+<link type="text/css" rel="stylesheet" href="../css/sogou_common.css"/>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<script>
+var app_status_gos=0;
+var obj;
+$(document).ready(function(){
+	novel_init()
+	$('.click_more').bind('click',function(){
+		var str='';
+		var s_count = $("#app_list li").length;
+		$('.loading').css("display","block");
+		$('.click_more').css("display","none");
+		$('.clickarea').unbind();
+		//获取软件
+		$.ajax({
+			url: '/lottery/sogou_e_book.php',
+			data: 'count='+s_count,
+			type: 'get',
+			success: function(data)
+			{
+				if(data)
+				{
+					$("#app_list").append(data); 
+					$('.loading').css("display","none");
+					$('.click_more').css("display","block");
+				}
+				else
+				{
+					$('.click_more').css("display","none");
+					$('.load_more').css("display","none");
+					$('.loading').css("display","none");
+					$('.load_end').css("display","block");
+				}
+				novel_init();
+			}
+		});
+	})
+})
+</script>
+</head>
+<body>
+<div class="app">
+	<ul class="app_list" id="app_list">
+		<!--{include file="sogou_list.html"}-->
+	</ul>
+</div>
+<!--{if $out.all_count > $out.show_info_count}-->
+<div class="load_more click_more" style="margin-bottom:10px;"><a href="javascript:void(0);">点击查看更多</a></div>
+<!--{/if}-->
+<div class="load_more loading" style="display:none;margin-bottom:10px;"><a href="javascript:void(0);">加载中...</a></div>
+<div class="load_more load_end" style="display:none;margin-bottom:10px;"><a href="javascript:void(0);">~到底了~</a></div>
+<script type="text/javascript">
+var aid = 0,p=0, sid='<!--{$out.sid}-->';
+var s_package = '<!--{$out.package}-->';
+function novel_init()
+{
+	$('.app_intro p').each(function(index){
+		var $introEle = $(this).parent(),$introHeight = $introEle.height(),$introPHeight = $(this).height(),$moreBtn = $(this).parent().siblings('.app_intro_more'),$clickArea = $(this).parent().parent().siblings('.clickarea');
+		if($introPHeight >22){
+			$moreBtn.css('display','block');
+			$clickArea.click(function(){
+				if($moreBtn.hasClass('intor_more_up')){
+					$moreBtn.removeClass('intor_more_up');
+					$introEle.css('height','22');
+				}
+				else{
+					$moreBtn.addClass('intor_more_up');
+					$introEle.css('height','auto');
+				}
+			})
+		}
+	})
+	check_status();
+}
+function check_status()
+{
+	check_app();
+	if(app_status_gos!==1)
+	{
+		$('.apk_down').each(function (){
+			$(this).attr('href',"#");
+			var json_data = $(this).attr('az-data');
+			var need_data = eval("("+json_data+")");
+			var softid = need_data['soft_id'];
+			var soft_package = need_data['soft_package'];
+			var soft_name = need_data['soft_name'];
+			var filesize = need_data['filesize'];
+			var version_code = need_data['version_code'];
+			
+			var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(softid));
+			var cmd = 'var soft_status=' + json_datas;
+			eval(cmd);
+	
+			if(soft_status ==1)
+			{
+				$(".app_des a").addClass("downed");
+				$(".app_des a").removeAttr("onclick");
+				$(this).removeClass("downed");
+				
+				$(this).html("下载中");
+				$(this).attr("onclick",'pause_download(parseInt('+softid+'));return false;');
+			}
+			else if(soft_status ==5)
+			{
+				$(".app_des a").addClass("downed");
+				$(".app_des a").removeAttr("onclick");
+				$(this).removeClass("downed");
+				
+				$(this).attr("onclick","installApp("+softid+")");
+				$(this).html("安装");
+			}
+			else if(soft_status ==2||soft_status ==3)
+			{
+				//继续状态
+				$(".app_des a").addClass("downed");
+				$(".app_des a").removeAttr("onclick");
+				$(this).removeClass("downed");
+				
+				$(this).attr("onclick",'download_apk(0,'+softid+',\''+soft_package+'\',\''+soft_name+'\','+version_code+','+filesize+',0);return false;');
+				$(this).html("继续");
+			}
+			else
+			{
+				$(this).attr("onclick",'download_apk(0,'+softid+',\''+soft_package+'\',\''+soft_name+'\','+version_code+','+filesize+',0);return false;');
+			}
+		});
+	}
+	
+}
+
+//下载
+function download_apk(aid,softid,pkgname,softname,versionCode,size,flag)
+{
+	$(".app_des a").addClass("downed");
+	$(".app_des a").removeAttr("onclick");
+	$('#anzhi_'+softid+'').removeClass("downed");
+	window.AnzhiActivitys.registerDownloadObserver(parseInt(softid));//注册下载状态监听 软件id
+	window.AnzhiActivitys.registerInstallObserver(pkgname);//注册安装状态监听 包名
+	window.AnzhiActivitys.downloadForActivity(aid,parseInt(softid),pkgname,softname,parseInt(versionCode),size,0);
+	//写日志
+	$.ajax({
+		url: '/lottery/year_feedback_download.php',
+		data: 'softid='+softid+'&sid='+sid+'&pkgname='+pkgname+'&aid=sougou',
+        type: 'post',
+		success: function(data){
+			$('#anzhi_'+softid+'').attr("onclick",'pause_download(parseInt('+softid+'));return false;');
+		}
+	});	
+}
+
+//暂停
+function pause_download(softid)
+{
+	window.AnzhiActivitys.pauseDownloadForActivity(softid);
+	$('#anzhi_'+softid+'').attr("onclick",'resume_download(parseInt('+softid+'));return false;');
+}
+function resume_download(softid)
+{
+	window.AnzhiActivitys.resumeDownloadForActivity(softid);
+	$('#anzhi_'+softid+'').attr("onclick",'pause_download(parseInt('+softid+'));return false;');
+}
+function onDownloadStateChanged(softid,newState){
+	var pkgname = $('#'+softid+'').parent().find('.soft_package').val();
+	if(newState == 1){
+		$('#anzhi_'+softid+'').html("下载中");
+	}else if(newState == 2){
+		$('#anzhi_'+softid+'').html("继续");
+	}else if(newState == 3){
+		$('#anzhi_'+softid+'').html("继续");
+	}else if(newState == 4){
+		$('#anzhi_'+softid+'').html("重试");
+	}else if(newState == 5){
+		$('#anzhi_'+softid+'').removeAttr("onclick");
+		$('#anzhi_'+softid+'').html("安装");
+		$('#anzhi_'+softid+'').bind('click',function(){	
+			installApp(parseInt(softid));
+		});		
+	}else if(newState == 6){
+		$('#anzhi_'+softid+'').removeAttr("onclick");
+		$('#anzhi_'+softid+'').html("打开");
+		$('#anzhi_'+softid+'').bind('click',function(){
+			openApp(pkgname,softid)
+		});	
+	}else if(newState == 8){
+		$('#anzhi_'+softid+'').html("继续");
+	}else if(newState == 9){
+		$('#anzhi_'+softid+'').html("检查中");
+	}
+}
+function installApp(softid)
+{
+	var json_data = $('#anzhi_'+softid+'').attr('az-data');
+	var need_data = eval("("+json_data+")");
+	var soft_package = need_data['soft_package'];
+	$.ajax({
+		url: '/lottery/vacation_third_install.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+soft_package+'&aid=sougou',
+		type: 'post',
+		success: function(data){
+			window.AnzhiActivitys.installAppForActivity(softid);
+			$('#anzhi_'+softid+'').removeAttr("onclick");
+		}
+	});
+}
+obj = setInterval(check_app,3000); 
+function check_app()
+{
+	if(app_status_gos==0)
+	{
+		//先判断客户端是否安装 搜狗阅读 包名
+		app_status_gos = window.AnzhiActivitys.isInstalledApp(s_package);
+	}
+	if(app_status_gos==1)//安装
+	{
+		$('.apk_down').each(function (){
+			var href = $(this).attr('rel');
+			//$(this).attr('href',href);
+			var json_data = $(this).attr('az-data');
+			var need_data = eval("("+json_data+")");
+			var softid = need_data['soft_id'];
+			var soft_package = need_data['soft_package'];
+			$(this).unbind();
+			$(this).removeAttr("onclick");
+			$(this).attr("onclick",'read(\''+href+'\','+softid+',\''+soft_package+'\');return false');
+			
+			$(".app_des a").removeClass("downed");
+			$(this).html("阅读");
+		});
+		if(obj)
+		{
+			clearInterval(obj);
+		}
+	}
+}
+function read(href,softid,pkg)
+{
+	$.ajax({
+		url: '/lottery/vacation_gift_open.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkg+'&aid=sougou',
+		type: 'get',
+		success: function(data){
+			window.location.href=href;
+		}
+	});
+}
+</script>
+</html>

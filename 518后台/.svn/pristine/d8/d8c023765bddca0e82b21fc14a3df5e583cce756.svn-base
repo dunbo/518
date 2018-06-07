@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+</head>
+<div style="margin:20px;">
+<h2>添加奖品</h2>
+<div style="margin:20px;">
+<form id='form1' action="__URL__/<?php if($list['pid']){ echo 'edit_award_do'; }else{ echo 'add_award_do'; } ?>" method="post" enctype="multipart/form-data">
+<table class="table_list">
+	
+	<tr>
+		<td>奖品名称
+			<input type="hidden" name="id" value="{$list['pid']}" />
+			<input type="hidden" name="aid" value="{$id}" />
+			<input type="hidden" name="ttype" value="{$type}" />
+			<input type="hidden" name="lottery_style" value="{$lottery_style}" />
+		</td>
+		<td><input type="text" name="name" value="{$list['name']}"  <?php if($start_tm && $start_tm < time()) echo 'readonly'?> /></td>
+	</tr>
+	<tr>
+		<td>奖品等级</td>
+		<td><input type="tel" name="level" value="{$list['level']}" <?php if($start_tm && $start_tm < time()) echo 'readonly'?> /></td>
+	</tr>
+	<tr>
+		<td>奖品类型</td>
+		<td>
+		<select name="type" id='type' <?php if($list['pid']) echo 'disabled'?> >
+			<option value="1" <?php if($list['type'] == 1) echo 'selected'; ?> >实物奖</option>
+			<option value="2" <?php if($list['type'] == 2) echo 'selected'; ?> >虚拟奖</option>
+			<option value="3" <?php if($list['type'] == 3) echo 'selected'; ?> >谢谢参与</option>
+			<option value="4" <?php if($list['type'] == 4) echo 'selected'; ?> >礼券</option>
+			<option value="5" <?php if($list['type'] == 5) echo 'selected'; ?> >礼包（直接发放）</option>
+		</select>
+		<?php 
+			if($start_tm && $start_tm < time()){
+				echo '<input type="hidden" name="type" value="'.$list["type"].'" />'; 
+			}
+		?>
+		</td>
+	</tr>
+
+	<tr id='gift_tr2' >
+		<td id='gift_id' >礼券ID</td>
+		<td><input type="tel" name="couponid" value="{$list['gift_file']}" <?php if($start_tm && $start_tm < time()) echo 'readonly'?> /></td>
+	</tr>
+	<tr>
+		<td>奖品图片</td>
+		<td><input type="file" name="pic_path" <?php if($start_tm && $start_tm < time()) echo 'disabled'?> /><br /><span style="color:red;">老虎机：80*128;九宫格：100*100；转盘：60*78；<br />(添加完奖品后，不可编辑活动页面的抽奖类型)</span></td>
+	</tr>
+	<tr>
+		<td>奖品说明</td>
+		<td><textarea cols="50" rows="4" name="desc" <?php if($start_tm && $start_tm < time()) echo 'disabled'?> >{$list['desc']}</textarea></td>
+	</tr>	
+	<input type="hidden" id="code" name="code" value="">
+	<input type="hidden" id="pkg_path" name="pkg_path" value="">
+	</form>
+	<tr id='gift_tr'>
+	<td>上传包名</td>
+	<td id='gift_tr2'>
+		<form method="post" action="__URL__/sign_package_view" enctype="multipart/form-data" name="fileForm" id="fileForm" target="fileUpload">
+		<input type="file" class="package" onchange="package_up()" name="package" <?php if($start_tm && $start_tm < time()) echo 'disabled'?>>
+		<font id='gift_err' style="color:red">
+			<?php if($list['pid'] && $gift_count){ echo "已上传包名：".$gift_count; } ?>
+		</font><br/>
+		<a href="/Public/sample6.csv">
+			<font id='gift_err' style="color:#0080FF">下载礼包模版</font>
+		</a>	
+		</form>
+		<?php if($list['pid'] && !empty($gift_arr) ) :?>
+			<ul style="list-style-type: none;text-align: left;">
+			<?php foreach($gift_arr as $k => $v ) : ?>
+				<li>{$k}</li>
+				<li>
+				<?php foreach($v as $kk => $vv ) : ?>
+						<input type="checkbox" checked="" disabled value="">
+						{$vv}
+				<?php endforeach;?>
+				</li>
+			<?php endforeach;?>
+			</ul>
+		<?php endif; ?>
+		<iframe name="fileUpload" id='fileUpload'  style="display: none;border:none;width:100%;min-height:20px;padding:0px;"></iframe>
+	</td>
+	</tr>
+	<tr>
+		<td><input type="button" value="提交" class="search_btn" onclick ="post_submit()" <?php if($start_tm && $start_tm < time()) echo 'disabled'?> /></td>
+		<td><input type="button" value="取消" class="search_btn" onclick="tb_remove();" /></td>
+	</tr>
+</table>
+</div>
+</div>
+
+<script>
+$(document).ready(function () {
+	var obj = document.getElementById("type");
+	sel_type(obj);
+});
+$("#type").change(function(){
+	sel_type(this);
+});
+
+function sel_type(obj){
+	var ap_type = obj.value;
+	if(ap_type == 4){
+		$('#gift_tr').css('display','none');
+		$('#gift_tr2').css('display','');
+		$('#gift_id').text('礼券id');
+	}else if(ap_type==5) {
+		$('#gift_tr').css('display','');
+		$('#gift_tr2').css('display','none');
+	}else{
+		$('#gift_tr').css('display','none');
+		$('#gift_tr2').css('display','none');
+	}
+}
+
+function package_up()
+{
+	$('#fileUpload').show();
+	$('#fileForm').submit();
+	
+}
+
+function post_submit()
+{
+	var code_obj = $("#fileUpload").contents().find("input[name='code']:checked");
+	var code_arr =[]; 
+	code_obj.each(function(){ 
+		code_arr.push($(this).val()); 
+	}); 
+	var pkg_path = $("#fileUpload").contents().find("input[name='pkg_path']").val();
+	
+	$('#pkg_path').val(pkg_path);
+	$('#code').val(code_arr.join(","));
+	$('#form1').submit();
+}
+
+</script>
+

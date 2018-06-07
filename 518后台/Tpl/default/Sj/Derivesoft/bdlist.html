@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+        <script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+		 <script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript">
+function showDiv(e) {
+	var o = document.getElementById("hidDiv"); 
+	o.style.left = e.clientX+"px"; 
+	o.style.top = e.clientY+10+"px"; 
+	o.style.display="block"; 
+}
+
+function hideDiv(e){
+	var o = document.getElementById("hidDiv"); 
+	o.style.left = e.clientX+"px";; 
+	o.style.top = e.clientX+10+"px"; 
+	o.style.display="none"; 
+}
+
+        function del(bdid,order_num){
+            if(confirm("删除不可恢复！确定要删除此条记录?")){
+                var param = {
+                    bdid : bdid,
+                    order_num : order_num,
+					from :  <?php echo $from; ?>
+                };
+                $.ajax({
+                    url:'__URL__/deletebd',
+                    type:'POST',
+                    data:param,
+                    dataType:'json',
+                    success:function(data){
+                        if(data==1)
+                        {
+                            location.reload();
+                        }
+                    }
+                });
+            }
+        };
+
+function changeorder(id,old_order)
+{
+    var order = $("#order_"+id).find("option:selected").val();
+    var param = {
+        id : id,
+        order : order,
+        old_order : old_order,
+		from : <?php echo $from; ?>
+    };
+    $.ajax({
+        url:'__URL__/bdlist',
+        type:'POST',
+        data:param,
+        dataType:'json',
+        success:function(data){
+            if(data==1)
+            {
+                location.reload(true);
+            }
+        }
+    });
+}
+    </script>
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+<body>
+        <br>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr height="35">
+		<td align="center" <?php if($from == 0 ) echo 'style="background:#FFCC66"'; ?> >
+			<a href="__URL__/bdlist"><font style="color:#000; font-weight:bold">5.5榜单频道</font></a>
+		</td>	
+		<td align="center" <?php if($from == 1 ) echo 'style="background:#FFCC66"'; ?>  >
+			<a href="__URL__/bdlist/from/1"><font style="color:#000; font-weight:bold">应用频道</font></a>
+		</td>
+		<td align="center" <?php if($from == 2 ) echo 'style="background:#FFCC66"'; ?>  >
+			<a href="__URL__/bdlist/from/2"><font style="color:#000; font-weight:bold">网游频道</font></a>
+		</td>
+		<td align="center" <?php if($from == 3 ) echo 'style="background:#FFCC66"'; ?>  >
+			<a href="__URL__/bdlist/from/3"><font style="color:#000; font-weight:bold">单机频道</font></a>
+		</td>
+        <td align="center" <?php if($from == 4 ) echo 'style="background:#FFCC66"'; ?>  >
+            <a href="__URL__/bdlist/from/4"><font style="color:#000; font-weight:bold">运营榜单</font></a>
+        </td>        
+	</tr>
+</table>		
+        <br>
+	<form action="/index.php/Sj/Systemmanage/tags_list" method="get" id="search">
+			<table>
+				<tr>
+					<td width="10%"><a href="__URL__/edit_bd?from={$from}&width=640&height=440&modal=true" style="float:left" class="search_btn thickbox">添加榜单</a></td>
+					<td><span onMouseOver="showDiv(event);" onMouseOut="hideDiv(event);"><a href="#" style="float:left" class="">客户端示例</a></span></td>
+				</tr>
+			</table>
+	</form>
+
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="7%" height="26">排序</th>
+				<th width="6%">榜单名称</th>
+				<th width="6%">榜单位置</th>
+				<th width="6%">软件数量</th>
+				<?php if($from == 0){ ?> <th width="6%">软件类型</th> <?php } ?>
+				<th width="7%">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="list">
+				<tr>
+					<td height="20" align="center">
+						<select id="order_{$list.id}" onchange="changeorder({$list.id},{$list.order_num})">
+							<?php foreach($order as $k=>$v){
+								if($v==$list['order_num']){
+									$selected = "selected='selected'";
+								}else{
+									$selected = "";
+								}
+							echo "<option value='".$v."' ".$selected." >".$v."</option>";
+							}
+							?>
+							</select>
+					</td>
+					<td height="20" align="center"> {$list.name}</td>
+					<td height="20" align="center"> 
+					<?php
+								if($from==0){
+									echo "5.5榜单频道";
+								}else if($from==1){
+									echo "应用频道";
+								}else if($from==2){
+									echo "网游频道";
+								}else{
+									echo "单机频道";
+								}
+					?>
+					</td>
+					<td height="20" align="center"> {$list.num}</td>
+				<?php if($from == 0){ ?>
+                    <td height="20" align="center"> <if condition="($list.type eq 0)">不限</if><if condition="($list.type eq 1)">应用</if><if condition="($list.type eq 2)">游戏</if></td>
+				<?php } ?>
+                    <td height="20" align="center">
+						<a href="__URL__/edit_bd?from={$from}&width=500&height=440&modal=true&bdid={$list.id}" class="thickbox blue">编辑</a>
+						|
+						<?php 
+							if(($from == 1 && $list['order_num'] <= 2) 
+							|| ($from == 0 && $list['order_num'] <= 4)){
+								echo "删除";
+							}else{
+						?>
+						<a href="#{$list.id}" onclick="del({$list.id},{$list.order_num})" class="blue">删除</a>
+						<?php } ?>
+					</td>
+				</tr>
+			</volist>
+		</tbody>
+	</table>
+        <div id="hidDiv" style="width: 238px; position: absolute; display: none; height: 120px;left: 228px; top: 22px; background-color: #ffcc33;"><img src="/Public/images/splash.jpg" width="100%"></div> 
+</body>
+</html>

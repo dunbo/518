@@ -1,0 +1,108 @@
+
+{//时间插件开始}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+<div>
+	<form action="__URL__/edit_soft" method="get" onsubmit="return checkPost()"
+>
+	<table>
+		<tr>	
+			<td>开始时间：<input type="hidden" value="{$cid}" name="cid" id="cid" /></td>
+			<td>
+				<input id="start_tm" name="start_tm" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value="{$result[0]['start_tm']|date='Y-m-d H:i:s',###}"/>
+			</td>
+		</tr>
+		<tr>	
+			<td>结束时间：</td>
+			<td>
+				<input id="end_tm" name="end_tm" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value="{$result[0]['end_tm']|date='Y-m-d H:i:s',###}"/>
+			</td>
+		</tr>
+		<tr>	
+			<td>包名：</td>
+			<td><input type="text" name="package" id="package" value="{$result[0]['package']}" onblur='get_softname()'/>
+			<input type="hidden" id = 'id' name="id" value="{$result[0]['id']}" />
+			<input type="hidden" id="category_id" name="category_id" value="{$result[0]['category_id']}" /><span id='call_pack' ></span></td>
+		</tr>
+		<tr>	
+			<td>软件名：</td>
+			<td><input type="text" name="softname" id ='softname' value="{$result[0]['softname']}"  readonly /></td>
+		</tr>
+		<tr>
+			<td>默认勾选：</td>
+			<td>
+				<select name="is_check">
+					<option value="1" <?php echo ($result[0]['is_check'] == 1)?'selected':'';?>>是</option>
+					<option value="2" <?php echo ($result[0]['is_check'] == 2)?'selected':'';?>>否</option>
+				</select>
+			</td>
+		</tr>
+		<tr>	
+			<td>一句话推荐：</td>
+			<td><input type="text" name="recommend"  id="recommend" value="{$result[0]['recommend']}" /><span id='call_recommend' ></span></td>
+		</tr>
+		<tr class="sub_tr">
+			<td>合作形式</td>
+			<td>
+				<SELECT name='type'>
+					<?php foreach($typelist as $key => $val): ?>
+						<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+					<?php endforeach; ?>				
+				</SELECT>
+			</td>
+		</tr>
+		<tr>
+			<td>行为id</td>
+			<td><input type="text" name="beid" id="beid" value="<?php if($result[0]['beid']) echo $result[0]['beid'] ?>" /></td>
+		</tr>
+		<tr>	
+			<td><input type="submit" value="保存" /></td>
+			<td><input type="button" value="取消" onclick="tb_remove();" /></td>
+		</tr>
+	</table>
+	</form>
+</div>
+<script type="text/javascript">
+	//软件包名验证
+	function get_softname(){
+		var pkg = $('#package').val();
+		$.ajax({
+			url: '/index.php/Sj/Onlinegame/get_softname/package/'+pkg,
+			type: 'get',
+			success: function(data){
+				if(data != 2){
+					var obj = eval('(' + data + ')');
+					
+					$('#softname').val(obj.soft_name);
+					$('#my_game').val(obj.category_name);
+				}else{
+					$('#package').val('');
+					$('#softname').val('');
+					$('#my_game').val('');
+					alert("该软件不存在");
+					return false;
+				}
+			}
+		});
+	}
+	function checkPost(){
+		var enable_two = true;
+		var pkg = $("#package").val();
+		$.ajax({
+			url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					if(!confirm(data)){
+						enable_two = false;
+					}
+				}
+				
+			}
+		});
+		return enable_two;
+	}
+</script>

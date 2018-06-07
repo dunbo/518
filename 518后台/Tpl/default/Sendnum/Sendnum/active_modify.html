@@ -1,0 +1,195 @@
+<include file="../Public/header"/>
+<style type="text/css">
+.tb{ border-top:1px solid #DCDCDC;border-left:1px solid #DCDCDC;}
+.tb th,.tb td{border-right:1px solid #DCDCDC; padding:5px 10px; border-bottom:1px solid #DCDCDC;}
+.list a{border:1px solid #000;margin-right:20px;padding:5px;}
+.active {background:#cdd;font-weight:bold;}
+.verify {margin-right:10px; margin-left:10px; cursor:pointer;}
+#openbox{ text-align:left; width:400px; height:200px; padding:10px 8px; border:1px #0c0c0c solid; background:#FFFFFF; position:absolute; z-index:2; display:none;}
+#openbox #close{ position:absolute; top:8px; right:15px; cursor:pointer; font-size:14px;}
+#mark{ top:0; left:0; position:absolute; z-index:1; background:#000000; filter:alpha(opacity=50); opacity:0.5;}
+</style>
+<link rel="stylesheet" type="text/css" href="/Public/css/tablelist.css" />
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script>
+
+$(function() {
+	$("#rule_all").click(function() {
+		if (this.checked == true) {
+			checked_rule_all();
+		} else {
+			$("#rule_day").attr("disabled", false);
+			$("#rule_ip").attr("disabled", false);
+			$("#rule_id").attr("disabled", false);
+			$("#rule_val").show();
+		}
+	});
+
+	var rule_type_data = $("#rule_type").attr("data");
+	if ((rule_type_data | 8) == rule_type_data || rule_type_data == 1) {
+		$("#rule_day").attr("checked", true);
+	}
+	if ((rule_type_data | 16) == rule_type_data || rule_type_data == 3) {
+		$("#rule_ip").attr("checked", true);
+	}
+	if ((rule_type_data | 32) == rule_type_data || rule_type_data == 4) {
+		$("#rule_id").attr("checked", true);
+	}
+	if ((rule_type_data | 64) == rule_type_data || rule_type_data == 2) {
+		$("#rule_all").attr("checked", true);
+		checked_rule_all();
+	}
+});
+
+function checked_rule_all() {
+	$("#rule_day").attr("checked", false);
+	$("#rule_day").attr("disabled", true);
+	$("#rule_ip").attr("checked", false);
+	$("#rule_ip").attr("disabled", true);
+	$("#rule_id").attr("checked", false);
+	$("#rule_id").attr("disabled", true);
+	$("#conf_cnt").val("");
+	$("#rule_val").hide();
+}
+
+ function checkinput(){
+	var activename = $("#active_name").val();
+	if(activename.length  < 2 || activename.length > 50){
+		alert('活动名不能低于2个字符不能高于50个');
+		return  false;
+	}
+
+	var type = '';
+	$("[name='rule_type[]']").each(function() {
+		if (this.checked == true) {
+			if (this.id == "rule_all") {
+				type = 'all';
+			} else {
+				type = 'common';
+			}
+		}
+	});
+	if (!type) {
+		alert('请选择发号方式');
+		return false;
+	} else if (type == 'common' && !$("#conf_cnt").val()) {
+		alert('请填写限制个数');
+		return false;
+	}
+
+	var numfile = $("#numfile").val();
+	if(numfile.length == 0){
+		alert('请上传文件');
+		return  false;
+	}
+
+	var time_arr = ["hour_1","min_1","sec_1","hour_2","min_2","sec_2"];
+	var len = time_arr.length;
+	var re = /^\d{1,2}$/i;
+	for(var a=0;a < len;a++){
+		if(!re.test($('#'+time_arr[a]).val())){
+			alert('请输入整型数字');
+			return false;
+		}
+		var intval = parseInt($('#'+time_arr[a]).val());
+		if(time_arr[a] == 'hour_1' || time_arr[a] == 'hour_2'){
+			if(intval < 0 || intval > 23){
+				alert('请输入 0-23 之间的数字');
+				return false;
+			}
+		}else{
+			if(intval < 0 || intval > 59){
+				alert('请输入 0-59 之间的数字');
+				return false;
+			}
+		}
+	}
+ }
+</script>
+<center>
+<div id="active">
+<form action="__URL__/active_modify_do" method="POST">
+<input type="hidden" value="{$url_suffix}" name="url_suffix"/>
+<table class="tb">
+<tr><td colspan="2">
+<center>活动编辑</center>
+</td><tr>
+<tr>
+<td>
+活动名称:
+</td>
+<td>
+<input style="width:450px;" type="text" id="active_name" name="active_name" value="<?php echo $result['active_name'];?>"> <font color="red" size="1px">活动名不能低于2个字符不能高于50个</font>
+</td></tr>
+<tr>
+		<td colspan="1">开始时间:</td><td colspan="1">
+		<span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+			<input id="begintime" name="begintime"
+				style="cursor: hand; width: 100px; border: none 0px black;"
+				value="<?php echo date('Y-m-d',$result['start_tm']);?>" size="15" type="text"><img
+				src="/Public/js/calendar.gif"
+				onclick="return showCalendar('begintime', 'y-m-d');"
+				style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+				height="15px">
+				</span>
+				请输入时间
+				<input type="text" name="hour1" id="hour_1" value="<?php echo $result['hour1'];?>" size="5"/>:
+				<input type="text" name="min1" id="min_1" value="<?php echo $result['min1'];?>" size="5"/>:
+				<input type="text" name="sec1" id="sec_1" value="<?php echo $result['sec1'];?>" size="5"/><font color="red" size="2px">可手动输入时间。小时：0-23之间的整数；分和秒：0-59之间的整数
+</font>
+				</td>
+</tr>
+<tr>
+		<td colspan="1">结束时间:</td><td colspan="1"><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;"><input id="endtime" name="endtime"
+				style="border: 0px none black; width: 100px;" value="<?php echo date('Y-m-d',$result['end_tm']);?>"
+				size="15" type="text"><img src="/Public/js/calendar.gif"
+				onclick="return showCalendar('endtime', 'y-m-d');"
+				style="margin: 1px;" width="16px" align="absmiddle" height="15px"></span>
+				请输入时间
+				<input type="text" name="hour2" id="hour_2"  value="<?php echo $result['hour2'];?>" size="5"/>:
+				<input type="text" name="min2" id="min_2"  value="<?php echo $result['min2'];?>" size="5"/>:
+				<input type="text" name="sec2" id="sec_2"  value="<?php echo $result['sec2'];?>" size="5"/><p><font color="red" size="2px">可手动输入时间。小时：0-23之间的整数；<br/>分和秒：0-59之间的整数 结束时间>=开始时间
+</font></p>
+				</td>
+</tr>
+<tr>
+<td>发号方式:</td>
+<td id="rule_type" data="<?php echo $result['active_type'];?>">
+	<input id="rule_day" type="checkbox" name="rule_type[]" value="8"/>按日限制&nbsp;
+	<input id="rule_ip" type="checkbox" name="rule_type[]" value="16"/>按IP限制&nbsp;
+	<input id="rule_id" type="checkbox" name="rule_type[]" value="32"/>按ID限制&nbsp;
+	<input id="rule_all" type="checkbox" name="rule_type[]" value="64"/>按总量限制
+	<span id="rule_val"><input id="conf_cnt" name="conf_cnt" type="text" value="<?php echo $result['conf_cnt']?>"/><font color="red" size="1px">可输入1位-10位整数；数值>0</font></span>
+	<!--
+	<select name="typeid" id="type_id" onchange="changeCnf(this)">
+		<option value="5000000">--请选择--</option>
+		<?php foreach($typelist as $type){ ?>
+			<option value="<?php echo $type['id'];?>" <?php if($type['id'] == $result['active_type']) echo "selected=selected";?>><?php echo $type['type_name'];?></option>
+		<?php } ?>
+	</select>
+	-->
+</td>
+</tr>
+
+<!--<tr id="hides">
+	<td><div id="type_name">{$type_name}</div></td>
+	<td><input id="type_conf_cnt" name="conf_cnt" type="text" value="<?php echo $result['conf_cnt']?>"/><font color="red" size="1px">可输入1位-10位整数；数值>0</font></td>
+</tr>-->
+
+<tr><td></td><td><?php if($_GET['view'] != 1){ ?><input type="submit" value="提交" onclick="return checkinput()"/><?php }?><input type="button" onclick="window.location.href='__URL__/active_list{$url_suffix}'" value="取消"></td></tr>
+</table>
+<input type="hidden" name="active_id" value="<?php echo $result['id'];?>">
+</form>
+<?php foreach($typelist as $type){ ?>
+	<input id="type_<?php echo $type['id']?>" type="hidden" value="<?php if($result['active_type'] == $type['id']){ echo $result['conf_cnt'];}else{ echo $type['conf_cnt'];}?>"/>
+	<input id="type_name_<?php echo $type['id']?>" type="hidden" value="<?php echo $type['type_name'];?>"/>
+<?php } ?>
+</div>
+<center>

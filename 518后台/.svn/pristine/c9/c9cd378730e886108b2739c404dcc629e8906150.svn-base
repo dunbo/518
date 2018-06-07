@@ -1,0 +1,446 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js"></script>
+<!--上传文件用到的js-->
+<script type="text/javascript" src="/Public/js/ajaxfileupload_anzhi.js?1"></script>   
+
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+    function checkPost() {
+         if(document.getElementById("single_pk").value=="")
+			  { 
+				 alert("请填写一个包名!");
+				 return false;
+			  }
+		// }
+		if(document.getElementById('radio_zero').checked){
+			var num=document.getElementById("upd_num").value;
+			if(!num.match(/^\d+$/g)){
+	        	alert('更新全部软件时软件更新数量不能为空');
+	        	return false;
+        	}
+		}
+		if(!(document.getElementById('radio_del_one').checked || document.getElementById('radio_del_two').checked)){
+			alert("请选择软件icon删除条件!");
+			return false;
+		}
+		if(!(document.getElementById('radio_zero').checked || document.getElementById('radio_one').checked || document.getElementById('radio_two').checked)){
+			alert("请选择预下载触发条件!");
+			return false;
+		}
+		if(document.getElementById('radio_one').checked){
+			if(document.getElementById("single_appoint").value==""){
+	        	alert('更新指定软件时请填写一个包名');
+	        	return false;
+        	}
+		}
+        var start_time = $("#start_time").val();
+        if (!start_time) {
+            alert("开始时间不能为空！");
+            return false;
+        }
+        var end_time = $("#end_time").val();
+        if (!end_time) {
+            alert("结束时间不能为空！");
+            return false;
+        }
+        if (start_time > end_time) {
+            alert("开始时间不能大于结束时间！");
+            return false;
+        }
+        //相同时间段更新指定软件包时，检查此包是否存在start_time和end_time
+        var pkg=document.getElementById('single_appoint').value;
+        var get_ready_pkg=document.getElementById('single_pk').value;
+
+		var enable = true;
+		$.ajax({
+			url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+get_ready_pkg,
+			// url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg+'/start_at/'+start_at+'/end_at/'+end_at,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					if(data==1){
+						alert('开始时间不能大于结束时间');
+						enable=false;
+					}else{
+						if(!confirm(data)){
+							enable=false;
+						}
+					}
+					
+				}
+			}
+		});
+		if(!enable){
+			return enable;
+		}
+		
+       	return get_softname('single_pk');
+        if(pkg==get_ready_pkg){
+        	alert("预下载软件包名和更新指定软件包名不能相同");
+        	return false;
+        }
+        if(document.getElementById('radio_one').checked){
+        	return get_softname('single_appoint');
+        	var k="";
+			$.ajax({
+				url:'/index.php/Sj/Deskdownset/check_package_appoint/package_appoint/'+pkg+'/start_time/'+start_time+'/num/'+Math.random()+'/end_time/'+end_time+'/id/'+{$list.id},
+				type: 'get',
+				async:false,
+				success: function(data)
+				{
+					k=data;
+				}
+			});
+			if(k!=1){
+				alert(k);
+				return false;
+			}
+        }
+		return true;
+    }
+    
+    //////// 渠道弹出的thickbox相关函数
+    function count() {
+        $.ajaxFileUpload({
+            url:'__APP__/Public/pub_csv_count',
+            type:'POST',
+			fileElementId:'upload_file',
+			dataType: 'json',
+            secureuri:false,
+            dataType:'json',
+            success:function(data)
+			{
+			    if(data.error1==-1)
+				{
+					alert("请选择导入的CSV文件!");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+					return false;
+				}
+				else if(data.error2==-2)
+				{
+					alert("请上传CSV格式文件！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else if(data.error2==-3)
+				{
+					alert("CSV文件格式不正确,请您参考下载模板！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else
+				{
+					document.getElementById("csv_url").value=data.csv_url;
+					document.getElementById("csv_count").value=data.out_count;
+					document.getElementById("pre_dl_count").value=data.out_count;
+                }				
+            }
+        });
+    }
+	
+	//渠道
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{
+		$('#channel_div').html($('.TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	//机型
+	function onclikDevice()
+	{
+		$('#device_div').html($('.TB_ajaxContent #c_device_res').html());
+	}
+
+	function check_arrs()
+	{
+		$('.TB_ajaxContent #c_device_res').html($('#device_div').html());
+
+		$('#device_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_did_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	function delItem(obj) {
+	$(obj).parent().remove();
+	//  var fatie = $("#channel_div");
+	//	fatie.remove();
+
+	}
+	 function addItem() {
+		var channel_select = $("#device_div");
+		channel_select.clone().appendTo("#device_td");
+	}
+	function submitDevice()
+	{
+		var cids = '';
+		$('#device_div').empty();
+		$(".TB_ajaxContent #c_device_res input:checked").each(function(){
+			var item = $('<label>' + $('#c_device_res .l_did_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			item.find('input').click(function(){
+				$(this).parent().remove();
+			});
+			$('#device_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	//软件包名验证
+	function get_softname(id)
+	{
+		var pkg=document.getElementById(id).value;
+		$.ajax({
+			url:'/index.php/Sj/Onlinegame/get_softname/package/'+pkg+'/num/'+Math.random(),
+			type: 'get',
+			success: function(data)
+			{
+			    if(data != 2)
+				{
+					if(id=='single_pk'){
+						var obj = eval('(' + data + ')');
+						// document.getElementById(id+"_name").value=obj.soft_name;
+						$('#'+id+'_ming').val(obj.soft_name);
+						//$('#my_game').val(obj.category_name);
+					}
+					if(id=='single_appoint'){
+						var obj = eval('(' + data + ')');
+						// document.getElementById(id+"_name").value=obj.soft_name;
+						$('#'+id+'_ming').val(obj.soft_name);
+						//$('#my_game').val(obj.category_name);
+					}
+					return true;
+				}
+				else
+				{
+				    document.getElementById(id).value="";
+					//document.getElementById("error_info").value="该软件不存在";
+					alert("该软件不存在");
+					return false;
+				}
+			}
+		});
+	}
+	function check_num(id){
+        var num=$("#"+id).val();
+        if(!num.match(/^\d+$/g)){
+        	$("#"+id).val("");
+        	alert('软件更新数量必须为整数');
+        	return false;
+        }
+    }
+   
+	function del_csv(obj)
+	{
+		var del_csv = $(obj).attr("id");
+		if(del_csv=="del_csv_value")
+		{
+			$("#csv_count").val("");
+			$("#csv_url").val("");
+			$("#have_pre_dl").val("");
+			$("#pre_dl_count").val("");
+		}
+		else if(del_csv=="del_search_csv_value")
+		{
+			$("#search_keys_count").val("");
+			$("#search_keys_url").val("");
+			$("#have_keys_url").val("");
+			$("#show_search_keys_count").val("");
+		}
+		alert("删除后提交即生效");
+	}
+	$(document).ready(function()
+	{
+		var have_csv="{$list.csv_url}";
+		var is_upload_csv="{$list.is_upload_csv}";
+		if(have_csv&&is_upload_csv==1)//添加的时候已经上传过了可以删除
+		{
+			$("#del_csv_value").css("display","");
+			$("#upload_csv").css("display","none");
+			$("#upload_file").css("display","none");
+			$("#have_pre_dl").css("display","");
+		}
+		else if(!have_csv&&is_upload_csv==1)//已经上传过了又删除了什么也不显示
+		{
+			$("#tr_csv").css("display","none");
+		}
+		else if(!have_csv&&is_upload_csv==0)//添加的时候没有上传可以上传
+		{
+			$("#del_csv_value").css("display","none");
+			$("#upload_csv").css("display","");
+			$("#upload_file").css("display","");
+			$("#have_pre_dl").css("display","none");
+		}
+	});
+	
+</script>
+
+<form id="edit_content_form" method="POST" action="__URL__/upd_downset_to" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr">
+        <td style="width:130px;"><font color="red">*</font>预下载软件包名</td>
+        <td>
+            <input type="text" name="package" id="single_pk" value='{$list.package}' onBlur="get_softname(this.id)"/>
+        </td>
+    </tr>
+    <tr class="sub_tr">
+        <td style="width:130px;"><font color="red">*</font>预下载软件名称</td>
+        <td>
+            <input type="text" id="single_pk_ming"."1" readonly="true" value='{$list.package_name}'/>
+        </td>
+    </tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>触发条件</td>
+    </tr>
+    <tr class="sub_tr">
+        <td></td>
+        <td align="left" bgcolor="#FFFFFF">
+             <input type="radio" name="trigger_condition" style="margin-bottom:10px" value="0" id="radio_zero" <if condition="$list.trigger_condition eq 0">checked='true'</if>/>更新全部软件&nbsp;&nbsp;&nbsp;更新数量<input type="text" size="13"  id="upd_num" name='upd_count' onblur="check_num(this.id)" <if condition="$list.trigger_condition eq 1">value=''<elseif condition="$list.trigger_condition eq 2"/>value=''<elseif condition="$list.trigger_condition eq 0"/>value='{$list.upd_count}'</if>/><br>
+			 <input type="radio" name="trigger_condition" style="margin-bottom:10px" value="1" id="radio_one" <if condition="$list.trigger_condition eq 1 ">checked='true'</if> />更新指定软件&nbsp;&nbsp;&nbsp;软件包名<input type="text" size="13"  id="single_appoint" name="package_appoint" onBlur="get_softname(this.id)" value='{$list.package_appoint}' ><br>
+			 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;软件名称<input type="text" size="13" id="single_appoint_ming"."1" readonly="true" value='{$list.package_appoint_name}'/><br>
+			 <input type="radio" name="trigger_condition" style="margin-bottom:10px" value="2" id="radio_two" <if condition="$list.trigger_condition eq 2">checked='true'</if>/>点击市场icon启动市场
+        </td>
+    </tr>
+	<tr class="sub_tr">
+        <td style="width:140px;"><font color="red">*</font>软件icon删除条件</td>
+    </tr>
+    <tr class="sub_tr">
+        <td></td>
+        <td align="left" bgcolor="#FFFFFF">
+             <input type="radio" name="del_condition" style="margin-bottom:10px" value="0" id="radio_del_one" <?php if(isset($list['del_condition']) && $list['del_condition']==0){echo "checked='true'";
+             	}?>/>点击图标后<br>
+			 <input type="radio" name="del_condition" style="margin-bottom:10px" value="1" id="radio_del_two" <if condition="$list.del_condition eq 1 ">checked='true'</if> />安装完成后
+        </td>
+    </tr>		
+	<tr id="tr_csv" class="sub_tr">
+		<td>覆盖用户：</td>
+		<td style="height:70px;">
+		<a href="__APP__/Public/down_moban" class="blue" style="text-decoration:none; color:blue;font-size:14px;">下载csv模板</a><br/>
+		<input type="file" id="upload_file" name="upload_file"  style="background:none; border:none; width:160px;" value="" /><input type="button" id="upload_csv" value="上传" onclick="count()" />
+		
+		<input type="text" id="have_pre_dl" name="have_pre_dl" value="<?php if($list['csv_url']){ ?>{$list.csv_url}<?php } ?>" readonly /><br>
+		<span id="csv_count_show_span" style="color:red; font-size:14px;">有效用户数</span>
+		<input type="text" id="pre_dl_count" name="pre_dl_count" readonly style="border:none;color:red; background:none;" value="<?php if($list['csv_count']){ ?>{$list.csv_count}<?php } ?>"/>
+		<input type='hidden' name='csv_url' id='csv_url' value="">
+		<input type='hidden' name='csv_count' id='csv_count' value="">
+		<input type="button" id="del_csv_value" value="删除" onclick="del_csv(this)" />
+		</td>
+	</tr>
+	<tr class="sub_tr">
+	<td>选择渠道可见</td>
+	<td align="left" width="300">
+	<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+		<div id="channel_div">
+			<volist id="chl_list_vo" name="chl_list" >
+				&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+			</volist>
+		</div>
+	</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>机型可见</td>
+			<td>
+			<a href="/index.php/Public/showDevice?callback=submitDevice&ready=check_arrs&type=checkbox&reset_device=1" class="thickbox"><font color="blue">选择机型</font></a>
+			<div id="device_div">
+			<volist id="chl_list_vo" name="device_selected" >
+				&nbsp;<label class="l_did_{$chl_list_vo.did}"><input type="checkbox" name="did[]" checked="checked" value="{$chl_list_vo.did}"/>{$chl_list_vo.dname}</label>&nbsp;
+			</volist>
+			</div>
+			</td>
+	</tr>
+	<tr class="sub_tr">
+	  <td>运营商</td>
+	  <td id="operator_td">
+		<div id="operator_div">
+			<?php foreach($operator_list as $k => $v): ?>
+			<label><input name="oid[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		  <br/>
+		</div>
+	  </td>
+	  </tr>
+	<tr class="sub_tr">
+	  <td>固件版本</td>
+	  <td id="channel_td">
+		<div id="abi_div">
+			<?php foreach($firmwarelist as $k => $v): ?>
+			<label><input name="firmware[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		</div>
+	  </td>
+	</tr>
+	<tr class="sub_tr">
+	  <td>市场版本</td>
+	  <td id="channel_td">
+		<div id="abi_div">
+			<?php foreach($version_list as $k => $v): ?>
+				 <label>
+				<input name="version_code[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		</div>
+	  </td>
+	</tr>
+    <tr class="sub_tr">
+		<td><font color="red">*</font>开始时间</td>
+		<td>
+            <input id="start_time" name="start_time" type="text" class="Wdate" style="float:left" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value='{$list.start_time|date="Y-m-d H:i:s",###}'/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>结束时间</td>
+		<td>
+            <input id="end_time" name="end_time" type="text" class="Wdate" style="float:left" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" value='{$list.end_time|date="Y-m-d H:i:s",###}'/>
+        </td>
+        <td/>
+	</tr>
+    <input type="hidden" name="id" id="id" value="{$list.id}"/>
+	<input type="hidden" name="life" value="<?php echo $_GET['life']; ?>"/>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="extent_id" value='<?php echo $extent_id?>'/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

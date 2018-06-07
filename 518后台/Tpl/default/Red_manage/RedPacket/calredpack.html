@@ -1,0 +1,145 @@
+<div>
+	<h3>预览</h3>
+	<table id="addform" style="border-spacing:10px 20px;" class="table_list">
+	<form>
+    
+        <tr>
+			<td class="caltright">实际发放的红包数/金额：</td>
+			<td class="calleft">{$outnum}个/{$usemon}元</td>
+		</tr>
+		
+        <if condition="$params.givetype gt 1 and $outnum gt $needusenum">
+            <tr>
+                <td class="caltright">未配置的红包数/金额：</td>
+                <td class="calleft">{$nousenum}个/{$nousemoney}元</td>
+            </tr>
+             <if condition="$params.givetype eq 3 ">
+            <volist name="params['starttime']" id="start" key="k">
+            <tr>
+            <td class="caltright">发放时间</td>
+            <td class="calleft">
+           {$start} - {$params['endtime'][$k-1]}
+            </td>
+            </tr>
+            <tr>
+            <td class="caltright">发放个数:</td>
+           <td class="calleft">
+            发放个数：{$params['pnum'][$k-1]}
+            </td>
+            </tr>
+            </volist>
+            </if>
+             <if condition="$params.givetype eq 2 ">
+            <volist name="usedconf['starttime']" id="start" key="k">
+            <tr>
+            <td class="caltright">发放时间</td>
+            <td class="calleft">
+            {$start} - {$usedconf['endtime'][$k-1]}
+            </td>
+            </tr>
+            <tr>
+            <td class="caltright">发放个数</td>
+            <td class="calleft">
+            {$usedconf['pnum'][$k-1]}
+            </td>
+            </tr>
+            </volist>
+        
+            </if>
+        </if>
+        
+        
+        
+        
+        <if condition="$restnum gt 0">
+        <tr>
+			<td class="caltright">无效红包数/金额：</td>
+			<td class="calleft">{$restnum}个/{$restmon}元</td>
+         
+			
+		</tr>
+        </if>
+         <tr>
+			<td class="caltright">随机最小值~最大值为：</td>
+			<td class="calleft">{$mincash}/{$maxcash}元</td>
+         
+			
+		</tr>
+        <input type="hidden" value="{$filename}" id="filename" name="filename">
+        <if condition="($restnum gt 0)&&(ACTION_NAME != 'preview')">
+            <tr>
+                <td class="caltright"><input type="checkbox" id="numpri" name="numpri" value="1"/> 红包总数优先：
+                </td>
+                <td>红包总数必须满足<span style="color:red">{$realnum}</span>个，需发出的实际红包总额为<span style="color:red">{$realmon}</span>,该金额超过红包总额，请谨慎选择</td>
+                
+            </tr>        
+        </if>
+        
+		
+	</form>
+    <tr>
+    <td colspan="2" style="text-align:left;">
+   注：<br/>
+        1，【下载查看红包结果】点击后可下载当前配置的随机红包结果。<br/>
+        2，【刷新】可重新随机一组数值。<br/>
+        3，多次刷新后仍无法满足发出的红包数和金额时，请试试调整最低红包金额或最高金额系数。<br/> 4，分时段发放红包时，若当前随机结果产生无效红包数，最后一个时间段实际发放的红包数可能在[该时段发放数量，该时段发放数量—无效红包数] 
+   </td>
+    </tr>
+    <tr>
+    <td width="33%" >
+    <a  style="margin:auto" href="__URL__/download/filename/{$filename}/<if condition="ACTION_NAME neq 'preview'">/type/origin/</if>" id="download" class="search_btn" target="_blank">下载红包结果</a></td>
+    <td>
+    <table>
+    <tr>
+    <td width="50%" style="border: none;"><a href="javascript:;" style="margin:auto" class="search_btn" onclick="validata(1)">刷新</a></td>
+    <td width="50%" style="border: none;"><a class="search_btn" href="javascript:;" onclick="subtheform()">确定添加</a></td>
+    </tr>
+    </table>
+    </td>
+    
+    </tr>
+	</table>	
+    
+    
+    
+    
+</div>
+<script type="text/javascript">
+var action = '{$Think.const.ACTION_NAME}';
+$(document).ready(function(){
+    $("#numpri").click(function(){
+        if(action != 'preview'){    
+            if($("#numpri").attr("checked")){
+                 $("#download").attr('href','__URL__/download/filename/{$filename}/type/add');
+            }else{
+                 $("#download").attr('href','__URL__/download/filename/{$filename}/type/origin');
+            }
+           
+        }else{
+            $("#download").attr('href','__URL__/download/filename/{$filename}/');
+        }
+        
+    })
+
+})
+
+    
+function subtheform(){
+    var theform = document.getElementById('pacf');   
+    var totalnum = deformat_int($("#totalnum").val());
+    var oldmon = deformat_int($("#oldmon").val());
+    if($("#numpri").attr("checked")){
+        var numpri = 1;
+    }else{
+        var numpri =0;
+    }
+    theform.numpri.value = numpri;
+    theform.filename.value = $("#filename").val();
+    theform.totalnum.value = totalnum;
+    theform.oldmon.value = oldmon;
+    theform.submit();
+
+}
+
+
+</script>

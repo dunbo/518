@@ -1,0 +1,297 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+<link rel="stylesheet" type="text/css" href="/Public/img/common.css" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<!-- <script type="text/javascript" src='__PUBLIC__/js/sensitive.js'></script> -->
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<style>
+<!--
+
+table.words td{width:180px;height:22px;padding-left:10px;word-wrap : break-word ;word-break:break-all;}
+#abcd,#abcd a{margin-left:10px;margin-right:10px;font-size:16px;}
+-->
+</style>
+
+<div class="main" >
+<div class="content">
+<center>
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="tb">
+<tr>
+<td align='left'>
+<form id="upload" method='post' action="__URL__/tag_add" onsubmit="return checkPostAdd()">
+<input size='19' type="text" name="tag_name" id="tag_name" value="" /> <input type="submit" name="button" id="button" value="&nbsp;添加标签&nbsp;"  />
+&nbsp;&nbsp;&nbsp;&nbsp;
+ <input type="button" onclick="javascript:get_tag_name();" value="&nbsp;编辑标签名称&nbsp;"  />&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+ <input type="button" id="batch_add" value="&nbsp;批量导入&nbsp;"  onclick="javascript:$('#batch_add_box').zxxbox();$('#batch_add_file').val('')"/>&nbsp;&nbsp;
+</form>
+</td>
+</tr>
+<br />
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr style="background-color:#ccc;">
+    <td align='left' width="10%" height="30"> <font style="color:#000; font-weight:bold">&nbsp&nbsp当前索引</font>&nbsp&nbsp<font style="color:#F00; font-weight:bold">(<if condition="$abc eq ''" > 全部<elseif condition="$abc eq '1'" />其他<else/> {$abc} </if>)</font></td>
+    <td align='left' height="30" >
+	<a href="__URL__/tag_list/" <if condition="$abc eq ''" > style="color:#f00" </if> >全部<br/>{$count}</a> 
+	</td>
+	<volist name='abc_arr' id='v'>
+		<td align='center'>	
+				<a href="__URL__/tag_list/abc/{$v}" <if condition="$abc eq $v" > style="color:#f00" </if> ><if condition="$v eq '1'" >其它<else/>{$v}</if><br/>{$abc_count.$v}</a>
+		</td>
+	</volist>
+  </tr>
+ </table> 
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">  
+  </tr>
+  <tr>
+    <td align='left' width="15%" height="30">&nbsp&nbsp&nbsp<input type="checkbox" value="全选" onclick="selectAll();"> <input type="button" id="del_all" value="&nbsp;删除标签&nbsp;"  /></td>
+    <td align='center' width="75%" height="30" ><div align='left'>&nbsp&nbsp{$page}</div></td>
+  </tr>
+   <tr>
+   <td colspan="2">
+	<table width="100%" height="60" border="0" cellpadding="0" cellspacing="0" class="tb words">
+	<tr>
+	<?php $i=1;foreach($list as $v) :?>
+	<td>
+		<input type="checkbox" name="check_id" alt="<?php echo ($v['soft_num']>0)?$v['tag_name']:'';?>" value="<?php  echo $v['tag_id']; ?>" atl="<?php echo $v['tag_name'];?>"><a href="/index.php/Dev/TagPackage/tags_softlist/tag_name/<?php  echo $v['tag_name']; ?>"><?php  echo $v['tag_name']; ?>(<?php  echo $v['soft_num']; ?>)</a>
+	</td>
+	<if condition="($i%6) eq 0" > </tr></if>
+	<?php $i++;endforeach;?>
+	</tr>
+	</table>
+	</td>
+   </tr>
+   </table>
+	</td>
+   </tr>
+</table>
+</center>
+</div>
+</div>
+
+<div id="edit_box" style="padding:10px; width:200px; height:100px;   display:none;">
+	<h2>编辑标签名称</h2><br />
+	<input size='19' type="text" name="edit_tag_name" id="edit_tag_name" value="" /><br /><br />
+	<input type='button'  id='sub_edit' value="确定" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='button'  onclick="javascript:$.zxxbox.hide();" value="取消" />
+</div>
+
+<div  id="batch_add_box" style="padding:10px; width:310px; height:100px;   display:none;">
+<form id="upload" method='post' action="__URL__/tag_add/batch/1" enctype="multipart/form-data" onsubmit="return checkPostbatch()">
+    <div style='margin-left: 20px;width:300px'>
+        请按照上传模板的要求添加内容（<a href="__PUBLIC__/sample18.csv" style="color:blue">下载批量导入模板</a>）
+        <input type="text" name="file_name" id="file_name" style="height: 23px;width:200px">
+        <input type="file" id="batch_add_file" style="width:70px" name="batch_add_file" onchange="get_val()">
+    </div>   
+    <div style="margin-top: 10px;margin-left: 210px;width:120px">
+        <input type="submit" value="上传" value="&nbsp;上传&nbsp;">
+        <input type="button" value="取消" onclick="javascript:$.zxxbox.hide();">
+    </div>
+</form>
+</div>
+<div id="url_str_box" style="padding:10px; width:200px; height:100px;   display:none;">
+	<form id="down_csv" method='post' action="__URL__/tag_add/" enctype="multipart/form-data">
+	<input type="hidden" value='<?php echo $error_list?>' name='error_list'>
+	<h2>导入结果</h2><br />
+	<div style="float:left;">导入成功：{$t_count}<br>
+	导入失败：{$f_count}</div>
+	<div style="float:right;"><button onclick="javascript:$('#down_csv').submit();">下载失败内容</button></div>
+	</form>
+</div>
+
+<script>
+	function get_val() {
+        var file = $("#batch_add_file").val();
+        $('#file_name').val(file);
+    }
+	var flag = false;
+	function selectAll(){
+		if(!flag){
+			$("[name='check_id']").each(function(){
+				$(this).attr('checked',true);
+			});
+			flag = true;
+			return;
+		}
+		if(flag){
+			$("[name='check_id']").each(function(){
+				$(this).attr('checked',false);
+			});
+			flag = false;
+			return;
+		}	
+	}
+	function checkPostAdd(){
+		var tag_name=$('#tag_name').val();
+		if(tag_name.length>10 || !tag_name){
+			alert('10个字符以内(标签格式：文字，英文字母，数字，特殊符号仅支持“-”“_”)');
+			return false;
+		}else{
+			var re=/^[\u4e00-\u9fa50-9a-zA-Z-_]*$/;
+			if(!re.test(tag_name)){
+				alert('10个字符以内(标签格式：文字，英文字母，数字，特殊符号仅支持“-”“_”)');
+				return false;
+			}
+		}
+		return true;
+	}
+	function checkPostbatch(){
+		var batch_add_file=$('#batch_add_file').val();
+	
+		if(!batch_add_file){
+			alert('批量导入文件必须上传');
+			return false;
+		}else if(batch_add_file.slice(-4)!='.csv'){
+			alert('批量导入文件必须为csv格式');
+			return false;
+		}
+		return true;
+	}
+	$('#del_all').click(function(){
+
+		if(!window.confirm('确定批量删除吗？')){
+			return;
+		}
+		var str = '';
+		var tag_name='';
+	    $("[name='check_id']").each(function(){
+	    	if($(this).attr('checked')){
+	    		
+	    		tag_name=$(this).attr('alt');
+
+	    		if(tag_name!=''){
+	    			alert('标签名称：'+tag_name+',已关联游戏，不能删除');
+	    			return false;
+	    		}
+	    		str+=$(this).val()+',';
+	    	}
+		});
+		if(tag_name){
+			return;
+		}
+	    var id = str=str.substring(0,str.length-1);
+	    if(id.length<1){
+	    	alert('请选择要删除的标签！');
+	    	return false;
+	    	
+	    }
+	    var url = '__URL__/tag_del';
+	    var data = '&tag_id='+id;
+	    $.ajax({
+			url: url,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function(data){
+					if(!!data && data.success){ 
+						alert(data.msg);
+						window.location.href="__URL__/tag_list";
+						// setTimeout(function(){
+						// 	//window.location.reload();
+						// },800);
+					}else{
+						alert(data.msg);
+						window.location.href="__URL__/tag_list";
+						// setTimeout(function(){
+						// 	//window.location.reload();
+						// },800);
+					}
+			}
+	     })
+  	
+	});
+
+	function get_tag_name(){
+		var str = '';
+	    var tag_name = '';
+	    var j=0;
+	    $("[name='check_id']").each(function(){
+	    	if($(this).attr('checked')){
+	    		str+=$(this).val()+',';
+	    		tag_name=$(this).attr('atl');
+	    		j++;
+	    	}
+		});
+		
+		var id = str=str.substring(0,str.length-1);
+		$('#edit_tag_name').val('');
+	    if(j<1){
+	    	alert('请选择要编辑的标签！');
+	    	return false;
+	    	
+	    }else if(j>1){
+	    	alert('请选择要编辑的标签，且只能勾选一个！');
+	    	return false;
+	    }  
+		$('#edit_tag_name').val(tag_name);
+		$('#edit_box').zxxbox();
+	}
+
+	$('#sub_edit').click(function(){
+		var url = '__URL__/tag_add';
+	    var edit_tag_name = $('#edit_tag_name').val();
+	    
+		if(edit_tag_name=='' || edit_tag_name==undefined){
+			
+				alert('标签名称不能为空');
+				return false;
+	    }
+	    if(edit_tag_name.length>10){
+			alert('10个字符以内(标签格式：文字，英文字母，数字，特殊符号仅支持“-”“_”)');
+			return false;
+		}else{
+			var re=/^[\u4e00-\u9fa50-9a-zA-Z-_]*$/;
+			if(!re.test(edit_tag_name)){
+				alert('10个字符以内(标签格式：文字，英文字母，数字，特殊符号仅支持“-”“_”)');
+				return false;
+			}
+		}
+	    var str = '';
+	    var j=0;
+	    $("[name='check_id']").each(function(){
+	    	if($(this).attr('checked')){
+	    		str+=$(this).val()+',';
+	    		j++;
+	    	}
+		});
+	    var id = str=str.substring(0,str.length-1);
+	    if(j<1){
+	    	alert('请选择要编辑的标签！');
+	    	return false;
+	    	
+	    }else if(j>1){
+	    	alert('请选择要编辑的标签，且只能勾选一个！');
+	    	return false;
+	    }  
+	    var data = '&edit_tag_name='+encodeURIComponent(edit_tag_name)+'&tag_id='+id;       
+	    $.ajax({
+			url: url,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function(data){
+					if(data && data.success){ 
+						alert(data.msg);
+						window.location.href="__URL__/tag_list";
+						closes();
+					}else{
+						alert(data.msg);
+					}
+			},
+		    error: function(){
+		    	
+		    	  alert('对不起，服务器错误，请联系管理员！');
+		    }
+	     });
+	});
+	$(document).ready(function(){
+		var show_div=<?php echo $show_div?>;
+		if(show_div==1){
+			$('#url_str_box').zxxbox();
+			$('#zxxBlank').click(function(){
+				window.location.href="/index.php/Dev/TagManage/tag_list";
+			});
+		}
+
+	});
+</script>

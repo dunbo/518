@@ -1,0 +1,115 @@
+<include file="../Public/header" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+
+<div class="main" >
+<div class="content">
+
+<table border="0" cellspacing="2" cellpadding="0" style="width:800px;">
+	<form method="post" action="__URL__/sms_alarm_edit" onsubmit="return form_chk()">
+	<tr>
+		<td align="left" colspan="2"><b>报警条件设定：</b></td>
+	</tr>
+	<tr>
+		<td align="right">短信数量设定：</td><td align="left"><input type="text" name="sms_alarm_counter" id="sms_alarm_counter" value="{$_res['sms_alarm_counter']}" />条/天<span style="color:#999999;">设置发送短信上限，超过此数值后发报警信息</span></td>
+	</tr>
+	<tr>
+		<td align="right">报警内容：</td><td align="left"><textarea cols="65" rows="4" style="color:red;" name="sms_alarm_cont" id="sms_alarm_cont"><?php if($_res['sms_alarm_cont']) { echo $_res['sms_alarm_cont']; } else { ?>警告：系统发送短信数量超过警戒数值，请监测人员检查系统是否出现异常！<?php } ?></textarea></td>
+	</tr>
+	<tr>
+		<td align="right">系统余额设定：</td><td align="left"><input type="text" name="sms_alarm_balance" id="sms_alarm_balance" value="{$_res['sms_alarm_balance']}" />元（RMB）<span style="color:#999999;">设置系统余额少于多少钱后，发报警信息</span></td>
+	</tr>
+	<tr>
+		<td align="right">报警内容：</td><td align="left"><textarea cols="65" rows="4" style="color:red;" name="sms_balance_cont" id="sms_balance_cont"><?php if($_res['sms_balance_cont']) { echo $_res['sms_balance_cont']; } else { ?>警告：系统余额不足，请充值，以保证短信系统正常使用！<?php } ?></textarea></td>
+	</tr>
+	<tr>
+		<td align="left" colspan="2">停止短信系统，每天短信总数量设定：<input type="text" name="sms_stop_counter" id="sms_stop_counter" value="{$_res['sms_stop_counter']}" />条/天<span style="color:#999999;">设置发送短信上限，超过此数值后停止短信发送系统</span></td>
+	</tr>
+	<tr>
+		<td align="left" colspan="2">报警发送频率设定：<input type="text" name="sms_alarm_rate" id="sms_alarm_rate" value="{$_res['sms_alarm_rate']}" />次/天<span style="color:#999999;">系统发送报警信息的频率</span></td>
+	</tr>
+	<tr>
+		<td align="left" colspan="2"><button type="submit">确定</button></td>
+	</tr>
+	</form>
+</table>
+
+<script language="javascript">
+function form_chk() {
+	if($('#sms_alarm_counter').val()=='') {
+		alert('请填写短信数量设定！');
+		return false;
+	}
+	if(!/^[0-9]+$/.test($('#sms_alarm_counter').val())) {
+		alert('短信数量设定需是数字，请重填！');
+		return false;
+	}
+	if($('#sms_alarm_cont').val()=='') {
+		alert('请填写达到发送短信上限后的报警内容！');
+		return false;
+	}
+	if($('#sms_alarm_balance').val()=='') {
+		alert('请填写系统余额设定！');
+		return false;
+	}
+	if(!/^[0-9]+$/.test($('#sms_alarm_balance').val())) {
+		alert('系统余额设定需是数字，请重填！');
+		return false;
+	}
+	if($('#sms_balance_cont').val()=='') {
+		alert('请填写小于系统设定余额后的报警内容！');
+		return false;
+	}
+	if($('#sms_stop_counter').val()=='') {
+		alert('请填写停止短信系统的短信数量设定！');
+		return false;
+	}
+	if(!/^[0-9]+$/.test($('#sms_stop_counter').val())) {
+		alert('停止短信系统的短信数量设定需是数字，请重填！');
+		return false;
+	}
+	if($('#sms_alarm_rate').val()=='') {
+		alert('请填写报警发送频率！');
+		return false;
+	}
+	if(!/^[0-9]+$/.test($('#sms_alarm_rate').val())) {
+		alert('报警发送频率需是数字，请重填！');
+		return false;
+	}
+
+	return true;
+}
+</script>
+
+<style type="text/css">
+.td1 {background:#FFFFCC;color:#000000;font-weight:bold;height:30px;}
+.td2 {background:#ffffff;color:#333333;height:30px;}
+</style>
+<table border="0" cellspacing="0" cellpadding="0" style="margin-top:15px;width:900px;">
+	<tr>
+		<td align="left"><b>监测人员列表：</b></td><td align="right"><button onclick="self.location='/index.php/Admin/Configuration/sms_alarm_person'">添加人员</button></td>
+	</tr>
+</table>
+<table border="0" cellspacing="1" cellpadding="0" style="width:900px;background:#797979;">
+	<tr>
+		<td align="center" class="td1">人员</td><td align="center" class="td1">邮箱</td><td align="center" class="td1">手机</td><td align="center" class="td1">添加时间</td><td align="center" class="td1">接收频率</td><td align="center" class="td1">应用场景</td><td align="center" class="td1">接收方式</td><td align="center" class="td1">操作</td>
+	</tr>
+	<volist name="list" id="vo">
+	<tr>
+		<td align="center" class="td2">{$vo.name}</td><td align="center" class="td2">{$vo.email}</td><td align="center" class="td2">{$vo.mobile}</td><td align="center" class="td2">{$vo.addtime}</td><td align="center" class="td2">{$rate}次/天</td><td align="center" class="td2">{$vo.scene_str}</td><td align="center" class="td2">{$vo.type_str}</td><td align="center" class="td2">{$vo.do}</td>
+	</tr>
+	</volist>
+</table>
+
+<script language="javascript">
+function do_status(url) {
+	if(confirm('您确定要执行该操作吗？')) {
+		self.location.href = url;
+		if(window.ActiveXObject) window.event.returnValue = false;
+		return false;
+	}
+}
+</script>
+
+</div>
+</div>
+<include file="../Public/footer" />

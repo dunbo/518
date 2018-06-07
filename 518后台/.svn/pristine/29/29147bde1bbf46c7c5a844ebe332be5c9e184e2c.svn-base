@@ -1,0 +1,97 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js?v3'></script>
+<script type="text/javascript" src='/Public/js/soft.js?v3'></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+<div class="main" >
+<div class="content">
+<form id="upload" method='get' action="__URL__/processed_feedback_daily" >
+<input type="hidden" name="mid" id="mid" value="<?php echo $mid?>"/>
+  <table width="100%" height="39" border="1" cellpadding="0" cellspacing="0" class="searchbar">
+  <tr>
+    <td>起止时间</td>
+    <td ><span><?php showDatePicker('fromdate','todate', $fromdate,$todate);?></td>  
+    <td>客服人员</td>
+    <td>
+		<select name="admin_id">
+			<option value="">全部</option>
+			<?php foreach($adminname as $k => $v): ?>
+			<option value="<?php echo $k; ?>" <?php if ($k==$admin_id){echo ' selected=true';}?>><?php echo $v['admin_user_name']; ?></option>
+			<?php endforeach; ?>
+		</select>
+	</td>
+
+    <td>班次</td>
+    <td>
+		<select name="shift">
+			<option value="">全部</option>
+			<option value="1" <?php if($shift == 1) echo "selected"; ?>>白班</option>
+			<option value="2" <?php if($shift == 2) echo "selected"; ?>>晚班</option>
+		</select>
+	</td>
+
+    <td><input type="submit" value="搜索" /></td>
+  </tr>
+  </table>
+</form>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+<tr  bgcolor="" height='30'>
+<td align='left' colspan='8'>
+<input alt="__URL__/add_customer/?" title="添加客服" class="thickbox" type="button" value="添加客服" /> 
+</td>
+<if condition="$total  gt '0'">
+	<td align='right'><button onclick="export_data('__URL__/exp_daily/count/{$total}/?{$param}');">导出当前数据</button></td>
+</if>
+</tr>
+</table>
+<div style="float:left">{$total}条记录</div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+	<tr>
+		<td width="10%" align='center' height="30" bgcolor="#e3e2fe">客服</td>
+		<td width="10%" align='center' height="30" bgcolor="#e3e2fe">时间</td>
+		<td width="10%" align='center' height="30" bgcolor="#e3e2fe">班次</td>
+		<td width="10%" align='center' height="30" bgcolor="#e3e2fe">合计</td>
+		<?php foreach($c_name as $v){ ?>
+		<td width="5%" align='center' height="30" bgcolor="#e3e2fe"><?php echo $v['c_name']; ?></td>
+		<?php } ?>
+		<td width="10%" align='center' height="30" bgcolor="#e3e2fe">备注</td>
+		<td width="10%" align='center' height="30" bgcolor="#e3e2fe">操作</td>
+	</tr>
+	<?php foreach ($list as $key => $val):?>
+	<tr>
+		<td><?php echo $val['admin_name']; ?></td>
+		<td align='center' >
+			<div style="width:70px;">
+			<?php echo $val['add_tm']; ?>
+			</div>
+		</td>
+		<td><?php echo $val['shift']; ?></td>
+		<td><?php echo $val['count']; ?></td>
+		<?php foreach($c_name as $k => $v){ ?>
+			<td><?php echo $val['num'][$k] ? $val['num'][$k] : 0; ?></td>	
+		<?php } ?>
+		<td>
+			<a class="thickbox" title='查看备注' href="__URL__/pub_remark_list?admin_id=<?php echo $key; ?>&fromdate=<?php echo $_GET['fromdate']; ?>&todate=<?php echo $_GET['todate']; ?>" ><?php echo $val['remark']; ?></a>
+		</td>
+		<td>
+			<a href='__URL__/processed_feedback_daily_save/id/<?php echo $val['id']; ?>/' class="thickbox" >编辑</a>&nbsp;|&nbsp;<a href="javascript:;" onclick="daily_del('<?php echo $key; ?>');" >删除</a>
+		</td>
+	</tr>
+	<?php endforeach; ?>
+</table>
+<div  align='left'>{$page}</div>
+</div>
+</div>
+<script type="text/javascript">
+function daily_del(admin_id){
+	if(confirm('是否确认删除？')) {
+		window.location.href="__URL__/processed_feedback_daily_del?admin_id="+admin_id+"&fromdate=<?php echo $_GET['fromdate']; ?>&todate=<?php echo $_GET['todate']; ?>";
+	}
+}
+</script>
+<include file="../../Caiji/Collection/export_data" />

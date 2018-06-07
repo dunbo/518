@@ -1,0 +1,891 @@
+	<div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box"  style="display: none;">
+		<span class="btns_close2" onclick="cloBox('#tip-box')"></span>
+        <div class="tip-con">
+			<img id='err_pic' src=""/>
+			<p id='notice' ><!--{$out.list.no_prize_text}--></p>
+		</div>
+		<a href="javascript:;" onclick="cloBox('#tip-box')" class="btns_close">关 闭</a>
+    </div>
+</section>
+</body>
+</html>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->',img_url = '<!--{$out.img_url}-->';
+var aid = '<!--{$out.aid}-->',p=0,soft_lists_go = [],soft_lists_anzhuang = [],flags={canMove:true};
+var version_code = '<!--{$out.version_code}-->';
+var is_user_winning = "<!--{$out.is_user_winning}-->";
+var lottery_num = "<!--{$out.lottery_num}-->";
+var prefix = "<!--{$out.prefix}-->";
+var limit = 4;
+var prize_limit = "<!--{$out.prize_limit}-->";
+var open_pkg_arr = [];
+var stopNum = '',index = 1,prevIndex = 0,Speed = 300,Time,arr = GetSide(3, 3),EndIndex = 0,cycle = 0,EndCycle = 0,flag = false,quick = 0,datas = [],p=0;
+$(function(){
+	TouchSlide({
+		slideCell:"#slideBox",
+		mainCell:".bd ul",
+		effect:"leftLoop",
+		autoPlay:true //自动播放
+	});
+})
+
+function GetSide(m, n) {
+	var arr = [];
+	for (var i = 0; i < m; i++) {
+		arr.push([]);
+		for (var j = 0; j < n; j++) {
+			arr[i][j] = i * n + j;
+		}
+	}
+
+	var resultArr = [];
+	var tempX = 0,tempY = 0,direction = "Along",count = 0;
+	while (tempX >= 0 && tempX < n && tempY >= 0 && tempY < m && count < m * n) {
+		count++;
+		resultArr.push([tempY, tempX]);
+		if (direction == "Along") {
+			if (tempX == n - 1)
+				tempY++;
+			else
+				tempX++;
+			if (tempX == n - 1 && tempY == m - 1)
+				direction = "Inverse"
+		}
+		else {
+			if (tempX == 0)
+				tempY--;
+			else
+				tempX--;
+			if (tempX == 0 && tempY == 0)
+				break;
+		}
+	}
+	return resultArr;
+}
+
+function onLoginComplete(sid,tip){
+		var is_register = 0;
+	if(tip == "注册成功"){
+		var is_register = 1;
+	}
+	sid_str = sid.replace("PHPSESSID=", "");
+	location.href="/lottery/"+prefix+"/index.php?sid="+sid_str+"&aid="+aid+"&is_register="+is_register;
+}
+
+var proid_arr = getArgs();
+var skinvc = proid_arr.skinvc;
+function getArgs() {
+	var args = {};
+	var query = location.search.substring(1);
+	var pairs = query.split("&");
+	for(var i = 0; i < pairs.length; i++) {
+			var pos = pairs[i].indexOf('=');
+			if (pos == -1) continue;
+			var argname = pairs[i].substring(0,pos);
+			var value = pairs[i].substring(pos+1);
+			value = decodeURIComponent(value);
+			args[argname] = value;
+	}
+	return args;
+}
+function my_soft() {
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	var soft_lists = soft_list.DATA;
+	var open_list = [];
+	var install_list = [];
+	var down_list = [];
+	for(j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var json_data =  window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(json_data == 0 || json_data == 1 ){
+			open_list.push(soft_lists[j]);
+			open_pkg_arr.push(soft_lists[j][7]);
+		}
+		if(json_data == -2 && soft_status_gos == 5){
+			install_list.push(soft_lists[j]);
+		}
+		if((json_data == -2 && soft_status_gos != 5 ) || json_data == -1){
+			down_list.push(soft_lists[j]);
+		}
+	}    
+	if(j<=4){
+		//软件小于等于4个不显示换一换按钮
+		$(".soft_title").css('display','none');
+	}		
+  	for(var ii in open_list) {
+		soft_lists_go.push(open_list[ii]);
+	}  
+  	for(var ii in install_list) {
+		soft_lists_go.push(install_list[ii]);
+	}
+  	for(var ii in down_list) {
+		soft_lists_go.push(down_list[ii]);
+	}
+	get_soft();
+}
+
+
+function get_soft(){
+	var pagemax= Math.floor(soft_lists_go.length/limit);
+	if(soft_lists_go.length%limit==0){
+		pagemax = pagemax-1;
+	}
+	var data = soft_lists_go.slice(p*limit,limit*(p+1));
+	if(data.length == 0){
+		p = 0;
+		data = soft_lists_go.slice(p*limit,limit*(p+1));
+	}
+
+	var str = '';
+	for(i = 0; i < data.length; i++) {
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);		
+		if(data[i][data[i].length-1] != ''){
+			var size = data[i][data[i].length-1];
+		}else{
+			var size = data[i][27];
+		}		
+		<!--{if $out.list.is_score eq 1 }-->	
+			var softname = data[i][2];
+			get_soft_one(soft_status,parseInt(data[i][0]),data[i][7],softname,parseInt(data[i][13]),size,data[i][1]);
+		<!--{else}-->
+			if(data[i][2].length > 4){
+				var softname = data[i][2].substring(0,3)+'...';
+			}else{
+				var softname = data[i][2];
+			}		
+			str += get_soft_li(soft_status,parseInt(data[i][0]),data[i][7],softname,parseInt(data[i][13]),size,data[i][1]);
+		<!--{/if}-->
+
+	}
+	<!--{if $out.list.is_score eq 2 }-->	
+	$('#soft-list').html(str);
+	<!--{/if}-->
+	if(p==pagemax){
+		p=0;
+	}else{
+		p=p+1;
+	}
+}
+
+function get_soft_one(soft_status,softid,my_package,softname,versioncode,size,src){
+	$("#soft-list").css('display','block');
+	$("#gm_pic").attr('src',src);
+	$("#gm_name").html(softname);
+	if(soft_status == 1){
+		$(".app_btn").html("下载中");
+	}else if(soft_status == 2 || soft_status == 3 || soft_status == 8){
+		$(".app_btn").attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')').html("继续");
+	}else if(soft_status == 4){
+		$(".app_btn").attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')').html("下载");
+	}else if(soft_status == 5){
+		$(".app_btn").attr("onclick",'installApp('+softid+',\''+my_package+'\')').html("安装");	
+	}else if(soft_status == 6){
+		$(".app_btn").attr("onclick",'openApp(\''+my_package+'\','+softid+')').html("打开");		
+	}else if(soft_status == 9){
+		$(".app_btn").attr("onclick",'installApp('+softid+',\''+my_package+'\')').html("校验中");
+	}else if(soft_status == 10){
+		$(".app_btn").attr("onclick","").html("已下载");	
+	}else if(soft_status == -1){
+		var soft_other_status = window.AnzhiActivitys.isInstalledApp(my_package,parseInt(versioncode));
+		if(soft_other_status == -2){
+			$(".app_btn").attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')').html("下载");		
+		}else if(soft_other_status == -1){
+			$(".app_btn").attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')').html("更新");			
+		}else if(soft_other_status == 0){
+			$(".app_btn").attr("onclick",'openApp(\''+my_package+'\','+softid+')').html("打开");	
+		}else if(soft_other_status == 1){
+			$(".app_btn").attr("onclick","").html("已下载");
+		}
+	}
+	<!--{if $out['is_login']==1 && $out.list.get_lottery_type == 2}-->
+	if(soft_status == 5 || soft_status == 6 || soft_status == 9 || (soft_status == -1 && soft_other_status == 0)){
+		get_lottery_num(softid,2);
+	}
+	<!--{/if}-->	
+}
+function get_soft_li(soft_status,softid,my_package,softname,versioncode,size,src){
+	if(soft_status == 1){
+		var soft_li = '<li id="li_'+softid+'" ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn"><a href="javascript:;" class="downlode" >下载中</a></p></li>';
+	}else if(soft_status == 2 || soft_status == 3 || soft_status == 8){
+		var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="downlode"  >继续</a></p></li>';
+	}else if(soft_status == 4){
+		var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="downlode" >下载</a></p></li>';
+	}else if(soft_status == 5){
+		var soft_li = '<li onclick="installApp('+softid+',\''+my_package+'\')" ><p class="soft-icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn"><a href="javascript:;" class="downlode" >安装</a></p></li>';
+	}else if(soft_status == 6){
+		var soft_li = '<li onclick="openApp(\''+my_package+'\','+softid+')" ><p class="soft-icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a href="javascript:;" class="downlode"  >打开</a></p></li>';
+	}else if(soft_status == 9){
+		var soft_li = '<li onclick="installApp('+softid+',\''+my_package+'\')" ><p class="soft-icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a href="javascript:;" class="downlode"  >校验中</a></p></li>';
+	}else if(soft_status == 10){
+		var soft_li = '<li><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="downlode" >已下载</a></p></li>';
+	}else if(soft_status == -1){
+		var soft_other_status = window.AnzhiActivitys.isInstalledApp(my_package,parseInt(versioncode));
+		if(soft_other_status == -2){
+			var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="downlode"  >下载</a></p></li>';
+		}else if(soft_other_status == -1){
+			var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="downlode"  >更新</a></p></li>';
+		}else if(soft_other_status == 0){
+			var soft_li = '<li onclick="openApp(\''+my_package+'\','+softid+')" ><p class="soft-icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn" ><a href="javascript:;" class="downlode"  >打开</a></p></li>';
+		}else if(soft_other_status == 1){
+			var soft_li = '<li ><p class="soft-icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft-name">'+softname+'</p><p class="btn"><a id="'+softid+'" href="javascript:;" class="downlode" >已下载</a></p></li>';
+		}
+	}
+	<!--{if $out['is_login']==1 && $out.list.get_lottery_type == 2}-->
+	if(soft_status == 5 || soft_status == 6 || soft_status == 9 || (soft_status == -1 && soft_other_status == 0)){
+		get_lottery_num(softid,2);
+	}	
+	<!--{/if}-->	
+	return soft_li;
+}
+$(document).ready(function () {
+	setTimeout(function(){
+			my_soft();
+	}, 500);
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+});
+
+function change_soft(){
+	$('#soft-list').html('');
+	get_soft();
+}
+
+
+function openApp(pkg,softid){
+	the_soft = [softid];
+	$.ajax({
+		url: '/lottery/vacation_gift_open.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkg+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+		}
+	});
+}
+
+
+function go_softinfo_down(softid,my_package,softname,versioncode,size){
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	<!--{if $out.list.is_score == 1}-->
+		$(".app_btn").html("下载中").removeAttr("onclick");	
+		get_lottery_num(softid,1);
+	<!--{else}-->
+		$('#'+softid+'').html("下载中").removeAttr("onclick");	
+		$('#li_'+softid+'').removeAttr("onclick");
+		get_lottery_num(softid,2,1);
+	<!--{/if}-->
+		
+	$.ajax({
+		url: '/lottery/year_feedback_download.php',  //supwater  点击详情 点击下载
+		data:"softid="+softid+"&sid="+sid+"&aid="+aid+"&pkgname="+my_package, 
+		type:"post",
+		success:function(data) {
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),softid,my_package,softname,versioncode,size,0);
+		},
+	});
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		<!--{if $out.list.is_score eq 1 }-->	
+		$(".app_btn").html("下载中");
+		<!--{else}-->	
+		$('#'+softid+'').html("下载中");
+		<!--{/if}-->
+	}else if(newState == 2 || newState == 3 || newState == 8){
+		<!--{if $out.list.is_score eq 1 }-->	
+		$(".app_btn").html("继续");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				if(soft_lists_go[i][soft_lists_go[i].length-1] != ''){
+					var size = soft_lists_go[i][soft_lists_go[i].length-1];
+				}else{
+					var size = soft_lists_go[i][27];
+				}				
+				$(".app_btn").attr('onclick',"go_softinfo_down("+parseInt(softid)+",'"+soft_lists_go[i][7]+"','"+soft_lists_go[i][2]+"','"+soft_lists_go[i][13]+"','"+size+"')");
+			}
+		}		
+		<!--{else}-->	
+		$('#'+softid+'').html("继续");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				if(soft_lists_go[i][2].length > 4){
+					var softname = soft_lists_go[i][2].substring(0,3)+'...';
+				}else{
+					var softname = soft_lists_go[i][2];
+				}	
+				if(soft_lists_go[i][soft_lists_go[i].length-1] != ''){
+					var size = soft_lists_go[i][soft_lists_go[i].length-1];
+				}else{
+					var size = soft_lists_go[i][27];
+				}					
+				$('#li_'+softid+'').attr('onclick',"go_softinfo_down("+parseInt(softid)+",'"+soft_lists_go[i][7]+"','"+softname+"','"+soft_lists_go[i][13]+"','"+size+"')");
+			//	$('#'+softid+'').attr('onclick',"go_softinfo_down("+parseInt(softid)+",'"+soft_lists_go[i][7]+"','"+softname+"','"+soft_lists_go[i][13]+"','"+size+"')");
+			}
+		}		
+		<!--{/if}-->		
+	}else if(newState == 4){
+		<!--{if $out.list.is_score eq 1 }-->	
+		$(".app_btn").html("重试");
+		<!--{else}-->	
+		$('#'+softid+'').html("重试");
+		<!--{/if}-->			
+	}else if(newState == 5){
+		<!--{if $out['is_login']==1 && $out.list.get_lottery_type == 2}-->
+		get_lottery_num(softid,2);
+		<!--{/if}-->			
+		<!--{if $out.list.is_score eq 1 }-->	
+		$(".app_btn").html("安装");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				$(".app_btn").attr('onclick',"installApp("+parseInt(softid)+",'"+soft_lists_go[i][7]+"')");
+			}
+		}		
+		<!--{else}-->
+		$('#'+softid+'').html("安装");
+		$('#li_'+softid+'').removeAttr("onclick");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				$('#li_'+softid+'').attr('onclick',"installApp("+parseInt(softid)+",'"+soft_lists_go[i][7]+"')");
+			//	$('#'+softid+'').attr('onclick',"installApp("+parseInt(softid)+",'"+soft_lists_go[i][7]+"')");
+			}
+		}
+		<!--{/if}-->
+	}else if(newState == 6){
+		<!--{if $out['is_login']==1 && $out.list.get_lottery_type == 2}-->
+		get_lottery_num(softid,2);
+		<!--{/if}-->	
+		<!--{if $out.list.is_score eq 1 }-->	
+		$(".app_btn").html("打开");
+		for(var i=0;i < soft_lists_go.length;i++){		
+			if(soft_lists_go[i][0] == softid){
+				$(".app_btn").attr('onclick',"openApp('"+soft_lists_go[i][7]+"',"+parseInt(softid)+")");
+                break;
+			}
+		}		
+		<!--{else}-->	
+		$('#'+softid).html("打开");
+		$('#li_'+softid+'').removeAttr("onclick");
+		for(var i=0;i < soft_lists_go.length;i++){		
+			if(soft_lists_go[i][0] == softid){
+				$('#li_'+softid).attr('onclick',"openApp('"+soft_lists_go[i][7]+"',"+parseInt(softid)+")");
+			//	$('#'+softid).attr('onclick',"openApp('"+soft_lists_go[i][7]+"',"+parseInt(softid)+")");
+                break;
+			}
+		}
+		<!--{/if}-->
+	}else if(newState == 9){
+		<!--{if $out.list.is_score eq 1 }-->	
+		$(".app_btn").html("检查中");
+		<!--{else}-->	
+		$('#'+softid+'').html("检查中");
+		<!--{/if}-->				
+	}
+}
+
+function installApp(softid,pkgname){
+	$.ajax({
+		url: '/lottery/vacation_third_install.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+		type: 'post',
+		success: function(data){
+			window.AnzhiActivitys.installAppForActivity(softid);
+		}
+	});
+}
+
+	 
+	//老虎机抽奖	 
+	<!--{if $out.list.lottery_style == 1}-->
+	var rnds = [];
+	//是否可抽奖
+	if(lottery_num > 0) {
+		var is_lottery = 1;
+	}else{
+		var is_lottery = 0;
+	}	
+	$(document).ready(function(){
+		var machine1 = $("#machine1").slotMachine({
+			active	: 0,
+			delay	: 500
+		});
+								
+		var machine2 = $("#machine2").slotMachine({
+			active	: 1,
+			delay	: 500
+		});
+								
+		var machine3 = $("#machine3").slotMachine({
+			active	: 2,
+			delay	: 500
+		});
+								
+		function onComplete($el, active){
+			switch($el[0].id){
+				case 'machine1':
+					$("#machine1Result").text("Index: "+active.index);
+					break;
+				case 'machine2':
+					$("#machine2Result").text("Index: "+active.index);
+					break;
+				case 'machine3':
+					$("#machine3Result").text("Index: "+active.index);
+
+					break;
+			}	
+		}
+		
+		$("#slotMachineButton1").live('click',function(){	
+		<!--{if $out['is_login'] == 2}-->
+			login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+			return false;
+		<!--{/if}-->	
+			if(is_lottery != 1) return false;
+			$('#slotMachineButton1').attr('class', 'btns_02 btns_02_disabled');
+			if(lottery_num <= 0){
+				<!--{if $out.list.not_winning_tips == 1}-->
+				$("#err_pic").attr('src',img_url+"<!--{$out.list.lose_no_img}-->");
+				pop_tips('',"次数不足",'',1)
+				<!--{/if}-->
+				return false;				
+			}			
+			go_lottery();								
+		})
+		var pkg_str = open_pkg_arr.join(";");
+		function go_lottery(){
+			is_lottery = 0;
+			$.ajax({
+				url: '/lottery/'+prefix+'/lottery.php',
+				data: 'sid='+sid+'&aid='+aid+'&pkg='+pkg_str,
+				type: 'post',
+				dataType: 'json',			
+				success: function(data){
+					lottery_num = lottery_num-1;
+					$('#lottery_num').html(lottery_num);
+					if(lottery_num > 0){
+						setTimeout(function(){
+							$('#slotMachineButton1').attr('class', 'btns_02');
+							is_lottery = 1;							
+						}, 3000);
+					}					
+					if(data.code == 0){
+						rnds = [0,1,2];	
+						setTimeout(function(){
+							$("#err_pic").attr('src',img_url+"<!--{$out.list.lose_no_img}-->");
+							pop_tips('',data.msg,'',1)
+							return false;
+						}, 4000);
+					}else{
+						if(data.type == -1){
+							rnds = [0,1,2];							
+						}else{
+							var rank = data.prize_rank-1;
+							rnds = [rank,rank,rank];
+						}
+						prize_jump(data);						
+					}
+					machine1.shuffle(3, onComplete);
+										
+					setTimeout(function(){
+						machine2.shuffle(3, onComplete);
+					}, 300);
+										
+					setTimeout(function(){
+						machine3.shuffle(3, onComplete);
+					}, 600);					
+				}/*,
+				error: function(data, status, e){
+					alert(data.responseText);
+					alert(status);
+					alert(e);
+				}	
+				*/
+			});
+		}		
+	});
+	<!--{/if}-->
+	//九宫格抽奖
+	<!--{if $out.list.lottery_style == 2}-->
+		function getCookie(name){
+		 var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+		 if(arr=document.cookie.match(reg))
+		  return unescape(arr[2]);
+		 else
+		  return null;
+		} 
+		$("#gameBtn").click(function () {
+			if(lottery_num <= 0 ){
+				<!--{if $out.list.not_winning_tips == 1}-->
+				$("#err_pic").attr('src',img_url+"<!--{$out.list.lose_no_img}-->");
+				pop_tips('',"次数不足",'',1)
+				<!--{/if}-->
+				return false;	
+			}
+			$(this).hide(); //开始后隐藏开始按钮
+			$(this).parent().addClass("waitGame");
+			click_lottery();
+		});
+		function click_lottery(){
+		<!--{if $out['is_login'] == 2}-->
+			login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+			return false;
+		<!--{/if}-->	
+			var pkg_str = open_pkg_arr.join(";");		
+			$.ajax({
+				url: '/lottery/'+prefix+'/lottery.php',
+				data:'sid='+sid+'&aid='+aid+'&pkg='+pkg_str,
+				type: 'post',
+				dataType: 'json',				
+				success:function(data){
+					if(data.code == 1){
+						lottery_num = lottery_num-1;
+						$('#lottery_num').html(lottery_num);
+						if(data.type == -1 && data.prize_rank == 8){
+							cirle_go(200,0);
+						}else{
+							cirle_go(200,data.prize_rank);
+						}
+						prize_jump(data);						
+					}else if(data.code == 2){
+						location.href=data.url+"?sid="+sid+"&aid="+aid;
+					}else{	
+						$("#err_pic").attr('src',img_url+"<!--{$out.list.lose_no_img}-->");
+						pop_tips('',data.msg,'',1)
+						return false;							
+					}
+				}
+			});
+		}
+		
+		function cirle_go(my_notice,my_award){
+			var stopNum = my_award+1;//点击产生随机数，最后将停在次数上
+			document.cookie="stopNum="+stopNum;
+			cycle = 0;
+			flag = false;
+			EndIndex = Math.floor(Math.random() * 8);
+			EndCycle = 1;
+			Time = setInterval(function (){Star(my_notice,my_award)}, Speed);
+		}
+		
+		function Star(my_notice,my_award) {
+			var gameTable = document.getElementById('gameTable');
+			gameTable.rows[arr[index][0]].cells[arr[index][1]].style.border = "";
+			gameTable.rows[arr[index][0]].cells[arr[index][1]].style.backgroundImage = "url('<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/cj_light.png')";
+			gameTable.rows[arr[index][0]].cells[arr[index][1]].style.backgroundSize = "100% 100%";
+			if (index > 0) {
+				prevIndex = index - 1;
+			}
+			else {
+				prevIndex = arr.length - 1;
+			}
+			gameTable.rows[arr[prevIndex][0]].cells[arr[prevIndex][1]].style.border = "";
+			gameTable.rows[arr[prevIndex][0]].cells[arr[prevIndex][1]].style.background = "";
+			index++;
+			quick++;
+			if (index >= arr.length) {
+				index = 0;
+				cycle++;
+			}
+			
+			if (flag == false) {
+				if (quick == 5) {
+					clearInterval(Time);
+					Speed = 50;
+					Time = setInterval(function (){Star(my_notice,my_award)}, Speed);
+				}
+				if (cycle == EndCycle + 3 && index == EndIndex) {
+					clearInterval(Time);
+					Speed = 300;
+					flag = true;  
+					Time = setInterval(function (){Star(my_notice,my_award)}, Speed);
+				}
+			}
+		
+			var stopNums = getCookie('stopNum');
+			if (flag == true && index == stopNums - 1) {
+				quick = 0;
+				clearInterval(Time);
+				if(lottery_num > 0){
+					$("#gameContent p").removeClass("waitGame");
+					$("#gameBtn").show(); //停止后显示开始按钮
+				}					
+			}
+		}
+		
+	<!--{/if}-->
+	//转盘抽奖
+	<!--{if $out.list.lottery_style == 3}-->
+	function lottery_click(){
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->	
+		var pkg_str = open_pkg_arr.join(";");
+		if(parseInt(lottery_num) <= 0 ){
+			$('#lottery_but').attr('class', 'rotate-pointer pointer-disabled');
+			<!--{if $out.list.not_winning_tips == 1}-->
+			$("#err_pic").attr('src',img_url+"<!--{$out.list.lose_no_img}-->");
+			pop_tips('',"次数不足！",'',1);
+			<!--{/if}-->
+			return false;				
+		}
+		$('#lottery_but').attr('class', 'rotate-pointer pointer-disabled').attr('onclick', '');
+		$.ajax({
+			url: '/lottery/'+prefix+'/lottery.php',
+			data: 'sid='+sid+'&aid='+aid+'&pkg='+pkg_str,
+			type: 'post',
+			dataType: 'json',				
+			success: function(data){
+				if(data.code == 1){
+					lottery_num = lottery_num-1;
+					$('#lottery_num').html(lottery_num);
+					<!-- if(data.type == -1){ -->
+						<!-- var a = runzp_new(0,prize_limit); -->
+					<!-- }else{ -->
+						var a = runzp_new(data.prize_rank,prize_limit);
+					//}			
+					if(lottery_num > 0){
+						setTimeout(function(){
+							$('#lottery_but').attr('class', 'rotate-pointer');
+							$('#lottery_but').attr('onclick', 'lottery_click();');
+						}, 3000);
+					}else{
+						setTimeout(function(){
+							$('#lottery_but').attr('class', 'rotate-pointer pointer-disabled');
+						}, 3000);
+					}				
+					prize_jump(data);
+				}else if(data.code == 2){
+					location.href=data.url+"?sid="+sid+"&aid="+aid;
+				}else{
+					$("#err_pic").attr('src',img_url+"<!--{$out.list.lose_no_img}-->");
+					pop_tips('',data.msg,'',1)
+					return false;				
+				}
+			}
+		});
+	}
+	<!--{/if}-->
+function prize_jump(data){
+	if(data.type == -1){
+		setTimeout(function(){
+			if(lottery_num > 0){
+				$(".btns_close").attr("onclick","come_again();").html("再抽一次");
+				$("#err_pic").attr('src',img_url+"<!--{$out.list.lose_yes_img}-->");
+				pop_tips('',"<!--{$out.list.lose_yes_desc}-->",'',1)
+			}else{
+				$(".btns_close").attr("onclick","cloBox('#tip-box');").html("关闭");
+				$("#err_pic").attr('src',img_url+"<!--{$out.list.lose_no_img}-->");
+				pop_tips('',"<!--{$out.list.lost_no_desc}-->",'',1)
+
+			}
+			return false;
+		}, 4000);							
+	}else{
+		setTimeout(function(){
+			location.href="/lottery/"+prefix+"/my_prize.php?type=2&sid="+sid+"&aid="+aid+"&prizename="+data.prizename+"&softname="+data.softname+"&gift_number="+data.gift_number+"&package="+data.package+"&prize_type="+data.prize_type;					
+		}, 5000);	
+	}
+}
+
+function come_again(){
+cloBox('#tip-box');
+<!--{if $out.list.lottery_style == 1}-->
+	$("#slotMachineButton1").click();
+<!--{else if $out.list.lottery_style == 2}-->
+	$("#gameBtn").click();
+<!--{else if $out.list.lottery_style == 3}-->
+	lottery_click();
+<!--{/if}-->
+}
+//我的奖品
+function my_prize(){
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	location.href="/lottery/"+prefix+"/my_prize.php?type=1&sid="+sid+"&aid="+aid;
+}
+//个人信息
+function user_info(){
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	location.href="/lottery/"+prefix+"/userinfo.php?sid="+sid+"&aid="+aid;
+}
+
+
+function openvideo(url){
+	<!--{if $out['is_test'] == 1}-->
+    var real_url = 'http://m.test.anzhi.com/cmcc'+url;
+	<!--{else}-->
+    var real_url = 'http://v.cdn.anzhi.com'+url;
+	<!--{/if}-->
+	<!--{if $out.version_code >= 6400 }-->
+    window.AnzhiActivitys.openVideoForActivity(real_url,'',2);
+	<!--{else}-->
+	location.href="/lottery/"+prefix+"/video.php?sid="+sid+"&aid="+aid+"&video_url="+encodeURIComponent(real_url);
+	<!--{/if}-->
+}
+
+function openpic(weizhi){
+    var jsonText = '<!--{$out.json_pic}-->';
+    //var jsonText = JSON.stringify(jsonText);
+    window.AnzhiActivitys.openPicturesForActivity(weizhi,jsonText,jsonText);
+}
+
+//分享
+function go_share(){
+	$.ajax({
+		url: '/lottery/my_name_MT3_new/share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+		}
+	});
+
+	<!--{if $out['is_login'] == 1 && $out.list.share_add_all == 1}-->
+	$.ajax({
+		url: '/lottery/'+prefix+'/get_lottery_num.php',
+		data: 'share=1&sid='+sid+'&aid='+aid,
+		type: 'post',
+		async:false,
+		dataType: 'json',			
+		success:function(data){
+			if(data.code == 3){
+				lottery_num = parseInt(lottery_num)+1;
+				$('#lottery_num').html(lottery_num);	
+				<!--{if $out.list.lottery_style == 1}-->
+					is_lottery = 1;	
+					$('#slotMachineButton1').attr('class', 'btns_02');	
+				<!--{else if $out.list.lottery_style == 2}-->
+					$("#gameBtn").show(); //停止后显示开始按钮
+				<!--{else if $out.list.lottery_style == 3}-->
+				$('#lottery_but').attr('class', 'rotate-pointer');
+				$('#lottery_but').attr('onclick', 'lottery_click();');				
+				<!--{/if}-->				
+			}
+		}
+	});
+	<!--{/if}-->	
+	var share_text="<!--{$out.list.share_text}-->";	
+	var share_url='<!--{$out.activity_host}-->/lottery/'+prefix+'/index.php?is_share=1&aid='+aid;	
+	var share_json = '{"TEXT":"'+share_text+'","URL":"<!--{$out.img_url}--><!--{$out.list.share_other_pic}-->","ACTIONURL":"'+share_url+'","URLWEIXIN":"<!--{$out.img_url}--><!--{$out.list.share_weixin_pic}-->"}';
+
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+
+<!--{if $out['is_share'] == 1}-->
+var js_param = {type:'action', id:aid, callback:invite_callback};
+var php_param = {type:'action', aid:aid};
+$(document).ready(function () {
+	share_download(js_param, php_param);
+});	
+<!--{/if}-->	
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6200){
+			js_param = {type:'action', id:aid, callback:null};
+			Azfd.lock = false;
+			share_download(js_param, php_param);			
+		}else {
+			setTimeout(function(){
+				var php_url = 'fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;			
+			},1000);		
+		} 
+	}else{
+		setTimeout(function(){
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;			
+		},1000);		
+	}
+}
+function is_null(){}
+function get_lottery_num(softid,type,down){
+	<!--{if $out['is_login'] == 1}-->
+	if(type == 2){
+		//下载完成
+		if(down == 1){
+			var post_data = 'softid='+softid+'&sid='+sid+'&aid='+aid+"&down=1"
+		}else{
+			var post_data = 'softid='+softid+'&sid='+sid+'&aid='+aid+"&is_complete=1"
+		}
+	}else{
+		//触发下载
+		var post_data = 'softid='+softid+'&sid='+sid+'&aid='+aid+"&trigger_down=1"
+	}
+	$.ajax({
+		url: '/lottery/'+prefix+'/get_lottery_num.php',
+		data: post_data,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+			if(data.code == 2){
+				location.href=data.url+"?sid="+sid+"&aid="+aid;
+			}else if(data.code == 3){
+				lottery_num = parseInt(lottery_num)+1;
+				$('#lottery_num').html(lottery_num);	
+				<!--{if $out.list.lottery_style == 1}-->
+					is_lottery = 1;	
+					$('#slotMachineButton1').attr('class', 'btns_02');				
+				<!--{else if $out.list.lottery_style == 2}-->
+					$("#gameBtn").show(); //停止后显示开始按钮
+				<!--{else if $out.list.lottery_style == 3}-->
+				$('#lottery_but').attr('class', 'rotate-pointer');
+				$('#lottery_but').attr('onclick', 'lottery_click();');				
+				<!--{/if}-->
+				return true;
+			}
+		},
+		/*
+		error: function(data, status, e){
+			alert(data.responseText);
+			alert(status);
+			alert(e);
+		}
+		*/
+	});
+	<!--{/if}-->
+}
+//返回顶部
+function showScroll(){
+	$(window).scroll( function() { 
+		var scrollValue=$(window).scrollTop();
+		scrollValue > 100 ? $('div[class=scroll]').fadeIn():$('div[class=scroll]').fadeOut();
+	} );	
+	$('#scroll').click(function(){
+		$("html,body").animate({scrollTop:0},200);	
+	});	
+}
+
+function enlarge_pic(url){
+	window.location.href=url;
+	//window.open(url);
+}
+</script>

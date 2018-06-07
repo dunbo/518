@@ -1,0 +1,52 @@
+<include header="../Public/header"/>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+<style type="text/css">
+    .widen {width:500px}
+</style>
+<body>
+
+    <div class="form_list_one">
+        <span style='margin-right:15px;'>书籍名称：</span> {$res.bk_name}<br>
+        <span style='margin-right:15px;'>书籍名称(安智)：</span> <input type='text' name='anzhi_bk_name' id='anzhi_bk_name' value="{$res.anzhi_bk_name}" /><br>
+       <span style='margin-right:15px;'>章节信息：</span> 共{$count}章<br>
+       <span style='margin-right:18x;'>vip状态：</span> <input type="radio"  name="book_vip_type" alt="book_vip_type" value="1" id='book_vip_type' <?php echo ($res['book_vip_type']==1)?"checked":'';?>/>免费<br>
+        <span style='margin-right:65px;'></span><input type="radio"  name="book_vip_type"  value="2" alt="book_vip_type" id='book_vip_type' <?php echo ($res['book_vip_type']==2)?"checked":'';?>/>全书vip<br>
+        <span style='margin-right:65px;'></span><input type="radio"  name="book_vip_type"  value="3"  alt="book_vip_type" id='book_vip_type' <?php echo ($res['book_vip_type']==3)?'checked':'';?>/>章节vip <span style='margin-left:20px;' >起始章节</span>
+        <input type='text' name='bk_vip_ch_id_start' id='bk_vip_ch_id_start' value="{$res.bk_vip_ch_id_start}" placeholder="填写起始章节ID"/>
+        <input type="hidden" name="bk_id_new" value="{$id}" id='bk_id_new'/><br><br>
+        <input type="hidden" name="anzhi_bk_name_old" value="{$res.anzhi_bk_name}" id='anzhi_bk_name_old'/>
+        <input type="hidden" name="bk_vip_ch_id_start_old" value="{$res.bk_vip_ch_id_start}" id='bk_vip_ch_id_start_old'/>
+        <input type='button' value="&nbsp;&nbsp;提交&nbsp;&nbsp;" onclick="set_vip()" style="width:50px;" />
+        <input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;" style="width:50px;" >
+    </div>
+    <div class="clear"></div>
+</body>
+<script type="text/javascript">
+    function set_vip(){
+        var id=$('#bk_id_new').val();
+        var book_vip_type=$('input:radio[alt="book_vip_type"]:checked').val();;
+
+        var anzhi_bk_name=$('#anzhi_bk_name').val();
+        var anzhi_bk_name_old=$('#anzhi_bk_name_old').val();
+        var bk_vip_ch_id_start_old=$('#bk_vip_ch_id_start_old').val();
+        var bk_vip_ch_id_start=$('#bk_vip_ch_id_start').val();
+        $.ajax({    
+            url:'/index.php/Cooperate/Ebookmanager/set_vip',
+            type: 'post',
+            data: "id="+id+"&book_vip_type="+book_vip_type+"&bk_vip_ch_id_start="+bk_vip_ch_id_start+"&anzhi_bk_name="+anzhi_bk_name+"&anzhi_bk_name_old="+anzhi_bk_name_old+"&bk_vip_ch_id_start_old="+bk_vip_ch_id_start_old,
+            async:false,
+            success: function(data)
+            {   
+                if(data==1){
+                    alert('操作成功');
+                    tb_remove();
+                    window.location.reload();
+                }else if(data==2){
+                    alert('操作失败');
+                }else if(data==3){
+                    alert('起始章节应为正整数');
+                }
+            }
+        }); 
+    }
+</script>

@@ -1,0 +1,142 @@
+<include file="../Public/header" />
+<script>
+function searchinfo(name){
+	var url_str = ''; 
+	if(name == 'cname'){
+		var cname = $('#cname').val();
+		if(cname==''){
+			alert('请输入要查找的渠道！');
+			return false;
+		}
+		//var query = cname ? 'cname='+cname : '';
+		var query = 'cname='+cname;
+		url_str = '__URL__/ajaxChlList'; 
+	}else{
+		var dname = $('#dname').val();
+		if(dname==''){
+			alert('请输入要查找的机型！');
+			return false;
+		}
+		//var query = dname ? 'dname='+dname : '';
+		 var query = 'dname='+dname;
+		 url_str = '__URL__/ajaxDeviceList'; 
+	}
+	$.ajax({
+		url:url_str,
+		type:'POST',
+		data:query,
+		success:function(data){
+			$('#'+name+'list').show();
+			$('#'+name+'list').html(data);
+		}
+	});
+}
+function checkdata(name){
+	var val_id = $('#'+name+'list').val();
+	var val_html = $('#'+name+'list').find('option:selected').text();
+	$('#'+name).val(val_html);
+	if(name == 'cname'){
+	$('#cid').val(val_id);
+	}else if(name == 'dname'){
+	$('#did').val(val_id);
+	}
+}
+function showtype(id){
+    var url_str = '__URL__/ajaxCategory';
+	var query = 'id='+id;
+	var name = 'cate';
+	$.ajax({
+		url:url_str,
+		type:'POST',
+		data:query,
+		success:function(data){
+			$('#'+name+'list').attr('disabled',false);
+			$('#'+name+'list').html(data);
+		}
+	});
+}
+function checkinput(){
+var cid = $("#cid").val();
+var did = $("#did").val();
+var oid = $("#oid").val();
+var cateid = $("#catelist").val();
+var cnt = $("#cnt").val();
+if(cid == "0" && oid == "0" && did=="0"){
+ alert('至少输入 运营商，渠道，运营商任一种条件');
+ return false;
+}
+if(cateid == "0"){
+	alert('请选择去类别！');
+	return false;
+}
+if(!cnt){
+	alert('请选择输入显示条数！');
+	return false;
+}
+return true;
+}
+</script>
+<center>
+<form action="__URL__/addwidgt" method="POST">
+<table>
+<tr>
+<th>添加小工具</th>
+<th></th>
+</tr>
+<tr>
+<td>运营商:</td>
+<td>
+<select name="oid" id="oid">
+<option value="0">默认不选</option>
+<?php 
+foreach($op_list as $info){
+echo "<option value='".$info['oid']."'>".$info['mname']."</option>";
+}
+?>
+</select>
+</td>
+</tr>
+<tr>
+<td>
+渠道:
+<font color="#3399FF">输入有效渠道名点击查找否则默认不选择</font>
+</td><td><input type="text" name="cname" id='cname' value="默认不选" onclick="if(this.value == '默认不选') this.value=''"/>
+<input type="button" id="srchcid" value="查找" onclick="searchinfo('cname')"/>
+<input type="hidden" id="cid" name="cid" value="0"/>
+</td>
+<td>
+<select id="cnamelist" name="cnamelist" style="display:none" onchange="checkdata('cname')"></select>
+</td>
+</tr><tr>
+<td>
+机型:
+<font color="#3399FF">输入有效机型点击查找否则默认不选择</font>
+</td>
+<td>
+<input type="text" name="dname" id='dname' value="默认不选" onclick = "if(this.value == '默认不选') this.value=''"/>
+<input type="button" id="srchdid" value="查找" onclick="searchinfo('dname')"/>
+<input type="hidden" id="did" name="did" value="0"/>
+</td>
+<td><select id="dnamelist" name="dnamelist" style="display:none" onchange="checkdata('dname')"></select></td>
+</tr>
+<tr>
+<td>软件来源类别:</td>
+<td>
+<label><input type="radio" name="type" value="1" onclick="showtype(1)">:软件专题</label>
+<label><input type="radio" name="type" value="2" onclick="showtype(2)">:软件分类</label>
+</td>
+<td><select id="catelist" name="cateid" disabled='true'><option value="0">请选择</option></select></td>
+</tr>
+<tr>
+<td>显示条数:</td>
+<td><input type="text" name="cnt" id="cnt" value=""></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><input type="submit" value="添加" onclick=" return checkinput()"></td>
+<td></td>
+</tr>
+</table>
+</form>
+</center>

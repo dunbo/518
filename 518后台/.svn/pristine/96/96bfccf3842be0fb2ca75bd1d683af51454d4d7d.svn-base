@@ -1,0 +1,79 @@
+<include file="../Public/header" />
+<style type="text/css">
+<!--
+body,td,th {
+	font-size: 12px;
+}
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666; table-layout:fixed;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666; word-wrap:break-word;}
+-->
+</style>
+<body>
+<center>
+<table class="tb" border='1'>
+<form method="GET" action="__URL__/channels_soft_list">
+<tr><td>渠道名：{$chname}</td><td><?php if($filter == 'added'){ ?>已添加列表<?php }else{ ?>未添加列表<?php } ?></td><td><?php if($filter == 'added'){ ?><a href="__URL__/channels_soft_list/cid/{$cid}/filter/add">未添加列表</a><?php }else{ ?><a href="__URL__/channels_soft_list/cid/{$cid}/filter/added">已添加列表</a><?php } ?></td><td><a href="__URL__/Channels_filtering">返回</a><input type="hidden" name="filter" value="{$filter}"/> <input type="hidden" name="cid" value="{$cid}"/></td></tr><tr><td>包名：<input type="text" name="package" size="50" value="{$package}"></td><td>软件名：<input type="text" name="softname" value="{$softname}"></td><td>类别：<select name="category_id">
+<option value="all">所有</option>
+<volist name="category_list" id="vo"><option value="{$vo.category_id}" <?php if($category_id == $vo['category_id']){ ?>selected = true<?php } ?>>{$vo.name}</option></volist>
+
+</select></td><td><input type="submit" value="搜索"></td></tr>
+</form>
+</td>
+</table>
+<form method="POST" action="__URL__/channels_filterad">
+<table class="tb" border=1>
+   <tr><td colspan="4"><?php if($filter == 'added'){ ?>已添加列表<?php }else{ ?>未添加列表<?php } ?></td></tr>
+    <?php if(count($softlist) > 0){ ?>
+    <volist name="softlist" id="vo">
+    <tr>
+        <td><input type="checkbox" value="{$vo.package}" name="pkg[]"></td>
+        <td><img width="32" height="32" src="<?php echo IMGATT_HOST;?>{$vo.iconurl}"/></td>
+        <td>{$vo.softname}({$vo.package})</td>
+        <td>{$vo.cname}</td>
+    </tr>
+    </volist>
+    <tr><td><input type="checkbox" name="All" onclick="checkAll('pkg[]')"/>全</td><td><input type="submit" value="批量<?php if($filter == 'add'){ ?>添加<?php }else{ ?>删除<?php } ?>" onclick="return checksmt('pkg[]')"/></td><td><input type="hidden" name="filter" value="{$filter}"/> <input type="hidden" name="cid" value="{$cid}"/></td></tr>
+    <?php }else{ ?>
+       没有你要搜索的结果
+    <?php } ?>
+</table>
+{$page}
+</form>
+</center>
+<script>
+var check = 1;
+function checkAll(name){
+   var ckd = document.getElementsByName(name);
+   var leng = ckd.length;
+   var a = 0;
+   var b = 0;
+   if(check == 1){
+        for(var i = 0; i < leng; i++){
+        ckd[i].checked = true;
+        }
+        check = 2;
+   }else{
+        for(var i = 0; i < leng; i++){
+        ckd[i].checked = false;
+        }
+        check = 1;
+   }
+}
+function checksmt(name){
+   var ckd = document.getElementsByName(name);
+   var a = 0;
+   var leng = ckd.length;
+   for(var i=0; i<leng;i++){
+     if(ckd[i].checked== true){
+        a++;
+     }
+   }
+   if(a == 0){
+     alert('请选择软件');
+     return false;
+   }
+     return true;
+
+}
+</script>
+</body>

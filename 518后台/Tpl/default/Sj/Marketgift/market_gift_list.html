@@ -1,0 +1,118 @@
+<include file="../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+    function checkit()
+    {
+        if (confirm("确定要这么执行该操作吗？"))
+        {
+            return ture;
+        }
+        return false;
+    }
+
+    function select_checkit() {
+        if (confirm("您是否确认将该条信息配置到网游精选中显示?"))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    function checkit_no() {
+        if (confirm("您确认要移除该信息在网游精选中的显示？"))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    function been_show() {
+        $("#no_release").css('display', 'none');
+        $("#been_release").css('display', 'block');
+        $("#bt_been").css("background", "#949494");
+        $("#bt_no").css("background", "#e4e4e4");
+    }
+
+    function no_show() {
+        $("#no_release").css('display', 'block');
+        $("#been_release").css('display', 'none');
+        $("#bt_been").css("background", "#e4e4e4");
+        $("#bt_no").css("background", "#949494");
+    }
+</script>
+<div  style="padding-left:50px">
+    <div>
+        <a href="__URL__/market_gift_list">未过期</a>&nbsp;&nbsp;
+        <a href="__URL__/market_gift_list_last">已过期</a>
+        <table border="1" cellpadding="0" cellspacing="0">
+            <tr>
+                <td width="97"><span style='color:red'>未过期列表</span></td>
+                <td width="2%"><input type="button" value="礼包类型配置" onclick="javascript:location.href = '__URL__/add_type_show'" /></td>
+                <td width="1%"><input type="button" value="添加礼包" onclick="javascript:location.href = '__URL__/market_add_show'" /></td>
+            </tr>
+        </table>
+        <table border="1" cellpadding="0" cellspacing="0" id="been_release" <?php if($from == 2){ ?>style="display:none;"<?php } ?> />
+               <tr>
+                <td width="5%">序号</td>
+                <td width="5%">ID</td>
+                <td width="10%">标题</td>
+                <td width="7%">发布平台</td>
+                <td width="5%">礼包类型</td>
+                <td width="8%">开始时间</td>
+                <td width="8%">截止时间</td>
+                <td width="7%">总个数</td>
+                <td width="5%">剩余个数</td>
+                <td width="5%">每日限额</td>
+                <td width="10%">操作</td>
+                <td width="10%">排序</td>
+                <td width="3%">网游精选配置状态</td>
+            </tr>
+            <?php foreach($result as $key => $val){ ?>
+            <tr>
+                <td>{$val.num}</td>
+                <td>{$val.active_id}</td>
+                <td>{$val.active_name}</td>
+                <td>{$val.active_from}</td>
+                <td>{$val.gift_type_name}</td>
+                <!-- <td>{$val.usable}</td>
+                <td align="center"><?php if($val['intro']){ ?>{$val.intro}<?php }else{ ?>......<?php } ?></td> -->
+                <!-- <td>{$val.sim_content}</td> -->
+                <td><?php echo date('Y-m-d H:i:s',$val['start_tm']); ?></td>
+                <td><?php echo date('Y-m-d H:i:s',$val['cut_tm']); ?></td>
+                <td>{$val.all_num}</td>
+                <td>{$val.surplus_num}</td>
+                <td>{$val.limit_num}</td>
+                <td><a href="__URL__/market_edit_show/id/{$val.active_id}/lr/{$lr}/p/{$p}">[编辑]</a>&nbsp;&nbsp;<a href="__URL__/market_del/id/{$val.active_id}/lr/{$lr}/p/{$p}" onclick="return checkit();">[删除]</a>
+                    <?php if($val['start_button'] == 1){ ?>
+                    &nbsp;&nbsp;<?php if($val['selection'] == 1){ ?><a href="__URL__/market_change_selection/id/{$val.id}" onclick="return checkit_no();">[关闭]<?php }else{ ?><a href="__URL__/market_change_selection/id/{$val.id}" onclick="return select_checkit();">[启用]<?php } ?></a>
+                        <?php } ?>
+                </td>
+                <td><input type="text" name="rank" value="{$val.rank}" size="2" rel="<?php echo $val['id'] ?>" class="extent_rank"></td>
+                <td><span style="color:blue;align:center;"><?php if($val['selection'] == 1){ ?>已开启<?php }else{ ?>---<?php } ?></span></td> 
+            </tr>
+            <?php } ?>
+        </table>
+    </div>
+    <div>
+        {$page}
+    </div>
+</div>
+</body>
+</html>
+<script>
+    $('.extent_rank').blur(function() {
+
+        var url = "__URL__/edit_rank/id/" + $(this).attr('rel') + "/rank/" + $(this).val();
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function(response) {
+                var url = eval("(" + response + ")");
+                var jumpUrl = "__URL__/market_gift_list/";
+                //window.location.reload();
+                window.location.href = jumpUrl;
+            }
+        });
+    });
+</script>

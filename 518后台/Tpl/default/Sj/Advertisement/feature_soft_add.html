@@ -1,0 +1,189 @@
+<style>
+<!--
+.tr{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tr th,.tr td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+-->
+</style>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+function submitedit(feature_id){
+	var package = $(":input[name='package']").val();
+	var rank = $("#rank").val();
+	var special = $(":input[name=special]:checked").val();
+	var remark = $(":input[name='remark']").val();
+	var recommend_soft_name = $(":input[name='recommend_soft_name']").val();
+	var recommend_reason = $(":input[name='recommend_reason']").val();
+	var recommend_person = $(":input[name='recommend_person']").val();
+	var begintime = $(":input[name='begintime']").val();
+	var endtime = $(":input[name='endtime']").val();
+	var feature_graphic_id = $(":input[name='feature_graphic_id']").val();
+	var type = $(":input[name='type']").val();
+	var enable=true;
+	if(package){
+		$.ajax({
+		url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+package,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					if(!confirm(data)){
+						enable=false;
+					}
+				}
+				
+			}
+		});
+		if(!enable){
+			return enable;
+		}
+	}
+	$.ajax({
+		url:"__URL__/feature_soft_upload",
+		data:"feature_id="+feature_id+" &package="+package+" &rank="+rank+" &special="+special+" &remark="+remark+" &begintime="+begintime+" &endtime="+endtime+'&feature_graphic_id='+feature_graphic_id+"&type="+type+"&recommend_reason="+recommend_reason+"&recommend_person="+recommend_person+"&recommend_soft_name="+recommend_soft_name,
+		type:'POST',
+		dataType: 'json',
+		success: function(json){
+			alert(json.info);
+			if(json.status == 1){
+				window.location.reload();
+			}
+		}
+	});
+}  
+function countChar(textareaName,spanName,spanNames){ 
+	document.getElementById(spanName).innerHTML = document.getElementById(textareaName).value.length;
+	document.getElementById(spanNames).innerHTML = 20 - document.getElementById(textareaName).value.length;
+}
+//软件包名验证
+function get_softname(){
+	var pkg = $('#apply_pkg').val();
+	$.ajax({
+		url: '/index.php/Public/pub_get_softname/package/'+pkg,
+		type: 'get',
+		success: function(data){
+			if(data != 2){
+				var obj = eval('(' + data + ')');
+				
+				$('#soft_name').val(obj.soft_name);
+				$('#my_game').val(obj.category_name);
+			}else{
+				$('#soft_name').val('');
+				$('#my_game').val('');
+				alert("该软件不存在");
+				return false;
+			}
+		}
+	});
+}
+$(document).ready(function(){
+	$("#recommend_reason").live('click', function(){
+		var str = $(this).val();
+		if (str == '一句话短评') {
+		$(this).html("");
+		}
+	});	
+	$("#recommend_person").live('click', function(){
+		var str = $(this).val();
+		if (str == '一句话短评') {
+		$(this).html("");
+		}
+	});	
+});
+</script>
+<center>
+	<form onsubmit="submitedit({$feature_id}); return false;">
+	<table>
+		<?php if($feature){ ?>
+		<tr>
+			<td >所属段落：</td>
+			<td>
+				<select style='width:135px' name="feature_graphic_id" id="feature_graphic_id">
+					<volist name='feature' id='m'>				
+						<option value="{$m.id}" <if condition="$feature_graphic_id == $m['id']">selected="selected"</if>>{$m.title}</option>
+					</volist>		
+				</select>
+			</td>		
+		</tr>
+		<?php } ?>
+		<tr>
+			<td align='right' valign='top'>软件包名:</td>
+			<td align='left'><input name='package' id="apply_pkg" onblur="get_softname();"  type='text' value='' /><br />
+			<span style='color: #f00'>需填写有效包名</span>
+			</td>
+		</tr>
+		<tr>
+			<td align='right'>软件名称</td>
+			<td align='left'><input type="text" name="soft_name" id="soft_name" readonly /></td>
+		</tr>
+		<tr>
+			<td align='right'>软件名称(推荐)</td>
+			<td align='left'><input type="text" name="recommend_soft_name" id="recommend_soft_name"  /></td>
+		</tr>
+		<tr><td align='right'>所在位置：</td><td align='left'>
+		<input type='text' name="rank" id="rank" value="" />
+		</td></tr>
+		<tr>
+		<td align='right'>开始时间:</td>
+		<td align='left'>
+			<input id="begintime" name="begintime"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"begintime",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px">
+		</td>
+		</tr>
+		<tr>
+		<td align='right'>结束时间:</td>
+		<td align='left'>
+		<input id="endtime" name="endtime"
+			style="border: 0px none black; width: 100px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"endtime",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</td>
+		</tr>
+		<tr>
+			<td align='right' valign='top'>是否特殊条件:</td>
+			<td align='left'>
+			是:<input type='radio' name='special' value='1' />&nbsp;
+			否:<input type='radio' name='special' value='0' /><br />
+			<span style='color: #f00'>如果标记为特殊软件，会优先返回给客户端<br />（君正专题中，需要下载的软件设置为是）</span>
+			</td>
+		</tr>
+		<tr>
+			<td align='right' valign='top'>软件简介:</td>
+			<td align='left'>
+				<textarea id='remark' onkeydown='countChar("remark", "word", "words");' onkeyup='countChar("remark", "word", "words");' name='remark' cols='40' rows='5'></textarea><br />
+				<span style='color: #f00'>限制字数10-20&nbsp;&nbsp;&nbsp;已用字数:<span id='word'></span>&nbsp;&nbsp;剩余字数:<span id='words'></span>&nbsp;</span>
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td>合作形式</td>
+			<td>
+				<SELECT name='type'>
+					<?php foreach($typelist as $key => $val): ?>
+						<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+					<?php endforeach; ?>				
+				</SELECT>
+			</td>
+		</tr>
+		<tr>
+			<td align='right' valign='top'>推荐理由:</td>
+			<td align='left'>
+				<textarea id='recommend_reason' onkeydown='countChar("recommend_reason", "word_reason", "words_reason");' onkeyup='countChar("recommend_reason", "word_reason", "words_reason");' name='recommend_reason' cols='40' rows='5'>一句话短评</textarea><br />
+				<span style='color: #f00'>限制字数10-20&nbsp;&nbsp;&nbsp;已用字数:<span id='word_reason'></span>&nbsp;&nbsp;剩余字数:<span id='words_reason'></span>&nbsp;</span>
+			</td>
+		</tr>
+		<tr>
+			<td align='right' valign='top'>推荐人群:</td>
+			<td align='left'>
+				<textarea id='recommend_person' onkeydown='countChar("recommend_person", "word_person", "words_person");' onkeyup='countChar("recommend_person", "word_person", "words_person");' name='recommend_person' cols='40' rows='5'>一句话短评</textarea><br />
+				<span style='color: #f00'>限制字数10-20&nbsp;&nbsp;&nbsp;已用字数:<span id='word_person'></span>&nbsp;&nbsp;剩余字数:<span id='words_person'></span>&nbsp;</span>
+			</td>
+		</tr>
+		<tr><td align='right'><input type='submit' value='&nbsp;提交&nbsp;' /></td><td align='left'><input type='button' onclick='tb_remove();' value='&nbsp;&nbsp;取消&nbsp;&nbsp;' /></td></tr>
+	</table>
+	</form>
+</center>

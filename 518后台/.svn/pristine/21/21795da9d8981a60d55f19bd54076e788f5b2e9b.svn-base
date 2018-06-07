@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen"/>
+<link rel="stylesheet" href="/Public/css/tablelist.css?v2" type="text/css" media="screen"/>
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>『Goapk|安智网』管理平台</title>
+    <script type="text/javascript">
+        if (typeof (window.parent) != 'undefined' && (menuFrame = window.parent.document.getElementById('menu-frame').contentWindow)) {
+            try {
+                menuFrame.selectMenu('__ACTION__');
+            } catch (e) {
+            }
+        }
+    </script>
+</head>
+
+<script type="text/javascript">
+    $(function () {
+        document.onkeydown = function (e) {
+            var ev = document.all ? window.event : e;
+            if (ev.keyCode == 13) {
+                search();
+            }
+        }
+    });
+
+    function search() {
+        var add_begintime = $("#add_begintime").val();
+        var add_endtime = $("#add_endtime").val();
+        if (add_begintime.length > 0 && add_endtime.length > 0 && add_endtime < add_begintime) {
+            alert('结束时间不能小于开始时间');
+        } else {
+            $("#search").submit();
+        }
+    };
+
+        function allstop() {
+            var is_select = false;
+            $(":checkbox[checked]").each(function () {
+                if ($(this).val() != 'on') {
+                    is_select = true;
+                }
+            });
+
+            if (is_select) {
+
+                if (confirm("确定要结算这些订单吗?")) {
+                    var str = "";
+                    $(":checkbox[checked]").each(function () {
+                        if ($(this).val() != 'on') {
+                            str = str + $(this).val() + ',';
+                        }
+                    });
+                    var param = {
+                        str: str
+                    };
+                    $.ajax({
+                        url: '__URL__/orderinfo',
+                        type: 'POST',
+                        data: param,
+                        dataType: 'json',
+                        success: function (data) {
+                            location.reload();
+                        }
+                    });
+                }
+            } else {
+                alert("请选择要操作的对象");
+                return false;
+            }
+        }
+        function selectAll() {
+            if ($("input[name='SelectAll']").attr("checked")) {
+                    $(":checkbox").attr("checked", true);
+                    var str = 0;
+                    str = parseInt(str);
+                    $(":checkbox[checked]").each(function () {
+                        if ($(this).val() != 'on') {
+                            str = str+1;
+                        }
+                    });
+                    $("#jine").html(str*10);
+                    if($("#is_effective").val()==2){
+                        $("#effective_mess").html('已勾选异常订单');
+                    }
+            } else {
+                $("#jine").html('0');
+                $(":checkbox").attr("checked", false);
+                $("#effective_mess").html('');
+            }
+        }
+
+        function effective(id){
+            if($("input[name='cb_"+id+"']").attr("checked")){
+                var jine = $("#jine").html();
+                $("#jine").html(parseInt(jine)+10);
+                if($("#effective_"+id).val()==2){
+                    $("#effective_mess").html('已勾选异常订单');
+                }
+            }else{
+                    var jine = $("#jine").html();
+                    $("#jine").html(parseInt(jine)-10);
+                    $("#effective_mess").html('');
+            }
+        }
+</script>
+<body>
+<form action="/index.php/Sendnum/Store/orderinfo/id/{$get.id}" method="get" id="search">
+    <input type="hidden" value="{$effective}" id="is_effective">
+    <div class="search_box">
+        <table  width="60%" class="">
+            <tr>
+                <td width="60" align="right"><a href="#" class="search_btn" onclick="window.history.go(-1);return false;">返回</a></td>
+                <td>
+                    {$info.school}-{$info.store_name}
+                </td>
+            </tr><tr>
+                <td width="20" align="right">兑换时间:</td>
+                <td>
+                    <input id="add_begintime" name="add_begintime" value="{$get.add_begintime}" type="text"
+                           class="Wdate"
+                           onClick="WdatePicker({startDate: '%y-%M-%d 00:00:00', dateFmt: 'yyyy-MM-dd HH:mm:ss'})"
+                           style="width:140px;">&nbsp;&nbsp;&nbsp;至</td><td><input id="add_endtime" name="add_endtime"
+                                                                    value="{$get.add_endtime}" type="text" class="Wdate"
+                                                                    onClick="WdatePicker({startDate: '%y-%M-%d 23:59:59', dateFmt: 'yyyy-MM-dd HH:mm:ss'})"
+                                                                    style="width:140px;">
+                </td>
+                <td>
+                    <select name="yichang">
+                        <option value="-1"
+                        <if condition="($get.yichang eq -1)"> selected="selected"</if>
+                        >全部订单</option>
+                        <option value="1"
+                        <if condition="($get.yichang eq 1)"> selected="selected"</if>
+                        >正常订单</option>
+                        <option value="2"
+                        <if condition="($get.yichang eq 2)"> selected="selected"</if>
+                        >异常订单</option>
+                    </select>
+                </td>
+
+                <td align="right"><input class="search_btn" style="margin-right:6px ; height:30px;" type="button" value="搜索" onclick="search()"></td>
+            </tr>
+
+        </table>
+    </div>
+</form>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;已选择订单金额:<span id="jine">0</span>元&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="" onclick="allstop()" href="#">确定结算</a>&nbsp;&nbsp;<font color="red"><span id="effective_mess"></span></font>
+<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+    <thead>
+    <tr align="center">
+        <th width="3%"><input type="checkbox" name="SelectAll" onclick="selectAll();">订单号</th>
+        <th width="4%">手机号</th>
+        <th width="5%">IMEI</th>
+        <th width="4%">结算金额(元)</th>
+        <th width="4%">领取时间</th>
+        <th width="4%">兑换时间</th>
+    </tr>
+    </thead>
+    <tbody>
+    <volist name="list" id="list">
+    <if condition="($list.effective eq 2)"><tr style='background-color:red'></if>
+    <if condition="($list.effective eq 1)"><tr></if>
+        <td align='left'><input type="checkbox" name="cb_{$list.id}" value="{$list.id}" onchange="effective({$list.id})"/>{$list.id}</td>
+        <input type="hidden" value="{$list.effective}" id="effective_{$list.id}">
+            <td height="20" align="center"> {$list.tel}</td>
+            <td height="20" align="center"> {$list.imei}</td>
+            <td height="20" align="center">10</td>
+            <td height="20" align="center">
+                    <if condition="($list.receive_tm neq null)">{$list.receive_tm|date="Y-m-d H:i:s",###}</if>
+            </td>
+            <td height="20" align="center">
+                <if condition="($list.exchange_tm neq null)">{$list.exchange_tm|date="Y-m-d H:i:s",###}</if>
+            </td>
+        </tr>
+        
+    </volist>
+    </tbody>
+</table>
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>
+</html>

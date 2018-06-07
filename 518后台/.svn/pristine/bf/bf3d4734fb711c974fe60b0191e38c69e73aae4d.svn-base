@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>推送行为管理页面</title>
+<style type="text/css">
+	body, td, th {
+		font-size: 12px;
+	}
+</style>
+<script type="text/javascript" src="/Public/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/Public/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="/Public/js/json2.js"></script>
+<script type="text/javascript">
+	function selectAll()
+	{
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].disabled == false)
+				checkall[i].checked = true;
+		}
+	}
+	
+	function selectRev()
+	{
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox"  && checkall[i].disabled == false)
+				checkall[i].checked = !checkall[i].checked;
+		}
+	}
+	
+	function passAll()
+	{
+		var count = 0;
+		var id = new Array();
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+			{
+				id[count] = checkall[i].id;
+				count++;
+			}
+		}
+		var ids = id.join(',');
+		
+		status(ids,1);
+	}
+	
+	function rejectAll()
+	{
+		var count = 0;
+		var id = new Array();
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+			{
+				id[count] = checkall[i].id;
+				count++;
+			}
+		}
+		var ids = id.join(',');
+		
+		status(ids,2);
+	}
+</script>
+</head>
+
+<body>
+<div style="width:95%; margin-top:4px">
+		<table width="99%" border="1" align="center" cellpadding="0" cellspacing="0">
+			<form action="/index.php/Sj/Products/push" method="get">
+			<tbody align="middle">
+				<td width="5%">行为ID：</td>
+				<td width="10%"><input type="text" name="so_beid" id="so_beid" value="<?php if($_GET['so_beid']){echo $_GET['so_beid'];} ?>" style="width:60px;"></td>
+				<td width="8%">行为规则：</td>
+				<td width="16%"><input type="text" name="so_col" id="so_col" value="<?php if($_GET['so_col']){echo $_GET['so_col'];} ?>"></td>
+				<td width="8%">行为条件：</td>
+				<td width="35%"><input type="text" name="so_value" id="so_value" value="<?php if($_GET['so_value']){echo $_GET['so_value'];} ?>" style="width:450px;"></td>
+				<td width="8%">状态：
+					<select name="so_status" id="so_status">
+						<option value="0" <?php if($_GET['so_status']!=1 && $_GET['so_status']!=2){ ?>selected="selected"<?php } ?>>全部</option>
+						<option value="1" <?php if($_GET['so_status']==1){ ?>selected="selected"<?php } ?>>启用</option>
+						<option value="2" <?php if($_GET['so_status']==2){ ?>selected="selected"<?php } ?>>停用</option>
+					</select>
+				</td>
+				<td width="10%"><input type="submit" value="搜索"></td>
+			</tbody>
+			</form>
+			<tbody>
+				<td colspan="8" style="text-align:left;padding-left:10px;height:30px;line-height:30px;"><button style="cursor:pointer;font-weight:bold;" onclick="popup('_add_div')">添加推送行为</button></td>
+			</tbody>
+		</table>
+	
+	<table width="99%" border="1" align="center" cellpadding="0" cellspacing="0" style="margin-top:10px">
+		<thead>
+			<tr align="center">
+				<th width="3%" height="26" bgcolor="#E3E2FE">&nbsp;</th>
+				<th width="7%" bgcolor="#E3E2FE">行为ID</th>
+				<th width="10%" bgcolor="#E3E2FE">行为规则</th>
+				<th width="60%" bgcolor="#E3E2FE">行为条件</th>
+				<th width="10%" bgcolor="#E3E2FE">状态</th>
+				<th width="10%" bgcolor="#E3E2FE">操作栏</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="vo">
+			<tr style="color:#707070; background-color:#fff">
+				<td><input type="checkbox" id="{$vo.beid}" /></td>
+				<td height="20" align="center">{$vo.beid|default='&nbsp;'}</td>
+				<td align="center" id="col_{$vo.beid}">{$vo.col|default='&nbsp;'}</td>
+				<td align="center" id="value_{$vo.beid}">{$vo.value|default='&nbsp;'}</td>
+				<td align="center" id="status_{$vo.beid}">{$vo.status|default='&nbsp;'}</td>
+				<td align="center"><if condition="$vo.status eq '启用'"><a style="margin-right:12px;cursor:pointer;"  href="javascript:void(0);" onclick="status({$vo.beid},2)">停用</a><else/><a style="margin-right:12px;cursor:pointer;" href="javascript:void(0);" onclick="status({$vo.beid},1)">启用</a></if><a style="cursor:pointer;"  href="javascript:void(0);" onclick="edit({$vo.beid})">编辑</a></td>
+			</tr>
+			</volist>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="10">
+					
+					<input type="button" value="全选" onclick="selectAll();">
+					<input type="button" value="反选" onclick="selectRev();">
+					<input type="button" value="批量启用" onclick="passAll();">
+					<input type="button" value="批量停用" onclick="rejectAll();">
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+
+<!-- 添加推送行为 -->
+<style type="text/css">
+.tb_add .td1 {height:30px;line-height:30px;font-size:14px;}
+.tb_add input {width:300px;height:22px;font-size:14px;}
+.tb_add .td2 {height:30px;line-height:30px;font-size:14px;}
+</style>
+<div id="_add_div" style="position:absolute;top:0px;left:0px;display:none;background:#fff;width:430px;height:270px;border:1px solid #000;">
+	<form name="form_add" method="post" action="/index.php/Sj/Products/push_add" id="_form_add" onsubmit="return form_chk()">
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+		<tr>
+			<td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">添加推送行为：</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">行为规则：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="behavior_col" id="behavior_col" /></td>
+		</tr>
+		<tr>
+			<td class="td2" align="right" valign="top">行为条件：</td><td align="left" style="padding-left:10px;"><textarea cols="39" rows="7" name="behavior_value" id="behavior_value" style="font-size:14px;"></textarea></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="text-align:center;height:30px;line-height:30px;"><button style="margin-right:15px;" type="submit">确定</button><button type="button" onclick="popclose('_add_div')">取消</button></td>
+		</tr>
+	</table>
+	</form>
+</div>
+
+<div id="_edit_div" style="position:absolute;top:0px;left:0px;display:none;background:#fff;width:430px;height:270px;border:1px solid #000;">
+	<form name="form_add" method="post" action="/index.php/Sj/Products/push_edit" onsubmit="return form_chk_edit()">
+	<input type="hidden" id="edit_beid" name="edit_beid" />
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+		<tr>
+			<td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">编辑推送行为：</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">行为规则：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="edit_col" id="edit_col" /><input type="hidden" name="edit_p" id="edit_p" /></td>
+		</tr>
+		<tr>
+			<td class="td2" align="right" valign="top">行为条件：</td><td align="left" style="padding-left:10px;"><textarea cols="39" rows="7" name="edit_value" id="edit_value" style="font-size:14px;"></textarea></td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">状态：</td><td align="left" style="padding-left:10px;"><select style="width:80px;" name="edit_status" id="edit_status"><option value="启用">启用</option><option value="停用">停用</option></select></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="text-align:center;height:30px;line-height:30px;"><button style="margin-right:15px;" type="submit">确定</button><button type="button" onclick="popclose('_edit_div')">取消</button></td>
+		</tr>
+	</table>
+	</form>
+</div>
+
+<form method="post" action="" id="tmp_form">
+<input type="hidden" id="beid" name="beid" />
+<input type="hidden" id="sta" name="sta" />
+<input type="hidden" value="{$p}" name="p" id="p" />
+</form>
+<div id="bgdiv" style="position:absolute;display:none; left:0px; top:0px; width:100%; height:100%; filter:alpha(opacity=40);opacity:0.4; background-color:#000000; z-index:1000;"></div>
+<script language="javascript">
+function edit(beid) {
+	popup('_edit_div');
+	$('#edit_col').val($('#col_'+beid).html());
+	$('#edit_value').html($('#value_'+beid).html());
+	$('#edit_beid').val(beid);
+	$('#edit_status').val($('#status_'+beid).html());
+	$('#edit_p').val($('#p').val());
+}
+function form_chk() {
+	if($('#behavior_col').val()=='') {
+		alert("请填写行为规则！");
+		return false;
+	}
+	if(isNaN($('#behavior_col').val())) {
+		alert("行为规则只能是数字，请重填！");
+		return false;
+	}
+	if($('#behavior_value').val()=='') {
+		alert("请填写行为条件！");
+		return false;
+	}
+
+	$('#_form_add').submit();
+}
+function form_chk_edit() {
+	if($('#edit_col').val()=='') {
+		alert("请填写行为规则！");
+		return false;
+	}
+	if(isNaN($('#edit_col').val())) {
+		alert("行为规则只能是数字，请重填！");
+		return false;
+	}
+	if($('#edit_value').val()=='') {
+		alert("请填写行为条件！");
+		return false;
+	}
+
+	return true;
+}
+function status(beid,sta) {
+	if(confirm('你确认执行此操作！')) {
+		$('#tmp_form')[0].action = '/index.php/Sj/Products/push_oper';
+		$('#beid').val(beid);
+		$('#sta').val(sta);
+		$('#tmp_form').submit();
+	}
+}
+function popup(id) {
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+}
+function popclose(id) {
+	$("#"+id).css({display:"none"});
+	$("#bgdiv").css({display:"none"});
+}
+</script>
+</body>
+</html>

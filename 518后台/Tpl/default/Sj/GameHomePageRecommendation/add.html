@@ -1,0 +1,333 @@
+<include file="../Public/header" />
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+
+<script>
+    function trim(str){ //删除左右两端的空格 
+        return str.replace(/(^\s*)|(\s*$)/g, ""); 
+    };
+    function checkLen(obj) {
+        var maxChars = 70;//最多字符数
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+    };
+    //字符型日期转时间戳
+    function strtotime(str){
+        var new_str = str.replace(/:/g,'-');
+        new_str = new_str.replace(/ /g,'-');
+        var arr = new_str.split("-");
+        var systime = new Date(Date.UTC(arr[0],arr[1]-1,arr[2]));
+        return parseInt(systime.getTime()/1000);
+    }
+    // 得到今天零时的时间戳
+    function get_today_start_time () {
+        var new_str = new Date().toLocaleDateString();
+        var new_str = new_str.replace(/年/g,'-');
+        new_str = new_str.replace(/月/g,'-');
+        new_str = new_str.replace(/日/g,'-');
+        new_str = new_str.replace(/ /g,'-');
+        var arr = new_str.split("-");
+        var systime = new Date(Date.UTC(arr[0],arr[1]-1,arr[2]));
+        return parseInt(systime.getTime()/1000);
+    }
+    
+    function config_select(value) {
+        if (value == "1") {
+            var param = {
+                ids : 1
+            };
+            $.ajax({
+                url:'__URL__/check_before_add',
+                type:'POST',
+                data:param,
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    if(data.status != 0) {
+                        alert("有效期期已添加一组数据，您可以选择修改软件和时间");
+                        $("#op1").attr("selected", false);
+                        $("#op2").attr("selected", true);
+                        document.getElementById("div_home_page").style.display="none";
+                        document.getElementById("div_backup").style.display="";
+                    } else {
+                        document.getElementById("div_home_page").style.display="";
+                        document.getElementById("div_backup").style.display="none";
+                    }
+                }
+            });
+        } else {
+            document.getElementById("div_home_page").style.display="none";
+            document.getElementById("div_backup").style.display="";
+        }
+    };
+    function add() {
+        if ($("#op1").attr("selected")=="selected") {
+            // 获得输入的三个包名
+            var package1= trim($("#package1").val());
+            var package2= trim($("#package2").val());
+            var package3= trim($("#package3").val());
+            if(package1 == "") {
+                $("#s1").html('<font color="red">软件1（包名）不能为空<font>');
+                return;
+            } else {
+                $("#s1").html('');
+            }
+            if(trim($("#note1").val()) == "") {
+                $("#s2").html('<font color="red">软件1（简介）不能为空<font>');
+                return;
+            } else {
+                $("#s2").html('');
+            }
+            if (trim($("#note1").val()).length>70) {
+                $("#s2").html('<font color="red">软件1（简介）限制在70字以内<font>');
+                return;
+            } else {
+                $("#s2").html('');
+            }
+            if(package2 == "") {
+                $("#s3").html('<font color="red">软件2（包名）不能为空<font>');
+                return;
+            } else {
+                $("#s3").html('');
+            }
+            if(trim($("#note2").val()) == "") {
+                $("#s4").html('<font color="red">软件2（简介）不能为空<font>');
+                return;
+            } else {
+                $("#s4").html('');
+            }
+            if (trim($("#note2").val()).length>70) {
+                $("#s4").html('<font color="red">软件2（简介）限制在70字以内<font>');
+                return;
+            } else {
+                $("#s4").html('');
+            }
+            if(package3 == "") {
+                $("#s5").html('<font color="red">软件3（包名）不能为空<font>');
+                return;
+            } else {
+                $("#s5").html('');
+            }
+            if(trim($("#note3").val()) == "") {
+                $("#s6").html('<font color="red">软件3（简介）不能为空<font>');
+                return;
+            } else {
+                $("#s6").html('');
+            }
+            if (trim($("#note3").val()).length>70) {
+                $("#s6").html('<font color="red">软件3（简介）限制在70字以内<font>');
+                return;
+            } else {
+                $("#s6").html('');
+            }
+            if(trim($("#starttime").val()) == "") {
+                $("#s7").html('<font color="red">开始时间不能为空<font>');
+                return;
+            } else {
+                $("#s7").html('');
+            }
+            if(trim($("#endtime").val()) == "") {
+                $("#s8").html('<font color="red">结束时间不能为空<font>');
+                return;
+            } else {
+                $("#s8").html('');
+            }
+            // 判断开始时间是否小于今天零时时间
+            // var now_stamp = (new Date()).getTime();
+            var now_stamp = get_today_start_time();
+            var starttime_stamp = strtotime(trim($("#starttime").val()));
+            if (starttime_stamp<now_stamp) {
+                $("#s7").html('<font color="red">开始时间不能小于当前时间<font>');
+                return;
+            } else {
+                $("#s7").html('');
+            }
+            if (trim($("#starttime").val()) > trim($("#endtime").val())) {
+                $("#s8").html('<font color="red">结束时间需大于开始时间<font>');
+                return;
+            } else {
+                $("#s8").html('');
+            }
+            // 检查三个包名是否有重复
+            if (package2 == package1) {
+                $("#s3").html('<font color="red">软件2（包名）与软件1（包名）不能相同<font>');
+                return;
+            } else {
+                $("#s3").html('');
+            }
+            if (package3 == package1) {
+                $("#s5").html('<font color="red">软件3（包名）与软件1（包名）不能相同<font>');
+                return;
+            } else {
+                $("#s5").html('');
+            }
+            if (package3 == package2) {
+                $("#s5").html('<font color="red">软件3（包名）与软件2（包名）不能相同<font>');
+                return;
+            } else {
+                $("#s5").html('');
+            }
+            // 最后检查每个填写的包名
+            var package1_exists = check_package(false, package1, "s1");
+            if (!package1_exists) {
+                return;
+            }
+            var package2_exists = check_package(false, package2, "s3");
+            if (!package1_exists) {
+                return;
+            }
+            var package3_exists = check_package(false, package3, "s5");
+            if (!package3_exists) {
+                return;
+            }
+            
+        } else if ($("#op2").attr("selected")=="selected") {
+            var package_backup = trim($("#package_backup").val());
+            if(package_backup == "") {
+                $("#s9").html('<font color="red">软件（包名）不能为空<font>');
+                return;
+            } else {
+                $("#s9").html('');
+            }
+            if(trim($("#note_backup").val()) == "") {
+                $("#s10").html('<font color="red">软件（简介）不能为空<font>');
+                return;
+            } else {
+                $("#s10").html('');
+            }
+            if (trim($("#note_backup").val()).length>70) {
+                $("#s10").html('<font color="red">软件（简介）限制在70字以内<font>');
+                return;
+            }
+            // 最后检查填写的包名
+            var package_backup_exists = check_package(false, package_backup, "s9");
+            if (!package_backup_exists) {
+                return;
+            }
+        }
+        $('#add').submit();
+    }
+    
+    // 检查软件名称是否可用，传入参数b_async如果为true，表示设置ajax请求为异步，false为同步
+    function check_package(b_async, package_name, s_id) {
+        var package_name = $.trim(package_name);
+        var ret = true;
+        $("#"+s_id).html('');
+        if (package_name != "") {
+            var param = {
+                package_name : package_name
+            };
+            $.ajax({
+                url:'__URL__/check_package',
+                type:'POST',
+                async:b_async,
+                data:param,
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    if(data == 1) {
+                        $("#"+s_id).html('<font color="red">包名不存在<font>');
+                        ret = false;
+                    } else if (data == 2) {
+                        $("#"+s_id).html('<font color="red">包名已添加<font>');
+                        ret = false;
+                    } else {
+                        $("#"+s_id).html('');
+                        ret = true;
+                    }
+                }
+            });
+        }
+        return ret;
+    }
+</script>
+
+<body>
+<h2>首页推荐配置</h2>
+<form method="post" action="__URL__/add" id="add">
+    <div class="form_list">
+        <label><font color="red">*</font>配置选择：</label>
+        <select id="config" name="config" onChange="config_select(this.value);">
+            <option id="op1" name="op1" value="1" <?php if($add_config==1) echo "selected='selected'";?>>首页推荐</option>
+            <option id="op2" name="op2" value="2" <?php if($add_config!=1) echo "selected='selected'";?>>备选库</option>
+        </select>
+    </div>
+    <div class="clear"></div>
+    <div id="div_home_page" name="div_home_page" <?php if($add_config!=1) echo "style='display:none;'";?>>
+        <div class="form_list">
+            <label><font color="red">*</font>软件1（包名）：</label>
+            <input id="package1" name="package1" type="text" onblur='check_package(true, this.value, "s1")' class="input_text"/>
+            <span id="s1" class="prompt_infor"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list">
+            <label><font color="red">*</font>软件1（简介）：</label>
+            <textarea id="note1" type="text" name="note1" onKeyUp="checkLen(this)" class="input_text"></textarea>
+            <span id="s2" class="prompt_infor"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list">
+            <label><font color="red">*</font>软件2（包名）：</label>
+            <input id="package2" name="package2" type="text" onblur='check_package(true, this.value, "s3")' class="input_text"/>
+            <span id="s3" class="prompt_infor"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list">
+            <label><font color="red">*</font>软件2（简介）：</label>
+            <textarea id="note2" type="text" name="note2" onKeyUp="checkLen(this)" class="input_text"></textarea>
+            <span id="s4" class="prompt_infor"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list">
+            <label><font color="red">*</font>软件3（包名）：</label>
+            <input id="package3" name="package3" type="text" onblur='check_package(true, this.value, "s5")' class="input_text"/>
+            <span id="s5" class="prompt_infor"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list">
+            <label><font color="red">*</font>软件3（简介）：</label>
+            <textarea id="note3" type="text" name="note3" onKeyUp="checkLen(this)" class="input_text"></textarea>
+            <span id="s6" class="prompt_infor"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list">
+            <label><font color="red">*</font>开始时间：</label>
+            <input id="starttime" name="starttime" type="text" class="Wdate" style="float:left"
+                onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"/>
+            <span id="s7" class="prompt_infor"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list">
+            <label><font color="red">*</font>结束时间：</label>
+            <input id="endtime" name="endtime" type="text" class="Wdate" style="float:left"
+                onClick="WdatePicker({startDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd'})"/>
+            <span id="s8" class="prompt_infor"></span>
+        </div>
+    </div>
+    <div id="div_backup" name="div_backup" <?php if($add_config==1) echo "style='display:none;'";?>>
+        <div class="form_list">
+            <label><font color="red">*</font>软件（包名）：</label>
+            <input id="package_backup" name="package_backup" type="text" onblur='check_package(true, this.value, "s9")' class="input_text"/>
+            <span id="s9" class="prompt_infor"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list">
+            <label><font color="red">*</font>软件（简介）：</label>
+            <textarea id="note_backup" type="text" name="note_backup" onKeyUp="checkLen(this)" class="input_text"></textarea>
+            <span id="s10" class="prompt_infor" style="padding-left:155px"></span>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <div class="clear"></div>
+    <div class="form_btns_box">
+		<a href="#" onClick="add()">提交</a>
+		<a href="__URL__/home_page_list">取消</a>
+	</div>
+</form>
+
+
+</body>

@@ -1,0 +1,737 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+<!--csv文件上传 -->
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+
+<!--使用灵活运营的推荐内容编辑必需添加此js-->
+<script type="text/javascript" src="/Public/js/edit_content_type.js?v3"></script>
+
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+    jQuery(function(){
+        // 推荐内容值
+        /*var content_arr = Array();
+        content_arr['content_type'] = "{$list.content_type}";
+        if (content_arr['content_type'] == 1) {
+            content_arr['package'] = "{$list.package}";
+            content_arr['uninstall_setting'] = "{$list.uninstall_setting}";
+            content_arr['install_setting'] = "{$list.install_setting}";
+            if (content_arr['install_setting'] == 4) {
+                content_arr['start_to_page'] = "{$list.start_to_page}";
+            }
+            content_arr['lowversion_setting'] = "{$list.lowversion_setting}";
+        } else if (content_arr['content_type'] == 2) {
+            content_arr['activity_id'] = "{$list.activity_id}";
+        } else if (content_arr['content_type'] == 3) {
+            content_arr['feature_id'] = "{$list.feature_id}";
+        } else if (content_arr['content_type'] == 4) {
+            content_arr['page_type'] = "{$list.page_type}";
+			content_arr['parameter_field'] = '{$list.parameter_field}';
+        } else if (content_arr['content_type'] == 5) {
+            content_arr['website'] = "{$list.website}";
+            content_arr['website_open_type'] = "{$list.website_open_type}";
+        }else if (content_arr['content_type'] == 6) {
+            content_arr['gift_id'] = "{$list.gift_id}";
+			content_arr['page_type'] = "{$list.page_type}";
+        }else if (content_arr['content_type'] == 7) {
+            content_arr['strategy_id'] = "{$list.strategy_id}";
+			content_arr['page_type'] = "{$list.page_type}";
+        }*/
+		var soft_arr = {:json_encode($list)};
+		var content_arr = edit_load(soft_arr);
+        // 生成推荐内容展示
+        generate_append_html("content_type_div", content_arr);
+        // 生成推荐链接
+        href = generate_content_type_href('content_type_div', "{$list.content_type}", content_arr);
+        $("#content_type_a").attr("href", href);
+        
+        // 剩余可输入字数展示
+        var title = "{$list.title}";
+        var title_left = 3 - title.length;
+        $("#title_hint").html(title_left + "/" + 3);
+        
+        var description = "{$list.description}";
+        var description_left = 20 - description.length;
+        $("#description_hint").html(description_left + "/" + 20);
+        
+        // 样式
+        var image_type = "{$list.image_type}";
+        $('input:radio[name="image_type"][value="' + image_type + '"]').prop('checked', true);
+		//V6.4.1增加手机清理 没有图片 推荐内容只有软件和页面
+        if(image_type==4)
+		{
+			href = generate_content_type_href('content_type_div','{$list.content_type}',content_arr,'phone_cleaning');
+			$("#content_type_a").attr("href", href);
+		}
+		if(image_type == 5||image_type == 6){
+			$(".page_pt").css('display','none');
+		}else{
+			$(".page_pt").css('display','');
+		}
+
+		if(image_type == 5){
+			$(".icon").css('display','');
+			$(".ad_n").html('<font color="red">*</font>ICON名称');
+		}else{
+			$(".icon").css('display','none');
+			$(".ad_n").html('<font color="red">*</font>广告名称');
+		}
+        // toggle图片大小提示
+        toggle_image_size_hint(image_type);
+    });
+    
+    function checkLen(obj, maxChars, hint_id) {
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);        
+        var left = maxChars - obj.value.length;
+        $("#" + hint_id).html(left + "/" + maxChars);
+    };
+    
+    function checkPost() {
+        var ad_name = $("#edit_content_form #ad_name").val();
+        if (!ad_name) {
+            alert("广告名称不能为空！");
+            return false;
+        }
+        var show_place_elem = $("#edit_content_form input[name='show_place[]']");
+        var show_place = 0;
+		var is_have = true;
+        show_place_elem.each(function() {
+            if ($(this).attr("checked") == "checked") {
+				show_place |= $(this).val();
+				if($(this).val()=='2097152')
+				{
+					var coop_channels_elem = $("#edit_content_form input[name='coop_channel[]']");
+					var coop_channels=0;
+					coop_channels_elem.each(function() 
+					{
+						if ($(this).attr("checked") == "checked")
+						{
+							coop_channels |= $(this).val();
+						}
+					});
+					if (!coop_channels) 
+					{
+						alert("请选择6.3资讯站点！");
+						is_have = false;
+					}
+				}
+				if($(this).val()=='4194304')
+				{
+					var coop_sites_elem = $("#edit_content_form input[name='coop_site[]']");
+					var coop_sites=0;
+					coop_sites_elem.each(function() {
+						if ($(this).attr("checked") == "checked")
+						{
+							coop_sites |= $(this).val();
+						}
+					});
+					if (!coop_sites) {
+						alert("请选择6.3合作站点！");
+						is_have = false;
+					}
+				}
+            }
+        });
+		var image_type = $("#edit_content_form input:radio[name='image_type']:checked").val();
+		if(image_type!=4&&image_type!=5&&image_type!=6)
+		{
+			if (!show_place) {
+				alert("页面位置不能为空！");
+				return false;
+			}
+		}
+		if(!is_have)
+		{
+			return false;
+		}
+        var pkg=$('input[name=package]').val();
+        var enable=true;
+		$.ajax({
+			url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					if(!confirm(data)){
+						 enable=false;
+					}
+				}
+			}
+		});
+		if(!enable){
+			return enable;
+		}
+        var start_at = $("#edit_content_form #start_at").val();
+        if (!start_at) {
+            alert("开始时间不能为空！");
+            return false;
+        }
+        var end_at = $("#edit_content_form #end_at").val();
+        if (!end_at) {
+            alert("结束时间不能为空！");
+            return false;
+        }
+        if (start_at > end_at) {
+            alert("开始时间不能大于结束时间！");
+            return false;
+        }
+		//V6.4选择 居中弹窗广告 关闭倒计时选择有  时间必填
+		var image_type = $("#edit_content_form input:radio[name='image_type']:checked").val();
+		if(image_type==3)
+		{
+			var closed_count_type = $("#edit_content_form input:radio[name='closed_count_type']:checked").val();
+			if(closed_count_type==1)
+			{
+				var closed_time = $("#edit_content_form #closed_time").val();
+				if(!closed_time)
+				{
+					alert("选择倒计时时间，时间必填");
+					return false;
+				}
+				else
+				{
+					var r=/^[1-9]\d*$/;
+					if(r.test(closed_time) == false)
+					{			
+						alert("关闭倒计时时间请填写正整数！");
+						$("#edit_content_form #closed_time").attr("value",'');						
+						return false;		
+					}
+				}
+			}
+		}
+		return checkRcontent("#edit_content_form");
+    }
+   
+    // 上传图片大小提示变化函数
+    function toggle_image_size_hint(type) {
+        // 动画广告图片大小
+        var image_width = <?php echo $image_width?>;
+        var image_height = <?php echo $image_height?>;
+        
+        // 弹窗广告图片大小
+        var popup_image_width = <?php echo $popup_image_width?>;
+        var popup_image_height = <?php echo $popup_image_height?>;
+        
+		//居中弹窗广告
+		var center_image_width = <?php echo $center_image_width?>;
+		var center_image_height = <?php echo $center_image_height?>;
+		var center_image_width_high = <?php echo $center_image_width_high?>;
+		var center_image_height_high = <?php echo $center_image_height_high?>;
+		
+        if (type == 1) {
+            $("td.image_size_hint").html("限制上传" + image_width + "*" + image_height + "的JPG/PNG/GIF图片");
+            // show_place也要发生变化
+            $("#caution_div").css('display', 'none');
+        } else if (type == 2) {
+            $("td.image_size_hint").html("限制上传" + popup_image_width + "*" + popup_image_height + "的JPG/PNG/GIF图片");
+            // show_place也要发生变化
+            $("#caution_div").css('display', '');
+        }
+		else if (type == 3) {
+            $("td.image_size_hint").html("限制上传" + center_image_width + "*" + center_image_height + "的JPG/PNG/GIF图片");
+			$("td.high_image_size_hint").html("限制上传" + center_image_width_high + "*" + center_image_height_high + "的JPG/PNG/GIF图片");
+            // show_place也要发生变化
+            $("#caution_div").css('display', 'none');
+        }
+    }
+	//////// 精准投放thickbox相关函数
+    function count() {
+        $.ajaxFileUpload({
+            url:'__APP__/Public/pub_csv_count',
+            type:'POST',
+			fileElementId:'upload_file',
+			dataType: 'json',
+            secureuri:false,
+            dataType:'json',
+            success:function(data)
+			{
+			    if(data.error1==-1)
+				{
+					alert("请选择导入的CSV文件!");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+					return false;
+				}
+				else if(data.error2==-2)
+				{
+					alert("请上传CSV格式文件！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else if(data.error2==-3)
+				{
+					alert("CSV文件格式不正确,请您参考下载模板！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else
+				{
+					document.getElementById("csv_url").value=data.csv_url;
+					document.getElementById("csv_count").value=data.out_count;
+					document.getElementById("pre_dl_count").value=data.out_count;
+                }				
+            }
+        });
+    }
+	//渠道
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{
+		$('#channel_div').html($('.TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	//机型
+	function onclikDevice()
+	{
+		$('#device_div').html($('.TB_ajaxContent #c_device_res').html());
+	}
+
+	function check_arrs()
+	{
+		$('.TB_ajaxContent #c_device_res').html($('#device_div').html());
+
+		$('#device_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_did_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	function delItem(obj) {
+	$(obj).parent().remove();
+	//  var fatie = $("#channel_div");
+	//	fatie.remove();
+
+	}
+	function addItem() {
+		var channel_select = $("#device_div");
+		channel_select.clone().appendTo("#device_td");
+	}
+	function submitDevice()
+	{
+		var cids = '';
+		$('#device_div').empty();
+		$(".TB_ajaxContent #c_device_res input:checked").each(function(){
+			var item = $('<label>' + $('#c_device_res .l_did_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			item.find('input').click(function(){
+				$(this).parent().remove();
+			});
+			$('#device_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	//删除csv
+	function del_csv()
+	{
+		$("#csv_count").val("");
+		$("#csv_url").val("");
+		$("#have_pre_dl").val("");
+		$("#pre_dl_count").val("");
+		alert("删除后提交即生效");
+	}
+	$(document).ready(function()
+	{
+		var have_csv="{$list.csv_url}";
+		var is_upload_csv="{$list.is_upload_csv}";
+		if(have_csv&&is_upload_csv==1)//添加的时候已经上传过了可以删除
+		{
+			$("#del_csv_value").css("display","");
+			$("#upload_csv").css("display","none");
+			$("#upload_file").css("display","none");
+			$("#have_pre_dl").css("display","");
+		}
+		else if(!have_csv&&is_upload_csv==1)//已经上传过了又删除了什么也不显示
+		{
+			$("#tr_csv").css("display","none");
+		}
+		else if(!have_csv&&is_upload_csv==0)//添加的时候没有上传可以上传
+		{
+			$("#del_csv_value").css("display","none");
+			$("#upload_csv").css("display","");
+			$("#upload_file").css("display","");
+			$("#have_pre_dl").css("display","none");
+		}
+		show_zixun_channel();
+		show_coop_site();
+		show_641app_channel();
+		show_641game_channel();
+	});
+	function show_zixun_channel()
+	{
+		if(document.getElementById("show_zixun").checked==true)
+		{
+			$("#coop_channel_div").css("display","block");
+		}
+		else
+		{
+			$("#coop_channel_div").css("display","none");
+		}
+	}
+	function show_coop_site()
+	{
+		if(document.getElementById("show_coopsite").checked==true)
+		{
+			$("#coop_site_div").css("display","block");
+		}
+		else
+		{
+			$("#coop_site_div").css("display","none");
+		}
+	}
+	function show_641app_channel()
+	{
+		if(document.getElementById("show_641app").checked==true)
+		{
+			$("#application641_div").css("display","block");
+		}
+		else
+		{
+			$("#application641_div").css("display","none");
+		}
+	}
+	function show_641game_channel()
+	{
+		if(document.getElementById("show_641game").checked==true)
+		{
+			$("#game641_div").css("display","block");
+		}
+		else
+		{
+			$("#game641_div").css("display","none");
+		}
+	}
+	function show_activation_date(num){
+		if(num==2){
+			$('#activation_date').show();
+	    }else{
+	   	    $('#activation_date').hide();
+	    }
+	}
+</script>
+
+<form id="edit_content_form" method="POST" action="__URL__/edit_content" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr">
+        <td style="width:120px;"><font color="red">*</font>样式</td>
+        <td>
+            <input type="radio" name='image_type' id="image_type" value="1" disabled/>动画广告
+            <span>&nbsp;</span>
+            <input type="radio" name='image_type' id="image_type" value="2" disabled/>图片广告
+			<span>&nbsp;</span>
+			<input type="radio" name='image_type' id="image_type" value="3" disabled/>居中弹窗广告
+			<span>&nbsp;</span>
+			<input type="radio" name='image_type' id="image_type" value="4" disabled/>手机清理
+			<span>&nbsp;</span>
+			<input type="radio" name='image_type' id="image_type" value="5" disabled/>桌面ICON
+			<span>&nbsp;</span>
+			<input type="radio" name='image_type' id="image_type" value="6" disabled/>外投专用
+        </td>
+        <td></td>
+    </tr>
+    <tr class="sub_tr">
+        <td class="ad_n"><font color="red">*</font>广告名称</td>
+        <td>
+            <input type="text" name="ad_name" id="ad_name" value="{$list.ad_name}" <?php if($list['image_type']==5){ ?>onBlur="checkLen(this,6,'ad_error')" onKeyUp="checkLen(this,6,'ad_error')"<?php } ?>/>
+        </td>
+        <td id="ad_error"><?php if($list['image_type']==5){echo '2-6字符';} ?></td>
+    </tr>
+	<tr class="sub_tr icon"  style="display:none">
+		<td><font color="red">*</font>ICON图片</td>
+		<td><input name='icon_url' id="icon_url" type='file'/></td>
+		<td class="icon_size_hint">限制上传{$icon_width}*{$icon_height}的JPG/PNG图片</td>
+	</tr>
+	<?php if($list['image_type']!=4&&$list['image_type']!=5) { ?>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>动画图片</td>
+        <td><input name='image_url' id="image_url" type='file'/></td>
+        <td class="image_size_hint">限制上传{$image_width}*{$image_height}的JPG/PNG/GIF图片</td>
+    </tr>
+	<?php } ?>
+	<?php if($list['image_type']==1||$list['image_type']==6) { ?>
+	<tr class="sub_tr" id="animation_pic_645">
+		<td><font color="red">*</font>动画图片6.4.5</td>
+		<td><input name='image_url_645' id="image_url_645" type='file'/></td>
+		<td class="image_size_hint_645">限制上传{$image_width_645}*{$image_height_645}的JPG/PNG/GIF图片</td>
+	</tr>
+	<?php } ?>
+	<?php if($list['image_type']==2) { ?>
+	 <tr class="sub_tr" id="high_pic">
+        <td><font color="red">*</font>高分图片</td>
+        <td><input name='image_url_high' id="image_url_high" type='file'/></td>
+        <td >限制上传{$popup_image_width_high}*{$popup_image_height_high}的JPG/PNG/GIF图片</td>
+    </tr>
+	<?php } ?>
+	<?php if($list['image_type']==3) { ?>
+	 <tr class="sub_tr" id="high_pic">
+        <td><font color="red">*</font>高分图片</td>
+        <td><input name='image_url_high' id="image_url_high" type='file'/></td>
+        <td >限制上传{$center_image_width_high}*{$center_image_height_high}的JPG/GIF图片</td>
+    </tr>
+	<tr class="sub_tr high_png">
+		<td>高分PNG图片</td>
+		<td><input name='high_png_url' id="high_png_url" type='file'/></td>
+		<td class="high_png_size_hint">限制上传{$center_image_width_high}*{$center_image_height_high}的PNG图片，649以上版本有效</td>
+	</tr>
+	<?php } ?>
+    <tr class="sub_tr page_pt">
+        <td><font color="red">*</font>页面位置</td>
+        <td>
+            <input type='checkbox' name='show_place[]' value='512' id="512" <?php if($list['show_place']&512) echo 'checked'?>><label for="512">游戏-最热</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='1024' id="1024" <?php if($list['show_place']&1024) echo 'checked'?>><label for="1024">网游</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='2048' id="2048" <?php if($list['show_place']&2048) echo 'checked'?>><label for="2048">单机</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <div id="caution_div" name="caution_div" style="display:none;">
+                <label style="color:red;">以下页面请慎用</label><br/>
+            </div>
+            <input type='checkbox' name='show_place[]' value='4' id="4" <?php if($list['show_place']&4) echo 'checked'?>><label for="4">首页推荐</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='1' id="1" <?php if($list['show_place']&1) echo 'checked'?>><label for="1">详情页</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='2' id="2" <?php if($list['show_place']&2) echo 'checked'?>><label for="2">可更新页</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <input type='checkbox' name='show_place[]' value='8' id="8" <?php if($list['show_place']&8) echo 'checked'?>><label for="8">飙升</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='16' id="16" <?php if($list['show_place']&16) echo 'checked'?>><label for="16">首页必备</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <!--
+            <input type='checkbox' name='show_place[]' value='32' id="32" <?php if($list['show_place']&32) echo 'checked'?>><label for="32">首页尝鲜</label><span>&nbsp;&nbsp;&nbsp;</span>
+            -->
+            <br/>
+            <input type='checkbox' name='show_place[]' value='64' id="64" <?php if($list['show_place']&64) echo 'checked'?>><label for="64">应用-最热</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='128' id="128" <?php if($list['show_place']&128) echo 'checked'?>><label for="128">应用分类Tab</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <br/>
+            <input type='checkbox' name='show_place[]' value='256' id="256" <?php if($list['show_place']&256) echo 'checked'?>><label for="256">应用日排行</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='4096' id="4096" <?php if($list['show_place']&4096) echo 'checked'?>><label for="4096">游戏分类Tab</label><span>&nbsp;&nbsp;&nbsp;</span>
+            <input type='checkbox' name='show_place[]' value='8192' id="8192" <?php if($list['show_place']&8192) echo 'checked'?>><label for="8192">管理</label><br/>
+			<input type='checkbox' name='show_place[]' value='65536' id="65536" <?php if($list['show_place']&65536) echo 'checked'?>><label for="65536">发现-推荐</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='131072' id="131072" <?php if($list['show_place']&131072) echo 'checked'?>><label for="131072">发现-汉化</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='262144' id="262144" <?php if($list['show_place']&262144) echo 'checked'?>><label for="262144">发现-专题</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<input type='checkbox' name='show_place[]' value='524288' id="524288" <?php if($list['show_place']&524288) echo 'checked'?>><label for="524288">6.0应用排行</label><span>&nbsp;&nbsp;&nbsp;</span><br/>
+			<input type='checkbox' id="show_zixun" name='show_place[]' onclick="show_zixun_channel()" value='2097152' <?php if($list['show_place']&2097152) echo 'checked'?>><label for="show_zixun">6.3资讯站点</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<div id="coop_channel_div" style="display:none;border:1px solid #d6d6d6;padding:5px 10px;">
+				<volist name="channel_list" id="ch">
+					<input  type='checkbox' name='coop_channel[]' <?php if(in_array($ch['id'],$have_page_place_arr['2097152'])) echo "checked=checked" ?> id="coop_channel_{$ch.id}" value='{$ch.id}'><label for="coop_channel_{$ch.id}">{$ch.channel_name}</label><span>&nbsp;&nbsp;&nbsp;</span>
+				</volist>
+			</div>
+			<input type='checkbox' id="show_coopsite" name='show_place[]' onclick="show_coop_site()" value='4194304' <?php if($list['show_place']&4194304) echo 'checked'?>><label for="show_coopsite">6.3合作站点</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<div id="coop_site_div" style="display:none;border:1px solid #d6d6d6;padding:5px 10px; margin-bottom:5px;">
+				<volist name="coop_site" id="vo">
+					<input alt="{$vo.type}" type='checkbox' name='coop_site[]' <?php if(in_array($vo['id'],$have_page_place_arr['4194304'])) echo "checked=checked" ?> id="coop_site_{$vo.id}" value='{$vo.id}'><label for="coop_site_{$vo.id}">{$vo.website_name}</label><span>&nbsp;&nbsp;&nbsp;</span>
+				</volist>
+			</div>
+			<input type='checkbox' name='show_place[]' id="show_641app" onclick="show_641app_channel()" value='8388608' <?php if($list['show_place']&8388608) echo 'checked'?>><label for="show_641app">6.4.1应用</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<div id="application641_div" style="display:none;border:1px solid #d6d6d6;padding:5px 10px; margin-bottom:5px;">
+				<volist name="channel_app_list" id="ch_app">
+					<input  type='checkbox' name='coop_app_channel[]' <?php if(in_array($ch_app['id'],$have_page_place_arr['8388608'])) echo "checked=checked" ?>  id="coop_app_channel_{$ch_app.id}" value='{$ch_app.id}'><label for="coop_app_channel_{$ch_app.id}">{$ch_app.channel_name}</label><span>&nbsp;&nbsp;&nbsp;</span>
+				</volist>
+			</div>
+			<input type='checkbox' name='show_place[]' id="show_641game" onclick="show_641game_channel()" value='16777216' <?php if($list['show_place']&16777216) echo 'checked'?>  ><label for="show_641game">6.4.1游戏</label><span>&nbsp;&nbsp;&nbsp;</span>
+			<div id="game641_div" style="display:none;border:1px solid #d6d6d6;padding:5px 10px; margin-bottom:5px;">
+				<volist name="channel_game_list" id="ch_game">
+					<input  type='checkbox' name='coop_game_channel[]' <?php if(in_array($ch_game['id'],$have_page_place_arr['16777216'])) echo "checked=checked" ?> id="coop_game_channel_{$ch_game.id}" value='{$ch_game.id}'><label for="coop_game_channel_{$ch_game.id}">{$ch_game.channel_name}</label><span>&nbsp;&nbsp;&nbsp;</span>
+				</volist>
+			</div>
+        </td>
+        <td/>
+    </tr>
+
+	<?php if($list['image_type']!=4) { ?>
+	<tr class="sub_tr" id="close_tr">
+	    <td>关闭：</td>
+		<td>
+		   <select name="close">
+		     <option value="0" <?php if($list['closed_type'] == 0) echo "selected"?>>关闭后不再显示</option>
+			 <option value="1" <?php if($list['closed_type'] == 1) echo "selected"?>>下次启动仍显示</option>
+		   </select>
+		</td>
+	</tr>
+	<?php if($list['image_type']==3) { ?>
+	<tr class="sub_tr" id="closed_time_tr">
+	    <td>关闭倒计时：</td>
+		<td>
+			<input type="radio" name='closed_count_type' value="0" <?php if($list['closed_count_type'] == 0) echo "checked"?>/>无
+			<input type="radio" name='closed_count_type' value="1" <?php if($list['closed_count_type'] == 1) echo "checked"?> />有
+			<input type="text" name ="closed_time" id="closed_time"  value="{$list.closed_time}"/>秒<span style="font-size:12px; color:red;">&nbsp&nbsp&nbsp&nbsp输入整数</span>
+		</td>
+	</tr>
+	<?php } ?>
+	<tr class="sub_tr" id="click_tr">
+	    <td>点击：</td>
+		<td>
+		 <select name="click">
+		     <option value="0" <?php if($list['click_type'] == 0) echo "selected"?>>点击跳转后关闭</option>
+			 <option value="1" <?php if($list['click_type'] == 1) echo "selected"?>>点击跳转后不关闭</option>
+			 <option value="2" <?php if($list['click_type'] == 2) echo "selected"?>>下次启动再显示</option>
+		   </select>
+		</td>
+	</tr>
+	<?php } ?>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>推荐内容</td>
+        <td>
+            <!--下面a里的href的url会在ready函数里自动生成-->
+            <a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+            <!--下面的content_type_div是选择推荐内容后append的地方-->
+            <div id="content_type_div"/>
+        </td>
+        <td/>
+    </tr>
+    <tr id="tr_csv" class="sub_tr">
+		<td>覆盖用户：</td>
+		<td style="height:70px;">
+		<a href="__APP__/Public/down_moban" class="blue" style="text-decoration:none; color:blue;font-size:14px;">下载csv模板</a><br/>
+		<input type="file" id="upload_file" name="upload_file"  style="background:none; border:none; width:160px;" value="" /><input type="button" id="upload_csv" value="上传" onclick="count()" />
+		
+		<input type="text" id="have_pre_dl" name="have_pre_dl" value="<?php if($list['csv_url']){ ?>{$list.csv_url}<?php } ?>" readonly /><br>
+		<span id="csv_count_show_span" style="color:red; font-size:14px;">有效用户数</span><input type="text" id="pre_dl_count" name="pre_dl_count" readonly style="border:none;color:red; background:none;" value="<?php if($list['csv_count']){ ?>{$list.csv_count}<?php } ?>"/>
+		<input type='hidden' name='csv_url' id='csv_url' value="">
+		<input type='hidden' name='csv_count' id='csv_count' value="">
+		<input type="button" id="del_csv_value" value="删除" onclick="del_csv()" />
+		</td>
+	</tr>
+	<tr class="sub_tr">
+	<td>选择渠道可见</td>
+	<td align="left" width="300">
+	<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+		<div id="channel_div">
+			<volist id="chl_list_vo" name="chl_list" >
+				&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+			</volist>
+		</div>
+	</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>机型可见</td>
+			<td>
+			<a href="/index.php/Public/showDevice?callback=submitDevice&ready=check_arrs&type=checkbox&reset_device=1" class="thickbox"><font color="blue">选择机型</font></a>
+			<div id="device_div">
+			<volist id="chl_list_vo" name="device_selected" >
+				&nbsp;<label class="l_did_{$chl_list_vo.did}"><input type="checkbox" name="did[]" checked="checked" value="{$chl_list_vo.did}"/>{$chl_list_vo.dname}</label>&nbsp;
+			</volist>
+			</div>
+			</td>
+	</tr>
+	<tr class="sub_tr">
+	  <td>运营商</td>
+	  <td id="operator_td">
+		<div id="operator_div">
+			<?php foreach($operator_list as $k => $v): ?>
+			<label><input name="oid[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		  <br/>
+		</div>
+	  </td>
+	  </tr>
+	<tr class="sub_tr">
+	  <td>固件版本</td>
+	  <td id="channel_td">
+		<div id="abi_div">
+			<?php foreach($firmwarelist as $k => $v): ?>
+			<label><input name="firmware[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		</div>
+	  </td>
+	</tr>
+	<tr class="sub_tr">
+	  <td>市场版本</td>
+	  <td id="channel_td">
+		<div id="abi_div">
+			<?php foreach($version_list as $k => $v): ?>
+				 <label>
+				<input name="version_code[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		</div>
+	  </td>
+	</tr>
+	<?php if($list['image_type']!=4&&$list['image_type']!=5&&$list['image_type']!=6) { ?>
+	<tr class="sub_tr">
+	    <td>覆盖用户类型：</td>
+		<td>
+			<input type="radio" name='cover_user_type' id="cover_user_type" value="0"   onclick="show_activation_date(0)" <?php if ($list['cover_user_type'] == 0):?> checked<?php endif; ?>/>全部
+            <span>&nbsp;</span>
+		 	<input type="radio" name='cover_user_type' id="cover_user_type" value="1"  <?php if ($list['cover_user_type'] == 1):?> checked<?php endif; ?> onclick="show_activation_date(1)"/>新用户
+            <span>&nbsp;</span>
+            <input type="radio" name='cover_user_type' id="cover_user_type" value="2" <?php if ($list['cover_user_type'] == 2):?> checked<?php endif; ?> onclick="show_activation_date(2)"/>定向用户
+			<span>&nbsp;</span>
+		</td>
+	</tr>
+	<tr class="sub_tr" id='activation_date' <?php if ($list['cover_user_type'] != 2):?> style="display:none;"<?php endif; ?>>
+		<td>激活日期</td>
+		<td colspan="2">
+            开始日期<input id="activation_date_start" name="activation_date_start" type="text" class="Wdate"  onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"  <?php if ($list['activation_date_start']):?> value='{$list.activation_date_start|date="Y-m-d H:i:s",###}'<?php endif; ?>/>
+            结束日期<input id="activation_date_end" name="activation_date_end" type="text" class="Wdate"  onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d  23:59:59'})"  <?php if ($list['activation_date_end']):?> value='{$list.activation_date_end|date="Y-m-d H:i:s",###}'<?php endif; ?>/>
+        </td>
+	</tr>
+	<?php echo ''; }?>
+    <tr class="sub_tr">
+		<td><font color="red">*</font>开始时间</td>
+		<td>
+            <input id="start_at" name="start_at" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value='{$list.start_at|date="Y-m-d H:i:s",###}'/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>结束时间</td>
+		<td>
+            <input id="end_at" name="end_at" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" value='{$list.end_at|date="Y-m-d H:i:s",###}'/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='co_type'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+    <input type="hidden" name="id" id="id" value="{$list.id}"/>
+    <input type='hidden' name="pid" value="{$list.pid}"/>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="extent_id" value='<?php echo $extent_id?>'/>
+			<input type='hidden' name="life" value='<?php echo $_GET['life']; ?>'/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

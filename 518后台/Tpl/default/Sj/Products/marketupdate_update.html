@@ -1,0 +1,116 @@
+<include file="../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+ <body>
+ <load href="__PUBLIC__/Js/Base.js" />
+<load href="__PUBLIC__/Js/prototype.js" />
+<load href="__PUBLIC__/Js/mootools.js" />
+<load href="__PUBLIC__/Js/Ajax/ThinkAjax.js" />
+<load href="__PUBLIC__/Js/jquery.js" />
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+ <script language="JavaScript">
+$(function(){
+		var ff = $('input[name:version_code]');
+		ff.blur(function(){
+			if(ff.val() == '') 
+			{
+				alert('不能为空！');
+			}
+		});
+	});
+ </script>
+
+<script>
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	//主层动态变化数据
+	function onclikChannel()
+		{	
+			$('#channel_div').html('');
+			$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+				var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+				item.find('input').attr('checked', 'true');
+				$('#channel_div').append(item);
+			})
+			$.cookie('cids', '', {path: '/'});
+		}
+	//
+	function check_arr()
+		{
+			$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+		}
+</script>
+
+ <div class="main">
+ <h2>市场编辑表单</h2><br/>
+<form id="form1" method='POST' action="__URL__/marketupdate_update" >
+<table  height="80%" border="10" cellspacing="5" align= "center">
+		<td >版本号：</td>
+		<td class="tLeft" ><input type="text" name="version_code" style="height:23px" class="large bLeft" value="{$vo.version_code}"></td>
+	 </tr>
+	 <tr>
+		<td >版本名称：</td>
+		<td class="tLeft" ><input type="text" name="version_name" style="height:23px" class="large bLeft" value="{$vo.version_name}"></td>
+	 </tr>
+	 <tr>
+		<td >适用版本：</td>
+		<td class="tLeft" >
+		<volist name="fw" id="v" mod="3" >
+				&nbsp;&nbsp;<input type="checkbox"  name="firmware[]" id="firmware[]" value="{$v.configname}" <if condition="$v.type eq 1 ">checked</if>>&nbsp;&nbsp;{$v.configcontent}
+	    </volist>
+		</td>
+
+	 </tr>
+	 <tr>
+		<td >是否为强制更新：</td>
+		<td class="tLeft" >
+		<select name="force_update">
+			<option value="0" {~echo $vo['force_update'] == 0 ? selected : ''}>非强制更新
+			<option value="1" {~echo $vo['force_update'] == 1 ? selected : ''}>强制更新
+		</select></td>
+	 </tr>
+	 <tr>
+		<td >描述：</td>
+		<td class="tLeft" ><textarea name="note" rows="10px" cols="30px" >{$vo.note}</textarea></td>
+	 </tr>
+	 <tr>
+		<td >适配渠道名称：</td>
+		<td class="tLeft" >
+		<a href="__APP__/Public/showChannel?callback=submitChannel&type=radio&ready=check_arr&selected=onclikChannel" class="thickbox">选择指定渠道</a><br />
+		<div id="channel_div">
+			<?php if(!empty($vo['chname'])){ ?>
+			<label class="l_cid_{$vo.cid}"><input type="radio" name="cid" checked="checked" value="{$vo.cid}"/>{$vo.chname}</label>
+			<?php } ?>
+		</div>
+	<!-- 	<select name="cid">
+        <if condition="$vo.cid eq 0"> <option value="0" selected>通用 
+        <else/><option value="0" >通用</if>
+			<volist name="info" id="ve">
+			<option value="{$ve.cid}" <if condition="$ve['cid'] eq $vo.cid " > selected </if> >{$ve.chname} - {$ve.only_auth} - {$ve.chl }
+			</volist>
+		</select> -->
+		
+		</td>
+	 </tr>
+	 <tr>
+	 <td>针对的版本</td>
+	 <td><input name="target_version_code" type="text" value="{$vo.target_version_code}">（用英文“,”分隔，留空则通用）</td>
+	 </tr>
+	 <tr><td><input type="hidden" id="id" name="id" value="{$vo.id}"></td>
+		<td><input type="submit"  value="保 存"> <input type="reset" value="清 空"></td>
+	</tr>
+	 </table>
+</form>
+</div>
+ </body>
+

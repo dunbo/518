@@ -1,0 +1,1472 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?v3"></script>
+<!--使用灵活运营的推荐内容编辑必需添加此js-->
+<script type="text/javascript" src="/Public/js/edit_content_type.js?v5"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload_anzhi.js?1"></script>
+
+<script type="text/javascript">
+var package_status = false;
+$(function() {
+	var soft_arr = {:json_encode($soft)};
+	var content_arr = edit_load(soft_arr);
+    var extent_type = "{$extent_type}";
+    var package_643 = "{$soft.package_643}";
+    var enabled_content_type = '{$soft.content_type}';
+    // 生成推荐内容展示
+    generate_append_html("content_type_div", content_arr);
+    // 生成推荐内容的链接
+    content_type_href(extent_type,enabled_content_type,content_arr);
+    if(extent_type==2||extent_type==24||extent_type==25||extent_type==26||extent_type==29||extent_type==30){
+        $('#new_package').val(package_643);
+        hidden_image();
+        package_check();
+
+    }else if(extent_type==28||extent_type==32||extent_type==35||extent_type==38||extent_type==39){
+        package_check();
+    }
+    if(extent_type==29){
+        get_video(package_643);
+        change_tag();
+    }
+});
+//v6.4.4 参数二为0时根据分区类型控制推荐内容的内容类型，参数二不为0时则为参数二
+function content_type_href(extent_type,final_content_type,content_arr){
+    var enabled_content_type = '1,2,3,4,5,6,7,8';//默认可推荐除应用内览全部内容类型
+    var function_from="flexible&extent_type="+extent_type;//区别灵活运营页面和网页的时候添加运营标识
+    if($('#phone_dis').attr('checked') == 'checked'){
+        function_from += '&is_developer=1';
+    }
+    if (extent_type == 4) {
+        // 多软件类型区间只能推荐软件，不过现在该类型区间已去掉，用自定义列表取代
+        enabled_content_type = '1';
+    } else if (extent_type == 5) {
+        // 专题-页面,多软件,多软件(无下载)类型区间只能专题和页面
+        enabled_content_type = '3,4';
+		change_style();
+    }else if(extent_type==19||extent_type==20||extent_type==21){
+        //游戏桌面widget只能为网页   灵活运营样式双排-H5
+        enabled_content_type = '5';
+    } else if(extent_type==25){
+        //v.6.4.3  单软件(图) 内容类型去掉预约
+        enabled_content_type = '1,2,3,4,5,6,7';
+    } else if(extent_type==27){
+        //v.6.4.3  预约列表单图内容类型只有游戏预约
+        enabled_content_type = '10';
+    }else if(extent_type==2 || extent_type==24 || extent_type==26){
+        //v.6.4.4  单软件(列表单图)、单软件(3图) 内容类型增加应用内览
+        enabled_content_type = '1,2,3,4,5,6,7,9';
+    }else if(extent_type==29){
+        //单软件（视频）
+        enabled_content_type = '1,2,3,4,5,6,7';
+    }else if(extent_type == 31){
+        //banner+软件
+        enabled_content_type = '1,8';
+    }
+	var use_final = true;
+	if(extent_type ==29){
+		var is_tag = '{$soft.is_tag}';
+		if(is_tag==0){
+			use_final = false;
+		}
+	}
+    if(final_content_type&&use_final){
+        enabled_content_type = final_content_type;
+    }
+	
+    href = generate_content_type_href('content_type_div', enabled_content_type,content_arr,function_from);
+    $("#content_type_a").attr("href", href);
+}
+
+function checkPost() {
+    var extent_type = "{$extent_type}";
+    // 如果是单排或双排或多排专题页面区间的内容，则标题必填
+    // extent_type是字符串中的值时
+    if((extent_type==2 || extent_type==24 || extent_type==26 || extent_type==28) && $('#from_resource').attr('checked') == 'checked'){
+        if($('#resource_id option:selected').val()==0){
+            alert('资源库没有该包名的内容类型');
+            return false;
+        }
+    }
+    if (',2,3,5,22,23,24,25,26,27,29,30,31,33,39,40,'.indexOf(','+extent_type+',') > -1) {
+        if ($.trim($('#title').val()) == ''&& !$('#from_resource').attr('checked')) {
+            if(extent_type==30){
+				alert('请填写推荐人名称');
+			}else{
+				alert('请填写标题');
+			}
+			return false;
+        }
+    }
+    
+    //v6.4.3单软件(列表单图)、单软件(图)v6.4.4单软件(3图)软件包名必填
+    if (',24,25,26,28,29,30,32,35,38,39,'.indexOf(','+extent_type+',') > -1) {
+        package_check();
+        if (package_status == false) {
+            alert('软件包名不存在');
+             $('#new_package')[0].focus();
+            return false;
+        }
+    }
+    // 如果是单排或双排区间的内容，若有图片，检查类型
+    if (extent_type == 2 || extent_type == 3) {
+        if ($.trim($('#image_url').val()) != '') {
+            var image_name = $.trim($("#image_url").val());
+            var image_name_length = image_name.length;
+            if (image_name_length > 4)
+                var image_type = image_name.substring(image_name_length-4, image_name_length);
+            if (image_name_length <=4 || (image_type != ".png" && image_type != ".jpg")) {
+                alert('请选择上传png、jpg类型');
+                return false;
+            }
+        }
+    }
+    
+    // 如果是多排专题页面区间的内容，则图片和列表介绍二选一
+    if (extent_type == 5) {
+        var image_name = $.trim($("#image_url").val());
+        var image_name_old = $.trim($("#image_url_old").val());
+        var description = $.trim($('#description').val());
+		var position = $('input:radio[name="position"]:checked').val();
+        if (image_name_old == '' && image_name == '' && description == ''&&position == 2) {
+            alert('图片和列表介绍需至少填一个');
+            $('#image_url')[0].focus();
+            return false;
+        } else {
+            if (image_name != ''&&position==2) {
+                var image_name_length = image_name.length;
+                if (image_name_length > 4)
+                    var image_type = image_name.substring(image_name_length-4, image_name_length);
+                if (image_name_length <=4 || (image_type != ".png" && image_type != ".jpg")) {
+                    alert('请选择上传png、jpg类型');
+                    $('#image_url')[0].focus();
+                    return false;
+                }
+            }
+            if (description.length < 30 && position == 2) {
+                alert('列表介绍不得少于30个字');
+                $('#description')[0].focus();
+                return false;
+            }
+        }
+    }        
+    
+    // 推荐内容
+    var content_type = $.trim($("#content_type").val());
+    if (content_type == 1) {
+        // 只有单排、双排、多软件区间才可以推荐软件
+        if (',2,3,4,24,25,26,29,30,'.indexOf(','+extent_type+',') == -1) {// extent_type不是字符串中的值时
+            alert("不能推荐软件！");
+            return false;
+        }
+        var package = $.trim($('#package').val());
+        if (package == '') {
+            alert('请填写包名');
+            return false;
+        }else{
+            var enable=true;
+            $.ajax({
+                url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+package,
+                type: 'get',
+                async:false,
+                success: function(data){
+                    if(data){
+                        if(!confirm(data)){
+                             enable=false;
+                        }
+                    }
+                }
+            });
+            if(!enable){
+                return false;
+            }
+        }
+        var uninstall_setting = $.trim($('#uninstall_setting').val());
+        if (uninstall_setting == '') {
+            alert('请填写未安装跳转配置');
+            return false;
+        }
+        var install_setting = $.trim($('#install_setting').val());
+        if (install_setting == '') {
+            alert('请填写安装跳转配置');
+            return false;
+        }
+        if (install_setting == 4) {
+            var start_to_page = $.trim($('#start_to_page').val());
+            if (start_to_page == '') {
+                alert('请填写跳转页面');
+                return false;
+            }
+        }
+        var lowversion_setting = $.trim($('#lowversion_setting').val());
+        if (lowversion_setting == '') {
+            alert('请填写低版本跳转配置');
+            return false;
+        }
+    } else if (content_type == 2) {
+        // 只有单排、双排区间才可以推荐活动
+        if (',2,3,24,25,26,29,30,'.indexOf(','+extent_type+',') == -1) {
+            alert("不能推荐活动！");
+            return false;
+        }
+        var activity_id = $.trim($('#activity_id').val());
+        if (activity_id == '') {
+            alert('请填写活动');
+            return false;
+        }
+    } else if (content_type == 3) {
+        // 只有单排、双排、专题-页面区间才可以推荐专题
+        if (',2,3,5,24,25,26,29,30,'.indexOf(','+extent_type+',') == -1) {
+            alert("不能推荐专题！");
+            return false;
+        }
+        var feature_id = $.trim($('#feature_id').val());
+        if (feature_id == '') {
+            alert('请填写专题');
+            return false;
+        }
+    } else if (content_type == 4) {
+        // 只有单排、双排、专题-页面区间才可以推荐页面
+        if (',2,3,5,24,25,26,29,30,'.indexOf(','+extent_type+',') == -1) {
+            alert("不能推荐页面！");
+            return false;
+        }
+        var page_type = $.trim($('#page_type').val());
+        if (page_type == '') {
+            alert('请填写页面');
+            return false;
+        }
+    } else if (content_type == 5) {
+        // 只有单排、双排区间才可以推荐网页
+        if (',2,3,19,20,21,24,25,26,29,30,'.indexOf(','+extent_type+',') == -1) {
+            alert("不能推荐网页！");
+            return false;
+        }
+        var website = $.trim($('#website').val());
+        if (website == '') {
+            alert('请填写网页');
+            return false;
+        }
+        var website_open_type = $.trim($("#website_open_type").val());
+        if (website == '') {
+            alert('请填写打开方式');
+            return false;
+        }
+    }else if (content_type == 6) {
+        // 只有单排、双排、专题-页面区间才可以推荐礼包
+        if (',2,3,5,24,25,26,29,30,'.indexOf(','+extent_type+',') == -1) {
+            alert("不能推荐礼包！");
+            return false;
+        }
+        var gift_id = $.trim($('#gift_id').val());
+        if (gift_id == '') {
+            alert('请填写礼包');
+            return false;
+        }
+    }else if (content_type == 7) {
+        // 只有单排、双排、专题-页面区间才可以推荐攻略
+        if (',2,3,5,24,25,26,29,30,'.indexOf(','+extent_type+',') == -1) {
+            alert("不能推荐攻略！");
+            return false;
+        }
+        var strategy_id = $.trim($('#strategy_id').val());
+        if (strategy_id == '') {
+            alert('请填写攻略');
+            return false;
+        }
+    }
+    if(extent_type==19||extent_type==20||extent_type == 21){
+        if(!content_type){
+            alert("内容类型错误！");
+            return false;
+        }
+    }
+    //V6.4新增加的分区样式  热搜，热门下载和预约 所增加的字段
+	if(extent_type==16||extent_type==17||extent_type==32)
+	{
+		var new_package=$.trim($('#new_package').val());
+		if(new_package== '')
+		{
+			alert("包名为必填");
+			return false;
+		}else{
+			//兼容赛赛的屏蔽功能
+			$.ajax({
+				url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+new_package,
+				type: 'get',
+				async:false,
+				success: function(data){
+					if(data)
+					{
+						if(!confirm(data)){
+							return false;
+						}
+					}
+				}
+			});
+		}
+		
+		if(extent_type==16)
+		{
+			if($.trim($('#search_keys').val()) == '')
+			{
+				alert("搜索词为必填");
+				return false;
+			}
+		}
+	}
+
+    var r = /^[1-9]\d*$/;
+    if(extent_type==16||extent_type==17||extent_type==20||extent_type==21) {
+        var init_val = parseInt($.trim($('#init_val').val()));
+        var random_start = parseInt($.trim($('#random_start').val()));
+        var random_end = parseInt($.trim($('#random_end').val()));
+        if (init_val) {
+            if (r.test(init_val) == false) {
+                alert("初始值请填写正整数");
+                return false;
+            }
+        }
+        else {
+            alert("人气值初始值为必填");
+            return false;
+        }
+        if (random_start) {
+            if (r.test(random_start) == false) {
+                alert("随机值最小值请填写正整数");
+                return false;
+            }
+        }
+        else {
+            alert("人气值随机值最小值为必填");
+            return false;
+        }
+        if (random_end) {
+            if (r.test(random_end) == false) {
+                alert("随机值最大值请填写正整数");
+                return false;
+            }
+        }
+        else {
+            alert("人气值随机值最大值为必填");
+            return false;
+        }
+        if (random_start >= random_end) {
+            alert("人气值随机值最小值不能大于最大值");
+            return false;
+        }
+    }
+    if(extent_type == 35||extent_type == 36||extent_type == 38){
+        var rank = parseInt($.trim($('#rank').val()));
+        var subtitle = $("#subtitle").val();
+
+        if(r.test(rank) == false){
+            var msg = '排序需填写正整数';
+            if(extent_type == 35) msg = '软件'+msg;
+            alert(msg);
+            return false;
+        }
+    }
+    if(extent_type == 32){
+        var soft_rank = $("#soft_rank").val();
+        if(r.test(soft_rank) == false){
+            alert("软件位置请填写正整数");
+            return false;
+        }
+    }
+    if(extent_type == 33){
+        var content_rank = $("#content_rank").val();
+        if(r.test(content_rank) == false){
+            alert("位置请填写正整数");
+            return false;
+        }
+    }
+	if(extent_type==18){
+		var order_name=$.trim($('#order_name').val());
+		if(order_name== '')
+		{
+			alert("预约名称不能为空");
+			return false;
+		}
+		else
+		{
+			var order_id = convertOrderName2OrderId(order_name);
+			if(!order_id)
+			{
+				alert("预约名称不存在");
+				$('#order_name').val('');
+				return false;
+			}
+		}
+	}
+
+    //v6.4.3新增多软件(预约)、单软件(列表单图)、单软件(图)
+    if(',22,24,25,26,30,'.indexOf(','+extent_type+',') > -1){
+        if ($.trim($('#image_url').val()) != '') {
+            var image_name = $.trim($("#image_url").val());
+            var image_name_length = image_name.length;
+            if (image_name_length > 4)
+                var image_type = image_name.substring(image_name_length-4, image_name_length);
+            if (image_name_length <=4 || (image_type != ".png" && image_type != ".jpg"&& image_type != ".gif")) {
+                alert('请选择上传png、jpg、gif类型');
+                return false;
+            }
+        }
+    }
+    if(extent_type==29){
+        var video = $("#video").val();
+        var is_tag = $("input[name='is_tag']:checked").val();
+        var resource_id_29 = $('#resource_id_29').val();
+        if($('#from_resource').attr('checked') == 'checked'){
+            if(!resource_id_29){
+                alert("资源库没有该包名的相关视频");
+                return false;
+            }
+        }else{
+            if(!video){
+                alert("请选择视频");
+                return false;
+            }
+        }
+        if(is_tag==1){
+            var tag_title = $('#tag_title').val();
+            if(!tag_title){
+                alert("标签标题不能为空");
+                return false;
+            }
+        }
+    }
+
+    if(extent_type!=19&&extent_type!=20&&extent_type!=21&&extent_type!=38&&extent_type!=39) {
+        if ($.trim($('input[name=prob]').val()) > 100) {
+            alert('概率不能大于100');
+            return false;
+        }
+
+        if ($.trim($('input[name=prob]').val()) == '') {
+            alert('请填写概率');
+            return false;
+        }
+    }
+       
+    if ($.trim($('#start_at').val()) == '') {
+        alert('请填写开始时间');
+        return false;
+    }
+    if ($.trim($('#end_at').val()) == '') {
+        alert('请填写结束时间');
+        return false;
+    }
+    
+    if (Date.parse($('#start_at').val()) > Date.parse($('#end_at').val()) ) {
+        alert('开始时间不能大于结束时间');
+        return false;
+    }
+    if(extent_type==30){
+        var pic_bottom_des = $.trim($("textarea[name='pic_bottom_des']").val());
+        if(pic_bottom_des==''){
+            alert('请填写图片底部文字描述');
+            return false;
+        }
+    }
+    if((extent_type==36||extent_type==39)&&!check_forum()){
+        return false;
+    }
+    var forum_tid = $("#forum_tid").val();
+    if(forum_tid){
+        var parten= /^[\d,]*$/;
+        if(!parten.test(forum_tid)){
+            alert('论坛帖子TID用多个TID用","分割');
+            return false;
+        }
+    }
+    if(extent_type==37&&!chk_activity(1)){
+        return false;
+    };
+    var enable = true;
+    $.getJSON('/index.php/Sj/CategoryExtent/index/act/checkProp/extent_id/<?php echo $soft['extent_id']?>/id/<?php echo $soft['id']?>', function(data){
+        var total = parseInt(data.total)
+        var max = parseInt(data.max)
+        var now = parseInt($('#prob').val());
+    
+        if (total + now > max) {
+            alert('概率总和不能大于区间(位置数*100)');
+            enable = false;
+        }
+    });
+
+    return enable;
+}
+
+//v6.4.4若勾选开发者，则隐藏上传图片
+function hidden_image(){
+    if($('#phone_dis').attr('checked') == 'checked'){
+        $("tr[id^=phone_dis_]").css('display','none');
+    }
+}
+function hidden_tr(){
+    var extent_type = "{$extent_type}";
+    var new_package = $.trim($('#new_package').val());
+    var select_index = '{$soft.res_id}';
+    if($('#from_resource').attr('checked') == 'checked'){
+        if(extent_type==2 || extent_type==24 || extent_type==26 ){
+            $("tr[id^=phone_dis_]").css('display','none'); //隐藏上传图片按钮
+            $("tr[id^=resource_tr_]").css('display','none');
+            $("#content_type_tr").css('display','');
+            url = '__URL__/pub_get_package/package_643/'+new_package;
+            if(extent_type==24){
+                url += '/resource_type/24';
+            }else if(extent_type==26){
+                url += '/resource_type/26';
+            }else if(extent_type==2){
+                url += '/resource_type/2';
+                $("tr[id=phone_gif_1]").css('display','none');
+                $("tr[id=phone_gif_2]").css('display','none');
+                $("tr[id=resource_tr_3]").css('display','none');
+                $("tr[id=pic_bottom_des_block]").css('display','none');
+            }
+            // else if(extent_type==28){
+            //     url += '/resource_type/28';
+            //     $("tr[id=description_bock]").css('display','none');
+            // }
+            $.ajax({
+                url: url,
+                type: 'get',
+                dataType: 'json',
+                success: function(data){
+                    if(data.code==1){
+                        var str = "";
+                        if(extent_type == 28 ) {
+                            for(i=0;i<data.info.length;i++){
+                                str += "<option value='"+data.info[i]['id']+"'>"+data.info[i]['description']+"</option>";
+                            }
+                        }else {
+                            for(i=0;i<data.info.length;i++){
+                                if(select_index==data.info[i]['id']){
+                                    if(data.info[i]['content_type']==1){
+                                        str += "<option selected='selected' value='"+data.info[i]['id']+"'>软件</option>";
+                                    }else if(data.info[i]['content_type']==2){
+                                        str += "<option selected='selected' value='"+data.info[i]['id']+"'>活动</option>";
+                                    }else if(data.info[i]['content_type']==3){
+                                        str += "<option selected='selected' value='"+data.info[i]['id']+"'>专题</option>";
+                                    }else if(data.info[i]['content_type']==4){
+                                        str += "<option selected='selected' value='"+data.info[i]['id']+"'>页面</option>";
+                                    }else if(data.info[i]['content_type']==5){
+                                        str += "<option selected='selected' value='"+data.info[i]['id']+"'>网页</option>";
+                                    }else if(data.info[i]['content_type']==6){
+                                        str += "<option selected='selected' value='"+data.info[i]['id']+"'>礼包</option>";
+                                    }else if(data.info[i]['content_type']==7){
+                                        str += "<option selected='selected' value='"+data.info[i]['id']+"'>攻略</option>";
+                                    }else if(data.info[i]['content_type']==9){
+                                        str += "<option selected='selected' value='"+data.info[i]['id']+"'>应用内览</option>";
+                                    }
+                                }else{
+                                    if(data.info[i]['content_type']==1){
+                                        str += "<option value='"+data.info[i]['id']+"'>软件</option>";
+                                    }else if(data.info[i]['content_type']==2){
+                                        str += "<option value='"+data.info[i]['id']+"'>活动</option>";
+                                    }else if(data.info[i]['content_type']==3){
+                                        str += "<option value='"+data.info[i]['id']+"'>专题</option>";
+                                    }else if(data.info[i]['content_type']==4){
+                                        str += "<option value='"+data.info[i]['id']+"'>页面</option>";
+                                    }else if(data.info[i]['content_type']==5){
+                                        str += "<option value='"+data.info[i]['id']+"'>网页</option>";
+                                    }else if(data.info[i]['content_type']==6){
+                                        str += "<option value='"+data.info[i]['id']+"'>礼包</option>";
+                                    }else if(data.info[i]['content_type']==7){
+                                        str += "<option value='"+data.info[i]['id']+"'>攻略</option>";
+                                    }else if(data.info[i]['content_type']==9){
+                                        str += "<option value='"+data.info[i]['id']+"'>应用内览</option>";
+                                    }
+                                }
+                            }
+                        }
+                        $('#resource_id').html(str);
+                    }else{
+                        if(extent_type == 28 ) {
+                            $('#resource_id').html("<option value='0'>无可用的场景化卡片</option>");
+                        }else {
+                            $('#resource_id').html("<option value='0'>无可用内容类型</option>");
+                        }
+                    }
+                }
+            });
+        }else if(extent_type==29){
+            $("tr[id=resource_tr_1]").css('display','none');
+            $("tr[id=resource_tr_4]").css('display','none');
+            $("tr[id=resource_tr_5]").css('display','none');
+            $.ajax({
+                url: '__URL__/pub_get_package/resource_type/29/package_643/'+new_package,
+                type: 'get',
+                dataType: 'json',
+                success: function(data){
+                    if(data.code==1){
+                        $('#resource_id_29').val(data.info[0].id);
+                    }else{
+                        $('#resource_id_29').val('');
+                    }
+                }
+            });
+        }
+    }
+}  
+function checkLen(obj, maxChars) {
+	if($("#text_length").val()&&$(obj).attr('id')=='title'){
+		maxChars = $("#text_length").val();
+	}
+    if (obj.value.length > maxChars)
+        obj.value = obj.value.substring(0,maxChars);
+};
+
+function package_check(){
+    var extent_type = "{$extent_type}";
+	var new_soft_package = $.trim($('#new_package').val());
+    var url = '__APP__/Public/package_check/soft_package/'+new_soft_package;
+	$.ajax({
+		url: url,
+		type: 'get',
+        async:false,
+		dataType: 'json',
+		success: function(data){
+			if(data == 1){
+                // extent_type是字符串中的值时
+                if(',2,24,25,26,28,29,30,32,35,38,39,'.indexOf(','+extent_type+',') > -1){
+                    package_status = false;
+                    $('#new_soft_name').html('该软件包名不存在');
+                    $('#soft_name').val('');
+                    hidden_tr();
+                }else{
+                    $('#new_soft_name').html('');
+                    alert("该软件包名不存在！");
+                }
+            }else{
+                if(',2,24,25,26,28,29,30,32,35,38,39,'.indexOf(','+extent_type+',') > -1){
+                    package_status = true;
+                    $('#new_soft_name').html('');
+                    $('#soft_name').val(data);
+                    hidden_tr();
+                }else{
+                    $('#new_soft_name').html(data);
+                }
+            }
+		}
+	});
+}
+$(function() {
+	var order_id = "{$soft.order_id}";
+	var order_name = convertOrderId2OrderName(order_id);
+	$('#order_name').val(order_name);
+	$('#order_id').val(order_id);
+	//v6.4预约添加
+	options = {
+		serviceUrl:'/index.php/ContentType/showOrder',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+			var order_ids = convertOrderName2OrderId(value);
+			$('#order_id').val(order_ids);
+			$.ajax({
+				url: '__APP__/Public/check_game_order/id/'+order_ids,
+				type: 'get',
+				dataType: 'json',
+				success: function(data){
+					if(data == 1){
+						$('#game_name').html('');
+						$('#order_name').val('');
+						alert("预约名称不存在！");
+					}else{
+						var str="<span style='color:red;margin-right:8px;'>√</span>";
+						$('#game_name').html(str+data);
+					}
+				}
+			});
+		}
+	};
+	$('#order_name').autocomplete(options);
+ });
+/*function check_order()
+{
+	var order_id = $('#order_id').val();
+	$.ajax({
+		url: '__APP__/Public/check_game_order/id/'+order_id,
+		type: 'get',
+		dataType: 'json',
+		success: function(data){
+			if(data == 1){
+				$('#game_name').html('');
+				$('#order_id').val('');
+				alert("预约ID不存在！");
+			}else{
+				var str="<span style='color:red;margin-right:8px;'>√</span>";
+				$('#game_name').html(str+data);
+			}
+		}
+	});
+}*/
+function count() {
+    $.ajaxFileUpload({
+        url:'/index.php/Webmarket/marketPush/csv_count',
+        type:'POST',
+        fileElementId:'upload_file',
+        dataType: 'json',
+        secureuri:false,
+        dataType:'json',
+        success:function(data)
+        {
+            if(data.error1==-1)
+            {
+                alert("请选择导入的CSV文件!");
+                document.getElementById("csv_url").value="";
+                document.getElementById("csv_count").value="";
+                document.getElementById("pre_dl_count").value=""; 
+                return false;
+            }
+            else if(data.error2==-2)
+            {
+                alert("请上传CSV格式文件！");
+                document.getElementById("csv_url").value="";
+                document.getElementById("csv_count").value="";
+                document.getElementById("pre_dl_count").value=""; 
+                return false;                   
+            }
+            else if(data.error2==-3)
+            {
+                alert("CSV文件格式不正确,请您参考下载模板！");
+                document.getElementById("csv_url").value="";
+                document.getElementById("csv_count").value="";
+                document.getElementById("pre_dl_count").value=""; 
+                return false;                   
+            }
+            else
+            {
+                document.getElementById("csv_url").value=data.csv_url;
+                document.getElementById("csv_count").value=data.out_count;
+                document.getElementById("pre_dl_count").value="有效用户数"+data.out_count;
+                $("#csv_count_show_span").html('');
+                
+            }               
+        }
+    });
+}
+//删除csv
+function del_csv()
+{
+    $("#csv_count").val("");
+    $("#csv_url").val("");
+    $("#have_pre_dl").val("");
+    $("#pre_dl_count").val("");
+    alert("删除后提交即生效");
+}
+$(document).ready(function()
+{
+    var have_csv="{$soft.csv_url}";
+    var is_upload_csv="{$soft.is_upload_csv}";
+    if(have_csv&&is_upload_csv==1)//添加的时候已经上传过了可以删除
+    {
+        $("#del_csv_value").css("display","");
+        $("#upload_csv").css("display","none");
+        $("#upload_file").css("display","none");
+        $("#have_pre_dl").css("display","");
+    }
+    else if(!have_csv&&is_upload_csv==1)//已经上传过了又删除了什么也不显示
+    {
+        $("#tr_csv").css("display","none");
+        // $("#tr_csv").css("display","");
+    }
+    else if(!have_csv&&is_upload_csv==0)//添加的时候没有上传可以上传
+    {
+        $("#del_csv_value").css("display","none");
+        $("#upload_csv").css("display","");
+        $("#upload_file").css("display","");
+        $("#have_pre_dl").css("display","none");
+    }
+});
+
+//V6.4.4上传指定搜索词
+function upload_file_search_keys() {
+    $.ajaxFileUpload({
+        url:'__APP__/Public/pub_csv_count',
+        type:'POST',
+        fileElementId:'upload_search_keys',
+        dataType: 'json',
+        secureuri:false,
+        dataType:'json',
+        success:function(data)
+        {
+            if(data.error1==-1)
+            {
+                alert("请选择导入的CSV文件!");
+                document.getElementById("search_keys_url").value="";
+                document.getElementById("search_keys_count").value="";
+                document.getElementById("show_search_keys_count").value=""; 
+                return false;
+            }
+            else if(data.error2==-2)
+            {
+                alert("请上传CSV格式文件！");
+                document.getElementById("search_keys_url").value="";
+                document.getElementById("search_keys_count").value="";
+                document.getElementById("show_search_keys_count").value=""; 
+                return false;                   
+            }
+            else if(data.error2==-3)
+            {
+                alert("CSV文件格式不正确,请您参考下载模板！");
+                document.getElementById("search_keys_url").value="";
+                document.getElementById("search_keys_count").value="";
+                document.getElementById("show_search_keys_count").value=""; 
+                return false;                   
+            }
+            else
+            {
+                document.getElementById("search_keys_url").value=data.csv_url;
+                document.getElementById("search_keys_count").value=data.out_count;
+                document.getElementById("show_search_keys_count").value="有效搜索热词数"+data.out_count;
+            }               
+        }
+    });
+}
+
+function delete_csv(obj){
+    var del_csv = $(obj).attr("id");
+    if(del_csv=="del_search_csv_value"){
+        $("#search_keys_count").val("");
+        $("#search_keys_url").val("");
+        $("#have_keys_url").val("");
+        $("#have_keys_count").val("");
+        $("#show_search_keys_count").val("");
+    }
+    alert("删除后提交即生效");
+}
+
+function get_video(){
+    var package = $.trim($('#new_package').val());
+    var url = '__URL__/pub_get_video';
+    var video = '{$soft.video}';
+    if(!$('#from_resource').attr('checked')){
+        $.ajax({
+            url: url,
+            type: 'post',
+            data: 'package='+package,
+            async:false,
+            dataType: 'json',
+            success: function(data){
+                $("#video").html('<option value="" alt="">请选择视频</option>');
+                if(data){
+
+                    $.each(data,function (i, n) {
+                        if(video == n.id){
+                            var str = "<option value='"+n.id+"' alt='"+n.video_pic+"' selected>"+n.video_title+"</option>"
+                        }else{
+                            var str = "<option value='"+n.id+"' alt='"+n.video_pic+"'>"+n.video_title+"</option>"
+                        }
+                        $("#video").append(str);
+                    });
+                    show_pic();
+                }
+            }
+        });
+    }
+}
+
+function show_pic(){
+    var v_id = $("#video").val();
+    $('#video_pic').attr('src',$("#video").find("option:selected").attr('alt'));
+    var str = '视频ID:'+v_id;
+    $('#video').parent().next().html(str);
+}
+
+function change_style(){
+	var position = $('input:radio[name="position"]:checked').val();
+	if(position == 1){
+		$(".new_style").css('display','');
+		$("#title").parent().next().html('限15字以内');
+		$("#text_length").val(15);
+        $("#phone_dis_1").css('display','none');
+		$("#phone_dis_2").css('display','');
+		$("#phone_dis_3").css('display','');
+		$("#tr_description").css('display','none');
+	}else{
+		$(".new_style").css('display','none');
+		$("#title").parent().next().html('限10字以内');
+		$("#text_length").val(10);
+		checkLen(document.getElementById('title'), 10);
+		$("#phone_dis_1").css('display','');
+        $("#phone_dis_2").css('display','');
+		$("#phone_dis_3").css('display','');
+		$("#tr_description").css('display','');
+	}
+}
+
+function change_tag(){
+    var is_tag = $('input:radio[name="is_tag"]:checked').val();
+    if(is_tag==1){
+        $(".tag").css('display','');
+    }else{
+        $(".tag").css('display','none');
+    }
+}
+</script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+<FORM method="POST" action="__URL__/edit_soft" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <?php if($extent_type==19||$extent_type==20||$extent_type==21){ ?>
+    <tr class="sub_tr">
+        <td>图标名称</td>
+        <td><input id="i_title" name='i_title' type='text' onKeyUp="checkLen(this,{$text_length})" value="{$soft.title}"/>
+		</td>
+        <td>2~{$text_length}个字符</td>
+    </tr>
+    <tr class="sub_tr">
+        <td>图标素材</td>
+        <td><input name='i_image_url' id="i_image_url" type='file'/></td>
+        <td>限制上传{$image_width}*{$image_height}的JPG/PNG图片</td>
+    </tr>
+    <tr class="sub_tr">
+        <td>GIF图片</td>
+        <td><input name='gif_image_url1'  type='file'/></td>
+        <td>限制上传{$image_width}*{$image_height}的gif图片</td>
+    </tr>
+    <?php } ?>
+
+    <!-- $extent_type是字符串中的值时展示-->
+    <?php if(strpos(',2,3,4,5,22,23,24,25,26,27,28,29,30,31,33,36,39,40,',','.$extent_type.',') > -1 ){ ?>
+        <?php if($extent_type != 28&&$extent_type != 36) :?>
+        <tr class="sub_tr" id='resource_tr_1'>
+            <td style="width: 15%"><if condition="($extent_type eq 22) OR ($extent_type eq 23)">模块名称<elseif condition="$extent_type eq 31" />banner主标题<elseif condition="$extent_type eq 30" />推荐人名称<else />标题</if></td>
+            <td style="width: 45%"><input id="title" name='title' type='text' <?php if($extent_type != 39&&$extent_type != 40): ?>onKeyUp="checkLen(this, {$text_length})"<?php endif; ?> value="{$soft.title}"/>
+    		<input type="hidden" id='text_length'>
+    		</td>
+            <td><?php if($extent_type != 39&&$extent_type != 40): ?>限{$text_length}字以内<?php endif; ?></td>
+        </tr>
+        <?php endif ?>
+    <?php if(in_array($extent_type,array(31))){ ?>
+    <tr class="sub_tr new_style">
+        <td>banner副标题</td>
+        <td>
+            <input id="subtitle" name='subtitle' type='text'  value="{$soft.subtitle}"/>
+        </td>
+        <td></td>
+    </tr>
+    <?php } ?>
+    <?php if($extent_type == 36||$extent_type == 39||$extent_type == 40){ ?>
+    <tr class="sub_tr">
+        <td><if condition="$extent_type eq 39">论坛</if>版块ID</td>
+        <td>
+            <input id="forum_id" name='forum_id' type='text' onblur="check_forum()" value="{$soft.forum_id}"/>
+        </td>
+        <td></td>
+    </tr>
+    <?php } ?>
+    <?php if($extent_type == 36){ ?>
+    <tr class="sub_tr">
+        <td>版块名称</td>
+        <td>
+            <input id="forum_name" name='forum_name' type='text' readonly value="{$soft.forum_name}"/>
+        </td>
+        <td></td>
+    </tr>
+    <?php } ?>
+    <?php if($extent_type == 39||$extent_type == 40){ ?>
+    <tr class="sub_tr">
+        <td>论坛帖子TID</td>
+        <td>
+            <input id="forum_tid" name='forum_tid' type='text' value="{$soft.forum_tid}"/>
+        </td>
+        <td>选填项目，多个TID用","分割</td>
+    </tr>
+    <?php } ?>
+    <?php if($extent_type == 39){ ?>
+    <tr class="sub_tr">
+        <td>是否强制为单图</td>
+        <td>
+            <label><input type="radio" name="is_force_single" value="1" <?php if($soft['is_force_single']==1): ?>checked<?php endif; ?>>是</label>
+            <label><input type="radio" name="is_force_single" value="2" <?php if($soft['is_force_single']==2): ?>checked<?php endif; ?>>否</label>
+        </td>
+        <td></td>
+    </tr>
+    <?php } ?>
+	<?php if($extent_type == 5){ ?>
+	<tr class="sub_tr">
+        <td>软件样式</td>
+        <td>
+		<label><input type='radio' name='position' value=1  onclick='change_style()' <if condition="$soft.position eq 1">checked</if>>左对齐（支持645及以上版本）</label><br>
+		<label><input type='radio' name='position' value=2  onclick='change_style()' <if condition="($soft.position eq 2) or ($soft.position neq 1)">checked</if>>右移1/3（老样式）</label>
+		</td>
+		<td></td>
+    </tr>
+	<tr class="sub_tr new_style">
+        <td>是否展示下载按钮</td>
+        <td>
+		<label><input type='radio' name='show_down' value=1 <if condition="!$soft.show_down or $soft.show_down eq '1'">checked</if>>展示</label>
+		<label><input type='radio' name='show_down' value=0 <if condition="$soft.show_down eq '0'">checked</if>>不展示</label>
+		</td><td></td>
+    </tr>
+	<?php } ?>
+    <?php if(strpos(',24,26,29,',','.$extent_type.',') > -1 ){ ?>
+    <tr class="sub_tr">
+        <td style="width: 15%">使用资源库素材</td>
+        <td style="width: 45%">
+        <if condition="$extent_type eq 29">
+        <input type='hidden' name='resource_id_29' id='resource_id_29' value='{$soft['res_id']}' />
+        </if>
+        <input id='from_resource' disabled type='checkbox' <?php if($soft['res_id']!=0) echo "checked"?> />资源库</td>
+        <td>勾选则根据包名获取内容类型</td>
+    </tr>
+    <?php } ?>
+    <if condition="($extent_type eq 2) OR ($extent_type eq 28) OR ($extent_type eq 26) OR ($extent_type eq 24) ">
+    <tr class="sub_tr" id='content_type_tr' style='display:none' >
+        <td>内容类型</td>
+        <td><select id='resource_id' name='resource_id'>
+            <option value='0'>无可用内容类型</option>
+        </select></td>
+        <td></td>
+    </tr>
+    </if>
+    <if condition="($extent_type eq 26) OR ($extent_type eq 24) ">
+    <tr class="sub_tr" id='resource_tr_2'>
+        <td>素材来源</td>
+        <td><input name='phone_dis' id='phone_dis' type='checkbox' disabled value='1' <?php if($soft['phone_dis']==1) echo "checked"?>/>开发者</td>
+        <td></td>
+    </tr>
+    </if>
+    <if condition="($extent_type neq 23) AND ($extent_type neq 27) and ($extent_type neq 28) and ($extent_type neq 29) and ($extent_type neq 33) and ($extent_type neq 35) and ($extent_type neq 36) and ($extent_type neq 39) ">
+    <tr class="sub_tr" id="phone_dis_1">
+        <td><if condition="$extent_type eq 22 or $extent_type eq 5">背景图片<else />图片</if></td>
+        <td><input name='image_url' id="image_url" type='file'/><input name='image_url_old' id="image_url_old" type='hidden' value="{$soft.image_url}"/></td>
+        <td>
+        <?php if(strpos(',2,22,24,25,26,31,40,',','.$extent_type.',') > -1 ){ ?>
+        限制上传{$image_size['image_url'][0]}*{$image_size['image_url'][1]}的JPG/PNG图片
+        <?php }elseif($extent_type==30){ ?>
+        图片尺寸{$image_size['image_url'][0]}*{$image_size['image_url'][1]}，支持JPG/PNG/GIF
+        <?php }else{ ?>
+        限制上传{$image_width_long_multi}*{$image_height_long_multi}的JPG/PNG图片
+        <?php } ?>
+        </td>
+    </tr>
+    </if>
+    <?php } ?>
+
+    <?php if(strpos(',2,3,4,5,26,',','.$extent_type.',') > -1 ){ ?>
+	<tr class="sub_tr" id="phone_dis_2" style='<if condition="$soft.position eq 1">display:none</if>'>
+        <td><if condition="$extent_type eq 26">图片2<else />高分图片</if></td>
+        <td><input name='high_image_url' id="high_image_url" type='file'/><input name='high_image_url_old' id="high_image_url_old" type='hidden' value="{$soft.high_image_url}"/></td>
+        <td>
+        <?php if(strpos(',2,26,',','.$extent_type.',') > -1 ){ ?>
+        限制上传{$image_size['high_image_url'][0]}*{$image_size['high_image_url'][1]}的JPG/PNG图片
+        <?php }else{ ?>
+        限制上传{$high_image_width_multi}*{$high_image_height_multi}的JPG/PNG图片
+        <?php } ?>
+        </td>
+    </tr>
+	<tr class="sub_tr" id="phone_dis_3" style='<if condition="$soft.position eq 1">display:none</if>'>
+        <td><if condition="$extent_type eq 26">图片3<else />低分图片</if></td>
+        <td><input name='low_image_url' id="low_image_url" type='file'/><input name='low_image_url_old' id="low_image_url_old" type='hidden' value="{$soft.low_image_url}"/></td>
+        <td>
+        <?php if(strpos(',2,26,',','.$extent_type.',') > -1 ){ ?>
+        限制上传{$image_size['low_image_url'][0]}*{$image_size['low_image_url'][1]}的JPG/PNG图片
+        <?php }else{ ?>
+        限制上传{$low_image_width_multi}*{$low_image_height_multi}的JPG/PNG图片
+        <?php } ?>
+        </td>
+    </tr>
+    <?php } ?>
+    <?php if($extent_type==37): ?>
+    <tr class="sub_tr">
+        <td>活动ID</td>
+        <td>
+            <input id="activity_id" name='activity_id' type='text' onblur="chk_activity(0)" value="{$soft.activity_id}"/>
+        </td>
+        <td></td>
+    </tr>
+    <tr class="sub_tr">
+        <td>活动名称</td>
+        <td>
+            <input id="activity_name" name='activity_name' type='text' readonly value="{$soft.activity_name}"/>
+        </td>
+        <td></td>
+    </tr>
+    <?php endif; ?>
+
+	<if condition="$extent_type eq 2 and !$soft.res_id ">
+	<tr class="sub_tr" id="phone_gif_1">
+        <td>GIF图片(6.2)</td>
+        <td><input name='gif_image_url' id="gif_image_url" type='file'/><input name='gif_image_url_old' id="gif_image_url_old" type='hidden' value="{$soft.gif_image_url}"/></td>
+        <td>限制上传{$gif_width}*{$gif_height}的gif图片</td>
+    </tr>
+	<tr class="sub_tr" id="phone_gif_2">
+        <td>GIF图片(6.2)</td>
+        <td><input name='gif_image_url_62' id="gif_image_url_62" type='file'/><input name='gif_image_url_62_old' id="gif_image_url_62_old" type='hidden' value="{$soft.gif_image_url_62}"/></td>
+        <td>限制上传{$gif_width_62}*{$gif_height_62}的gif图片</td>
+    </tr>
+	</if>
+
+    <if condition="$extent_type eq 5">
+	<tr class="sub_tr" id="tr_description" style='<if condition="$soft.position eq 1">display:none</if>'>
+		<td>列表介绍</td>
+		<td><textarea name='description' id="description" onKeyUp="checkLen(this, 100)">{$soft.description}</textarea></td>
+		<td>限30~100字以内</td>
+	</tr>
+    </if>
+
+    <?php if(strpos(',2,16,17,24,25,26,28,29,30,32,35,38,39,',','.$extent_type.',') > -1 ){ ?>
+    <tr class="sub_tr" <?php echo ($extent_type==2&&$soft['res_id']==0)?'style="display:none"':'' ?> >
+        <td>软件包名</td>
+        <td><input id="new_package" name='new_package' type='text' onchange="package_check();<?php if($extent_type==29){ ?>get_video()<?php } ?>" value="<?php echo $soft['package'] ?>" /></td>
+        <td><span style="margin-left:10px;" id="new_soft_name" ></span></td>
+    </tr>
+    <?php } ?>
+
+    <?php if(strpos(',2,24,25,26,28,29,30,32,35,38,39,',','.$extent_type.',') > -1 ){ ?>
+    <tr class="sub_tr" <?php echo ($extent_type==2&&$soft['res_id']==0)?'style="display:none"':'' ?> >
+        <td>软件名称</td>
+        <td><input id="soft_name" readonly type='text' /></td>
+        <td></td>
+    </tr>
+    <?php } ?>
+    <?php if($extent_type == 35||$extent_type == 36||$extent_type == 38){ ?>
+    <tr class="sub_tr" >
+        <td><if condition="$extent_type eq 35">软件</if>排序</td>
+        <td><input id="rank" name="rank" type='text' value="{$soft.rank}"/></td>
+        <td>整数，数值越小越靠前，最小值为1</td>
+    </tr>
+    <?php } ?>
+    <?php if($extent_type == 29){ ?>
+    <tr class="sub_tr" id="resource_tr_4">
+        <td>选择视频</td>
+        <td>
+            <select name="video" id="video" onchange="show_pic()">
+                <option value="" alt="">请选择视频</option>
+            </select>
+        </td>
+        <td style="color:gray"></td>
+    </tr>
+    <tr class="sub_tr" id="resource_tr_5">
+        <td>视频默认图</td>
+        <td>
+            <img id='video_pic' src="{$soft.video_pic}" width="200" height="100">
+        </td>
+        <td style="color:gray"></td>
+    </tr>
+    <tr class="sub_tr">
+        <td>是否展示标签</td>
+        <td>
+            <input type="radio" name="is_tag" value="1" <?php if($soft['is_tag']=='1'){echo 'checked';}?> onclick="change_tag()">展示 &nbsp;
+            <input type="radio" name="is_tag" value="0" <?php if($soft['is_tag']=='0'){echo 'checked';}?> onclick="change_tag()">不展示
+        </td>
+        <td></td>
+    </tr>
+    <tr class="sub_tr tag" >
+        <td>标签标题</td>
+        <td>
+            <input id="tag_title" name="tag_title" type='text' value="{$soft.tag_title}" onKeyUp="checkLen(this, 10)"/>
+        </td>
+        <td></td>
+    </tr>
+    <?php } ?>
+
+    <?php if(strpos(',2,3,4,5,19,20,21,24,25,26,27,29,30,31,',','.$extent_type.',') > -1 ){ ?>
+    <tr class="sub_tr tag" id="resource_tr_3">
+        <td>推荐内容</td>
+        <td><!--下面a里的href的url会在ready函数里自动生成-->
+            <a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+            <!--下面的content_type_div是选择推荐内容后append的地方-->
+            <div id="content_type_div"/>
+        </td>
+        <td/>
+    </tr>
+    <?php } ?>
+    <?php if($extent_type == 33){ ?>
+    <tr class="sub_tr">
+        <td>位置</td>
+        <td><input id="content_rank" name='content_rank' type='text' value="{$soft.content_rank}"/></td>
+        <td></td>
+    </tr>
+    <?php } ?>
+    <?php if($extent_type == 32){ ?>
+    <tr class="sub_tr">
+        <td>软件位置</td>
+        <td><input id="soft_rank" name='soft_rank' type='text' value="{$soft.soft_rank}"/></td>
+        <td></td>
+    </tr>
+    <?php } ?>
+    <?php if($extent_type == 32||$extent_type==33){ ?>
+    <tr class="sub_tr">
+        <td>搜索词</td>
+        <td>
+            <select id="search_type" name='search_type'>
+                <?php  foreach($search_type as $k=>$v){ ?>
+                <option value="{$k}" <?php if($k==$soft['search_type']){echo 'selected';}?>>{$v}</option>
+                <?php } ?>
+            </select>
+        </td>
+        <td></td>
+    </tr>
+    <?php } ?>
+	<?php if($extent_type==16) { ?>
+	<tr class="sub_tr">
+        <td>搜索词</td>
+        <td><input id="search_keys" name='search_keys' type='text' placeholder="可填写多个搜索词以逗号隔开" value="{$soft.search_keys}" /></td>
+        <td></td>
+    </tr>
+	<?php } ?>
+
+    <?php if(strpos(',16,17,20,21,',','.$extent_type.',') > -1 ){ ?>
+	<tr class="sub_tr">
+        <td>人气值</td>
+        <td><span>初始值 </span><input id="init_val" name='init_val' type='text' onKeyUp="checkLen(this, 10)" value="{$soft.init_val}"/><br/>
+		<span>随机数 从</span><input id="random_start" value="{$soft.random_start}" name='random_start' type='text'/>到<input id="random_end" name='random_end' value="{$soft.random_end}" type='text'/><br/>
+		<span style="color:red; font-size:12px">人气值 = 初始值 + N1 + N2 + ...+Nn(N为每次的随机数)</span>
+		</td>
+        <td></td>
+    </tr>
+    <?php } ?>
+		
+    <?php if(strpos(',3,4,18,',','.$extent_type.',') > -1 ){ ?>
+	<tr class="sub_tr">
+        <td>预约名称</td>
+        <td>
+			<input id="order_name" name='order_name' type='text' value=""/>
+			<span style="display:inline-block; margin-left:10px;" id="game_name" ></span>
+			<input id="order_id" name='order_id' type='hidden' value="" />
+		</td>
+        <td></td>
+    </tr>
+	<tr class="sub_tr">
+        <td>预约样式</td>
+        <td>
+			<SELECT name='order_type'>
+				<option value='1' <?php if ($soft['order_type']==1) print ' selected';?>>样式一（预约人数）</option>
+				<option value='2' <?php if ($soft['order_type']==2) print ' selected';?>>样式二（游戏列表）</option>	
+			</SELECT>
+		</td>
+        <td></td>
+    </tr>
+	<?php } ?>
+
+	<tr class="sub_tr" <?php if($extent_type==19||$extent_type==20||$extent_type==21||$extent_type==38||$extent_type==39||$extent_type==40)echo 'style="display:none;"'?>>
+		<td>显示概率</td>
+		<td><input name='prob' type='text' value="{$soft.prob}"/></td>
+        <td/>
+	</tr>
+
+    <?php if($extent_type==4){ ?>
+    <tr class="sub_tr">
+		<td></td>
+		<td><input name='default_display' id='default_display' type='checkbox' value="1" <?php if($soft['default_display']==1) echo "checked"?>>默认展示</input></td>
+        <td/>
+	</tr>
+    <?php } ?>
+
+    <?php if($extent_type==20 || $extent_type==21 || $extent_type==28) { ?>
+    <tr class="sub_tr" id="description_bock">
+		<?php if($extent_type==21) { ?>
+		<td>软件类型</td>
+		<td><input name='s_description' type='text' onKeyUp="checkLen(this, 8)" value="{$soft.description}"/></td>
+		<td>2-8字符</td>
+		<?php } else if($extent_type==20) { ?>
+        <td>一句话简介</td>
+        <td><input name='s_description' type='text' onKeyUp="checkLen(this, 40)" value="{$soft.description}"/></td>
+        <td>2-40字符</td>
+        <?php } else if($extent_type==28) { ?>
+        <td>一句话点评</td>
+        <td><input name='s_description' type='text' onKeyUp="checkLen(this, 40)" value="{$soft.description}"/></td>
+        <td>该项目为非必填项，不填写则使用软件本身内容</td>
+		<?php } ?>
+    </tr>
+    <?php } ?>
+
+	<tr class="sub_tr">
+		<td>开始时间</td>
+		<td>
+            <input id="start_at" name="start_at" type="text" class="Wdate" style="float:left" <?php if($belong_page_type != 'external_special'){ ?>onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"<?php } ?> value="{$soft.start_at|date='Y-m-d H:i:s',###}" <?php if($belong_page_type == 'external_special'){echo 'readonly';}?>/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td>结束时间</td>
+		<td>
+            <input id="end_at" name="end_at" type="text" class="Wdate" style="float:left" <?php if($belong_page_type != 'external_special'){ ?>onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})"<?php } ?> value="{$soft.end_at|date='Y-m-d H:i:s',###}" <?php if($belong_page_type == 'external_special'){echo 'readonly';}?>/>
+        </td>
+        <td/>
+	</tr>
+	<if condition="$extent_type eq 2 or $extent_type eq 30">
+	<tr class="sub_tr" id="pic_bottom_des_block" >
+		<td>图片底部文字描述</td>
+		<td>
+			<textarea name='pic_bottom_des' onKeyUp="checkLen(this, {$pic_bottom_des})" type='text'>{$soft.pic_bottom_des}</textarea>
+		</td>
+        <td>
+            <?php if($extent_type == 30){ ?>
+            限{$pic_bottom_des}字内
+            <?php }else{ ?>
+            此项目为选填项目，限制文字为{$pic_bottom_des}
+            <?php } ?>
+        </td>
+	</tr>
+	</if>
+
+    <if condition="$belong_page_type eq 'search_result_page'">
+    <tr class="sub_tr">
+        <td>指定搜索词</td>
+        <td colspan="2">
+            <a href="__APP__/Public/down_moban" class="blue" style="text-decoration:none;font-size:14px; color:blue">下载csv模板</a><br>
+            <input type="file" id="upload_search_keys" name="upload_search_keys" style="background:none; border:none; width:170px;"/><input type="button" value="上传" onclick="upload_file_search_keys()"/><br>
+            <input type="text" id="show_search_keys_count" name="show_search_keys_count" style="border:none;background:none; color:red;" readonly value=""/><br>
+            <input type='hidden' name='search_keys_url' id='search_keys_url' value="">
+            <input type='hidden' name='search_keys_count' id='search_keys_count' value="">
+            <?php if($soft['search_keys_url']) { ?>
+            <input type="text" id="have_keys_url" name="have_keys_url" value="<?php if($soft['search_keys_url']){ ?>{$soft.search_keys_url}<?php } ?>" readonly /><br/>
+            <span style="color:red; font-size:14px;">有效搜索热词数</span>
+            <input type="text" id="have_keys_count" name="have_keys_count" readonly style="border:none;color:red; background:none;" value="<?php if($soft['search_keys_count']){ ?>{$soft.search_keys_count}<?php } ?>"/>
+            <input type="button" id="del_search_csv_value" value="删除" onclick="delete_csv(this)" />
+            <?php } ?>
+        </td>
+    </tr>
+    </if>
+    <?php if($extent_type != 39&&$extent_type != 40){ ?>
+        <tr id="tr_csv" class="sub_tr">
+            <td>覆盖用户：</td>
+            <td style="height:70px;">
+                <a href="__PUBLIC__/fugaiyonghu.csv" class="blue" style="text-decoration:none; color:blue;font-size:14px;">下载csv模板</a><br/>
+                <input type="file" id="upload_file" name="upload_file"  style="background:none; border:none; width:160px;" value="" /><input type="button" id="upload_csv" value="上传" onclick="count()" />
+                <input type="text" id="have_pre_dl" name="have_pre_dl" value="<?php if($soft['csv_url']){ ?>{$soft.csv_url}<?php } ?>" readonly /><br>
+                <span id="csv_count_show_span" style="color:red; font-size:14px;"><?php if($soft['csv_count']){ ?>有效用户数<?php } ?></span><input type="text" id="pre_dl_count" name="pre_dl_count" readonly style="border:none;color:red; background:none;" value="<?php if($soft['csv_count']){ ?>{$soft.csv_count}<?php } ?>"/>
+                <input type='hidden' name='csv_url' id='csv_url' value="">
+                <input type='hidden' name='csv_count' id='csv_count' value="">
+            </td>
+            <td><input type="button" id="del_csv_value" value="删除" onclick="del_csv()" /></td>
+        </tr>
+    <?php } ?>
+    <?php if($extent_type != 33){ ?>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='co_type'>
+			<?php foreach($typelist as $key => $val): ?>
+				<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+			<?php endforeach; ?>				
+			</SELECT>
+		</td>
+        <td></td>
+	</tr>
+    <?php } ?>
+    <?php if($extent_type != 39&&$extent_type != 40){ ?>
+	<tr class="sub_tr">
+		<td><?php if($pid == 13){ ?>SDK版本：<?php }else{ ?> 市场版本：<?php } ?></td>
+		<td>
+			<input id="ver_big" type='radio' name='type' <?php if($soft['version_type']=="1") echo  "checked='checked'";?> value='1'>大于等于
+			<input id="ver_big_input" type='text' name='version_code1' value="<?php if($soft['version_type']=="1") echo $soft['version_code'];?>"/><br/>
+			<input id="ver_small" type='radio' <?php if($soft['version_type']=="2") echo "checked='checked'";?> name='type' value='2'>小于等于
+			<input id="ver_small_input" type='text' name='version_code2' value="<?php if($soft['version_type']=="2") echo $soft['version_code'];?>"/><br/>
+			<input id="ver_eq" type='radio' <?php if($soft['version_type']=="3") echo "checked='checked'";?>" name='type' value='3'>等于
+            <?php if($pid == 13){ ?>
+            <a style="color:blue;" href="__APP__/Public/showVersion?append_id=selected_versions&from=sdk" class="thickbox">请选择SDK版本</a>
+            <?php }else{ ?>
+            <a style="color:blue;" href="__APP__/Public/showVersion?append_id=selected_versions" class="thickbox">请选择安智市场版本</a>
+            <?php } ?>
+			<div id="selected_versions">
+			   <input name="force_update_version" id="force_update_version" type="hidden" value="<?php if($soft['version_type']=="3") echo $soft['version_code'];?>"/><label><?php if($soft['version_type']=="3") echo substr($soft['version_code'],1,strlen($soft['version_code'])-2);?></label>
+			</div> 
+		</td>
+		<td></td>
+	</tr>
+    <?php } ?>
+    <?php if($extent_type == 39||$extent_type == 40){ ?>
+    <tr class="sub_tr">
+        <td>行为id</td>
+        <td>
+            <input id="recommend_behavior_id" name='recommend_behavior_id' type='text' value="{$soft.recommend_behavior_id}" />
+        </td>
+        <td></td>
+    </tr>
+    <?php } ?>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="extent_id" value='<?php echo $extent_id?>'/>
+			<input type='hidden' name="life" value='<?php echo $_GET['life'];?>'/>
+            <input type='hidden' name="id" value='<?php echo $soft['id']?>'/>
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</FORM>
+
+<script type="text/javascript">
+    function check_forum(){
+        var forum_id = $("#forum_id").val();
+        if(!forum_id){
+            alert('版块ID为必填');
+            return false;
+        }
+        var extent_type = "{$extent_type}";
+        var bo = true;
+        if(extent_type == 36||extent_type == 39){
+            $.ajax({
+                url: '__URL__/pub_check_forum',
+                data:"fid="+forum_id,
+                type: 'post',
+                success: function(forum){
+                    if(!forum){
+                        alert('该论坛无该版块');
+                        bo = false;
+                    }else{
+                        $("#forum_name").val(forum);
+                    }
+                }
+            });
+        }
+        if(!bo) return false;
+        return true;
+    }
+    function chk_activity(type){
+        var activity_id = $("#activity_id").val();
+        var end_at = $("#end_at").val();
+        if(!activity_id){
+            alert('请填写活动ID');
+            return false;
+        }
+        var bo = true;
+        $.ajax({
+            url: '__URL__/pub_get_activity',
+            data:"activity_id="+activity_id,
+            type: 'post',
+            async:false,
+            dataType:"json",
+            success: function(data){
+                if(data){
+                    $("#activity_name").val(data.name);
+                    if(type == 1){
+                        if(!end_at){
+                            alert('请填写结束时间');
+                            bo = false;
+                        }
+                        var end_tm = Date.parse(end_at)/1000;
+                        if(data.end_tm < end_tm){
+                            alert('结束时间只能小于等于活动的结束时间');
+                            bo = false;
+                        }
+                    }
+                }else{
+                    alert('活动不存在');
+                    bo = false;
+                }
+            }
+        });
+        return bo;
+    }
+</script>

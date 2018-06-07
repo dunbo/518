@@ -1,0 +1,119 @@
+<!--	<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>-->
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+    <script type="text/javascript">
+        function upload(){
+            if($("#reasontest").val().length==0)
+            {
+                $("#s1").html('<font color="red">驳回原因不能为空<font>');
+                return;
+            }else{
+                $("#s1").html('');
+            }
+            if($('#changeapp').attr('checked')){
+                var changeapp = 1;
+            }
+            var param = {
+                soft_id: $("#soft_id").val(),
+                dev_id: $("#dev_id").val(),
+                newsoftname: $("#newsoftname").val(),
+                reasontest: $("#reasontest").val(),
+                package:$("#package").val(),
+                changeapp:changeapp
+            };
+
+            //弹出加载中
+            var timenow = new Date().getTime();
+            suffix = timenow;
+            window_list.push(suffix);
+            var urls ="#TB_inline?height=100&width=200&inlineId=loading&modal=true";
+            tb_show('title',urls,"thickbox");
+
+            $.ajaxFileUpload({
+                url:'__URL__/bohui2',
+                type:'POST',
+                data:param,
+                files:[$('#uploadFile0')],
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                   if(data==1)
+                   {
+                        location.href ="/index.php/Sendnum/Product/testlist";
+                   }else if(data==2)
+                   {
+                        alert('只允许上传doc,docx,xls,xlsx的格式');
+                        tb_remove();
+                   }else if(data==3)
+                   {
+                        alert('程序忙，上传失败，请重试');
+                        tb_remove();
+                   }else if(data == 4){
+                       alert('包名不存在，请重试');
+                        tb_remove();
+                   }else if(data == 5){
+                       alert('将App Key、App Secret置为无效失败，请重试');
+                        tb_remove();
+                   }
+                }
+            });
+        };
+
+function qxenter()
+{
+    document.onkeydown = function(e){
+        var ev = document.all ? window.event : e;
+        if(ev.keyCode==13) {
+         }
+    }
+}
+    </script>
+</head>
+ 
+<body>
+
+<div style="width:45; margin-top:4px">
+	 <form id="form1" name="form1" method="post" action="__URL__/add/">
+  <table width="99%" height="63" border="0" align="center" cellpadding="4" cellspacing="1"  bgcolor="#333333" id="table1">
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">产品名称:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <span>{$rs.softname}</span>
+        </td>
+    </tr>    
+
+             <input type="hidden" id="soft_id" value="{$rs.soft_id}">
+             <input type="hidden" id="newsoftname" value="{$rs.softname}">
+             <input type="hidden" id="dev_id" value="{$rs.dev_id}">
+             <input type="hidden" id="package" value="{$rs.package}">
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">评测报告:</td>
+         <td align="left" bgcolor="#FFFFFF">
+           <input id="uploadFile0" type="file" name="upload[]" />
+        </td>
+    </tr>
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF"></td>
+         <td align="left" bgcolor="#FFFFFF">
+只限上传.doc/.docx/.xls/.xlsx文件
+        </td>
+    </tr>         
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF"><font color="red">*</font>驳回原因:</td>
+         <td align="left" bgcolor="#FFFFFF">
+           <textarea name="reasontest" id="reasontest" cols="30" rows="8" onfocus="qxenter()"></textarea><span id="s1"><font color="red"></font></span>
+        </td>
+    </tr>
+    <tr align="center">
+        <td width="12%" height="20" align="left" bgcolor="#FFFFFF" colspan="2">
+            <input type="checkbox" name="changeapp" id="changeapp">将App Key、App Secret置为无效（<font color="red">换皮游戏驳回时必选</font>）
+        </td>
+         
+    </tr>
+   <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="评测驳回" onclick="upload()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onclick="tb_remove();"/></td>
+      </tr>
+</table>
+  </form>
+</div>
+</body>
+</html>

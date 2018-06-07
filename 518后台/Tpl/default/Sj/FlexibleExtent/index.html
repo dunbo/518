@@ -1,0 +1,401 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/Public/css/style.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+
+<script>
+    $(function() {
+        options = {
+            serviceUrl:'/index.php/ContentType/showTagPage',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+                var general_page_type = $("#general_page_type").val();
+                location.href = '__URL__/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type + '/page_name/' + value;
+            }
+        };
+        $('#tag_name').autocomplete(options);
+
+        options = {
+            serviceUrl:'/index.php/ContentType/showCommonTagPage',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+                var general_page_type = $("#general_page_type").val();
+                location.href = '__URL__/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type + '/page_name/' + value;
+            }
+        };
+        $('#commontag_name').autocomplete(options);
+        
+        $('#tag_name').bind('keypress',function(event) {
+            if(event.keyCode == "13") {
+                var general_page_type = $("#general_page_type").val();
+                var page_name = $("#tag_name").val();
+                location.href = '__URL__/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type + '/page_name/' + page_name;
+            }
+        });
+        
+        $('#commontag_name').bind('keypress',function(event) {
+            if(event.keyCode == "13") {
+                var general_page_type = $("#general_page_type").val();
+                var page_name = $("#commontag_name").val();
+                location.href = '__URL__/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type + '/page_name/' + page_name;
+            }
+        });
+		
+		var custom_channel = $("#custom_channel").val();
+		if(custom_channel!=''){
+			$("#select_category").css('display','');
+		}
+    });
+    
+    // 选择平台时，刷新整个页面，清空之前选的频道数据等
+    function changePid(obj) {
+      window.location.href = "__URL__/index?pid=" + $(obj).val();
+    }
+    
+    // 选择频道类型时，页面发生变化
+    function changePageType(obj) {
+        opt = $(obj).val();
+        showPageType(opt);
+		location.href = '__URL__/index/pid/<?php echo $pid?>/general_page_type/' + opt;
+    }
+
+	function choose_coop_channel()
+	{
+        var general_page_type = $('#general_page_type').val();
+		var coop_channel = $('#coop_channel').val();
+		location.href = '__URL__/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type+'/coop_channel/'+coop_channel;
+	}
+
+
+    function choose_custom_channel(){
+        var general_page_type = $('#general_page_type').val();
+        var custom_channel= $("#custom_channel").val();
+        location.href = '__URL__/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type+'/custom_channel/'+custom_channel;
+    }
+
+    // 显示所选择的频道类型页面，隐藏其他类型
+    function showPageType(opt) {
+        if (opt == 0) {
+            document.getElementById("select_category").style.display="none";
+            document.getElementById("input_category").style.display="none";
+            document.getElementById("input_commontag_category").style.display="none";
+        } else if (opt == 1) {
+            document.getElementById("select_category").style.display="";
+            document.getElementById("input_category").style.display="none";
+            document.getElementById("input_commontag_category").style.display="none";
+        } else if (opt == 2) {
+            document.getElementById("select_category").style.display="none";
+            document.getElementById("input_category").style.display="";
+            document.getElementById("input_commontag_category").style.display="none";
+        } else if (opt == 3) {
+            document.getElementById("select_category").style.display="none";
+            document.getElementById("input_category").style.display="none";
+            document.getElementById("input_commontag_category").style.display="";
+        }
+    }
+    
+    // 普通频道时，下拉选择后跳转
+    function changeCategoryType(obj) {
+        var general_page_type = $("#general_page_type").val();
+		var custom_channel = $("#custom_channel").val();
+		var url = '__URL__/index/pid/<?php echo $pid?>/general_page_type/' + general_page_type + '/belong_page_type/' + $(obj).val();
+		if(custom_channel!=''){
+			url += '/custom_channel/' + custom_channel;
+		}
+        
+        location.href = url;
+    }
+</script>
+
+<body>
+<if condition="$belong_page_type neq 'fixed_resource_channel'">
+    <div class="search_box" style="margin:10px">
+        <span>
+            请选择要操作的产品:
+            <select name="pid" id="pid" onChange="changePid(this)">
+                <volist name="product_list" id="product_list" key="key_value">
+                    <option value="{$key_value}" <if condition="$key_value eq $pid">selected</if>>{$product_list.0}</option>
+                </volist>
+            </select>
+            请选择频道类型：
+            <select name="general_page_type" id="general_page_type" onChange="changePageType(this)">
+                <option value="0">全部</option>
+                <option value="1" <if condition="$general_page_type eq 1">selected</if>>普通</option>
+                <option value="2" <if condition="$general_page_type eq 2">selected</if>>标签</option>
+                <option value="3" <if condition="$general_page_type eq 3">selected</if>>常用标签</option>
+				<option value="8" <if condition="$general_page_type eq 8">selected</if>>内容合作</option>
+                <option value="9" <if condition="$general_page_type eq 9">selected</if>>自定义频道</option>
+            </select>
+
+            <?php if($general_page_type == 9){ ?>
+			<span>
+				自定义频道:
+				<select name="custom_channel" id="custom_channel" onchange="choose_custom_channel()">
+                    <option value=''>全部</option>
+					<volist name="custom_list_channel" id="vo">
+						<option value="{$vo.id}" <?php if($custom_channel == $vo['id']){ ?>selected<?php } ?> >{$vo.channel_name}</option>
+					</volist>
+				</select>
+			</span>
+            <?php } ?>
+			<?php if($general_page_type == 8){ ?>
+			<span>
+				子频道: 
+				<select name="coop_channel" id="coop_channel" onchange="choose_coop_channel()">
+					<volist name="coop_result" id="vo">
+						<option value="{$vo.coop_key_val}" <?php if($coop_channel == $vo['coop_key_val']){ ?>selected<?php } ?> >{$vo.new_channel_name}</option>
+					</volist>
+				</select>
+			</span>
+			<?php } ?>
+            <span id="select_category" <if condition="$general_page_type eq 1"><else/>style="display:none"</if>>
+            <?php if($general_page_type == 9): ?>
+            请选择自定义列表:
+            <?php else: ?>
+            请选择频道:
+            <?php endif; ?>
+            <select onChange="changeCategoryType(this)">
+                <?php foreach($category_list as $key => $val):?>
+                    <option value="<?php echo $key?>" <?php if($belong_page_type == $key) echo "selected";?>><?php echo $val?></option>
+                <?php endforeach;?>
+            </select>
+            </span>
+            <span id="input_category" <if condition="$general_page_type eq 2"><else/>style="display:none"</if>>
+            请输入频道：
+            <input type="text" name="tag_name" id="tag_name" value="{$page_name}"/>
+            </span>
+            <span id="input_commontag_category" <if condition="$general_page_type eq 3"><else/>style="display:none"</if>>
+            请输入频道：
+            <input type="text" name="commontag_name" id="commontag_name" value="{$page_name}"/>
+            </span>
+            <a href="__URL__/import_softs_AH" style="margin-left:200px;">场景化卡片批量导入</a>
+            <a href="__URL__/import_flexible_soft_38" style="margin-left:20px;">多行软件批量导入</a>
+			<div class="ad_pic_q">
+			 <img src="/Public/images/appfirst_btn_02.png" onMouseOver="appear_pic('pic_appear')" onMouseOut="disappear_pic('pic_appear')">
+				<div id="pic_appear" class="ad_pic" style="right:30px;">
+				 <img src="/Public/images/banner.jpg">
+				 </div>
+			</div>
+        </span>
+    </div>
+</if>  
+<script type="text/javascript">
+ function appear_pic(id)
+ {
+   var pic=document.getElementById(id);
+    pic.style.display="block";
+ }
+ function disappear_pic(id)
+ {
+   var pic=document.getElementById(id);
+    pic.style.display="none";
+ }
+
+    function chk(){
+        var package = $.trim($("input[name='package']").val());
+        if(!package){
+            alert('请输入包名');
+            return false;
+        }
+        return true;
+    }
+</script>
+
+<if condition="$belong_page_type eq 'fixed_resource_channel'">
+    <div style="margin: 10px">
+        <form name="fixed_resource_fml" method="get" action="__URL__/list_soft" >
+            软件包名：<input type="text" name="package">
+            <input type="hidden" name="from" value="fixed_resource_channel">
+            <input type="submit" value="搜索" onclick="return chk();">
+        </form>
+    </div>
+	<div style="margin:10px;float: left;">
+        <notempty name="belong_page_type"><a href="__URL__/add_extent?pid=<?php echo $pid?>&belong_page_type=<?php echo $belong_page_type?>&cont=<?php echo $cont?>" class="search_btn thickbox">添加新分区</a></notempty>
+    </div>
+    <div style="margin:10px;float: right;">
+    <a href="__URL__/import_softs_AH/belong_page_type/fixed_homepage_recommend/" style="margin-left:200px;">场景化卡片批量导入</a>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="3%">区间ID</th>
+                    <th width="8%">区间名</th>
+                    <th width="8%">所属页面</th>
+                    <th width="6%">类型</th>
+                    <th width="8%">标题</th>
+                    <th width="8%">发布时间</th>
+                    <th width="8%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                    <td>{$list.extent_id}</td>
+                    <td>{$list.extent_name}</td>
+                    <td>{$list.belong_page_name}</td>
+                    <td>
+                        <switch name="list.extent_type">
+                            <case value="2">单排</case>
+                            <case value="3">双排</case>
+                            <case value="4">多排-软件</case>
+                            <case value="5">多排-专题/页面</case>
+                            <case value="16">软件-热搜</case>
+                            <case value="17">软件-热门下载</case>
+                            <case value="18">软件-预约</case>
+                            <case value="19">网页游戏-图标(H5)</case>
+                            <case value="20">网页游戏-软件列表(H5)</case>
+                            <case value="21">双排-H5</case>
+                            <case value="22">多软件（预约）</case>
+                            <case value="23">多软件（预约+图）</case>
+                            <case value="24">单软件（列表单图）</case>
+                            <case value="25">单软件（图）</case>
+                            <case value="26">单软件（3图）</case>
+                            <case value="27">预约列表单图</case>
+                            <case value="28">场景卡片</case>
+                            <case value="29">单软件（视频）</case>
+                            <case value="30">单排（含推荐人）</case>
+                        </switch>
+                        <?php if($list['extent_type'] > '30'){
+                            echo $extent_type[$list['extent_type']][0];
+                        } ?>
+                    </td>
+                    <td>
+                        <if condition="$list.extent_type eq 28">{$list.scene_card}<else />{$list.display_title}
+                        </if>
+                    </td>
+                   
+                    <td>{$list.release_time|date="Y-m-d H:i:s",###}</td>
+                    <td>
+                        <!-- <a href="__URL__/add_soft?extent_id={$list.extent_id}" class="blue thickbox">添加</a> -->
+                        <a href="__URL__/add_soft/cont/{$cont}/extent_id/{$list.extent_id}/resource_type/{$list.extent_type}" class="blue thickbox">添加</a>
+                        
+                        ｜<a href="__URL__/list_soft/cont/{$cont}/extent_id/{$list.extent_id}/resource_type/{$list.extent_type}/" class="blue">查看</a>
+
+                        <if condition="$list.extent_type eq 28 ">
+                        ｜<a href="__URL__/edit_extent?extent_id={$list.extent_id}" class="blue thickbox">编辑</a>
+                        ｜<a href="__URL__/del_extent?extent_id={$list.extent_id}" class="blue" onClick="return confirm('确认删除？')">删除</a>
+                        </if>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>
+<else />
+    <div style="margin:10px">
+        <notempty name="belong_page_type"><a href="__URL__/add_extent?pid=<?php echo $pid?>&belong_page_type=<?php echo $belong_page_type?>" class="search_btn thickbox">添加新分区</a></notempty>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="4%">分区ID</th>
+                    <th width="8%">区间名</th>
+                    <th width="8%">所属页面</th>
+                    <th width="6%">类型</th>
+                    <th width="8%">标题</th>
+                    <th width="8%">描述</th>
+                    <th width="8%">图片</th>
+                    <th width="6%">所在位置</th>
+                    <th width="4%">区间软件数</th>
+                    <th width="5%">运营商</th>
+                    <th width="6%">渠道</th>
+                    <th width="8%">发布时间</th>
+                    <th width="14%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                    <td>{$list.extent_id}</td>
+                    <td>{$list.extent_name}</td>
+                    <td>{$list.belong_page_name}</td>
+                    <td>
+                        <switch name="list.extent_type">
+                            <case value="2">单排</case>
+                            <case value="3">双排</case>
+                            <case value="4">多排-软件</case>
+                            <case value="5">多排-专题/页面</case>
+							<case value="16">软件-热搜</case>
+							<case value="17">软件-热门下载</case>
+							<case value="18">软件-预约</case>
+                            <case value="19">网页游戏-图标(H5)</case>
+                            <case value="20">网页游戏-软件列表(H5)</case>
+							<case value="21">双排-H5</case>
+                            <case value="22">多软件（预约）</case>
+                            <case value="23">多软件（预约+图）</case>
+                            <case value="24">单软件（列表单图）</case>
+                            <case value="25">单软件（图）</case>
+                            <case value="26">单软件（3图）</case>
+                            <case value="27">预约列表单图</case>
+                            <case value="28">场景卡片</case>
+                            <case value="29">单软件（视频）</case>
+                            <case value="30">单排（含推荐人）</case>
+                        </switch>
+                        <?php if($list['extent_type'] > '30'){
+                            echo $extent_type[$list['extent_type']][0];
+                        } ?>
+                    </td>
+                    <td><if condition="$list.extent_type eq 28">{$list.scene_card}<else />{$list.display_title}</if></td>
+                    <td>
+                        <a href='__URL__/show_content?width=300&height=200&extent_id={$list.extent_id}' class='thickbox blue'>{$list.display_description}</a>
+                    </td>
+                    <td>
+                        <if condition="$list.display_image eq null"><else/>
+                        <a href="{$apkurl}{$list.display_image}" target="_blank"><image height="50" width="50" src="{$apkurl}{$list.display_image}"/></a>
+                        </if>
+                    </td>
+                    <td>
+                        <if condition="$list.belong_page_type eq 'fixed_homepage_recommend' ">
+                            {$list.rank}
+                        <else />
+                            {$list.position_detail}
+                        </if>
+                    </td>
+                    <td>{$list.soft_counts}</td>
+                    <td>{$list.oname}</td>
+                    <td>{$list.chname}</td>
+                    <td>{$list.release_time|date="Y-m-d H:i:s",###}</td>
+                    <td>
+                        <if condition="$list.extent_type neq 34">
+                            <if condition="$list.belong_page_type neq 'fixed_homepage_recommend'" >
+                                <a href="__URL__/add_soft?extent_id={$list.extent_id}" class="blue thickbox">添加推荐</a>
+                                ｜<a href="__URL__/list_soft?extent_id={$list.extent_id}" class="blue">查看推荐</a><br/>
+                            <else />
+                                  <if condition="$list.is_resource eq 0" >
+                                     <a href="__URL__/add_soft?extent_id={$list.extent_id}" class="blue thickbox">添加推荐</a>
+                                    ｜<a href="__URL__/list_soft?extent_id={$list.extent_id}" class="blue">查看推荐</a><br/>
+                                  </if>
+                            </if>
+                        </if>
+                        <if condition="$list.belong_page_type neq 'fixed_homepage_recommend'||$list.extent_type eq 34">
+                        <a href="__URL__/edit_extent?extent_id={$list.extent_id}&pid=<?php echo $pid?>" class="blue thickbox">编辑</a>｜
+                        </if>
+                        <a href="__URL__/del_extent?extent_id={$list.extent_id}" class="blue" onClick="return confirm('确认删除？')">删除</a>
+                        <if condition="$list.extent_type neq 34">
+                            ｜<a href="__URL__/release_extent?extent_id={$list.extent_id}" class="blue" onClick="return confirm('确认发布？')">发布</a>
+                        </if>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>
+
+</if>

@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style type="text/css">
+body,td,th {
+	font-size: 12px;
+}
+</style>
+	<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+	<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+	<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+	<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+        <script type="text/javascript">  
+        function choujiang(){
+            var chounum = $("#chounum").val();
+            var zhongnum = $("#zhongnum").val();
+            var huodongqi = $("#huodongqi1").val();
+            if(zhongnum.length==0)
+            {
+                alert('中奖人数不能为空');
+                return;
+            }
+            var reg =  /^-?\d+$/;
+            if(reg.test(zhongnum)!=true){
+                alert('中奖人数只能是整数');
+                return;
+            }
+
+            chounum = parseInt(chounum);
+            zhongnum= parseInt(zhongnum);
+            if(zhongnum>chounum)
+            {
+                alert('中奖人数不能高于投资池人数，高于则不允许抽奖。');
+                return;
+            }
+            var param = {
+                zhongnum: zhongnum,
+                chounum: chounum,
+                huodongqi: huodongqi
+	    };
+            $.ajax({
+                url:'__URL__/lottery',
+                type:'POST',
+                data:param,
+                dataType:'json',
+                success:function(data){
+                   if(data==1)
+                   {
+                       location.href ="/index.php/Sendnum/Market/index";
+                   }else if(data==2)
+                   {
+                        alert('中奖人数只能是正整数');
+                   }else if(data==3)
+                   {
+                       alert('该活动已经抽完奖了');
+                       location.href ="/index.php/Sendnum/Market/index";
+                   }else if(data==4)
+                   {
+                       alert('该活动已过期');
+                       location.href ="/index.php/Sendnum/Market/index";
+                   }                           
+                }
+            });  
+        };
+    </script>
+</head>
+ 
+<body>
+<div style="width:45; margin-top:4px">
+	 <form id="form1" name="form1" method="post" action="__URL__/add/">
+  <table width="99%" height="63" border="0" align="center" cellpadding="4" cellspacing="1"  bgcolor="#333333">
+    <tr align="center">
+         <td width="20%" size="20" height="20" align="right" bgcolor="#FFFFFF">抽奖期:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input name="huodongqi1" type="text" id="huodongqi1" size="5" value="{$id}" disabled=true/>
+        </td>
+    </tr>
+
+    <tr align="center">
+         <td width="20%" size="20" height="20" align="right" bgcolor="#FFFFFF">抽奖池人数:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input name="chounum" type="text" id="chounum" size="5" value="{$poolnum}" disabled=true/>
+        </td>
+    </tr>
+
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">中奖人数:</td>
+         <td align="left" bgcolor="#FFFFFF">
+           <input name="zhongnum" type="text" id="zhongnum" size="20" />
+        </td>
+    </tr>    
+        <tr align="center">
+         <td width="20%" size="20" height="20" align="right" bgcolor="#FFFFFF"></td>
+         <td align="left" bgcolor="#FFFFFF">
+             <font color="red">*，如：中奖总名额为10人，则填10，限制为整数。中奖人数不能高于投资池人数，高于则不允许抽奖。</font>
+        </td>
+    </tr>
+
+    <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="抽奖" onclick="choujiang()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onclick="tb_remove();"/></td>
+    </tr>
+        </tr>    
+        <tr align="center">
+         <td align="left" bgcolor="#FFFFFF" colspan=2>
+             <font color="red">注意事项：您当前抽奖只允许做一次操作，有问题需要重新抽奖，请与运营部门负责人邮件申请并且邮件抄送到研发负责人。</font>
+        </td>
+    </tr>
+</table>
+  
+  </form>
+</div>
+</body>
+</html>

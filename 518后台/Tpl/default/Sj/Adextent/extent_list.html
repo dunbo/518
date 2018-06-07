@@ -1,0 +1,159 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css?version1" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+</head>
+<script>
+	function changePid(){
+		var parent_id = $('#parent_id').val();
+		var child_id = $('#child_id').val();
+		window.location.href = '/index.php/Sj/Adextent/extent_list/parent_id/'+parent_id+'/child_id/'+child_id;
+	}
+	function choose_coop_channel()
+	{
+		var parent_id = $('#parent_id').val();
+		var child_id = $('#child_id').val();
+		var coop_channel = $('#coop_channel').val();
+		window.location.href = '/index.php/Sj/Adextent/extent_list/parent_id/'+parent_id+'/child_id/'+child_id+'/coop_channel/'+coop_channel;
+	}
+	
+	function select_rank(id,rank,parent_id,child_id){
+		$.ajax({
+			url:'__URL__/change_rank/extent_id/'+id+'/rank/'+rank+'/parent_id/'+parent_id+'/child_id/'+child_id,
+			type:'get',
+			success:function(data){
+				if(data == 1){
+					if(child_id.indexOf('coop_')==0)
+					{
+						location.href="/index.php/Sj/Adextent/extent_list/parent_id/"+parent_id+"/child_id/9/coop_channel/"+child_id;
+					}
+					else
+					{
+						location.href="/index.php/Sj/Adextent/extent_list/parent_id/"+parent_id+"/child_id/"+child_id;
+					}
+				}else{
+					alert("编辑失败");
+				}
+			}
+		});
+	}
+function showAreaName(id, name)
+{
+	if (name == ',,' || name == '' ) {
+		return false;
+	}
+	var arr = name.split(';');
+	var html = '';
+	$(arr).each(function(){
+		var t = this.split(' ');
+		if (typeof(t[0]) != 'undefined') {
+			var p = t[0].split(':');
+			var n = area_list[p[0]];
+			var m = n['name'].split("\t");
+			html += m[0] + ',';
+
+			if (typeof(t[1]) != 'undefined') {
+				var ps = t[1].split(':');
+				var n = area_list[p[0]]['sub'][ps[0]];
+				var m = n.split("\t");
+				html += m[0];
+			}
+			html += '<br>';
+			$('#_div_' + id).html(html);
+		}
+	});
+}
+</script>
+<body>
+<div class="main_r">
+	<h3 class="current_h3">广告分区列表</h3>
+	<div class="currentNav2">
+		<div class="currentNav2_l" style="width:60%;">请选择要操作的产品:
+		<select name="parent_id" id="parent_id" onchange="changePid()">
+			<?php foreach($product_list as $k => $v){ ?>
+			<option value="<?php echo $k;?>"<?php if ($k == $parent_id){ ?> selected<?php } ?> ><?php echo $v[0] ?></option>
+			<?php } ?>
+		</select>
+		<select name="child_id" id="child_id" onchange="changePid()">
+			<option value="1" <?php if($child_id == 1){ ?>selected<?php } ?>>首页</option>
+			<!--<option value="2" <?php if($child_id == 2){ ?>selected<?php } ?>>应用</option>
+			<option value="3" <?php if($child_id == 3){ ?>selected<?php } ?>>游戏</option>-->
+			<option value="4" <?php if($child_id == 4){ ?>selected<?php } ?>>TCL</option>
+			<option value="5" <?php if($child_id == 5){ ?>selected<?php } ?>>迅歌</option>
+			<?php if($parent_id==1) { ?>
+			<option value="6" <?php if($child_id == 6){ ?>selected<?php } ?>>游戏-推荐频道</option>
+			<option value="7" <?php if($child_id == 7){ ?>selected<?php } ?>>礼包频道</option>
+			<option value="8" <?php if($child_id == 8){ ?>selected<?php } ?>>游戏论坛频道</option>
+			<option value="9" <?php if($child_id == 9){ ?>selected<?php } ?>>内容合作</option>
+			<option value="10" <?php if($child_id == 10){ ?>selected<?php } ?>>应用-热门频道</option>
+			<!--<option value="11" <?php if($child_id == 11){ ?>selected<?php } ?>>红包助手</option><!-->
+			<option value="12" <?php if($child_id == 12){ ?>selected<?php } ?>>安智钱包</option>
+			<?php } ?>
+		</select>
+		<?php if($child_id == 9){ ?>
+		<select name="coop_channel" id="coop_channel" onchange="choose_coop_channel()">
+			<volist name="coop_result" id="vo">
+				<option value="{$vo.coop_key_val}" <?php if($coop_channel == $vo['coop_key_val']){ ?>selected<?php } ?> >{$vo.new_channel_name}</option>
+			</volist>
+		</select>
+		<?php } ?>
+		</div>
+		<div class="currentNav2_r">
+			<a href="/index.php/Sj/Adextent/add_extent_show/parent_id/{$parent_id}/child_id/{$child_id}/coop_channel/{$coop_channel}" class="recBtn_bg" >添加新分区</a>
+		</div>
+	</div>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="softlist_tab">
+		<thead>
+			<tr>
+				<td width="1%"></td>
+				<td width="7%">分区ID</td>
+				<td width="12%">区间名</td>
+				<td width="12%">类型</td>
+				<td width="7%">区间位置数</td>
+				<td width="7%">区间轮播图数</td>
+				<td width="5%">运营商</td>
+				<td width="5%">渠道</td>
+				<td width="5%">投放区域</td>
+				<td width="5%">排序</td>
+				<td width="40%" class="thead_position">操作</div>
+				</td>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach($result as $val){ ?>
+			<tr id="extent_<?php echo $val['extent_id'] ?>">
+				<td><?php if ($val['type'] == 2): ?><div class="off" id="div_<?php echo $val['extent_id'] ?>"><a href="javascript:" onclick="showExtent(<?php echo $val['extent_id'] ?>)"></a></div><?php endif;?></td>
+				<td><?php echo $val['extent_id']; ?></td>
+				<td><?php echo $val['extent_name']; ?></td>
+				<td><?php echo $val['type'] == 1 ? '普通分区' : '活动分区' ?></td>
+				<td><?php echo $val['extent_size']; ?></td>
+				<td><?php echo $val['pic_num']; ?></td>
+				<td><?php echo $val['operation_name']; ?></td>
+				<td><?php echo $val['chname_str']; ?></td>
+				<td>
+				<div id="_div_{$val['extent_id']}"><?php if($val['push_area']) { ?> {$val.push_area} <?php } else { ?>-<?php } ?></div>
+				<script>showAreaName({$val['extent_id']}, "{$val.push_area}");</script>
+				</td>				
+				<td>
+					<select name="rank" class="extent_rank" onchange="select_rank(<?php echo $val['extent_id']; ?>,this.value,<?php echo $val['pid']; ?>,<?php echo "'".$val['child_type']."'"; ?>);">
+						<?php foreach($rank_result as $k => $v){ ?>
+						<option value="{$v}" <?php if($v == $val['rank']){ ?>selected<?php } ?>>{$v}</option>
+						<?php } ?>
+					</select>
+				</td>
+				<td>
+				<?php if ($val['type'] == 1){ ?>
+				<a href="/index.php/Sj/Adextent/add_ad_show/extent_id/{$val.extent_id}/cid/{$val.cid}">添加轮播图</a>　｜　<a href="/index.php/Sj/Adextent/ad_list/extent_id/{$val.extent_id}/cid/{$val.cid}">查看轮播图</a>　｜　
+				<a href="/index.php/Sj/Adextent/edit_extent_show/extent_id/{$val.extent_id}/parent_id/{$val.pid}/child_id/{$val.child_type}/cid/{$val.cid}" >编辑</a>　｜　<a href="/index.php/Sj/Adextent/del_extent/extent_id/{$val.extent_id}/parent_id/{$val.pid}/child_id/{$val.child_type}" onclick="javascript:return checkit()">删除</a></td>
+			</tr>
+			<?php } ?>
+			<?php } ?>
+		</tbody>
+	</table>
+	<center>{$page}</center>
+</div>
+</body>
+</html>
+
+

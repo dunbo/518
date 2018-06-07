@@ -1,0 +1,119 @@
+<include file="../../Public/header" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<link type="text/css" href="/Public/css/co_common.css" rel="stylesheet" />
+<link type="text/css" href="/Public/css/checkout.css" rel="stylesheet" />
+<link type="text/css" href="/Public/css/account.css" rel="stylesheet" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="/Public/js/co_public.js"></script>
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script>
+	function checkit(){
+	   if(confirm("您确定执行此操作吗？")){
+		  return true;
+	   }else{
+		  return false;
+	   }
+	}
+
+</script>
+	<div class="content">
+		<div class="nav_page">安智合作运营平台>财务审核列表</div>
+		<div class="search_box">
+			<form method="get" action="__URL__/finance_check_list?mm">
+				<table cellpadding="0" cellspacing="0" class="search_table">
+					<tbody>
+						<tr>
+							<td width="18%">结算周期：<select name="balance_period" style="visibility: visible;">
+								<option value="0">请选择...</option>
+								<?php foreach($balance_period_need as $key => $val){ ?>
+								<option value="{$val.value_go}" <?php if($val['value_go'] == $balance_period){ ?>selected<?php } ?>>{$val.time_go}</option>
+								<?php } ?>
+							</select></td>
+							<td width="34%">审核时间：<input id="start_tm" name="start_tm" style="cursor: hand; width: 100px; height:28px; border: 1px solid #dcdcdc;" value="{$start_tm}" size="15" type="text" /><img src="/Public/js/calendar.gif" onclick="return showCalendar('start_tm', 'y-m-d');" style="margin: 1px; cursor: hand;" width="16px" align="absmiddle" height="15px" />至<input id="end_tm" name="end_tm" style="cursor: hand; width: 100px; height:28px; border: 1px solid #dcdcdc" value="{$end_tm}" size="15" type="text" /><img src="/Public/js/calendar.gif" onclick="return showCalendar('end_tm', 'y-m-d');" style="margin: 1px; cursor: hand;" width="16px" align="absmiddle" height="15px" /></td>
+							<td width="18%">账号名称：<input type="text" class="search_item_text" name="username" value="{$username}" /></td>
+							<td width="30%"><input type="submit" value="搜索" class="search_btn" /></td>
+						</tr>
+						<tr>
+							<td>　负责人：<select name="charge" style="visibility: visible;">
+								<option value="0">请选择...</option>
+								<?php foreach($charge_result as $key => $val){ ?>
+								<option value="{$val.id}" <?php if($val['id'] == $charge){ ?>selected<?php } ?>>{$val.charge_name}</option>
+								<?php } ?>
+							  </select></td>
+							<td>是否补差：<select name="salvation"><option value="0">请选择...</option><option value="1" <?php if($salvation == 1){ ?>selected<?php } ?>>是</option><option value="2" <?php if($salvation == 2){ ?>selected<?php } ?>>否</option></select></td>
+							<td></td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+			</form>
+		</div>
+		<div class="tablelist_box">
+			<p style="width:98%">单位：元</p>
+			<table cellpadding="0" cellspacing="0" class="table_list">
+				<thead>
+					<tr>
+						<th width="16%">账号信息</th>
+						<th width="8%">结算周期</th>
+						<th width="8%">结算金额</th>
+						<th width="8%">补差</th>
+						<th width="8%">税前金额</th>
+						<th width="6%">税率</th>
+						<th width="8%">税后金额</th>
+						<th width="7%">流转状态</th>
+						<th width="10%">业务审核时间</th>
+						<th width="18%">操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach($result as $key => $val){ ?>
+					<tr>
+						<td class="left">
+							<ul class="accout_infor">
+								<li>账号ID：<span class="blue"><a href="__URL__/finance_check_list/user_id/{$val.user_id}">{$val.user_id}</a></span></li>
+								<li class="novorder">账号名称：<a href="/index.php/Cooperative/CoAccount/AccountList/username/{$val.user_name}" class="blue">{$val.user_name}</a></li>
+							</ul>						</td>
+						<td>{$val.balance_period}</td>
+						<td>{$val.amount}</td>
+						<td>{$val.salvation}</td>
+						<td>{$val.pre_tax}</td>
+						<td>{$val.tax_rate}</td>
+						<td>{$val.after_tax}</td>
+						<td>财务审核</td>
+						<td><?php echo date('Y-m-d',$val['operation_tm']); ?></td>
+						<td class="table_btna left"><a href="__URL__/finance_check_show/id/{$val['id']}<?php if($balance_period){ ?>/balance_period/{$balance_period}<?php } ?><?php if($username){ ?>/username/{$username}<?php } ?><?php if($charge){ ?>/charge/{$charge}<?php } ?><?php if($salvation){ ?>/salvation/{$salvation}<?php } ?><?php if($start_tm && $end_tm){ ?>/start_tm/{$start_tm}/end_tm/{$end_tm}<?php } ?>?mm" class="thickbox">通过</a><a href="__URL__/finance_check_do/id/{$val['id']}/check/2<?php if($balance_period){ ?>/balance_period/{$balance_period}<?php } ?><?php if($username){ ?>/username/{$username}<?php } ?><?php if($charge){ ?>/charge/{$charge}<?php } ?><?php if($salvation){ ?>/salvation/{$salvation}<?php } ?><?php if($start_tm && $end_tm){ ?>/start_tm/{$start_tm}/end_tm/{$end_tm}<?php } ?>?mm" onclick="return checkit();">驳回</a><br/><a href="__URL__/operation_remark_show/id/{$val['id']}/from/2<?php if($balance_period){ ?>/balance_period/{$balance_period}<?php } ?><?php if($username){ ?>/username/{$username}<?php } ?><?php if($charge){ ?>/charge/{$charge}<?php } ?><?php if($salvation){ ?>/salvation/{$salvation}<?php } ?><?php if($start_tm && $end_tm){ ?>/start_tm/{$start_tm}/end_tm/{$end_tm}<?php } ?>?mm" class="thickbox">备注</a><a href="__URL__/finance_detail/id/{$val['id']}" class="table_btna2">查看详情</a></td>
+					</tr>
+					<?php } ?>
+				</tbody>
+			</table>
+			<div class="pagebars">
+				<table cellpadding="0" cellspacing="0" width="100%">
+					<td class="pagebars_right right">
+					  {$page}
+					</td>
+				</table>
+			</div>
+		</div>
+		<div class="table_infors">
+		<br />
+			<p>
+				注：<br/>1、点击ID，查看该账号在当前列表下的所有记录<br/>2、点击账号，跳转至账号列表，查看该账号信息<br/>3、付款内容，可点击“编辑”，调整付款信息
+			</p>
+		</div>
+	</div>
+	<div class="clear"></div>
+</div>
+<!--content end-->
+<!--footer begin-->
+
+<!--footer end-->
+
+
+
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>备选库管理</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+
+<?php if (!$isAjax) : ?>
+<link rel="stylesheet" href="/Public/css/tablelist.css?1" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+
+<?php endif;?>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+	<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script>
+var extents = new Array();
+<?php $i=0;foreach($extents as $val): ?>
+extents[<?php echo $i?>] = {extent_id:'<?php echo $val['extent_id']?>',extent_name:'<?php echo $val['extent_name']?>',type:<?php echo $val['type']?>,parent_id:<?php echo $val['parent_id']?>};
+<?php $i++;endforeach; ?>
+
+function showExtent(c, parent_id)
+{
+	var id = c + '_' + parent_id;
+	var path = '#' + c + ' .' + id
+	if (!$(path)[0]) {
+		var html = '<select class=' + id + ' onchange="showExtent(\'TB_ajaxContent\',$(this).val())">';
+		var has_item = false;
+		$(extents).each(function(){
+			if(this.parent_id == parent_id) {
+				html += '<option value="'+this.extent_id+'">'+this.extent_name+'</option>';
+				has_item = true;
+			}
+		});
+		html += '</select>';
+		if(has_item) $('#'+c+' p').append(html);
+	}
+}
+function switchTab(url, op_id)
+{
+	$('#' + op_id).load(url + '/op_id/' + op_id, function(){
+		tb_init('#' + op_id + ' .thickbox');
+	});
+}
+
+function selectExtent(c, extent_id)
+{
+	var str = new Array();
+	$($('input:checked')).each(function(){
+		str.push($(this).val());
+	});
+	console.log(str)
+	if (str.length > 0) {
+		$('#' + c + ' .selected_ids').val(str.join(','));
+		tb_show(null,'#TB_inline?height=150&width=400&inlineId=myOnPageContent',false)
+	} else {
+		alert('请选择要移动的软件');
+	}
+}
+function edit_more(){
+	var chks=$("input[alt='del']:checked");
+	var ids="";
+	var i=0;
+	$(chks).each(function(){
+		ids+=','+this.value;
+		i++;
+	});
+	if(i==0){
+		alert('请选择要修改的软件');
+		return;
+	}else{
+		ids = ids.substr(1,ids.length);
+		var id = new Array();
+		id = ids.split(',');
+		num = id.length;
+		$("#num").html(num);
+		$("#more_id").val(ids);
+		$("#edit_more").zxxbox();
+	}
+
+}
+
+function del_batch(url){
+	if(confirm("是否批量删除？"))
+	{
+		var chks=$("input[alt='del']:checked");
+		var ids="";
+		var i=0;
+	    $(chks).each(function(){
+	       ids+=','+this.value;
+	       i++;                      
+	    });
+	    var biaoshi=0;
+	    if(i==0){
+			alert('请选择要批量删除的软件');
+			return;
+		}
+		$('#tmp_form')[0].action = url;
+		$('#referer').val(location.href);
+		$('#ids').val(ids);
+		$('#tmp_form').submit();
+		if(window.ActiveXObject) window.event.returnValue = false;
+	}
+}
+</script>
+</head>
+
+<body>
+<div class="main_r">
+	<form action="__URL__/list_candidate_soft" method="GET">
+	<table width="100%">
+		<tr>
+			<td><h3 class="current_h3">备选软件列表</h3></td>
+			<td width="5%">&nbsp;</td>
+			<td>类型：<select name="game_type" id="game_type" style="width:80px">
+					<option value='0'<?php if($game_type==0){echo "selected=''selected";
+						}?>>全部</option>
+					<option value='1'<?php if($game_type==1){echo "selected=''selected";
+						}?>>应用</option>
+					<option value='2'<?php if($game_type==2){echo "selected=''selected";
+						}?>>游戏</option>
+
+			</select></td>
+			<td>投放时间：<span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 154px;">
+		<input id="start_at2" name="start_at2"
+			style="border: 0px none black; width: 130px;" value="<?php echo $start_at2?$start_at2:''?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span> 
+			至 <span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 154px;">
+		<input id="end_at2" name="end_at2"
+			style="border: 0px none black; width: 130px;" value="<?php echo $end_at2?$end_at2:''?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span>
+			<input type="submit" value="搜索" style="width:100px;margin-left:50px;" />
+			</td>
+			<td width="25%">&nbsp;</td>
+		</tr>
+	</table>
+	</form>
+	<table width="100%">
+		<tr>
+			<td  width='70%'></td>
+			<td>
+			<a class="thickbox" href="/index.php/Sj/ExtentV2/add_candidate_soft?1"><button class="btn btn-sm btn-default yahei" style="margin:10px;">添加备选库</button></a>
+			<a class="thickbox" href="/index.php/Sj/ExtentV2/edit_more_ad?height=100"><button class="btn btn-sm btn-default yahei thickbox" style="margin:10px;">批量投放广告</button></a>
+			<a style="margin-left:10px;color:blue;" href="__PUBLIC__/sample9.csv">下载批量投放模板</a>
+			</td>
+		</tr>
+	</table>
+
+	
+	<div class="currentNav">
+		<div class="currentNav_l"><a href="/index.php/Sj/ExtentV2/index">推荐区位管理</a> > 备选库管理</div>
+		<div class="currentNav_r">
+		<a class="recBtn_bg<?php if ($srch_type == 'e'):?> currentSel<?php endif;?>" href="__URL__/list_candidate_soft/srch_type/e">过期</a>
+		<a class="recBtn_bg<?php if ($srch_type == 'n'):?> currentSel<?php endif;?>" href="__URL__/list_candidate_soft/srch_type/n">当前</a>
+		<a class="recBtn_bg<?php if ($srch_type == 'f'):?> currentSel<?php endif;?>" href="__URL__/list_candidate_soft/srch_type/f">未开始</a>
+		</div>
+	</div>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="softlist_tab">
+		<thead>
+			<tr>
+				<td width="9%"><input type="checkbox" name="soft_allSelect" onclick="$('input[name^=ids]').attr('checked', $(this).attr('checked')=='checked')"  /></td>
+				<td width="15%">软件名</td>
+				<td width="15%">包名</td>
+				<td width="7%">优先级</td>
+				<td width="7%">类型</td>
+				<td width="12%">开始时间</td>
+				<td width="12%">结束时间</td>
+				<td width="15%">操作</div></td>
+			</tr>
+		</thead>
+		<tbody>
+<?php foreach($list as $val): ?>
+	<TR>
+		<TD><input name="ids[]" value="<?php echo $val['id'] ?>" type="checkbox" alt="del"/></TD>
+		<TD><?php echo $val['softname'] ?></TD>
+		<TD><?php echo $val['package'] ?></TD>
+		<TD><?php echo $val['order'] ?></TD>
+		<TD><?php echo ($val['type']==1)?'应用':'游戏' ?></TD>
+		<TD><?php echo date('Y-m-d H:i:s', $val['start_at']); ?></TD>
+		<TD><?php echo date('Y-m-d H:i:s', $val['end_at']); ?></TD>
+		<TD>
+		<a href="/index.php/Sj/ExtentV2/edit_candidate_soft/id/<?php echo $val['id'] ?>?modal=true" class="thickbox">
+			编辑 
+			<?php if($val['content_title'] || $val['c_id_1']) { ?>
+				<span style="color:blue">（有新列表内容）</span>
+			<?php }else{ ?>	
+				<span style="color:red">（无新列表内容）</span>
+			<?php } ?>
+		</a>
+		 | 
+		<a href="/index.php/Sj/ExtentV2/del_candidate_soft/id/<?php echo $val['id'] ?>" onclick="javascript:return checkit()">删除</a>
+		</TD>
+	</TR>
+<?php endforeach;?>
+
+	<tr class="softbtn">
+		<td colspan="8">
+			<div class="soft_all">
+				<input type="button" value='删除' style="width:100px;" onclick="del_batch('/index.php/Sj/ExtentV2/del_candidate_soft/')"/>
+			</div>
+			<div class="soft_all">
+				<input type="button" value='批量修改时间' style="width:100px;" onclick="edit_more()"/>
+			</div>
+		</td>
+	</tr>
+
+		</tbody>
+	</table>
+{$page}
+</div>
+<!-- 删除 -->
+<form method='post' action='' id='tmp_form'>
+<input type='hidden' name='referer' id='referer' value='' />
+<input type='hidden' name='ids' id='ids' value='' />
+</form>
+</body>
+</html>
+<div id="edit_more" style="display:none;height:150px;width: 400px">
+		<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+			<tr class="sub_tr">
+				<td>共选择软件：<font id="num"></font>个</td>
+				<td></td>
+			</tr>
+			<tr class="sub_tr">
+				<td>开始时间</td>
+				<td><span style="padding: 1px; display: inline-block; width: 154px;">
+		<input class="Wdate" value="" id="start" name="start" onclick="WdatePicker({startDate:&quot;%y-%M-%d 00:00:00&quot;,dateFmt:&quot;yyyy-MM-dd HH:mm:ss&quot;})" style="width:140px" type="text">
+		</span></td>
+			</tr>
+			<tr class="sub_tr">
+				<td>结束时间</td>
+				<td><span style="align: absmiddle; cursor: hand; display: inline-block; width: 154px; padding: 1px">
+		<input class="Wdate" value="" id="end" name="end" onclick="WdatePicker({startDate:&quot;%y-%M-%d 23:59:59&quot;,dateFmt:&quot;yyyy-MM-dd HH:mm:ss&quot;})" style="width:140px" type="text"></span></td>
+			</tr>
+			<tr class="sub_tr">
+				<td colspan="2"> <input type='hidden' name="more_id" id="more_id" value=''/><input type='button' value="提交" onclick="check_more()"/><input type="button" onclick="$.zxxbox.hide();" value="&nbsp;&nbsp;取消&nbsp;&nbsp;"></td>
+			</tr>
+		</table>
+
+</div>
+
+<script type="text/javascript">
+	function check_more(){
+		var start = $('#start').val();
+		var end = $('#end').val();
+		var id = $("#more_id").val();
+		if(start==''&&end==''){
+			alert('至少填一个时间');
+			return false;
+		}
+		if(start&&end){
+			if (Date.parse(start) > Date.parse(end) ) {
+				alert('开始时间不能大于结束时间');
+				return false;
+			}
+		}
+		$.ajax({
+			type: "POST",
+			url: "/index.php/Sj/ExtentV2/edit_more",
+			data: "id="+id+"&start="+start+"&end="+end,
+			dataType:'json',
+			success: function(msg){
+					if(!msg.msg){
+						alert('请检查是否有权限');
+					}else{
+						alert(msg.msg);
+						if(msg.code!=0){
+							window.location.reload();
+						}
+					}
+
+
+			}
+		});
+
+	}
+</script>

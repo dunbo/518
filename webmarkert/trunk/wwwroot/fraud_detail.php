@@ -1,0 +1,39 @@
+<?php
+include_once (dirname(realpath( __FILE__ )) . '/init.php');
+$type = $_GET['type'];
+if($type=="list")
+{
+	$tplObj->display('fraud_list.html');
+}
+if($type==1)
+{
+	$tplObj->display('fraud_detail_1.html');
+}
+if($type==2)
+{
+	$tplObj->display('fraud_detail_2.html');
+}
+if($type==3)
+{
+	$tplObj->display('fraud_detail_3.html');
+}
+if($type==4)
+{
+	$tplObj->display('fraud_detail_4.html');
+}
+if($type==5)
+{
+	$tplObj->display('fraud_detail_5.html');
+}
+if($type==6)
+{
+	$tplObj->display('fraud_detail_6.html');
+}
+if($type==7)
+{
+	$tplObj->display('fraud_detail_7.html');
+}
+if($type==8)
+{
+	$tplObj->display('fraud_detail_8.html');
+}

@@ -1,0 +1,667 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<script src="__PUBLIC__/js/datepicker/kit.js"></script>
+		<script src="__PUBLIC__/js/datepicker/array.js"></script>
+		<script src="__PUBLIC__/js/datepicker/date.js"></script>
+		<script src="__PUBLIC__/js/datepicker/dom.js"></script>
+		<script src="__PUBLIC__/js/datepicker/selector.js"></script>
+		<script src="__PUBLIC__/js/datepicker/datepicker.js"></script>
+		<link rel="stylesheet" href="__PUBLIC__/js/datepicker/datepicker.css" />
+		<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+		
+<style>
+body{font-size:14px; font-family:Microsoft Yahei; color:#333;}
+h4{ font-weight:normal; text-shadow:0 0 5px gray;}
+.back_list{ height:35px; background-color:#5cb85c; border-color:#4cae4c; border:none; border-radius:5px; color:#fff; font-size:14px;}
+.back_list:hover{ background-color:#449d44; border-color:#398439;}
+.new_co_soft{ width:100%; border-collapse:collapse;}
+.new_co_soft tr td{ height:30px; text-align:right; border:1px solid #ddd;}
+.new_co_soft tr td input{ margin-right:20px; border:1px solid #ddd; width:150px; height:25px; line-height:25px;float:left;}
+.new_co_soft tr td select{ height:25px; width:150px; border:1px solid #ddd; line-height:25px; margin-right:10px;float:left;}
+.cancel_button{height:35px; background-color:gray; border-color:#4cae4c; border:none; border-radius:5px; color:#fff; font-size:14px;}
+.cancel_button:hover{ background-color:#595959;}
+</style>
+		
+	</head>
+	
+	<body>
+
+		<h4>{$app.app_name}</h4>
+		
+		<a href="__URL__/detail/contract_id/{$app.contract_id}"><button class="back_list" style="margin:0px 0px 10px 30px;">返回合同软件</button></a>
+		<a href="/index.php/Settlement/Contract/index"><button class="back_list" style="margin:0px 0px 10px 40px;">返回合同列表</button></a>
+
+		<form id="edit_form_contract_app" name="form_contract_app" action="__URL__/edit/app_id/{$app.id}" method="post">
+
+		<table class="new_co_soft" >
+			
+			<tr>
+				<td>客户编号：</td>
+				<td>
+					<input type="text" id="input_mark" required="required" />
+					<select id="mark_list" style="width:120px;">
+					</select>
+				</td>
+				<td>软件包名：</td>
+				<td>
+					<input type="text" name="app_package"   id="input_app_package" class="form-control" value=""/>
+				</td>
+				<td>软件名称：</td>
+				<td>
+					<input type="text" name="app_name" id="input_app_name"  readonly="readonly" class="form-control" value=""/>
+				</td>
+			</tr>
+			
+			<tr>
+				<td>软件类别：</td>
+				<td>
+					<select id="select_app_type" class="form-control" required="required">
+					<option value="">请选择</option>
+						<option value="1" <?php if($app['app_type'] == 1){echo 'selected';}?>>应用</option>
+						<option value="2" <?php if($app['app_type'] == 2){echo 'selected';}?>>游戏</option>
+					</select>
+				</td>
+				<td>软件分类：</td>
+				<td><input type="text" id="input_category_name" readonly="readonly" /></td>
+				<td>刊例价格名称：</td>
+				<td>
+					<select id="edit_select_ratecard" class="form-control">
+						<option value="0">请选择</option>
+						<?php foreach($cards as $card){ ?>
+						<?php if($card['id']==$app['rate_card_id']){ ?>
+						<option value="<?php echo $card['id'];?>" selected><?php echo $card['rate_card_name'];?></option>
+						<?php }else{ ?>
+						<option value="<?php echo $card['id'];?>"><?php echo $card['rate_card_name'];?></option>
+						<?php }} ?>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>广告位：</td>
+				<td>
+					<select id="edit_select_advertising" class="form-control">
+						<option value="0">请先选择刊例</option>
+					</select>
+				</td>
+				<td>折扣：</td>
+				<td>
+				<input type="text" id="edit_input_discount" value="<?php echo $app['weekday_discount']>0 ? $app['weekday_discount'] : $app['weekend_discount'] ;?>">%
+				</td>
+				<td>关键字：</td>
+				<td>
+				<input type="text" name="app_keyword" id="edit_input_app_keyword" value="{$app.keyword}" <?php echo $app['is_keyword'] ? '' : 'disabled';?>/>
+				</td>
+			</tr>
+			
+			
+			
+			<tr>
+				<td>投放日期：</td>
+				<td colspan="5">
+					<input type="text" id="input_picker_date" value="{$date_str}" style="width:91.3%;">
+					<div style="color:#FF0000;text-align:left; margin-left:20px;">按住Ctrl或Shift键进行多选，选择日期之后点下面的按钮统计平日和周末天数</div>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="5" style="border:none;text-align:left;">
+					<button id="edit_button_put_date" class="back_list" style=" margin:10px; margin-left:30px; height:30px;">计算价格</button>
+				</td>
+			</tr>
+		</table>
+
+
+<div id="edit_div_price_area" style="display:none;">
+<table class="new_co_soft" style="width:100%;">
+	<tr id="tr_weekdays" style="display:none;">
+		<td style="width:80px;">平日：</td>
+		<td style="width:30px;"><span id="edit_span_weekdays">{$app.weekdays}</span>天<input type="hidden" id="edit_input_weekdays" value="{$app.weekdays}"/></td>
+		<td style="width:105px;">平日单价：</td>
+		<td><input type="text" style="width:140px; margin-right:0px;" id="edit_input_adv_weekday_price" value="{$advert_weekday_price}" disabled/>元</td>
+		<!--<td>折扣：</td>
+		<td><input type="text" style="width:140px; margin-right:0px;" id="edit_input_weekday_discount" value="{$app.weekday_discount}"/>%</td>-->
+		<input type="text" style="display:none;" id="edit_input_weekday_discount" value="{$app.weekday_discount}"/>
+		<td>折扣后单价：</td>
+		<td><input type="text" style="width:140px; margin-right:0px;" id="edit_input_weekday_price" value="{$app.weekday_price}" disabled/>元</td>
+		<td>折扣后总价：</td>
+		<td><input type="text" style="width:140px; margin-right:0px;" id="edit_input_weekday_total" value="{$app.weekday_total}" disabled/>元</td>
+	</tr>
+	<tr id="tr_weekends" style="display:none;">
+		<td>周末/月初：</td>
+		<td><span id="edit_span_weekends">{$app.weekends}</span>天<input type="hidden" id="edit_input_weekends" value="{$app.weekends}"/></td>
+		<td>周末/月初单价：</td>
+		<td><input type="text" style="width:140px; margin-right:0px;" id="edit_input_adv_weekend_price" value="{$advert_weekend_price}" disabled/>元</td>
+		<!--<td>折扣：</td>
+		<td><input type="text" style="width:140px; margin-right:0px;" id="edit_input_weekend_discount" value="{$app.weekend_discount}"/>%</td>-->
+		<input type="text" style="display:none;" id="edit_input_weekend_discount" value="{$app.weekend_discount}"/>
+		<td>折扣后单价：</td>
+		<td><input type="text" style="width:140px; margin-right:0px;" id="edit_input_weekend_price" value="{$app.weekend_price}" disabled/>元</td>
+		<td>折扣后总价：</td>
+		<td><input type="text" style="width:140px; margin-right:0px;" id="edit_input_weekend_total" value="{$app.weekend_total}" disabled/>元</td>
+	</tr>
+</table>
+</div>
+<button id="button_save" type="submit" class="back_list" style="margin:10px 0px 20px 30px; padding:5px 40px !important;">保存</button>
+<a href="__URL__/detail/contract_id/{$app.contract_id}"><button type="button" class="cancel_button" style="margin:10px 0px 20px 30px; padding:5px 40px !important;" >取消</button></a>
+</form>
+
+<script>
+
+$kit.$(function() {
+	//输入框下拉
+	$kit.ev({
+		el : '#input_picker_date',
+		ev : 'focus',
+		fn : function(e) {
+			var d, ipt = e.target;
+			d = e.target[$kit.ui.DatePicker.defaultConfig.kitWidgetName];
+			if(d) {
+				d.show();
+			} else {
+				d = new $kit.ui.DatePicker({
+					date : ipt.value,
+					dateFormat : 'yyyy/mm/dd',
+					dateStringSeparator : ','
+				}).init();
+				d.adhere($kit.el('#input_picker_date'));
+				d.show();
+			}
+			
+			$('#edit_div_price_area').hide();
+		}
+	});
+	$kit.ev({
+		el : document,
+		ev : 'click',
+		fn : function(e) {
+			var input = $kit.el('#input_picker_date');
+			d = input[$kit.ui.DatePicker.defaultConfig.kitWidgetName];
+			if(d && !$kit.contains(d.picker, e.target) && input != e.target) {
+				d.hide();
+			}
+		}
+	});
+});
+
+
+$(function(){
+
+	var var_edit_advert_data = []; //用于存储广告位信息
+	var var_edit_weekday_date = [{$weekday_str}]; //用于存储平日日期的选择
+	var var_edit_weekend_date = [{$weekend_str}]; //用于存储周末月初的选择
+	var var_edit_app_type = {$app.app_type};
+
+	var var_edit_weekday_bak = [{$weekday_str}];
+	var var_edit_weekend_bak = [{$weekend_str}];
+
+	//2014.12.10 jiwei
+	var var_advertising_id = {$app.advertising_id};
+	$.getJSON("__URL__/ajax_get_advert/ratecard_id/{$app.rate_card_id}", function(json){
+			var_edit_advert_data = json; // AJAX调用结果直接赋给广告位数组
+
+			$('#edit_select_advertising').empty();
+			$('#edit_select_advertising').append("<option value='0'>请选择</option>");
+			$.each(json, function(key, val){
+				if(val.id==var_advertising_id)
+					$('#edit_select_advertising').append("<option value='"+val.id+"' selected>"+val.advertising_name+"</option>");
+				else
+					$('#edit_select_advertising').append("<option value='"+val.id+"'>"+val.advertising_name+"</option>");
+			});
+		});
+	//end
+	
+	// 选择刊例获取刊例下的所有广告位
+	$('#edit_select_ratecard').change(function(){
+		$.getJSON("__URL__/ajax_get_advert/ratecard_id/"+$(this).val(), function(json){
+			var_edit_advert_data = json; // AJAX调用结果直接赋给广告位数组
+
+			$('#edit_select_advertising').empty();
+			$('#edit_select_advertising').append("<option value='0'>请选择</option>");
+			$.each(json, function(key, val){
+				$('#edit_select_advertising').append("<option value='"+val.id+"'>"+val.advertising_name+"</option>");
+			});
+		});
+		
+		$('#edit_div_price_area').hide();
+	});
+
+	// 用户选择广告位的时候将报价赋给页面上的输入框待用
+	$('#edit_select_advertising').change(function(){
+		var var_index = $(this).get(0).selectedIndex-1; //因为增加了“请选择”的条目，此处偏移减1
+		var var_channel = var_edit_advert_data[var_index].channel;
+
+		// 判断是否是关键词广告
+		if(var_channel == 'SK' || var_channel=='SKH' || var_channel=='SKD' ){
+			$('#edit_input_app_keyword').attr("disabled",false);
+		}else{
+			$('#edit_input_app_keyword').attr("disabled",true);
+		}
+
+		if(var_edit_app_type==2){ //游戏价格
+			$('#edit_input_adv_weekday_price').val(var_edit_advert_data[var_index].game_weekday_price);
+			$('#edit_input_adv_weekend_price').val(var_edit_advert_data[var_index].game_weekend_price);
+		}else{ //应用价格
+			$('#edit_input_adv_weekday_price').val(var_edit_advert_data[var_index].app_weekday_price);
+			$('#edit_input_adv_weekend_price').val(var_edit_advert_data[var_index].app_weekend_price);
+		}
+
+		//$.editCalculatePrice();
+		$('#edit_div_price_area').hide();
+	});
+
+	
+	//2014.12.9 jiwei
+	$('#edit_select_app_type').change(function(){
+		$('#edit_div_price_area').hide();
+	});
+	
+	$('#edit_input_discount').change(function(){
+		$('#edit_div_price_area').hide();
+	});
+	//end
+	
+	// 将选择的日期赋给相应的数组
+	$('#edit_button_put_date').click(function(){
+		
+		if($('#input_picker_date').val()==''){
+			alert('请选择投放日期！');
+			return false;
+		}
+		
+		if( $('#edit_input_adv_weekday_price').val()=='' || $('#edit_input_adv_weekend_price').val()=='' ) {
+			alert('请先选择广告位！');
+			return false;
+		}
+		
+		//2014.12.9 jiwei
+		if ( !($('#edit_input_discount').val() >= 0 && $('#edit_input_discount').val() <= 100 )) {
+			alert('折扣请输入1～100的数字!');
+			return false;
+		}
+		//end
+
+		var_edit_weekday_date = [];
+		var_edit_weekend_date = [];
+
+
+		var var_picker_date = $('#input_picker_date').val().split(',');
+		$.each(var_picker_date, function(key, val){
+
+			var var_date = new Date( Date.parse(val));
+	
+			if(var_date.getDate() <= 5){ //判断是否是月初，每月的1～5日
+				if($.inArray(val, var_edit_weekend_date) == -1 )
+					var_edit_weekend_date.push(val);
+			}
+			else if(var_date.getDay()==0 || var_date.getDay()==6) { //判断是否是周末，周六日
+				if($.inArray(val, var_edit_weekend_date) == -1 )
+					var_edit_weekend_date.push(val);
+			}
+			else {
+				if($.inArray(val, var_edit_weekday_date) == -1 )
+					var_edit_weekday_date.push(val);
+			}
+
+		});
+
+		if( 0 == var_edit_weekday_date.length + var_edit_weekend_date.length ){
+			alert('没有选择有效日期');
+			return false;
+		}
+		
+		//$('#edit_span_weekdays').html(var_edit_weekday_date.length);
+		//$('#edit_span_weekends').html(var_edit_weekend_date.length);
+		//$('#edit_input_weekdays').val(var_edit_weekday_date.length);
+		//$('#edit_input_weekends').val(var_edit_weekend_date.length);
+		
+		//2014.12.9 jiwei
+		if(var_edit_weekday_date.length>0){
+			$('#edit_span_weekdays').html(var_edit_weekday_date.length);
+			$('#edit_input_weekdays').val(var_edit_weekday_date.length);
+			$('#edit_input_weekday_discount').val($('#edit_input_discount').val());
+			$('#edit_input_weekday_price').val( editChangeTwoDecimal($('#edit_input_adv_weekday_price').val() * $('#edit_input_weekday_discount').val() * 0.01) );
+			$('#edit_input_weekday_total').val( editChangeTwoDecimal($('#edit_input_weekdays').val() * $('#edit_input_adv_weekday_price').val() * $('#edit_input_weekday_discount').val() * 0.01) );
+			$('#tr_weekdays').show();
+		}else{
+			$('#edit_input_weekdays').val(0);
+			$('#edit_input_weekday_price').val(0);
+			$('#edit_input_weekday_total').val(0);
+			$('#tr_weekdays').hide();
+		}
+		
+		if(var_edit_weekend_date.length>0){
+			$('#edit_span_weekends').html(var_edit_weekend_date.length);
+			$('#edit_input_weekends').val(var_edit_weekend_date.length);
+			$('#edit_input_weekend_discount').val($('#edit_input_discount').val());
+			$('#edit_input_weekend_price').val( editChangeTwoDecimal($('#edit_input_adv_weekend_price').val() * $('#edit_input_weekend_discount').val() * 0.01) );
+			$('#edit_input_weekend_total').val( editChangeTwoDecimal($('#edit_input_weekends').val() * $('#edit_input_adv_weekend_price').val() * $('#edit_input_weekend_discount').val() * 0.01) );
+			$('#tr_weekends').show();
+		}else{
+			$('#edit_input_weekends').val(0);
+			$('#edit_input_weekend_price').val(0);
+			$('#edit_input_weekend_total').val(0);
+			$('#tr_weekends').hide();
+		}
+		//end
+
+		//$.editCalculatePrice();
+
+		$('#edit_div_price_area').show(); //显示价格输入区域
+
+		return false;
+	});
+
+	// 处理周末月初的折扣率计算
+	$('#edit_input_weekend_discount').blur(function(){
+			$.editCalculatePrice();
+	});
+
+
+	// 处理平日的折扣率计算
+	$('#edit_input_weekday_discount').blur(function(){
+			$.editCalculatePrice();
+	});
+
+	// 处理提交
+	$('#edit_form_contract_app').submit(function(){
+		if($.editCalculatePrice()==false)
+			return false;
+
+		var var_data = {
+				'rate_card_id':$('#edit_select_ratecard').val(),
+				'advertising_id':$('#edit_select_advertising').val(),
+				'weekdays':$('#edit_input_weekdays').val(),
+				'weekends':$('#edit_input_weekends').val(),
+				'weekday_date':var_edit_weekday_date.join('|'),
+				'weekend_date':var_edit_weekend_date.join('|'),
+				'weekday_discount':$('#edit_input_weekday_discount').val(),
+				'weekend_discount':$('#edit_input_weekend_discount').val(),
+				'app_keyword':$('#edit_input_app_keyword').val(),
+				'app_type':$('#select_app_type').val(),
+				'mid':$('#mark_list').val()
+		};
+
+		$.post(	$(this).attr('action'), var_data, function(json){
+			if(json.result_no > 0){
+				alert('保存成功！');
+				location.href="__URL__/detail/contract_id/{$app.contract_id}";
+			}else{
+				alert(json.result_msg);
+			}
+		}, "json");
+
+		return false;
+	});
+
+	// 计算价格函数
+	$.editCalculatePrice = function(){
+		if( $('#edit_input_adv_weekday_price').val()=='' || $('#edit_input_adv_weekend_price').val()=='' ) {
+			alert('请先选择广告位！');
+			return false;
+		}
+
+		if( 0 == var_edit_weekday_date.length + var_edit_weekend_date.length ) {
+			alert('没有选择有效日期！');
+			return false;
+		}
+
+		// 平日天数大于0，则验证平日折扣率的输入
+		if( $('#edit_input_weekdays').val()>0 ){
+			if( $('#edit_input_weekday_discount').val() == '') {
+				alert('请输入平日折扣率！');
+				return false;
+			}
+
+			if( isNaN( $('#edit_input_weekday_discount').val() ) ){
+				alert('平日折扣请输入1～100的数字！');
+				return false;
+			}
+
+			if ( !($('#edit_input_weekday_discount').val() >= 0 && $('#edit_input_weekday_discount').val() <= 100 )) {
+				alert('平日折扣请输入1～100的数字！');
+				return false;
+			}
+
+			$('#edit_input_weekday_price').val( editChangeTwoDecimal($('#edit_input_adv_weekday_price').val() * $('#edit_input_weekday_discount').val() * 0.01) );
+			$('#edit_input_weekday_total').val( editChangeTwoDecimal($('#edit_input_weekdays').val() * $('#edit_input_adv_weekday_price').val() * $('#edit_input_weekday_discount').val() * 0.01) );
+		}else{
+			$('#edit_input_weekday_discount').val('');
+			$('#edit_input_weekday_price').val('');
+			$('#edit_input_weekday_total').val('');
+		}
+
+		// 周末月初天数大于0，则验证周末月初的折扣率输入
+		if( $('#edit_input_weekends').val() > 0 ){
+			if( $('#edit_input_weekend_discount').val() == '') {
+				alert('请输入周末月初折扣率！');
+				return false;
+			}
+
+			if( isNaN( $('#edit_input_weekend_discount').val() ) ){
+				alert('周末月初折扣请输入0～100的数字！');
+				return false;
+			}
+
+			if ( !($('#edit_input_weekend_discount').val() >= 0 && $('#edit_input_weekend_discount').val() <= 100 )) {
+				alert('周末月初折扣请输入0～100的数字！');
+				return false;
+			}
+
+
+			$('#edit_input_weekend_price').val( editChangeTwoDecimal($('#edit_input_adv_weekend_price').val() * $('#edit_input_weekend_discount').val() * 0.01) );
+			$('#edit_input_weekend_total').val( editChangeTwoDecimal($('#edit_input_weekends').val() * $('#edit_input_adv_weekend_price').val() * $('#edit_input_weekend_discount').val() * 0.01) );
+		}else{
+			$('#edit_input_weekend_discount').val('');
+			$('#edit_input_weekend_price').val('');
+			$('#edit_input_weekend_total').val('');
+		}
+
+		return true;
+	}
+
+
+	$('.edit_a_delete').click(function(){
+		if(!confirm('确认删除吗?'))
+			return false;
+
+		$.getJSON($(this).attr('href'), function(json){
+			if(json.result_no < 0){
+				alert(json.result_msg);
+			}else{
+				location.reload();
+			}
+		});
+		return false;
+	});
+});
+
+
+function editIsDate(dateString){
+    if(dateString.trim()=="")return false;
+    var r=dateString.match(/^(\d{1,4})(-|\/)(\d{1,2})\2(\d{1,2})$/);
+    if(r==null){
+      //alert("请输入格式正确的日期\n\r日期格式：yyyy-mm-dd\n\r例    如：2008-08-08\n\r");
+    return false;
+    }
+    var d=new Date(r[1],r[3]-1,r[4]);
+    var num = (d.getFullYear()==r[1]&&(d.getMonth()+1)==r[3]&&d.getDate()==r[4]);
+    if(num==0){
+      //alert("请输入格式正确的日期\n\r日期格式：yyyy-mm-dd\n\r例    如：2008-08-08\n\r");
+    }
+    return (num!=0);
+ }
+
+function editChangeTwoDecimal(floatvar){
+var f_x = parseFloat(floatvar);
+if (isNaN(f_x))
+{
+//alert('function:changeTwoDecimal->parameter error');
+return false;
+}
+var f_x = Math.round(floatvar*100)/100;
+return f_x;
+}
+
+
+
+
+
+
+(function(){
+
+	var markData = <?= json_encode($mark_list);?>;
+	
+	
+
+	function cleanInput() {
+	
+		$("#input_mark").val("");
+		$('#input_app_name').val("");
+		$("#input_app_package").val("");
+		$("#input_app_names").val("");
+		$("#input_category_name").val("");
+		markList.children().show();
+	
+	}
+
+	function getPackage(pac,callBack) {
+		$.getJSON('/index.php/Settlement/ContractApp/ajax_exist_app/package/'+pac, function(json){
+			if(json.result_no < 0){
+				$('#span_app_package').html('没有找到软件！');
+				$("#input_mark").val("");
+				$("#input_app_package").val("");
+				$("#input_app_names").val("");
+				$("#input_category_name").val("");
+			}else{
+				callBack(json.result_data);
+			}
+		});
+	
+	
+	}
+
+
+
+
+	var markList = $("#mark_list");
+	var html = '<option value="0" package="" softname="">请选择...</option>';
+	for(var i in markData) {
+		html += '<option value="'+ markData[i].mid +'" package="'+ markData[i].package  +'" softname="'+ markData[i].softname +'">'+markData[i].cmark + '</option>';
+	}
+
+	markList.html(html);
+	$("#input_mark").blur(function(){
+		
+		var is = false;
+		var obj = $(this);
+		if(obj.val() == "") {
+			is = true;
+			markList.val(0);
+		}
+		
+		markList.children().each(function(){
+			$self = $(this);
+			if($self.text() == obj.val()) {
+				markList.val($self.val());
+				is = true;
+				$self.show();
+			} else {
+				$self.hide();
+			}
+		});
+		if(!is) {
+			alert("没有这个编号");
+			markList.val(0);
+		}
+		
+		markList.change();
+
+	});
+
+	//添加软件包名触发
+	$("#input_app_package").blur(function(){
+		var obj = $(this);
+		var is = false;
+		markList.children().each(function(){
+			var $self = $(this);
+			if($self.attr("package") == obj.val()) {
+				
+				//$('#input_app_name').val($self.attr("softname"));
+				is = true;
+				$self.show();
+				
+				getPackage(obj.val(),function(data){
+					$("#input_app_package").val(data.package);
+					$("#input_app_name").val(data.softname);
+					$("#input_category_name").val(data.category_name);
+				});
+
+
+			} else {
+				$self.hide();
+			}
+		});
+
+		if(!is) {
+			alert("该软件包不存在");
+			cleanInput();
+		}
+		$("#input_mark").val("");
+		markList.val(0);
+		
+	
+	});
+
+	markList.change(function(){
+		$("#input_mid").val(this.value);
+		var obj = $(this);
+		//alert(obj.val());
+		obj.find("option").each(function(){
+			if(this.value == obj.val()) {
+				if(obj.val() == 0){
+					cleanInput();
+					return ;
+				}
+				
+				$("#input_mark").val($(this).text());
+				$.getJSON('/index.php/Settlement/ContractApp/ajax_exist_app/package/'+$(this).attr("package"), function(json){
+					if(json.result_no < 0){
+						$('#span_app_package').html('没有找到软件！');
+						$("#input_mark").val("");
+						$("#input_app_package").val("");
+						$("#input_app_names").val("");
+						$("#input_category_name").val("");
+					}else{
+						$("#input_app_package").val(json.result_data.package);
+						$("#input_app_name").val(json.result_data.softname);
+						$("#input_category_name").val(json.result_data.category_name);
+					}
+				});
+
+			}
+		});
+	});
+
+	markList.val(<?= $app['mid']?>);
+	markList.change();
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body></html>

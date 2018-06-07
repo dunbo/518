@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+    <script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+	<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+	<script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+	<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+    <script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+    <include file="../../Public/showapp" />
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>无标题文档</title>
+        <style type="text/css">
+            body, td, th {
+                font-size: 12px;
+            }
+
+			.table_list tbody td {
+			    padding: 5px;
+			}            
+			.TB_title{
+				text-align:right;
+			}
+        </style>
+        <script type="text/javascript">
+            if (typeof (window.parent) != 'undefined' && (menuFrame = window.parent.document.getElementById('menu-frame').contentWindow)) {
+                try {
+                    menuFrame.selectMenu('__ACTION__');
+                } catch (e) {
+                }
+            }
+        </script>
+    </head>
+    
+    <script type="text/javascript">
+            $(function() {
+                document.onkeydown = function(e) {
+                    var ev = document.all ? window.event : e;
+                    if (ev.keyCode == 13) {
+                        search();
+                    }
+                }
+            });
+            $(document).ready(function() {
+                $('.postionbtn').mouseover(function() {
+                    $(this).parent().find('.position_newbox').show();
+                });
+                $('.postionbtn').mouseout(function() {
+                    $(this).parent().find('.position_newbox').hide();
+                });
+            });
+            function del(soft_id) {
+                if (confirm("删除不可恢复！确定要删除此条记录?")) {
+                    var param = {
+                        soft_id: soft_id
+                    };
+                    $.ajax({
+                        url: '__URL__/deletepro',
+                        type: 'POST',
+                        data: param,
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data == 1)
+                            {
+                                location.href = "/index.php/Sendnum/Product/index";
+                            } else
+                            {
+                                alert('对不起，权限不足');
+                                location.href = "/index.php/Sendnum/Product/index";
+                            }
+                        }
+                    });
+                }
+            }
+            ;
+
+            function search() {
+                var begintime = $("#begintime").val();
+                var endtime = $("#endtime").val();
+                if (begintime.length > 0 && endtime.length > 0 && endtime < begintime)
+                {
+                    alert('结束时间不能小于开始时间');
+                } else
+                {
+                    $("#search").submit();
+                }
+            }
+
+
+            function unauthorized_tb_remove(obj) {
+                var reg = /^\{/;
+                //console.log(reg.test($(obj).html()));
+                if (reg.test($(obj).html())) {
+                    $("#TB_overlay").click(tb_remove);
+                }
+
+            }
+    </script>
+    
+    <body>
+        <div style="display:none;" id="loading">
+            <p style="position:absolute;left:20%;top:40%;">正在提交中，请稍候......</p>
+		</div>
+        <form action="__URL__/index" method="post" id="search">
+            <div class="search_box">
+                <table width="100%" cellpadding="0" cellspacing="0" class="search_table">
+                    <tr>
+                        <td width="16%">产品名称：<input type="text" name="softname" id="softname" value="{$softname}" class="search_item_text"></td>
+                        <td width="16%">公司名称：<input type="text" name="companyname" id="companyname" value="{$companyname}" class="search_item_text"></td>
+                        <td width="20%">合作方式：<input type="text" name="hztype" id="hztype" value="{$hztype}" class="search_item_text"></td>
+
+                        <td width="16%">产品状态：<select name="zhuangtai">
+                                <option value="-1" <if condition="($zhuangtai eq -1)"> selected="selected" </if>>全部</option>
+                                <option value="1" <if condition="($zhuangtai eq 1)"> selected="selected" </if>>待处理</option>
+                                <option value="2" <if condition="($zhuangtai eq 2)"> selected="selected" </if>>拒绝评测</option>
+                                <option value="3" <if condition="($zhuangtai eq 3)"> selected="selected" </if>>评测驳回</option>
+                            </select></td>
+                        <td width="20%"><input class="search_btn" style="float:left; height:30px;" type="button" value="搜索" onclick="search()"><a href="index?{$sqlparam}down=1" class="search_btn" style="float:left; margin-left:5px; display:inline">导出</a></td>
+                    </tr>
+                    <tr>
+                        <td>　操作人：<input type="text" name="osuser" id="osuser" value="{$osuser}" class="search_item_text"></td>
+                        <td colspan="2">
+                            <select name="rqtype" style="float:left; margin-right:5px; display:inline">
+                                <option value="1" <if condition="($rqtype eq 1)"> selected="selected" </if>>创建日期</option>
+                                <option value="2" <if condition="($rqtype eq 2)"> selected="selected" </if>>驳回日期</option>
+                            </select>
+                            <input id="begintime" name="begintime" value="{$begintime}" type="text" class="Wdate" onClick="WdatePicker({startDate: '%y-%M-%d 00:00:00', dateFmt: 'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px">到<input id="endtime" name="endtime" value="{$endtime}" type="text" class="Wdate" onClick="WdatePicker({startDate: '%y-%M-%d 23:59:59', dateFmt: 'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"></td>                         
+                    <td>
+                        是否首发:
+                        <select name="is_debut" >
+                            <option value="-1">请选择</option>
+                            <option value="1" <if condition="($is_debut eq 1)"> selected="selected" </if>>是</option>    
+                            <option value="0"  <if condition="($is_debut eq '0')"> selected="selected" </if>>否</option>    
+                        </select>
+                    </td>
+                    <td colspan="2"><a href="__URL__/import?width=450&height=100&modal=true&post_load=unauthorized_tb_remove" class="thickbox search_btn" style="float:left; margin-right:10px; display:inline">批量导入产品</a><a href="__URL__/add" style="float:left" class="search_btn">新增产品</a></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            备案编号:
+                            <select name="record_status" >
+                                <option value="1">全部</option>
+                                <option value="2" <if condition="($record_status eq 2)"> selected="selected" </if>>已添加</option>    
+                                <option value="3"  <if condition="($record_status eq 3)"> selected="selected" </if>>未添加</option>    
+                            </select>
+                        </td>
+                        <td>
+                            出版编号:
+                            <select name="publication_status" >
+                                <option value="1">全部</option>
+                                <option value="2" <if condition="($publication_status eq 2)"> selected="selected" </if>>已添加</option>    
+                                <option value="3"  <if condition="($publication_status eq 3)"> selected="selected" </if>>未添加</option>    
+                            </select>
+                        </td>
+                        <td></td><td></td><td><a href="index?mobandown=1">下载批量导入模板</a></td>
+                    </tr>
+                </table>
+                </div>
+		</form>
+
+		<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+			<thead >
+				<tr align="center" >
+					<th height="26" width="15%">产品名称</th>
+					<th >公司</th>
+					<th width="14%">合作情况</th>
+					<th >其他情况</th>
+					<th width="7%">创建时间</th>
+					<th width="7%">驳回时间</th>
+					<th width="8%"><a href='__URL__/index?orderby={$order}&{$sqlparam}'>预计上线<br>时间<if condition="$o eq '1'">&uarr;&darr;<elseif condition="$order eq 'desc'" />&uarr;<else/>&darr;</if></a></th>
+					<th>状态</th>
+					<th >备注</th>
+					<th width="4%">操作</th>
+					
+				</tr>
+			</thead>
+			<tbody>
+				<volist name="list" id="list">											
+				<tr>
+				<td style="text-align:left">
+					名称：<a href="http://gm.apk.anzhi.com{$list.apk_path}">{$list.softname}</a>
+					<br>
+					包名：{$list.package}<br>
+					大小：{$list.size}<br>
+					分类：{$list.p_fenlei|default='-'}<br>
+					类型:{$list.p_leixing|default='-'}<br>
+					性质:{$list.nature}<br>
+					产品简介：<a href="__URL__/show_jianjie?width=300&height=200&id={$list.soft_id}" class="thickbox blue" id="jianjie">查看</a>
+				</td>
+				<td style="text-align:left">
+					名称：{$list.companyname}<br>
+					联系方式：<a href="__URL__/show_com_tj_tel?width=300&height=200&id={$list.soft_id}" class="thickbox blue" id="com_tj_tel">查看</a><br>
+                    备案编号：<?php if($list["record_num"]){ ?>
+                        {$list.record_num}<a href="<?php echo IMGATT_HOST;?>{$list.record_url}" target="_blank">下载</a>
+                    <?php }else{ ?>
+                        未添加
+                    <?php } ?><br>
+                    出版编号：<?php if($list["publication_num"]){ ?>
+                        {$list.publication_num}<a href="<?php echo IMGATT_HOST;?>{$list.publication_url}" target="_blank">下载</a>
+                    <?php }else{ ?>
+                        未添加
+                    <?php } ?> 
+				</td>
+				<td style="text-align:left">
+					方式：{$list.hztype}<br>
+					评测报告：<if condition="($list.test_path neq NULL)"><a href="__URL__/down/soft_id/{$list.soft_id}/type/3">{$list.testname}</a>
+					<if condition="($list.test2_path neq NULL)"><br/><a href="__URL__/down/soft_id/{$list.soft_id}/type/4">{$list.testname2}</a></if>
+						<if condition="($list.test3_path neq NULL)"><br/><a href="__URL__/down/soft_id/{$list.soft_id}/type/5">{$list.testname3}</a></if>
+						<if condition="($list.test4_path neq NULL)"><br/><a href="__URL__/down/soft_id/{$list.soft_id}/type/6">{$list.testname4}</a></if>
+						<if condition="($list.test5_path neq NULL)"><br/><a href="__URL__/down/soft_id/{$list.soft_id}/type/7">{$list.testname5}</a></if>
+						<else/>暂无
+					</if>
+                    <br>
+                    <?php if($list['zs_path']!=''){ ?>
+                        证书：<a href="<?php echo IMGATT_HOST.$list['zs_path'];?>">下载</a><br>
+                    <?php }else{ ?>
+                        <?php if($list['nature']=='代理'){ ?>
+                        研发商授权文件：
+                        <?php if(empty($list['dev_auth_url'])){ ?>
+                        未添加
+                        <?php }else{ ?>
+                        <a href="<?php echo IMGATT_HOST.$list['dev_auth_url'];?>">下载</a>
+                        <?php } ?>
+                        <br>
+                        <?php } ?>
+                        安智合作授权书：
+                        <?php if(empty($list['coop_auth_url'])){ ?>
+                        未添加
+                        <?php }else{ ?>
+                        <a href="<?php echo IMGATT_HOST.$list['coop_auth_url'];?>">下载</a>
+                        <?php } ?>
+                        <br>
+                        软件著作权证书：
+                        <?php if(empty($list['soft_auth_url'])){ ?>
+                        未添加
+                        <?php }else{ ?>
+                        <a href="<?php echo IMGATT_HOST.$list['soft_auth_url'];?>">下载</a>
+                        <?php } ?>
+                        <br>
+                        IP授权：
+                        <?php if(empty($list['ip_auth_url'])){ ?>
+                        未添加
+                        <?php }else{ ?>
+                        <a href="<?php echo IMGATT_HOST.$list['ip_auth_url'];?>">下载</a>
+                        <?php } ?>
+                    <?php } ?>
+
+				</td>
+				<td style="text-align:left">
+					是否首发：<if condition="$list.is_debut eq '1'">是<elseif condition="$list.is_debut eq '0'"  />否</if><br>
+					合同：
+					<if condition="!$contract_status[$list['package']]||$contract_status[$list['package']]['status'] eq '0'">待提交
+					<elseif condition="$contract_status[$list['package']]['status'] eq '1'"  />已通过
+					<elseif condition="$contract_status[$list['package']]['status'] eq '2'"  />待审核
+					<elseif condition="$contract_status[$list['package']]['status'] eq '4'"  />未通过</if>
+					&nbsp;
+					<if condition="$contract_status[$list['package']]">
+						<a href="__APP__/Sendnum/Contract/index?package={$list['package']}" target="_blank">查看详情</a>
+					</if>
+					<br>
+					参数：<a href="javascript:void(0)" onclick="show_app('{$list.package}','{$list.softname}')">[查看]</a><br>
+					账号：<if condition="$list.is_accept_account eq '1'">接入账号<elseif condition="$list.is_accept_account eq '0'"  />不接入账号</if><br>
+					操作人：<?php  echo $list['osuser'] ? $list['osuser'] : '开发者'; ?>
+				</td>
+				<td> {$list.createtime|date="Y-m-d H:i:s",###}</td>
+				<td height="20" align="center"> <if condition="($list.status eq 1 or $list.status eq 2)">{$list.botime|date="Y-m-d H:i:s",###}</if><if condition="($list.status eq 0)">无</if></td>
+				<td height="20" align="center"><if condition="$list.pre_tm neq ''">{$list.pre_tm|date="Y-m-d ",###}<br>{$list.pre_tm|date="H:i:s",###}</if></td>
+				<td>
+					<div class="position_box">
+						<div>
+							<if condition="($list.status eq 0)">待处理</if><if condition="($list.status eq 1)">拒绝评测 <br><a href="javascript:;" class="blue postionbtn">[原因]</a></if>
+							<div class="position_newbox">
+								<h6>拒绝评测原因：</h6>
+								<p>{$list.reason}</p>
+							</div>
+						</div>
+						<div>
+							<if condition="($list.status eq 2)">评测驳回 <br><a href="javascript:;" class="blue postionbtn">[原因]</a></if>
+							<div class="position_newbox">
+								<h6>评测驳回原因：</h6>
+								<p>{$list.reasontest}</p>
+							</div>
+						</div>
+					</div>	
+				</td>
+				<td>
+					<a href="__URL__/show_beizhu?width=300&height=200&id={$list.soft_id}" class="thickbox blue" id="beizhu">{$list.beizhu}</a>
+				</td>
+				<td height="20" align="center">
+				<a href="__URL__/tonguo?width=450&height=240&soft_id={$list.soft_id}" class="thickbox blue">通过</a> <br>
+				<if condition="($list.status eq 0)"> <a href="__URL__/bohui?width=450&height=280&soft_id={$list.soft_id}" class="thickbox blue">驳回</a></if>
+				<if condition="($list.status eq 1 or $list.status eq 2)">驳回</if><br/><a href="__URL__/add/soft_id/{$list.soft_id}/status/{$list.status}" class="blue">编辑</a><br>
+				<a href="#{$list.id}" onclick="del({$list.soft_id})" class="blue">删除</a></td>
+				</tr> 
+				</volist>
+			</tbody>
+		</table>
+		<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+	</body>
+</html>

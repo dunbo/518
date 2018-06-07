@@ -1,0 +1,121 @@
+<include file="../../Public/header"/>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style>
+#add3 {
+    background: url("/Public/images/icon_add.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0);
+    cursor: pointer;
+    display: inline-block;
+    height: 16px;
+    margin-top: 4px;
+    width: 16px;
+}
+.icon_remove {
+    background: url("/Public/images/icon_remove.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0);
+    cursor: pointer;
+    display: inline-block;
+    height: 16px;
+    margin-top: 2px;
+    width: 16px;
+}
+</style>
+<script>
+var i=1;
+var pro_count = {$pro_count};
+var str = '';
+function add_do(){
+	if(pro_count && i == 1){
+		i = pro_count + 1;
+	}else{
+		i = i;
+	}
+
+	str = "<tr id='"+i+"'><td><span onClick='del("+i+")' class='icon_remove'></span>&nbsp;&nbsp;&nbsp;&nbsp;<input id='start_tm_"+i+"' name='start_tm[]' type='text' style='cursor: hand; width: 100px; border: none 0px black;' /><img src='/Public/js/calendar.gif' class='Wdate' style='margin: 1px; cursor: hand;width:16px;height:15px;align:absmiddle;'  OnClick=\"WdatePicker({startDate:'%y-%M-%d',el:'start_tm_"+i+"',dateFmt:'yyyy-MM-dd'})\" />&nbsp;&nbsp;--&nbsp;&nbsp;<input id='end_tm_"+i+"' name='end_tm[]' style='cursor: hand; width: 100px; border: none 0px black;' /><img src='/Public/js/calendar.gif' class='Wdate' onClick=\"WdatePicker({startDate:'%y-%M-%d',el:'end_tm_"+i+"',dateFmt:'yyyy-MM-dd'})\" style='margin: 1px; cursor: hand;' width='16px' align=absmiddle height='15px' /></td><td><input type='text' name='probability[]' /></td><td><input type='text' name='upperlimit[]' /></td><td></td><td><select name='is_addup[]'><option value='1'>是</option><option value='0'>否</option></select></td></tr>";
+	$('#add2').append(str);
+	i = i + 1;
+}
+
+function del(i){
+	$('#'+i+'').remove();
+}
+
+</script>
+<body>
+<div style="margin:20px;">
+	<h3>奖品中奖率</h3>
+</div>
+<form action="__URL__/edit_odds_do" method="post">
+<div style="margin:20px;">
+	<table class="table_list">
+		<tr>
+			<td width="40%">区域时间&nbsp;&nbsp;&nbsp;&nbsp;<span id="add3" onclick="add_do();"></span><input type="hidden" name="id" value="{$id}" /><input type="hidden" name="pptype" value="{$type}" /></td>
+			<td>中奖率</td>
+			<td>限制中奖数</td>
+			<td>剩余个数</td>
+			<td>是否累加</td>
+		</tr>
+		<tbody id="add2">
+		<?php if($pro_result){ ?>
+		<?php foreach($pro_result as $key => $val){ ?>
+		<tr id="<?php echo $key + 1;?>" >
+			<td>
+
+			<input id="start_tm_<?php echo $key + 1;?>" name="start_tm[]"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="<?php echo date('Y-m-d',$val['begin_tm']); ?>" size="15" type="text" ><img
+			src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"start_tm_<?php echo $key + 1;?>",dateFmt:"yyyy-MM-dd"})' 
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px">&nbsp;&nbsp;--&nbsp;&nbsp;<input id="end_tm_<?php echo $key + 1;?>" name="end_tm[]"
+			style="border: 0px none black; width: 100px;" value="<?php echo date('Y-m-d',$val['end_tm']); ?>"
+			size="15" type="text" /><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"end_tm_<?php echo $key + 1;?>",dateFmt:"yyyy-MM-dd"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+
+			</td>
+			<td><input type="text" name="probability[]" value="{$val['probability']}"/></td>
+			<td><input type="text" name="upperlimit[]" value="{$val['upperlimit']}" /></td>
+			<td>{$val['now_num']}</td>
+			<td><select name="is_addup[]" ><option value="1" <?php if($val['is_addup'] == 1){ ?>selected<?php } ?>>是</option><option value="0" <?php if($val['is_addup'] == 0){ ?>selected<?php } ?>>否</option></select></td>
+		</tr>
+		<?php } ?>
+		<?php }else { ?>
+		<tr id="0">
+			<td><input id="start_tm_0" name="start_tm[]"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="<?php echo date('Y-m-d',$activity_result['start_tm']); ?>" size="15" type="text" /><img
+			src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"start_tm_0",dateFmt:"yyyy-MM-dd"})' 
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px">&nbsp;&nbsp;--&nbsp;&nbsp;<input id="end_tm_0" name="end_tm[]"
+			style="border: 0px none black; width: 100px;"
+			size="15" type="text" value="<?php echo date('Y-m-d',$activity_result['end_tm']); ?>" /><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"end_tm_0",dateFmt:"yyyy-MM-dd"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+			</td>
+			<td><input type="text" name="probability[]" /></td>
+			<td><input type="text" name="upperlimit[]" /></td>
+			<td>{$val['now_num']}</td>
+			<td><select name="is_addup[]"><option value="1">是</option><option value="0">否</option></select></td>
+		</tr>
+		<?php } ?>
+		</tbody>
+	</table>
+	<table>
+		<tr>
+			<td colspan="2"><span style="color:red;">1.中奖率时间段必须是连续的,下一区间开始日期必须是上一区间结束日期的第二天;<br />
+			2.最初开始时间和最后结束时间必须是活动的开始时间和结束时间;<br />
+			3.编辑活动时间后须回到此页重新编辑中奖率;<br />
+			4.限制中奖个数总和不能超过上传的虚拟奖品个数;
+			</span></td>
+		</tr>
+		<tr>
+			<td><input type="submit" value="确定" class="search_btn" style="margin-left:320px;" /></td>
+			<td><a href="__URL__/award_list/type/{$type}/id/{$activity_result.id}" class="search_btn" style="margin-left:320px;" >取消</a>
+			</td>
+		</tr>
+	</table>
+</div>
+</form>
+</body>
+</html>

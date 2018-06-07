@@ -1,0 +1,425 @@
+<!--{include file="header.html"}-->
+<style>
+#forget_pwd_dialog{
+   -moz-user-select: none; /*火狐*/
+   -webkit-user-select: none;  /*webkit浏览器*/
+   -ms-user-select: none;   /*IE10*/
+   -khtml-user-select: none; /*早期浏览器*/
+   user-select: none;
+}
+</style>
+<script type="text/javascript">
+<!--
+	key_arr = ['user_name', 'user_password'];
+	for (i in key_arr) {
+	    obj = $("input[name='"+ key_arr[i] +"']");
+	    obj.keydown(function(event) {  
+	        if (event.keyCode == 13) {  
+	            $('#login_form').submit();
+	        }  
+	    });
+	}
+	//初始化页面时验证是否记住了密码
+	$(document).ready(function() {
+	    if ($.cookie("rmbUser") == "true") {
+	        $("#rmbUser").attr("checked", true);
+	        $("#user_name").val($.cookie("userName"));
+	    }
+	});
+	//保存用户信息
+	function saveUserInfo() {
+	    if ($("#rmbUser").attr("checked") == true || $("#autoLogin").attr("checked") == true) {
+	    var userName = $("#user_name").val();
+		    if($("#autoLogin").attr("checked") == true){$.cookie('autoLogin',"true", {expires: 7});}
+		    $.cookie("rmbUser", "true", { expires: 7 }); // 存储一个带7天期限的 cookie
+		    $.cookie("userName", userName, { expires: 7 }); // 存储一个带7天期限的 cookie
+	    } else {
+		    if($("#autoLogin").attr("checked") == false){$.cookie('autoLogin',"false", {expires: -1});}
+		    $.cookie("rmbUser", "false", { expires: -1 });
+		    $.cookie("userName", '', { expires: -1 });
+	    }
+	}
+
+//-->
+
+</script>
+
+<div class="content">
+	<div class="title">
+		<h2><a href="index.html">安智市场</a></h2>
+		<span class="space">&gt;</span>
+		<h3>用户登录</h3>
+	</div>
+	<div class="border_three">
+		<div class="register_box">
+			<div class="register_box_l">
+				<form action="<!--{url2static_url}-->login.php?act=submit<!--{/url2static_url}-->" method="post" id='login_form'>
+					<div class="register_list">
+						<label for="">用户名</label>
+						<input type="text" class="<!--{if $out.error}-->inputtext checkinput<!--{elseif $out.deny_user}-->inputtext checkinput<!--{else}-->inputtext<!--{/if}-->" name='user_name' id="user_name" />
+						<input type='hidden' name='referer' value='<!--{$smarty.get.referer}-->'>
+						<span></span>
+					</div>
+					<div class="register_list">
+						<label for="">密码</label>
+						<input type="password" class="<!--{if $out.error}-->inputtext checkinput<!--{elseif $out.deny_user}-->inputtext checkinput<!--{else}-->inputtext<!--{/if}-->" name='user_password'  id="passward" />
+						<span class="getpwd">
+						<a href="javascript:void(0);"  onclick="showOpenNew('forget_pwd_dialog')">忘记密码</a>
+						</span>
+					</div>
+					<div class="login_check">
+					<!--{if $out.error}-->
+						<span>登录名或密码错误！</span>
+					<!--{/if}-->
+					<!--{if $out.deny_user}-->
+						<span>您的账户已经被管理员屏蔽！</span>
+					<!--{/if}-->
+					</div>
+					<div class="login_cookies">
+						<input type="checkbox" id="rmbUser" name="rmbUser" />
+						<label for="">记住用户名</label>
+					</div>
+					<div class="login_cookies">
+						<input type="checkbox" id="autoLogin"  name="autoLogin" value="2" />
+						<label for="">下次自动登录</label>
+					</div>
+					<div class="register_btn" id="login_btn">
+						<span class="register1" onclick='saveUserInfo();$("#login_form").submit();'>登　录</span>
+						<p>没有账号？<a href="javascript:void(0);" onclick="show_register('register_dialog')">注册</a></p>
+					</div>
+				</form>
+			</div>
+			<div class="register_box_r">
+				<ul>
+					<li>
+						<h6>海量精品软件免费下载</h6>
+						<p>搜罗最新最流行的精品应用游戏<br/>轻松一键免费下载</p>
+					</li>
+					<li>
+						<h6>满足不同用户的个性化需求</h6>
+						<p>精心打造多种特色功能<br/>满足不同用户的个性化需求</p>
+					</li>
+					<li>
+						<h6>多种客户端　全方位的下载渠道</h6>
+						<p>多种客户端组成的全方位的下载渠道<br/>力求给用户带来全方位的下载体验</p>
+					</li>
+				</ul>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+</div>
+<!--login box-->
+<!--forget password begin-->
+<div id="forget_pwd_dialog" class="newbox" style="display:none;">
+	<h6>忘记密码<em onclick="closeBtn('forget_pwd_dialog');"></em></h6>
+	<div class="newbox_cnt">
+		<form id="getpassword" onsubmit="return false;" name="getpassword" method="POST" action="get_password.php">
+			<div class="registeritem">
+				<label>账　　号：</label>
+				<input id="username" class="inputtext" type="text" name="username" onblur="detection()" />
+				<span  id="_user_name3_mark" class="registeritem_right"></span>
+				<div class="clear"></div>
+				<span class="prompt_infor2" id = 'hint'></span>
+			</div>
+			<div class="registeritem">
+				<label>选择方式：</label>
+				<span class="register_item_radio"><input type="radio" name="getpwd_type" id='email_sel' onclick="getpwd_email()" value = 'sel_email'/> 邮箱　<input type="radio" name="getpwd_type" id='phone' onclick="getpwd_phone()" value = 'sel_phone'/> 手机</span>
+				<div class="clear"></div>
+			</div>
+			<div class="registeritem" id="getpwd_email" style="display:none">
+				<label>邮　　箱：</label>
+				<span id ='oneemail' class="register_item_radio" style="display:none"><span id = 'on_email'></span></span>
+				<span id='selemail' class ="register_item_radio" style="display:none"><input type="radio" name="getemail" value='dev' id='dev'><span id= "show_dev" ></span><br><br><input type="radio" name="getemail" value='bbs' id ='bbs'/><span id= "show_bbs" ></span><br>
+				</span>
+				<div class="clear"></div>
+				<span  class="prompt_infor2" id = 'hint_e' ></span>	
+				
+			</div>
+			<div class="registeritem" id="getpwd_phone" style="display:none">
+				<div class="registeritem" id="getpwd_email">
+					<label>手　　机：</label>
+					<input type="text" class="inputtext" id='mobile' name='mobile' value=" " readonly="true"/>
+					<div class="clear"></div>
+				</div>
+				<div style="display:block" class="registeritem" id="check_code_div">
+					<label>验 证 码：</label>
+					<input type="text" style="width:275px" class="inputtext" id="verify_code" name="verify_code">
+					<a class="send_checkcode" name="countdown_btn" id="countdown_btn" onclick="SendVerify()" href="javascript:void(0);" rel="1">发送验证码</a>
+					<div class="clear"></div>
+					<span class="prompt_infor2" id="error_re"></span>
+				</div>
+			</div>
+			
+			<div class="clear"></div>
+			<div class="dialog_btns01">
+				<a href="javascript:void(0);" class="submit_btn1" onclick="respassword();" >提 交</a>
+			</div>
+		</form>
+	</div>
+</div>
+<!--reset password begin-->
+<div id="reset_pwd_dialog" class="newbox" style="display:none">
+	<h6>重置密码<em onclick="closeBtn('reset_pwd_dialog');"></em></h6>
+	<div class="newbox_cnt">
+		<form id="resetpassword_to" method="post" action="resetpass.php?act=submit">
+			<div class="registeritem">
+				<label>密　　码：</label>
+				<input type="password" class="inputtext" id= 'res_pass' name='password_new' onblur='r_pass()'/>
+				<em id='reset_pass'>*</em>
+				<div class="clear"></div>
+				<span class="prompt_infor2" id='res_error'>由6-16个字符(字母、数字符号）组成，区分大小写</span>
+			</div>
+			<div class="registeritem">
+				<label>确认密码：</label>
+				<input type="password" class="inputtext" id= 'res_to_pass' name="re_user_password"  onblur="r_to_pass()" />
+				<em id='reset_to_pass'>*</em>
+				<div class="clear"></div>
+				<span class="prompt_infor2" id='res_to_error'></span>
+			</div>
+			<div class="clear"></div>
+			<div id ='add'>
+				<input type="hidden" id="str" name="str" value="<!--{$str}-->"/>
+				<input type="hidden" id="u_name" name="u_name" value="<!--{$user_name}-->"/>
+				<input type="hidden" id="authstr" name="authstr" value="<!--{$authstr}-->"/>
+				<input type='hidden' id='u_id' name = "u_id" value ="<!--{$id}-->">	
+				<input type='hidden' id='type' name = "type" value ="<!--{$type}-->">
+			</div>
+			<div class="dialog_btns01" >
+				<a href="javascript:void(0);" onclick="reset_submit()">确定</a>
+			</div>
+		</form>
+	</div>
+</div>
+<!--{if $reset_pwd_dev eq 1}-->
+<script>
+	var show_dev = document.getElementById('reset_pwd_dialog');
+	if(show_dev){
+		show_dev.style.display = 'block';
+		show_dev.style.top = (viewHeight() - show_dev.offsetHeight)/2 + scrollY() + 'px';
+		show_dev.style.left = (viewWidth() - show_dev.offsetWidth)/2 + 'px';
+	}
+</script>
+<!--{/if}-->
+<!--reset password end-->
+<!--reset password result begin-->
+<div id="reset_pwd_dialog2" class="newbox" style="display:none">
+	<div class="newbox_cnt" style="border:none">
+		<div class="dialog_result">
+			<div class="dialog_result_left"></div>
+			<div class="dialog_result_right">
+				<p>密码修改成功！请使用新的密码登录！<br/><a href="/login.php">重新登录</a></p>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+</div>
+<!--reset password result end-->
+<div id="register_email_ok" class="newbox" style="display:none; width:580px">
+	<div class="newbox_cnt" style="border:none">
+		<div class="dialog_result">
+			<div class="dialog_result_right" style="width:100%; height:27px; margin-left:0; text-align:center;">
+				<p>密码重置邮件发送成功，请通过激活链接重置密码</p>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+</div>
+<!--forget password end-->
+<script type="text/javascript">
+	function SendVerify()
+	{
+		var username = $("#username").val();
+
+		$.ajax({
+				type: 'POST',
+				url: "phonecode.php",
+				data: "username="+username,
+				success: function(msg){
+					if(msg=='验证码已成功发送到您的手机，请查收！'){
+						_countdown2();
+						$("#error_re").html(msg).css({color : '#555555'});
+					}else{
+						$("#error_re").html(msg).css({color : '#CE0421'});
+						return false;
+					}
+					
+				}
+		});
+	}
+	var _seconds = 600;
+	var _speed = 1000;
+	var _timer = _seconds;
+	function _countdown2() {
+	if(_timer==0) {
+		clearTimeout(_timeId);
+		_timer = _seconds;
+
+		//恢复按钮为原始
+		$('#countdown_btn').html('发送验证码');
+		$('#countdown_btn').attr('rel', 1);
+	} else {
+		//提示按钮显示
+		$('#countdown_btn').html('<span style="color:#7d7d7d;">'+_timer+'秒后重新发送</span>');
+		$('#countdown_btn').attr('rel', 2);
+		var _timeId = setTimeout("_countdown2()",_speed);
+		_timer--;
+	}
+}
+
+	$(document).ready(function() {
+		  //$('#foo').bind('click', function(event) {
+		    //alert('The mouse cursor is at ('
+		      //+ event.pageX + ', ' + event.pageY + ')');
+		  //});
+	});
+	function go_trim(str){
+		return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+	}
+	function respassword(){
+		var username = go_trim($("#username").val());
+		var email = $('#on_email').html();
+		var sel_way = $('[name="getpwd_type"]:checked').val();
+		var sel_email = $('[name="getemail"]:checked').val();
+		var verify_code = $('#verify_code').val();
+		if(username==''){
+			$('#hint').html('请填写账号').css({color : '#CE0421'});
+			$('#_user_name3_mark').html('<img src="/images/error_icon.png" alt="" />');
+			return false;
+		}else if(username.toLowerCase()=='admin'){
+  			$('#hint').html('用户名不合法').css({color : '#CE0421'});
+  			$('#_user_name3_mark').html('<img src="/images/error_icon.png" alt="" />');
+  			return false;
+  		}else{
+			if(sel_way == 'sel_phone' && verify_code=='' )
+			{
+				return false;
+			}else{
+				$.ajax({
+					type: 'POST',
+					url: "get_password.php",
+					data: "username="+username+"&sel_way="+sel_way+"&sel_email="+sel_email+"&email="+email+"&verify_code="+verify_code,
+					dataType: 'json',
+					success: function(data){
+					if(data['status']=='1'){
+						if(sel_way=='sel_phone')
+						{
+							$('#forget_pwd_dialog').css('display','none');
+							showOpenNew('reset_pwd_dialog');
+							$("#str").val(data['str']);
+							$("#u_name").val(username);
+							$("#u_id").val(data['uid']);
+							$("#_username").html(username);
+							$("#type").val(data['type']);
+
+						}else if(sel_way=='sel_email'){
+							if(data['error'] != 0){
+								return false;
+							}else{
+  			 					$("#forget_pwd_dialog").css('display','none');
+  			 					showOpenNew('register_email_ok');
+  			 					window.setInterval(function(){window.location.href='www.anzhi.com/';}, 3000)
+							}
+						}
+					}else{
+						if(data['error'] != 0){
+								if(data['error']==600){
+									$("#hint_e").html('<span style="color : #CE0421">重发验证邮件每次需隔3分钟</span>');
+								}
+								return false;
+							}else{
+  			 					$("#forget_pwd_dialog").css('display','none');
+  			 					showOpenNew('register_email_ok');
+  			 					window.setInterval(function(){window.location.href='http://www.anzhi.com/';}, 3000)
+							}
+					}
+				}
+			});
+			return true;
+		}
+	}
+}
+
+	function r_pass(){
+		var pass = $("#res_pass").val();
+		var len = $("#res_pass").val().length;
+		min = 6;
+		max = 16;
+		if(len < min){
+			$("#res_error").html('密码不能少于六位').css({color : '#CE0421'});
+			$('#reset_pass').html('<img src="/images/error_icon.png" alt="" />');
+			return false;
+		}else if(len > max){
+			$("#res_error").html('密码不能超过十六位').css({color : '#CE0421'});
+			$('#reset_pass').html('<img src="/images/error_icon.png" alt="" />');
+			return false;
+		}else{
+			$("#res_error").html('帐号由6-16个字符(字母、数字、符号）组成，区分大小写').css({color : '#595959'});
+			$('#reset_pass').html('<img src="/images/right_icon.png" alt="" />');
+			
+		}
+		return true;
+	}
+
+	function r_to_pass(){
+		var pass = $("#res_pass").val();
+		var pass_to = $('#res_to_pass').val();
+			if(pass!=pass_to){
+				$("#res_to_error").html('两次密码不一致').css({color : '#CE0421'});
+				$("#reset_to_pass").html('<img src="/images/error_icon.png" alt="" />');
+				return false;
+			}else if(pass_to==''){
+				$("#res_to_error").html('确认密码不能为空！').css({color : '#CE0421'});
+				$("#reset_to_pass").html('<img src="/images/error_icon.png" alt="" />');
+				return false;
+			}else{
+				$("#res_to_error").html('');
+				$("#reset_to_pass").html('<img src="./images/right_icon.png" alt="" />');
+			}
+			return true;
+	}
+
+	function reset_submit()
+	{
+		var new_password = $("#res_pass").val();
+		var verify_password = $('#res_to_pass').val();
+		var u_name = $('#u_name').val();
+		var u_id =  $('#u_id').val();
+		var str =  $('#str').val();
+
+		if(new_password==''){
+			$("#res_error").html('密码不能为空').css({color : '#CE0421'});
+			$("#reset_pass").html('<img src="/images/error_icon.png" alt="" />');
+			return false;
+		}else if(verify_password==''){
+			$("#res_to_error").html('确认密码不能为空').css({color : '#CE0421'});
+			$("#reset_to_pass").html('<img src="/images/error_icon.png" alt="" />');
+			return false;
+		}else{
+			if(r_pass()==true && r_to_pass()==true){
+				$.ajax({
+				type: 'POST',
+				url: "resetpass.php",
+				data: "u_name="+u_name+"&new_password="+new_password+"&verify_password="+verify_password+"&u_id="+u_id+"&str="+str,
+					dataType: 'json',
+					success: function(data){
+						if(data['error']<0 || data['status']==0)
+						{
+							$('#res_to_error').html(data['info']).css({color : '#CE0421'});
+						}else{
+							showOpenNew('reset_pwd_dialog2');
+							$('#reset_pwd_dialog').css('display','none');
+							window.setInterval(function(){window.location.href='http://www.anzhi.com/';}, 3000)
+						}
+					}
+				});
+				
+			}else{
+					return false;
+				}
+			}	
+	}
+</script>
+</div>
+<!--login box-->
+<!--{include file="footer.html"}-->

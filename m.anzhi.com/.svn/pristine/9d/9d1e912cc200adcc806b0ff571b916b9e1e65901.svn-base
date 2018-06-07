@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>答题进行时</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/soft_list_v1.js?v1"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v4"></script>
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/banner.jpg" />
+</div>
+<div class="main">
+	<div class="relive2">
+		<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/relive_bg2.png" />
+		<p>复活机会：<span id="res_num" ><!--{$out.res_num}--></span></p>
+	</div>
+	<div class="process_wrap">
+		<div class="process">
+			<!--{assign var='num' value="3.23"}-->
+			<span id="speed" style="width:<!--{$num*$out.down_num/3}-->rem" ></span>
+			<em><font id='flow2'><!--{$out.down_num}--></font>/3</em>				
+		</div>
+	<!--{if $out.resurrection_num gt 2}-->
+		<a href="javascript:;">已领取<span></span></a>
+	<!--{else}-->	
+		<a href="javascript:;" onclick="sign_flow(2);" id='sign_flow2'  >领取</a>
+	<!--{/if}-->			
+	</div>
+	<div class="wrap" style="margin-top:0.2rem">
+		<div class="wrap_inner">
+			<div class="wrap_inner2">
+				<div class="wrap_inner3">
+					<div class="wrap_inner4">
+						<p class="tab_date">下载并安装软件可增加复活机会，每天最多3次</p>
+						<ul class="soft_list clear" id="soft-list" >
+						</ul>
+						<a  onclick="change_soft2();" href="javascript:;" class="change_btn">换一批</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="btns3">
+		<a href="/lottery/<!--{$out.prefix}-->/my_prize.php?top_list=1&aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->" class="fl"  >英雄榜</a>
+		<a href="/lottery/<!--{$out.prefix}-->/my_prize.php?rule=1&aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->" class="fr">活动规则</a>
+		<div class="clear"></div>
+	</div>
+</div>
+</body>
+</html>
+
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box tip-box3"  id="tip-box2" style="display: none;">
+    	<div class="wrap">
+			<div class="wrap_inner">
+				<div class="wrap_inner2">
+					<div class="wrap_inner3">
+						<div class="wrap_inner4">
+							<div class="tip-mid">
+						        <div class="tip-con">
+						        	<img class="tip_icon1" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tip_box_05.png" />
+						            <img class="tip_txt1" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tip_box_06.png" />
+						        </div>
+						        <a href="javascript:;" class="btns" id="revive" >朕知道了</a>
+						   </div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>	
+</section>
+</body>
+</html>
+
+<script>
+function scrollWindow(){
+	window.scrollTo(100,1250);
+}
+
+var from = '<!--{$out.from}-->';
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->',p=0,soft_lists_go = [],open_pkg_arr = [];
+var prefix = '<!--{$out.prefix}-->';
+var down_num = parseInt('<!--{$out.down_num}-->');	
+var resurrection_num = parseInt('<!--{$out.resurrection_num}-->');	
+var res_num = parseInt('<!--{$out.res_num}-->');	
+
+$(document).ready(function () {
+	setTimeout(function(){
+		//go_from 1排行榜（无软件名称、状态按钮） 2抽奖页面（有软件名称、和状态按钮）
+		var go_from =2;
+		my_soft(aid,sid,6,go_from);
+	}, 500);
+
+});
+function change_soft2(){
+	$('#soft-list').html('');
+	get_soft(aid,sid,6,2);
+}
+
+function go_softinfo_down(softid,my_package,softname,versioncode,size,aid,sid,details){
+	setTimeout(function(){
+		$.ajax({
+			url: "/lottery/"+prefix+"/down.php",
+			data:"down=1&aid="+aid+"&sid="+sid+"&pkg="+my_package,
+			type:"post",
+			dataType: 'json',
+			success:function(data) {
+				if(data.code == 1){
+					down_num = down_num+1;
+					$("#speed").attr("style","width:"+(down_num*3.23/3)+"rem");
+					$("#flow2").html(down_num);			
+				}else{
+					//alert(data.msg);	
+					return false;
+				}
+			},
+		});	
+	}, 3000);
+	$.ajax({
+		url: '/lottery/year_feedback_download.php',  //supwater  点击详情 点击下载
+		data:"softid="+softid+"&sid="+sid+"&aid="+aid+"&pkgname="+my_package, 
+		type:"post",
+		success:function(data) {
+			if(details == 1){
+				details =1;
+			}else{
+				details = 0
+			}
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),softid,my_package,softname,versioncode,size,details);
+		},
+	});
+}
+
+function sign_flow(type){
+	if(resurrection_num > 3){
+		$("#sign_flow"+type).attr("onclick","").attr("class","fr flow_get flow_end").html("已领取<span></span>");
+		return false;
+	}
+	if(down_num == 0 || (resurrection_num >= down_num)){
+		$("#sign_flow"+type).html("领取");//去完成
+		scrollWindow();
+		return false;
+	}
+	$("#down_flow_num").html(resurrection_num+1);
+	$("#sign_flow"+type).attr("onclick","");
+	$.ajax({
+		url: "/lottery/"+prefix+"/down.php",
+		data:"relive=1&aid="+aid+"&sid="+sid,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if(data.code == 1){
+				resurrection_num = resurrection_num+1;
+				res_num = res_num+1;
+				$("#res_num").html(res_num);					
+				if(resurrection_num < 3){
+					if(resurrection_num >= down_num){
+						$("#sign_flow"+type).html("领取");//去完成
+					}					
+					$("#sign_flow"+type).attr("onclick","sign_flow("+type+")");
+				}else{
+					$("#sign_flow"+type).attr("onclick","").attr("class","fr flow_get flow_end").html("已领取<span></span>");
+				}	
+				if(from == ''){
+					$("#revive").attr("onclick","cloBox('.tip-box3');scrollWindow();");
+				}else{
+					$("#revive").attr("onclick","go_answer();");	
+				}	
+				pop_tips("","","2",1);
+				return false;
+			}else{
+				 window.AnzhiActivitys.showToastForJs(data.msg);
+				//$('#userinfo_err').html(data.msg);
+				return false;
+			}
+		},
+	});	
+} 
+//开始答题
+function go_answer(){
+	window.location.href="/lottery/"+prefix+"/answer.php?is_revive=1&aid="+aid+"&sid="+sid;
+}
+</script>

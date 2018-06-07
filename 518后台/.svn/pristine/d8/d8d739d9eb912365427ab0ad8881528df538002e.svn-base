@@ -1,0 +1,81 @@
+<include file="../Public/header" />
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+
+<script>
+    function add_software() {
+        $.ajax({
+            url:'__URL__/check_before_add',
+            type:'POST',
+            secureuri:false,
+            dataType:'json',
+            success:function(data){
+                if(data.status != 0) {
+                    //alert("有效期期已添加一组数据，您可以选择修改软件和时间");
+                    location.href ="/index.php/Sj/GameHomePageRecommendation/add?add_config=2";
+                } else {
+                    location.href ="/index.php/Sj/GameHomePageRecommendation/add?add_config=1";
+                }
+            }
+        });
+    };
+    function delete_backup_record(id) {
+        if (confirm("是否确认删除该数据？")) {
+            var param = {
+                id:id
+            };
+            $.ajax({
+                url:'__URL__/delete_backup_record',
+                type:'POST',
+                data:param,
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    if(data.status != 0) {
+                        alert("删除失败！");
+                    } else {
+                        alert("删除成功！");
+                    }
+                    location.href ="/index.php/Sj/GameHomePageRecommendation/backup_list";
+                }
+            });
+        }
+    }
+</script>
+
+<body>
+    <ul class="tab_title margin_top" style="margin-left:0; padding:0; position:relative">
+        <li><a href="__URL__/home_page_list">推荐列表</a></li>
+        <li class="current"> <a href="__URL__/backup_list">备选库</a></li>
+        <input type="button" onClick="add_software()" class="search_btn" style="position:absolute; right:10px; top:0;" value="添加"/>
+    </ul>
+    <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list" id="table_list">
+		<thead>
+			<tr align="center">
+                <th width="1%">序号</th>
+				<th width="4%">软件名称</th>
+                <th width="4%">包名</th>
+				<th width="6%">简介（软件）</th>
+                <th width="2%">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+            <volist name="list" id="list">
+                <tr>
+                    <td height="20" align="center">{$list.rank}</td>
+                    <td height="20" align="center">{$list.softname}</td>
+                    <td height="20" align="center">{$list.package}</td>
+                    <td height="20" align="center">{$list.note}</td>
+                    <td height="20" align="center">
+                        <a href="__URL__/edit_backup?id={$list.id}" class="thickbox blue">编辑</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+                        <a href="#" onClick="delete_backup_record({$list.id})" class="blue">删除</a>
+                    </td>
+                </tr>
+            </volist>
+        </tbody>
+    </table>
+    <div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>

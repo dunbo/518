@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>败家不够 礼物来凑</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/double11/css/common2.css?v1"/>
+<script type="text/javascript" src="<!--{$out.static_url}-->/double11/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="/js/anzhi.js"></script>
+<script type="text/javascript">
+var actsid='<!--{$out.actsid}-->';
+var aid='<!--{$out.aid}-->';
+var is_shared = <!--{$out.is_shared}-->;
+var promotion_share_url = '<!--{$out.promotion_share_url}-->';
+var redpacket_num = <!--{$out.redpacket_num}-->;
+
+var js_param = {type:'launchact', id:aid, actsid:actsid, callback:'invite_callback'};
+var php_param = {type:'launchact', aid:aid, actsid:actsid};
+
+var share_title = "败家不够 礼物来凑";
+var comment = "双十一你们败家剁手，我在安智市场白拿礼物！这次抢到" + redpacket_num + "次抽奖机会，快和我一起去安智市场参加活动吧！";
+var share_pic = "http://promotion.anzhi.com/images/double11/share_big.jpg";
+var jiathis_config={
+	siteNum:6,
+	sm:"qzone,tsina,weixin,tqq,renren,cqq",
+	url:promotion_share_url,
+	summary:comment,
+	title:share_title,
+	boldNum:6,
+	pic: share_pic,
+	shortUrl:false,
+	hideMore:false
+}
+
+var flags={canMove:true};
+function showOpenBox(obj){
+	var bg_h=$("#body-bg").height()+$(document).scrollTop(),
+			top_h= $(obj).height()/ 2-$(document).scrollTop();
+	$(obj).css("margin-top",-top_h+"px").show();
+	$("#body-bg").css("height",bg_h+"px").show();
+	flags.canMove=false;
+}
+function cloBox(obj){
+	$(obj).hide();
+	$("#body-bg").hide();
+	flags.canMove=true;
+}
+$(function(){
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+})
+
+$(document).ready(function(){
+	if (is_shared) {
+		$("#go_lottery").removeClass('disabled');
+		$("#go_lottery").bind('click', function(){
+			share_downloads();
+		});
+	}
+})
+
+function share_downloads() {
+	$.ajax({
+		url:'/lottery/double11_promotion_go_lottery_click.php?actsid='+actsid,
+		type:'get',
+		success:function(data){
+		}
+	});
+	share_download(js_param,php_param);
+}
+
+function go_share() {
+	showOpenBox('#tip-box-share');
+	// 从cookie中取得抽奖次数
+	//var actsid = getCookie('actsid');
+	$.ajax({
+		url:'/lottery/double11_promotion_share_api.php?actsid='+actsid,
+		type:'get',
+		success:function(data) {
+			setTimeout(function(){
+				if ($("#go_lottery").hasClass('disabled')) {
+					$("#go_lottery").removeClass('disabled');
+					$("#go_lottery").bind('click', function(){
+						share_downloads();
+					});
+				}
+			}, 2000);
+		}
+	});
+}
+
+function getCookie(name)//取cookies函数       
+{
+    var arr = document.cookie.match(new RegExp("(^| )"+name+"=([^;]*)(;|$)"));
+     if(arr != null) return (arr[2]); return null;
+}
+
+function invite_callback()
+{
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if (flag == 1 && version<6000) {
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;
+		}
+	}
+}
+
+</script>
+
+</head>
+<body>
+<section>
+    <div class="banner" id="top">
+        <a href="#"><img src="<!--{$out.static_url}-->/double11/images/cam_banner.png"/></a>
+    </div>
+    <div class="main">
+		<div class="wrap2 share_wrap">
+			<img src="<!--{$out.static_url}-->/double11/images/share_bg.png"/>
+			<!--{if $out.redpacket_num}-->
+			<p><img src="<!--{$out.static_url}-->/double11/images/share_0<!--{$out.redpacket_num}-->.png"/></p>
+			<!--{else}-->
+			<p class="share_none"><img src="<!--{$out.static_url}-->/double11/images/share_06.png"/></p>
+			<!--{/if}-->
+		</div>
+		<div class="prompt btns_share clear">
+			<a href="javascript:;" class="fl btns" onclick="go_share();">先分享</a>
+			<a id="go_lottery" href="javascript:;" class="fr btns disabled">去抽奖</a>
+		</div>
+		<div class="prompt clear">
+			<a href="/lottery/double11_promotion_lottery_rules.php?actsid=<!--{$out.actsid}-->" class="marauto prompt_btn" style="width:94px;">
+				<i></i><span>活动规则</span><em></em>
+				<div class="clear"></div>
+			</a>
+		</div>
+	</div>
+	<div class="footer">
+		<p>*本次活动最终解释权归安智所有</p>
+	</div>
+	<div id="az_spirit"></div>
+</section>
+
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box-share"  style="display: none;">
+        <div class="tip_hd">
+            <h4>分享</h4>
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box-share')">关闭</a></div>
+        </div>
+        <div class="tip-mid">
+			<ul class="share_tips">
+				<div class="jiathis_style_32x32">
+					<li><a class="jiathis_button_qzone"></a></li>
+					<li><a class="jiathis_button_tsina"></a></li>
+					<li><a class="jiathis_button_cqq"></a></li>
+					<li><a class="jiathis_button_tieba"></a></li>
+					<li><a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a></li>
+					<div class="clear"></div>
+				</div>
+			</ul>
+        </div>
+    </div>
+</section>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+</body>
+</html>

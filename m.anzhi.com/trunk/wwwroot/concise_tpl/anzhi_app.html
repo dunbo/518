@@ -1,0 +1,172 @@
+<!--{include file="header.html"}-->
+<!--{include file="header_search_2.html"}-->
+<script type="text/javascript">
+$(document).ready(function(){
+	if($('#az_appcntlist1 p').height()>60){
+		$('#az_appcntlist1').next('.az_toggle_btn').show();
+	}
+	else{
+		$('#az_appcntlist1').css('height','auto');
+	}
+	if($('#az_appcntlist2 p').height()>60){
+		$('#az_appcntlist2').next('.az_toggle_btn').show();
+	}
+	else{
+		$('#az_appcntlist2').css('height','auto');
+	}
+	$('.az_toggle_btn span').bind('click',function(){
+		if($(this).attr('id')=='az_open'&& $(this).attr('class')=='')
+		{
+			$(this).parents('.az_cnt_ul').find('.az_appcntlist').css('height','auto');
+			$(this).addClass('az_up');
+		}
+		else
+		{
+		if($(this).attr('class')=='az_up'&& $(this).attr('id')=='az_open')
+		{
+			$(this).parents('.az_cnt_ul').find('.az_appcntlist').css('height','54px');
+			$(this).removeClass('az_up');
+		}
+		}
+		
+	});
+    
+    document.addEventListener("WeixinJSBridgeReady",
+    function() {
+        document.getElementById("az_weixin_hint").style.display = "block",
+        window.isWeixin = !0
+    });
+    
+<!--{if $out.share}-->
+    var proid_arr = getArgs();
+    var aztype = proid_arr.aztype;
+    var from = 3;
+    if (aztype == 'qr') {
+        from = 1;
+    }
+    var js_param = {type:'details', id:<!--{$out.info.ID}-->, pkg:'<!--{$out.info.PACKAGENAME}-->', flag:1, from:from};
+    var php_param = {type:'details', softid:<!--{$out.info.ID}-->};
+    setTimeout(share_download(js_param, php_param), 2000);
+<!--{/if}-->
+});
+
+function getArgs() {
+    var args = {};
+    var query = location.search.substring(1);
+    var pairs = query.split("&");
+    for(var i = 0; i < pairs.length; i++) {
+        var pos = pairs[i].indexOf('=');
+        if (pos == -1) continue;
+        var argname = pairs[i].substring(0,pos);
+        var value = pairs[i].substring(pos+1);
+        value = decodeURIComponent(value);
+        args[argname] = value;
+    }
+    return args;
+}
+</script>
+<style type="text/css">
+.az_appcntlist{height:54px; overflow:hidden; margin-bottom:10px;}
+.az_toggle_btn{display:none;}
+</style>
+
+<section>
+   <div class="az_header_cnt">
+      <h2>
+	  <a class="az_font_A" href="<!--{url2static_url}-->app.php?type=classifyapp&sub_cat_id=<!--{$out.info.category_id}-->&order=1<!--{/url2static_url}-->"><!--{$out.info.category_name}--></a>><a class="az_font_B"><!--{$out.info.SOFT_NAME}--></a>
+	  </h2>
+   </div>
+   <div class="az_soft_cnt">
+      <div class="az_cnt_1">
+	    <a href="#"><!--{$out.info.SOFT_NAME}--></a>
+		<ul>
+		  <!--{if $out.info.category_id neq 55}--><li>下载：<!--{$out.info.SOFT_DOWNLOAD_REGION}--></li><!--{/if}-->
+          <li>时间：<!--{$out.info.SOFT_PROMULGATE_TIME}--></li>
+		  <li>大小：<!--{$out.info.SOFT_SIZE}--></li>
+		  <li>版本：<!--{$out.info.SOFT_VERSION}--> </li>
+		</ul>
+	  </div>
+	  <div class="az_cnt_1">
+	    <div class="az_down_btn">
+            <!--{if $out.info.PACKAGENAME=='cn.goapk.market'}-->
+                <a id="az_down_immediately" href="<!--{if $smarty.server.REQUEST_URI|strstr:'uc/'}-->http://m.goapk.com/redirect.php?do=dlapk&puid=18<!--{elseif $smarty.server.REQUEST_URI|strstr:'qq/'}-->http://m.anzhi.com/redirect.php?do=dlapk&puid=74<!--{elseif $smarty.server.REQUEST_URI|strstr:'qq/'}-->http://m.anzhi.com/redirect.php?do=dlapk&puid=422<!--{elseif $smarty.server.HTTP_HOST|strstr:'bj.'}-->http://xiaoyuan.anzhi.com/dl_app.php<!--{else}-->download.php?softid=<!--{$out.info.ID}--><!--{if $out.info.recommend eq 1}-->&k=r<!--{/if}--><!--{/if}-->">立即下载</a>
+            <!--{else}-->
+				<!--{if $out.channel_mk eq 'baidu' }-->
+				 <a id="az_down_topspeed" href="download.php?from=&softid=<!--{$out.info.ID}-->">立即下载</a>
+				<!--{else}-->
+				 <a id="az_down_topspeed" rel="<!--{$out.info.ID}-->,'<!--{$out.info.PACKAGENAME}-->'" href="download.php?softid=<!--{$out.info.ID}-->">极速下载</a>
+				<!--{/if}-->
+                <p><a id="az_down_commonspeed" href="download.php?softid=<!--{$out.info.ID}-->">普通下载</a></p>
+            <!--{/if}-->
+	    </div>
+        <div class="view_history">
+            <a href="<!--{url2static_url}-->app.php?type=history&softid=<!--{$out.info.ID}--><!--{/url2static_url}-->">查看历史版本</a>
+        </div>
+        <!--{if $out.share}--><!--{if $out.from eq 1 or $out.from eq 4}-->
+		<div class="az_note" id="az_weixin_hint" style="display:none;">
+		  <p><!--{$out.weixin_hint}--></p>
+		</div>
+        <!--{/if}--><!--{/if}-->
+        </div>
+		<div class="az_cnt_ul">
+		    <h5>简介</h5>
+			<div id="az_appcntlist1" class="az_appcntlist">
+			<p><!--{$out.info.SOFT_DESCRIBE}--></p>
+			</div>
+			<div class="az_toggle_btn" style="">
+			  <span id="az_open" class=""></span>
+			</div>
+		</div>
+        <!--{if $out.info.update_content !=''}-->
+		<div class="az_cnt_ul">
+		    <h5>更新说明</h5>
+			<div id="az_appcntlist2" class="az_appcntlist">
+			<p><!--{$out.info.update_content|nl2br}--></p>
+			</div>
+			<div class="az_toggle_btn" style="">
+			  <span  id="az_open" class=""></span>
+			</div>
+		</div>
+        <!--{/if}-->
+		<div class="az_cnt_ul">
+		    <h5>评论(共<!--{$out.info.COMMENT_COUNT}-->条)</h5>
+            <!--{foreach from=$out.commentlist item=v name=a}-->
+                <div class="az_comment_cnt">
+                    <div class="az_comment_top">
+                         <span>安智网友</span>
+                         <em><!--{$v.3}--></em>
+                         </div>
+                     <p id="az_comment_as"><!--{$v.4}--></p>
+                </div>
+            <!--{/foreach}-->
+            <div class="az_prompt" id="az_prompt1">
+            </div>
+            <script>
+                $('#az_prompt1').load('<!--{url2static_url}-->anzhiapk.php?type=1<!--{/url2static_url}-->');
+            </script>
+		</div>
+		<div class="az_cnt_ul">
+		    <h5>历史版本（共<!--{$out.historysoft_total}-->个版本）</h5>
+            <!--{foreach from=$out.historysoft item=v name=a}-->
+			<p><!--{$v.4}-->  更新版本<!--{$v.5}--></p>
+            <!--{/foreach}-->
+			<p>更多版本...</p>
+            <div class="az_prompt" id="az_prompt2">
+            </div>
+            <script>
+                $('#az_prompt2').load('<!--{url2static_url}-->anzhiapk.php?type=2<!--{/url2static_url}-->');
+            </script>
+		</div>
+		<div class="az_cnt_ul" style="border:none;">
+		    <h5>用户还下载了</h5>
+                <ul id="az_mylove">
+                <!--{foreach from=$out.DATA_LIKE item=v name=a key=i}-->
+                    <li <!--{if $i < 6}-->class="az_border_bottom"<!--{/if}-->><a href="<!--{url2static_url}-->app.php?type=info&softid=<!--{$v.3}--><!--{/url2static_url}-->"><!--{$v.2}--></a></li>
+                <!--{/foreach}-->
+                </ul>
+				<div class="az_clear"></div>
+		</div>
+	 </div>
+</section>
+<div id="az_spirit"></div>
+<!--{include file="foot.html"}-->

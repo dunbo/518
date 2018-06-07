@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>区间软件列表</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css?version1" />
+<?php if (!$isAjax) : ?>
+<link rel="stylesheet" href="/Public/css/tablelist.css?1" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<?php endif;?>
+<script>
+var extents = new Array();
+<?php $i=0;foreach($extents as $val): ?>
+extents[<?php echo $i?>] = {extent_id:'<?php echo $val['extent_id']?>',extent_name:'<?php echo $val['extent_name']?>',type:<?php echo $val['type']?>,parent_id:<?php echo $val['parent_id']?>};
+<?php $i++;endforeach; ?>
+
+function showExtent(c, parent_id)
+{
+	var id = c + '_' + parent_id;
+	var path = '#' + c + ' .' + id
+	if (!$(path)[0]) {
+		var html = '<select class=' + id + ' onchange="showExtent(\'TB_ajaxContent\',$(this).val())">';
+		var has_item = false;
+		$(extents).each(function(){
+			if(this.parent_id == parent_id) {
+				html += '<option value="'+this.extent_id+'">'+this.extent_name+'</option>';
+				has_item = true;
+			}
+		});
+		html += '</select>';
+		if(has_item) $('#'+c+' p').append(html);
+	}
+}
+function switchTab(url, op_id)
+{
+	$('#' + op_id).load(url + '/op_id/' + op_id, function(){
+		tb_init('#' + op_id + ' .thickbox');
+	});
+}
+
+function selectExtent(c, extent_id)
+{
+	var str = new Array();
+	$($('input[name^=ids]:checked')).each(function(){
+		str.push($(this).val());
+	});
+	//alert(str)
+	if (str.length > 0) {
+		$('#' + c + ' .selected_ids').val(str.join(','));
+		tb_show(null,'#TB_inline?height=150&width=400&inlineId=myOnPageContent&modal=true',false)
+	} else {
+		alert('请选择要移动的软件');
+	}
+}
+</script>
+</head>
+
+<body>
+<div class="main_r">
+	<h3 class="current_h3">软件列表</h3>
+	<div class="currentNav2">
+		<div class="currentNav2_l"></div>
+		<div class="currentNav2_r">
+			<a class="thickbox recBtn_bg" href="/index.php/Sj/ExtentV2/add_soft?extent_id=<?php echo $extent_id?>&show_form=<?php echo $show_form?>&modal=true">添加软件</a>
+		</div>
+	</div>
+	<div class="currentNav">
+		<div class="currentNav_l"><a href="/index.php/Sj/ExtentV2/<?php if($extent_type==4) echo 'index_multiSoftwareExtent'; else if ($type == 3) echo "union"; else echo "index"?>/pid/<?php echo $pid?>">推荐区位管理</a> > <?php echo $extent_name?></div>
+		<div class="currentNav_r">
+		<a class="recBtn_bg<?php if ($srch_type == 'e'):?> currentSel<?php endif;?>" href="__URL__/list_soft/extent_id/<?php echo $extent_id ?>/show_form/<?php echo $show_form ?>/srch_type/e">过期</a>
+		<a class="recBtn_bg<?php if ($srch_type == 'n'):?> currentSel<?php endif;?>" href="__URL__/list_soft/extent_id/<?php echo $extent_id ?>/show_form/<?php echo $show_form ?>/srch_type/n">当前</a>
+		<a class="recBtn_bg<?php if ($srch_type == 'f'):?> currentSel<?php endif;?>" href="__URL__/list_soft/extent_id/<?php echo $extent_id ?>/show_form/<?php echo $show_form ?>/srch_type/f">未开始</a>
+		</div>
+	</div>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="softlist_tab">
+		<thead>
+			<tr>
+				<td width="9%">全选</td>
+				<td width="12%">软件名</td>
+				<td width="12%">包名</td>
+				<td width="8%">高低配手机区分展示</td>
+				<td width="8%">显示在旧版本中(低于V4.4.1)</td>
+				<!--<td width="5%">投放区域</td>-->
+				<td width="5%">显示概率</td>
+				<td width="10%">开始时间</td>
+				<td width="10%">结束时间</td>
+				<td width="10%">合作形式</td>
+                <?php if($extent_type==4):?>
+                <td width="4%">默认展示</td>
+                <?php endif;?>
+				<td width="15%">操作</td>
+			</tr>
+		</thead>
+		<tbody>
+<?php foreach($list as $val): ?>
+	<TR>
+		<TD><input name="ids[]" value="<?php echo $val['id'] ?>" type="checkbox"/></TD>
+		<TD><?php echo $val['softname'] ?></TD>
+		<TD><?php echo $val['package'] ?></TD>
+		<td><?php if($val['phone_dis'] == 1){ ?>-<?php }elseif($val['phone_dis'] == 2){ ?>仅高配手机展示<?php }elseif($val['phone_dis'] == 3){ ?>仅低配手机展示<?php } ?></td>
+		<td><?php if($val['phone_dis'] == 1){ ?>-<?php }else{ ?><?php if($val['old_phone'] == 1){ ?><span style="color:green">Y</span><?php }else{ ?>N<?php } ?><?php } ?></td>
+		<!--<td><?php echo str_replace(';', '<br>', $val['location']); ?></td>-->
+		<TD><?php echo $val['prob'] ?></TD>
+		<TD><?php echo date('Y-m-d H:i:s', $val['start_at']); ?></TD>
+		<TD><?php echo date('Y-m-d H:i:s', $val['end_at']); ?></TD>
+		<TD><?php if ($val['type'] !=0) { echo $val['types'] ; }else{ echo "-";} ?></TD>
+        <?php if($extent_type==4):?>
+        <TD><?php echo $val['default_display'] == 1 ? '是' : '否'?></TD>
+        <?php endif;?>
+		<TD>
+		<?php if($val['srch_type']=="e") { ?>
+		<a href="/index.php/Sj/ExtentV2/edit_soft/id/<?php echo $val['id'] ?>/life/1/show_form/<?php echo $show_form ?>?modal=true" class="thickbox recBtn_bg" style="width:100px; line-height17px; display:block;">复制上线</a>
+		<?php } else { ?>
+		<a href="/index.php/Sj/ExtentV2/edit_soft/id/<?php echo $val['id'] ?>/show_form/<?php echo $show_form ?>/modal=true" class="thickbox">
+			编辑
+			<?php if($show_form==1 || $show_form==3 || $show_form==4) { ?>
+				<?php if($val['content_title'] || $val['c_id_1']) { ?>
+					<span style="color:blue">（有新列表内容）</span>
+				<?php }else{ ?>	
+					<span style="color:red">（无新列表内容）</span>
+				<?php } ?>
+			<?php } ?>
+		</a>
+		<a href="/index.php/Sj/ExtentV2/del_soft/id/<?php echo $val['id'] ?>" onclick="javascript:return checkit()">删除</a>
+		<?php } ?>
+		</TD>
+	</TR>
+<?php endforeach;?>
+			<tr class="softbtn">
+				<td colspan="11">
+					<div class="soft_all"><input type="checkbox" name="soft_allSelect" onclick="$('input[name^=ids]').attr('checked', $(this).attr('checked')=='checked')"/>全选</div>
+					<div class="soft_btnr"><a class="recBtn_bg softbtn1" href="javascript:" onclick="selectExtent('myOnPageContent', <?php echo $extent_id?>)">移动软件到指定分区</a><a class="recBtn_bg" <a href="javascript:history.go(-1);">返回</a></div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	{$page}
+</div>
+<div id="myOnPageContent" style="display:none">
+<p>
+<form method="post" action="/index.php/Sj/ExtentV2/move_soft">
+<select name="extent_id">
+<?php foreach($extent_select as $k => $v): ?>
+<option value="<?php echo $k?>"><?php echo $v?></option>
+<?php endforeach; ?>
+</select>
+<input type="hidden" value="" class="selected_ids" name="selected_ids"/>
+<input type="submit" value="提交"/>
+<input type="button" onclick="self_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+</form>
+</p>
+</div>
+</body>
+</html>
+
+<script>
+function self_remove() {
+	$("#TB_imageOff").unbind("click");
+	$("#TB_closeWindowButton").unbind("click");
+	$("#TB_window").fadeOut("fast",function(){
+		$('#TB_window,#TB_overlay,#TB_HideSelect').trigger("unload").unbind().remove();
+	});
+	$("#TB_load").remove();
+	if ( document.body.style.maxHeight == "undefined") {
+		$("body","html").css( {height: "auto", width: "auto"} );
+		$("html").css("overflow","");
+	}
+	document.onkeydown = "";
+	document.onkeyup = "";
+	//刷新父页面，未指定
+	return false;
+}
+</script>

@@ -1,0 +1,92 @@
+<div class="content" style="text-align:center">
+        <div style="margin-top: 10px;float: left;">
+            软件包名：<input type="text" class="search_item_text" value="" id="package" name="package" style="width:140px">
+        </div>
+         <div id="softname" style="float: left;margin-left: 60px";></div>
+        <div style="float: left;margin-top: 10px;margin-left: 25px">
+            备注：<textarea cols="20" rows="4" name="beizhu" id="beizhu"></textarea>
+        </div>
+    <div style="clear: both;margin-bottom: 10px"></div>
+    <div style="margin-top:10px;">
+            <div style="float:left;margin-left:32px"><input type="button" value="确定" class="thickbox search_btn" onclick="add_soft()"></div>
+            <div style="float:left;margin-left:20px"><input type="button" value="取消" class="search_btn " onclick="tb_remove();"></div>
+        </div>
+        <a href="" id="click_to" class="thickbox"></a>
+</div>
+
+<script type="text/javascript">
+    $("#package").blur(function(){
+        if(!check_pkg()){
+            alert('此软件不在广告库中，不能添加');
+        }
+    })
+    function check_pkg(){
+        var package = $("#package").val();
+
+        var bo = true;
+        if(package!=''){
+            $.ajax({
+                url:'/index.php/Sj/Soft/pub_is_ad_soft',
+                data:'package='+package,
+                type: 'post',
+                dataType:"json",
+                async: false,
+                success: function(data)
+                {
+                    $("#softname").html('');
+                    if(data!=0){
+                        $("#softname").html(data.softname);
+                        bo =  data.softid;
+                    }else{
+                        bo = false;
+
+                    }
+                }
+            });
+        }
+        return bo;
+    }
+
+    function add_soft(){
+        var package = $("#package").val();
+        if(!package){
+            alert('请输入包名');
+            return false;
+        }
+        var softid = check_pkg();
+        if(softid){
+            var beizhu = $("#beizhu").val();
+            var cid;
+            $.ajax({
+                url:'/index.php/Sj/Soft/pub_add_behavior',
+                data:'beizhu='+beizhu,
+                type: 'post',
+                dataType:"json",
+                async: false,
+                success: function(data)
+                {
+                   cid = data.cid;
+                }
+            });
+            if(cid){
+                $("#click_to").attr('href','/index.php/Cooperate/Contentcooperation/save_chl_pkg?package='+package+'&softid='+softid+'&cid='+cid);
+                setTimeout(function() {
+                    // IE
+                    if(document.all) {
+                        document.getElementById("click_to").click();
+                    }
+                    // 其它浏览器
+                    else {
+                        var e = document.createEvent("MouseEvents");
+                        e.initEvent("click", true, true);
+                        document.getElementById("click_to").dispatchEvent(e);
+                    }
+                }, 500);
+            }
+
+        }else{
+            alert('此软件不在广告库中，不能添加');
+            return false;
+        }
+    }
+</script>

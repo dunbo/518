@@ -1,0 +1,75 @@
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<ul class="tab_title margin_top">
+    <li class="<?php if($type == 2) echo "current";?>"><a href="__URL__/ad_exit_list/type/2">正在运营</a></li>
+    <li class="<?php if($type == 3) echo "current";?>"><a href="__URL__/ad_exit_list/type/3">已过期</a></li>
+    <li class="<?php if($type == 1) echo "current";?>"><a href="__URL__/ad_exit_list/type/1">未开始</a></li>
+</ul>
+
+<body>
+    <div class="search_box">
+        <form method="get" action="__URL__/ad_exit_list" >
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="18%">
+                        <label>广告类型：</label>
+                        <select name="ad_type" id="ad_type">
+                            <option value="" selected>全部</option>
+                            <option value="1" <if condition="$ad_type eq 1">selected</if>>单图片广告</option>
+                            <option value="2" <if condition="$ad_type eq 2">selected</if>>应用广告</option>
+                        </select>
+                    </td>
+					<input type="hidden" name="type" id="type" value='{$type}' />
+                    <td width="25%"><input type="submit" value="搜索" class="search_btn"/></td>
+                    <td width="10%"><a href='__URL__/add_exit_ad' class="search_btn">添加广告</a></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="20%">广告类型</th>
+                    <th width="20%">发布范围</th>
+                    <th width="10%">开始时间</th>
+                    <th width="10%">结束时间</th>
+                    <th width="5%">优先级</th>
+                    <th width="15%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list" key='k'>
+                <tr>
+                    <td><?php echo $list['ad_type'] ==1 ? '单图片广告' : '应用广告'; ?></td>
+                    <td>
+						<a href="__URL__/pub_view_extents?width=400&height=400&id={$list.id}" class="thickbox">查看发布范围</a>
+					</td>
+                    <td>{$list.ad_start_tm}</td>
+                    <td>{$list.ad_end_tm}</td>
+                    <td>{$list.priority}</td>
+                    <td>
+                        <a href="__URL__/ad_exit_edit/id/{$list.id}">编辑</a>
+				<?php if($type != 3){ ?>
+                        <span>&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;</span>
+					<?php if($list['ad_switch'] == 1){ ?>
+                        <a href="__URL__/ad_exit_switch/id/{$list.id}/ad_switch/0" onClick="return confirm('您是否确认关闭该广告，停止后该广告将停止投放？');" >停用</a>
+					<?php }else{ ?>	
+						<a href="__URL__/ad_exit_switch/id/{$list.id}/ad_switch/1" onClick="return confirm('您是否确认启用该广告？');">启用</a>
+					<?php }?>	
+				<?php } ?>	
+					<?php if($type == 3 || $list['ad_switch'] == 0){ ?>	
+                        <span>&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;</span>
+                        <a href="__URL__/ad_exit_del?id={$list.id}" onClick="return confirm('你是否确认要删除该广告？');">删除</a>					 
+					<?php } ?>	
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>

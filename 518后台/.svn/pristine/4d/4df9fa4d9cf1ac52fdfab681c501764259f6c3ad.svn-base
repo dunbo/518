@@ -1,0 +1,74 @@
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript">
+function checkAll(obj)
+{
+  var flag = $(obj).attr('checked') == 'checked';
+  $('input[name^=id_]').attr('checked', flag);
+}
+function batchDeleteUser()
+{
+  if (confirm("是否批量删除用户？")) {
+    var input = new Array();
+    var has = false;
+    $('input[name^=id_]').each(function(){
+      if (this.name != 'id_all' && this.checked) {
+        input.push(this.value);
+        has = true;
+      }
+    });
+    if (has) {
+      location.href = '__URL__/del_user/ids/'+ input.join(',');
+    } else {
+      alert('请选择需要进行删除的用户信息');
+    }
+  }
+}	
+</script>
+<div class="main" >
+<div class="content">
+<form id="upload" method='get' action="__URL__/log_static_list">
+  <table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="searchbar">
+  <tr>
+    <td><input type="button" value="添加人员" class="thickbox" alt="/index.php/Dev/LogStatic/add_user?"/></td>
+    <td><input type="button" value="删除人员" onclick="batchDeleteUser()"/></td>
+    <td>起止时间</td>
+    <td width="300" colspan='4'><?php showDatePicker('fromdate','todate', $fromdate,$todate);?></td>
+    <td width="50%"><input type="submit" value="搜索" /></td>
+  </tr>
+  </table>
+</form>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td width="50" align='center' height="30" bgcolor="#ffea5d"><label><input type="checkbox" onclick="checkAll(this)" name="id_all"/>操作人员</label></td>
+    <?php foreach ($category as $val): ?>
+    <td width="50" align='center' height="30" bgcolor="#ffea5d">
+	<a href="/index.php/Dev/LogStatic/log_static_list_sub/cid/<?php echo $val['id']?>/fromdate/<?php echo $fromdate?>/todate/<?php echo $todate?>"><?php echo $val['name']?></a></td>
+	<?php endforeach; ?>
+  </tr>
+  <?php foreach ($users as $val): ?>
+  <tr>
+  	<td align='center'>
+<label><input type="checkbox" value="<?php echo $val['userid'] ?>" name="id_<?php echo $val['userid'] ?>"/><?php echo $val['name'] ?></label>
+  	</td>
+    <?php foreach ($category as $v): ?>
+    <td align='center'>
+		<a href="/index.php/Dev/LogStatic/log_static_list_sub/cid/<?php echo $v['id']?>/fromdate/<?php echo $fromdate?>/todate/<?php echo $todate?>/userid/<?php echo $val['userid']?>"><?php echo $val['data'][$v['id']];?></a>
+    </td>
+	<?php endforeach; ?> 
+  </tr>
+  <?php endforeach ?>
+  <tr>
+  	<td align='center'>总计</td>
+    <?php foreach ($category as $v): ?>
+    <td align='center'><?php echo $total_result[$v['id']]?></td>
+	<?php endforeach; ?> 
+  </tr>
+</table>
+</div>
+</div>

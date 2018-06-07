@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="/Public/css/jquery.autocomplete.css" type="text/css" media="screen" />
+<script type="text/javascript" src="/Public/js/jquery.autocomplete.js"></script>
+<style>
+td{padding:5px;}
+.red{color:red;}
+.box_input tr td{text-align:left !important; font-size:14px;}
+.box_input tr td input{ height:31px; width:250px; float:left;}
+.green{color:green;}
+.myradio{display:inline;height:auto !important;width:auto;}
+.justfy{width:124px;}
+<!-- CSS goes in the document HEAD or added to your external stylesheet -->
+table.gridtable {
+	font-family: verdana,arial,sans-serif;
+	font-size:5px;
+	color:#333333;
+	border-width: 1px;
+	border-color: #666666;
+	border-collapse: collapse;
+}
+table.gridtable th {
+	border-width: 1px;
+	/*padding: 4px;*/
+	border-style: solid;
+	border-color: #666666;
+	background-color: #dedede;
+}
+table.gridtable td {
+	border-width: 1px;
+	/*padding: 4px;*/
+	border-style: solid;
+	border-color: #666666;
+	background-color: #ffffff;
+}
+</style>
+</head>
+<body>
+
+
+<h5 class="yahei" style="padding-left:10px;">
+	<if condition="!($data['invoice_status']) "> 
+		确认发票
+	</if>
+	<if condition="($data['invoice_status']) "> 
+		编辑备注
+	</if>
+</h5>
+<form action="__URL__/edit_invoice_show" method="post" class="uform">
+
+
+<input type="hidden" name="contract_id" value="{$data.contract_id}" id="contract_id" />
+<input type="hidden" name="invoice_sum_old" value="{$data.invoice_sum}">
+
+<input type="hidden" name="id" value="{$data.id}" />
+	<table id="addable_table" class="yahei">
+		<tbody id="invoice_main_0" border='1' class="box_input">
+			<tr>
+				<td class="justfy">&nbsp;产品名称：</td>
+				<td>
+					<input type="text" style="width:246px" name="softname" id="softname" value="{$softname}" class="search_item_text" <?php if($softname){echo 'disabled';}?> >
+				</td>
+			</tr>
+			<tr>
+				<td class="justfy">&nbsp;客户名称：</td>
+				<td><span id='client_name'>{$client_name}</span></td>
+			</tr>
+			<tr>
+				<td class="justfy">&nbsp;协议主体：</td>
+				<td><span id='c_name'>{$c_name}</span></td>
+			</tr>
+			<tr>
+				<td class="justfy">&nbsp;预存金额：</td>
+				<td><span>{$data['recharge_sum']}</span></td>
+			</tr>
+			<tr>
+				<td class="justfy">&nbsp;预存<if condition="($flexible_sys eq 1) ">日期<else/>月份</if>：</td>
+				<td><span><?php echo $data['prestores_tm']?(($flexible_sys==1)?date("Y-m-d",$data['prestores_tm']):date("Y-m",$data['prestores_tm'])):"";?></span></td>
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red>*</font>发票<if condition="($flexible_sys eq 1) ">日期<else/>月份</if>：</td>
+				<if condition="!($data['invoice_status']) "> 
+				<td><input type="text" name="invoice_tm" class="Wdate" id="invoice_tm" required <if condition="($flexible_sys eq 1) ">onClick="WdatePicker({dateFmt:'yyyy-MM-dd',startDate:'%y-%M-%d'})"<else/>onClick="WdatePicker({dateFmt:'yyyy-MM',startDate:'%y-%M'})"</if> value="<?php echo $data['prestores_tm']?(($flexible_sys==1)?date("Y-m-d",$data['prestores_tm']):date("Y-m",$data['prestores_tm'])):"";?>"></td>
+				<td style="color:red;"></td>
+				</if>
+				<if condition="($data['invoice_status']) "> 
+					<td><?php echo $data['invoice_tm']?(($flexible_sys==1)?date("Y-m-d H:i:s",$data['invoice_tm']):date("Y-m",$data['invoice_tm'])):"";?></td>
+					<input type='hidden' id='invoice_tm' name='invoice_tm' value="<?php echo $data['invoice_tm']?date("Y-m-d H:i:s",$data['invoice_tm']):"";?>" />
+				</if>
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red>*</font>发票金额：</td>
+				<if condition="!($data['invoice_status']) "> 
+					<td><input type="text" name="invoice_sum" class="" id="invoice_sum" required value="{$data.recharge_sum}"></td>
+					<td style="color:red;"></td>
+				</if>
+				<if condition="($data['invoice_status']) "> 
+					<td>{$data.invoice_sum}</td>
+					<input type='hidden' id='invoice_sum' name='invoice_sum' value="{$data.invoice_sum}" />
+				</if>
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red></font>&nbsp;发票编号：</td>
+				<if condition="!($data['invoice_status']) "> 
+					<td><input value="" type="text" name="invoice_number" class="" id="invoice_number"  maxlength='100'></td>
+					<td style="color:red;"></td>
+				</if>
+				<if condition="($data['invoice_status']) "> 
+					<td>{$data.invoice_number}</td>
+					<input type='hidden' id='invoice_number' name='invoice_number' value="{$data.invoice_number}" />
+				</if>
+			</tr>
+		</tbody>
+	</table>
+	<table class="yahei box_input">
+		<tr>
+			<td class="justfy">&nbsp;备&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注：</td>
+			<td><textarea style="width:250px;height:100px;" name="invoice_remark" id="invoice_remark">{$data.invoice_remark}</textarea></td>
+			<td style="color:red;"><div id='remark_error'></div></td>
+		</tr>
+	
+	</table>
+	<div style="margin:10px auto;padding:0px 90px;">
+	<button class=" btn btn-sm btn-success yahei"  style="padding-left:30px;padding-right:30px;margin-left:40px;" type="submit" onclick="javascript:return checkBeforeSubmit();">保存</button>
+	<button class=" btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;margin-left:40px;" type="button" onClick="javascript:tb_remove();">取消</button>
+	</div>
+</form>
+<script>
+function checkBeforeSubmit()
+{
+
+	var i= 1;
+	if($("#invoice_sum").val().length == 0 || $("#invoice_sum").val() == "")
+	{
+		$("#invoice_sum").css("border","1px solid red").focus().parent().next().text("请先填写发票金额！");
+		var i = 0;
+	}else if(isNaN($("#invoice_sum").val()))
+	{
+		$("#invoice_sum").css("border","1px solid red").focus().parent().next().text("发票金额必须是数字！");
+		var i = 0;
+	}else if(Number($("#invoice_sum").val()) <0){
+		$("#invoice_sum").css("border","1px solid red").focus().parent().next().text("发票金额不可为负数！");
+		var i = 0;
+	}
+	
+	if($("#invoice_tm").val().length == 0 || $("#invoice_tm").val() == "")
+	{
+		$("#invoice_tm").css("border","1px solid red").focus().parent().next().text("请先填写发票日期！");
+		var i = 0;
+	}
+	if($("#invoice_remark").val().length >100)
+	{
+		$("#invoice_remark").css("border","1px solid red").focus().parent().next().text("100个字符以内");
+		var i = 0;
+	}
+	if(i == 0)
+	{
+		return false;
+	}else{
+		return true;
+	}
+}
+</script>
+
+<!-- 主页面结束 -->
+</body>
+</html>

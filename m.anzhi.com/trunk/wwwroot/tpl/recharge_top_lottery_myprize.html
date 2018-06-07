@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>充值排行榜-我的奖品</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/recharge_top/css/recharge_top_common.css?v2"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+</head>
+<script>
+var sid='<!--{$out.sid}-->';
+function save(){
+
+                function isMobel(value)  {  
+                        if(/^13\d{9}$/g.test(value)||(/^14\d{9}$/g.test(value))||(/^15\d{9}$/g.test(value))||(/^18\d{9}$/g.test(value))){    
+                                return true;  
+                        }else{
+                                return false;  
+                        }
+                }
+
+                var lxname = $("#lxname").val();
+                if(lxname == "") {
+                        $("#lxname").css("borderColor", "#f00");
+                        $("#notice1").html('联系人姓名不能为空');
+                        $("#lxname").focus();
+                        return false;
+                 }
+
+                var mobile_phone = $("#mobile_phone").val();
+                if(mobile_phone == "") {
+                        $("#mobile_phone").css("borderColor", "#f00");
+                        $("#notice2").html('联系人手机号码不能为空');
+                        $("#mobile_phone").focus();
+                        return false;
+                 }
+
+                 if(mobile_phone !="" && !isMobel(mobile_phone)) {
+                        $("#notice2").html('手机号格式不正确');
+                        $("#mobile_phone").focus();
+                        return false;
+                 }
+
+
+                var address = $("#address").val();
+                if(address == "") {
+                        $("#address").css("borderColor", "#f00");
+                        $("#notice3").html('邮寄地址不能为空');
+                        $("#address").focus();
+                        return false;
+                 }
+
+                $.ajax({
+                        url: '/lottery/recharge_top_lottery_myprize.php',
+                        data:"&sid="+sid+"&lxname="+lxname+"&mobile_phone="+mobile_phone+"&address="+address, 
+                        type:"post",
+                        success:function(data) {
+                            if(data==1){
+                                window.location.href= '/lottery/recharge_top_lottery.php?sid='+sid;
+                            }
+                        },
+                });
+}
+</script>
+<body>
+<section>
+    <div class="main">
+        <div class="my_prize">
+            <div class="prompt4">【我的奖品】</div>
+            <ul class="my_prize_list">
+                                <!--{foreach from=$out.prize item=v key=k}-->
+                                <li>恭喜您获得《<!--{$v.prizename}-->》</li>
+                                <!--{/foreach}-->
+
+                                <!--{foreach from=$out.gift item=v key=k}-->
+                                <li>《<!--{$v.softname}-->》礼包码:<!--{$v.gift_number}--></li>
+                                <!--{/foreach}-->
+            <!--{if $out['is_empty'] == 1}-->
+                <li>很遗憾，您暂未获奖;</li>
+            <!--{/if}-->
+            </ul>
+            <!--{if $out['is_save'] == 2}-->
+            <div class="split"><img src="<!--{$out.static_url}-->/recharge_top/images/split.png"/> </div>
+            <div class="prompt_05">请您填写如下信息，以便于我们将奖品邮寄给您</div>
+            <ul class="form-items">
+                <li><p align="center"><font id="notice1" color="red"></font></p></li>
+                <li><label>联系人姓名：</label><span><input type="text" id="lxname"/></span></li>
+                <li><p align="center"><font id="notice2" color="red"></font></p></li>
+                <li><label>联系人手机号码：</label><span><input type="text" id="mobile_phone"/></span></li>
+                <li><p align="center"><font id="notice3" color="red"></font></p></li>
+                <li><label>邮寄地址：</label><span><input type="text"/ id="address"></span></li>
+            </ul>
+            <div class="split"><img src="<!--{$out.static_url}-->/recharge_top/images/split.png"/> </div>
+            <div  class="btn_submit"><a href="#" onclick="save()">提交</a> </div>
+            <!--{/if}-->
+            <!--{if $out['is_save'] == 1}-->
+            <br>
+            <div  class="btn_submit"><a href="/lottery/recharge_top_lottery.php">返回</a></div>
+            <!--{/if}-->
+        </div>
+        <div class="sycee"><img src="<!--{$out.static_url}-->/recharge_top/images/sycee.png"/></div>
+    </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+<script type="text/javascript" src="/Public/lightbox/js/jquery.lightbox-0.5.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/lightbox/css/jquery.lightbox-0.5.css" media="screen" />
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:center;}
+
+.white_content{display:none;position:absolute;top:20%;left:40%;width:20%;min-height:20%;padding:16px;background-color:#FBFBFC;z-index:1002;border:2px solid #9DA0A0;overflow:auto;word-wrap:break-word}.white_content p{height:20px;margin:0}.white_content a{float:right;text-decoration:none}
+.a_new { display:block; width:80px; height:25px; border:1px solid #bdbdbd; background:#dfdfdf;padding-top: 5px;padding-left: 10px;text-decoration:none; color:#000000;} 
+</style>
+<table  width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+<tr height="35">
+	<td align="center" style=<?php if($passed ==1){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/user_register_task_list/passed/1"><font style="color:#000; font-weight:bold">待审核</font></a>
+	</td>
+	<td align="center" style=<?php if($passed ==2){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/user_register_task_list/passed/2"><font style="color:#000; font-weight:bold">已通过</font></a>
+	</td>
+	<td align="center" style=<?php if($passed ==3){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/user_register_task_list/passed/3"><font style="color:#000; font-weight:bold">未通过</font></a>
+	</td>
+</tr>
+</table>
+ <div class="search_box" style="margin-top:10px;height:90px;width:80%;margin-left:0px;border:0px;">
+            <form method="get" action="">
+                <table cellspacing="0" cellpadding="0" width="99%" class="search_table">
+                    <tbody>
+                    <tr>
+                        
+                        <td >软件包名:
+                            <input type="text" style="width:140px" value="{$package}" name="s_package" id="s_package" class="search_item_text">
+                        </td>
+						<td >软件名称:
+                            <input type="text" style="width:140px" value="{$softname}" name="s_softname" id="s_softname" class="search_item_text">
+                        </td>
+                        <td >用户名:
+                            <input type="text" style="width:140px" value="{$uid}" name="s_uid" id="s_uid" class="search_item_text">
+                        </td>
+                        <td >用户昵称:
+                            <input type="text" style="width:140px" value="{$nickname}" name="s_nickname" id="s_nickname" class="search_item_text">
+                        </td>
+                    </tr>
+                    <tr>
+                    	<td colspan="2">
+                            上传时间:
+	                            <input id="begintime" name="begintime" value="{$begintime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M-%d 00:00:00', dateFmt: 'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px">至
+	                            <input id="endtime" name="endtime" value="{$endtime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M-%d 00:00:00', dateFmt: 'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px">
+                          
+                        </td>
+                         <td>
+                            <input type="submit" onclick="" value="查询" style="float:left; height:30px;" class="search_btn">
+                        </td>
+                        <td>
+                            <a href="" target="_blank" class="a_new" id='export_csv'  onclick="return export_csv();">导出用户列表</a>
+                        </td>
+
+                    </tr>
+                    </tbody></table>
+              </form>
+ </div>
+<table style='float:center;' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+	<?php if($passed == 1){ ?>
+		<tr>
+			<td >
+				<input type="button" class="search_btn" value="全选" onclick='javascript:$("input[name=chk_list]").attr("checked",true); ' style="background:white">	
+			</td>
+			<td colspan="5">
+			<input type="button" class="search_btn" value="反选" onclick='ag_select()' style="background:white">	
+			</td>
+			<td align='right' colspan="4">
+			<input type="button" class="search_btn" value="批量通过" onclick="get_ids(2)" style="width:150px;background:white">	
+			</td>
+			<td align='left' colspan="2">
+			<input type="button" class="search_btn" value="批量驳回" onclick="get_ids(3)" style="width:150px;background:white">	
+			</td>	
+		</tr>
+	<?php }else if($passed == 2){ ?>
+		<tr>
+			<td >
+				<input type="button" class="search_btn" value="全选" onclick='javascript:$("input[name=chk_list]").attr("checked",true); ' style="background:white">	
+			</td>
+			<td colspan='10'>
+			<input type="button" class="search_btn" value="反选" onclick='javascript:$("input[name=chk_list]").attr("checked",false);' style="background:white">	
+			</td>
+			<!-- <td align='right'>
+			<input type="button" class="search_btn" value="批量撤销" onclick="get_ids(1)" style="width:150px;background:white">	
+			</td> -->
+		</tr>
+	<?php }else if($passed == 3){ ?>
+		<tr>
+			<td >
+				<input type="button" class="search_btn" value="全选" onclick='javascript:$("input[name=chk_list]").attr("checked",true); ' style="background:white">	
+			</td>
+			<td colspan='8'>
+			<input type="button" class="search_btn" value="反选" onclick='javascript:$("input[name=chk_list]").attr("checked",false);' style="background:white">	
+			</td>
+			<td align='right' colspan="3">
+			<input type="button" class="search_btn" value="批量撤销" onclick="get_ids(1)" style="width:150px;background:white">	
+			</td>
+		</tr>
+	<?php } ?>
+
+      	<tr>
+			<th width="5%" bgcolor="#e3e2fe">选择</th>
+			<th width="5%">用户名/昵称</th>
+			<th width="5%">软件包名/软件名称</th>
+			<th width="10%">任务时间</th>
+			<th width="10%">审核截止时间</th>
+			<th width="5%">IMEI</th>
+			<th width="5%">MAC</th>
+			<th width="15%">任务详细说明</th>
+			<th width="15%">用户上传截图</th>
+			<th width="10%">上传时间</th>
+			<th width="10%">审核时间</th>
+			<th width="5%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='list' id='list'>
+		<tr>
+			<td align='center' id='{$list.id}'>
+				<?php if((strtotime($list['abort_tm'])>time())){ ?>	
+					<input type="checkbox" name="chk_list" value="{$list.id}" />
+				<?php } ?>	
+			</td>
+			<td align='center'>
+				{$list.uid}<br><br>{$list.nickname}
+			</td>
+			<td align='center'>
+				{$list.package}<br><br>{$list.softname}
+			</td>
+			<td align='center'>
+				{$list.start_tm}至{$list.end_tm}
+			</td>
+			<td align='center'>
+				{$list.abort_tm}
+			</td>
+			<td align='center'>
+				{$list.imei}
+			</td>
+			<td align='center'>
+				{$list.mac}
+			</td>
+			<td>
+				{$list.task_intro}
+			</td>
+			<td>
+				<div id="gallery{$list.id}">
+				<?php foreach($list["upload_thumb"] as $k=>$v){ ?>
+					<a href="{$attachment_host}{$v}" target="_blank"><img src="{$attachment_host}{$v}" width="48" height="48"/></a>
+				<?php }?>
+				</div>
+			</td>
+			<td align='center'>
+				{$list.create_tm}
+			</td>
+			<td align='center'>
+				{$list.update_tm}
+			</td>
+			<td align='center' id='hide_{$list.id}'>
+			<?php if($list['passed'] == 1 && (strtotime($list['abort_tm'])>time())){ ?>				
+				<a href="javascript:void(0);" class="blue"  onclick="change_status('{$list.id}',2)" style="text-decoration:none;">通过</a><br/>
+				<a href="__URL__/change_status/id/{$list.id}/passed/3/rejected/1"  class="blue thickbox" style="text-decoration:none;">驳回</a><br/>
+			<?php }else if($list['passed'] == 2){ ?>
+				<!-- <a href="javascript:void(0);" class="blue"  onclick="change_status('{$list.id}',1)" style="text-decoration:none;">撤销</a><br/> -->
+			<?php }else if($list['passed'] == 3){ ?>
+				<a href="javascript:void(0);" class="blue"  onclick="change_status('{$list.id}',1)" style="text-decoration:none;">撤销</a><br/>
+			<?php } ?>	
+				<!-- <a href="__URL__/edit_mess?id={$list.id}&pg={$pg}"  class="blue" style="text-decoration:none;">编辑</a>	 -->				
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='12'>
+			<div  align='center' >{$page}</div>
+		</td>
+	<tr>
+</table>
+<div id="light" class="white_content">
+<p><a href="#" onClick="closeWindow()">关闭</a></p>
+<p id='show_msg'></p>
+<a href=" " target="_blank" id='fail_name' style="margin-right:50px;"><button class="btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;margin-top:50px;">下载失败名单</button></a>
+</div>
+</body>
+</html>
+<script>
+$(function() {
+	var ids_str="<?php echo $ids_str;?>";
+	var strs= new Array(); 
+	strs=ids_str.split(",");
+	for (i=0;i<strs.length ;i++ )
+	{
+		$("#gallery"+strs[i]+" a").lightBox();
+	} 
+ 	
+});
+function export_csv(){
+	var chks=$("input[name='chk_list']:checked");
+	var ids=new Array();
+	var i=0;
+    $(chks).each(function(){
+       ids[i]=this.value;
+       i++;                   
+    });
+    if(i==0){
+		alert('请选择要批量导出用户信息');
+		return false;
+	}
+
+	$('#export_csv').attr('href','?export=1&ids='+ids);
+	return true;
+}
+function change_status(id,passed){
+	if(!confirm("你确认操作吗？"))
+	{
+		return true;
+	}
+	if(id){
+		$.ajax({    
+                url:'__URL__/change_status/id/'+id+'/passed/'+passed,
+                type: 'get',
+                async:false,
+                success: function(data)
+                {   
+                    if(data==1){
+                    $('#'+id).parent().css('background','#ccc');
+                    $('#hide_'+id).html('');
+                    $('#'+id).html('');
+                    	alert('操作成功');
+                    }else{
+                    	alert('操作失败');
+                    }
+                }
+            });
+	}
+}
+
+function get_ids(passed){
+	if(!confirm("你确认操作吗？"))
+	{
+		return true;
+	}
+	var chks=$("input[name='chk_list']:checked");
+	var ids=new Array();
+	var i=0;
+    $(chks).each(function(){
+       ids[i]=this.value;
+       i++;                      
+    });
+    if(i==0){
+		alert('请选择要批量操作的用户数据');
+		return;
+	}
+	if(passed!=2){
+		$.ajax({    
+                url:'__URL__/change_status/ids/'+ids+'/passed/'+passed+'/biaoshi/1',
+                type: 'get',
+                // async:false,
+                success: function(data)
+                {   
+                	var data = eval("("+data+")");
+                    if(data==1){
+                    	$(chks).each(function(){
+       						$('#'+this.value).parent().css('background','#ccc');
+       						$('#hide_'+this.value).html('');
+       						$('#'+this.value).html('');
+       						                    
+    					});
+                    	alert('操作成功');
+                    }else if(data==2){
+                    	alert('操作失败');
+                    }else{
+                    	// $('#light').show().append(data['msg']);
+
+                    	$('#fail_name').attr('href','?export=1&ids='+data['fail_name']);
+                    	$('#show_msg').html(data['msg']);
+                    	$('#light').show();
+                    }
+                }
+            }); 
+	}else{
+		for (var i=0;i<ids.length;i++){
+			if(ids.length==(i+1)){
+	        	setTimeout("change_status_timing("+ids[i]+","+passed+","+ids[i]+")",i*1000);
+	        }else{
+	        	setTimeout("change_status_timing("+ids[i]+","+passed+","+0+")",i*1000);
+	        }
+		}
+	}
+    
+}
+function change_status_timing(id,passed,id_last){
+		$.ajax({    
+            url:'__URL__/change_status/id/'+id+'/passed/'+passed+'/id_last/'+id_last,
+            type: 'get',
+            async:false,
+            success: function(data)
+            {   
+                if(data==1){
+	                $('#'+id).parent().css('background','#ccc');
+	                $('#hide_'+id).html('');
+	                $('#'+id).html('');
+	                if(id==id_last){
+			        	alert('操作成功');
+			        }
+                }else{
+                	if(id_last>0){
+                		data = eval("("+data+")");
+                		$('#fail_name').attr('href','?export=1&ids='+data['fail_name']);
+	                	$('#show_msg').html(data['msg']);
+	                	$('#light').show();
+                	}
+                	
+                }
+            }
+        });
+
+}
+function ag_select(){
+	var chks=$("input[name='chk_list']");
+    $(chks).each(function(){
+       	if($(this).attr('checked')!='checked'){
+       		$(this).attr('checked','checked');
+       	}else{
+       		$(this).attr('checked',false);
+       	}
+    });
+}
+function closeWindow(){
+        document.getElementById('light').style.display='none';
+        window.location.reload();
+    }
+</script>

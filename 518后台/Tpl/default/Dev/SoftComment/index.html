@@ -1,0 +1,120 @@
+<include file="../../Public/new_header" />
+<script type="text/javascript" src="/Public/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<style type="text/css">
+	.c_class{width: 200px}
+	.tb td{word-break:break-all; word-wrap:break-word;}
+	.margin_top{ float:left;}
+	.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+</style>
+<script>
+	function add_c(){
+		var str = "<tr><td></td><td><textarea name='content[]' cols='50' rows='10'></textarea></td><td></td></tr>";
+		$("#c_table").append(str);
+	}
+
+	function chk(){
+		var package = $("#package").val();
+		var time_rule = $("input[name='time_rule']:checked").val();
+		if(!time_rule){
+			alert("请选择时间显示规则");
+			return false;
+		}
+		if(!package){
+			alert("请填写包名");
+			return false;
+		}
+		window.fml.submit();
+	}
+</script>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+	<tr height="35">
+		<td align="center" style=<?php if($from == 'index'){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/index"><font style="color:#000; font-weight:bold">评论软件</font></a>
+		</td>
+		<td align="center" style=<?php if($from == 'comment_history'){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/comment_history"><font style="color:#000; font-weight:bold">评论历史</font></a>
+		</td>
+	</tr>
+</table>
+<div>
+	<form name="fml" action="__URL__/index" method="post">
+	<input type="hidden" name='ad' value="{$admin_id}">
+	<div style="float:left;width: 100%">
+		<table id="c_table">
+			<tr>
+			<td>时间显示规则：</td>
+			<td>
+				<label><input type="radio" name="time_rule" value="1">按最新时间</label>
+				<label><input type="radio" name="time_rule" value="2">按随机时间</label>
+			</td>
+			</tr>
+			<tr>
+			<td>包名：</td>
+			<td><input type="text" name="package" id="package" class="c_class"></td>
+			</tr>
+			<tr>
+				<td>
+					评论内容：
+				</td>
+				<td>
+					<textarea name="content[]"  cols="50" rows="10"></textarea>
+				</td>
+				<td><a href="javascript:void(0)" onclick="add_c()">+添加</></td>
+			</tr>
+		</table>
+	</div>
+	<div style="float:left;margin-top: 10px;margin-left: 86px">
+		<input type="button" value="提交" onclick="return chk()">
+		<input type='button' value='批量导入'  id='upload' onclick='javascript:$("#hiddenFile").click();'/>
+		<input id='hiddenFile' name="hiddenFile" style="display:none" type='file' onchange="get_val()"/>
+		<a href="/Public/comment_import.csv" style="color: blue;">下载模板</a>
+	</div>
+	</form>
+</div>
+<div style="clear:both"></div>
+<div style="display:none;width:500px;height: auto;margin: 10px 0" id="result">
+
+</div>
+
+<script type="text/javascript">
+	function get_val(){
+		var file = $("#hiddenFile").val();
+		if (file.length == 0)
+		{
+			alert('请上传文件');
+			return;
+		}
+		var param = {
+			is_status: 1
+		};
+		$("#upload").val('导入中').attr('disabled',true);
+
+		$.ajaxFileUpload({
+			url: '__URL__/import_comment',
+			type: 'POST',
+			data: param,
+			files: [$('#hiddenFile')],
+			secureuri: false,
+			dataType: 'json',
+			success: function(data) {
+				$("#upload").val('批量导入').attr('disabled',false);
+				if(data.data.msg) alert(data.data.msg);
+				if(data.data.code!=0) {
+					if (data.data.code != 2) {
+						var str = '<span style="color:red">导入失败：</span><br>';
+						$.each(data.data[2], function(index, content){
+							str += '包名：' + content[0] + ',评论内容：' + content[1] + ',失败原因：' + content.error +'<br>';
+						})
+						$("#result").html(str);
+						$("#result").zxxbox();
+					}
+				}
+				$("#hiddenFile").val('');
+			}
+		});
+	}
+</script>

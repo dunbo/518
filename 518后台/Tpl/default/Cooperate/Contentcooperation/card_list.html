@@ -1,0 +1,191 @@
+<include header="../Public/header"/>
+<link rel="stylesheet" href="/Public/css/tablelist.css?1" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<style>
+    .future_class {
+        background-color:#CCCCCC
+    }
+</style>
+
+<body style="position:relative;">
+
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<tr>
+			<td>选择站点</td>
+			<td>
+				<select id="site_id" name="site_id" onchange="card_list(1);">
+					<?php 
+						foreach($coop_site as $k => $v){ 
+					?>
+					<option value="<?php echo $v['id']; ?>" <?php if($site_id == $v['id']) echo 'selected="selected"'; ?> >
+						<?php echo $v['anzhi_name']; ?>
+					</option>
+					<?php } ?>
+				</select>
+			</td>
+			<td>选择频道</td>
+			<td id='channle_td' >
+				<select id="channle_id" name="channle_id" onchange="card_list();">
+					<?php 	foreach($channel_list as $k => $v){ ?>
+						<option value="<?php echo $k; ?>" <?php if($k == $channle_id) echo 'selected="selected"'; ?> >
+							<?php echo $v['channel_name']; ?>
+						</option>
+					<?php } ?>
+				</select>
+			</td>		
+			<td><a href="javascript:;" onclick="add_card();" >创建卡片</a></td>
+		</tr>		
+	</table>
+    <br><br>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="4%">卡片ID</th>
+                    <th width="5%">卡片名称</th>
+                    <th width="4%">卡片类型</th>
+                    <th width="4%">卡片内容行数</th>
+                    <th width="4%">更多按钮</th>
+                    <th width="4%">内容类型角标</th>
+                    <th width="4%">排序值</th>
+                    <th width="4%">卡片状态</th>
+                    <th width="10%">导向页面</th>
+                    <th width="10%">关联内容</th>
+                    <th width="8%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                    <td>{$list.id}</td>
+                    <td>{$list.card_name}</td>
+                    <td><?php echo $card_type_conf[$list['card_type']];	?></td>
+                    <td>{$list.content_num}</td>
+                    <td><if condition="$list.is_more eq 1 ">有 <else/>无</if></td>
+                    <td><if condition="$list.is_mark eq 1 ">有 <else/>无</if></td>
+					<td>{$list.rank}</td>
+                    <td> <if condition="$list.status eq 1 ">启用 <else/>停用</if></td>
+                    <td>
+						<?php 
+							if($list['is_more'] == 1){
+								echo "导向站点：".$coop_site[$list['contact_site_id']]['anzhi_name']."<br/>";
+								if($list['contact_type'] ==1){
+									echo "导向频道：".$channel_list[$list['contact_id']]['channel_name'];
+								}else{
+									echo "导向标签：".$site_tag[$list['contact_id']]['tag_anzhi_name'];
+								}
+							}
+						?>
+						
+					</td>
+                    <td>
+						<?php 
+							echo "关联站点：".$coop_site[$list['content_site_id']]['anzhi_name']."<br/>";
+							if($list['content_rank'] == 1){
+								echo "最热<br/>";
+							}else{
+								echo "最新<br/>";
+							}
+							$tag_str = '标签：';
+							$i = 0;
+							foreach(explode(",",$list['content_tags']) as $v){
+								if(!$site_tag[$v]['tag_anzhi_name']) continue;
+								$i++;
+								$tag_str .= $site_tag[$v]['tag_anzhi_name']."、";
+								if($i%2 == 0){
+									$tag_str .= "<br/>";
+								}
+							}
+							echo $tag_str;
+						?>
+					</td>
+                    <td>
+						<if condition="$list.status eq 1 ">
+						<a href="__URL__/switch_card?id={$list.id}&status=0&channle_id={$list.channle_id}" class="blue" onClick="return confirm('确定要停用吗？');">停用</a>
+						<else/>
+						<a href="__URL__/switch_card?id={$list.id}&status=1&channle_id={$list.channle_id}" class="blue" onClick="return confirm('确定要启用吗？');">启用</a>
+						</if>|
+						<a title ="编辑卡片" class="thickbox" href="__URL__/save_card?id={$list.id}&site_id={$list.site_id}&channle_id={$list.channle_id}" class="blue">编辑</a>|
+						<a href="__URL__/del_card?id={$list.id}" class="blue"  onClick="return confirm('确定要删除吗？');">删除</a>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>
+<script type="text/javascript">
+$(document).ready(function(){
+	get_channel_all();
+});
+function change_name(){
+	var configcontent=$("#configcontent").val();
+	$.ajax({    
+		url:'/index.php/Cooperate/Contentcooperation/save_meun_name/configcontent/'+configcontent,
+		type: 'get',
+		dataType: 'json',		
+		async:false,
+		success: function(res){   
+			if(res.code == 1){
+				alert(res.msg);
+			}else{
+				alert(res.msg);
+			}
+		}
+	});
+}
+function add_card(){
+	var site_id = $("#site_id").val();
+	var channle_id = $("#channle_id").val();
+	if(!site_id || !channle_id){
+		alert("请选择站点和频道！");
+		return false;
+	}
+	var urls ="__URL__/add_card?site_id="+site_id+"&channle_id="+channle_id;
+	tb_show('添加卡片',urls,"thickbox");
+}
+function card_list(type){
+	if(type == 1){
+		get_channel_all();
+	}
+	setTimeout(function(){
+		var site_id = $("#site_id").val();
+		var channle_id = $("#channle_id").val();
+		window.location.href="__URL__/card_list?site_id="+site_id+"&channle_id="+channle_id;
+	}, 500);
+
+}
+
+function get_channel_all(){
+	var contact_id = "{$channle_id}";
+	var contact_site_id = $('#site_id').val();
+	$.ajax({
+		url: '__URL__/pub_channel_list?site_id='+contact_site_id,
+		type: 'get',
+		dataType: 'json',
+		success: function(ret) {
+			var str = '<select id="channle_id" name="channle_id" onchange="card_list();" >';
+			for(var i in ret){
+				if(ret[i].id != 'undefined'){
+					if(ret[i].id == contact_id){
+						var str2 = 'selected="selected"';
+					}else{
+						if(i==0){
+							var str2 = 'selected="selected"';
+						}else{
+							var str2 = '';
+						}
+					}	
+					//console.log(ret[i].id);
+					str += '<option value="'+ret[i].id+'"'+str2+'>'+ret[i].channel_name+'</option>';
+				}
+			}	
+			str += '</select>'; 	
+			$('#channle_td').html(str);
+		}
+	});	
+}
+</script>

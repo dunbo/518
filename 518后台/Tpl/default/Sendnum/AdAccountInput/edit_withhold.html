@@ -1,0 +1,85 @@
+<script>
+    function submit_check() {
+        var withhold_input = $.trim($("#withhold_input").val());
+        
+        if (!withhold_input) {
+            $("#withhold_input_hint").html('<br/><label>&nbsp;</label><label style="width:200px;text-align:left"><font color="red">请输入收款金额</font></label>');
+            return false;
+        } else {
+            var ret = check_input(withhold_input, false);
+            if (!ret)
+                return false;
+            $("#withhold_input_hint").html('');
+        }
+        
+        return true;
+    }
+    
+    function check_input(input, b_async) {
+        var contract_id = $.trim($("#contract_id").val());
+        var id = $.trim($("#id").val());
+        var param = {
+            input : input,
+            contract_id : contract_id,
+            id : id
+        };
+        var ret = true;
+        $.ajax({
+            url : "__URL__/check_withhold_input",
+            type : "post",
+            async : b_async,
+            secureuri : false,
+            dataType : 'json',
+            data : param,
+            success : function (data) {
+                if (data.status != 0) {
+                    $("#withhold_input_hint").html('<br/><label>&nbsp;</label><label style="width:200px;text-align:left"><font color="red">' + data.info + '</font></label>');
+                    ret = false;
+                } else {
+                    $("#withhold_input_hint").html('');
+                    ret = true;
+                }
+            }
+        });
+        return ret;
+    }
+    
+</script>
+
+<div>
+    <form action="__URL__/edit_withhold" method="post">
+        <div class="form_list_one">
+            <label>待抵扣保证金收款：</label>
+            <label>{$available_withhold} 元</label>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>待抵扣保证金发票：</label>
+            <label>{$available_withhold_invoice} 元</label>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label><font color="red">*</font>此次抵扣：</label>
+            <input type="text" class="input_text widen" name="withhold_input" id="withhold_input" onblur="check_input(this.value,true)" value="{$record.withhold_input}"/>
+            <span id="withhold_input_hint"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>&nbsp;</label>
+            <label style="width:220px;font-size:8px;text-align:left">抵扣金额要小于待抵扣保证金发票金额</label>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>备注：</label>
+            <textarea style="width:200px" name="remark" id="remark">{$record.remark}</textarea>
+        </div>
+        <div class="clear"></div>
+        <input type="hidden" name="contract_id" id="contract_id" value="{$contract_id}">
+        <input type="hidden" name="month" id="month" value="{$month}">
+        <input type="hidden" name="id" id="id" value="{$record.id}">
+        <div class="form_btns_box">
+            <input type="submit" value="确定" onclick="return submit_check();" style="margin-left:155px"/>
+            <input type="button" onclick="tb_remove()" value="取消"/>
+        </div>
+    </form>
+</div>

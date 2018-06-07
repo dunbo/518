@@ -1,0 +1,31 @@
+
+评论逻辑说明：
+	相关表： sj_soft_comment 软件评论表 
+			 相关字段：status (0|1|2) is_new (0|1) processed(0|1|2) all_post(0|1...) content(''|'comment') new_score(0|1) 
+			 sj_post 评论回复表
+
+	旧版：只显示一条评论(评论和评分一起提交) 用is_new 来标示，覆盖掉之前的is_new = 0 and status = 2
+
+	新版：评论和评分分开提交，分两条存储，可以无限评论，最新的评论和评分(两条) is_new = 1 
+		  评分只有一条，content = '' and new_score > 0 and is_new = 1
+
+		  评论有多条，评论时若已经评分，则将评分同步过来 is_new  = 1 同时将其他数据的 is_new = 0
+		  					若无评分，则 is_new = 0 
+
+
+旧版读新版的数据，is_new = 1 and content != ''
+
+
+
+post 数据新旧分离
+
+通过 is_old 来判断 默认1为旧数据，新数据为2
+
+     all_post_new 新版的回复数
+
+
+
+ALTER TABLE `sj_post`
+ADD COLUMN `version_num`  int(11) NOT NULL DEFAULT 0 COMMENT '版本号' AFTER `conver_id`,
+ADD COLUMN `all_post_new`  int(11) NOT NULL DEFAULT 0 COMMENT '新版回复数' AFTER `version_num`;
+

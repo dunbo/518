@@ -1,0 +1,318 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>新服开服列表</title>
+<style type="text/css">
+body, td, th {font-size: 12px;height:35px;}
+</style>
+	<link rel="stylesheet" type="text/css" href="/Public/css/tablelist.css" />
+	<link type="text/css" href="/Public/css/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
+	<link type="text/css" href="/Public/css/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+	<script type="text/javascript" src="/Public/school/js/jquery-1.6.2.min.js"></script>
+	<script type="text/javascript" src="/Public/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+	<!--<script type="text/javascript" src="/Public/js/json2.js"></script>
+	<script type="text/javascript" src="/Public/js/jquery-ui-timepicker-addon.js"></script>
+    <script type="text/javascript" src="/Public/js/jquery-ui-timepicker-zh-CN.js"></script>-->
+	<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+	<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+	<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/css/tablelist.css" />
+	<script type="text/javascript" src='/Public/js/jquery.js'></script>
+	<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+	<link type="text/css" href="/Public/js/My97DatePicker/skin/WdatePicker.css" />
+
+</head>
+<body>
+<div style="width:99%; margin-top:4px">
+	<div class="search_box" align="center">
+		游戏开服列表
+	</div>
+	<div style="margin:10px;float:right;"><button style="float:left; margin-right:15px; display:inline; cursor:pointer;" onclick="popup('_add_div')" class="search_btn">添加新服</button></div>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="5%">序号</th>
+				<th width="9%" bgcolor="#E3E2FE">应用名称</th>
+				<th width="12%" bgcolor="#E3E2FE">开服时间</th>
+				<th width="9%" bgcolor="#E3E2FE">服务器名称</th>
+				<th width="10%" bgcolor="#E3E2FE">简介</th>
+				<th width="15%" bgcolor="#E3E2FE">操作</th>
+				<th width="15%" bgcolor="#E3E2FE">排序</th>
+				<th width="8%" bgcolor="#E3E2FE">网游精选配置状态</th>
+			</tr>
+		</thead>
+		<tbody>
+				<volist name ='value' id='vo'>
+			    <tr>
+					<td class ='{$vo.id}'>{$vo.pid}</td>
+					<td class="left">{$vo.pack_name}</td>
+					<td class="left">{:date("Y-m-d H:i:s",$vo['begin'])}</td>
+					<td class="left">{$vo.new_server_name}</td>
+					<php>if($vo['comment'] ==''){ </php>
+						<td align="center">---</td>
+					<php>}else{</php>
+						<td align="center">{$vo.comment}</td>
+					<php>}</php>
+
+					<td align="center">
+
+					<a href="__URL__/update_server_show?id={$vo.id}" class="thickbox">【编辑】</a>
+
+					<a href="__URL__/del_new_server?id={$vo.id}" onclick="deleteOne(4)" class="blue">【删除】</a>	
+					<php> if($vo['stats'] ==0){ </php>
+						<a href='javascript:if(confirm("您是否确认将该条信息配置到网游精选中显示?"))location="__URL__/start_server?id={$vo.id}&stats={$vo.stats}"'>【开启】</a>
+						
+					<php>}else if($vo['stats'] ==1){</php>
+						<a href='javascript:if(confirm("您确认要移除该信息在网游精选中的显示?"))location="__URL__/start_server?id={$vo.id}&stats={$vo.stats}"'>【关闭】</a>
+					<php>}</php>
+					</td>
+					<td align="center">	
+						<a href='__URL__/server_top?id={$vo.id}&sort={$vo.sort}'>【置顶】</a>
+						<!--判断上移-->
+						<php> if($vo['sort'] == $min){ </php>	
+						<php>}else{</php>
+						<a href='__URL__/server_up?id={$vo.id}&sort={$vo.sort}&type=up'>【上移】</a>
+						<php>}</php>
+						<!--判断下移-->
+						<php> if($vo['sort'] == $max){ </php>	
+						<php>}else{</php>
+						<a href='__URL__/server_up?id={$vo.id}&sort={$vo.sort}&type=down'>【下移】</a>
+						<php>}</php>
+					</td>
+					<td align="center">
+					<php> if($vo['stats'] ==1){ </php>
+						【已开启】
+					<php>}else if($vo['stats'] ==0){</php>
+						---
+					<php>}</php>
+					</td>
+				</tr>			
+				</volist>
+				<tr  height="50">
+				
+			 </tr>
+		</tbody>
+	</table>
+	<center>
+	{$page}
+	</center>
+</div>
+<!--添加新服-->
+<!--添加新服-->
+<script>
+function get_softname(){
+	var pkg = $('#apply_pkg').val();
+	$.ajax({
+		url: '/index.php/Sj/Onlinegame/get_softname/package/'+pkg,
+		type: 'get',
+		success: function(data){
+			if(data != 2){
+				var obj = eval('(' + data + ')');
+				
+				$('#soft_name').val(obj.soft_name);
+				$('#my_game').val(obj.category_name);
+			}else{
+				$('#soft_name').val('');
+				$('#my_game').val('');
+				alert("该软件不存在");
+				return false;
+			}
+		}
+	});
+}
+</script>
+<div id="_add_div" style="position:absolute;top:150px;left:350px;display:none;background:#EEEEEE;width:550px;height:auto;border:1px solid #000;font-size:14px;">
+	<form name="form_add" method="post" action="/index.php/Sj/Onlinegame/add_new_server" id="_form_add"  style="width:100%;height:100%;" onsubmit="return jc()">
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+		<tr>
+			<td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">添加新服：</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">应用包名：</td><td align="left" style="padding-left:10px;"><input type="text" value="" id="apply_pkg" onblur="get_softname();" name="pack_name"/></td>
+		</tr>
+        <tr>
+			<td class="td1" align="right">软件名称：</td>
+			<td align="left" style="padding-left:10px;"><input type="text" name="soft_name" id="soft_name" readonly /></td>
+		</tr>
+		<tr>
+			<td  align="right">开始时间：</td><td align="left" style="padding-left:10px;" id="softname">
+			<input type="text" name="begin" class="ui_timepicker" value="" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" />
+			</td>
+			</td>
+		</tr>
+
+		<tr>
+			<td class="td1" align="right">新服名称：</td><td align="left" style="padding-left:10px;" id="softname">
+			<input type="text" value="" name="new_server_name" id='new_server_name' onBlur="gbname(form.new_server_name);" /></td>
+			</td>
+		</tr>
+
+
+		<tr>
+			<td class="td1" align="right">简介：</td>
+			<td>
+			<textarea id="update_content" name="comment" rows="4" cols="40"   onKeyDown="gbcount(this.form.update_content);" onKeyUp="gbcount(this.form.update_content);"></textarea>
+			</td>
+			</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">简介限制在50字之内</td>
+		</tr>
+		<tr id="cut_add_input">
+			<td colspan="2" style="text-align:center;">
+			<!--<button style="margin:15px;" type="submit">确定</button>-->
+			<input type="button" value="确定" onClick="form_add.submit();">
+			<input type="button" value="取消" onClick="popclose('_add_div')">
+			
+			<!--<button type="button" onclick="popclose('_add_div')">取消</button></td>-->
+		</tr>
+	</table>
+	<input type="hidden" name="__hash__" value="4a674d3b2b9cb54d6467a3ced6861674" />
+	<input type="hidden" name="xin_str" id="hidden_name_01" />
+	</form>
+</div>
+
+<div style="width:92%; padding-top:4px; text-align:right"></div>
+
+<script>
+$('input#package').live('blur',function(){
+	var packages = $.trim($(this).val());
+	var url = '/index.php/Sj/AbiWhiteList/GetSoftname';
+    var data = '&package='+packages;
+    var _this = $(this);
+    $.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		success: function(data){
+				if(!!data && data.success){ 
+					$('#softname').html(data.softname);
+				}
+		},
+	    error: function(){
+	    	alert('对不起，服务器错误，请联系管理员！');
+	    }
+     })
+});
+function deleteOne(pid){
+	if (!confirm("确定要删除该项么？"))
+		return false;
+	window.location="/index.php/Sj/AbiWhiteList/abi_del/id/%5b%22" + pid + "%22%5d/type/1";
+}
+var flag = false;
+function selectAll(){
+	if(!flag){
+		$("[name='id[]']").each(function(){
+			$(this).attr('checked',true);
+		});
+		
+		flag = true;
+		return;
+	}
+	if(flag){
+		$("[name='id[]']").each(function(){
+			$(this).attr('checked',false);
+		});
+		
+		flag = false;
+		return;
+	}	
+}
+function deleteAll(){
+
+	var count = 0;
+	var id = new Array();
+	checkall = document.getElementsByTagName("input");
+	for (i = 0; i < checkall.length; i++)
+	{
+		if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+		{
+			id[count] = checkall[i].id;
+			count++;
+		}
+	}
+	if(id==''){
+		alert('请选择相关软件！');
+		return false;
+	}
+	if (!confirm("确定要删除选定项么？"))
+		return false;
+	
+	url = encodeURI(JSON.stringify(id));
+	url = "/index.php/Sj/AbiWhiteList/abi_del/type/1/id/" + url;
+	window.location = url;
+}
+function popup(id,user_id) {
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+}
+function popclose(id) {
+	$("#"+id).css({display:"none"});
+	$("#bgdiv").css({display:"none"});
+}
+function gbcount(message)
+{
+	var max;
+	max = 50;
+	if (message.value.length > max) {
+		message.value = message.value.substring(0,max);
+		alert("简介不能超过 50 个字!");
+	}
+	else {}
+}
+function gbname(message)
+{
+	var min;
+	var max;
+	min = 1;
+	max = 8;
+	//var messageLength = message.value.length;
+	document.getElementById('hidden_name_01').value = messageLength;
+	var messageLength = message.value.replace(/\s+/gi,'').length;
+	if (messageLength < min) {
+		message.value = message.value.substring(0,min);
+		alert("新服名称不能少于 1 个字!");
+		return false;
+	}
+	else if(messageLength > max){
+		message.value = message.value.substring(0,max);
+		alert("新服名称不能超过 8 个字!");
+		return false;
+	}
+}	
+
+
+/*function gbname(obj)
+{
+	var min;
+	var max;
+	var str;
+	min = 1;
+	max = 8;
+
+	obj.value = obj.value.replace(/\s+/gi,"");
+
+	length = obj.value.length;
+
+	if(length<min)
+	{
+		alert("新服名称不能少于 1 个字!");
+		return false;
+	}
+	else if(length>max)
+	{
+		alert("新服名称不能超过 8 个字!");
+		return false;
+	}
+}*/
+
+
+</script>
+</body>
+</html>

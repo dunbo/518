@@ -1,0 +1,103 @@
+<html>
+<style>
+.red{color:red;}
+.green{color:green;}
+input{height:31px !important;}
+</style>
+<script>
+	var check_name = 1;
+	var check_contact = 1;
+        var check_contact1 = 1;
+	var check_num = 1;
+	var check_none = 1;
+
+	function check_name1(){
+            if($('#ratecard_name').val() == ""){
+                $('#my_error').html('刊例名称为必填项');
+                check_none = 2;
+            }else if($('#ratecard_name').val().length>50){
+                $('#my_error1').html('刊例名称不能超过50个字符');
+                check_contact1 = 2;
+            }else{
+                 $('#my_error').html('');
+                 $('#my_error1').html('');
+                check_none = 1;
+                check_contact1 = 1;
+            }
+
+            if($('#ratecard_remark').val().length>255){
+                $('#my_error_contact').html('刊例备注不能超过255个字符');
+                check_contact = 2;
+            }else{
+                 $('#my_error_contact').html('');
+                check_contact = 1;
+            }
+        }
+	function check_all(){
+            if(!$('#ratecard_name').val()){
+                    $('#my_error').html('刊例名称为必填项');
+                    check_none = 2;
+            }else{
+                    $('#my_error').html('');
+                    check_none = 1;
+
+            }
+            if($('#ratecard_name').val().length>50){
+
+                    $('#my_error1').html('刊例名称不能超过50个字符');
+                    check_contact1 = 2;
+            }else{
+                    $('#my_error1').html('');
+                    check_contact1 = 1;
+            }
+            if($('#ratecard_remark').val().length>255){
+
+                    $('#my_error_contact').html('刊例备注不能超过255个字符');
+                    check_contact = 2;
+            }else{
+                    $('#my_error_contact').html('');
+                    check_contact = 1;
+            }
+
+            if(check_name == 2 || check_none == 2 || check_contact == 2 || check_num == 2 || check_contact1 == 2){
+                  return false;
+            }
+	}
+
+</script>
+<body>
+
+<form id="edit_ratecard_form" action="__URL__/edit_ratecard_do/id/{$ratecard_id}" method="POST" class="yahei">
+    <td><span class="red">*</span>刊例名称：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><input type="text" name="ratecard_name" style="width:200px;" id="ratecard_name" onblur="check_name1();" value="{$ratecard_name}"/></td><td><span style="color:red;" id="my_error"></span><span style="color:red;" id="my_error1"></span></td><br><br>
+    <td>选择文件：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>导入刊例后不能再次选择文件上传</td><br><br>
+    <td>备注：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><input type="text" name="ratecard_remark" onblur="check_name1();" style="width:200px;" id="ratecard_remark" value="{$ratecard_remark}"/></td><td><span style="color:red;" id="my_error_contact"></span></td><br><br>
+    <td><span id="message" class="red"></span></td><br><br>
+
+    <div style="margin:10px auto;padding:0px 30px;">
+	<button class="btn btn-success yahei" type="submit" onclick="return check_all();" style="padding-left:20px;padding-right:20px;margin-left:100px;">保存</button>
+	<button class="btn btn-default yahei" type="button" onClick="tb_remove()"style="padding-left:20px;padding-right:20px;margin-left:30px;">取消</button>
+	</div>
+
+</form>
+
+<script>
+$(function(){
+	$('#edit_ratecard_form').submit(function(){
+
+		$.post($(this).attr('action'), $(this).serialize(), function(json){
+			if(json.result_no < 0)
+				$('#message').html(json.result_msg);
+			else
+			{
+
+				location.reload();
+			}
+		}, "json");
+
+		return false;
+	});
+});
+</script>
+
+</body>
+</html>

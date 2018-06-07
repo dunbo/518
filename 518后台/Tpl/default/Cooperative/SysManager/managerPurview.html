@@ -1,0 +1,116 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link type="text/css" href="/Public/css/co_common.css" rel="stylesheet" />
+<link type="text/css" href="/Public/css/co_managers.css" rel="stylesheet" />
+<script type="text/javascript" src="/Public/js/jquery.js"></script>
+<script type="text/javascript" src="/Public/js/co_public.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+function stopAdmin(id){
+	var r=confirm("停用该账号！");
+	if (r==true){
+		$.ajax({
+			type: "GET",
+			url: "/index.php/Cooperative/SysManager/stopAdmin/",
+			data: 'id='+id,
+			dataType: "json",
+			success: function(json){
+				if(json!=1){
+					alert('停用失败！');
+				}
+				window.location.reload();
+			}
+		});		
+	}
+}
+function restoreAdmin(id){
+	var r=confirm("恢复该账号！");
+	if (r==true){
+		if (r==true){
+			$.ajax({
+				type: "GET",
+				url: "/index.php/Cooperative/SysManager/restoreAdmin/",
+				data: 'id='+id,
+				dataType: "json",
+				success: function(json){
+					if(json!=1){
+						alert('恢复失败！');
+					}
+					window.location.reload();
+				}
+			});		
+		}
+	}
+}
+function delAdmin(){
+	var r=confirm("删除该账号！");
+	if (r==true){
+		return true;
+	}else{
+		return false;
+	}
+}
+
+</script>
+	<div class="content">
+		<div class="nav_page">安智合作运营平台>管理员列表</div>
+		<div class="search_box">
+			<form method="get" action='/index.php/Cooperative/SysManager/managerPurview'>
+				<table cellpadding="0" cellspacing="0" class="search_table">
+					<tbody>
+						<tr><td><h2>管理员列表：</h2></td></tr>
+						<tr>
+							<td width="15%"><input name='search' type="text" class="search_item_text" style="width:180px" value="<?php if($search){ ?>{$search}<?php }else{ ?>请输入管理员用户名<?php } ?>" onfocus="if(this.value=='请输入管理员用户名'){this.value=''}" onblur="if(value==''){value='请输入管理员用户名'}"/></td>
+							<td width="85%"><input type='submit' value=' 搜索' class="search_btn" /></td>
+						</tr>
+			</form>
+						<tr>
+							<td colspan="2"><a href="__URL__/adminList/" class="thickbox search_btn search_btn2" style="border-bottom:1px solid #bdbdbd">添  加</a></td>
+						</tr>
+					</tbody>
+				</table>
+		</div>
+		<div class="tablelist_box">
+			<table cellpadding="0" cellspacing="0" class="table_list">
+				<thead>
+					<tr>
+						<th width="5%">序号</th>
+						<th width="8%">用户名</th>
+						<th width="15%">添加时间</th>
+						<th width="8%">登录次数</th>
+						<th width="10%">查看日志</th>
+						<th width="10%">状态</th>
+						<th width="44%">操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<volist name='list' id='info'>
+					<tr>
+						<td>{$info.num}</td>
+						<td>{$info.aname}</td>
+						<td><?php echo date('Y-m-d',$info['create_time']).'<br />'.date('H:i:s',$info['create_time']); ?></td>
+						<td>{$info.admin_visits}</td>
+						<td><a href="__URL__/logList/admin_id/{$info.aid}/start_tm/{$month_ago}/end_tm/{$today}" class="blue">查看</a></td>
+						<td><if condition="$info.status eq 1">正常<elseif condition="$info.status eq 2" />暂停</if></td>
+						<td class="table_btna"><a href="__URL__/editAdmin/aid/{$info.aid}/search/{$search}">编辑</a><if condition="$info.status eq 1"><a href="javascript:;" onclick="stopAdmin({$info.id});">停用</a><elseif condition="$info.status eq 2" /><a href="javascript:;" onclick="restoreAdmin({$info.id});">恢复</a></if><a href="__URL__/delAdmin/id/{$info.id}" onclick="return delAdmin();">删除</a><a href="__URL__/copyAdmin/id/{$info.id}/aid/{$info.aid}/search/{$search}/" class="thickbox">复制</a></td>
+					</tr>
+					</volist>
+				</tbody>
+			</table>
+			<div class="pagebars">
+				<table cellpadding="0" cellspacing="0" width="100%">
+					<td class="pagebars_right right">
+					  {$page}
+					</td>
+				</table>
+			</div>
+		</div>
+		<div class="table_infors">
+			<p class="red">
+				注：<br/>该列表用于配置用户管理合作方账号的权限
+			</p>
+		</div>
+	</div>
+	<div class="clear"></div>
+</div>
+<!--content end-->

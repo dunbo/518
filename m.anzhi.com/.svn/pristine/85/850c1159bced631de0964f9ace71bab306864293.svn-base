@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>专题</title>
+<link type="text/css" rel="stylesheet" href="/static/feature/css/feature_new_common.css?v8"/>
+<style type="text/css">
+body {background: white;}
+.app_inro,.app_des{color:#a4a4a4}
+.app1{min-height:60px;}
+.app_txt .app_name {padding: 0 0 4px;}
+.line { margin: 10px 0; height: 1px; overflow: hidden;}
+.mod_m{padding:0 12px}
+.app_icon{left:0;}
+.app_btn{right:0; background:#17d7fe}
+.comment_list li{margin-left:12px; margin-right:12px;}
+.comment_list li .replay_list li{margin-left:0; margin-right:0}
+.replay_list .comment_r {margin-right:5px}
+</style>
+<script type="text/javascript" src="/js/TouchSlide.1.1.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js?v2"></script>
+<script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="/js/underscore.js"></script>
+<script type="text/javascript" src="/js/anzhi-fd-min.js"></script>
+</head>
+<script type="text/javascript">
+function bytesToSize(bytes) {  
+       if (bytes === 0) return '0 B';  
+        var k = 1024;  
+        sizes = ['B','KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];  
+        i = Math.floor(Math.log(bytes) / Math.log(k));  
+        return (bytes / Math.pow(k, i)).toPrecision(3)  + ' ' + sizes[i];   
+       //toPrecision(3) 后面保留一位小数，如1.0GB                                                                        //return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];  
+} 
+$(document).ready(function(){
+    $(".app_btn").live('click', down_action);
+    setTimeout('lazy_load()', 50);
+});
+
+function down_action() {
+    var rel = $(this).attr('rel');
+    var info_arr = rel.split(',');
+    var info_len = info_arr.length;
+    if (info_len < 2) {
+        return false;
+    }
+    var id = $.trim(info_arr[0]);
+    var pkg = $.trim(info_arr[1]);
+    var puid = 0;
+    if (info_len > 2) {
+        puid = $.trim(info_arr[2]);
+    }
+
+    var args = getArgs();
+    var js_param = {type:'details', id:id, pkg:pkg, flag:1, from:2};
+    if (typeof(args['auto']) != 'undefined') {
+        var php_param = {type:'feature', id:args.id, chl_cid:args.chl_cid,pkg:pkg};
+    } else {
+        var php_param = {type:'feature', id:args.id, chl_cid:args.chl_cid};
+    }
+    Azfd.share_download(js_param, php_param);
+    return false;
+}
+
+var curr_type = 0; curr_index = 0; page=0;
+
+function lazy_load()
+{
+    var json_data = window.AnzhiActivitys.getSubjectDetail(0,20);
+    var cmd = 'var data1=' + json_data;
+    eval(cmd);
+    $('#main_content').html(_.template($('#main_tpl').html(),data1));
+    document.title = data1.SUBJECT_NAME;
+
+    // var json_data = window.AnzhiActivitys.getSubjectCommentList(0,20);
+    // var cmd = 'var data=' + json_data;
+    // eval(cmd);
+    // $('#comment_wrap').html(_.template($('#comment_tpl').html(),data));
+
+}
+
+</script>
+<body style="position:relative;">
+    <div id="main_content">
+
+    </div>
+        <a name="for_comment"></a>
+<div class="comment_wrap" id="comment_wrap" style="background: rgb(255, 255, 255) none repeat scroll 0% 0%; padding: 0 0px 10px;">
+</div>
+<div id="applist_more" style="background:#fff; padding: 0 0 10px;  overflow: hidden;display:none;">
+    <div class="applist_more" >
+        <a href="javascript:" onclick="add_more_comment();">点击加载更多</a>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/template" id="main_tpl">
+<div class="main" id="maindesc>">
+    <div class="mod_m" > 
+        <div class="description"><p><%=SUBJECT_DESC%></p></div>
+    </div>
+</div>    
+<% for(var i = 0; i < DATA.length; i++) { %>
+    <% var data = DATA[i];%>
+    <% if(data.TYPE == 2){ %>
+<div class="main" id="main<%=data.SECTION_ID%>">
+    <div class="mod_m" > 
+        <div class="description"><p><%=data.COMPOUND_TEXT%></p></div>
+
+        <% var h = i+1; %>
+        <% if(typeof(DATA[h]) != 'undefined' && DATA[h]['TYPE'] == 1) { %>
+        <% var hdata = DATA[h];i=h;%>
+        <div class="line"><img src="http://img3.anzhi.com/static/feature/images/long_line.png"/></div>
+        <% for(var j = 0; j < hdata['INFO'].length; j++) { %>
+        <% var val=hdata['INFO'][j] %>
+        <div class="app1">
+            <div class="app_icon">
+                <img onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val[1]%>" alt="<%=val[2]%>" />
+            </div>
+            <div class="app_txt">
+                <div class="app_name"><%=val[2]%></div>
+                <div class="app_inro"><span><%=bytesToSize(val[9])%></span>&nbsp&nbsp&nbsp<em><%=val[11]%>次下载</em></div>
+                <div class="app_des"><%=val[23]%></div>
+                <a href="javascript:" class="app_btn" rel="<%=val[0]%>,<%=val[7]%>">下载</a>
+            </div>
+        </div>
+		<div class="line"><img src="http://img3.anzhi.com/static/feature/images/long_line.png"/></div>
+        <% }%>
+        
+        <% }%>
+    </div>
+</div>
+    <% } else {%>
+<div class="main" id="main<%=data.SECTION_ID%>">
+    <div class="mod_m" > 
+        <div class="line"><img src="http://img3.anzhi.com/static/feature/images/long_line.png"/></div>
+        <% for(var j = 0; j < data['INFO'].length; j++) { %>
+        <% var val=data['INFO'][j] %>
+        <div class="app1">
+            <div class="app_icon">
+                <img onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val[1]%>" alt="<%=val[2]%>" />
+            </div>
+            <div class="app_txt">
+                <div class="app_name"><%=val[2]%></div>
+                <div class="app_inro"><span><%=bytesToSize(val[9])%></span>&nbsp&nbsp&nbsp<em><%=val[11]%>次下载</em></div>
+                <div class="app_des"><%=val[23]%></div>
+                <a href="javascript:" rel="<%=val[0]%>,<%=val[7]%>" class="app_btn">下载</a>
+            </div>
+        </div>
+        <div class="line"><img src="http://img3.anzhi.com/static/feature/images/long_line.png"/></div>
+        <% }%>
+    </div>
+</div>    
+    <% }%>
+<% }%>    
+</script>
+<script type="text/template" id="comment_tpl">
+<%   var add_ul  = page;
+    for(var i = 0; i < DATA.COMMENTS.length; i++) { 
+        var val = DATA.COMMENTS[i];
+        if(val.TYPE != curr_type) { 
+        if(curr_type > 0) { %>
+            </ul>
+        <% } %> 
+        <div class="comment_title"><%=DATA.GROUP_INFO[curr_index][1]%></div>
+        <% curr_type = val.TYPE; curr_index++; %>
+        <ul class="comment_list">
+    <% } if(add_ul >0) { %><ul class="comment_list"><% add_ul=0; } %>
+    <li>
+        <img class="comment_img" onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=val['USER'][2]%>">
+        <div class="comment_r">
+            <div class="comment_name clear">
+                <p><%=val['USER'][1]%></p>
+                <span><%=val['COMMENT'][3]%></span>
+            </div>
+            <p class="comment_cnt"><%=val['COMMENT'][1]%></p>
+            <div class="comment_info">
+                <p class="phone_verson"><%=val['COMMENT'][6]%></p>
+                <div class="comment_infor">
+                    <a href="javascript:" onclick="window.AnzhiActivitys.startSubjectCommentDetail(<%=val['COMMENT'][0]%>);"><span class="comment_infor2">(<%=val['COMMENT'][4]%>)</span></a>
+                    <a href="javascript:"  onclick="add_praise(this,<%=val['COMMENT'][0]%>,<%=val['COMMENT'][5]%>)">
+                        <span class="comment_num">
+                        <%  var comment_id = parseInt(val['COMMENT'][0]);
+                            if(window.AnzhiActivitys.isSubjectCommentPraised(comment_id)==true)
+                            {%>
+                                <i class="comment_icon  comment_act"></i>
+                            <%} 
+                            else {%>
+                                <i class="comment_icon"></i><font>+1</font>
+                            <%}
+                        %>
+                            (<%=val['COMMENT'][5]%>)
+                        </span>
+                    </a>
+                    <em <% if(val.REPLAY.length<1) { %> style="background:none;"<% } %>></em>
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+        <% if(val.REPLAY.length>0) { %>
+        <ul class="replay_list">
+            <%for(var j = 0; j < val.REPLAY.length; j++) { 
+                var re_val = val.REPLAY[j]; %>
+                <li>
+                    <img class="comment_img" onerror="javascript:this.src='/images/ic_app_default.png'" src="<%=re_val[2]%>">
+                    <div class="comment_r">
+                        <div class="comment_name clear">
+                            <p><%=re_val[1]%></p>
+                            <span><%=re_val[6]%></span>
+                        </div>
+                        <p class="comment_cnt"><%=re_val[7]%><% if(re_val[8]==3) { %>//@<%=re_val[9]%>:<%=re_val[11]%><% }%></p>
+                        <div class="comment_info">
+                            <p class="phone_verson"><%=re_val[5]%></p>
+                        </div>
+                    </div>
+                </li>
+            <%} %>
+            <div class="clear"></div>
+        </ul>
+        <% } %>
+    </li>
+<%}
+    if(curr_type > 0) { %>
+    </ul>
+<% } %> 
+</script>
+
+
+<script type="text/javascript">
+    function add_more_comment()
+    {
+        var is_have = window.AnzhiActivitys.getSubjectCommentList(0,20);
+        if(is_have) 
+        {
+            page++;
+        }
+        var size = 20;
+        var start = page*size;
+        var json_data = window.AnzhiActivitys.getSubjectCommentList(start,size);
+        
+        var cmd = 'var data=' + json_data;
+        eval(cmd);
+        if(data.DATA.COMMENTS.length>0)
+        {
+            $('#comment_wrap').append(_.template($('#comment_tpl').html(),data));
+            if(data.DATA.COMMENTS.length<size)
+            {
+                $('#applist_more').css('display','none');
+            }
+        }
+    }       
+</script>

@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>ABI黑名单列表</title>
+<style type="text/css">
+body, td, th {font-size: 12px;height:35px;}
+</style>
+<link rel="stylesheet" type="text/css" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="/Public/js/json2.js"></script>
+</head>
+<body>
+<div style="width:99%; margin-top:4px">
+	<div class="search_box">
+		<form action="__URL__/abilist" method="get">
+		<table width="99%" cellpadding="0" cellspacing="0">
+			<tbody align="middle">
+				<td align="left">
+		&nbsp&nbsp软件名称：<input type="text" name="softname"  value="{$softname}" width="100%">&nbsp&nbsp
+				软件包名：<input type="text" name="package" value="{$package}" width="100%">
+				&nbsp&nbsp<input type="submit" value="搜索" style="margin-right:15px; display:inline; cursor:pointer;" class="search_btn" />
+				</td>
+			</tbody>
+		</table>
+	</form>
+	</div>
+	
+	<div style="margin:10px;float:right;"><button style="float:left; margin-right:15px; display:inline; cursor:pointer;" onclick="popup('_add_div')" class="search_btn">添加软件</button></div>
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="3%"><input type="checkbox" value="全选" onclick="selectAll();"></th>
+				<th width="25%" bgcolor="#E3E2FE">软件信息</th>
+				<th width="15%" bgcolor="#E3E2FE">CPU类型</th>
+				<!--<th width="15%" bgcolor="#E3E2FE">开发者</th>
+				--><th width="15%" bgcolor="#E3E2FE">添加时间</th>
+				<th width="12%" bgcolor="#E3E2FE">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="list">
+				<tr>
+					<td><input type="checkbox" name="id[]" id="{$list.id}"></td>
+					<td class="left">{$list.softname}<br />{$list.package}</td>
+					<td class="left">{$list.abi}</td>
+					<!--<td class="left">{$list.dev_name}</td>
+					--><td align="center"> {$list.add_time|date='Y-m-d H:i:s',###|default='&nbsp;'} </td>
+					<td align="center">
+						<a href="javascript:void(0);" onclick="deleteOne({$list.id})" class="blue">删除</a>
+					</td>
+				</tr>
+			</volist>
+			<tr  height="50">
+  <td colspan="5" style="align:left">
+     <input type="checkbox" onclick="selectAll();" style="float:left;margin:0 15px;"/>
+	<button style="float:left; margin-right:15px; display:inline; cursor:pointer;" onclick="deleteAll();" class="search_btn">批量删除</button>
+  </td>
+  </tr>
+		</tbody>
+	</table>
+</div>
+<div id="_add_div" style="position:absolute;top:150px;left:350px;display:none;background:#EEEEEE;width:550px;height:auto;border:1px solid #000;font-size:14px;">
+	<form name="form_add" method="post" action="__URL__/oper/type/0" id="_form_add"  style="width:100%;height:100%;">
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+		<tr>
+			<td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">添加软件：</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">软件包名：</td><td align="left" style="padding-left:10px;"><input type="text" value="" name="package"  id="package" /></td>
+			<input type="hidden" value="add" name="sub_type"  />
+		</tr>
+		<tr>
+			<td class="td1" align="right">软件名称：</td><td align="left" style="padding-left:10px;" id="softname"></td>
+			
+		</tr>
+		<tr>
+			<td class="td1" align="right">针对CPU类型可见：</td><td align="left" style="padding-left:10px;">
+			<br/><label><input type="radio" value="1" name="abi" />ABI_ARMEABI(普通机型)</label>
+			<br/><label><input type="radio" value="2" name="abi" />ABI_ARMEABI_V7A(普通机型)</label>
+			<br/><label><input type="radio" value="4" name="abi" />ABI_X86(pc)</label>
+			<br/><label><input type="radio" value="8" name="abi" />ABI_MIPS(mips机型)</label>
+			</td>
+		</tr>
+		<tr id="cut_add_input">
+			<td colspan="2" style="text-align:center;"><button style="margin:15px;" type="submit">确定</button><input name="sub_type" type="hidden" value="add" /><button type="button" onclick="popclose('_add_div')">取消</button></td>
+		</tr>
+	</table>
+	</form>
+</div>
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+<script>
+$('input#package').live('blur',function(){
+	var packages = $.trim($(this).val());
+	var url = '__URL__/GetSoftname';
+    var data = '&package='+packages;
+    var _this = $(this);
+    $.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		success: function(data){
+				if(!!data && data.success){ 
+					$('#softname').html(data.softname);
+				}
+		},
+	    error: function(){
+	    	alert('对不起，服务器错误，请联系管理员！');
+	    }
+     })
+});
+function deleteOne(pid){
+	if (!confirm("确定要删除该项么？"))
+		return false;
+	window.location="__URL__/abi_del/id/%5b%22" + pid + "%22%5d/type/0";
+}
+var flag = false;
+function selectAll(){
+	if(!flag){
+		$("[name='id[]']").each(function(){
+			$(this).attr('checked',true);
+		});
+		
+		flag = true;
+		return;
+	}
+	if(flag){
+		$("[name='id[]']").each(function(){
+			$(this).attr('checked',false);
+		});
+		
+		flag = false;
+		return;
+	}	
+}
+function deleteAll(){
+
+	var count = 0;
+	var id = new Array();
+	checkall = document.getElementsByTagName("input");
+	for (i = 0; i < checkall.length; i++)
+	{
+		if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+		{
+			id[count] = checkall[i].id;
+			count++;
+		}
+	}
+	if(id==''){
+		alert('请选择相关软件！');
+		return false;
+	}
+	if (!confirm("确定要删除选定项么？"))
+		return false;
+	
+	url = encodeURI(JSON.stringify(id));
+	url = "__URL__/abi_del/type/0/id/" + url;
+	window.location = url;
+}
+function popup(id) {
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+}
+function popclose(id) {
+	$("#"+id).css({display:"none"});
+	$("#bgdiv").css({display:"none"});
+}
+</script>
+</body>
+</html>

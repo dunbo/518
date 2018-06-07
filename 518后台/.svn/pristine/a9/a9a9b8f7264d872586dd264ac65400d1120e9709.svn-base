@@ -1,0 +1,202 @@
+<include file="../../Public/new_header" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src="/Public/school/js/jquery.zxxbox.3.0.js"></script>
+
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+<link rel="stylesheet" type="text/css" media="all"	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<link rel="stylesheet" href="__PUBLIC__/css/bootstrap.min.css">
+
+<div class="main" >
+    <div class="content">
+        <div class="search_box" style="margin-top:10px;height:90px">
+            <form method="get" action="">
+                <input type='hidden' name='cateid' id='cateid' value="{$init_cateid}"/>
+                <table cellspacing="0" cellpadding="0" width="99%" class="search_table">
+                    <tbody>
+                    <tr>
+                        <td >产品名称
+                            <input type="text" style="width:130px" value="{$softname}" name="s_softname" id="s_softname" class="search_item_text">
+                        </td>
+                        <td >产品包名
+                            <input type="text" style="width:130px" value="{$package}" name="s_package" id="s_package" class="search_item_text">
+                        </td>
+                        <td >
+                            月份
+                            <input id="begintime" name="begintime" value="{$begintime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" style="width:130px; height:28px">到：
+                            <input id="endtime" name="endtime" value="{$endtime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" style="width:130px; height:28px">
+                        </td>
+                        <td >
+                            账单状态
+                            <select name="bill_status" id="bill_status" class="search_item_text">
+                                <option value="">全部</option>
+                                <?php foreach($bill_status as $k=>$v){ ?>
+                                    <option value="{$k}" <?php if($k==$s_bill_status) echo 'selected';?>>{$v}</option>
+                                <?php } ?>
+                            </select>
+                        </td>
+                        <td >              </td>
+                        <td>
+                            <input type="submit" onclick="" value="搜索" style="float:left; height:30px;" class="search_btn">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td >合同编号
+                            <input type="text" style="width:130px" name="s_contract_code" id="s_contract_code" value="{$contract_code}" class="search_item_text">
+                        </td>
+                        <td >
+                            收款状态
+                            <select name="receipt_status" id="receipt_status" class="search_item_text">
+                                <option value="">全部</option>
+                                <?php foreach($receipt_status as $k=>$v){ ?>
+                                <option value="{$k}" <?php if($k==$s_receipt_status) echo 'selected';?>>{$v}</option>
+                                <?php } ?>
+                            </select>
+                        </td>
+                        <td >
+                            协议主体
+                            <select name="contact_config_id" id="contact_config_id" class="search_item_text">
+                                <option value="">全部</option>
+                                <?php
+                                    foreach($c_a_config as $k=>$v){
+                                    ?>
+                                        <option value="<?php echo $k;?>" <?php if($contact_config_id==$k){echo 'selected';}?>><?php echo $v['c_name']?></option>
+                                    <?php
+                                    }
+                                ?>
+                            </select>
+                        </td>
+
+                        <td >
+                            消耗状态
+                            <select name="expend_status" id="expend_status" class="search_item_text">
+                                <option value="">全部</option>
+                                <?php foreach($expend_status as $k=>$v){ ?>
+                                <option value="{$k}" <?php if($k==$s_expend_status) echo 'selected';?>>{$v}</option>
+                                <?php } ?>
+                            </select>
+                        </td>
+                        <td >              </td>
+                        <td> <input type="button" onclick="my_reset()" value="清除查询状态" style="float:left; height:30px;" class="search_btn"></td>
+                    </tr>
+                    </tbody></table>
+                <input type="hidden" value="5580cb87fc83ace494fd9e28f5eecfa7" name="__hash__"></form>
+        </div>
+        <div style="float:left;margin-top:10px;margin-left:5px">
+            <a href='javascript:void(0)' style="float:left;" onclick="import_out()" class="search_btn">导出报表</a>
+        </div>
+
+        <div style="margin-top:50px;width:170%;overflow:visible;">
+            <table class="table_list" >
+                <thead >
+                <th style="text-align: center">
+                    <input type="checkbox" name="chk_all" onclick="checkAll(this)"></th><th style="text-align: center;width:4%">月份</th><th style="text-align: center;width:8%">合同编号</th><th style="text-align: center;width:8%">合同产品</th><th style="text-align: center;width:5%">客户名称</th><th style="text-align: center;width:5%">协议主体</th><th style="text-align: center;width:8%">余额_上月</th><th style="text-align: center">余额_本月</th><th style="text-align: center">预存金额</th><th style="text-align: center">收款金额</th><th style="text-align: center">转出金额</th><th style="text-align: center">消耗下载量<br>(核减后)</th><th style="text-align: center">消耗金额<br>(核减后)</th><th style="text-align: center">消耗金额<br>(充值)</th><th style="text-align: center">消耗金额<br>(配送)</th><th style="text-align: center">收款状态</th><th style="text-align: center">消耗状态</th><th style="text-align: center">账单状态</th><th style="text-align: center">备注</th><th style="text-align: center">操作</th>
+                </thead>
+                <?php foreach($bill as $k=>$v){ ?>
+                <tr>
+                    <td><input type="checkbox" name="id_<?php echo $v['id'];?>" value="<?php echo $v['id'];?>"></td>
+                    <td><?php echo date('Y-m',strtotime($v['bill_month'].'01'));?></td>
+                    <td>
+                        <?php echo $v['contract_code'];?>
+
+                    </td>
+                    <td><?php echo $v['softname'];?><br>
+                        <?php echo $v['package'];?><br>
+                        <?php echo $v['category_name'];?>
+                        </td>
+                    <td><?php echo $custom_name[$v['custom_id']];?></td>
+                    <td>
+                        <?php echo $c_a_config[$v['contact_config_id']]['c_name'];?>
+                    </td>
+                    <td><?php echo m_number_format($v['lt_month_balance']);?></td>
+                    <td><?php if($v['status'])echo m_number_format($v['month_balance']);?></td>
+                    <td><?php echo m_number_format($v['month_prestore']);?></td>
+                    <td><?php echo m_number_format($v['month_receipts']);?></td>
+                    <td><?php echo m_number_format($v['month_out']);?></td>
+                    <td>
+                        <?php echo round($v['month_download'],2);?>
+                    </td>
+                    <td>
+                        <?php echo m_number_format($v['month_cost']);?>
+                    </td>
+                    <td>
+                        <?php echo m_number_format($v['month_cost_recharge']);?>
+                    </td>
+                    <td>
+                        <?php echo m_number_format($v['month_cost_delivery']);?>
+                    </td>
+                    <td>
+                        <?php echo $receipt_status[$v['receipt_status']]; ?>
+                    </td>
+                    <td>
+                        <?php echo $expend_status[$v['expend_status']]; ?>
+                    </td>
+                    <td>
+                        <?php echo $bill_status[$v['bill_status']]; ?>
+                    </td>
+                    <td><a href="__URL__/edit_beizhu/id/{$v['id']}" class="thickbox">编辑</a></td>
+                    <td>
+                        <?php
+                        if($v['status']!=2){
+                            if($v['expend_status']==1){ ?>
+                             <a href="__URL__/edit_bill_status/id/{$v['id']}/status/2/type/expend_status">【确认】</a>
+                        <?php }else if($v['expend_status']==2&&$v['bill_status']!=2){ ?>
+                                <a href="__URL__/edit_bill_status/id/{$v['id']}/status/1/type/expend_status">【驳回】</a>
+                        <?php   }
+                        }else{
+                            echo '请稍后...';
+                        }
+                        ?>
+                    </td>
+                </tr>
+                <?php
+				}
+			?>
+            </table>
+        </div>
+        <div>
+            {$page}
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function my_reset() {
+        var text_arr = ['s_softname','s_package','begintime','endtime','bill_status','s_contract_code','receipt_status','contact_config_id','expend_status'];
+        for(var i=0;i<text_arr.length;i++){
+            $("#"+text_arr[i]).val('');
+        }
+        $("#open input[type='checkbox']").attr('checked',false);
+    }
+
+
+    function import_out(){
+        var choose_id_str = search_str ='';
+        $('input[name^=id_]').each(function(i){
+            if($(this).attr('checked') == 'checked'){
+                choose_id_str += $(this).val()+',';
+            }
+        });
+        search_str = '{$param}';
+        if(choose_id_str!=''){
+            search_str += "&id_str="+choose_id_str;
+        }else{
+            alert('请选择要导出的账单');
+            return false;
+        }
+
+        window.location.href = '__URL__/expend_bill?import_out=1&'+search_str;
+    }
+
+    function checkAll(obj)
+    {
+        var flag = $(obj).attr('checked') == 'checked';
+        $('input[name^=id_]').attr('checked', flag);
+    }
+
+</script>
+<include file="../../Public/category" />

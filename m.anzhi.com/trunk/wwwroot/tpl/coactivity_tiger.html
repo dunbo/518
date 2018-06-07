@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title><!--{$out.activity_result['name']}--></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/coactivity/css/common.css?v1"/>
+<script type="text/javascript" src="<!--{$out.static_url}-->/coactivity/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/coactivity/js/jquery.slotmachine.js"></script>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/activity_public3.js"></script>
+<!--{if $out['share'] == 1}-->
+<script type="text/javascript" src="/js/anzhi.js"></script>
+<!--{/if}-->
+<style type="text/css">
+body{<!--{if $out.page_result['bg_img']}-->background:url(<!--{$out.imgurl}--><!--{$out.page_result['bg_img']}-->) no-repeat;background-size:100% auto;<!--{elseif $out.page_result['bg_color'] && !$out.page_result['bg_img']}-->background-color: <!--{$out.page_result['bg_color']}-->;<!--{/if}--> color: <!--{$out.page_result['second_text_color']}-->;}
+.soft-list li a.downlode{background-color: <!--{$out.page_result['download_bgcolor']}-->; border:0px solid ;}
+.soft-list2 li a.downlode{background-color: <!--{$out.page_result['download_bgcolor']}-->; border:0px solid ;}
+.btns_tip{background:<!--{$out.page_result['warning_bgcolor']}-->;}
+.notice{width: 100%;height: 26px; margin-top:5px;line-height: 26px;background:<!--{$out.page_result['award_color']}-->; color: #fff; overflow: hidden; }
+.warning btns{background:<!--{$out.page_result['update_button_color']}-->;}
+.warning_txt{color:<!--{$out.page_result['update_button_color']}-->;}
+.btns{display:block; width:88px; height:32px; margin:10px auto;<!--{if $out.page_result['button_color'] && !$out.page_result['button_pic']}-->background-color:<!--{$out.page_result['button_color']}-->;<!--{elseif ($out.page_result['button_pic'] && $out.page_result['button_color']) || $out.page_result['button_pic']}-->background:url(<!--{$out.imgurl}--><!--{$out.page_result['button_pic']}-->) no-repeat;<!--{/if}-->border-radius:4px; <!--{if $out.page_result['button_text_color']}-->color:<!--{$out.page_result['button_text_color']}-->;<!--{/if}--> font-size:16px; text-align:center; line-height:32px;}
+.subject{margin:0 0 8px; padding:10px; background:<!--{$out.page_result['desc_color']}-->; font-size:16px;}
+.tip-box{position:absolute;width: 90%;left:50%;top:50%; margin-left:-45%; background:<!--{$out.page_result['alert_color']}-->; border-radius:10px; z-index: 99999; color:#fff}
+.btns_tip{background:<!--{$out.page_result['alert_button_color']}-->; border-radius:10px; color:#fff; border:none}
+.soft-list{ margin: 0 auto; padding:6px 5px 0; background:<!--{$out.page_result['soft_bg']}-->; color:#fffefe}
+.soft-list2{ margin: 0 auto; padding:6px 5px 0; background:<!--{$out.page_result['soft_bg']}-->; color:#fffefe}
+.lottery{width:96%; margin:0 auto; min-width:270px; padding-bottom:1px; border-radius:4px; background:url(<!--{$out.imgurl}--><!--{$out.page_result['lottery_pic']}-->) no-repeat; background-size:100% 100%}
+.wrap{border:0px solid #fff; border-radius:8px;}
+</style>
+</head>
+<script>
+	var sid = '<!--{$out.sid}-->',prefix_url= '<!--{$out.prefix_url}-->',imgurl = '<!--{$out.imgurl}-->',version_status='<!--{$out.version_status}-->',aid = '<!--{$out.aid}-->',is_ios = '<!--{$out.is_ios}-->',is_weixin = '<!--{$out.is_weixin}-->',is_filter="<!--{$out.page_result['is_filter']}-->",soft_style="<!--{$out.page_result['soft_style']}-->",soft_col_num="<!--{$out.page_result['soft_col_num']}-->",soft_order="<!--{$out.page_result['soft_order']}-->",share_switch="<!--{$out.page_result['share_switch']}-->",share_text="<!--{$out.page_result['share_text']}-->",share_other_pic="<!--{$out.page_result['share_other_pic']}-->",share_weixin_pic="<!--{$out.page_result['share_weixin_pic']}-->",package_size_switch = "<!--{$out.page_result['package_size_switch']}-->",is_score=<!--{$out.page_result['is_score']}-->,is_warning='<!--{$out.page_result['is_warning']}-->',share='<!--{$out.share}-->',static_url='<!--{$out.static_url}-->',my_num='<!--{$out.now_num}-->',gift_type = '<!--{$out.page_result['gift_type']}-->',version_code = '<!--{$out.version_code}-->',status ='<!--{$out.status}-->',click_lottery_pic = '<!--{$out.page_result['click_lottery_pic']}-->',unclick_lottery_pic = '<!--{$out.page_result['unclick_lottery_pic']}-->',dep_type = '<!--{$out.page_result['dep_type']}-->';
+	var stopNum = '',index = 1,prevIndex = 0,Speed = 300,arr = GetSide(3, 3),EndIndex = 0,cycle = 0,EndCycle = 0,flag = false,quick = 0,soft_lists_go = [],flags={canMove:true},p=0;
+	
+	function getArrayItems(arr, num) {
+		var temp_array = new Array();
+		for (var index in arr) {
+			temp_array.push(arr[index]);
+		}
+		var return_array = new Array();
+		for (var i = 0; i<num; i++) {
+			if (temp_array.length>0) {
+				var arrIndex = Math.floor(Math.random()*temp_array.length);
+				return_array[i] = temp_array[arrIndex];
+				temp_array.splice(arrIndex, 1);
+			} else {
+				break;
+			}
+		}
+		return return_array;
+	}
+	
+	function change_soft(){
+		$('#my_softs').html('');
+		my_soft();
+	}
+	
+	function GetSide(m, n) {
+		var arr = [];
+		for (var i = 0; i < m; i++) {
+			arr.push([]);
+			for (var j = 0; j < n; j++) {
+				arr[i][j] = i * n + j;
+			}
+		}
+
+		var resultArr = [];
+		var tempX = 0,tempY = 0,direction = "Along",count = 0;
+		while (tempX >= 0 && tempX < n && tempY >= 0 && tempY < m && count < m * n) {
+			count++;
+			resultArr.push([tempY, tempX]);
+			if (direction == "Along") {
+				if (tempX == n - 1)
+					tempY++;
+				else
+					tempX++;
+				if (tempX == n - 1 && tempY == m - 1)
+					direction = "Inverse"
+			}
+			else {
+				if (tempX == 0)
+					tempY--;
+				else
+					tempX--;
+				if (tempX == 0 && tempY == 0)
+					break;
+			}
+		}
+		return resultArr;
+	}
+	
+
+//分享地址为活动页 用的方法
+/*
+function add_async_download_listen_script(port) {
+    var m = document.createElement("script");
+    m.type = 'text/javascript';
+    var url = 'http://127.0.0.1:' + port + '/query?type=action&id='+aid+'&callback=change_install_status&r=' + Math.floor(Math.random() * ( 1000000000 + 1));
+    m.src = url;
+    m.async = "async";
+    m.onload = function() {
+        listen_failed_count++;
+        if (listen_failed_count >= listen_failed_max) {
+            //window.location.href= 'http://m.anzhi.com/info_1979088.html';
+        }
+    };
+    m.onerror = function() {
+        listen_failed_count++;
+        if (listen_failed_count >= listen_failed_max) {
+            //window.location.href= 'http://m.anzhi.com/info_1979088.html';
+        }
+    };
+    document.getElementById("az_spirit").appendChild(m);
+}*/
+
+	function get_soft(){
+		if (soft_lists_go.length ==0) {
+			var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+			var cmd = 'var soft_list=' + json_data;
+			eval(cmd);
+			var soft_lists = soft_list.DATA;
+			if(soft_order == 1){
+				for(j=0;j<soft_lists.length;j++){
+					var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+					if(is_filter == 1){
+						if(soft_status_go == -2){
+							soft_lists_go.push(soft_lists[j]);
+						}
+					}else{
+						soft_lists_go.push(soft_lists[j]);
+					}
+				}
+			}else if(soft_order == 3){
+				for(j=0;j<soft_lists.length;j++){
+					var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+					var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+					if((soft_status_go == -2 && json_datas_gos== -1) || json_datas_gos == 1 || json_datas_gos == 3){
+						soft_lists_go.push(soft_lists[j]);
+					}
+				}
+				
+				for(j=0;j<soft_lists.length;j++){
+					window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+					window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+					var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+					var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+					if(json_datas_gos == 5 && soft_status_gos == -2){
+						soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+					}
+				}
+				
+				for(j=0;j<soft_lists.length;j++){
+					window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+					window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+					var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+					var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+					if(soft_status_gos != -2){
+						soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+					}
+				}
+			}else if(soft_order == 2){
+				for(j=0;j<soft_lists.length;j++){
+					window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+					window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+					var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+					var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+					if(soft_status_gos != -2){
+						soft_lists_go.push(soft_lists[j]);
+					}
+				}
+				
+				for(j=0;j<soft_lists.length;j++){
+					window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+					window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+					var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+					var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+					if(json_datas_gos == 5 && soft_status_gos == -2){
+						soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+					}
+				}
+				
+				for(j=0;j<soft_lists.length;j++){
+					var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+					var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+					if((soft_status_go == -2 && json_datas_gos== -1) || json_datas_gos == 1 || json_datas_gos == 3){
+						soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+					}
+				}
+			}
+		}
+		my_soft();
+	}
+	
+	function my_soft() {
+		if(soft_style == 4){
+			if(soft_order == 1){
+				var data = getArrayItems(soft_lists_go,8);
+			}else{
+				var data = soft_lists_go.slice(p*8,8*(p+1));
+				if(data.length == 0){
+					p = 0;
+					data = soft_lists_go.slice(p*8,8*(p+1));
+				}
+				p = p+1;
+			}
+		}else{
+			var data = soft_lists_go; 
+		}
+		var str = '';
+		for(i = 0; i < data.length; i++) {
+		        if(soft_style == 1){
+                            if(data[i][2].length > 7){
+                                    var softname = data[i][2].substring(0,6)+'...';
+                            }else{
+                                    var softname = data[i][2];
+                            }
+                        }
+		        if(soft_style == 4){
+                            if(data[i][2].length > 4){
+                                    var softname = data[i][2].substring(0,3)+'...';
+                            }else{
+                                    var softname = data[i][2];
+                            }
+                        }
+
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(data[i][0]));
+			window.AnzhiActivitys.registerInstallObserver(data[i][7]);
+			var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+			var cmd = 'var soft_status=' + json_datas;
+			eval(cmd);
+			if(soft_status == 1){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][data[i].length-1]+',0,0,'+data[i][27]+');" class="downlode btns">下载中</a>';
+			}else if(soft_status == 2){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][data[i].length-1]+',0,0,'+data[i][27]+');" class="downlode btns">继续</a>';
+			}else if(soft_status == 3){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][data[i].length-1]+',0,0,'+data[i][27]+');" class="downlode btns">继续</a>';
+			}else if(soft_status == 4){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk(parseInt('+aid+'),'+data[i][0]+',"'+data[i][7]+'","'+data[i][2]+'",parseInt('+data[i][13]+'),"'+data[i][data[i].length-1]+'",0,0,'+data[i][27]+');" class="downlode btns">下载</a>';
+			}else if(soft_status == 5){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="installApp(parseInt('+data[i][0]+'),\''+data[i][7]+'\');" class="downlode btns">安装</a>';
+			}else if(soft_status == 6){
+				if(version_code >= 6000){
+					var my_soft = '<a id="'+data[i][0]+'" class="downlode btns" onclick="openApp('+data[i][0]+',\''+data[i][7]+'\');">打开</a>';
+				}else{
+					var my_soft = '<a id="'+data[i][0]+'" class="downlode btns">已下载</a>';
+				}
+			}else if(soft_status == 8){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][data[i].length-1]+',0,0,'+data[i][27]+');" class="downlode btns">继续</a>';
+			}else if(soft_status == 9){
+				var my_soft = '<a value="校验中" id="'+data[i][0]+'" class="downlode btns">校验中</a>';
+			}else if(soft_status == 10){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode btns">已下载</a>';
+			}else if(soft_status == -1){
+				var soft_other_status = window.AnzhiActivitys.isInstalledApp(data[i][7],parseInt(data[i][13]));
+				if(soft_other_status == -2){
+					var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][data[i].length-1]+',0,0,'+data[i][27]+');" class="downlode btns">下载</a>';
+				}else if(soft_other_status == -1){
+					var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][data[i].length-1]+',0,0,'+data[i][27]+');" class="downlode btns">更新</a>';
+				}else if(soft_other_status == 0){
+					var my_soft = '<a id="'+data[i][0]+'" class="downlode btns" onclick="openApp('+data[i][0]+',\''+data[i][7]+'\');">打开</a>';
+				}else if(soft_other_status == 1){
+					var my_soft = '<a id="'+data[i][0]+'" class="downlode btns">已下载</a>';
+				}
+			}
+			var soft_size = '';
+			if(package_size_switch == 1){
+				soft_size = data[i][9];
+			}else{
+				soft_size = '';
+			}
+
+			if(soft_style == 4){
+				$('#my_softs').addClass('soft-list clear');
+				str += '<li><p class="soft-icon"><img src="'+data[i][1]+'"></p><p class="soft-name">'+softname+'</p>'+soft_size+'<p>'+my_soft+'</p></li>';
+			}else if(soft_style == 1){
+				var j = Math.floor ( data[i][3] / 2 );
+				var k = data[i][3] % 2;
+				var score_str = '';
+				for(var i1 = j; i1 > 0; i1 --) {
+					score_str += '<img src="'+static_url+'/coactivity/images/star_01.png"/>';
+				}
+				if (k != 0) {
+					score_str += '<img src="'+static_url+'/coactivity/images/star_02.png"/>';
+				}
+				if ((j + k) < 5) {
+					for(var i2 = (5 - j - k); i2 > 0; i2 --) {
+						score_str += '<img src="'+static_url+'/coactivity/images/star_03.png"/>';
+					}
+				}
+			
+				if(is_score){
+					score_strs = '<p class="star">'+score_str+'</p>';
+				}else{
+					score_strs = '';
+				}
+				$('#my_softs').addClass('soft-list2 clear');
+				str += '<li><div class="soft_icon"><img src="'+data[i][1]+'"/></div><div class="soft_info"><h4>'+softname+'</h4>'+score_strs+'<p class="size">'+soft_size+'</p></div>'+my_soft+'</li>';
+				
+			}
+		}
+		$('#my_softs').html(str);
+	}
+	
+	function installApp(softid,pkgname){
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				pkgname = soft_lists_go[i][7];
+			}
+		}
+		$.ajax({
+			url: '/lottery/coactivity_install.php',
+			data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+			type: 'get',
+			success: function(data){
+				if(data != 200){
+					$('#my_num').html(data);
+					my_num = data;
+					param = 1;
+					//$('#slotMachineButton1').css('background',''+imgurl+click_lottery_pic+'');
+                                        $('#slotMachineButton1').css('background','url('+imgurl+click_lottery_pic+')');
+				}
+				window.AnzhiActivitys.installAppForActivity(softid);
+			}
+		});
+	}
+
+	function onInstalled(pkg){
+		for(i=0;i<soft_lists_go.length;i++){
+			if(soft_lists_go[i][7] == pkg){
+				soft_lists_go.splice(i,1); 
+			}
+		}
+	}
+	
+		//下载软件
+	function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag,noflux,firmware,status){
+		window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+		setTimeout(function(){download_go(softid,pkgname,softname)},3000);		
+	}
+	
+	function download_go(softid,pkgname,softname){
+		$.ajax({
+			url: '/lottery/coactivity_download.php',
+			data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+			type: 'get',
+			success: function(data){
+				if(data != 200){
+					setTimeout(function (){
+						$('#my_num').html(data);
+						my_num = data;
+						param = 1;
+                                                $('#slotMachineButton1').css('background','url('+imgurl+click_lottery_pic+')');
+						//$('#slotMachineButton1').css('background',''+imgurl+click_lottery_pic+'');
+					},5000);
+				}
+			}
+		});
+	}
+	
+	//更新软件状态（正在下载）
+	function onDownloadCreated(softid){
+		$('#'+softid+'').html("下载中");
+	}
+
+	function onDownloadStateChanged(softid,newState){
+		if(newState == 1){
+			$('#'+softid+'').html("下载中");
+		}else if(newState == 2){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 3){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 4){
+			$('#'+softid+'').html("重试");
+		}else if(newState == 5){
+			$('#'+softid+'').html("安装");
+			$('#'+softid+'').unbind('onclick');
+			for(i=0;i < soft_lists_go.length;i++){
+				if(soft_lists_go[i][0] == softid){
+					$('#'+softid+'').bind('click',function(){	
+						installApp(parseInt(softid));
+					});
+				}
+			}
+		}else if(newState == 8){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 9){
+			$('#'+softid+'').html("检查中");
+		}
+	}
+	
+	function openApp(softid,pkg){
+		the_soft = [softid];
+		$.ajax({
+			url: '/lottery/coactivity_open.php',
+			data: 'softid='+softid+'&sid='+sid+'&package='+pkg+'&aid='+aid,
+			type: 'get',
+			success: function(data){
+				if(data != 200){
+						$('#my_num').html(data);
+						my_num = data;
+						param = 1;
+                                                $('#slotMachineButton1').css('background','url('+imgurl+click_lottery_pic+')');
+						//$('#slotMachineButton1').css('background',''+imgurl+click_lottery_pic+'');
+				}
+				window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+			}
+		});
+	}
+
+	function go_share(){
+        var share_url=prefix_url+'/lottery/coactivity_lottery.php?share=1&cbm=1&aid='+aid;
+		$.ajax({
+			url: '/lottery/coactivity_share.php',
+			data: 'sid='+sid+'&aid='+aid,
+			type: 'get',
+			async:false,
+			success:function(data){
+				if(data != 200){
+					setTimeout(function (){
+						$('#my_num').html(data);
+                                                $('#slotMachineButton1').css('background','url('+imgurl+click_lottery_pic+')');
+						//$('#slotMachineButton1').css('background',''+imgurl+click_lottery_pic+'');//supwater
+						my_num = data;
+					},5000);
+				}
+			}
+		});
+		var share_json = '{"TEXT":"'+share_text+'","URL":"'+imgurl+''+share_other_pic+'","ACTIONURL":"'+share_url+'","URLWEIXIN":"'+imgurl+''+share_weixin_pic+'"}';
+		window.AnzhiActivitys.getShareDialog(share_json);
+	}
+	// 客户端分享回调函数
+	function onSharedResult(share_result) {
+		var result_json = $.parseJSON(share_result);
+		//分享应用类型（0：短信，1：新浪微博，2：QQ空间，3：微信好友，4：微信朋友圈，6：QQ好友）
+		var appType = result_json.appType; 
+		 //分享结果（1：分享成功，2：分享取消，3：分享失败）
+		var resultType = result_json.resultType;
+		// 记日志
+		$.ajax({
+			url:'/lottery/coactivity_share_result.php',
+			data:"aid="+aid+"&sid="+sid+"&appType="+appType+"&resultType="+resultType,
+			type:'post',
+			success:function(){
+			}
+		});	
+	}	
+	function get_telphone(){
+		var telphone = $('#telphone').val();
+		var name = $('#name').val();
+		var address = $('#address').val();
+		if(!telphone || telphone == '手机号'){
+			$('#my_error').css('display','');
+			$('#my_error').html('请输入手机号');
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		if(!name){
+			$('#my_error').css('display','');
+			$('#my_error').html("请输入收货人");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		if(name.length > 10){
+			$('#my_error').css('display','');
+			$('#my_error').html("请输入10个字以内的收货人姓名");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		if(address.length > 30){
+			$('#my_error').css('display','');
+			$('#my_error').html("请输入30个字以内的收货地址");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		if(!address){
+			$('#my_error').css('display','');
+			$('#my_error').html("请输入收货地址");
+			return false;
+		}else{
+			$('#my_error').css('display','none');
+		}
+		$.ajax({
+			url: '/lottery/coactivity_get_info.php',
+			data: 'telphone='+telphone+'&name='+name+'&address='+address+'&sid='+sid+'&aid='+aid,
+			type: 'get',
+			success: function(data){
+				if(data){
+					data = eval(''+data+'');
+					if(data == 500){
+						$('#my_error').css('display','');
+						$('#my_error').html('请输入正确的手机号');
+					}else if(data == 200){
+						$('#my_error').css('display','');
+						$('#my_error').html('提交成功');
+						setTimeout(function (){go_info()},1000);
+					}else if(data == 400){
+						$('#my_error').css('display','');
+						$('#my_error').html('参数错误');
+					}
+				}
+			}
+		});
+	}
+	
+	function go_info(){
+		window.location.href="http://promotion.anzhi.com/lottery/coactivity_lottery.php?aid="+aid+"&sid="+sid;
+	}
+	
+	function showOpenBox(obj){
+		var bg_h=$("#body-bg").height()+$(document).scrollTop(),
+		top_h= $(obj).height()/ 2-$(document).scrollTop();
+		$(obj).css("margin-top",-top_h+"px").show();
+		$("#body-bg").css("height",bg_h+"px").show();
+		flags.canMove=false;
+	}
+	
+	function cloBox(obj){
+		$(obj).hide();
+		$("#body-bg").hide();
+		flags.canMove=true;
+	}
+	
+	function lottery_again(obj){
+		cloBox(obj);
+		click_lottery();
+	}
+	
+	$(function(){
+		$("body").bind('touchmove', function (e) {
+			if(!flags.canMove){
+				e.preventDefault();
+			}
+		});
+	})
+	
+	function go_update(){
+		var anzhi_softid = '<!--{$out.resultanzhi.ID}-->';
+		var anzhi_package = 'cn.goapk.market';
+		var anzhi_softname = '<!--{$out.resultanzhi.SOFT_NAME}-->';
+		var anzhi_versioncode = '<!--{$out.resultanzhi.SOFT_VERSION_CODE}-->';
+		var anzhi_size = '<!--{$out.resultanzhi.SOFT_SIZE}-->';
+		$.ajax({
+			url: '/lottery/coactivity_update.php',
+			data: '&sid='+sid+'&aid='+aid,
+			type: 'get',
+			success: function(data){
+				window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(anzhi_softid),anzhi_package,anzhi_softname,parseInt(anzhi_versioncode),anzhi_size,1);
+			}
+		});
+	}
+</script>
+<body>
+<section>
+    <div class="banner" id="top">
+        <img src="<!--{$out.imgurl}--><!--{$out.page_result['ap_imgurl']}-->"/>
+    </div>
+    <div class="notice clear">
+        <div class="notice-icon"></div>
+        <div class="notice-list">
+            <marquee scrollamount="2" scrolldelay="90" direction="left">
+				<!--{if $out.all_award_result}-->
+				<!--{foreach from=$out.all_award_result item=vo}-->
+                <span><!--{$vo.telphone}--> &nbsp;获得<!--{$vo.award}--><em><!--{$vo.the_time}--></em></span>
+                <!--{/foreach}-->
+				<!--{else}-->
+				坚持每天抽一发，奖品拿到你手软！
+				<!--{/if}-->
+            </marquee>
+        </div>
+    </div>
+	<!--{if $out.version_status == 200}-->
+	<div class="main">
+		<div class="tips_p prompt clear">
+			<p class="warning_txt">少年，你的安智市场版本过低喔，快去升级再来参加抽奖吧！</p>
+			<img src="<!--{$out.imgurl}--><!--{$out.page_result['update_warning_pic']}-->">
+		</div>
+		<a href="javascript:;" alt="马上升级" onClick="go_update();" class="warning btns">马上升级</a>
+	</div>
+	<!--{elseif $out.channel_status == 200}-->
+	<ul class="soft-list clear">
+		<div class="version-low">
+		<p class="warning_txt">很抱歉，您的安智市场版本过低，请升级后参与活动。</p>
+		<p class="warning_txt">升级方式：在[管理-设置]中检查更新。</p>
+		</div>
+	</ul>
+	<!--{elseif $out.channel_status == 100}-->
+	<ul class="soft-list clear">
+		<div class="version-low">
+		<p class="warning_txt">很抱歉，您的安智市场版本过低，请升级后参与活动。</p>
+		</div>
+	</ul>
+	<!--{else}-->
+	<div class="main">
+		<!--{if $out.status == 100}-->
+        <div class="wrap tips_sim redcolor">
+			<p class="warning_txt">请先插入SIM卡，重启安智市场参与此活动</p>
+		</div>
+		<!--{else}-->
+		<div class="prompt clear">
+			<a href="/lottery/coactivity_rule.php?aid=<!--{$out.aid}-->" class="fl btns">活动规则</a>
+			<a href="/lottery/coactivity_prize.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->" class="fr btns">我的奖品</a>
+		</div>
+		<!--{/if}-->
+		<div id="no_need">
+		<div class="wrap subject">
+			<p><!--{$out.page_result['ap_desc']}--></p>
+		</div>
+		<!--{if $out.page_result['share_switch']}--><a href="javascript:;" class="btns share_btn" onclick="go_share();" style="background:<!--{$out.page_result['share_bgcolor']}-->;">分享去抽奖</a><!--{/if}-->
+		<p class="rotate_tips">你还有<span id="my_num"><!--{if $out.now_num}--><!--{$out.now_num}--><!--{else}-->0<!--{/if}--></span>次抽奖机会</p>
+		</div>
+		<div class="lottery" id="go_lottery">
+			<div class="lottery_inner">
+				<div id="machine1" class="slotMachine" style="overflow:hidden;">
+					<!--{foreach from=$out.prize_results item=vo}-->
+					<div class="slot" style="background:url(<!--{$out.imgurl}--><!--{$vo.pic_path}-->) no-repeat center center;"></div>
+					<!--{/foreach}-->
+				</div>
+				<div id="machine2" class="slotMachine">
+					<!--{foreach from=$out.prize_results item=vo}-->
+					<div class="slot" style="background:url(<!--{$out.imgurl}--><!--{$vo.pic_path}-->) no-repeat center center;"></div>
+					<!--{/foreach}-->
+				</div>
+				<div id="machine3" class="slotMachine">
+					<!--{foreach from=$out.prize_results item=vo}-->
+					<div class="slot" style="background:url(<!--{$out.imgurl}--><!--{$vo.pic_path}-->) no-repeat center center;"></div>
+					<!--{/foreach}-->
+				</div>
+			</div>
+			<a href="javascript:;" class="btns" id="slotMachineButton1" <!--{if !$out.now_num && $out.page_result['is_warning'] == 0}-->style="background:url(<!--{$out.imgurl}--><!--{$out.page_result['unclick_lottery_pic']}-->) no-repeat center center;background-size:100% 100%;"<!--{else}-->style="background:url(<!--{$out.imgurl}--><!--{$out.page_result['click_lottery_pic']}-->) no-repeat center center;background-size:100% 100%;"<!--{/if}-->></a>
+		</div>
+		<div id="soft_div">
+		<p class="soft-p">下载软件增加抽奖机会！</p>
+		<ul id="my_softs">
+		</ul>
+		<!--{if $out.page_result['change_switch'] && $out.page_result['soft_style'] == 4}--><a class="btns" id="my_change" onclick="change_soft();" >换一换</a><!--{/if}-->
+		</div>
+	</div>
+</section>
+<div class="footer" id="footer"><img src="<!--{$out.imgurl}--><!--{$out.page_result['ap_imgurl_bg']}-->"/></div>
+<div class="tip-box" id="tip-box-have"  style="display: none;">
+	<div class="tip_hd">
+		<img src="<!--{$out.imgurl}--><!--{$out.page_result['lose_yes_img']}-->"/>
+		<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box-have')">关闭</a></div>
+	</div>
+	<div class="tip-mid">
+		<div class="tip-con">
+			<p id="have_text"></p>
+			<a href="javascript:;" class="btns btns_tip" id="go_down3" style="display:none;" onclick="cloBox('#tip-box-have');">去下载</a>
+			<a href="javascript:;" class="btns btns_tip" id="lottery_again3">再抽一次</a>
+
+		</div>
+	</div>
+</div>
+<div class="tip-box" id="tip-box-no"  style="display: none;">
+	<div class="tip_hd">
+		<img src="<!--{$out.imgurl}--><!--{$out.page_result['lose_no_img']}-->"/>
+		<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box-no')">关闭</a></div>
+	</div>
+	<div class="tip-mid">
+		<div class="tip-con">
+			<p id='lost_err' ><!--{$out.page_result['lost_no_desc']}--></p>
+			<a href="javascript:;" class="btns btns_tip" id="go_down2"   onclick="cloBox('#tip-box-no');">去下载</a>
+			<a href="javascript:;" class="btns btns_tip" style="display:none;" id="lottery_again2">再抽一次</a>
+		</div>
+	</div>
+</div>
+<div class="tip-box tip-box3" id="virtual_prize"  style="background:<!--{$out.page_result['alert_color']}-->;display: none;">
+<p class="prize-title cnt"><span class="spec">少年恭喜你获得<br/><span id="virtual_name"></span></span></p>
+	<div class="prize_ok clear">
+		<div class="prize_okl">
+			<span id="prize_icon"></span>
+			<span id="soft_name"></span>
+		</div>
+		<div class="prize_okr">
+			<p><span id="virtual_first"></span><br/><span id="virtual_second"></span></p>
+			<p class="wordwrap" id="prize_notice"></p>
+		</div>
+	</div>
+	<div class="btns2 btns3">
+		<a class="btns btns_tip" href="javascript:;" onclick="cloBox('#virtual_prize')">关闭</a>
+		<a class="btns btns_tip" style="width:160px" href="javascript:;" id="go_download"></a>
+	</div>
+</div>
+<div class="tip-box tip-box3" id="my_awards" style="background:<!--{$out.page_result['alert_color']}-->; display: none;">
+	<p class="prize-title cnt"><span class="spec">少年恭喜你获得<br/><span id="the_prize"><!--{$out.award_info_result['name']}--></span></span></p>
+		<div class="form_title"></div>
+		<form class="form1">
+		<div class="prompt1">快输入手机号领取奖品吧！</div>
+		<div class="form-item clear">
+			<label for="username">姓名：</label>
+			<div class="textbox"><input type="text" id="name" /> </div>
+		</div>
+		<div class="form-item clear">
+			<label for="telephone">手机：</label>
+			<div class="textbox"><input type="text" id="telphone" /> </div>
+		</div>
+		<div class="form-item clear">
+			<label for="address">地址：</label>
+			<div class="textbox"><input type="text" id="address" /> </div>
+		</div>
+		<div class="prompt2 redcolor" style="display:none;" id="my_error"></div>
+		</form>
+	<div class="btns2" style="width:108px">
+	<a class="btns btns_tip" href="javascript:;" onclick="get_telphone();">提交</a>
+	</div>
+</div>
+<!--{/if}-->
+<div style="display:none;" id="az_spirit"></div>
+<div id="body-bg"></div>
+<!--{include file="../tpl/lottery/public_anzhi_down.html"}-->
+</body>
+</html>
+<script type="text/javascript">
+var param=1,prize=[],lose_yes_desc = "<!--{$out.page_result['lose_yes_desc']}-->";
+
+function have_no(){
+	param = 1;
+	showOpenBox('#tip-box-no');
+	$('#slotMachineButton1').css('background-color','#999999');
+	$('#my_button').css('display','');
+}
+
+function have_last(){
+	param = 1;
+	showOpenBox('#tip-box-one');
+	$('#my_button').css('display','');
+}
+
+function _have_num(warning){
+	param = 1;
+	showOpenBox('#tip-box-have');
+	$('#have_text').html(warning);
+	$('#my_button').css('display','');
+}
+
+function _go_award(warning){
+	param = 1;
+	showOpenBox('#my_awards');
+	$('#the_prize').html(warning);
+}
+
+function _go_virtual(warning,prize,desc,icon,size,softname){
+	param = 1;
+	showOpenBox('#virtual_prize');
+	$('#virtual_name').html(warning);
+	$('#soft_name').html(softname);
+	if(desc){
+		$('#prize_notice').html(desc);
+	}
+
+	if(prize['first_text']){
+            if(dep_type==1){
+		$('#virtual_first').html("卡号："+prize['first_text']+"");
+            }else{
+		$('#virtual_first').html("礼包："+prize['first_text']+"");
+            }
+	}
+	if(prize['second_text']){
+		$('#virtual_second').html("密码："+prize['second_text']+"");
+	}
+	if(icon){
+		$('#prize_icon').html('<img src="'+icon+'" style="height:70px;width:70px;display:block;"/>');
+	}
+	if(prize['third_text']){
+		$('#go_download').html('下载软件('+size+')');
+		for(j=0;j<soft_lists_go.length;j++){
+			if(prize['third_text'] == soft_lists_go[j][7]){
+				prize[2] = soft_lists_go[j][7];
+				prize[4] = soft_lists_go[j][0];
+				prize[5] = soft_lists_go[j][2];
+				prize[6] = soft_lists_go[j][13];
+				prize[7] = soft_lists_go[j][soft_lists_go[j].length-1];
+				var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists_go[j][7],parseInt(soft_lists_go[j][13]));
+				var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists_go[j][0]));
+				if((soft_status_go == -2 && json_datas_gos== -1) || json_datas_gos == 1 || json_datas_gos == 3){
+					$('#go_download').click(function(){
+						window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(prize[4]),prize[2],prize[5],parseInt(prize[6]),prize[7],1);
+					});
+				}else if(json_datas_gos == 5 && soft_status_go == -2){
+					$('#go_download').click(function(){
+						installApp(parseInt(prize[4]),prize[2]);
+					});
+				}else if(soft_status_go != -2){
+					$('#go_download').click(function(){
+						openApp(parseInt(prize[4]),prize[2]);
+					});
+				}
+			}
+		}
+	}else{
+		$('#go_download').html('下载去兑奖');
+		$('#go_download').click(function(){
+			go_info();
+		});
+	}
+	$('#virtual_prize').css('display','');
+}
+
+var prize_count = <!--{$out.prize_count}-->
+var my_notice=0,warning='',prize=[],rnds = [];
+$(document).ready(function(){
+        <!--{if $out['share'] == 1}-->
+        //var js_param = {type:'action', id:aid, callback:invite_callback,from:7};
+        var js_param = {type:'action', id:aid, callback:invite_callback};
+        var php_param = {type:'action', aid:aid};
+        share_download(js_param, php_param);
+        $('a').click(function(){
+            $('a').removeAttr('onclick');
+            if(is_weixin==1){//微信
+            window.location.href="http://m.test.anzhi.com/lottery/coactivity_lottery.php?share=1&type=1&aid="+aid;
+            }else if(is_ios==1){//ios
+            window.location.href="http://m.test.anzhi.com/lottery/coactivity_lottery.php?share=1&type=2&aid="+aid;
+            }else{
+                showOpenBox('#tip-boxnew6');
+                share_download(js_param, php_param);
+            }
+            })
+        <!--{/if}-->
+	get_soft();
+	if(status == 2000){
+		showOpenBox('#my_awards');
+	}
+	var machine1 = $("#machine1").slotMachine({
+		active	: 0,
+		delay	: 500
+	});
+							
+	var machine2 = $("#machine2").slotMachine({
+		active	: 1,
+		delay	: 500
+	});
+							
+	var machine3 = $("#machine3").slotMachine({
+		active	: 2,
+		delay	: 500
+	});
+
+	$("#slotMachineButton1").click(function(){
+		let_go();		
+	});
+	
+	$("#lottery_again").click(function(){
+		cloBox('#tip-box-have');
+		let_go();
+	});
+
+	$("#lottery_again2").click(function(){
+		cloBox('#tip-box-no');
+		let_go();
+	});
+	$("#lottery_again3").click(function(){
+		cloBox('#tip-box-have');
+		let_go();
+	});
+	
+	
+	function go_lottery(){
+
+		if(my_num <= 0){
+			if(is_warning == 1){
+				param = 1;
+					if(dep_type==2){
+                                                        $("#lottery_again3").css('display','none');
+                                                        $("#go_down3").css('display','');
+                                        		var all_warning= new Array();
+							var all_warning = lose_yes_desc.split(",");
+							var n = Math.floor(Math.random() * all_warning.length);
+							warning = all_warning[n];
+						setTimeout(function(){_have_num(warning);},1000);
+					}else{
+						setTimeout(have_no,500);
+					}
+				return ;
+			}else{
+				return ;
+			}
+		}
+		param = 2;
+		var soft_package = '';
+		if(gift_type == 2){
+			for(j=0;j<soft_lists_go.length;j++){
+				window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists_go[j][0]));
+				window.AnzhiActivitys.registerInstallObserver(soft_lists_go[j][7]);
+				var  soft_status_need = window.AnzhiActivitys.isInstalledApp(soft_lists_go[j][7],parseInt(soft_lists_go[j][13]));
+				var json_datas_need = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists_go[j][0]));
+				if(json_datas_need != -2){
+					soft_package += soft_lists_go[j][7] + ',';
+				}
+			}
+			var params = 'sid='+sid+'&aid='+aid+'&package='+soft_package;
+		}else if(gift_type == 3){
+			for(j=0;j<soft_lists_go.length;j++){
+				window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists_go[j][0]));
+				window.AnzhiActivitys.registerInstallObserver(soft_lists_go[j][7]);
+				var  soft_status_need = window.AnzhiActivitys.isInstalledApp(soft_lists_go[j][7],parseInt(soft_lists_go[j][13]));
+				var json_datas_need = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists_go[j][0]));
+				if(json_datas_need == -2){
+					soft_package += soft_lists_go[j][7] + ',';
+				}
+			}
+			var params = 'sid='+sid+'&aid='+aid+'&package='+soft_package;
+		}else if(gift_type == 1){
+			var params = 'sid='+sid+'&aid='+aid;
+		}
+		$.ajax({
+			url: '/lottery/coactivity_get_award.php',
+			data: params,
+			type: 'get',
+			success: function(data){
+				if(data == 0){
+					if(dep_type==2){
+                                                        $("#lottery_again3").css('display','none');
+                                                        $("#go_down3").css('display','');
+                                        		var all_warning= new Array();
+							var all_warning = lose_yes_desc.split(",");
+							var n = Math.floor(Math.random() * all_warning.length);
+							warning = all_warning[n];
+						setTimeout(function(){_have_num(warning);},1000);
+					}else{
+						setTimeout(have_no,500);
+					}
+				}else{
+					var data = eval(''+data+'');
+					$('#my_num').html(data[1]);
+					my_num = data[1];
+					param = 3;
+					if(data[0] == -1){
+						if(data[1] == 0){
+							if(is_warning==0){
+								$('#slotMachineButton1').css('background','url('+imgurl+unclick_lottery_pic+')');
+							}
+                                                        $("#lottery_again2").css('display','none');
+                                                        $("#go_down2").css('display','');
+							setTimeout(have_no,3000);
+						}else if(data[1] >= 1){
+                                                        $("#lottery_again2").css('display','');
+                                                        $("#go_down2").css('display','none');
+                                                        $("#lottery_again3").css('display','');
+                                                        $("#go_down3").css('display','none');
+                                                
+							my_notice = 300;
+							var all_warning= new Array();
+							var all_warning = lose_yes_desc.split(",");
+							var n = Math.floor(Math.random() * all_warning.length);
+							warning = all_warning[n];
+                                                        if(dep_type==2){
+								setTimeout(have_no,500);
+                                                        }else{
+								setTimeout(function(){_have_num(warning);},1100);
+                                                        }
+						}
+                                                        rnds = [0,1,2];
+                                                        /*
+						var first_award = Math.floor((Math.random()*prize_count));
+						var third_award = Math.floor((Math.random()*prize_count));
+						var second_award = Math.floor((Math.random()*prize_count));
+
+                                            if(first_award==second_award&&second_award==third_award){
+                                                        rnds = [0,1,2];
+                                            }else{
+                                                        rnds = [first_award,second_award,third_award];
+                                            }*/
+
+
+					}else{
+						if(data[1] == 0){
+                                                        $("#lottery_again2").css('display','none');
+                                                        $("#go_down2").css('display','');
+                                                    if(is_warning==0){
+                                                        $('#slotMachineButton1').css('background','url('+imgurl+unclick_lottery_pic+')');
+                                                    }
+                                                }
+
+						if(data[3] == 1){
+							my_notice = 500;
+							warning = data[2];
+							setTimeout(function(){_go_award(warning);},4000);
+						}else if(data[3] == 2){
+							my_notice = 600;
+							warning = data[2];
+							prize = data[4];
+							setTimeout(function(){_go_virtual(warning,prize,data[5],data[6],data[7],data[8]);},4000);
+						}
+						award = data[0] - 1;
+						rnds = [award,award,award];
+					}
+                                        machine1.setstop(rnds[0]);
+                                        machine2.setstop(rnds[1]);
+                                        machine3.setstop(rnds[2]);
+				}
+			}
+		});
+
+		machine1.shuffle(3);
+								
+		setTimeout(function(){
+			machine2.shuffle(3);
+		}, 300);
+							
+		setTimeout(function(){
+			machine3.shuffle(3);
+		}, 600);
+	}
+	
+	function let_go(){
+		if(param == 1){
+			go_lottery();
+		}
+	}
+});
+</script>

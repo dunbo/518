@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>夏日来了爽歪歪</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/summer_coming/css/common.css?v3"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/soft_list_v1.js?v2"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v5"></script>
+</head>
+<script>
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+$(document).ready(function () {
+	get_soft();
+	//my_soft(aid,sid,3,3);
+});
+function get_soft() 
+{
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var soft_lists = eval("("+json_data+")").DATA;
+	var str = '';
+	for(i=0;i<soft_lists.length;i++)
+	{
+		if(soft_lists[i][2].length > 4){
+			var softname = soft_lists[i][2].substring(0,3)+'...';
+		}else{
+			var softname = soft_lists[i][2];
+		}
+		//str +='<li><a href="javascript:;" onclick="download_apk('+aid+','+soft_lists[i][0]+',\''+soft_lists[i][7]+'\',\''+soft_lists[i][2]+'\','+soft_lists[i][13]+','+soft_lists[i][27]+',1);"><p class="soft_icon"><img src="'+soft_lists[i][1]+'"/></p><p class="soft_name">'+softname+'</p><p class="soft_size">'+soft_lists[i][9]+'</p><a class="soft_btn" a href="javascript:;" onclick="download_apk('+aid+','+soft_lists[i][0]+',\''+soft_lists[i][7]+'\',\''+soft_lists[i][2]+'\','+soft_lists[i][13]+','+soft_lists[i][27]+',1);">下载</p></a></li>';	
+		
+		str +='<li><p class="soft_icon"><img src="'+soft_lists[i][1]+'"/></p><p class="soft_name">'+softname+'</p><p class="soft_size">'+soft_lists[i][9]+'</p><a class="soft_btn" href="javascript:;" onclick="download_apk('+aid+','+soft_lists[i][0]+',\''+soft_lists[i][7]+'\',\''+soft_lists[i][2]+'\','+soft_lists[i][13]+','+soft_lists[i][27]+',1);">下载</a></li>';	
+	}
+	$('#my_softs').html(str);
+}
+//下载软件
+function download_apk(aid,softid,pkgname,softname,versionCode,size,flag)
+{
+	var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(pkgname,parseInt(versionCode));
+	if(soft_status_gos==0||soft_status_gos==1)
+	{
+		//window.AnzhiActivitys.inDetail(parseInt(aid),parseInt(softid),0);	
+		window.AnzhiActivitys.inDetailByPackageName(pkgname,aid,0);		
+		//写日志
+		$.ajax({
+			url: '/lottery/vacation_gift_open.php',
+			data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+			type: 'get',
+			success: function(data){
+			}
+		});
+	}
+	else
+	{
+		window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,1);//flag = 1下载并进入详情页
+		//写日志
+		$.ajax({
+			url: '/lottery/year_feedback_download.php',
+			data: 'softid='+softid+'&sid='+sid+'&pkgname='+pkgname+'&aid='+aid,
+			type: 'post',
+			success: function(data){
+			}
+		});
+	}
+}
+</script>
+<body>
+<div class="banner">
+	<img src="<!--{$out.new_static_url}-->/activity/summer_coming/images/banner.png"/>
+</div>
+<div class="wrap">
+	<div class="titles">
+		<h3>参与步骤</h3>
+	</div>
+	<ul>
+		<li>1.填写正确手机号码</li>
+		<li>2.下载活动软件</li>
+		<li>3.在活动软件评论中找到名为“野生安智君”的评论进行回复</li>
+	</ul>
+	<div class="wrap_icon wrap_icon_l"></div>
+	<div class="wrap_icon wrap_icon_r"></div>
+	<div class="bg3"></div>
+</div>
+<div class="wrap">	
+	<form action="" class="phone_form">
+		<p>请填写手机号码</p>
+		<div class="form_item">
+			<input type="text" placeholder="请输入手机号领取" id="telephone_input" class="input_text"/>
+            <span  id="info"></span>
+		</div>
+		<div class="form_btn">
+			<a href="javascript:;" onclick="set_telephone('<!--{$out.aid}-->','<!--{$out.sid}-->');">提交</a>
+		</div>
+	</form>
+	<div class="wrap_icon wrap_icon_l"></div>
+	<div class="wrap_icon wrap_icon_r"></div>
+	<div class="bg4"></div>
+</div>	
+<div class="wrap">
+	<div class="titles">
+		<h3>活动软件</h3>
+	</div>
+	<ul class="soft_list clear" id="my_softs">
+	</ul>
+	<div class="clear"></div>
+	<div class="wrap_icon wrap_icon_l"></div>
+	<div class="wrap_icon wrap_icon_r"></div>
+	<div class="bg5"></div>
+</div>
+<div class="wrap">
+	<div class="titles">
+		<h3>活动奖品</h3>
+	</div>
+	<ul class="prize_list clear">
+		<li><img src="<!--{$out.new_static_url}-->/activity/summer_coming/images/prize/prize1.jpg"/></li>
+		<li><img src="<!--{$out.new_static_url}-->/activity/summer_coming/images/prize/prize2.jpg"/></li>
+		<li><img src="<!--{$out.new_static_url}-->/activity/summer_coming/images/prize/prize3.jpg"/></li>
+		<li><img src="<!--{$out.new_static_url}-->/activity/summer_coming/images/prize/prize4.jpg"/></li>
+		<div class="clear"></div>
+	</ul>
+	<div class="wrap_icon wrap_icon_l"></div>
+	<div class="wrap_icon wrap_icon_r"></div>
+	<div class="bg6"></div>
+</div>
+<div class="wrap">
+	<div class="titles">
+		<h3>参与规则</h3>
+	</div>
+	<div class="rule">
+		<p><span>活动时间：6月23日-6月27日</span></p>
+		<p><span>活动规则：</span><br/>1、本次针对安智市场V6.0.0及以上版本用户，进入活动页面下载安装活动软件，并在软件详情
+页评论区中回复账号为“野生安智君”的评论，即可参与抽奖。<br/>2、请在参与活动时在页面上填写手机号码，若您填写的手机号码有误或者无法联系到您本人，导致无法正常领奖，安智不对此负责。<br/>3、为保证活动的公平公正，严重鄙视作弊、恶意刷量等行为，此类中奖无效。<br/>4、本次活动仅支持安智市场V6.0.0及以上版本参加，版本较低的用户请升级后参与活动。</p>
+	</div>
+	<div class="wrap_icon wrap_icon_l"></div>
+	<div class="wrap_icon wrap_icon_r"></div>
+	<div class="icon_02"></div>
+</div>
+<div class="footer">
+	<img src="<!--{$out.new_static_url}-->/activity/summer_coming/images/bg2.png"/>
+	<p>本次活动最终解释权归安智所有</p>
+</div>
+</body>
+</html>

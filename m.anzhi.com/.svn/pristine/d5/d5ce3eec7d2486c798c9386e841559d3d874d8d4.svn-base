@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>一起叫醒春天</title>
+<link type="text/css" rel="stylesheet" href="/css/spring2015/common.css?v2"/>
+<script type="text/javascript" src="/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="/js/jQueryRotate.js"></script>
+<script type="text/javascript" src="/js/jquery.easing.min.js"></script>
+<script type="text/javascript" src="/js/zp.js"></script>
+
+</head>
+<body>
+<section>
+    <div class="banner" id="top">
+        <a href="#"><img src="/images/spring2015/cam_banner.jpg"/></a>
+        <a href="/lottery/spring_lottery_rules.php" class="detail">活动详情</a>
+    </div>
+    <div class="notice clear">
+        <div class="notice-icon"></div>
+        <div class="notice-list">
+            <marquee scrollamount="2" scrolldelay="90" direction="left">
+                <!--{if $out.all_award_count}-->
+                <!--{foreach from=$out.all_award_result item=v key=k}-->
+                <span><!--{$v.telephone}--> &nbsp;获得<!--{$v.award}--><em><!--{$v.the_time}--></em></span>
+                <!--{/foreach}-->
+                <!--{else}-->
+                <span>春天等着被你叫醒发礼物呢！</span>
+                <!--{/if}-->
+            </marquee>
+        </div>
+    </div>
+	<div class="wrap_bg1 padbom80">
+		<!--先判断sim卡-->
+		<!--检查有没有imsi，没有的话提示用户插入sim卡-->
+		<!--{if !$out.imsi_status}-->
+			<div class="tips_p colorred" style="padding:20px 10px;">
+				<p>请先插入SIM卡，重启安智市场参与此活动</p>
+			</div>
+		<!--{else}-->
+		<!--版本低于5.4.1，不显示大部分内容-->
+		<!--{if $out.imsi_status && $out.check_status != 1}-->
+			<!--{if $out.check_status == 2}-->
+				<div class="tips_p colorred"  style="padding:20px 10px;">
+					<p>少年，你的版本过低哦，快去升级来叫醒春天吧！(<!--{$out.intro_result.soft_sizes}-->)</p>
+				</div>
+				<div class="btns btns_update ptop">
+					<a href="javascript:;" onClick="download_apk('',<!--{$out.intro_result.softid}-->,'cn.goapk.market','<!--{$out.intro_result.softname}-->','<!--{$out.intro_result.version_code}-->','<!--{$out.intro_result.soft_size}-->',1);"></a>
+				</div>
+			<!--{else if $out.check_status == 3}-->
+				<div class="tips_p colorred" style="padding:20px 10px 0;">
+					<p>很抱歉，你的安智市场版本过低，请升级后参与活动。<br/>升级方式：在[管理-设置]中检查更新。</p>
+				</div>
+			<!--{else if $out.check_status == 4}-->
+				<div class="tips_p colorred" style="padding:20px 10px 0;">
+					<p>很抱歉，你的安智市场版本过低，请升级后参与活动。</p>
+				</div>
+			<!--{/if}-->
+		<!--{/if}-->
+		<!--{/if}-->
+    
+		<!--版本正确的时候才会显示以下内容-->
+		<!--{if $out.check_status == 1}-->
+			<div class="progress padbom40">
+				<p>叫醒春天指数</p>
+				<span><a href="#" class="current"><i id="sign_sum" style="clip:rect(0px, <!--{eval $out.sign_sum*12}-->px, 44px, 0px);"></i></a></span>
+			</div>
+			<div id="wakeup_div" class="btns ptop <!--{if $out.imsi_status == 0 || $out.already_signed == 1}-->btns_disabled<!--{/if}-->">
+				<a id="wakeup" href="javascript:void(0);" title="叫醒春天"></a>
+			</div>
+		<!--{/if}-->
+	</div>
+    <div class="footer" style="margin-top:-100px"><img src="/images/spring2015/foot_bg.png"/></div>
+    
+    <!--弹出窗口-->
+    <div class="tip-box" id="tip-box1"  style="display: none;">
+        <div class="tip-con">
+             <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box1')">关闭</a></div>
+             <p>你已叫醒4%的春天<br/>少年记得明天继续来叫哦~<!--{$out.spring_step}--></p>
+			 <div class="btns <!--{if $out.spring_step==1}-->btns_11<!--{else if $out.spring_step == 2}-->btns_07<!--{else}-->btns_12<!--{/if}-->">
+				<a href="/lottery/spring_share.php?sid=<!--{$out.sid}-->" title="去发春"></a>
+			 </div>
+        </div>
+    </div>
+</section>
+</body>
+
+<script type="text/javascript">
+// 全局变量
+var sid = '<!--{$out.sid}-->';
+var aid = <!--{$out.aid}-->;
+var imsi_status = <!--{$out.imsi_status}-->;
+var already_signed = <!--{$out.already_signed}-->;
+
+$(function(){
+    $("#wakeup").bind('click', sign_up);
+});
+
+function sign_up() {
+    // 没有插sim卡，不可点击
+    if (imsi_status == 0 || already_signed == 1)
+        return false;
+    $.ajax({
+        url:"/lottery/spring_sign.php",
+        data:'sid='+sid,
+        type:'get',
+        success:function(data){
+            // 一系列动作
+            // 叫醒（签到）按钮置灰
+            //$("#wakeup_div").addClass("btns_disabled");
+            //$("#wakeup").unbind('click');
+            // 进度条增加
+            $("#sign_sum").css("clip", "rect(0px, " + data*12 + "px, 44px, 0px)");
+            $("#tip-box1 p").html("你已叫醒" + data*4 + "%的春天<br/>少年记得明天继续来叫哦~");
+            // 打开窗口，提交已叫醒多少的春天
+            showOpenBox('#tip-box1');
+        }
+    });
+}
+
+// 弹出窗口
+ var flags={canMove:true};
+    function showOpenBox(obj){
+		var oDiv = document.createElement('div');
+		oDiv.id = 'body-bg';
+		document.body.appendChild(oDiv);
+		var bg_h=$("#body-bg").height()+$(document).scrollTop(),
+		top_h= $(obj).height()/ 2-$(document).scrollTop();
+		$(obj).css("margin-top",-top_h+"px").show();
+		$("#body-bg").css("height",bg_h+"px").show();
+		flags.canMove=false;
+    }
+    function cloBox(obj){
+        var oDiv = document.getElementById('body-bg');
+		$(obj).hide();
+		document.body.removeChild(oDiv);
+        flags.canMove=true;
+    }
+    $(function(){
+        $("body").bind('touchmove', function (e) {
+            if(!flags.canMove){
+                e.preventDefault();
+            }
+        });
+    })
+
+//下载软件
+function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag) {
+    window.AnzhiActivitys.downloadForActivity(aid,parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+}
+</script>
+
+</html>

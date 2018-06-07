@@ -1,0 +1,145 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+<script>
+$('#input_rank').hide();
+function switchExtentType(obj)
+{
+	console.log($(obj).val());
+	if ($(obj).val() == 1) {
+		$('#extent_size_tr').show();
+		$('#filter_installed_tr').show();
+		$('#depot_limit_tr').show();
+		$('#select_rank').show();
+		$('#input_rank').hide();
+	} else if ($(obj).val() == 2) {
+		$('#extent_size_tr').hide();
+		$('#filter_installed_tr').hide();		
+		$('#depot_limit_tr').hide();
+        $('#input_rank').show();
+		$('#select_rank').hide();		
+	}
+}
+</script>
+<FORM method="POST" action="/index.php/Sj/NecessaryExtent/add_extent">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td width="30%">&nbsp;&nbsp;</td>
+		<td>&nbsp;&nbsp;</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>区间名称</td>
+		<td><input name='extent_name' type='text'/></td>
+	</tr>
+	<?php if (empty($parent_id)): ?>
+	<tr class="sub_tr" style='height:70px'>
+		<td>区间类型</td>
+		<td>
+			<SELECT name='type' onchange="switchExtentType(this)">
+				<option value='1'>普通区间</option>
+				<option value='2'>活动区间</option>			
+			</SELECT><br>普通区间：该区间下不可再分区间，只有软件列表。
+			活动区间：分区下可以再进行分区操作
+		</td>
+	</tr>
+	<?php endif;?>
+	<tr class="sub_tr">
+		<td>运营商</td>
+		<td>
+			<SELECT name='oid'>
+				<option value='0'>不限制</option>
+				<?php foreach($operatinglist as $val): ?>
+					<option value='<?php echo $val['oid']?>'><?php echo $val['mname']?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>渠道</td>
+		<td>
+			<SELECT name='cid'>
+				<option value='0'>不限制</option>
+				<?php foreach($channel_list as $val): ?>
+					<option value='<?php echo $val['cid']?>'><?php echo $val['chname']?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="extent_size_tr">
+		<td>区间位置数</td>
+		<td><input name='extent_size' type='text'/></td>
+	</tr>
+	<!--
+	<tr class="sub_tr" id="filter_installed_tr">
+		<td>是否过滤已安装软件</td>
+		<td>
+			<SELECT name='filter_installed'>
+				<option value='1' >是</option>
+				<option value='0' >否</option>
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr" id="depot_limit_tr">
+		<td>区间默认返回备选库数量</td>
+		<td><input name='depot_limit' type='text'/></td>
+	</tr>
+	-->
+	<tr class="sub_tr">
+		<td>区间排序</td>
+		<td><input name='rank' type='text' id='input_rank' />
+		    <SELECT name='rank' id='select_rank'>
+			    <?php
+					for($i = 1;$i <= $count; $i++){
+					    echo "<option value=\"".$i."\"";
+					    if($count == $i) echo " selected=\"selected\" ";
+					    echo ">".$i."</option>";
+					}
+				?>
+			</SELECT>
+			<input type='hidden' name="currank" value='<?php echo $count ?>' />
+		</td>
+	</tr>
+	<!--
+	<tr>
+		<td>开始时间</td>
+		<td><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+		<input id="start_at" name="start_at"
+			style="border: 0px none black; width: 100px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			onclick="return showCalendar('start_at', 'y-mm-dd');"
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span></td>
+	</tr>
+	<tr>
+		<td>结束时间</td>
+		<td><span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="end_at" name="end_at"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			onclick="return showCalendar('end_at', 'y-mm-dd');"
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span></td>
+	</tr>
+	-->
+	<tr>
+		<td colspan="2"> 
+		<input type='hidden' name="parent_id" value='<?php echo $parent_id?>' />
+		<input type='submit'/>
+		<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+	</tr>
+</table>
+</FORM>	

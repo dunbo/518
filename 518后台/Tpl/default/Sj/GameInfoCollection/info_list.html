@@ -1,0 +1,190 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script>
+function change()
+{
+	var val=$('#match_pck').val();
+	if(val==1)
+	{
+		show_pck();
+	}
+	else
+	{
+		hidden_pck();
+	}
+}
+function show_pck()
+{
+	$('#game_pck').css({'display':''});
+}
+function hidden_pck()
+{
+	$('#game_pck').css({'display':'none'});
+	$("#search_pckname").attr("value",""); 
+}
+    $(function(){
+        document.onkeydown = function(e){
+            var ev = document.all ? window.event : e;
+            if(ev.keyCode==13) {
+                $('#info_list').submit();
+             }
+        }
+    });
+	function select_all()
+	{
+		$("input[name='nid[]']").attr("checked",true);
+	}
+	function select_again()
+	{	
+		$("input[name='nid[]']").each(function () {  
+			$(this).attr("checked", !$(this).attr("checked"));  
+		});       
+	}
+	function delete_go()
+	{
+		if(!confirm("确定要这么执行该操作吗？"))
+		{
+			return false;
+		}
+		var nid = document.getElementsByName("nid[]");
+		var id = "";
+		var is_select = false;
+		for ( i = 0 ; i < nid.length ; i++ ) 
+		{
+			if ( nid[i].checked == true ) 
+			{
+				id += "," + nid[i].value;
+				is_select = true;
+			}
+		}
+		if (is_select) 
+		{
+			window.location = "__URL__/del/id/"+id;
+		}
+		else
+		{
+			alert( "请至少选择一个条目，才能进行操作" );
+			return false;
+		}
+	}
+</script>
+
+<body>
+    <div class="search_box">
+        <form method="get" action="__URL__/info_list" name="info_list" id="info_list">
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="16%">
+                        <label>游戏名称：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_softname" id="search_softname" value="{$search_softname}"/>
+                    </td>
+                    <td width="16%">
+                        <label>资讯标题：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_news_name" id="search_news_name" value="{$search_news_name}"/>
+                    </td>
+                    <td width="16%">
+                        <label>资讯类型：</label>
+                        <select name="search_info_type" id="search_info_type">
+                            <option value="-1" selected>全部</option>
+                            <option value="1" <if condition="$search_info_type eq 1">selected</if>>资讯</option>
+                            <option value="2" <if condition="$search_info_type eq 2">selected</if>>评测</option>
+                            <option value="3" <if condition="$search_info_type eq 3">selected</if>>攻略</option>
+                        </select>
+                    </td>
+					 <td width="16%">
+                        <label>是否包含敏感词：</label>
+                        <select name="include_sensitive" id="include_sensitive">
+                            <option value="-1" selected>全部</option>
+                            <option value="1" <if condition="$include_sensitive eq 1">selected</if>>是</option>
+                            <option value="0" <if condition="$include_sensitive eq 0">selected</if>>否</option>
+                        </select>
+                    </td>
+                    <td width="16%"><input type="submit" value="搜索" class="search_btn"/></td>
+                </tr>
+				<tr>
+					<td width="16%">
+							<label>采集站点：</label>
+							<input type="text" class="search_item_text" style="width:150px" name="search_website" id="search_website" value="{$search_website}"/>
+					</td>
+					<td width="16%">
+                        <label>是否匹配包名：</label>
+                        <select name="match_pck" id="match_pck" onchange="change()">
+                            <option value="-1" selected>全部</option>
+                            <option value="1"  <if condition="$match_pck eq 1">selected</if>>是</option>
+                            <option value="0"  <if condition="$match_pck eq 0">selected</if>>否</option>
+                        </select>
+                    </td>
+					 <td width="16%" id="game_pck" <?php if($search_pckname) { ?> style="display:" <?php } else { ?>style="display:none"  <?php } ?> >
+                        <label>游戏包名：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_pckname" id="search_pckname" value="{$search_pckname}"/>
+                    </td>
+				</tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+					<th width="3%">选择</th>
+                    <th width="10%">资讯标题</th>
+                    <th width="15%">资讯默认图片</th>
+                    <th width="10%">游戏名称</th>
+					<th width="10%">游戏包名</th>
+					<th width="5%">是否包含敏感词</th>
+                    <th width="5%">采集站点</th>
+                    <th width="5%">作者</th>
+                    <th width="5%">资讯类型</th>
+                    <th width="8%">抓取时间</th>
+                    <th width="8%">原文发布时间</th>
+                    <th width="11%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+					<td><input type="checkbox" name="nid[]" value="{$list.id}"/></td>
+                    <td>{$list.news_name}</td>
+                    <td><if condition='$list.news_pic eq null'>-<else/><a href='{$apkurl}{$list.news_pic|default='&nbsp;'}' target="_blank"><img height="80" width="130" src="{$apkurl}{$list.news_pic|default='&nbsp;'}"/></a></if></td>
+                    <td>{$list.softname}</td>
+					<td>{$list.package}</td>
+					<td><?php if($list['sensitive_status']==1) echo "是"; else echo "否"; ?></td>
+                    <td>{$list.website_name}</td>
+                    <td>{$list.author}</td>
+                    <td>
+                        <switch name="list.info_type">
+                            <case value="1">资讯</case>
+                            <case value="2">评测</case>
+                            <case value="3">攻略</case>
+                        </switch>
+                    </td>
+                    <td>{$list.create_tm|date="Y-m-d H:i:s",###}</td>
+                    <td>{$list.news_date|date="Y-m-d H:i:s",###}</td>
+                    <td>
+                        <a href="__URL__/info_preview?id={$list.id}&width=480" class="thickbox">预览</a>
+                        <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                        <a href="__URL__/pass?id={$list.id}&model=true" class="thickbox">通过</a>
+                        <span>&nbsp;&nbsp;&nbsp;</span>|
+                        <a href="__URL__/edit_info?id={$list.id}&{$url_param}">编辑</a>
+                        <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                        <a href="__URL__/del?id={$list.id}" onclick="return confirm('确定要删除此记录吗？');">删除</a>
+						<span>&nbsp;&nbsp;&nbsp;</span>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+		<div style="margin:10px;">
+			<input type="button" value="全选" onclick="select_all()"/>&nbsp;
+			<input type="button" value="反选" onclick="select_again()"/>&nbsp;&nbsp;&nbsp;
+			批量操作：
+			<input type="button" value="批量删除" onclick="return delete_go()" />
+		<div>
+        <center>{$page}</center>
+    </div>
+</body>

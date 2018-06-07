@@ -1,0 +1,134 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style type="text/css">
+.tbspan{font-size:15px;margin:20px 6px;padding-bottom:20px;}
+.tbdiv{font-size:15px;margin:6px 0px;padding-bottom:20px;clear:both;}
+</style>
+	<h3>编辑广告素材</h3>
+<form method="post" action="__URL__/doedit/advdid/{$_GET['advdid']}/from/{$_GET['from']}" enctype="multipart/form-data">
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+<tr>
+	<td>分类标签：</td>
+	<td><input type="text" name="ext_title" size="50" value="广告" disabled="disabled"></td>
+</tr>
+<tr>
+	<?php if($advid){ ?><input type="hidden" value="{$advid}" name="advid"> <?php } ?>
+	<input type="hidden" value="{$_GET['source']}" name="source">
+	<input type="hidden" value="{$_GET['id']}" name="id">
+	<input type="hidden" value="{$_GET['from']}" name="from">
+	<td>宣传标题：</td>
+	<td><input type="text" name="ext_title" size="50" value="{$result.ext_title}"><br/></td>
+</tr>	
+<tr>
+	<td>链接地址：</td>
+	<td><input type="text" size="30" name="url" value="{$result.url}" > </td>
+</tr>
+<tr>
+	<td>推荐理由：</td>
+	<td><textarea rows="5" cols="50" name="description" id="description" value="{$result.description}">{$result.description}</textarea> </td>
+</tr>
+<?php if(in_array($_GET['from'],array('care','wrap','dailyrecom'))): ?>
+<volist name="platform" id="list1">
+	<tr style="display:none;">
+      <td width="30%" align="center">
+		{$list1.platformname}
+	  </td>
+      <td height="25" align="center">
+		<volist name="position" id="list2">
+        <label><input type="checkbox" name="pp[]" value="{$list1.platform}_{$list2.position}" <?php if(in_array($list1['platform'].'_'.$list2['position'],$checked)) {echo 'checked="checked"';if(in_array($list1['platform'].'_'.$list2['position'],$disable)) echo ' disabled="disabled"';} ?> />
+		{$list2.positionname} </label>
+		</volist>
+      </td>
+	</tr>
+</volist>
+<?php else: ?>
+<tr style="border:1px solid black !important;">
+	<td>平台</td>
+	<td>位置</td>
+</tr>
+<volist name="platform" id="list1">
+	<tr>
+      <td width="30%" align="center">
+		{$list1.platformname}
+	  </td>
+      <td height="25" align="center">
+		<volist name="position" id="list2">
+        <label><input type="checkbox" name="pp[]" value="{$list1.platform}_{$list2.position}" <?php if(in_array($list1['platform'].'_'.$list2['position'],$checked)) {echo 'checked="checked"';if(in_array($list1['platform'].'_'.$list2['position'],$disable)) echo ' disabled="disabled"';} ?> />
+		{$list2.positionname} </label>
+		</volist>
+      </td>
+	</tr>
+</volist>
+<?php endif; ?>
+	<!--tr >
+	  <td height="25" align="right" style="border: 0px;">
+        上线时间：
+      </td>
+	  <td style="border: 0px;"><input id="starttime" name="starttime" value="" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px" />至
+	  <input id="endtime" name="endtime" value="" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"/></td>
+    </tr-->
+<tr>
+	<td>宣传图片上传（小图）：</td>
+	<td><?php if($result['img_path1']){ ?>
+		<img src="<?php echo IMGATT_HOST;?>/{$result.img_path1}" >
+	<?php } ?>
+		<br/>
+	<span>尺寸1（列表图）：最大宽度200像素<input type="file" name="img1"> </span></td>
+</tr>
+<tr>
+	<td>宣传图片上传（大图）：</td>
+	<td><?php if($result['img_path2']){ ?>
+		<img src="<?php echo IMGATT_HOST;?>/{$result.img_path2}" >
+	<?php } ?>
+	<br/>
+	<span class="tbspan">尺寸2（轮播图）：最大宽度700像素<input type="file" name="img2"></span></td>
+</tr>
+	<tr>
+      <td colspan="3" align="center" style="border: 0px;"><input type="submit" name="submit" onclick="return check()" class="search_btn" style="display:inline-block;" id="submit" value="提交" /> <a style="display:inline-block;margin:10px auto" class="search_btn" href="
+	  <?php if($_GET['from'] == 'wrap'): ?>
+	  /index.php/Zhiyoo/Care/result_wrap/postime/{$_GET['source']}
+	  <?php elseif($_GET['from'] == 'care'): ?>
+	  /index.php/Zhiyoo/Care/result_list/postime/{$_GET['source']}
+	  <?php elseif($_GET['from'] == 'dailyrecom'): ?>
+	  /index.php/Zhiyoo/Care/dailyrecom/postime/{$_GET['source']}
+	  <?php else: ?>
+	  __URL__/result_list/postime/{$_GET['source']}
+	  <?php endif; ?>">取消</a></td>
+    </tr>
+</table>
+</form>
+<script>
+function check(){
+	
+	var pp = document.getElementsByName('pp[]');
+	var pp_length = pp.length;
+	var pp_only = false;
+	for(var i =0;i<pp_length;i++){
+		if(pp[i].checked){
+			pp_only = true;
+			break;
+		}
+	}
+	if(pp_only != true){
+		alert('请至少选择一个位置！');
+		return false;
+	}
+	return true;
+	
+	var check =  document.getElementById("starttime").value;
+	if(check == ''){
+		alert('开始时间不能为空');
+		return false;
+	}
+	var check =  document.getElementById("endtime").value;
+	if(check == ''){
+		alert('结束时间不能为空');
+		return false;
+	}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>安智购省钱 福利进校园</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/store/css/common.css?v1"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/store/js/common.js"></script>
+<script type="text/javascript">
+
+/*
+        $(function () {
+		$('#feedback_select li').click(function(){
+                        $("#p_tel").html($(this).attr('rel'));
+		});
+        });
+*/
+
+var sid='<!--{$out.sid}-->';
+
+        function save(){
+                var recommend = $("#feedback_select_value").val();
+                $("#username_mess").html('');
+                $("#password_mess").html('');
+                $("#password2_mess").html('');
+                $("#recommend_mess").html('');
+                if($("#username").val().trim().length==0){
+                    $("#username_mess").html("用户名不能为空");
+                    return;
+                }
+                var matchstr = /^[a-zA-Z0-9_]{2,20}$/;
+                if(matchstr.test($("#username").val())==false){
+                    $("#username_mess").html("用户名只能是2-20个英文、数字");
+                    return;
+                }
+
+
+                if($("#password").val().trim().length==0){
+                    $("#password_mess").html("密码不能为空");
+                    return;
+                }
+                var matchstr = /^[\@A-Za-z0-9\!\#\$\%\^\&\*\.\~]{6,16}$/;
+                if(matchstr.test($("#password").val())==false){
+                    $("#password_mess").html("密码只能是6-16个字符");
+                    return;
+                }
+
+                if($("#password2").val().trim().length==0){
+                    $("#password2_mess").html("密码不能为空");
+                    return;
+                }
+
+                if($("#password").val()!=$("#password2").val()){
+                    $("#password2_mess").html("两次密码不一致");
+                    return;
+                }
+
+                if(recommend.trim().length==0){
+                    $("#recommend_mess").html("请选择推荐人");
+                    return;
+                }
+
+                var p_tel = $("#p_tel").html();
+
+                var param = {
+                    username: $("#username").val(),
+                    password: $("#password").val(),
+                    recommend: recommend,
+                    mobile : p_tel
+                };
+
+                $.ajax({
+                    url: '/lottery/store/register.php?sid='+sid,
+                    type:'POST',
+                    data:param,
+                    secureuri:false,
+                    dataType:'json',
+                    success:function(data){
+                        if(data==2){
+                            $("#username_mess").html("用户名已存在");
+                            return;
+                        }else if(data==3){
+                            $("#username_mess").html("获取不到您的设备号，请换台手机重试");
+                            return;
+                        }else if(data==4){
+                            $("#username_mess").html("您今日操作次数过多，请明日再试");
+                            return;
+                        }else{
+                            location.href="/lottery/store/register2.php?sid="+sid; 
+                        }
+                    }
+                });
+        };
+
+function select_tel(obj){
+    $("#p_tel").html($(obj).attr('rel'));
+}
+
+</script>
+</head>
+<body class="body2">
+<div class="main2">
+	<div class="register_wrap">
+		<h3>卖家注册<span>（所有信息必填）</span></h3>
+		<form method="post" action="">
+                    <input type="text" placeholder="输入用户名(2-20个英文、数字)" class="inputtext" id="username" value="<!--{$out.ret.username}-->"/>
+					<div class="error_form red"><span id="username_mess"></span></div>
+			<input type="password" placeholder="输入密码(6-16个字符)" class="inputtext" id="password" value="<!--{$out.ret.password}-->"/>
+			<div class="error_form red"><span id="password_mess"></span></div>
+			<input type="password" placeholder="再次输入密码(6-16个字符)" class="inputtext" id="password2" value="<!--{$out.ret.password}-->"/>
+			<div class="error_form red"><span id="password2_mess"></span></div>
+			<div class="feedback_form_item">
+				<input value="<!--{$out.ret.recommend}-->" type="text" class="inputtext select_input" readonly="readonly" placeholder="选择推荐人" id="feedback_select_value" readonly/>
+
+				<span class="form_arrow arrow_down"></span>
+                                
+				<ul class="select_type" id="feedback_select">
+                                    <!--{foreach from=$out.recommendlist item=vo}-->
+					<li onclick="select_tel(this)" rel="<!--{$vo.tel}-->"><!--{$vo.name}--></li>
+                                    <!--{/foreach}-->
+				</ul>
+			</div>
+			<div class="error_form red"><span id="recommend_mess"></span></div>
+			<div class="reference">
+                            <p>推荐人电话：<span id="p_tel"><!--{$out.ret.mobile}--></span><br/>将发送验证码给推荐人</p>
+			</div>
+			<div class="btns2">
+				<a href="javascript:;" onclick="save()">下一步</a>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="footer">
+	<p>客服电话：010-58851836-8002</p>
+</div>
+</body>
+</html>

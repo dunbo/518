@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>修改登录问答</title>
+<load href='__PUBLIC__/css/style.css' />
+<load href="__PUBLIC__/js/Base.js" />
+<load href="__PUBLIC__/js/prototype.js" />
+<load href="__PUBLIC__/js/mootools.js" />
+<load href="__PUBLIC__/js/Ajax/ThinkAjax.js" />
+<load href="__PUBLIC__/js/Form/CheckForm.js" />
+<load href="__PUBLIC__/js/common.js" />
+<script language="JavaScript">
+<!--
+function fleshVerify(){
+//重载验证码
+var timenow = new Date().getTime();
+$('verifyImg').src= '__URL__/verify/'+timenow;
+}
+
+function isPassword(psw) {
+   var count = 0;
+   if(psw.length >= 8 && psw.length <= 16){
+	 count +=2;
+	 //return false;
+	}
+
+   if(/[0-9]/.test(psw)){
+	 count +=4; //6
+   }
+   if((/[a-z]/.test(psw)) || (/[A-Z]/.test(psw))){
+     count +=5; //11
+   }
+    //count++;
+   if(/[~!@#$%^&*()_+]/.test(psw)){
+     count += 8; //20
+   }
+   return count;
+}	
+//-->
+</script>
+</head>
+
+<body onLoad="document.login.oldpassword.focus()" >
+<form method='post' name="login" action="__URL__/changeLoginQa/">
+<div class="tCenter hMargin">
+<table id="checkList" class="login" cellpadding=0 cellspacing=0 >
+<tr><td height="5" colspan="2" class="topTd" ></td></tr>
+<tr class="row" ><Th colspan="2" class="tCenter space">  修改登录问答</th></tr>
+<tr><td height="5" colspan="2" class="topTd" ></td></tr>
+<tr class="row" ><td class="tRight">密码：</td><td><input type="password" class="medium bLeftRequire" name="_login_password_qa" id="_login_password_qa" /></td></tr>
+<tr class="row" ><td class="tRight">原登录问题：</td><td><select id="question" name="question"><option value="0">-- 请选择 --</option><volist name="question" id="vo"><option value="{$vo.id}">{$vo.question}</option></volist><option value="-1">自己填写问题</option></select></td></tr>
+<tr class="row" style="display:none;" id="self_question_tr" name="self_question_tr" ><td class="tRight">原自填问题：</td><td><input type="text" class="medium bLeftRequire" check="Require" warning="请输入自填问题" name="self_question" id="self_question" /></td></tr>
+<tr class="row" ><td class="tRight">原登录回答：</td><td><input type="text" class="medium bLeftRequire" name="answer" id="answer" /></td></tr>
+<tr class="row" ><td class="tRight"><span style="color:red;">新登录问题：</span></td><td><select id="new_question" name="new_question"><option value="0">-- 请选择 --</option><volist name="question" id="vo"><option value="{$vo.id}">{$vo.question}</option></volist><option value="-1">自己填写问题</option></select></td></tr>
+<tr class="row" style="display:none;" id="new_self_question_tr" name="new_self_question_tr" ><td class="tRight"><span style="color:red;">新自填问题：</span></td><td><input type="text" class="medium bLeftRequire" check="Require" warning="请输入自填问题" name="new_self_question" id="new_self_question" /></td></tr>
+<tr class="row" ><td class="tRight"><span style="color:red;">新登录回答：</span></td><td><input type="text" class="medium bLeftRequire" name="new_answer" id="new_answer" /></td></tr>
+<tr class="row" ><td class="tRight">验证码：</td><td><input type="text" class="small bLeftRequire" name="verify" id="verify" /> <img SRC="__URL__/verify/" BORDER="0" ALT="点击刷新验证码" id="verifyImg" onClick="fleshVerify()" style="cursor:pointer" align="absmiddle"></td></tr>
+<tr class="row" ><td class="tCenter" align="justify" colspan="2">
+<input  type="submit" class="hMargin submit small" onclick="return checkLoginQa()" value="确 认" alt="确认" />
+<input  type="button" onClick="history.back()" class="hMargin submit small" value="取 消" alt="取消" />
+</td></tr>
+<tr><td height="5" colspan="2" class="bottomTd" ></td></tr>
+</table>
+</div>
+</form>
+
+<load href="__PUBLIC__/js/jquery.js" />
+<script language="javascript">
+var jq = jQuery.noConflict();
+jq('#question').bind('change',function(){question_sel();});
+question_sel();
+function question_sel() {
+	if(jq('#question').val()==-1) {
+		jq('#self_question_tr').show();
+	} else {
+		jq('#self_question_tr').hide();
+	}
+};
+
+jq('#new_question').bind('change',function(){new_question_sel();});
+new_question_sel();
+function new_question_sel() {
+	if(jq('#new_question').val()==-1) {
+		jq('#new_self_question_tr').show();
+	} else {
+		jq('#new_self_question_tr').hide();
+	}
+};
+
+function checkLoginQa(){
+	if(jq('#_login_password_qa').val()=='') {
+		alert('请填写您的登录密码！');
+		return false;
+	}
+	if(jq('#question').val()==0) {
+		alert('请选择原登录问题！');
+		return false;
+	}
+	if(jq('#question').val()==-1 && jq('#self_question').val()=='') {
+		alert('请填写原自填问题！');
+		return false;
+	}
+	if(jq('#answer').val()=='') {
+		alert('请填写原登录回答！');
+		return false;
+	}
+	if(jq('#new_question').val()==0) {
+		alert('请选择新登录问题！');
+		return false;
+	}
+	if(jq('#new_question').val()==-1 && jq('#new_self_question').val()=='') {
+		alert('请填写新自填问题！');
+		return false;
+	}
+	if(jq('#new_answer').val()=='') {
+		alert('请填写新登录回答！');
+		return false;
+	}
+	if(jq('#verify').val()=='') {
+		alert('请填写验证码！');
+		return false;
+	}
+	return true;
+}
+</script>
+</body>
+</html>

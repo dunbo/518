@@ -1,0 +1,99 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+function ok(data)
+  {
+   if(confirm(data))
+    return true;
+   else return false
+  }
+  
+</script>
+<style type="text/css">
+.tbspan{font-size:15px;margin:20px 6px;font-weight: bold;height:30px;background: #cdd;}
+.radiotype{margin:3px;}
+.table_list img{max-width:200px}
+</style>
+<body>
+<div style="margin:10px;">
+<h2><if condition="$_GET['histype'] eq 1"> 推送历史 <else/> 推送列表</if></h2>
+<div style="float:right;margin: 5px;">
+<a href="__URL__/pushadd/type/8" class="search_btn">推送配置</a>
+</div>
+<div style="float:right;margin: 5px;">
+<a href="__URL__/push_list/type/8" class="search_btn">推送列表</a>
+</div>
+<div style="float:right;margin: 5px;">
+<a href="__URL__/push_list/type/8/histype/1" class="search_btn">推送历史</a>
+</div>
+</div>
+<div>
+<form method="GET" action="__URL__/push_list/type/8">
+	开始时间<input id="starttime" name="starttime" value="{$starttime}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px" /> 结束时间
+	  <input id="endtime" name="endtime" value="{$endtime}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"/>
+	  标题 <input type="text" name="subject" value="{$subject}" size="20">
+	  <input type="submit" value="搜索" name="submit">
+</form>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th style="width: 80px;">标题</th>
+			<th style="width: 150px;">推送时间</th>
+			<th style="width: 80px;">展示状态</th>
+			<th style="width: 80px;">状态</th>
+			<th style="width: 100px;">链接</th>
+			<th>推送用户</th>
+			<if condition="$histype neq 1"><th style="width: 90px;">操作</th></if>
+		</tr>
+	</thead>
+	
+	<volist name='actlist' id='list'>
+	<tr>
+	<td>
+	{$list.subject}
+	</td>
+	<td>
+	<?php echo date("Y-m-d H:i:s",$list['start_tm']);?>--<?php echo date("Y-m-d H:i:s",$list['end_tm']);?>
+	</td>
+	<td>
+	<if condition="$list['display_type'] eq 6">图+文
+	<elseif condition="$list['display_type'] eq 7"/>图+文+按钮
+	<elseif condition="$list['display_type'] eq 8"/>图</if>
+	</td>
+	<td>
+	<?php 
+	if($list['start_tm'] > time()){
+		echo "未发送";
+	}elseif($list['start_tm'] < time() && $list['end_tm'] > time()){
+		echo "发送中";
+	}elseif($list['end_tm'] < time()){
+		echo "已发送";
+	}
+	
+	?>
+	</td>
+	<td>
+	{$list.jumptxt}
+	</td>
+	<td>
+	<textarea style="width:400px">{$list.pushuser}</textarea>
+	</td>
+	<if condition="$histype neq 1">
+	<td>
+	<a href="__URL__/pushedit/id/{$list.id}" style="color:blue">编辑</a> | 
+	<a href="__URL__/changestatus/id/{$list.id}/status/{$list.status}" onclick="return ok('确定要更改状态吗？');" style="color:<if condition="$list.status eq 1">blue<else/>red</if>"><if condition="$list.status eq 1"> 启用 <else/> 停用</if></a>
+	</td>
+	</if>
+	</tr>
+	</volist>
+	
+	
+			
+
+</table>
+</body>
+</html>

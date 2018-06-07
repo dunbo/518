@@ -1,0 +1,111 @@
+<!--	<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>-->
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+    <script type="text/javascript">
+        function upload(){
+            if($("#hztype3").val().length==0)
+            {
+                $("#s1").html('<font color="red">合作方式不能为空<font>');
+                return;
+            }else{
+                $("#s1").html('');
+            }
+
+            if($("#hztype3").val().length>20)
+            {
+                $("#s1").html('<font color="red">合作方式太长了<font>');
+                return;
+            }else{
+                $("#s1").html('');
+            }
+
+            if($("#reason").val().length==0)
+            {
+                $("#s2").html('<font color="red">拒绝评测原因不能为空<font>');
+                return;
+            }else{
+                $("#s2").html('');
+            }
+
+            var param = {
+                soft_id: $("#soft_id2").val(),
+                hztype : $("#hztype3").val(),
+                reason: $("#reason").val(),
+                o_reason:$("#o_reason").is(':checked')
+            };
+            $.ajaxFileUpload({
+                url:'__URL__/bohui',
+                type:'POST',
+                data:param,
+                files:[$('#uploadFile0'),$('#uploadFile1')],
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    if(data==1)
+                    {
+                        location.href ="/index.php/Sendnum/Product/index";
+                    }else if(data==2)
+                    {
+                        alert('操作失败，请稍候重试');
+                        return;
+                    }else if(data==3)
+                    {
+                        alert('拒绝评测原因太长了');
+                        return;
+                    }
+                }
+            });
+
+        };
+
+function qxenter()
+{
+    document.onkeydown = function(e){
+        var ev = document.all ? window.event : e;
+        if(ev.keyCode==13) {
+         }
+    }
+}
+    </script>
+</head>
+ 
+<body>
+
+<div style="width:45; margin-top:4px">
+	 <form id="form1" name="form1" method="post" action="__URL__/add/">
+  <table width="99%" height="63" border="0" align="center" cellpadding="4" cellspacing="1"  bgcolor="#333333" id="table1">
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">产品名称:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <span>{$rs.softname}</span>
+        </td>
+    </tr>    
+
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">合作方式:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input type="hidden" id="soft_id2" value="{$rs.soft_id}">
+             <input type="text" value="{$rs.hztype}" size="20"  id="hztype3" name="hztype3"> （CPS、广告、换量、其它）<font color="red">*</font><span id="s1"><font color="red"></font></span>
+        </td>
+    </tr>      
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">拒绝评测原因:</td>
+         <td align="left" bgcolor="#FFFFFF">
+           <textarea name="reason" id="reason" cols="30" rows="8" onfocus="qxenter()"></textarea><font color="red">*</font><span id="s2"><font color="red"></font></span>
+        </td>
+    </tr>
+    <tr align="center">
+      <td width="12%" height="20" align="right" bgcolor="#FFFFFF">其他原因:</td>
+      <td align="left" bgcolor="#FFFFFF">
+          <input type="checkbox" name="o_reason" id="o_reason">{$other_reason}
+      </td>
+    </tr>
+   <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="提交" onclick="upload()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onclick="tb_remove();"/></td>
+      </tr>
+</table>
+  
+  </form>
+</div>
+</body>
+</html>
+

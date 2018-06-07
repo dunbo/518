@@ -1,0 +1,84 @@
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var package = $('#package').val();
+	$.ajax({
+		type: 'POST',
+		url:'__URL__/soft_hot_words_search/',
+		data:'package='+package,
+		dataType: 'json',
+		success:function(json){
+			if(json.status == 1){
+				$('#softname').text(json.info);
+			}
+		}
+	});
+}
+)
+
+function checkPost(){
+	var enable_two = true;
+	var pkg = $("#package").val();
+	$.ajax({
+		url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+		type: 'get',
+		async:false,
+		success: function(data){
+			if(data){
+				if(!confirm(data)){
+					enable_two = false;
+				}
+			}
+		}
+	});
+	return enable_two;
+}
+</script>
+<center>
+<form method='POST' action="__URL__/soft_hot_words_edit/" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table>
+<tr><th colspan='2'>编辑推荐软件</th></tr>
+<tr><td align='right'><font color="red">*</font>软件包名：</td><td align='left'><input style='background-color: #efefef' type='text' name='package' id='package' readonly='readonly' value='{$list.package}' /></td></tr>
+<tr><td align='right'>软件名称：</td><td align='left' id='softname' style='color: #000; font-size: 120%;'></td></tr>
+<tr><td align='right'>推荐简介：</td><td align='left'><textarea name='recommend'>{$list.recommend}</textarea><br /><span style='color:#f00;'>限制150字以内，建议最少80字以上</span></td></tr>
+<tr><td align='right'><font color="red">*</font>关联热词：</td><td align='left'><textarea name='associate'>{$list.associate}</textarea><br /><span style='color:#f00;'>注：多个关联热词以分号隔开</span></td></tr>
+<tr><td align='right'>背景图片：</td><td align='left'><input type='file' name='background' value='' /><if condition="$list.background neq ''"><img width="40px" height="40px"  src="<?php echo IMGATT_HOST;?>{$list.background}"></if><br /><span style='color:#f00;'>建议上传400*122的PNG/JPG图</span></td></tr>
+<tr><td align='right'>软件截图：</td><td align='left'><input type='file' name='publicimg' value='' /><if condition="$list.publicimg neq ''"><img width="40px" height="40px"  src="<?php echo IMGATT_HOST;?>{$list.publicimg}"></if><br /><span style='color:#f00;'>V5.2以上版本专用，建议上传124*195的PNG/JPG图</span><!-- <span style='color:#f00;'>注 ： 图片上传格式为jpg ，高宽尺寸为122x480像素，大小20k以内</span> --></td></tr>
+<tr>
+<td align='right'>开始时间：</td>
+<td align='left'><input id="begintime" name="begintime"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value=<?php if(trim($list['begin'])){ echo "'".date('Y-m-d H:i:s', $list['begin'])."'";}else{echo '""';} ?> size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"begintime",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></td>
+</tr>
+<tr>
+<td align='right'>结束时间：</td>
+<td align='left'><input id="endtime" name="endtime"
+			style="border: 0px none black; width: 100px;" value=<?php if(trim($list['end'])){ echo "'".date('Y-m-d H:i:s', $list['end'])."'";}else{echo '""';} ?>
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"endtime",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px"></td>
+</tr>
+<tr class="sub_tr">
+	<td>合作形式</td>
+	<td>
+		<SELECT name='type'>
+			<?php foreach($typelist as $key => $val): ?>
+				<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+			<?php endforeach; ?>				
+		</SELECT>
+	</td>
+</tr>
+<tr><td align='right'><input type='submit' value='&nbsp;提交&nbsp;' /></td><td align='left'><input type="button" value="&nbsp;&nbsp;取消&nbsp;&nbsp;" onclick="tb_remove();"></td></tr>
+</table>
+<input type='hidden' value='{$id}' name='id' />
+<input type='hidden' value='{$list.pid}' name='pid' />
+</form>
+</center>

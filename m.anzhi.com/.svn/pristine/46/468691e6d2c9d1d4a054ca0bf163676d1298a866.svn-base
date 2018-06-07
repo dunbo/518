@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>超级英雄蛋生记</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/superman/css/common7.css?v1"/>
+<script type="text/javascript"  src="<!--{$out.static_url}-->/superman/js/jquery-1.10.2.min.js?v1"></script>
+<script type="text/javascript">
+	var sid = '<!--{$out.sid}-->',aid = '<!--{$out.aid}-->',static_url = '<!--{$out.static_url}-->';
+	var stopNum = '',index = 1,prevIndex = 0,Speed = 300,Time,arr = GetSide(3, 3),EndIndex = 0,cycle = 0,EndCycle = 0,flag = false,quick = 0,soft_lists_go = [],datas = [],flags={canMove:true},my_package='',p=0;
+	function getArrayItems(arr, num) {
+		var temp_array = new Array();
+		for (var index in arr) {
+			temp_array.push(arr[index]);
+		}
+		var return_array = new Array();
+		for (var i = 0; i<num; i++) {
+			if (temp_array.length>0) {
+				var arrIndex = Math.floor(Math.random()*temp_array.length);
+				return_array[i] = temp_array[arrIndex];
+				temp_array.splice(arrIndex, 1);
+			} else {
+				break;
+			}
+		}
+		return return_array;
+	}
+	
+	function GetSide(m, n) {
+		var arr = [];
+		for (var i = 0; i < m; i++) {
+			arr.push([]);
+			for (var j = 0; j < n; j++) {
+				arr[i][j] = i * n + j;
+			}
+		}
+
+		var resultArr = [];
+		var tempX = 0,tempY = 0,direction = "Along",count = 0;
+		while (tempX >= 0 && tempX < n && tempY >= 0 && tempY < m && count < m * n) {
+			count++;
+			resultArr.push([tempY, tempX]);
+			if (direction == "Along") {
+				if (tempX == n - 1)
+					tempY++;
+				else
+					tempX++;
+				if (tempX == n - 1 && tempY == m - 1)
+					direction = "Inverse"
+			}
+			else {
+				if (tempX == 0)
+					tempY--;
+				else
+					tempX--;
+				if (tempX == 0 && tempY == 0)
+					break;
+			}
+		}
+		return resultArr;
+	}
+	
+	function getCookie(name)
+	{
+	 var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+	 if(arr=document.cookie.match(reg))
+	  return unescape(arr[2]);
+	 else
+	  return null;
+	} 
+	
+	$(document).ready(function () {
+		get_soft();
+	});
+	
+	function get_soft(){
+		var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+		var cmd = 'var soft_list=' + json_data;
+		eval(cmd);
+		var soft_lists = soft_list.DATA;
+		for(j=0;j<soft_lists.length;j++){
+			if(soft_lists[j][7] == 'com.kokozu.android'){
+				datas.push(soft_lists[j]);
+			}
+		}
+		for(j=0;j<soft_lists.length;j++){
+			var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+			var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+			if(soft_lists[j][7] != 'com.kokozu.android'){
+				if((soft_status_go == -2 && json_datas_gos== -1) || json_datas_gos == 1 || json_datas_gos == 3){
+					soft_lists_go.push(soft_lists[j]);
+				}
+			}
+		}
+		
+		for(j=0;j<soft_lists.length;j++){
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+			window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+			var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+			var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+			if(soft_lists[j][7] != 'com.kokozu.android'){
+				if(json_datas_gos == 5 && soft_status_gos == -2){
+					soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+				}
+			}
+		}
+		
+		for(j=0;j<soft_lists.length;j++){
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+			window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+			var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+			var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+			if(soft_lists[j][7] != 'com.kokozu.android'){
+				if(soft_status_gos != -2){
+					soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+				}
+			}
+		}
+		my_soft();
+	}
+	
+	function my_soft() {
+		
+		var strss = '';
+		for(i=0 ;i< datas.length; i++){
+			if(datas[i][2].length > 4){
+				var softnames = datas[i][2].substring(0,3)+'...';
+			}else{
+				var softnames = datas[i][2];
+			}
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(datas[i][0]));
+			window.AnzhiActivitys.registerInstallObserver(datas[i][7]);
+			var json_data_own = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(datas[i][0]));
+			var cmd = 'var soft_status_own=' + json_data_own;
+			eval(cmd);
+			if(soft_status_own == 1){
+				var my_soft_own = '<a id="'+datas[i][0]+'" onclick="download_apk('+aid+','+datas[i][0]+',\''+datas[i][7]+'\',\''+datas[i][2]+'\','+datas[i][13]+','+datas[i][27]+',0,0,'+datas[i][27]+');" class="downlode">下载中</a>';
+			}else if(soft_status_own == 2){
+				var my_soft_own = '<a id="'+datas[i][0]+'" onclick="download_apk('+aid+','+datas[i][0]+',\''+datas[i][7]+'\',\''+datas[i][2]+'\','+datas[i][13]+','+datas[i][27]+',0,0,'+datas[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status_own == 3){
+				var my_soft_own = '<a id="'+datas[i][0]+'" onclick="download_apk('+aid+','+datas[i][0]+',\''+datas[i][7]+'\',\''+datas[i][2]+'\','+datas[i][13]+','+datas[i][27]+',0,0,'+datas[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status_own == 4){
+				var my_soft_own = '<a id="'+datas[i][0]+'" onclick="download_apk(parseInt('+aid+'),'+datas[i][0]+',"'+datas[i][7]+'","'+datas[i][2]+'",parseInt('+datas[i][13]+'),"'+datas[i][27]+'",0,0,'+datas[i][27]+');" class="downlode">下载</a>';
+			}else if(soft_status_own == 5){
+				var my_soft_own = '<a id="'+datas[i][0]+'" onclick="installApp(parseInt('+datas[i][0]+'),\''+datas[i][7]+'\');" class="downlode">安装</a>';
+			}else if(soft_status_own == 6){
+				var my_soft_own = '<a id="'+datas[i][0]+'" class="downlode">已下载</a>';
+			}else if(soft_status_own == 8){
+				var my_soft_own = '<a id="'+datas[i][0]+'" onclick="download_apk('+aid+','+datas[i][0]+',\''+datas[i][7]+'\',\''+datas[i][2]+'\','+datas[i][13]+','+datas[i][27]+',0,0,'+datas[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status_own == 9){
+				var my_soft_own = '<a value="校验中" id="'+datas[i][0]+'" class="downlode">校验中</a>';
+			}else if(soft_status_own == 10){
+				var my_soft_own = '<a id="'+datas[i][0]+'" class="downlode">已下载</a>';
+			}else if(soft_status_own == -1){
+				var soft_other_status_own = window.AnzhiActivitys.isInstalledApp(datas[i][7],parseInt(datas[i][13]));
+				if(soft_other_status_own == -2){
+					var my_soft_own = '<a id="'+datas[i][0]+'" onclick="download_apk('+aid+','+datas[i][0]+',\''+datas[i][7]+'\',\''+datas[i][2]+'\','+datas[i][13]+','+datas[i][27]+',0,0,'+datas[i][27]+');" class="downlode">下载</a>';
+				}else if(soft_other_status_own == -1){
+					var my_soft_own = '<a id="'+datas[i][0]+'" onclick="download_apk('+aid+','+datas[i][0]+',\''+datas[i][7]+'\',\''+datas[i][2]+'\','+datas[i][13]+','+datas[i][27]+',0,0,'+datas[i][27]+');" class="downlode">更新</a>';
+				}else if(soft_other_status_own == 0){
+					var my_soft_own = '<a id="'+datas[i][0]+'" class="downlode" onclick="openApp(\''+datas[i][7]+'\','+datas[i][0]+');">打开</a>';
+				}else if(soft_other_status_own == 1){
+					var my_soft_own = '<a id="'+datas[i][0]+'" class="downlode">已下载</a>';
+				}
+			}
+			
+			strss += '<li><p class="soft-icon"><img src="'+datas[i][1]+'"/></p><p class="soft-name"><a href="javascript:;">'+softnames+'</a></p><p class="soft-size">'+datas[i][9]+'</p><p>'+my_soft_own+'</p></li>';
+		}
+		
+		var data = soft_lists_go.slice(p*7,7*(p+1));
+		if(data.length == 0){
+			p = 0;
+			data = soft_lists_go.slice(p*7,7*(p+1));
+		}else{
+			p = p + 1;
+		}
+		
+		var strs = '';
+		
+		for(i = 0; i < data.length; i++) {
+			if(data[i][2].length > 4){
+				var softname = data[i][2].substring(0,3)+'...';
+			}else{
+				var softname = data[i][2];
+			}
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(data[i][0]));
+			window.AnzhiActivitys.registerInstallObserver(data[i][7]);
+			var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+			var cmd = 'var soft_status=' + json_datas;
+			eval(cmd);
+			
+			if(soft_status == 1){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载中</a>';
+			}else if(soft_status == 2){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status == 3){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status == 4){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk(parseInt('+aid+'),'+data[i][0]+',"'+data[i][7]+'","'+data[i][2]+'",parseInt('+data[i][13]+'),"'+data[i][27]+'",0,0,'+data[i][27]+');" class="downlode">下载</a>';
+			}else if(soft_status == 5){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="installApp(parseInt('+data[i][0]+'),\''+data[i][7]+'\');" class="downlode">安装</a>';
+			}else if(soft_status == 6){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+			}else if(soft_status == 8){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+			}else if(soft_status == 9){
+				var my_soft = '<a value="校验中" id="'+data[i][0]+'" class="downlode">校验中</a>';
+			}else if(soft_status == 10){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+			}else if(soft_status == -1){
+				var soft_other_status = window.AnzhiActivitys.isInstalledApp(data[i][7],parseInt(data[i][13]));
+				if(soft_other_status == -2){
+					var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载</a>';
+				}else if(soft_other_status == -1){
+					var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">更新</a>';
+				}else if(soft_other_status == 0){
+					var my_soft = '<a id="'+data[i][0]+'" class="downlode" onclick="openApp(\''+data[i][7]+'\','+data[i][0]+');">打开</a>';
+				}else if(soft_other_status == 1){
+					var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+				}
+			}
+	
+			strs += '<li><p class="soft-icon"><img src="'+data[i][1]+'"/></p><p class="soft-name"><a href="javascript:;">'+softname+'</a></p><p class="soft-size">'+data[i][9]+'</p><p>'+my_soft+'</p></li>';
+		}
+		str = strss + strs;
+		$('#my_softs').html(str);
+	}
+	
+	function change_soft(){
+		$('#my_softs').html('');
+		my_soft();
+	}
+	
+	//下载软件
+	function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag,noflux,firmware,status){
+		window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+		setTimeout(function(){download_go(pkgname)},3000);
+	}
+	
+	function download_go(pkgname){
+		$.ajax({
+			url: '/lottery/superman_download.php',
+			data: 'aid='+aid+'&sid='+sid+'&pkgname='+pkgname,
+			type: 'get',
+			success: function(data){
+				var data = eval(''+data+'');
+				if(data != 200){
+					$('#my_button').css('display','');
+					$('#my_num').html(data);	
+					$('#my_num_1').html(data);	
+					$('#my_num_2').html(data);
+					$('#my_click').css('background-color','#ca171b');
+				}
+			}
+		});
+	}
+	
+	function installApp(softid){
+		window.AnzhiActivitys.installAppForActivity(softid);
+	}
+	
+	//更新软件状态（正在下载）
+	function onDownloadCreated(softid){
+		$('#'+softid+'').html("下载中");
+	}
+
+	function onDownloadStateChanged(softid,newState){
+		if(newState == 1){
+			$('#'+softid+'').html("下载中");
+		}else if(newState == 2){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 3){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 4){
+			$('#'+softid+'').html("重试");
+		}else if(newState == 5){
+			$('#'+softid+'').html("安装");
+			$('#'+softid+'').bind('click',function(){
+				installApp(parseInt(softid));
+			});
+		}else if(newState == 6){
+			$('#'+softid+'').html("打开");
+			if(soft_lists_go[i][0] == softid){
+				$('#'+softid+'').bind('click',function(){
+					openApp(soft_lists_go[i][7],softid);
+				});
+			}
+		}else if(newState == 8){
+			$('#'+softid+'').html("继续");
+		}else if(newState == 9){
+			$('#'+softid+'').html("检查中");
+		}
+	}
+	
+	function openApp(pkg,softid){
+		var the_soft = [softid];
+		for(i=0; i< datas.length; i++){
+			if(datas[i][0] == softid){
+				var the_pkg = datas[i][7];
+			}
+		}
+		if(!the_pkg){
+			for(i=0; i< soft_lists_go.length; i++){
+				if(soft_lists_go[i][0] == softid){
+					var the_pkg = soft_lists_go[i][7];
+				}
+			}
+		}
+
+		window.AnzhiActivitys.openAppForActivity(the_pkg,the_soft);
+	}
+	
+	
+	function my_notice(){
+		var notice_no = new Array();
+		notice_no = [['没中奖不要紧！看成败人生豪迈，大不了从头再来。'],['默念三遍你砸出的英雄就会中，再试下~'],['少年你离奖品就差一步，再试试嘛~'],['说好的奖品呢，连辣条都不给我啊喂！'],['继续攒人品，下次一定RP大爆发！'],['少年别灰心，安智君相信下次你就能中~'],['天灵灵，地灵灵，下次中奖一定灵~'],['奖品是个磨人的小妖精，看我再试一次定会抓住你~'],['姿势不对，再抽一次~']];
+		var i = Math.floor(Math.random()*9);
+		var the_notice = notice_no[i];
+		$("#active_text").html(''+the_notice+'');
+	}
+	
+	function click_lottery(){
+		var my_param = '';
+		$('#my_button').css('display','none');
+		$.ajax({
+			url: '/lottery/superman_get_award.php',
+			data:'sid='+sid+'&aid='+aid,
+			type: 'get',
+			success:function(data){
+				var data = eval(''+data+'');
+				if(data != 400){
+					$('#my_num').html(data[1]);
+					$('#my_num_1').html(data[1]);
+					$('#my_num_2').html(data[1]);
+					if(data[0] == 8){
+						if(data[1] > 0){	
+							my_param = 202;
+							cirle_go(my_param,0);
+						}else{
+							my_param = 203;
+							cirle_go(my_param,0);
+						}
+					}else if(data[0] <= 3){
+						my_param = 200;
+						cirle_go(my_param,data[0],data[2],data[3]);
+					}else if(data[0] >= 4 && data[0] <= 7){
+						my_param = 201;
+						my_package = data[5];
+						cirle_go(my_param,data[0],data[2],data[3],data[4],data[5]);
+					}
+				}
+			}
+		});
+	}
+
+	
+	function Star(my_notice,my_award,my_award_level,my_prize,gift_num,pkgname) {
+		var gameTable = document.getElementById('gameTable');
+		gameTable.rows[arr[index][0]].cells[arr[index][1]].style.border = "";
+		gameTable.rows[arr[index][0]].cells[arr[index][1]].className = "current"; 
+		gameTable.rows[arr[index][0]].cells[arr[index][1]].style.color = "";	
+		if (index > 0) {
+			prevIndex = index - 1;
+		}
+		else {
+			prevIndex = arr.length - 1;
+		}
+		gameTable.rows[arr[prevIndex][0]].cells[arr[prevIndex][1]].style.border = "";
+		gameTable.rows[arr[index][0]].cells[arr[index][1]].style.color = "";
+		gameTable.rows[arr[prevIndex][0]].cells[arr[prevIndex][1]].className = ""; 
+		index++;
+		quick++;
+		if (index >= arr.length) {
+			index = 0;
+			cycle++;
+		}
+		
+		if (flag == false) {
+			if (quick == 5) {
+				clearInterval(Time);
+				Speed = 50;
+				Time = setInterval(function (){Star(my_notice,my_award,my_award_level,my_prize,gift_num,pkgname)}, Speed);
+			}
+
+			if (cycle == EndCycle + 3 && index == EndIndex) {
+				clearInterval(Time);
+				Speed = 300;
+				flag = true;  
+				Time = setInterval(function (){Star(my_notice,my_award,my_award_level,my_prize,gift_num,pkgname)}, Speed);
+			}
+		}
+	
+		var stopNums = getCookie('stopNum');
+		if (flag == true && index == stopNums - 1) {
+			quick = 0;
+			clearInterval(Time);
+			if(my_notice == 202){
+				setTimeout(have_num,1000);
+			}else if(my_notice == 203){
+				setTimeout(no_num,1000);
+			}else if(my_notice == 200){
+				setTimeout(function(){_award_one(my_award_level,my_prize)},1000);
+			}else if(my_notice == 201){
+				setTimeout(function(){_award_two(my_award,my_award_level,my_prize,gift_num,pkgname)},1000);
+			}
+			$("#gameContent p").removeClass("waitGame");
+			$("#gameBtn").show();
+		}
+	}
+
+	function cirle_go(my_notice,my_award,my_award_level,my_prize,gift_num,pkgname){
+		var stopNum = my_award+1;//点击产生随机数，最后将停在次数上
+		document.cookie="stopNum="+stopNum;
+		//$(this).hide(); //开始后隐藏开始按钮
+		//$(this).parent().addClass("waitGame");
+		cycle = 0;
+		flag = false;
+		EndIndex = Math.floor(Math.random() * 8);
+		EndCycle = 1;
+		Time = setInterval(function (){Star(my_notice,my_award,my_award_level,my_prize,gift_num,pkgname)}, Speed);
+	}
+
+	function no_num(){
+		showOpenBox('#tip-box-no');
+		$('#my_click').css('background-color','#999999');
+	}
+
+	function have_num(){
+		my_notice();
+		showOpenBox('#tip-box');
+		$('#my_button').css('display','');
+	}
+	
+	function _award_one(my_award_level,my_prize){
+		$('#award_level_1').html(my_award_level);
+		$('#award_prize_1').html(my_prize);
+		$('#lottery').css('display','none');
+		$('#prize_1').css('display','');
+		$('#my_button').css('display','');
+	}
+	
+	function _award_two(my_award,my_award_level,my_prize,gift_num,pkgname){
+		$('#award_level_2').html(my_award_level);
+		$('#award_prize_2').html(my_prize);
+		$('#gift_num').html(gift_num);
+		if(my_award == 4 || my_award == 5){
+			$('#convert').html("下载APP-购票选座-选择兑换券支付-输入兑换码-确认支付");
+		}else if(my_award == 6){
+			$('#convert').html("下载游戏-主界面“活动”-“礼包码”-输入礼包码-领取");
+		}else if(my_award == 7){
+			$('#convert').html("下载APP-个人中心—优惠券/礼品卡-填写礼包码兑换");
+		}
+		
+		if(my_package != 'com.kokozu.android'){
+			var own_softs = soft_lists_go;
+		}else{
+			var own_softs = datas;
+		}
+		for(var i=0;i<own_softs.length;i++){
+			if(my_package == own_softs[i][7]){
+				var  soft_status_go = window.AnzhiActivitys.isInstalledApp(own_softs[i][7],parseInt(own_softs[i][13]));
+				var soft_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(own_softs[i][0]));
+				if((soft_status_go == -2 && soft_datas_gos== -1) || soft_datas_gos == 1 || soft_datas_gos == 3){
+					$('#go_convert').html("下载去兑换");
+				}else if(soft_datas_gos == 5 && soft_status_go == -2){
+					$('#go_convert').html("去兑换");
+				}else if(soft_status_go != -2){
+					$('#go_convert').html("去兑换");
+				}
+			}
+		}
+		
+		$('#lottery').css('display','none');
+		$('#prize_2').css('display','');
+		$('#my_button').css('display','');
+	}
+	
+	function lottery_again(){
+		cloBox('#tip-box');
+		click_lottery();
+	}
+	
+	function get_telephone(){
+		var telephone = $('#telephone').val();
+		var name = $('#name').val();
+		if(!name){
+			$('#warning').css('display','');
+			$('#warning').html("请输入姓名");
+			return false;
+		}else{
+			$('#warning').css('display','none');
+			$('#warning').html("");
+		}
+		if(!telephone || telephone == '手机号'){
+			$('#warning').css('display','');
+			$('#warning').html('请输入手机号');
+			return false;
+		}else{
+			$('#warning').css('display','none');
+		}
+	
+		$.ajax({
+			url: '/lottery/superman_get_info.php',
+			data: 'name='+name+'&telephone='+telephone+'&sid='+sid+'&aid='+aid,
+			type: 'get',
+			success: function(data){
+				if(data){
+					data = eval(''+data+'');
+					if(data == 500){
+						$('#warning').css('display','');
+						$('#warning').html('请输入正确的手机号');
+					}else if(data == 300){
+						$('#warning').css('display','');
+						$('#warning').html('参数错误');
+					}else if(data == 200){
+						$('#warning').css('display','');
+						$('#warning').html('提交成功');
+						setTimeout(go_lottery,1000);
+					}
+				}
+			}
+		});
+	}
+	
+	function go_lottery(){
+		$('#lottery').css('display','');
+		$('#prize_1').css('display','none');
+	}
+	
+    function showOpenBox(obj){
+        var bg_h=$(window).height()+$(document).scrollTop(),
+                top_h= $(obj).height()/ 2-$(document).scrollTop();
+        $(obj).css("margin-top",-top_h+"px").show();
+        $("#body-bg").css("height",bg_h+"px").show();
+        flags.canMove=false;
+    }
+    function cloBox(obj){
+        $(obj).hide();
+        $("#body-bg").hide();
+        flags.canMove=true;
+    }
+    $(function(){
+        $("body").bind('touchmove', function (e) {
+            if(!flags.canMove){
+                e.preventDefault();
+            }
+        });
+    })
+	
+	function download_package(){
+		if(my_package != 'com.kokozu.android'){
+			var own_softs = soft_lists_go;
+		}else{
+			var own_softs = datas;
+		}
+		for(var i=0;i<own_softs.length;i++){
+			if(my_package == own_softs[i][7]){
+				var  soft_status_go = window.AnzhiActivitys.isInstalledApp(own_softs[i][7],parseInt(own_softs[i][13]));
+				var soft_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(own_softs[i][0]));
+				if((soft_status_go == -2 && soft_datas_gos== -1) || soft_datas_gos == 1 || soft_datas_gos == 3){
+					window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(own_softs[i][0]),own_softs[i][7],own_softs[i][2],parseInt(own_softs[i][13]),own_softs[i][27],1);
+				}else if(soft_datas_gos == 5 && soft_status_go == -2){
+					installApp(parseInt(own_softs[i][0]));
+				}else if(soft_status_go != -2){
+					openApp(own_softs[i][7],parseInt(own_softs[i][0]));
+				}
+			}
+		}
+	}
+	
+	function go_download(){
+		cloBox('#tip-box-no');
+		window.scrollTo(0,724);
+	}
+</script>
+</head>
+<body>
+<section>
+    <div class="banner" id="top">
+        <a href="javascript:;"><img src="<!--{$out.static_url}-->/superman/images/banner.jpg"/></a>
+    </div>
+    <div class="notice clear">
+        <div class="notice_icon"></div>
+        <div class="notice_list">
+            <marquee scrollamount="2" scrolldelay="90" direction="left">
+			<!--{if $out.all_award_count}-->
+			<!--{foreach from=$out.all_award_result item=v}-->
+			<span><!--{$v.telephone}--> &nbsp;获得<!--{$v.award}--><em><!--{$v.the_time}--></em></span>
+            <!--{/foreach}-->
+			<!--{else}-->
+			少年，快去砸蛋救英雄拿大奖！
+			<!--{/if}-->
+            </marquee>
+        </div>
+    </div>
+    <div class="wrap" id="lottery" <!--{if $out.lottery_status == 200}-->style="display:none;"<!--{/if}--> >
+        <div class="hammer">
+            <div class="lot_times">您还有<span id="my_num"><!--{$out.my_num}--></span>次抽奖机会</div>
+            <div class="my_prize"><a href="/lottery/superman_prize.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->">我的奖品</a></div>
+            <div class="mod2">英雄去拯救世界，留下抽奖机会，少年赶紧抽一发！ </div>
+        </div>
+        <div id="gameContent">
+            <table id="gameTable" cellspacing="3" cellpadding="0">
+                <tr>
+                    <td><div class="td_w"><img src="<!--{$out.static_url}-->/superman/images/prize_01.jpg"/><div class="active"></div></div></td>
+                    <td><div class="td_w"><img src="<!--{$out.static_url}-->/superman/images/prize_02.jpg"/><div class="active"></div></div></td>
+                    <td><div class="td_w"><img src="<!--{$out.static_url}-->/superman/images/prize_03.jpg"/><div class="active"></div></div></td>
+                </tr>
+                <tr>
+                    <td><div class="td_w"><img src="<!--{$out.static_url}-->/superman/images/prize_04.jpg"/><div class="active"></div></div></td>
+                    <td id="my_click" <!--{if !$out.my_num}-->style="background-color:#999999;"<!--{/if}-->>点击<br>抽奖</td>
+                    <td><div class="td_w"><img src="<!--{$out.static_url}-->/superman/images/prize_05.jpg"/><div class="active"></div></div></td>
+				</tr>
+                <tr>
+                    <td><div class="td_w"><img src="<!--{$out.static_url}-->/superman/images/prize_06.jpg"/><div class="active"></div></div></td>
+                    <td><div class="td_w"><img src="<!--{$out.static_url}-->/superman/images/prize_07.jpg"/><div class="active"></div></div></td>
+                    <td><div class="td_w"><img src="<!--{$out.static_url}-->/superman/images/prize_08.jpg"/><div class="active"></div></div></td>
+                </tr>
+            </table>
+            <p id="my_button"><a id="gameBtn" href="javascript:;" onclick="click_lottery();">点击抽奖</a></p>
+        </div>
+        <div class="prompt_mid">下载APP增加抽奖机会！</div>
+        <div class="mod">
+            <ul class="soft-list clear" id="my_softs">
+			</ul>
+        </div>
+        <div class="btns"><a href="javascript:;" onclick="change_soft();">换一换</a></div>
+        <div class="btn_rule"><a href="/lottery/superman_rule.php?actsid=<!--{$out.key}-->">【活动规则】</a></div>
+    </div>
+	<div class="wrap" id="prize_1" <!--{if $out.lottery_status != 200}-->style="display:none;"<!--{/if}-->>
+        <div class="prompt_col">
+            <div class="lot_times">您还有<span id="my_num_1"><!--{$out.my_num}--></span>次抽奖机会</div>
+            <div class="my_prize"><a href="/lottery/superman_prize.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->">我的奖品</a></div>
+        </div>
+		<div class="mod">
+			<div class="contact-info">
+				<h4 class="prize_hd"><span id="award_level_1"><!--{$out.award_level}--></span> <span id="award_prize_1"><!--{$out.award_prize}--></span></h4>
+				<p class="prize_tip">恭喜少年好手气，填信息去领奖</p>
+				<ul class="form_items">
+					<li><label>姓名</label><span><input type="text" id="name" /></span></li>
+					<li><label>手机号</label><span><input type="text" id="telephone" /></span></li>
+				</ul>
+			</div>
+			<div class="btns" style="margin-top: 30px;">
+				<a href="javascript:;" class="btn_submit" onclick="get_telephone();" >提交</a>
+			</div>
+			<p class="prompt_submit" id="warning" style="display:none;">提交成功！</p>
+		</div>
+		<div class="btn_rule"><a href="/lottery/superman_rule.php?actsid=<!--{$out.key}-->">【活动规则】</a></div>
+	</div>
+	<div class="wrap" id="prize_2" style="display:none;">
+        <div class="prompt_col">
+            <div class="lot_times">您还有<span id="my_num_2"><!--{$out.my_num}--></span>次抽奖机会</div>
+            <div class="my_prize"><a href="/lottery/superman_prize.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->">我的奖品</a></div>
+        </div>
+		<div class="mod">
+			<div class="contact-info">
+				<h4 class="prize_hd"><span id="award_level_2"></span> <span id="award_prize_2"></span></h4>
+				<p class="prize_tip">恭喜少年好手气，下载APP去兑奖</p>
+				<p class="prize_gift mtop"><label>礼包码</label><span id="gift_num"></span></p>
+				<p class="prize_gift mtop"><label>兑换路径</label><span id="convert"></span></p>
+			</div>
+			<div class="btns" style="margin: 40px 0px 20px;">
+				<a href="javascript:;" class="btn_submit" onclick="download_package();" id="go_convert">下载去兑换</a>
+			</div>
+		</div>
+		<div class="btn_rule"><a href="/lottery/superman_rule.php?actsid=<!--{$out.key}-->">【活动规则】</a></div>
+	</div>
+    <div class="footer"><img src="<!--{$out.static_url}-->/superman/images/ft_bg.jpg"/></div>
+    <!--弹框-->
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box-no"  style="display: none;">
+        <a href="javascript:;" class="clo" onclick="cloBox('#tip-box-no')">关闭</a>
+        <div class="tip-icon"><img src="<!--{$out.static_url}-->/superman/images/tip_cry.png"/></div>
+        <div class="tip-con">
+            <p>我真的还想再抽500遍</p>
+            <p>乖~下载APP增加抽奖机会再抽吧！</p>
+        </div>
+        <div class="btns mtb">
+            <a href="javascript:;" onclick="go_download();">去下载</a>
+        </div>
+    </div>
+    <div class="tip-box" id="tip-box" style="display: none;">
+        <a href="javascript:;" class="clo" onclick="cloBox('#tip-box')">关闭</a>
+        <div class="tip-icon"><img src="<!--{$out.static_url}-->/superman/images/tip_cry.png"/></div>
+        <div class="tip-con">
+            <p id="active_text"></p>
+        </div>
+        <div class="btns mtb">
+            <a href="javascript:;" onclick="lottery_again();">再抽一次</a>
+        </div>
+    </div>
+</section>
+</body>
+</html>

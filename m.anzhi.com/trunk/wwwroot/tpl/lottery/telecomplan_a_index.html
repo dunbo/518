@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>500M专区</title>
+<script type="text/javascript" src="<!--{$out.static_url}-->/telecomplan_a/js/jquery-1.10.2.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/telecomplan_a/css/common.css?v1"/>
+</head>
+<body>
+<section>
+    <div id="banner" class="banner">
+        <img src="<!--{$out.static_url}-->/telecomplan_a/images/banner1.jpg"/>
+    </div>
+    <div class="step">第 <span>1</span> 步：安装一款游戏并打开试玩</div>
+	<ul class="app clear" id="my_softs">
+	</ul>
+    <div class="step b_none" id="step2_div">第 <span>2</span> 步：提交手机号码</div>
+	<div id="submit_div">
+		<div class="input_box"><input id="telephone" name="telephone" type="text" placeholder="输入手机号码"/></div>
+		<div class="prompt" id="hint"></div>
+		<div class="btns"><a id="submit_btn" href="javascript:;" class="btn_gray">提交</a></div>
+	</div>
+	<div class="loading" id="loading_div" style="display:none;">
+        <p><img src="<!--{$out.static_url}-->/telecomplan_a/images/loading.png"/></p>
+        <p>&nbsp;&nbsp;提交中...</p>
+    </div>
+	<div class="success" id="success_div" style="display:none;">
+        <h4 id="return_info"></h4>
+        <p id="return_telephone"></p>
+    </div>
+    <div class="rule">
+        <h4>活动规则</h4>
+        <p>1.用户须在本页面选择一款游戏，下载安装，并打开试玩；</p>
+        <p>2.提交正确的手机号码即可参与活动；</p>
+		<p>3.待运营商核实资料信息，即可获得徽章，每周一，三，五发放奖品，节假日顺延 。</p>
+    </div>
+    <div class="btns"><a href="#banner" class="btn_top">返回顶部</a></div>
+</section>
+</body>
+
+<script type="text/javascript">
+	var sid = '<!--{$out.sid}-->';
+	var aid = <!--{$out.aid}-->;
+	var soft_lists_go = [];
+	var times = <!--{$out.times}-->;
+	
+	$(function(){
+		my_soft();
+		if (times > 0) {
+			$("#submit_btn").removeClass('btn_gray');
+			$("#submit_btn").bind('click', function(){submit_tel();});
+		}
+	});
+	
+	function my_soft() {
+		var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+		var soft_list = $.parseJSON(json_data);
+		var soft_lists = soft_list.DATA;
+		for (j = 0; j < soft_lists.length; j++) {
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+            window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+			window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+			window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+			soft_lists_go.push(soft_lists[j]);
+		}
+        get_soft();
+	}
+	
+	function get_soft() {
+		var data = soft_lists_go.slice(0, 4);
+		var str = '';
+		for (var i = 0; i < data.length; i++) {
+			var soft = data[i];
+			var softname = soft[2];
+			var short_softname;
+			if(softname.length > 4){
+                short_softname = softname.substring(0,3) + '...';
+            } else {
+                short_softname = softname;
+            }
+			var softid = parseInt(soft[0]);
+			var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(softid);
+			var soft_status = parseInt(json_datas);
+			// 根据软件不同状态，拼接展示
+            var my_soft = '';
+            var pkgname = soft[7];
+            var versionCode = parseInt(soft[13]);
+            var size = soft[27];
+            var icon_url = soft[1];
+            if (soft_status == 1) {
+                my_soft = '<a id="'+softid+'" onclick="download_apk('+aid+','+ softid +',\''+ pkgname +'\',\''+ softname +'\','+ versionCode +','+ size + ',0);" class="downlode">下载中</a>';
+            } else if (soft_status == 2 || soft_status == 3 || soft_status == 8) {
+                my_soft = '<a id="'+softid+'" onclick="download_apk('+aid+','+ softid +',\''+ pkgname +'\',\''+ softname +'\','+ versionCode +','+ size +',0);" class="downlode">继续</a>';
+            } else if (soft_status == 4) {
+                my_soft = '<a id="'+softid+'" onclick="download_apk('+aid+','+ softid +',\''+ pkgname +'\',\''+ softname +'\','+ versionCode +','+ size +',0);" class="downlode">下载</a>';
+            } else if (soft_status == 5) {
+                my_soft = '<a id="'+soft[0]+'" onclick="installApp(\''+ pkgname +'\','+softid+');" class="downlode">安装</a>';
+            } else if (soft_status == 6) {
+                my_soft = '<a id="'+soft[0]+'" class="downlode" onclick="openApp(\''+ pkgname +'\','+softid+');">打开</a>';
+            } else if (soft_status == 9) {
+                my_soft = '<a value="校验中" id="'+ softid +'" class="downlode">校验中</a>';
+            } else if (soft_status == 10) {
+                my_soft = '<a id="'+ softid +'" class="downlode">已下载</a>';
+            } else if (soft_status == -1) {
+                var soft_other_status = window.AnzhiActivitys.isInstalledApp(pkgname, versionCode);
+                if (soft_other_status == -2) {
+                    my_soft = '<a id="'+softid+'" onclick="download_apk('+aid+','+ softid +',\''+ pkgname +'\',\''+ softname +'\','+ versionCode +','+ size +',0);" class="downlode">下载</a>';
+                } else if (soft_other_status == -1) {
+                    my_soft = '<a id="'+softid+'" onclick="download_apk('+aid+','+ softid +',\''+ pkgname +'\',\''+ softname +'\','+ versionCode +','+ size +',0);" class="downlode">更新</a>';
+                } else if (soft_other_status == 0) {
+                    my_soft = '<a id="'+soft[0]+'" class="downlode" onclick="openApp(\''+ pkgname +'\','+softid+');">打开</a>';
+                } else if (soft_other_status == 1) {
+					my_soft = '<a id="'+soft[0]+'" class="downlode">已安装</a>';
+				}
+            }
+			str += '<li><div class="app_icon"><img src="' + icon_url + '"/></div><div class="app_info"><h4>' + short_softname + '</h4><p><span>' + soft[9] + '</span>' + my_soft + '</p></div></li>';
+		}
+		$('#my_softs').html(str);
+	}
+	
+	function download_apk(aid, softid, pkgname, softname, versionCode, size, flag) {
+		window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+		$.ajax({
+			url:'/lottery/telecomplan_a_submit_click.php?sid='+sid,
+			data:{action:'download_soft', package:pkgname},
+			type:'post',
+			dataType:'',
+			success:function(data){
+			}
+		});
+	}
+	
+	function installApp(pkgname, softid) {
+		window.AnzhiActivitys.installAppForActivity(parseInt(softid));
+		$.ajax({
+			url:'/lottery/telecomplan_a_submit_click.php?sid='+sid,
+			data:{action:'install_soft', package:pkgname},
+			type:'post',
+			dataType:'',
+			success:function(data){
+			}
+		});
+	}
+	
+	function openApp(pkgname, softid) {
+		window.AnzhiActivitys.openAppForActivity(pkgname,[softid]);
+		$.ajax({
+			url:'/lottery/telecomplan_a_submit_click.php?sid='+sid,
+			data:{action:'open_soft', package:pkgname},
+			type:'post',
+			dataType:'',
+			success:function(data){
+				if (data > 0) {
+					if ($("#submit_btn").hasClass('btn_gray')) {
+						$("#submit_btn").removeClass('btn_gray');
+						$("#submit_btn").bind('click', function(){submit_tel();});
+					}
+				} else {
+					if (!$("#submit_btn").hasClass('btn_gray')) {
+						$("#submit_btn").addClass('btn_gray');
+						$("#submit_btn").unbind('click');
+					}
+				}
+			}
+		});
+	}
+	
+	function onDownloadStateChanged(softid,newState){
+        if(newState == 1){
+            $('#'+softid+'').html("下载中");
+        }else if(newState == 2){
+            $('#'+softid+'').html("继续");
+        }else if(newState == 3){
+            $('#'+softid+'').html("继续");
+        }else if(newState == 4){
+            $('#'+softid+'').html("重试");
+        }else if(newState == 5){
+            $('#'+softid+'').html("安装");
+			$('#'+softid+'').removeAttr("onclick");
+			$('#'+softid+'').unbind('click');
+			for(i=0;i < soft_lists_go.length;i++){
+                if(soft_lists_go[i][0] == softid){
+                    $('#'+softid+'').bind('click',function(){
+                        installApp(soft_lists_go[i][7],softid);
+                    });
+					break;
+                }
+            }
+        }else if(newState == 6){
+            $('#'+softid+'').html("打开");
+			$('#'+softid+'').removeAttr("onclick");
+			$('#'+softid+'').unbind('click');
+            for(i=0;i < soft_lists_go.length;i++){
+                if(soft_lists_go[i][0] == softid){
+                    $('#'+softid+'').bind('click',function(){
+                        openApp(soft_lists_go[i][7],softid);
+                    });
+					break;
+                }
+            }
+        }else if(newState == 8){
+            $('#'+softid+'').html("继续");
+        }else if(newState == 9){
+            $('#'+softid+'').html("检查中");
+        }
+    }
+	
+	function submit_tel() {
+		var telephone = $.trim($("#telephone").val());
+		if (telephone.length == 0) {
+			$("#hint").html('请输入手机号码');
+			return false;
+		}
+		var re = /^(13|14|15|17|18)\d{9}$/
+		if (!re.test(telephone)) {
+			$("#hint").html('请输入正确的手机号码');
+			return false;
+		}
+		$.ajax({
+			url:'/lottery/telecomplan_a_submit_tel.php?sid='+sid,
+			data:{telephone:telephone},
+			type:'post',
+			dataType:'json',
+			timeout:40000,
+			success:function(data) {
+				$("#loading_div").hide();
+				$("#success_div").show();
+				$('#return_info').html(data.info);
+				if (data.status == 0) {
+					$('#return_telephone').html("我的手机号码："+ data.return_telephone);
+				}
+			},
+			error:function(XMLHttpRequest,status){
+				$("#loading_div").hide();
+				$("#success_div").show();
+				$('#return_info').html('网络不给力，请稍后再试~');
+			}
+		});
+		$("#submit_div").hide();
+		$("#step2_div").removeClass("b_none");
+		$("#loading_div").show();
+	}
+</script>
+
+</html>

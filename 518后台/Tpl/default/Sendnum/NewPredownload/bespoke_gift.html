@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<input type="hidden" name="p" value="{.p}" /><input type="hidden" name="lr" value="{.lr}" />
+<div style="margin: 10px"><input type="button" value="返回预约列表" onclick="go_back()" style="width: 100px;height: 30px"></div>
+<table style="margin-top:10px;float:left;<?php if($_GET['lijuan']){ echo'display:none;'; }?>"  cellspacing="0" cellpadding="0" class="search_table">
+	<tbody>
+	<form method='get' action="__URL__/bespoke_gift" >
+		<tr>
+			<td width="20%">礼包名称：<input type="text" value="{$s_name}" id="s_name" name="s_name" class="search_item_text" style="width:140px" ></td>
+			<td>
+				<input type="hidden" name="id" id="id" value="{$id}">
+				<input type="submit" class="search_btn" value="搜索"></td>
+		</tr>
+	</form>
+	</tbody>
+</table>
+
+<div style="float: left;margin-top: 10px;margin-left: 10px">
+	<a href="__URL__/save_bespoke_gift?ap_id={$id}&lijuan={$_GET['lijuan']}" style="float:left;" title="添加" class="thickbox search_btn">
+	<?php if(!$_GET['lijuan']){ echo'添加礼包';}else{echo '添加礼券'; }?>
+	</a>
+</div>
+<div style="clear: both"></div>
+
+<table style='float:left;width: 100%' cellpadding="0" cellspacing="0" class="table_list" >
+	<thead>
+		<tr>
+			<th width="3%">序号</th>
+			<th width="6%">礼包名称</th>
+			<th width="8%">总数</th>
+			<th width="8%">剩余个数</th>
+			<th width="7%">礼包说明</th>
+			<th width="7%">预约是否赠送礼包</th>
+			<th width="7%">排序</th>
+			<th width="7%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='res' id='list'>
+		<tr>
+			<td>
+				{$list.id}
+			</td>
+			<td>{$list.name}</td>
+			<td>{$list.num}</td>
+			<td align='center' ><?php if(!$_GET['lijuan']){ echo $list['last_num'];}else{echo $list['run_num']; }?></td>
+			<td align='center' >{$list.intro}
+			</td>
+			<td><?php if($list['is_give_gift']==1){echo '是';}elseif($list['is_give_gift']==2){echo '否';}?></td>
+			<td><input type="text" name="rank_{$list.id}" id="rank_{$list.id}" value="{$list.rank}" style="width: 50px" onblur="edit_rank('{$list.id}','{$list.rank}')"/></td>
+			<td align='center'>
+				<if condition="$_GET['lijuan'] neq 1">
+				<if condition="$is_running neq 1"><a href="__URL__/add_gift_code?pid={$list.id}&ap_id={$list.ap_id}" class="blue thickbox">上传激活码</a><br></if>
+				</if>
+				<a href="__URL__/save_bespoke_gift?id={$list.id}&ap_id={$list.ap_id}&lijuan=<?php echo $_GET['lijuan']; ?>" class="blue thickbox">编辑</a><br>
+				<a href="__URL__/del_bespoke_gift?id={$list.id}&lijuan=<?php if($_GET['lijuan']){ echo $_GET['lijuan'];} ?>" class="blue">删除</a>
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='12'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+</html>
+<script>
+	function  go_back(){
+		var p = $("input[name='p']").val();
+		var lr = $("input[name='lr']").val();
+		window.location.href = '__URL__/activity_list?p='+p+'&lr='+lr;
+	}
+
+	function edit_rank(id,o_rank){
+		var rank = $("#rank_"+id).val();
+		if(rank <= 0||isNaN(rank)){
+			alert("排序需为大于0的整数");
+			return false;
+		}
+
+		if(rank != o_rank&&rank>0){
+			window.location.href  = "__URL__/save_bespoke_gift?id="+id+"&rank="+rank;
+		}
+
+	}
+	function GetCharLength(str) {
+		var iLength = 0;  //记录字符的字节数
+		for (var i = 0; i < str.length; i++)  //遍历字符串中的每个字符
+		{
+			if (str.charCodeAt(i) > 255)   //如果当前字符的编码大于255
+			{
+				iLength += 2;    //所占字节数加2
+			}
+			else {
+				iLength += 1;   //否则所占字节数加1
+			}
+		}
+		return iLength;   //返回字符所占字节数
+	}
+
+	function ag_select(){
+		var chks=$("input[name='content_list']");
+		$(chks).each(function(){
+			if($(this).attr('checked')!='checked'){
+				$(this).attr('checked','checked');
+			}else{
+				$(this).attr('checked',false);
+			}
+		});
+	}
+
+	function save_content(id,passed,is_more){
+		if(is_more==1){
+			var chks=$("input[name='content_list']:checked");
+			var ids="";
+			var i=0;
+			$(chks).each(function(){
+				ids+=this.value+',';
+				i++;
+			});
+			if(ids==''){
+				alert('未选择任何内容');
+			}
+			id = ids;
+		}else{
+			if(passed==2){
+				var info = "撤销";
+			}else if(passed==1){
+				var info = '通过'
+			}else if(passed==3){
+				var info = '驳回';
+			}
+			if(!confirm("确认"+info+"吗")){
+				return false;
+			}
+		}
+		if(id){
+			$.ajax({
+				url:'__URL__/save_content',
+				data:'id='+id+'&status='+passed+'&is_more='+is_more,
+				type: 'post',
+				async:false,
+				dataType:'json',
+				success: function(data)
+				{
+					alert(data.msg);
+					if(data.code==1){
+						if(is_more==1){
+							data=id.split(',');
+							var str="";
+							$(chks).each(function(){
+								if(data.indexOf(this.value)!=-1){
+									$('#'+this.value).parent().css('background','#ccc');
+									$('#pro_'+this.value+' a ').each(function(){
+										$(this).html('');
+									})
+								}
+							});
+						}else{
+							$('#'+id).parent().css('background','#ccc');
+							$('#pro_'+id+' a ').each(function(){
+								$(this).html('');
+							})
+						}
+					}
+				}
+			});
+		}
+	}
+
+</script>

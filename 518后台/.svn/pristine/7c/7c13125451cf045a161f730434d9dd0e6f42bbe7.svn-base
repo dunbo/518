@@ -1,0 +1,102 @@
+<include file="../../Public/new_header" />
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+
+
+<script type="text/javascript">
+    function upload() {
+        var import_file = $.trim($("#upload_file").val());
+        if (import_file.length == 0) {
+            alert("请上传文件！");
+            return;
+        }
+        $.ajaxFileUpload({
+            url:'__URL__/flow_white_add',
+            type:'POST',
+            files:[$('#upload_file')],
+            secureuri:false,
+            dataType:'json',
+            success:function(data){
+                var div = $("#error_show_div");
+                div.empty();
+                switch(data.status) {
+                case -1: // 上传文件错误
+                case -2: // 请上传CSV格式文件
+                case -3: // 文件打开错误，请检查文件是否损坏
+                case -4: // 文件数据内容不能为空
+                case 1:  // 已经有正在导入
+                    alert(data.info);
+                    break;
+                case 0:  // 导入成功
+                    alert(data.info);
+                    location.href = "/index.php/Coop/FlowWhiteList/flow_white_list";
+                    break;
+                case -5: // 您上传的CSV有如下问题，请修改后重新上传
+                case -6: // 存在部分导入失败记录
+                    // 将每行错误输出到表格里
+                    var hint = $("<p><font color='red'>" + data.info + "</font></p>");
+                    var table = $("<table cellpadding='0' cellspacing='0' style='margin-top:10px;' class='table_list'></table>");
+                    div.append(hint);
+                    div.append(table);
+                    table.append("<thead><tr><th width='10%'>行数</th><th width='80%'>描述</th></tr></thead>");
+                    var error_msg = data.data;
+                    for(var i in error_msg) {
+                        if (error_msg[i]['flag']) {
+                            var line = parseInt(i) + 2;//算上标题行
+                            var msg = error_msg[i]['msg'].replace(/;/g, "<br/>");
+                            table.append("<tbody><tr><td>" + line + "</td><td class='left'>" + msg + "</td></tr></tbody>");
+                        }
+                    }
+                    break;
+                default:
+                    alert("导入失败！");
+                    break;
+                }
+            }
+        });
+    } 
+</script>
+
+<div class="main" >
+    <div class="content">
+        <div class="" style="margin-top:10px">
+			<input type='file' name='upload_file' id='upload_file' style="border: 1px solid blue;" value=""/>
+			<input type="button" value="添加" onClick="upload()" style="height:30px; display:inline-block;" class="search_btn"/>
+			<a href="__PUBLIC__/application_flow_coop.csv" class="blue" style="text-decoration:none;font-size:14px;">下载csv模板</a><br>
+			<!-- error_show_div用来展示文件的错误信息 -->
+			<div id="error_show_div">
+			</div>
+        </div>
+        
+        <div style="margin-top:50px;width:100%;overflow:visible;">
+            <table class="table_list" >
+				<thead>
+					<tr>
+						<th width="10%">ID</th>
+						<th width="30%">录入时间</th>
+						<th width="35%">录入文件</th>
+						<th width="25%">软件数量</th>
+					</tr>
+				</thead>
+				<tbody>
+					<volist name="result" id="list">
+					<tr>
+						<td>{$list.id}</td>
+						<td>{$list.create_tm|date="Y-m-d H:i:s",###}</td>
+						<td><a href='{$domain_url}{$list.file_url}'>{$list.file_name}</a></td>
+						<td>{$list.pk_count}</td>
+					</tr>
+					</volist>
+				</tbody>
+            </table>
+        </div>
+        <center>{$page}</center>
+    </div>
+</div>

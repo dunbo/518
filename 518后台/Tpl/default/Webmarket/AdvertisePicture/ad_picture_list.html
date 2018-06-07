@@ -1,0 +1,66 @@
+<include file="../Public/header" />
+
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript">
+function checkit()
+{
+    if(confirm("确定要这么执行该操作吗？"))
+    {
+        return ture;
+    }
+    return false;
+}
+</script>
+<body>
+<div>
+	<table border="3">
+		<tr><?php if($pic_type == 1){ ?><td bgcolor="yellow"><?php }else{ ?><td><?php } ?><a href="__URL__/ad_picture_list/pic_type/1">侧栏顶部广告位</a></td>
+		
+		<?php if($pic_type == 2){ ?><td bgcolor="yellow"><?php }else{ ?><td><?php } ?><a href="__URL__/ad_picture_list/pic_type/2">侧栏底部广告位</a></td>
+		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		<form action="__URL__/ad_picture_list" method="get" name="get_time">
+			<input type="hidden" name="pic_type" value="<?php echo $pic_type; ?>">
+			<td>
+			<select name="time_go" onChange="javascript:get_time.submit();">
+				<option value="1" <?php if($state == 1){ ?> selected <?php } ?> >正在推广</option>
+				<option value="2" <?php if($state == 2){ ?> selected <?php } ?> >未开始</option>
+				<option value="3" <?php if($state == 3){ ?> selected <?php } ?> >已过期</option>
+			</select>
+			</td>
+		</form>
+			<td>
+				<a href="__URL__/ad_picture_add/type/<?php echo $pic_type;?>?mm" class="thickbox">添加广告图</a>
+			</td>
+		</tr>
+	</table>
+</div>
+<div>
+	<table border="1" cellspacing="0" cellpadding="0">
+		<tr>
+			<td>序号</td>
+			<td>广告标题</td>
+			<td>图片</td>
+			<td>链接地址</td>
+			<td>上传时间</td>
+			<td>开始时间</td>
+			<td>结束时间</td>
+			<td>操作</td>
+		</tr>
+		<?php foreach($result as $key => $val){ ?>
+		<?php if($state == 2){echo '<tr bgcolor="green">';}elseif($state == 3){echo '<tr bgcolor="red">';}else{ echo '<tr>';} ?>
+			<td><?php echo $val['id']; ?></td>
+			<td><?php echo $val['title']; ?></td>
+			<td><img src="<?php echo IMGATT_HOST.$val['pic_url']; ?>"></td>
+			<td><?php echo $val['link']; ?></td>
+			<td><?php echo date('Y/m/d',$val['upload_tm']); ?></td>
+			<td><?php echo date('Y/m/d H:i:s',$val['start_tm']); ?></td>
+			<td><?php echo date('Y/m/d H:i:s',$val['end_tm']); ?></td>
+			<td><a href="__URL__/ad_picture_edit/id/<?php echo $val['id']; ?>/pic_type/<?php echo $val['type'];?>" class="thickbox" >编辑</a>&nbsp;|&nbsp;<a href="__URL__/delete_ad/id/<?php echo $val['id']; ?>" onclick="return checkit();">删除</a></td>
+		</tr>
+		<?php } ?>
+	</table>
+</div>
+{$page}
+</body>

@@ -1,0 +1,202 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css?version1" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src="/index.php/Sj/Extent/pub_get_address?1"></script>
+<script type="text/javascript" src='/Public/js/cn_area.js'></script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+<script>
+function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		tb_remove();
+	}
+//主层动态变化数据
+function onclikChannel()
+	{
+		$('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+	}
+function check_arr()
+	{
+		$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+
+function switchExtentType(obj)
+{
+	if ($(obj).val() == 1) {
+		$('#extent_size_tr').show();
+		$('#filter_installed_tr').show();
+		$('#depot_limit_tr').show();
+		$('#select_rank').show();
+	} else if ($(obj).val() == 2) {
+		$('#extent_size_tr').hide();
+		$('#filter_installed_tr').hide();		
+		$('#depot_limit_tr').hide();
+		$('#select_rank').hide();		
+	}
+}
+//推送区域
+var area_num = 1;
+function addArea()
+{
+	var html = '<div id="area_div_' + area_num + '">';
+	html += '<select name="push_area[]" id="push_area_'+area_num+'" class="push_area" onchange="showSubArea(this)">';
+	html += '<option value="">请选择</option>';
+	for(var i in area_list){
+		if (i == 990000) continue ;//海外排除
+		var item = area_list[i]['name'].split("\t");
+		html += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+	}
+	html += '</select>';
+	html += '<span class="sub_area"></span>';
+	html += '<input type="button" value="删除" onclick="delArea(this)" class="act_btn"/>';
+	html += '</div>';
+	$('#push_td').append(html);
+	var obj = $('#push_area_' + area_num);
+	area_num++;
+	return obj;
+}
+function delArea(obj)
+{
+	$(obj).parent().remove();
+	refreshArea();
+}
+
+function showSubArea(obj)
+{
+	var sub_id = $(obj).attr('id').replace('push_area_', 'push_city_');
+	var sub_select = "<select name='push_city[]' id='"+sub_id+"' onchange='refreshArea()'><option value=''>请选择</option>";
+	var value = $(obj).children('option:selected').val();
+	var arr = value.split(':');
+	var code = arr[0];
+	if (typeof(area_list[code]) == 'undefined') {
+		$(obj).parent().find('.sub_area').html('');
+		return false;
+	}
+	var sub_area = area_list[code]['sub'];
+	for(var i in sub_area){
+		var item = sub_area[i].split("\t");
+		sub_select += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+	}
+	sub_select += "</select>";
+	$(obj).parent().find('.sub_area').html(sub_select);
+	refreshArea();
+}
+
+function refreshArea()
+{
+	var area_value = '';
+	$('.push_area').each(function(){
+		var sub_id = $(this).attr('id').replace('push_area_', 'push_city_');
+		if ($(this).val() !='') {
+			area_value += $(this).find('option:selected').html() + ',';
+			if ($('#' + sub_id).val() !='') {
+				area_value += $('#' + sub_id).find('option:selected').html();
+			}
+			area_value += ';';
+		}
+	});
+	area_value = area_value.replace(/;$/, '');
+	$('#area_value').val(area_value);
+}
+</script>
+<FORM method="POST" action="/index.php/Sj/Adextent/add_extent_do" onsubmit="return checkForm()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td width="30%">&nbsp;&nbsp;</td>
+		<td>&nbsp;&nbsp;</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>区间名称
+		<input type="hidden" name="parent_id" value="{$parent_id}" />
+		<input type="hidden" name="child_id" value="{$child_id}" />
+		<input type="hidden" name="coop_channel" value="{$coop_channel}" />
+		</td>
+		<td><input name='extent_name' type='text'/></td>
+	</tr>
+	<tr class="sub_tr" style='height:70px'>
+		<td>区间类型</td>
+		<td>
+			<SELECT name='type' onchange="switchExtentType(this)">
+				<option value='1'>普通区间</option>
+
+			</SELECT><br>普通区间：该区间下不可再分区间，只有轮播图列表。
+			活动区间：分区下可以再进行分区操作
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>运营商</td>
+		<td>
+			<SELECT name='oid'>
+				<option value='0'>不限制</option>
+				<?php foreach($operation_result as $key => $val){ ?>
+					<option value='<?php echo $val['oid']?>'><?php echo $val['mname']?></option>
+				<?php } ?>				
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>渠道</td>
+		<td>
+		<a href="__APP__/Public/showChannel?callback=submitChannel&type=checkbox&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+		<div id="channel_div">
+		</div>
+		</td>
+	</tr>
+	<!--<tr class="sub_tr" id="extent_size_tr">
+		<td>区间位置数</td>
+		<td><input name='extent_size' type='text'/></td>
+	</tr>-->
+	
+
+	<tr class="sub_tr">
+		<td>区间排序</td>
+		<td>
+		    <SELECT name='rank' id='select_rank'>
+			   <?php foreach($rank_result as $k => $v){ ?>
+			   <option value="{$v}">{$v}</option>
+			   <?php } ?>
+			   <option value="<?php echo ($result_count+1);?>" selected><?php echo ($result_count+1);?></option>
+			</SELECT>
+			<input type='hidden' name="currank" value='<?php echo $count ?>' />
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>推送区域</td>
+		<td align="left" id="push_td">
+		<input type="button" value="添加" onclick="addArea()" class="act_btn"/>
+		<input type="hidden" value="" name="area_value" id="area_value"/>
+		</td>
+	</tr>	
+	<tr>
+		<td colspan="2"> 
+		<input type='hidden' name="parent_id" value='<?php echo $parent_id?>' />
+		<input type='hidden' name="pid" value='<?php echo $pid?>' />
+		<input type='submit'value="&nbsp;&nbsp;提交&nbsp;&nbsp;" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type="button" onclick="javascript:history.go(-1);" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+	</tr>
+</table>
+</FORM>	

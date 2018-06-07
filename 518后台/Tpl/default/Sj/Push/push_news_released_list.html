@@ -1,0 +1,179 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+
+<script type="text/javascript">
+	$(function(){
+		document.onkeydown = function(e){
+			var ev = document.all ? window.event : e;
+			if(ev.keyCode==13) {
+				$('#push_news_released_list').submit();
+			 }
+		}
+	});
+	
+	function select_all()
+	{
+		$("input[name='nid[]']").attr("checked",true);
+	}
+	function select_again()
+	{	
+		$("input[name='nid[]']").each(function () {  
+			$(this).attr("checked", !$(this).attr("checked"));  
+		});       
+	}
+	function release()
+	{
+		if(!confirm("确定要这么执行该操作吗？"))
+		{
+			return false;
+		}
+		var nid = $("input[name='nid[]']");
+		var id = "";
+		var is_select = false;
+		for ( i = 0 ; i < nid.length ; i++ ) 
+		{
+			if ( nid[i].checked == true ) 
+			{
+				id += "," + nid[i].value;
+				is_select = true;
+			}
+		}
+		if (is_select) 
+		{
+			window.location = "__URL__/news_release/id/"+id;
+		}
+		else
+		{
+			alert( "请至少选择一个条目，才能进行操作" );
+			return false;
+		}
+	}
+	function delete_go()
+	{
+		if(!confirm("确定要这么执行该操作吗？"))
+		{
+			return false;
+		}
+		var nid = document.getElementsByName("nid[]");
+		var id = "";
+		var is_select = false;
+		for ( i = 0 ; i < nid.length ; i++ ) 
+		{
+			if ( nid[i].checked == true ) 
+			{
+				id += "," + nid[i].value;
+				is_select = true;
+			}
+		}
+		if (is_select) 
+		{
+			window.location = "__URL__/push_news_del/id/"+id;
+		}
+		else
+		{
+			alert( "请至少选择一个条目，才能进行操作" );
+			return false;
+		}
+	}
+</script>
+
+
+
+<body>
+    <div class="search_box">
+        <form method="get" action="__URL__/push_news_released_list" name="push_news_released_list" id="push_news_released_list">
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="23%">
+                        <label>Push标题：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_softname" id="search_softname" value="{$search_softname}"/>
+                    </td>
+                    <td width="23%">
+                        <label>Push类型：</label>
+                        <select name="search_info_type" id="search_info_type">
+                          <option value="-1" selected>全部</option>
+                          <option value="1" 
+                            <if condition="$search_info_type eq 1">selected</if>
+                            >网页</option>
+                          <option value="2" 
+                            <if condition="$search_info_type eq 2">selected</if>
+                            >礼包</option>
+                          <option value="3" 
+                            <if condition="$search_info_type eq 3">selected</if>
+                            >活动</option>
+                            <option value="4" 
+                            <if condition="$search_info_type eq 4">selected</if>
+                            >公告</option>
+							<option value="6" 
+                            <if condition="$search_info_type eq 6">selected</if>
+                            >H5 游戏</option>
+                            <option value="7" <if condition="$search_info_type eq 7">selected</if>
+                            >游戏</option>
+                        </select></td>
+                    <td width="13%"><input type="submit" value="搜索" class="search_btn"/></td>
+                    <td width="41%"><a href='__URL__/push_add_show?from={$function_name}&{$url_param}' class="search_btn">添加push</a></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+					<th width="3%">选择</th>
+                    <!--<th width="5%">ID</th>-->
+                    <th width="20%">Push标题</th>
+                    <th width="14%">Push类型</th>
+                    <th width="9%">开始时间</th>
+                    <th width="9%">结束时间</th>
+                    <th width="8%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+					<td><input type="checkbox" name="nid[]" value="{$list.id}"/></td>
+                    <!--<td>{$list.id}</td>-->
+                    <td>{$list.title}</td>
+                    <td>
+                   	<?php
+                    	$push_type = $list['push_type'];
+                    	if($push_type == 1){
+                        	echo "网页";
+                        }else if($push_type == 2){
+                        	echo "礼包";
+                        }else if($push_type == 3){
+                        	echo "活动";
+                        }else if($push_type == 4){
+                        	echo "公告";
+                        }else if($push_type == 6){
+                        	echo "H5 游戏";
+                        }else if($push_type == 7){
+                        	echo "游戏";
+                        }
+                    ?>
+                    </td>
+                    <td>{$list.start_time|date="Y-m-d H:i:s",###}</td>
+                    <td>{$list.end_time|date="Y-m-d H:i:s",###}</td>
+                    <td><a href="__URL__/push_edit_show?from={$function_name}&id={$list.id}&{$url_param}">编辑</a>
+                        <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                        <a href="__URL__/push_news_del?id={$list.id}" onClick="return confirm('确定要删除此条记录吗？');">删除</a>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+		<div style="margin:10px;">
+			<input type="button" value="全选" onClick="select_all()"/>&nbsp;
+			<input type="button" value="反选" onClick="select_again()"/>&nbsp;&nbsp;&nbsp;
+			批量操作：
+			<input type="button" value="批量删除" onClick="return delete_go()" />
+		<div>
+        <center>{$page}</center>
+    </div>
+</body>

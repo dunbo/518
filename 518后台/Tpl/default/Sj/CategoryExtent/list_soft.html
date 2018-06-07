@@ -1,0 +1,166 @@
+<?php
+function make_url($params, $new = array())
+{
+	$url = '/index.php/Sj/CategoryExtent/list_soft';
+	foreach ($new as $key => $val) {
+		$params[$key] = $val;
+	}
+	foreach ($params as $key => $val) {
+		if (empty($val)) continue;
+		$url .= '/'.$key.'/'.$val;
+	}
+	return $url;
+}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>频道运营区间管理</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<?php if (!$isAjax) : ?>
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<?php endif;?>
+<script>
+var extents = new Array();
+<?php $i=0;foreach($extents as $val): ?>
+extents[<?php echo $i?>] = {extent_id:'<?php echo $val['extent_id']?>',extent_name:'<?php echo $val['extent_name']?>',type:<?php echo $val['type']?>,parent_id:<?php echo $val['parent_id']?>};
+<?php $i++;endforeach; ?>
+
+function showExtent(c, parent_id)
+{
+	var id = c + '_' + parent_id;
+	var path = '#' + c + ' .' + id
+	if (!$(path)[0]) {
+		var html = '<select class=' + id + ' onchange="showExtent(\'TB_ajaxContent\',$(this).val())">';
+		var has_item = false;
+		$(extents).each(function(){
+			if(this.parent_id == parent_id) {
+				html += '<option value="'+this.extent_id+'">'+this.extent_name+'</option>';
+				has_item = true;
+			}
+		});
+		html += '</select>';
+		if(has_item) $('#'+c+' p').append(html);
+	}
+}
+function switchTab(url, op_id)
+{
+	$('#' + op_id).load(url + '/op_id/' + op_id, function(){
+		tb_init('#' + op_id + ' .thickbox');
+	});
+}
+
+function selectExtent(c, extent_id)
+{
+	var str = new Array();
+	$($('input:checked')).each(function(){
+		str.push($(this).val());
+	});
+	if (str.length > 0) {
+		$('#' + c + ' .selected_ids').val(str.join(','));
+		tb_show(null,'#TB_inline?height=150&width=400&inlineId=myOnPageContent',false)
+	} else {
+		alert('请选择要移动的软件');
+	}
+}
+</script>
+</head>
+
+<body>
+<div class="main_r">
+	<h3 class="current_h3">分区软件列表</h3>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="recPos">
+	<thead>
+	<tr>
+		<td><form action="<?php echo make_url($query)?>">软件包名：<input type="text" name="search_key" value="<?php echo $search_key?>"/><input type="submit" /></form></td>
+		
+		<td><?php if (!empty($extent_id)):?><a class="thickbox" href="/index.php/Sj/CategoryExtent/add_soft?extent_id=<?php echo $extent_id?>&list_display=<?php echo $_GET['list_display'] ?>&modal=true">添加软件</a><?php endif;?></td>	
+	</tr>
+	</thead>
+	</table>
+	<div class="currentNav">
+		<div class="currentNav_l">
+		<?php if (!empty($extent_id)):?>
+		<a href="/index.php/Sj/CategoryExtent/index/pid/<?php echo $pid?>/category_type/<?php echo $category_type?>"><?php echo $category_name?></a> > <?php echo $extent_name?>
+		<?php else:?>
+		<a href="/index.php/Sj/CategoryExtent/index">首页</a>
+		<?php endif;?>
+		
+		</div>
+		<div class="currentNav_r">
+		<a class="recBtn_bg<?php if ($srch_type == 'e'):?> currentSel<?php endif;?>" href="<?php echo make_url($query, array('srch_type' => 'e')) ?>/list_display/<?php echo $_GET['list_display'] ?>">过期</a>
+		<a class="recBtn_bg<?php if ($srch_type == 'n'):?> currentSel<?php endif;?>" href="<?php echo make_url($query, array('srch_type' => 'n')) ?>/list_display/<?php echo $_GET['list_display'] ?>">当前</a>
+		<a class="recBtn_bg<?php if ($srch_type == 'f'):?> currentSel<?php endif;?>" href="<?php echo make_url($query, array('srch_type' => 'f')) ?>/list_display/<?php echo $_GET['list_display'] ?>">未开始</a>
+		</div>
+	</div>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="softlist_tab">
+		<thead>
+			<tr>
+				<td width="4%">全选</td>
+				<td width="8%">软件名</td>
+				<td width="8%">包名</td>
+				<td width="4%">高低配手机区分展示</td>
+				<td width="4%">显示在旧版本中(低于V4.4.1)</td>
+				<td width="4%">显示概率</td>
+				<td width="5%">所属页面</td>
+				<td width="12%">开始时间</td>
+				<td width="12%">结束时间</td>
+				<td width="12%">合作形式</td>
+				<td width="15%">操作</td>
+			</tr>
+		</thead>
+		<tbody>
+<?php foreach($list as $val): ?>
+	<TR>
+		<TD><input name="ids[]" value="<?php echo $val['id'] ?>" type="checkbox"/></TD>
+		<TD><?php echo empty($package_result[$val['package']]['softname']) ? '-' : $package_result[$val['package']]['softname']?></TD>
+		<TD><?php echo empty($val['package']) ? '-' : $val['package']?></TD>
+		<TD><?php if($val['phone_dis'] == 1){ ?>-<?php }elseif($val['phone_dis'] == 2){ ?>仅高配手机展示<?php }elseif($val['phone_dis'] == 3){ ?>仅低配手机展示<?php } ?></TD>
+		<TD><?php if($val['phone_dis'] == 1){ ?>-<?php }else{ ?><?php if($val['old_phone'] == 1){ ?><span style="color:green">Y</span><?php }else{ ?>N<?php } ?><?php } ?></TD>
+		<TD><?php echo $val['prob'] ?></TD>
+		<TD><?php echo $category_list[$extent_list[$val['extent_id']]['category_type']] ?></TD>
+		<TD><?php echo date('Y-m-d H:i:s', $val['start_at']); ?></TD>
+		<TD><?php echo date('Y-m-d H:i:s', $val['end_at']); ?></TD>
+		<TD><?php if ($val['type'] !=0) { echo $val['types'] ; }else{ echo "-";} ?></TD>
+		<TD>
+		<?php if ($srch_type !='e'): ?>
+		<a href="/index.php/Sj/CategoryExtent/edit_soft?id=<?php echo $val['id'] ?>&list_display=<?php echo $_GET['list_display'] ?>&modal=true" class="thickbox">编辑</a>
+		<a href="/index.php/Sj/CategoryExtent/del_soft/id/<?php echo $val['id'] ?>" onclick="javascript:return checkit();">删除</a>
+		<?php else: ?>
+		<a href="/index.php/Sj/CategoryExtent/edit_soft?id=<?php echo $val['id'] ?>&modal=true&life=1" class="thickbox recBtn_bg" style="display:block;width:100px; height:17px; line-height:17px;">复制上线</a>
+		<?php endif;?>
+		</TD>
+	</TR>
+<?php endforeach;?>
+<!--
+			<tr class="softbtn">
+				<td colspan="7">
+					<div class="soft_all"><input type="checkbox" name="soft_allSelect" onclick="$('input[name^=ids]').attr('checked', $(this).attr('checked')=='checked')"/>全选</div>
+					<div class="soft_btnr"><a class="recBtn_bg softbtn1" href="javascript:" onclick="selectExtent('myOnPageContent', <?php echo $extent_id?>)">移动软件到指定分区</a><a class="recBtn_bg" href="/index.php/Sj/NecessaryExtent/index/p/{$p};">返回</a></div>
+				</td>
+			</tr>
+-->
+		</tbody>
+	</table>
+</div>
+<div id="myOnPageContent" style="display:none">
+<p>
+<form method="post" action="/index.php/Sj/CategoryExtent/move_soft">
+<select name="extent_id">
+<?php foreach($extent_select as $k => $v): ?>
+<option value="<?php echo $k?>"><?php echo $v?></option>
+<?php endforeach; ?>
+</select>
+<input type="hidden" value="" class="selected_ids" name="selected_ids"/>
+<input type="submit"/>
+</form>
+</p>
+</div>
+</body>
+</html>

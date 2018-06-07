@@ -1,0 +1,96 @@
+<link type="text/css" href="/Public/css/co_managers.css" rel="stylesheet" />	
+<link type="text/css" href="/Public/css/co_common.css" rel="stylesheet" />
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="/Public/js/co_public.js"></script>
+<script type="text/javascript">
+function checkall(obj,cName)
+{
+    var checkboxs = document.getElementsByName(cName);
+    for(var i=0;i<checkboxs.length;i++){checkboxs[i].checked = obj.checked;}
+}
+</script>
+	<div class="content">
+		<div class="nav_page">安智合作运营平台><a href="accout_managers.html">账号负责人列表</a></div>
+		<div class="content_inner">
+			<div class="title">
+				<h2>账号转移：</h2>
+			</div>
+			<div class="accout_change_cnt">
+<form action="/index.php/Cooperative/SysManager/moveChargeDo/" name='formto' method="post">			
+				<p>转出负责人：{$from.charge_name}<input id="fromCharge" name='fromCharge' type='hidden' value='{$from.id}' /></p>
+				转出账号列表：
+				<table cellpadding="0" cellspacing="0" class="table_list">
+					<thead>
+						<tr>
+							<th width="4%"><input type="checkbox" name="all" onclick="checkall(this,'uid[]')" /></th>
+							<th width='5'>账号ID</th>
+							<th width="23%">账号名称</th>
+							<th width='23'>负责人</th>
+							<th width="23%">创建时间</th>
+							<th width="21%">账号状态</th>
+						</tr>
+					</thead>
+					<tbody>
+					<volist id='list' name='chuser'>
+						<tr>
+							<td><input type="checkbox" name='uid[]' value='{$list.uid}' /></td>
+							<td>{$list.uid}</td>
+							<td>{$list.user_name}</td>
+							<td>{$list.charge_name}</td>
+							<td>{$list.create_time}</td>
+							<td>{$list.stat}</td>
+						</tr>
+					</volist>
+					</tbody>
+				</table>
+				<table cellpadding="0" cellspacing="0" class="search_table" style="margin-top:20px; padding-left:0">
+					<tbody>
+						<tr>
+							<td>转入负责人：<input type="hidden" id="charge_name" name="charge_name" value="{$charge_name}" /><select name='toCharge' id='toCharge' style="width:220px"><volist id='charges' name='charge'><option value='{$charges.id}'>{$charges.charge_name}</option></volist></select></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+</form>			
+			<div class="open_close_btn" style="padding-left:22%">
+				<a href="javascript:void(0);" onclick='moveCharge();'>确认</a>
+				<a href="javascript:history.go(-1);">取消</a>
+				<div class="clear"></div>
+			</div>
+		</div>
+  </div>
+	<div class="clear"></div>
+<script type="text/javascript">
+function moveCharge(){
+	var chk_value =[]; 
+	var charge_name = $('#charge_name').val();
+	$('input[name="uid[]"]:checked').each(function(){    
+		chk_value.push($(this).val());    
+	});
+	if (chk_value.length==0) {
+		alert('你还没有选择任何内容！');
+		return false;
+	}
+	var toCharge=$("#toCharge").val();
+	var fromCharge=$("#fromCharge").val();
+	$.ajax({
+		   type: "POST",
+		   url: "/index.php/Cooperative/SysManager/moveChargeDo/",
+		   data: "uid="+chk_value+"&toCharge="+toCharge+"&fromCharge="+fromCharge,
+		   dataType: 'JSON',
+		   success: function(json){
+		     if(json==2){
+			     alert('你还没有选择任何内容！');
+			 } else if(json == 1){
+				alert('操作成功');
+				window.location.assign('/index.php/Cooperative/SysManager/chargeList/charge/'+charge_name+'');
+			 } else {
+			     if(json==0){
+			    	 alert('添加失败！');
+			     }
+			     window.location.assign('/index.php/Cooperative/SysManager/chargeList/charge/'+charge_name+'');
+		     }
+		   }
+		});
+}
+</script>

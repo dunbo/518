@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="/Public/css/style.css" />
+<link rel="stylesheet" href="/Public/js/ueditor/themes/default/ueditor.css" /> 
+<script type="text/javascript" src="/Public/js/ueditor/editor_config.js"></script>
+<script type="text/javascript" src="/Public/js/ueditor/editor.min.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/jquery.validate.min.js'></script>
+<script type="text/javascript" src='/Public/js/jtextcount.js'></script>
+<script>
+	function selectAll(){
+		$("input[name^=channel_id]").each(function(){
+			if(this.checked != true){
+				this.checked = true;
+			}
+		})
+    }
+
+	function selectUnAll(){
+		$("input[name^=channel_id]").each(function(){
+			this.checked = !$(this).attr("checked");
+		})
+	}
+
+	function showDiv(id,type){		
+			if(type == 2){
+				$("#ch1_video"+id).show();
+				$("#ch1_image"+id).hide();	
+				//$("#ch1_image"+id).remove();
+				$("#ch1_image"+id+" > input").val("");
+			}else if(type==1){
+				$("#ch1_video"+id).hide();
+				$("#ch1_image"+id).show();
+				//$("#ch1_video"+id).remove();
+				
+			}
+	}
+	
+	$(document).ready(function(){
+	    $(".video").hide();
+		$('#wenzhang').inputlimitor({
+			limit: 400,
+			boxId: 'wenzhang_limit',
+			boxAttach: false
+		});
+		$('#tupian').inputlimitor({
+			limit: 200,
+			boxId: 'tupian_limit',
+			boxAttach: false
+		});
+    });
+
+	
+	function checkform(){
+		if (document.article_add_form.activate_id.value.length == 0) { 
+			alert("请选择活动期!");
+			document.article_add_form.activate_id.focus();
+			return false;
+		}
+		if (document.article_add_form.title.value.length == 0) { 
+			alert("请输入标题!");
+			document.article_add_form.title.focus();
+			return false;
+		}
+		if (document.article_add_form.dispcript.value.length == 0) { 
+			alert("请输入文章描述!");
+			document.article_add_form.dispcript.focus();
+			return false;
+		}
+		var check = false;
+		var channel_ids = document.getElementsByName("channel_id[]");
+        for ( i = 0 ; i < channel_ids.length ; i++ ) {
+		    if(channel_ids[i].checked == true){
+			    check = true;
+			}
+	    }
+		if(!check){
+		    alert("请选择所在频道!");
+			return false;
+		}
+    }
+</script>
+</head>
+<body>
+<div class="main">
+<div class="content">
+<center>
+<form action="__URL__/article_add_do" method="post" id="article_add" name="article_add_form" enctype="multipart/form-data" onsubmit="return checkform()">
+<table width="90%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td colspan="2" align="center"><h2>添加文章</h2></td>
+  </tr>
+  <tr>
+	<td width="100" align="center">活动期：</td>
+	<td width="400" align="left" style="padding-left:20px">
+	    <select name="activate_id" class="required">
+		    <?php foreach($activate_list as $activate_id):?>
+			    <option value="<?php echo $activate_id['id'] ?>" ><?php echo $activate_id['id']?></option>
+			<?php endforeach;?>
+		</select>
+		<font color="red">*</font>
+	</td>
+  </tr>
+ 
+<!--	<td width="100" align="center">频道:</td>
+	<td width="400" align="left" style="padding-left:20px">
+		<ul style="list-style:none;">
+		<?php foreach($channnel_list as $channnel_info):?>
+			<li style="float:left;padding-left:2px;"><input type="checkbox" name="channel_id[]" value="<?php echo $channnel_info['id'] ?>" class="required" />&nbsp;&nbsp;<?php echo $channnel_info['channel_name'] ?>&nbsp;&nbsp;</li>
+		<?php endforeach;?>
+			<li style="float:left;padding-left:2px;">
+				<a href="javascript:void(0);" onclick="selectAll()">全选</a>&nbsp;&nbsp;
+				<a href="javascript:void(0);" onclick="selectUnAll()">反选</a>&nbsp;&nbsp;
+				<font color="red">*</font>
+			</li>
+		</ul>
+	</td>
+    -->
+    
+  
+ 
+  
+   <tr>
+       <td width="100" align="center">频道/图片/视频
+       <br /><a href="javascript:void(0);" onclick="selectAll()">全选</a>&nbsp;&nbsp;
+				<a href="javascript:void(0);" onclick="selectUnAll()">反选</a>&nbsp;&nbsp;
+       </td>
+     <td width="400" align="left" style="padding-left:20px" >
+  
+  <table width="100%" border="0" cellspacing="2" cellpadding="2">
+  
+
+		
+    <?php foreach($channnel_list as $channnel_info):?>
+  <tr>
+    <td width="13%"> <?php echo $channnel_info['channel_name'] ?>
+      <input type="checkbox" name="channel_id[]" id="chl_id<?php echo $channnel_info['id'] ?>" value="<?php echo $channnel_info['id'] ?>"/>
+	  <input type="hidden" value="<?php echo $channnel_info['id'] ?>" name="channel_arr[]">
+    </td>
+    <td width="87%">
+    <span  id="ch1_image<?php echo $channnel_info['id'] ?>">图片 <input type="file" name="article_image[]" />  描述 <input type="text" name="image_dispcript<?php echo $channnel_info['id'] ?>"   size="38" /> </span>
+    <span  id = "ch1_video<?php echo $channnel_info['id']?>" style="display:none"> 视频地址 <input type="text" name="article_video<?php echo $channnel_info['id'] ?>"  size="30"/> 描述<input type="text" name="video_dispcript<?php echo $channnel_info['id'] ?>"  size="38"/></span> 
+        <input type="radio" value="1" name="picture_view<?php echo $channnel_info['id'] ?>" onclick="showDiv(<?php echo $channnel_info['id'] ?>,1)" checked="checked"/>图片 <input type="radio" value="2" name="picture_view<?php echo $channnel_info['id'] ?>" onclick="showDiv(<?php echo $channnel_info['id'] ?>,2)"/>视频
+	
+    </td>
+  </tr>
+  
+  <?php endforeach;?>
+  
+  <tr>
+  
+   <td width="100%" colspan="2">
+ <font color="green">&nbsp;该图片主要应用于沙龙首页视频位置(312*236)、首页特邀嘉宾(158*100)、沙龙页面视频位置(276*296)、主题讨论(120*130)、请上传合适大小的图片。</font>
+  </td>
+  
+  </tr>
+  
+ <!-- <tr>
+    <td>主题嘉宾
+    <input type="checkbox" name="channel_id[]" id="chl_id2" /></td>
+    <td  >
+    
+ <span  id="ch1_image2">图片 <input type="file" name="article_image" />  描述 <input type="text" name="image_dispcript" id="textfield" size="38" /> </span>
+ <span id = "ch1_video2" style="display:none"> 视频地址 <input type="text" name="article_video" /> 描述<input type="text" name="video_dispcript" /></span> 
+        <input type="radio" value="1" name="picture_view2" onclick="showDiv(2,1)" checked="checked"/>图片
+	    <input type="radio" value="2" name="picture_view2" onclick="showDiv(2,2)"/>视频
+   
+   
+   </td>
+    </tr>
+      <tr>
+    <td>焦点视频
+    <input type="checkbox" name="channel_id[]" id="chl_id3" /></td>
+    <td>
+    <span  id="ch1_image3">图片 <input type="file" name="article_image" />  描述 <input type="text" name="image_dispcript" id="textfield" size="38" /> </span>
+    <span  id="ch1_video3" style="display:none"> 视频地址 <input type="text" name="article_video" /> 描述<input type="text" name="video_dispcript" /></span> 
+        <input type="radio" value="1" name="picture_view3" onclick="showDiv(3,1)" checked="checked"/>图片
+	    <input type="radio" value="2" name="picture_view3" onclick="showDiv(3,2)"/>视频
+    
+    </td>
+    </tr>
+      <tr>
+    <td>主题讨论  
+    <input type="checkbox" name="channel_id[]" id="chl_id4" /></td>
+    <td>
+    <span  id="ch1_image4">图片 <input type="file" name="article_image" />  描述 <input type="text" name="image_dispcript" id="textfield" size="38" /> </span>
+    <span  id="ch1_video4" style="display:none"> 视频地址 <input type="text" name="article_video" /> 描述<input type="text" name="video_dispcript" /></span> 
+        <input type="radio" value="1" name="picture_view4" onclick="showDiv(4,1)" checked="checked"/>图片
+	    <input type="radio" value="2" name="picture_view4" onclick="showDiv(4,2)"/>视频
+  
+    </td>
+    </tr>-->
+</table>
+
+ </td>
+   </tr>
+   <tr>
+	<td width="100" align="center">标题:</td>
+	<td width="400" align="left" style="padding-left:20px">
+	    <input type="text" name="title" size="60" class="required" />
+		<font color="red">*</font>
+	</td>
+   </tr>
+   <tr>
+	<td width="100" align="center">正文:(编辑器中上传的图片宽度不超过600px)</td>
+	<td width="400" align="left" style="padding-left:20px">
+		<script type="text/plain" id="editor" style="width:760px;height:380px;"></script>
+		<script type="text/javascript">
+			var heditor = new baidu.editor.ui.Editor();
+			heditor.render('editor');
+		</script>
+		<font color="red">&nbsp;*</font>
+	</td>
+   </tr>
+   <tr>
+	<td width="100" align="center">关键字：</td>
+	<td width="400" align="left" style="padding-left:20px"><input type="text" name="target" />多个关键字以逗号隔开</td>
+   </tr>
+   <tr>
+	<td width="100" align="center">作者：</td>
+	<td width="400" align="left" style="padding-left:20px"><input type="text" name="author" /></td>
+   </tr>
+   <tr>
+	<td width="100" align="center">文章描述：</td>
+	<td width="400" align="left" style="padding-left:20px">
+	    <textarea rows="5" cols="30" id="wenzhang" name="dispcript" class="jTextCount-text"></textarea>
+		&nbsp;<font color="red">*</font>
+		&nbsp;<span id="wenzhang_limit" style="color: green">允许输入400个字符</span>
+	</td>
+   </tr>
+
+   <tr >
+     <td width="100" align="center"><input type="submit" value="发布" /></td>
+     <td width="400" align="center"><input type="reset" value="重置" /></td>
+   </tr>
+</table>
+</form>
+</center>
+</div>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,167 @@
+<include file="../../Public/header"  />
+<link rel="stylesheet" type="text/css" href="/Public/css/style.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src="/Public/js/webuploader.js"></script>
+<style>
+.webuploader-container {
+	position: relative;
+}
+.webuploader-element-invisible {
+	position: absolute !important;
+	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+    clip: rect(1px,1px,1px,1px);
+}
+.webuploader-pick {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	background: url(/Public/images/repeat_bg_01.png) repeat-x;
+	padding: 10px 15px;
+	color: #000;
+	text-align: center;
+	border-radius: 3px;
+	overflow: hidden;
+}
+.webuploader-pick-hover {
+	//background: #00a2d4;
+}
+
+.webuploader-pick-disable {
+	opacity: 0.6;
+	pointer-events:none;
+}
+div {
+    margin:10px;
+}
+</style>
+<div>
+	<h3>上传图片</h3>
+    <div>上传的图片最大尺寸为宽2000x高5000，支持png，jpg格式，上传图片体积不宜过大，建议2M以内，单次支持上传图片20张</div>
+    <div id="filePicker"></div>
+	<form action="__URL__/doaddpic/" method="post" id="picform">
+    <div>分类：<select name="typeid">
+				<option value='0'>无</option>
+                <volist name="typelist" id="list">
+				<option value='{$list.typeid}' >{$list.typename}</option>
+				</volist>
+			</select>
+    </div>
+    <div>水印：<input type="radio" name="watermark" value="0" onclick="setwatermark(0)" checked="checked"/>无
+        <input type="radio" name="watermark" value="1" onclick="setwatermark(1)" />有</div>
+    <div>
+    备注：<input name="ext" type="text" value="" />
+    </div>
+    <div style="color:red;">文件数量：<span id="listNum">0</span></div>
+    <div>
+        <table>
+            <tbody id="list">
+            
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <button id="submitbtn" type="button" onclick="doupload();" class="search_btn" style="display:inline-block;">上传</button>
+		<a href="__URL__/index" class="search_btn" style="display:inline-block;">取消</a>
+	</div>	
+	</form>
+
+</div>
+<script type="text/javascript">
+uploader = WebUploader.create({
+    pick: {
+        id: '#filePicker',
+        label:'选择图片'
+    },
+    compress: false,
+    accept: {
+        title: 'Images',
+        extensions: 'jpg,jpeg,png',
+        mimeTypes: 'image/*'
+    },
+    // auto:true,
+
+    // swf文件路径
+    swf: '/Public/js/webuploader.swf',
+    server: '__URL__/uploadpic/',
+    fileNumLimit: 20,
+    fileSingleSizeLimit: 3 * 1024 * 1024  
+});
+    
+uploader.onStartUpload = function(file){
+    submitbtn.disabled=true;
+    submitbtn.className='';
+    submitbtn.innerHTML='上传中。。。';
+};
+uploader.onFileQueued = function(file){
+    uploader.makeThumb( file,function(e){
+        if(file._info.width > 2000){
+            alert('添加的文件宽度超出限制'+file.name);
+            uploader.removeFile(file);
+        }else if(file._info.height > 5000){
+            alert('添加的文件高度超出限制'+file.name);
+            uploader.removeFile(file);
+        }else{
+            $('#list').append('<tr id="'+file.id+'"><td>'+file.name+'</td><td id="pr_'+file.id+'"></td><td><a href="javascript:;" onclick="del(\''+file.id+'\')">删除</a></td></tr>');
+        }
+        listNum.innerHTML = uploader.getFiles('inited').length;
+    });
+    
+};
+uploader.on('error', function(e){
+    switch(e){
+        case 'Q_EXCEED_NUM_LIMIT':
+            alert('最多支持20张');
+            break;
+        case 'Q_EXCEED_SIZE_LIMIT':
+            alert('添加的文件总大小超出限制');
+            break;
+        case 'F_EXCEED_SIZE':
+            alert('添加的文件大小超出限制');
+            break;
+        case 'Q_TYPE_DENIED':
+            alert('文件类型错误');
+            break;
+    }
+});
+uploader.on('uploadError', function(file,json){
+    $('#pr_'+file.id).html('失败');
+});
+uploader.on('uploadProgress', function(file,percentage){
+    $('#pr_'+file.id).html(percentage*100 +'%');
+});
+uploader.on('uploadSuccess', function(file,json){
+    if(json.ok === 1){
+        $('#'+file.id).append('<td><input name="path[]" type="hidden" value="'+json.path+'">');
+    }else{
+        $('#pr_'+file.id).html('失败');
+    }
+    //console.log(file,json);
+});
+//当所有文件上传结束时触发
+uploader.on('uploadFinished', function(e){
+    picform.submit();
+    console.log('submit form!');
+});
+
+function del(id){
+    uploader.removeFile(id);
+    document.getElementById(id).remove();
+    listNum.innerHTML = uploader.getFiles('inited').length;
+}
+function setwatermark(id){
+    if(id == 1){
+        uploader.option('server','__URL__/uploadpic/watermark/1/');
+    }else{
+        uploader.option('server','__URL__/uploadpic/');
+    }
+}
+
+function doupload(){
+
+    if(uploader.getFiles('inited').length==0){
+        alert('请先选择需要上传的图片');
+        return false;
+    }
+    uploader.upload();
+}
+</script>

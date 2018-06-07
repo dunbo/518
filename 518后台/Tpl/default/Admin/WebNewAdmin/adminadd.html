@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>修改密码</title>
+<load href='__PUBLIC__/css/style.css' />
+<load href="__PUBLIC__/js/Base.js" />
+<load href="__PUBLIC__/js/prototype.js" />
+<load href="__PUBLIC__/js/mootools.js" />
+<load href="__PUBLIC__/js/Ajax/ThinkAjax.js" />
+<load href="__PUBLIC__/js/Form/CheckForm.js" />
+<load href="__PUBLIC__/js/common.js" />
+<load href="__PUBLIC__/js/jquery.js" />
+<script language="JavaScript">
+function isPassword(psw) {
+   var count = 0;
+   if(psw.length >= 8 && psw.length <= 16){
+	 count +=2;
+	 //return false;
+	}
+
+   if(/[0-9]/.test(psw)){
+	 count +=4; //6
+   }
+   if((/[a-z]/.test(psw)) || (/[A-Z]/.test(psw))){
+     count +=5; //11
+   }
+    //count++;
+   if(/[~!@#$%^&*()_+]/.test(psw)){
+     count += 8; //20
+   }
+   return count;
+}	
+function checkPassword(){
+var pwd = document.getElementById('admin_user_password').value;
+var user = document.getElementById('admin_user_name').value;
+var gurp = document.getElementById('group_id').value;
+if(user.length == 0){
+  alert('请输入用户名');
+  return  false;
+}
+if(pwd.length == 0){
+  alert('请输入密码');
+  return  false;
+}
+if(parseInt(gurp)==0){
+  alert('请选择分组');
+  return  false;
+}
+var ischeck = true;
+ if(pwd.length > 0){
+	checkcode = isPassword(pwd);
+	switch(checkcode){   
+	  case 19: return true;
+	  case 17: alert('你的密码长度要在8-16位之间！'); return false;
+	  case 15: alert('你的密码必须要有数字！');return false;
+	  case 14: alert('你的密码必须要有大写或小写字母！');return false;
+	  case 11: alert('你的密码必须要有特殊字符！');return false;
+	  default : alert("你要设置的密码必须要有字母数字特殊字符长度在8-16！");return false;
+	}
+ }else{
+	alert('请输入密码！');
+	return false;
+ }
+ return true;
+}
+
+
+function pub_rand_password(){
+	$.ajax({
+		url: '__URL__/pub_rand_password/',
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			$('#admin_user_password').val(ret['msg']);
+		}
+	});
+
+} 
+</script>
+</head>
+<body>
+<div class="main" >
+<div class="content">
+
+<center>
+<form id="upload" method='post' action="__URL__/adminuseradd" >
+  <table width="95%" border="1" align="center">
+    <tr>
+      <td height="25" colspan="2" align="center"><strong>添加后台管理员</strong></td>
+    </tr>
+    <tr>
+      <td width="30%" height="25" align="right">管理员用户名：</td>
+      <td height="25" align="left"><label>
+        <input type="text" name="admin_user_name" id="admin_user_name" /> <span id="showmessage">&nbsp;</span>
+      </label></td>
+    </tr>
+    <tr>
+      <td width="30%" height="25" align="right">管理员密码：</td>
+      <td height="25" align="left"><label>
+        <input type="text" name="admin_user_password" id="admin_user_password" />
+		<input type="button" onclick="pub_rand_password()" value="生成"/>
+      </label></td>
+    </tr>
+    <tr>
+      <td width="30%" height="25" align="right">密码：</td>
+      <td height="25" align="left"><label>
+        <input type="password" name="_login_password" id="_login_password" value=""/>
+      </label><span style="color:red;">*必填。</span>请填写<span style="color:red;">{$Think.session.admin.admin_user_name}</span>的登录密码</td>
+    </tr>
+    <tr>
+      <td width="30%" height="25" align="right">用户状态：</td>
+      <td height="25" align="left"><label>
+        <select name="admin_state" id="admin_state">
+          <option value="0" >禁用</option>
+          <option value='1' selected >启用</option>
+        </select>
+      </label></td>
+    </tr>
+    <tr> 
+    <td width="30%" height="25" align="right">用户组：</td>  
+    <td height="25" align="left" >       
+     <select name="group_id" id="group_id" >
+      <option value="0">----无组----</option> 
+      <volist name='list' id='adminvo'>
+           <option value="{$adminvo.group_id}">{$adminvo.group_name}</option> 
+      </volist>
+      </select>
+      </tr>
+    </tr>
+    <tr>
+      <td width="30%" height="25" align="right">备注：</td>
+      <td height="25" align="left"><textarea id="note" name="note" rows="5" cols="50"></textarea></td>
+    </tr>
+    <tr>
+      <td width="30%" height="25" align="right">管理员邮箱：</td>
+      <td height="25" align="left"><label>
+        <input type="text" name="admin_user_email" id="admin_user_email" />
+      </label></td>
+    </tr>
+    <tr>
+      <td height="25" colspan="2" align="center"><label>
+        <input type="submit" name="submit" id="submit" onclick="return checkPassword()" value="提交" />
+      </label>
+        <label>
+          <input type="reset" name="reset" id="reset" value="重置" />
+      </label></td>
+    </tr>
+  </table>
+</form>
+</div>
+</div> 
+</body>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+ 

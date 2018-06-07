@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>清凉夏日 热辣返利-首页</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/june_recharge/css/common.css?v1"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/TouchSlide.1.1.js"></script>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+</head>
+<script>
+var sid = '<!--{$out.sid}-->',img_url = '<!--{$out.img_url}-->';
+var aid = 239,p=0,soft_lists_go = [],flags={canMove:true};
+
+function my_soft() {
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	var soft_lists = soft_list.DATA;
+
+	for(j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(soft_status_gos != -2){
+			//soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+			soft_lists_go.push(soft_lists[j]);
+		}
+	}        
+
+	
+	for(j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(json_datas_gos == 5 && soft_status_gos == -2){
+			soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+		}
+	}
+
+	for(j=0;j<soft_lists.length;j++){
+		var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if((soft_status_go == -2 && json_datas_gos== -1) || json_datas_gos == 1 || json_datas_gos == 3 || json_datas_gos == 4){
+			//soft_lists_go.push(soft_lists[j]);
+			soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+		}
+	}        
+	
+	get_soft();
+}
+
+function get_soft(){
+        var pagemax= Math.floor(soft_lists_go.length/8);
+        if(soft_lists_go.length%8==0){
+            pagemax = pagemax-1;
+        }
+	var data = soft_lists_go.slice(p*8,8*(p+1));
+	if(data.length == 0){
+		p = 0;
+		data = soft_lists_go.slice(p*8,8*(p+1));
+	}
+	var str = '';
+	for(i = 0; i < data.length; i++) {
+		if(data[i][2].length > 4){
+			var softname = data[i][2].substring(0,3)+'...';
+		}else{
+			var softname = data[i][2];
+		}
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);
+		if(soft_status == 1){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载中</a>';
+		}else if(soft_status == 2){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+		}else if(soft_status == 3){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+		}else if(soft_status == 4){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk(parseInt('+aid+'),'+data[i][0]+',"'+data[i][7]+'","'+data[i][2]+'",parseInt('+data[i][13]+'),"'+data[i][27]+'",0,0,'+data[i][27]+');" class="downlode">下载</a>';
+		}else if(soft_status == 5){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="installApp(parseInt('+data[i][0]+'),\''+data[i][7]+'\');" class="downlode">安装</a>';
+		}else if(soft_status == 6){
+			var my_soft = '<a id="'+data[i][0]+'" class="downlode" onclick="openApp("'+data[i][7]+'",'+data[i][0]+');">打开</a>';
+		}else if(soft_status == 8){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+		}else if(soft_status == 9){
+			var my_soft = '<a value="校验中" id="'+data[i][0]+'" class="downlode">校验中</a>';
+		}else if(soft_status == 10){
+			var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+		}else if(soft_status == -1){
+			var soft_other_status = window.AnzhiActivitys.isInstalledApp(data[i][7],parseInt(data[i][13]));
+			if(soft_other_status == -2){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载</a>';
+			}else if(soft_other_status == -1){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">更新</a>';
+			}else if(soft_other_status == 0){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode" onclick="openApp(\''+data[i][7]+'\','+data[i][0]+');">打开</a>';
+			}else if(soft_other_status == 1){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+			}
+		}
+		str += '<li><p class="soft-icon"><a href="javascript:;"><img src="'+data[i][1]+'"/></a></p><p class="soft-name"><a href="javascript:;">'+softname+'</a></p><p>'+my_soft+'</p></li>';
+	}
+	$('#my_softs').html(str);
+
+	if(p==pagemax){
+		p=0;
+	}else{
+		p=p+1;
+	}
+}
+
+$(document).ready(function () {
+	my_soft();
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+});
+
+function change_soft(){
+	$('#my_softs').html('');
+	get_soft();
+}
+
+//下载软件
+function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag,noflux,firmware,status){
+        if($('#'+softid+'').html()=='安装'){
+            exit;
+        }
+	window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+	setTimeout(function(){download_go(softid,pkgname,softname)},3000);
+}
+
+function download_go(softid,pkgname,softname){
+	$.ajax({
+		url: '/lottery/year_feedback_download.php',
+		data: 'softid='+softid+'&sid='+sid+'&pkgname='+pkgname+'&aid='+aid,
+                type: 'post',
+		success: function(data){
+		}
+	});
+}
+
+
+function installApp(softid,pkgname){
+        for(i=0;i < soft_lists_go.length;i++){
+                if(soft_lists_go[i][0] == softid){
+                        pkgname = soft_lists_go[i][7];
+                }
+        }
+        $.ajax({
+                url: '/lottery/vacation_third_install.php',
+                data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+                type: 'post',
+                success: function(data){
+                        window.AnzhiActivitys.installAppForActivity(softid);
+                }
+        });
+}
+
+function openApp(pkg,softid){
+	the_soft = [softid];
+	$.ajax({
+		url: '/lottery/vacation_gift_open.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkg+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+		}
+	});
+}
+
+function onDownloadStateChanged(softid,newState){
+        if(newState == 1){
+                $('#'+softid+'').html("下载中");
+        }else if(newState == 2){
+                $('#'+softid+'').html("继续");
+        }else if(newState == 3){
+                $('#'+softid+'').html("继续");
+        }else if(newState == 4){
+                $('#'+softid+'').html("重试");
+        }else if(newState == 5){
+                $('#'+softid+'').html("安装");
+                $('#'+softid+'').unbind('onclick');
+                for(i=0;i < soft_lists_go.length;i++){
+                        if(soft_lists_go[i][0] == softid){
+                                $('#'+softid+'').bind('click',function(){	
+                                        installApp(parseInt(softid));
+                                });
+                        }
+                }
+        }else if(newState == 6){
+                $('#'+softid+'').html("打开");
+                $('#'+softid+'').unbind('onclick');
+                for(i=0;i < soft_lists_go.length;i++){
+                        if(soft_lists_go[i][0] == softid){
+                                $('#'+softid+'').bind('click',function(){
+                                        openApp(soft_lists_go[i][7],softid);
+                                });
+                        }
+                }
+        }else if(newState == 8){
+                $('#'+softid+'').html("继续");
+        }else if(newState == 9){
+                $('#'+softid+'').html("检查中");
+        }
+}
+
+function showOpenBox(obj){
+	var bg_h=$("#body-bg").height()+$(document).scrollTop(),
+	top_h= $(obj).height()/ 2-$(document).scrollTop();
+	$(obj).css("margin-top",-top_h+"px").show();
+	$("#body-bg").css("height",bg_h+"px").show();
+	flags.canMove=false;
+}
+
+function cloBox(obj){
+	$(obj).hide();
+	$("#body-bg").hide();
+	flags.canMove=true;
+}
+
+</script>
+
+<body>
+<section>
+    <div class="banner"><img src="<!--{$out.static_url}-->/june_recharge/images/banner.jpg"/></div>
+    <div class="main">
+        <div class="mod rule">
+			<div class="mod-t"></div>
+            <div class="mod-m">
+				<h4>【活动规则】</h4>
+				<p>活动时间：2015年6月26日-6月28日</p>
+				<p>活动说明：缤纷盛夏，冰凉返利来袭！</p>
+				<p style="margin-top:8px">活动期间凡单日充值累积超过50元的用户，均会获得不同额度和比例的返利哦！多充多返，每日都返，赶紧充值吧！</p>
+				<p class="rule_small">【该活动不与平台其他活动同时参与，梦幻西游和花千骨不参与本活动】</p>
+			</div>
+			<div class="mod-b"></div>
+        </div>
+        <div class="mod">
+			<div class="mod-t"></div>
+			<div class="mod-m">
+            <div class="mod_hd clear"><span>【活动推荐游戏】</span><a href="javacript:;" ontouchend="change_soft();" class="chang_btn">换一换</a></div>
+            <ul class="soft-list clear" id="my_softs">
+            </ul>
+				<div class="mod_hd">【返还额度】</div>
+				<ul class="rebate clear">
+					<li><span>单日充值50-199元</span><em>返还100安智币</em></li>
+					<li><span>单日充值200-499元</span><em>返还500安智币</em></li>
+					<li><span>单日充值500-999元</span><em>返还1600安智币</em></li>
+					<li><span>单日充值1000-1999元</span><em>返还4000安智币</em></li>
+					<li><span>单日充值2000-4999元</span><em>返还10000安智币</em></li>
+					<li><span>单日充值满5000-9999元</span><em>返还充值金额的65%</em></li>
+					<li><span>单日充值满10000元</span><em>返还充值金额的75%</em></li>
+				</ul>
+				<div class="split"><img src="<!--{$out.static_url}-->/june_recharge/images/split.png"/></div>
+				<div class="mod_hd cnt">【充值流程参考】</div>
+				<div id="slideBox" class="slideBox">
+					<div class="bd">
+						<ul>
+							<li>
+								<a href="javascript:;"><img src="<!--{$out.static_url}-->/june_recharge/images/flowchart/m1_s1.jpg" /></a>
+							</li>
+							<li>
+								<a href="javascript:;"><img src="<!--{$out.static_url}-->/june_recharge/images/flowchart/m1_s2.jpg"/></a>
+							</li>
+							<li>
+								<a href="javascript:;"><img src="<!--{$out.static_url}-->/june_recharge/images/flowchart/m1_s3.jpg"/></a>
+							</li>
+							<li>
+								<a href="javascript:;"><img src="<!--{$out.static_url}-->/june_recharge/images/flowchart/m1_s4.jpg"/></a>
+							</li>
+							<li>
+								<a href="javascript:;"><img src="<!--{$out.static_url}-->/june_recharge/images/flowchart/m1_s5.jpg"/></a>
+							</li>
+							<li>
+								<a href="javascript:;"><img src="<!--{$out.static_url}-->/june_recharge/images/flowchart/m2_s1.jpg"/></a>
+							</li>
+							<li>
+								<a href="javascript:;"><img src="<!--{$out.static_url}-->/june_recharge/images/flowchart/m2_s2.jpg"/></a>
+							</li>
+							<li>
+								<a href="javascript:;"><img src="<!--{$out.static_url}-->/june_recharge/images/flowchart/m2_s3.jpg"/></a>
+							</li>
+							<li>
+								<a href="javascript:;"><img src="<!--{$out.static_url}-->/june_recharge/images/flowchart/m2_s4.jpg"/></a>
+							</li>
+						</ul>
+					</div>
+					<span class="prev"></span>
+					<span class="next"></span>
+				</div>
+				<div class="copyright">*本活动最终解释权归安智所有。</div>
+			</div>
+			<div class="mod-b"></div>
+        </div>
+		<div class="person"></div>
+    </div>
+    <div class="footer">
+        <img src="<!--{$out.static_url}-->/june_recharge/images/ft_bg.jpg"/>
+        <img src="<!--{$out.static_url}-->/june_recharge/images/ft_bg1.jpg"/>
+    </div>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box" style="display: none;">
+        <div class="mod">
+            <ul class="my_prize_list2">
+                <li> 恭喜你获得《XX》尊贵礼包一份</li>
+                <li>礼包码：XXXXXXXXXXXX</li>
+            </ul>
+            <div class="btn_submit">
+                <a href="#" onclick="cloBox('#tip-box')">返回</a>
+            </div>
+        </div>
+    </div>
+</section>
+<script type="text/javascript">
+    $(function(){
+        //轮播图
+        TouchSlide({
+            slideCell:"#slideBox",
+            mainCell:".bd ul",
+            effect:"leftLoop",
+            autoPlay:true //自动播放
+        });
+    })
+</script>
+</body>
+</html>

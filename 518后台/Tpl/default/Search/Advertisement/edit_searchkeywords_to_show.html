@@ -1,0 +1,331 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<script charset="utf-8" src="/Public/js/jquery.colorPicker.js"></script>
+<style>
+	p.legend em { color: #C00; font-style: normal; }
+	div.form-container div.controlset {display: block; float:left; width: 100%; padding: 0.25em 0;}
+	div.form-container div.controlset label,
+	div.form-container div.controlset input,
+	div.form-container div.controlset div { display: inline; float: left; }
+	div.form-container div.controlset label { width: 200px;}
+</style>
+<script>
+	$(function() {
+		$("input[name='color[]']").colorPicker();
+		$("select[name='keyword_type[]']").each(function(i){
+			var id = $(this).attr('id');
+			id = id.replace('keyword_type_','');
+			var type = $(this).val();
+			if(type == 2){
+				$("#show_pic_"+id).css('display','none');
+				$("#is_personalize_"+id).css('display','none');
+				$("#upload_"+id).css('display','');
+			}else{
+				$("#show_pic_"+id).css('display','');
+				$("#is_personalize_"+id).css('display','');
+			}
+		})
+		$("select[name='show_pic[]']").each(function(i){
+			var id = $(this).attr('id');
+			id = id.replace('show_pic_','');
+			if($(this).val()==1){
+				$("#upload_"+id).css('display','');
+			}
+		})
+		$("select[name='is_personalize[]']").each(function (i) {
+			var t_id = $(this).attr('id');
+			t_id = t_id.replace('is_personalize_','');
+			change_personalize($(this),t_id)
+		})
+	})
+	
+	function no_update(){
+		loaction.href="__URL__/searchkeywords_list";
+	}
+	
+	function submit_check(){
+		if($('#check_all').val() == 2){
+			return false;
+		}
+		var enable_two = true;
+		var pkgs =$("input[id^='package_']");
+		$(pkgs).each(function(){
+		       $.ajax({
+					url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+this.value,
+					type: 'get',
+					async:false,
+					success: function(data){
+						if(data){
+							if(!confirm(data)){
+								enable_two = false;
+							}
+						}
+					}
+				});                  
+	    });
+		return enable_two;
+	}
+	function checkit(){
+			if(confirm("热词删除后不可恢复，并直接影响线上数据，是否确认删除？"))
+			{
+				return true;
+			}
+			return false;
+	}
+	
+	 function strlen(str){  
+        var len = 0;  
+        for (var i=0; i<str.length; i++) {   
+         var c = str.charCodeAt(i);   
+        //单字节加1   
+         if ((c >= 0x0001 && c <= 0x007e) || (0xff60<=c && c<=0xff9f)) {   
+           len++;   
+         }   
+         else {   
+          len+=2;   
+         }   
+        }   
+        return len;  
+    }  
+	
+	function check_keywords(id){
+		var keywords = $('#keywords_'+id+'').val();
+		var keyword_type = $("#keyword_type_"+id).val();
+//		if(keyword_type == 2){
+//			var max = 30;
+//			var max_zi = 15;
+//		}else{
+//			var max = 20;
+//			var max_zi = 10;
+//		}
+		//!(/^[\u4e00-\u9fa5a-zA-Z0-9]*$/.test(keywords)) ||
+//		if(strlen(keywords) > max || strlen(keywords) < 1){
+//			var str = "搜索热词只能为"+max_zi+"汉字，"+max+'字符以内';
+//			$('#keywords_'+id+'').css("border","#ff0000 1px solid");
+//			$('#check_all').val(2);
+//			$('#warning').html(str);
+//			$('#warning').css('display','block');
+//		}else{
+//			$('#keywords_'+id+'').css("border","");
+//			$('#check_all').val(1);
+//			$('#warning').css('display','none');
+//		}
+	}
+	
+	function check_package(id){
+		var my_package = $('#package_'+id+'').val();
+		$.ajax({
+			url: '__URL__/check_package/package/'+my_package,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){			
+				if(data == 1){
+					$('#package_'+id+'').css("border","#ff0000 1px solid");
+					$('#check_all').val(2);
+					$('#warning_package').css('display','block');
+					$('#show_pic_'+id+'').attr("disabled","disabled");
+				}else{
+					$('#package_'+id+'').css("border","");
+					$('#check_all').val(1);
+					$('#warning_package').css('display','none');
+					if(my_package)
+					{
+						$('#show_pic_'+id+'').removeAttr("disabled");
+						$('#disabled_input_value').attr("disabled","disabled");
+						$("#show_pic_"+id+" option[value='2']").remove();
+						$("#show_pic_"+id).append("<option value='2'>显示大图</option>");
+
+					}
+				}
+			}
+		});
+	}
+
+	function change_style(target,id){
+		$("#show_pic_"+id+" option[value='2']").remove();
+	}
+
+	function change_show_type(target,id){
+		var type = $(target).val();
+		$("#upload_"+id).css("display",'none');
+		$("#change_rank_"+id).css("display",'none');
+		if(type == 1){
+			$("#upload_"+id).css("display",'');
+		}else if(type == 2){
+			$("#change_rank_"+id).css("display",'');
+		}
+	}
+
+	function change_keyword_type(target,id){
+		var type = $(target).val();
+		$("#change_rank_"+id).css("display",'none');
+		if(type == 2){
+			$("#show_pic_"+id).css('display','none');
+			$("#upload_"+id).css("display",'');
+			$("#is_personalize_"+id).css('display','none');
+
+		}else{
+			$("#show_pic_"+id).css('display','');
+			if($("#show_pic_"+id).val()!=1){
+				$("#upload_"+id).css("display",'none');
+			}
+			$("#is_personalize_"+id).css('display','');
+		}
+		$("#is_personalize_"+id).val(1);
+		change_personalize($("#is_personalize_"+id),id);
+	}
+
+	function change_personalize(target,id){
+		var type = $(target).val();
+		if(type == 1){
+			$("#keywords_"+id).attr('disabled',false);
+			$("#color_"+id).attr('disabled',false);
+			$("#package_"+id).attr('disabled',false);
+			$("#show_pic_"+id).attr('disabled',false);
+			$("#type_"+id).attr('disabled',false);
+		}else{
+			$("#keywords_"+id).attr('disabled',true).val('');
+			$("#color_"+id).attr('disabled',true);
+			$("#color_"+id).parent().find('.colorPicker-picker').css('background-color','#545454');
+			$("#package_"+id).attr('disabled',true).val('');
+			$("#show_pic_"+id).attr('disabled',true).val(0);
+			$("#type_"+id).attr("disabled",true).val(0);
+			$("#upload_"+id).css("display",'none');
+			$("#change_rank_"+id).css("display",'none');
+			check_package(id);
+		}
+
+	}
+</script>
+<div style="padding:20px;">
+<!-- <span>编辑状态(除ID外所有项目均可编辑)</span> -->
+</div>
+<span style='color:red;'>搜索热词支持汉字，数字，英文和符号<br>
+	小图上传图片尺寸大小为{$icon_width}*{$icon_height}<br>
+	热搜内容图片尺寸大小为{$big_icon_width}*{$big_icon_height}
+</span>
+<div class="clear"></div>
+
+<form action="__URL__/update_searchkeywords_to" method="post"  enctype="multipart/form-data">
+<table width="99%" cellpadding="0" cellspacing="0" border="1" class="table_list">
+	<thead>
+		<tr>
+			<th>排序</th>
+			<th>搜索热词</th>
+			<!--<th>展示热词</th>-->
+			<th>热词颜色</th>
+			<th>热词类型</th>
+			<th class='is_personalize_c'>类型</th>
+			<th>关联应用(包名)</th>
+			<th>图标</th>
+			<th>图片显示</th>
+			<!-- <th>旧版排序</th> -->
+			<th>趋势</th>
+			<th>开始时间</th>
+			<th>结束时间</th>
+			<th>合作形式</th>
+		</tr>
+	</thead>
+	<tbody>
+
+		<?php foreach($result as $key => $val){ ?>
+		<tr>
+			<td>
+				<!-- <select name="rank" rel="<?php echo $val['id'] ?>" class="extent_rank">
+						<?php
+						for($i = 1;$i <= $count; $i++){
+							echo "<option value=\"".$i."\"";
+							if($val['rank'] == $i) echo " selected=\"selected\" ";
+							echo ">".$i."</option>";
+						}
+						?>
+				</select> -->
+				<input name="rank[]" value="{$val['rank']}" style="width:20px";>
+				<select name="change_rank[]" id="change_rank_{$val.id}" style="<?php if($val['show_pic']!=2){echo 'display: none';}?>">
+					<option value="1" <?php if($val['change_rank']==1){echo 'selected';}?>>不更换位置</option>
+					<option value="2" <?php if($val['change_rank']==2){echo 'selected';}?>>更换位置</option>
+				</select>
+
+			</td>
+			<td><input type="hidden" name="id[]" value="{$val.id}" /><input type="text" name="key_word[]" onblur="check_keywords({$val.id});" id="keywords_{$val.id}" value="{$val.key_word}" /><input type="hidden" name="hot_id[]" value="{$val.hot_id}" /></td>
+			<!--<td><input type="text" name="show_keyword[]" value="{$val.show_keyword}"></td>-->
+			<td><div class="controlset"> <input  type="text"  id="color_{$val.id}" name="color[]" value="{$val.color|default='#000000'}" /></div></td>
+			<td>
+				<select name="keyword_type[]" id="keyword_type_{$val.id}" onchange="change_keyword_type(this,'{$val.id}')">
+					<option value="1" <?php if($val['keyword_type'] == 1) echo 'selected';?>>热词</option>
+					<option value="2" <?php if($val['keyword_type'] == 2) echo 'selected';?>>内容</option>
+				</select>
+			</td>
+			<td class='is_personalize_c'>
+			<select name="is_personalize[]" id="is_personalize_{$val.id}" onchange="change_personalize(this,'{$val.id}')">
+				<option value="1" <?php if($val['is_personalize'] == 1) echo 'selected';?>>普通热词</option>
+				<option value="2" <?php if($val['is_personalize'] == 2) echo 'selected';?>>个性化热词</option>
+			</select>
+			</td>
+			<td><input type="text" name="package[]" onblur="check_package({$val.id});if(value==''){change_style(this,'<?php echo $val['id'];?>');}" id="package_{$val.id}" <?php if($val['package']){ ?>value="{$val.package}"  <?php } ?> placeholder = "为空表示不关联" /></td>
+			<td>
+				<?php if(!empty($val['icon_url'])){ ?>
+				<a href="<?php echo $domain_url.$val['icon_url'];?>" target="_blank"><img height="50" width="50" src="<?php echo $domain_url.$val['icon_url'];?>"/></a>
+				<?php } ?>
+			</td>
+			<td>
+				<select name="show_pic[]" id="show_pic_{$val.id}" onchange="change_show_type(this,'{$val.id}')" style="<?php if($val['keyword_type']==2){echo 'display:none';}?>">
+					<option <?php if(empty($val['show_pic'])){ ?> selected <?php }?> value=0>-</option>
+					<option <?php if($val['show_pic'] == 1){ ?> selected <?php }?> value=1>显示小图</option>
+					<?php if($val['keyword_type']==1&&$val['package']){ ?>
+						<option <?php if($val['show_pic'] == 2){ ?> selected <?php }?> value=2>显示大图</option>
+					<?php } ?>
+				</select>
+				<input type="button" value="上传图标" id="upload_{$val.id}" onclick="javascript:$('#icon_url_{$val.id}').click();" style="<?php if($val['keyword_type']==2||$val['show_pic']==1){echo 'display:block';}else{echo 'display:none';} ?>">
+				<input id="icon_url_{$val.id}" name="icon_url[]" style="display:none" type="file">
+				<input type="hidden" name="old_icon_url[]" value="{$val.icon_url}">
+		   </td>
+			<!-- <td><input type='text' name='location[]' id='location' value="{$val.location}" ></td> -->
+			<td><select name='key_type[]'><option value='1'<?php if($val['key_type']==1):?>selected <?php endif; ?> >上升</option><option value='2' <option value='1'<?php if($val['key_type']==2):?>selected <?php endif; ?> >下降</option><option value='3' <option value='1'<?php if($val['key_type']==3):?>selected <?php endif; ?> >持平</option></select></td>
+			<td><span><input type='text' name='fromdate[]' id="fromdate_{$val.id}" value='{$val.start_tm}' style='cursor: hand; width: 150px;' class='Wdate' onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" /></span></td>
+			<td><span><input type='text' name='todate[]' id="todate_{$val.id}" value='{$val.end_tm}' style='cursor: hand; width: 150px;' class='Wdate' onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" /></span></td>
+			<td>
+				<SELECT name='type[]' id="type_{$val.id}">
+					<?php foreach($typelist[$key] as $key => $val): ?>
+						<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+					<?php endforeach; ?>				
+				</SELECT>
+			</td>
+		</tr>
+		<?php } ?>
+		<input type="hidden" id="check_all" value="1" />
+		<input type='hidden' name="life" value="<?php echo $_GET['life'] ?>" />
+	</tbody>
+</table>
+	<span style="color:red;display:none;" id="warning">*关键字只能为10个汉字(含)以内的汉字 数字 英文</span>
+	<span style="color:red;display:none;" id="warning_package">*软件包名错误</span>
+	<input type="hidden" name="keywordtype" value="{$keyword_type}" />
+	<input type="hidden" name="product_id" value="{$select_pid}" />	
+	<input type="submit" class="search_btn" onclick="return submit_check();" style="float:left; margin-right:10px; display:inline" class="search_btn" value="确认" />
+	<a href="__URL__/searchkeywords_list_hot/keyword_type/{$keyword_type}" class="search_btn" style="float:left;">取消</a>
+	</div>
+</form>
+</div>
+</body>
+</html>
+<script>
+$('.extent_rank').blur(function(){
+	var url = "__URL__/edit_rank_to/id/"+$(this).attr('rel')+"/rank/"+$(this).val()+"";
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+
+			var url     = eval("("+response+")");
+			var jumpUrl = "__URL__/edit_searchkeywords_to_show/";
+			//window.location.reload();
+			window.location.href = jumpUrl;	
+		}
+	});
+});
+</script>

@@ -1,0 +1,139 @@
+
+
+<form method="post" action="__URL__/add_sdk_channel">
+<body>
+<div>
+	渠道名称：<input type="text" id="chl_name" name="chl_name" value="{$channel_name}" class="search_item_text" style="width:200px"> <br /><br />
+	渠道类型：<select id="channel_type"  style="width: 100px" name="channel_type" <?php if(isset($channel_type)){echo 'disabled';}?>>
+	<option <?php if($channel_type == 1) echo 'selected';?> value="1">融合渠道(不打包)</option>
+</select><br /><br />
+	合作形式：<select id="market_type"  onchange="change_type()" style="width: 100px" name="market_type"> 
+		<option   value="1">单品网游</option>
+		<option <?php if($market_type == 2) echo 'selected';?> value="2">安智市场（渠道）</option>
+		</select> <br /><br />
+
+		<div id='channel_show_div'>
+	选择渠道：<a id="channel_link1" href="/index.php/Public/showChannel?callback=submitChannel2&type=radio&ready=check_arr2&selected=onclickChannel2" class="thickbox">选择渠道</a>
+                    <div id="channel_div1">
+                        <label class="l_cid_<?php echo $val?>">
+                        <?php if($cid):?>
+                            <input type="radio" name="cid" id="channelid" onclick='selectChannel_tb_not_remove(this,onclickChannel2,"radio")' checked="true" value="<?php echo $cid;?>"/><?php echo $market_c_name;?>
+                            <?php endif; ?>
+                        </label>
+                    </div> 
+	 </div>
+	<input type="hidden" id="market_c_name" name="market_c_name" value="{$market_c_name}">	
+	<input type="hidden" id="id" name="id" value="{$id}">
+</div>
+<div style="margin-top:10px">
+	<div style="float:left;margin-left:35px"><input type="submit" value="确定" class="search_btn" onclick='return check_f()'></div>
+	<div style="float:left;margin-left:20px">
+	<input type="button" value="取消" class="search_btn" onclick="tb_remove();"></div>
+</div>
+</form>
+<script type="text/javascript">
+	function change_type(){
+		var val = $("#market_type").val();
+		if(val == '1'){
+			$('#channel_show_div').hide();
+		}
+		if(val == '2'){
+			$('#channel_show_div').show();
+		}
+	}
+	change_type();
+	function check_f(){
+		var channel_name = $("#chl_name").val();
+		if(channel_name==''){
+			alert('渠道名称不能为空');
+			return false;
+		}
+		var cid = $("*[name='cid']").val();('id','name'); 
+		var type = $("#market_type").val();
+		if(type == '2'){
+			if(cid==''){
+				alert('请关联渠道');
+				return false;
+			}else{
+				var name = $("*[name='cid']").attr('alt');
+				$("#market_c_name").val(name);
+			}
+		}
+
+		 
+	}
+	 function submitChannel2() {
+			var cids = '';
+			$('#channel_div1').html('');
+			$("#channel_selected input:checked").each(function(){
+				var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+				item.find('input').attr('checked', 'true');
+				$('#channel_div1').append(item);
+			})
+			//$.cookie('cids', '', {path: '/'});
+			console.info(2);
+			tb_remove();
+		}
+	    
+	    // thickbox使用到的js
+	    //主层动态变化数据
+	    function onclikChannel2() {	
+	    	alert(5);return false;
+	        $('#channel_div1').html('');
+	        $("#channel_selected input:checked").each(function(){
+	            var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+	            item.find('input').attr('checked', 'true');
+	            item.find('input').attr('id','channelid');
+	            $('#channel_div1').append(item);
+	        })
+	        //$.cookie('cids', '', {path: '/'});
+	    }
+	    //
+	    function check_arr2() {
+	        $('#channel_selected').html($('#channel_div1').html());
+	    }
+	    
+
+	    
+	    // thickbox使用到的js
+	    //主层动态变化数据
+	    function onclickChannel2() {	
+	        $('#channel_div1').html('');
+	        $("#channel_selected input:checked").each(function(){
+	            //var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+	            // 将copy过来的html里默认的channel.html里的selectChannel函数换成自己的函数selectChannel_tb_not_remove，二者的区别主要是去掉tb_remove
+	            var xxx = $('#channel_selected .l_cid_' + this.value).html();
+	            xxx = xxx.replace("selectChannel","selectChannel_tb_not_remove");
+	            var item = $('<label class="l_cid_'+ this.value+'">' + xxx + '</label>');
+	            item.find('input').attr('checked', 'true');
+	            //item.find('input').attr('id','channelid');
+	            $('#channel_div1').append(item);
+	        })
+	        //$.cookie('cids', '', {path: '/'});
+	    }
+	    
+	    // 最开始的时候，没有从thickbox里继承过来，要自定义
+	    function selectChannel_tb_not_remove(obj,fselected,type) {
+	        if (obj.checked == true) {
+	            var item = $('<label class="l_cid_' + $(obj).val() + '">' + $('.l_cid_' + $(obj).val()).html() + '</label>');
+	            item.find('input').attr('checked', true);
+	            $('#channel_selected').append(item);
+	            //alert(fselected);
+	            //if(type=="radio"){
+	                //tb_remove();
+	            //}
+	            fselected();
+	        } else {
+	            $('.l_cid_' + $(obj).val() + ' input:checked').attr('checked', false);
+	            $('#channel_selected .l_cid_' + obj.value).remove();
+	            onclikChannel_c(obj.value);
+	        }
+	    }
+	    function selectPlatform(obj)
+	    {
+	        $('#channel_div1').html('');
+	    	$('#channel_link1').attr('href',"/index.php/Public/showChannel?callback=submitChannel2&type=radio&ready=check_arr2&selected=onclikChannel2&platform=" + $(obj).val());
+	    }
+
+</script>
+</body>

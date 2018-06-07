@@ -1,0 +1,139 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/Public/js/zhiyoo/common.js"></script>
+<style>
+h2{margin:10px;}
+</style>
+<body>
+
+<h2>添加申请用户</h2>
+<form method='post' onsubmit="return checkform();" action="__URL__/doapplyAdd/tid/{$tid}/pnum/{$_GET['pnum']}" id="appform">
+
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<tr>
+		<td >用户名</td>
+		<td ><input type="text" name="username" id="username" style="width:80%" value="" />(必填)</td>
+	</tr>
+	<tr>
+		<td >姓名</td>
+		<td ><input type="text" name="names" id="names" style="width:80%" value="" />(必填)</td>
+	</tr>
+	<tr>
+		<td >地址</td>
+		<td ><input type="text" name="address" id="address" style="width:80%" value="" />(必填)</td>
+	</tr>
+	<tr>
+		<td >电话</td>
+		<td ><input type="text" name="tel" id="tel" style="width:80%" value="" />(必填)</td>
+	</tr>
+	<tr>
+		<td >QQ </td>
+		<td ><input type="text" name="qq" id="qq" style="width:80%" value="" />(必填)</td>
+	</tr>
+	<tr>
+		<td >邮箱</td>
+		<td ><input type="text" name="email" id="email" style="width:80%" value="" /></td>
+	</tr>
+	<tr>
+		<td >申请理由</td>
+		<td ><textarea name="content" id="content" style="width:80%;height:80px"></textarea></td>
+	</tr>
+	<tr>
+		<td >晒物链接1</td>
+		<td ><input type="text" name="pasturl" id="pasturl" style="width:80%" value="" /></td>
+	</tr>
+	<tr>
+		<td >晒物链接2</td>
+		<td ><input type="text" name="pasturl2" id="pasturl2" style="width:80%" value="" /></td>
+	</tr>
+	<tr>
+		<td >晒物链接3</td>
+		<td ><input type="text" name="pasturl3" id="pasturl3" style="width:80%" value="" /></td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center"><input type="submit" onclick="return checkuser()" style="display:inline-block;width:135px;" value="提交" class="search_btn" /> <a href="__URL__/applyList/tid/{$tid}/pnum/{$_GET['pnum']}/applyAdd/1/" class="search_btn" style="display:inline-block;">取消</a></td>
+	</tr>
+</table>
+</form>
+
+
+<script type="text/javascript">
+var flag = true;
+function checkuser(){
+	var username = $.trim($('#username').val());
+	if(!username){
+		alert('用户名不能为空');
+		$('#username').focus();
+		return false;
+	}else{
+	//验证用户名
+		$.ajax({
+		type:'post',
+		async:false,
+		data:{username:username},
+		dataType:'json',
+		success:function(e){
+			if(e.ok){
+				flag = false;
+			}else{
+				alert('用户名不存在');
+				flag = true;
+			}
+		},
+		url:'__URL__/checkUser/'
+		});
+		
+	}
+	
+}
+function checkform(){
+	if(flag)return false;
+	var p_tel=/^1[1-9][0-9]{9}$/i;
+	var p_qq=/^[1-9][0-9]{4,12}$/i;
+	var p_url=/^(https?):\/\/([A-z0-9]+[_\-]?[A-z0-9]+\.)*[A-z0-9]+\-?[A-z0-9]+\.[A-z]{2,}(\/.*)*\/?$/;
+	if(!$.trim($('#names').val())){
+		alert('姓名不能为空');
+		$('#names').focus();
+		return false;
+	}else if($.trim($('#names').val()).length<2 || $.trim($('#names').val()).length>10){
+		alert('姓名字数不得少于2字，最多10字');
+		$('#names').focus();
+		return false;
+	}else {
+		$('#names_verify').text('');
+	}
+	if(!$.trim($('#address').val())){
+		alert('联系地址不能为空');
+		$('#address').focus();
+		return false;
+	}else if($.trim($('#address').val()).length<5 || $.trim($('#address').val()).length>100){
+		alert('联系地址字数不得少于5字，最多100字');
+		$('#address').focus();
+		return false;
+	}else {
+		$('#address_verify').text('');
+	}
+	if(!p_tel.test($('#tel').val())){
+		alert('手机号格式不正确，请正确填写');
+		$('#tel').focus();
+		return false;
+	}else{
+		$('#tel_verify').text('');
+	}
+	if(!p_qq.test($('#qq').val())){
+		alert('QQ号格式不正确，请重新填写');
+		$('#qq').focus();
+		return false;
+	}else{
+		$('#qq_verify').text('');
+	} 
+	return true;
+}
+</script>
+</body>
+</html>

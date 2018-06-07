@@ -1,0 +1,278 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<link rel="stylesheet" type="text/css" media="all"
+	href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<style type="text/css">
+<!--
+body,td,th {
+	font-size: 12px;
+
+}
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666; table-layout:fixed;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666; word-wrap:break-word;}
+.reject{width:350px; height:75px; padding:0 9px; background:#fff; position:absolute; left:-385px; top:-51px; border:1px solid #000}
+.reject p{height:30px; padding:0; margin:0; font-size:14px; line-height:32px; text-align:left; overflow:hidden;}
+.reject form input{width:340px; height:30px; background:#e9ffe3; border:1px solid #000; line-height:30px;}
+.arrow{width:24px; height:19px; background:url('__PUBLIC__/images/arrow_bg.png') no-repeat top left; position:absolute; top:16px; left:-26px;}
+.closebtn{width:14px; height:14px; background:url('__PUBLIC__/images/close.gif') no-repeat; cursor:pointer; position:absolute; right:5px; top:5px;}
+-->
+</style>
+<div class="main" >
+<div class="content" style="margin:20px;">
+<table width="" height="35" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td align="right">年份</td><td align="left"><select name="select_year" id="select_year" ><?php foreach($year_list as $key => $val){ ?><option value="{$val.id}" <?php if($my_year == $val['id']){ ?>selected<?php } ?>>{$val.year}</option><?php } ?></select>&nbsp;&nbsp;</td>
+		<td align="right">所属频道列表</td><td align="left"><select id="_channel" name="_channel">
+		<?php foreach($channel_list as $key => $val){ ?>
+			<option value="{$val.channel_id}" <if condition="$_GET['_channel'] eq $val['channel_id']"> selected</if>>{$val.channel}</option>
+		<?php } ?>
+		</select></td>
+		<td width="55%"></td>
+		<td align="right"><button style="cursor:pointer;" onclick="add()">添加软件</button></td>
+	</tr>
+</table>
+<table width="850" height="auto" border="0" cellpadding="0" cellspacing="1" style="margin-top:5px;background:#797979;">
+	<tr style="background:#FFFFCC;height:25px;">
+		<td align="center">软件名称</td>
+		<td align="center">显示的软件名称</td>
+		<td align="center">包名</td>
+		<td align="center">位置</td>
+		<td align="center">所属类别</td>
+		<td align="center">年份</td>
+		<td align="center">操作</td>
+	</tr>
+	<volist name="softlist" id="vo">
+	<tr style="background:#FFFFFF;height:25px;">
+		<td align="center" id="name_{$vo.id}">{$vo.name}</td>
+		<td align="center" id="name_show_{$vo.id}">{$vo.name_show}</td>
+		<td align="center" id="package_{$vo.id}">{$vo.package}</td>
+		<td align="center" id="pos_{$vo.id}">{$vo.pos_str}</td>
+		<td align="center" id="sort_name_{$vo.id}">{$vo.sort_name}</td>
+		<td align="center" id="year_{$vo.id}">{$vo.year_name}</td>
+		<td align="center"><a href="__URL__/edit_AnzhiSoftList/id/{$vo.id}" class="thickbox">编辑</a><a style="margin-left:5px;" href="javascript:void(0);" onclick="del({$vo.id})">删除</a></td>
+	</tr>
+	</volist>
+</table>
+
+</center>
+</div>
+</div>
+
+<script language="javascript">
+$('.extent_rank').change(function(){
+	var year = $('#select_year').val();
+	var url = '/index.php/Sl/Activate/AnzhiSoftList_sequence/id/'+$(this).attr('rel')+'/pos/'+$(this).val()+'/_channel/<?php echo isset($_GET['_channel']) ? $_GET['_channel'] : 1; ?>/select_year/'+year;
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+			var url     = eval("("+response+")");
+			var jumpUrl = '/index.php/Sl/Activate/AnzhiSoftList/_channel/<?php echo isset($_GET['_channel']) ? $_GET['_channel'] : 1; ?>/select_year/'+year;
+			window.location.href = jumpUrl;
+			if(window.ActiveXObject) window.event.returnValue = false;
+		}
+	});
+});
+</script>
+
+<style type="text/css">
+.add_td {width:40%;height:35px;text-align:right;}
+.add_inpt {width:180px;height:25px;}
+</style>
+<div style="position:absolute;top:0;left:0;background:#fff;width:400px;height:auto;border:1px solid #797979;display:none;" id="add_soft">
+<center>
+<form method="post" action="/index.php/Sl/Activate/AnzhiSoftList_add" onsubmit="return add_chk()" name="add_form">
+<input type="hidden" id="edit_id" name="edit_id" />
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<td class="add_td">软件名称：</td><td class="add_td" style="text-align:left;padding-left:5px;width:60%;"><input type="text" name="name" id="name" class="add_inpt" /></td>
+	</tr>
+	<tr>
+		<td class="add_td">显示的软件名称：</td><td class="add_td" style="text-align:left;padding-left:5px;width:60%;"><input type="text" name="name_show" id="name_show" class="add_inpt" /></td>
+	</tr>
+	<tr>
+		<td class="add_td">包名：</td><td class="add_td" style="text-align:left;padding-left:5px;width:60%;"><input type="text" name="package" id="package" class="add_inpt" onblur="get_package();" /></td>
+	</tr>
+	<tr>
+		<td class="add_td">所属类别：</td><td class="add_td" style="text-align:left;padding-left:5px;width:60%;"><input type="text" name="sort_name" id="sort_name" class="add_inpt" /></td>
+	</tr>
+	<tr>
+		<td class="add_td">所属年度：</td>
+		<td class="add_td" style="text-align:left;padding-left:5px;width:60%;">
+		<select name="the_year" id="my_year" onchange="add_year();">
+		<?php foreach($year_list as $key => $val){ ?><option value="{$val.id}">{$val.year}</option><?php } ?>
+		</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="add_td">所属频道列表：</td><td class="add_td" style="text-align:left;padding-left:5px;width:60%;">
+		<div id="change_channel">
+		<select id="channel" name="channel">
+		<?php foreach($add_channel_list as $key => $val){ ?>
+			<option value="{$val.channel_id}" <if condition="$_GET['_channel'] eq $val['channel_id']"> selected</if>>{$val.channel}</option>
+		<?php } ?>
+		</select>
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" class="add_td" style="text-align:center;"><button type="submit">提交</button><button type="button" style="margin-left:10px;" onclick="popclose('add_soft')">取消</button></td>
+	</tr>
+</table>
+</form>
+</div>
+<div id="bgdiv" style="position:absolute;display:none; left:0px; top:0px; width:100%; height:100%; filter:alpha(opacity=40);opacity:0.4; background-color:#000000; z-index:1000;"></div>
+<script language="javascript">
+$('#_channel').bind('change',function(){_channel_chg();});
+$('#select_year').bind('change',function(){_channel_chgs();});
+function _channel_chg() {
+	var select_year = $('#select_year').val();
+	var _channel = $('#_channel').val();
+	window.location.href = '/index.php/Sl/Activate/AnzhiSoftList/select_year/'+select_year+'/_channel/'+ _channel;
+	if(window.ActiveXObject) window.event.returnValue = false;
+}
+
+function _channel_chgs() {
+	var select_year = $('#select_year').val();
+	window.location.href = '/index.php/Sl/Activate/AnzhiSoftList/select_year/'+select_year;
+	if(window.ActiveXObject) window.event.returnValue = false;
+}
+
+function get_package(){
+	var my_package = $('#package').val();
+	var my_year = $('#my_year').val();
+	var my_channel = $('#channel').val();
+	$.ajax({
+		type: "GET",
+		url : '/index.php/Sl/Activate/AnzhiSoftList/from/2/my_package/'+my_package+'/year/'+my_year+'/channel/'+my_channel,
+		dataType: 'json',
+		success: function(data){
+			if(data == 'no'){
+				alert('包名不存在');
+				$('#name').val('');
+				$('#name_show').val('');
+				$('#sort_name').val('');
+			}else if(data == 'have'){
+				alert('包名已存在于该年份该频道');
+				$('#name').val('');
+				$('#name_show').val('');
+				$('#sort_name').val('');
+			}else{
+				$('#name').val(data.softname);
+				$('#name_show').val(data.softname);
+				$('#sort_name').val(data.category_name);
+			}
+		}
+	});
+
+}
+
+function add_year(){
+	var the_year = $('#my_year').val();
+	$.ajax({
+		type: "GET",
+		url : '/index.php/Sl/Activate/AnzhiSoftList/the_year/'+the_year+'/from/1',
+		dataType: 'json',
+		success: function(data){
+			var str = '';
+			for(i=0;i<data.length;i++){
+				str += '<option value="'+data[i].channel_id+'" <if condition="$_GET['_channel'] eq '+data[i].channel_id+'"> selected</if>>'+data[i].channel+'</option>';
+			}
+
+			$('#change_channel').html("<select id='channel' name='channel'>"+str+"</select>");
+		}
+	});
+
+}
+
+function edit(id) {
+	popup('add_soft');
+	$('#name').val($('#name_'+id).html());
+	$('#name_show').val($('#name_show_'+id).html());
+	$('#package').val($('#package_'+id).html());
+	$('#pos').val($('#pos_'+id).html());
+	$('#sort').val($('#sort_'+id).val());
+	$('#sort_name').val($('#sort_name_'+id).html());
+	$('#my_year').val($('#year_'+id).html());
+	$('#edit_id').val(id);
+
+	document.forms['add_form'].action = '/index.php/Sl/Activate/AnzhiSoftList_edit';
+}
+function sequence() {
+	var id_str = {$id_str};
+	var pos_arr = new Array();
+	var pos = '';
+	for(var i in id_str) {
+		pos = $('#sequ_'+id_str[i]).val();
+		if(typeof(pos_arr[pos])!='undefined') {
+			alert("排序的位置不能重！");
+			return false;
+		}
+		pos_arr[pos] = pos;
+	}
+
+	return true;
+}
+function del(id) {
+	if(confirm("您确定执行删除操作吗？")) {
+		window.location.href = '/index.php/Sl/Activate/AnzhiSoftList_del/id/'+id+'/_channel/'+$('#_channel').val();
+		if(window.ActiveXObject) window.event.returnValue = false;
+	}
+}
+function add() {
+	popup('add_soft');
+	$('#name').val('');
+	$('#name_show').val('');
+	$('#package').val('');
+	//$('#pos').val(1);
+	//$('#sort').val(0);
+}
+function add_chk() {
+	if($('#name').val()=='') {
+		alert('请填写软件名称！');
+		return false;
+	}
+	if($('#name_show').val()=='') {
+		alert('请填写显示的软件名称！');
+		return false;
+	}
+	if($('#package').val()=='') {
+		alert('请填写包名！');
+		return false;
+	}
+	if($('#sort_name').val()=='') {
+		alert('请填写所属类别！');
+		return false;
+	}
+
+	//$('#sort_name').val($('#sort').find('option:selected').text());
+
+	return true;
+}
+function popup(id) {
+	var ids=['reg','login','bgdiv'];
+	for(var i in ids) {
+		popclose(ids[i]);
+	}
+
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+}
+function popclose(id) {
+	$("#"+id).css({display:"none"});
+	$("#bgdiv").css({display:"none"});
+}
+</script>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }

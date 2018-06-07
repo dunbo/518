@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="/Public/css/jquery.autocomplete.css" type="text/css" media="screen" />
+<script type="text/javascript" src="/Public/js/jquery.autocomplete.js"></script>
+<style>
+td{padding:5px;}
+.red{color:red;}
+.box_input tr td{text-align:left !important; font-size:14px;}
+.box_input tr td input{ height:31px; width:250px; float:left;}
+.green{color:green;}
+.myradio{display:inline;height:auto !important;width:auto;}
+.justfy{width:124px;}
+<!-- CSS goes in the document HEAD or added to your external stylesheet -->
+table.gridtable {
+	font-family: verdana,arial,sans-serif;
+	font-size:5px;
+	color:#333333;
+	border-width: 1px;
+	border-color: #666666;
+	border-collapse: collapse;
+}
+table.gridtable th {
+	border-width: 1px;
+	/*padding: 4px;*/
+	border-style: solid;
+	border-color: #666666;
+	background-color: #dedede;
+}
+table.gridtable td {
+	border-width: 1px;
+	/*padding: 4px;*/
+	border-style: solid;
+	border-color: #666666;
+	background-color: #ffffff;
+}
+</style>
+</head>
+<body>
+
+<if condition="$vo_id gt 0"> 
+<h5 class="yahei" style="padding-left:10px;">编辑预存</h5>
+	<form action="__URL__/edit_prestore_show" method="post" class="uform">
+ <else /> 
+ <h5 class="yahei" style="padding-left:10px;">录入预存</h5>
+	<form action="__URL__/{$vo_edit}_prestore_show" method="post" class="uform">
+</if>
+<input type="hidden" name="reason" id="reason" />
+<input type="hidden" name="contract_id" value="{$data.contract_id}" id="contract_id" />
+<input type="hidden" name="id" value="{$data.id}" />
+
+	<table id="addable_table" class="yahei">
+		<tbody id="invoice_main_0" border='1' class="box_input">
+			<tr>
+				<td class="justfy">&nbsp;产品名称：</td>
+				<td>
+					<input type="text" style="width:246px" name="softname" id="softname" value="{$contract_data.softname}" class="search_item_text" <?php if($contract_data['category_name']){echo 'disabled';}?> <?php if(!$contract_data['category_name']){echo 'onblur="get_soft()"';}?>>
+				</td>
+			</tr>
+			<!-- <tr>
+				<td class="justfy">&nbsp;软件分类：</td>
+				<td><span id='category_name'>{$contract_data.category_name}</span></td>
+			</tr> -->
+			<tr>
+				<td class="justfy">&nbsp;客户名称：</td>
+				<td><span id='client_name'>{$contract_data.client_name}</span></td>
+			</tr>
+			<tr>
+				<td class="justfy">&nbsp;协议主体：</td>
+				<td><span id='c_name'>{$contract_data.c_name}</span></td>
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red>*</font>充值金额：</td>
+				<td><input value="{$data.recharge_sum}" type="text" name="recharge_sum" class="" id="recharge_sum" required <?php if($data['recharge_sum']==($data['recharge_sum_zhuan']+$data['recharge_expend_sum']) && $data['recharge_sum']){echo 'readonly';}?>></td>
+				<td style="color:red;"></td>
+
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red>&nbsp;</font>配送金额：</td>
+				<td><input placeholder="<?php echo ($data['delivery_sum']&& $data['delivery_sum']!=0)?'':'无';?>" value="<?php echo ($data['delivery_sum']&& $data['delivery_sum']!=0)?$data['delivery_sum']:'';?>" type="text" name="delivery_sum" class="" id="delivery_sum"></td>
+				<td style="color:red;"></td>
+
+			</tr>
+			<tr>
+				<td class="justfy"><font color=red>*</font>预存<if condition="($flexible_sys eq 1) ">日期<else/>月份</if>：</td>
+				<if condition="($flexible_sys eq 1) "> 
+				<td><input type="text" name="prestores_tm" class="Wdate" id="prestores_tm" required onClick="WdatePicker({dateFmt:'yyyy-MM-dd',startDate:'%y-%M-%d 00:00:00'})" value="<?php echo $data['prestores_tm']?date("Y-m-d",$data['prestores_tm']):"";?>"></td>
+				<else/>
+				<td><input type="text" name="prestores_tm" class="Wdate" id="prestores_tm" required onClick="WdatePicker({dateFmt:'yyyy-MM',startDate:'%y-%M'})" value="<?php echo $data['prestores_tm']?date("Y-m",$data['prestores_tm']):"";?>"></td>
+				</if>
+				<td style="color:red;"></td>
+			</tr>
+		</tbody>
+	</table>
+	<table class="yahei box_input">
+		<tr>
+			<td class="justfy">&nbsp;备&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注：</td>
+			<td><textarea style="width:250px;height:100px;" name="remark" id="remark">{$data.remark}</textarea></td>
+			<td style="color:red;"><div id='remark_error'></div></td>
+		</tr>
+
+	</table>
+	<div style="margin:10px auto;padding:0px 90px;">
+	<button class=" btn btn-sm btn-success yahei"  style="padding-left:30px;padding-right:30px;margin-left:40px;" type="submit" onclick="javascript:return checkBeforeSubmit();">保存</button>
+	<button class=" btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;margin-left:40px;" type="button" onClick="javascript:tb_remove();">取消</button>
+	</div>
+</form>
+<script>
+$(document).ready(function() {
+        var all_softnames = [{$all_softnames}];
+        $("#softname").autocomplete(all_softnames,{
+            minChars: 0,//自动完成激活之前填入的最小字符
+            max:12,//列表条目数
+            width: 400,//提示的宽度
+            scrollHeight: 300,//提示的高度
+            matchContains: true,//是否只要包含文本框里的就可以
+        });
+    })
+function get_soft(){
+    var softname = $("#softname").val();
+    if(softname!=''){
+        $.ajax({
+            type: "POST",
+            url: "__URL__/get_soft_info",
+            data: "softname="+softname,
+            dataType:"json",
+            success:function(data){
+                if(data.code==0){
+                    // alert(data.msg);
+                    $("#category_name").html('');
+                    $("#client_name").html('');
+                    $('#contract_id').val('');
+                    $("#c_name").html('');
+                    $("#reason").val(data.msg);
+                }else{
+                    $("#category_name").html(data.contract_data.category_name);
+                    $("#client_name").html(data.contract_data.client_name);
+                    $("#c_name").html(data.contract_data.c_name);
+                    $('#contract_id').val(data.contract_data.id);
+                    $("#reason").val('');
+                }
+            }
+        });
+    }else{
+    	$("#category_name").html('');
+        $("#client_name").html('');
+        $('#contract_id').val('');
+        $("#c_name").html('');
+    }
+}
+
+function checkBeforeSubmit()
+{
+	// var chks=$("input[name^='chk_list']:checked");
+	// var ids=new Array();
+	// var j=0;
+	// var receipts_sum=0;
+ //    $(chks).each(function(){
+ //       receipts_sum= Number(receipts_sum)+ Number($(this).attr('receipts_sum'));
+ //       ids[j]=this.value;
+ //       j++;                   
+ //    });
+    // $('#sel_re_id').val(ids);
+	var i= 1;
+	if($("#recharge_sum").val().length == 0 || $("#recharge_sum").val() == "")
+	{
+		$("#recharge_sum").css("border","1px solid red").focus().parent().next().text("请先填写充值金额！");
+		var i = 0;
+	}else if(isNaN($("#recharge_sum").val()))
+	{
+		$("#recharge_sum").css("border","1px solid red").focus().parent().next().text("充值金额必须是数字！");
+		var i = 0;
+	}else if(Number($("#recharge_sum").val()) <0){
+		$("#invoice_cash").css("border","1px solid red").focus().parent().next().text("充值金额不可为负数！");
+		var i = 0;
+	}
+	if($("#delivery_sum").val().length == 0 || $("#recharge_sum").val() == "")
+	{
+		// $("#recharge_sum").css("border","1px solid red").focus().parent().next().text("请先填写充值金额！");
+		// var i = 0;
+	}else if(isNaN($("#delivery_sum").val()))
+	{
+		$("#delivery_sum").css("border","1px solid red").focus().parent().next().text("配送金额必须是数字！");
+		var i = 0;
+	}else if(Number($("#delivery_sum").val()) <0){
+		$("#delivery_sum").css("border","1px solid red").focus().parent().next().text("配送金额不可为负数！");
+		var i = 0;
+	}
+	if($("#prestores_tm").val().length == 0 || $("#prestores_tm").val() == "")
+	{
+		$("#prestores_tm").css("border","1px solid red").focus().parent().next().text("请先填写预存日期！");
+		var i = 0;
+	}
+	if($("#remark").val().length >100)
+	{
+		$("#remark").css("border","1px solid red").focus().parent().next().text("100个字符以内");
+		var i = 0;
+	}
+	if($('#reason').val())
+	{
+		alert($('#reason').val());
+		var i = 0;
+	}
+	if(i == 0)
+	{
+		return false;
+	}else{
+		return true;
+	}
+}
+</script>
+
+<!-- 主页面结束 -->
+</body>
+</html>

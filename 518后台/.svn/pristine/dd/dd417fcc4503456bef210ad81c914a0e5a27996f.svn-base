@@ -1,0 +1,63 @@
+<include file="../Public/header" />
+</head>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+function checkit(){
+    if(confirm("确定要这么执行该操作吗？"))
+    {
+        return true;
+    }
+    return false;
+}
+</script>
+<body>
+<br />
+<div style="padding-left:50px">
+<form action="__URL__/channel_list" method="get">
+<input type="text" name="key_word" value="{$key_word}" />&nbsp;&nbsp;<input type="submit" value="搜索" />
+</form>
+<br />
+<table border="1" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>账户ID</td>
+		<td>用户名</td>
+		<td>密码</td>
+		<td>创建时间</td>
+		<td>创建人</td>
+		<td>更新时间</td>
+		<td>账号状态</td>
+		<td>操作</td>
+	</tr>
+	<?php if($user_results){ ?>
+	<?php foreach($user_results as $key => $val){ ?>
+	<tr>
+		<td>{$val['id']}</td>
+		<td>{$val['username']|default='&nbsp;'}</td>
+		<td>{$val['passwd']|default='&nbsp;'}</td>
+		<td><?php echo date('Y-m-d H:i:s',$val['create_tm']); ?></td>
+		<td>{$val['create_user']|default='&nbsp;'}</td>
+		<td><?php echo date('Y-m-d H:i:s',$val['update_tm']); ?></td>
+		<td><?php if($val['status'] == 1){ echo "正常"; }elseif($val['status'] == 2){ echo "创建中"; }elseif($val['status'] == 3){ echo "编辑中"; }elseif($val['status'] == 0){ echo "暂停"; } ?></td>
+		<td>
+			<?php if($val['status'] == 1){ ?>
+				<a href="__URL__/alter_status/uid/{$val['id']}/status/0" onclick="return checkit();">停用</a>&nbsp;<a href="__URL__/show_alter_pwd/uid/{$val['id']}?modal=true" class="thickbox">重置密码</a>&nbsp;<a href="__URL__/show_edit_user/uid/{$val['id']}/?modal=true" class="thickbox">编辑账号信息</a>&nbsp;<a href="__URL__/channel_manage_list/uid/{$val['id']}">渠道管理</a>
+			<?php }elseif($val['status'] == 2){ ?>
+				<a href="<?php if($val['node'] == 1){ ?>__URL__/select_channel/uid/{$val['id']}<?php }elseif($val['node'] == 2){  ?>__URL__/channel_config/uid/{$val['id']}<?php } ?>">继续创建</a>&nbsp;&nbsp;<a href="__URL__/give_up/uid/{$val['id']}" onclick="return checkit();">放弃创建</a>
+			<?php }elseif($val['status'] == 3){ ?>
+				<a href="<?php if($val['node'] == 1){ ?>__URL__/select_channel/uid/{$val['id']}/from/1/<?php }elseif($val['node'] == 2){ ?>__URL__/channel_config/uid/{$val['id']}/from/1/<?php } ?>">继续编辑</a>&nbsp;&nbsp;<a href="__URL__/give_up_edit/uid/{$val['id']}" onclick="return checkit();">放弃编辑</a>
+			<?php }elseif($val['status'] == 0){ ?>
+				<a href="__URL__/alter_status/uid/{$val['id']}/status/1" onclick="return checkit();">恢复</a>
+			<?php } ?>
+		</td>
+	</tr>
+	<?php } ?>
+	<?php }else{ ?>
+	<tr>
+	<td colspan="8" style="text-align:center;"><span>未找到相关信息</span></td>
+	<tr>
+	<?php } ?>
+</table>
+</div>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<!--<div style="font-size: 18px;font-weight: bold;margin-left: 10px">-->
+	<!--标签：{$tag_name}-->
+<!--</div>-->
+<table style='margin-top:10px;float:left;' width="100%" cellspacing="0" cellpadding="0" class="search_table">
+	<tbody>
+	<form method='get' action="__URL__/audit_tag" >
+		<tr>
+			<td>标签：
+				<select name="tag_id" id="tag_id" style="width:140px">
+					<option value="">--全部--</option>
+					<foreach name="tag_list" item="vo">
+						<option value="{$vo.id}" <if condition="$tag_id eq $vo.id ">selected</if>>{$vo.tag_name}</option>
+					</foreach>
+				</select>
+			</td>
+			<td>原标题：<input type="text" value="{$title}" id="s_title" name="s_title" class="search_item_text" style="width:140px" onkeyup="this.value = this.value.substring(0, 50)"></td>
+			<td>时间：<span><input type="text" name="begintime" id="begintime" value="{$begintime}" style="cursor: hand; width: 150px;" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>~
+				<span><input id="endtime" name="endtime" style="cursor: hand; width: 150px;"
+							 value="{$endtime}" size="15" type="text" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>
+			</td>
+			<td>
+				<input type="hidden" name="status" id="status" value="{$status}">
+				<input type="submit" class="search_btn" value="搜索"></td>
+		</tr>
+	</form>
+	</tbody>
+</table>
+<div style="float: right;width: 30%;text-align:right">
+	<table border="0" cellpadding="0" cellspacing="0" class="margin_top" width="100%" align="right">
+		<tr height="35">
+			<td align="center" style=<?php if($status ==1){ echo "background:#FFCC66"; } ?> >
+			<a href="__URL__/audit_tag?status=1<?php if($tag_id){echo '&tag_id='.$tag_id;} if($tag_name){echo '&tag_name='.$tag_name;}?>" onclick="$('#status').val(1)"><font style="color:#000; font-weight:bold">全部</font></a>
+			</td>
+			<td align="center" style=<?php if($status ==2){ echo "background:#FFCC66"; } ?> >
+			<a href="__URL__/audit_tag?status=2<?php if($tag_id){echo '&tag_id='.$tag_id;} if($tag_name){echo '&tag_name='.$tag_name;}?>" onclick="$('#status').val(2)"><font style="color:#000; font-weight:bold">进行中</font></a>
+			</td>
+			<td align="center" style=<?php if($status ==3){ echo "background:#FFCC66"; } ?> >
+			<a href="__URL__/audit_tag?status=3<?php if($tag_id){echo '&tag_id='.$tag_id;} if($tag_name){echo '&tag_name='.$tag_name;}?>" onclick="$('#status').val(3)"><font style="color:#000; font-weight:bold">已过期</font></a>
+			</td>
+		</tr>
+	</table>
+</div>
+<div style="float: left;margin-top: 30px;margin-left: 10px">
+	<a href="__URL__/save_audit_tag?width=400" style="float:left;" title="添加内容" class="thickbox search_btn">添加内容</a>
+</div>
+<div style="clear: both"></div>
+
+<table style='float:left;width: 100%' cellpadding="0" cellspacing="0" class="table_list" >
+	<thead>
+		<tr>
+			<th width="3%">合作资讯ID</th>
+			<th width="6%"><a href="__URL__/audit_tag?rank=<?php if($rank==''||$rank=='asc'){echo 'desc';}else{echo 'asc';}?>&{$param}">排序值<?php if($rank==''){echo '↑↓';}else if($rank=='desc'){echo '↓';}else{echo '↑';}?></th>
+			<th width="8%">原图片/标题</th>
+			<th width="8%">展示图片/标题</th>
+			<th width="7%">合作站点</th>
+			<th width="7%">作者</th>
+			<th width="7%"><a href="__URL__/audit_tag?order_num=<?php if($order_num==''||$order_num=='asc'){echo 'desc';}else{echo 'asc';}?>&{$param}">点击量<?php if($order_num==''){echo '↑↓';}else if($order_num=='desc'){echo '↓';}else{echo '↑';}?></th>
+			<th width="7%">开始时间</th>
+			<th width="7%">结束时间</th>
+			<th width="8%">状态</th>
+			<th width="5%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='info' id='list'>
+		<tr>
+			<td>
+				{$list.content_id}
+			</td>
+			<td><input type="text" name="rank_{$list.id}" id="rank_{$list.id}" value="{$list.rank}" style="height: 20px;width:45px;" onblur="edit_rank('{$list.id}','{$list.rank}')"></td>
+			<td><img src ="{$list.images_small}" width="63" height="50"><br>{$list.title}</td>
+			<td align='center' >
+				<img src ="<if condition="$list.az_images neq ''"><?php echo IMGATT_HOST;?>{$list.az_images}<else />{$list.images_small}</if>" width="63" height="50">
+				<br>
+				<if condition="$list.az_titile neq ''">{$list.az_titile}<else />{$list.title}</if></td>
+			<td align='center' >{$list.website_name}
+			</td>
+			<td>{$list.from}</td>
+			<td>{$list.view_num}</td>
+			<td>{$list.start_tm|date="Y-m-d H:i:s",###}</td>
+
+			<td align='center' >{$list.end_tm|date="Y-m-d H:i:s",###}</td>
+			<td align='center' >
+				<if condition="$list.data_status eq '1'">
+					未开始
+				<elseif condition="$list.data_status eq '2'"/>
+					进行中
+				<else />
+					已过期
+				</if>
+			</td>
+			<td align='center'>
+				<a href="__URL__/save_audit_tag?id={$list.id}" class="blue thickbox">编辑</a><br>
+				<a href="__URL__/del_audit_tag?id={$list.id}" class="blue">删除</a>
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='12'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+</html>
+<script>
+	function GetCharLength(str) {
+		var iLength = 0;  //记录字符的字节数
+		for (var i = 0; i < str.length; i++)  //遍历字符串中的每个字符
+		{
+			if (str.charCodeAt(i) > 255)   //如果当前字符的编码大于255
+			{
+				iLength += 2;    //所占字节数加2
+			}
+			else {
+				iLength += 1;   //否则所占字节数加1
+			}
+		}
+		return iLength;   //返回字符所占字节数
+	}
+
+	function ag_select(){
+		var chks=$("input[name='content_list']");
+		$(chks).each(function(){
+			if($(this).attr('checked')!='checked'){
+				$(this).attr('checked','checked');
+			}else{
+				$(this).attr('checked',false);
+			}
+		});
+	}
+
+	function save_content(id,passed,is_more){
+		if(is_more==1){
+			var chks=$("input[name='content_list']:checked");
+			var ids="";
+			var i=0;
+			$(chks).each(function(){
+				ids+=this.value+',';
+				i++;
+			});
+			if(ids==''){
+				alert('未选择任何内容');
+			}
+			id = ids;
+		}else{
+			if(passed==2){
+				var info = "撤销";
+			}else if(passed==1){
+				var info = '通过'
+			}else if(passed==3){
+				var info = '驳回';
+			}
+			if(!confirm("确认"+info+"吗")){
+				return false;
+			}
+		}
+		if(id){
+			$.ajax({
+				url:'__URL__/save_content',
+				data:'id='+id+'&status='+passed+'&is_more='+is_more,
+				type: 'post',
+				async:false,
+				dataType:'json',
+				success: function(data)
+				{
+					alert(data.msg);
+					if(data.code==1){
+						if(is_more==1){
+							data=id.split(',');
+							var str="";
+							$(chks).each(function(){
+								if(data.indexOf(this.value)!=-1){
+									$('#'+this.value).parent().css('background','#ccc');
+									$('#pro_'+this.value+' a ').each(function(){
+										$(this).html('');
+									})
+								}
+							});
+						}else{
+							$('#'+id).parent().css('background','#ccc');
+							$('#pro_'+id+' a ').each(function(){
+								$(this).html('');
+							})
+						}
+					}
+				}
+			});
+		}
+	}
+
+	function edit_rank(id,old_rank){
+		var rank = $("#rank_"+id).val();
+		if(parseInt(rank)!=rank||rank<0||rank>50){
+			alert('请输入1-50以内的整数');
+			return false;
+		}
+		if(old_rank!=rank){
+			$.ajax({
+				url:'__URL__/pub_edit_rank',
+				data:'id='+id+'&rank='+rank,
+				type: 'post',
+				async:false,
+				dataType:'json',
+				success: function(data)
+				{
+					alert(data.msg);
+					window.location.reload();
+				}
+			});
+		}
+
+	}
+</script>

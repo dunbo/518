@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>预购礼券</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/preorder/css/common.css?v3"/>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/activity/preorder/js/public.js?v2"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js"></script>
+<script type="text/javascript">
+<!--{if !$out.is_login}-->
+	toast("已超时，请重新登录");
+	window.location='index.php?aid=<!--{$out.aid}-->';
+<!--{/if}-->
+	var addTimer = function(){
+	    var list = [],
+	        interval;
+
+	    return function(id,button_id,timeStamp){
+	        if(!interval){
+	            interval = setInterval(go,1000);
+	        }
+	        list.push({ele:document.getElementById(id),button:document.getElementById(button_id),time:timeStamp});
+	    }
+
+	    function go() {
+	        for (var i = 0; i < list.length; i++) {
+	            if (!list[i].time) {
+	                list.splice(i--, 1);
+	            }
+	            var distancetime = new Date(list[i].time*1000).getTime() - new Date().getTime();
+
+	            if (distancetime <= 0) {
+	                console.log(i);
+	                list[i].button.className="over_btn";
+	                list[i].button.innerHTML="已过期";
+	                list[i].button.onclick="";
+	                list.splice(i--, 1);
+	            } else {
+	                list[i].ele.innerHTML = changeTimeStamp(distancetime);
+	            }
+	        }
+	    }
+
+	    //传入unix时间戳，得到倒计时
+	    function changeTimeStamp(distancetime){
+	　　　　//如果大于0.说明尚未到达截止时间
+	        var ms = Math.floor(distancetime%1000);
+	        var sec = Math.floor(distancetime/1000%60);
+	        var min = Math.floor(distancetime/1000/60);
+	        //var hour = Math.floor(distancetime/1000/60/60);
+
+	        if(ms<100){
+	            ms = "0"+ ms;
+	        }
+	        if(sec<10){
+	            sec = "0"+ sec;
+	        }
+	        if(min<10){
+	            min = "0"+ min;
+	        }
+			/*
+	        if(hour<10){
+	            hour = "0"+ hour;
+	        }
+			*/
+	        return "订单有效期： " + min +":" + sec;
+	    }
+	}();
+
+	function checkout(order_id) {
+		$.post("checkout.php?aid=<!--{$out.aid}-->",{"order_id":order_id},function(data,status){
+			if (data.status == 1) {
+				window.location = data.jump_url;
+			} else if (data.status == 0) {
+				toast("出错了，请刷新页面后重试");
+			} else if (data.status == 2) {
+				toast("已超时，请重新登录");
+			}
+		},"json");
+	}
+</script>
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.new_static_url}-->/activity/preorder/images/banner.png" />
+</div>
+<div class="main">
+<!--{foreach from=$out.orders key=i item=order}-->
+	<div class="unpay_list">
+		<!--{if $i eq 0}-->
+		<div class="title2">
+			<img src="<!--{$out.new_static_url}-->/activity/preorder/images/txt_02.png" />
+		</div>
+		<p class="friend_tip">友情提示：因参与活动人数较多，可购买礼券数量将在订单失效1分钟内自动释放。</p>
+		<!--{/if}-->
+		<div id="timer_<!--{$order.order_id}-->" class="order_time">订单有效期： 00:00</div>
+		<table cellpadding="0" cellspacing="0" class="table1">
+			<thead>
+				<tr>
+					<th>商品名称</th>
+					<th>商品单价</th>
+					<th>商品数量</th>
+				</tr>
+			</thead>
+			<tbody>
+			<!--{foreach from=$order.coupon item=coupon}-->
+				<tr>
+					<td><!--{$coupon.name}--></td>
+					<td>￥<!--{$coupon.real_price/100}--></td>
+					<td><!--{$coupon.amount}--></td>
+				</tr>
+			<!--{/foreach}-->
+			</tbody>
+		</table>
+		<div class="pay_money">
+			<p>合计<span>￥<!--{$order.real_price/100}--></span></p>
+			<em><!--{$order.price/100}--><i></i></em>
+			<a id="button_<!--{$order.order_id}-->" href="javascript:;" onclick="checkout('<!--{$order.order_id}-->')">立即支付</a>
+		</div>
+		<script>addTimer("timer_<!--{$order.order_id}-->","button_<!--{$order.order_id}-->",<!--{$order.expire_time}-->)</script>
+	</div>
+<!--{/foreach}-->
+	<a href="index.php?aid=<!--{$out.aid}-->" class="reutrn_btn">返回上一页</a>
+	<div class="rule_wrap">
+		<div class="title">
+			<h3>活动说明：</h3>
+		</div>
+		<div class="rule">
+			<ul>
+				<li>1、活动期间用户在指定页面预购礼券，可享受折扣价格;</li>
+				<li>2、预购礼券自活动结束后的3个工作日内发出，<span>有效期为7天</span>，请尽快使用，礼券过期不予补发或者退还。</li>
+				<li>3、活动期间单用户每种折扣限购3张礼券，每个用户最多可购12张。</li>
+				<li>4、禁止采用非法手段抢购折扣礼券，超过限额部分将自动转换成等价安智币。</li>
+				<li>5、预购礼券不适用于以下游戏（海岛奇兵、梦幻西游、列王的纷争、大话西游、部落冲突、皇室战争、最终幻想：觉醒、镇魔曲、诛仙、阴阳师、倩女幽魂、剑侠世界、青云志、永恒纪元：戒、问道、率土之滨、大唐无双、火炬之光、王者传奇、仙剑奇侠传3D回合、传奇霸业、大天使之剑H5）</li>
+				<li>6、本次活动最终解释权归安智运营团队所有</li>
+			</ul>
+		</div>
+	</div>
+</div>
+</body>
+</html>

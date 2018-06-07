@@ -1,0 +1,186 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<style type="text/css">
+<!--
+.client_search_div,.client_table_div
+{
+	width:100%;
+
+}
+.client_search_div table td
+{
+	padding:5px 10px;
+
+}
+.client_table_div th,td{text-align:center !important;vertical-align:middle !important;font-size:12px;}
+.client_search_div input{width:140px;height:24px !important;padding:1px;}
+.navgition form
+{
+	display:inline;
+}
+.navgition{text-align:right;padding-right:30px;padding-bottom:20px;}
+.navgition input{padding:0px 15px;}
+.table-body td{padding:8px 2px !important;}
+-->
+</style>
+
+<link rel="stylesheet" type="text/css" media="all"	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<link rel="stylesheet" href="__PUBLIC__/css/bootstrap.min.css">
+<script type="text/javascript" src="__PUBLIC__/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/bootstrap.min.js"></script>
+<script type="text/javascript" src='__PUBLIC__/js/thickbox-compressed.js' ></script>
+<script type="text/javascript" src='__PUBLIC__/js/modal.js' ></script>
+<link rel="stylesheet" href="__PUBLIC__/css/thickbox.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script>
+function datetime_to_unix(datetime){
+    var tmp_datetime = datetime.replace(/:/g,'-');
+    tmp_datetime = tmp_datetime.replace(/ /g,'-');
+    var arr = tmp_datetime.split("-");
+    var now = new Date(Date.UTC(arr[0],arr[1]-1,arr[2],arr[3]-8,arr[4],arr[5]));
+    return parseInt(now.getTime()/1000);
+}
+function check_all(){
+	var alt=$('#chk_all').attr('alt');
+	if(alt==1){
+		$("input[name=chk_list]").attr("checked",true); 
+		$('#chk_all').attr('alt',2);
+	}else{
+		$("input[name=chk_list]").attr("checked",false); 
+		$('#chk_all').attr('alt',1);
+	}
+}
+function select_box(obj){
+	var num=$('#chk_all').attr('num');
+		var chks=$("input[name='chk_list']:checked");
+		var i=0;
+	    $(chks).each(function(){
+	       i++;                   
+	    });
+	    if(i==num){
+	    	$("#chk_all").attr("checked",true); 
+	    	$('#chk_all').attr('alt',2);
+	    }else{
+	    	$("#chk_all").attr("checked",false); 
+	    	$('#chk_all').attr('alt',1);
+	    }
+}
+function export_csv(){
+	var chks=$("input[name='chk_list']:checked");
+	var ids=new Array();
+	var i=0;
+    $(chks).each(function(){
+       ids[i]=this.value;
+       i++;                   
+    });
+    if(i==0){
+		alert('请选择要批量导出的单价');
+		return false;
+	}
+	$('#export_csv').attr('href','?export=1&ids='+ids);
+	return true;
+}
+</script>
+<div class="" style="margin-bottom:10px;">
+	<h4 class="yahei">应用推广&gt;&gt;合同管理 &gt;&gt;单价管理</h4>
+</div>
+ <div class="search_box" style="margin-top:10px;height:90px">
+            <form method="get" action="">
+                <table cellspacing="0" cellpadding="0" width="99%" class="search_table">
+                    <tbody>
+                    <tr>
+                        <td >产品名称
+                            <input type="text" style="width:140px" value="{$softname}" name="s_softname" id="s_softname" class="search_item_text">
+                        </td>
+                        <td >产品包名
+                            <input type="text" style="width:140px" value="{$package}" name="s_package" id="s_package" class="search_item_text">
+                        </td>
+
+                        <td >
+                            生效日期
+                            <input id="begintime" name="begintime" value="{$begintime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})" style="width:140px; height:28px">到：
+                            <input id="endtime" name="endtime" value="{$endtime}" type="text" class="Wdate" onclick="WdatePicker({startDate: '%y-%M-%d', dateFmt: 'yyyy-MM-dd'})" style="width:140px; height:28px">
+                        </td>
+
+                        <td rowspan='2'>
+                            <input type="submit" onclick="" value="搜索" style="float:left; height:30px;" class="search_btn">
+                        </td>
+                    </tr>
+                    <tr>
+                       <td >合同编号
+                            <input type="text" style="width:140px" value="{$contract_code}" name="s_contract_code" id="s_contract_code" class="search_item_text">
+                        </td>
+                        <td align="left">协议主体
+                            <select name="contact_config_id" id='contact_config_id' style="width:131px;">
+								<option value="0" <?php echo ($contact_config_id==0)?'selected':'';?>>请选择</option>
+								<volist name="contract_configs" id="li">
+								<option value="{$li.id}" <?php echo ($contact_config_id==$li['id'])?'selected':'';?>>{$li.c_name}</option>
+								</volist>
+							</select>
+                        </td>
+                    </tr>
+                    </tbody></table>
+              </form>
+ </div>
+<div style="width:100%;padding:10px 10px;margin-bottom:10px;">
+	<a href="__URL__/add_unit_price_show/contract_id/{$contract_id}?" class="thickbox"><button class=" btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;">录入单价</button></a>&nbsp;&nbsp;&nbsp;&nbsp;
+	<a href="" target="_blank" class="" onclick="return export_csv();" id='export_csv'><button class="btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;margin-left:0px;">导出报表</button></a>&nbsp;&nbsp;&nbsp;&nbsp;
+	<?php if ($flexible_sys==1): ?>
+	<a href="/index.php/Settlement/CpdContractDepositBatch/import_unit_price?width=380&height=140" class="thickbox" title='批量导入'><button class=" btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;">导入单价</button></a>
+	<?php endif ?>
+</div>
+<div class="client_table_div">
+	<table class="table_list table table-striped table-bordered center middle yahei table-body">
+		<thead>
+			<tr>
+				<th><input type="checkbox" id="chk_all" onclick="check_all()" alt="1" num='{$receipts_num}'/></th>
+				<th>单价ID</th>
+				<th style='width:8%'>合同编号</th>
+				<th style='width:8%'>合同产品</th>
+				<th>客户名称</th>
+				<th style='width:8%'>协议主体</th>
+				<th>生效日期</th>
+				<th>单价</th>
+				<th style="width:25%;">备注</th>
+				<!-- <th>录入时间<if condition="$type eq 1 "><a href="?type={$type}" style="a:link { text-decoration: none;} ">↓</a><else /><a style="a:link { text-decoration: none;}" href="?type={$type}">↑</a></if></th>
+				<th style="width:5%;">操作人</th> -->
+				<th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="lists" id="li">
+				<tr>
+					<td><input type="checkbox" name="chk_list" value="{$li.id}" onclick="select_box(this)" /></td>
+					<td>{$li.id}</td>
+					<td>{$li.contract_code}</td>
+					<td>{$li.softname}<br>{$li.package}<br>{$li.category_name}</td>
+					<td>{$li.client_name}</td>
+					<td>{$li.c_name}</td>
+					<td><?php echo date("Y-m-d",$li['price_tm']);?></td>
+					<td>{$li['price_num']}</td>
+					<td>{$li.remark}</td>
+					<!-- <td><?php echo date("Y-m-d H:i:s",$li['add_tm']);?></td>
+					<td>{$li.admin_user_name}</td> -->
+					<td>
+						<?php if (!$li['is_edite']): ?>
+							<a href="__URL__/edit_unit_price_show/id/{$li.id}/contract_id/{$li.contract_id}" class="thickbox yahei">编辑</a>
+						<?php endif ?>
+						<?php if ($li['price_tm']<strtotime(date("Y-m-d",time()))): ?>
+						<a href="__URL__/edit_unit_price_show/id/{$li.id}/contract_id/{$li.contract_id}/online/1" class="thickbox yahei">复制上线</a>
+						<?php endif ?>
+					</td>
+					
+				</tr>
+			</volist>
+
+		</tbody>
+	</table>
+	<div class="yahei navgition">
+		{$page|default='&nbsp;'}
+	</div>
+</div>
+
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />

@@ -1,0 +1,427 @@
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/default.js'></script>
+<link rel="stylesheet" href="/Public/css/jquery.autocomplete.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/js/jquery.autocomplete.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload_anzhi.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<div id="top"></div>
+<table width="80%" height="29" border="0" cellpadding="0" cellspacing="1" class="tb">
+<tr><td colspan="1"><strong>信息管理 ——软件反馈</strong></td> <td align="right" ><a href=<?php if($_GET['type'] != 1){ ?> "__URL__/feedback_list/processed/<?php echo $processed; ?>"<?php }else{ ?> "__URL__/feedback_list/type/unshow" <?php } ?>>返回</a></tr>
+</table>
+<style type="text/css">
+body,div,span,img,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,input,textarea,select,option,fieldset,legend,p,th,td{margin:0; padding:0;  font-weight:normal; font-family:"微软雅黑",Arial,sans-serif;}
+body{ font-size:14px; color:#202020;}
+fieldset,img {border: 0;}
+a{text-decoration:none; color:#202020;}
+a:hover{text-decoration:underline;}
+ul,li{list-style:none;}
+/*.feedback_replay_wrap{width:100%; padding-top:240px; position:relative;}
+.feedback_kf{width:1000px;  padding-left:8px; border:1px solid #dcdcdc; background:#efefef; overflow:hidden; position:fixed; left:10px; top:30px; font-size:12px;_position:absolute; _top:expression(eval(document.documentElement.scrollTop + 10));}*/
+.feedback_kf{width:1000px;  padding-left:8px; border:1px solid #dcdcdc; background:#efefef; overflow:hidden; font-size:12px;}
+.feedback_kf h3{height:24px; font-size:16px;}
+.feedback_kf textarea{width:400px; height:100px; border:1px solid #dcdcdc;}
+.feedback_user_cnt,.feedback_dev_cnt,.feedback_kf_cnt{ padding:10px 0; border-bottom:1px dashed #dcdcdc;}
+.feedback_img{display:none;}
+.feedback_kf_cnt h4{font-weight:bold;}
+.feedback_showimg{display:block; height:22px; line-height:22px; color:#055CC6;}
+
+.return_top{width:22px; height:90px; padding-top:10px; background:#f2f2f2; border:1px solid #d2d2d2; text-align:center; position:fixed; right:80px; bottom:40px; _position:absolute; _bottom:80px}
+.return_top a{color:#808080;}
+.return_top a:hover{ text-decoration:none;}
+</style>
+<script>
+//软件包名验证
+	function get_softname(id){
+		var pkg=document.getElementById(id).value;
+		if(pkg=="")
+		{
+		  alert("请填写软件包名");
+		   return false;
+		}
+		else
+		{
+		$.ajax({
+			url: '/index.php/Public/pub_get_softname/package/'+pkg,
+			type: 'get',
+			success: function(data)
+			{
+				if(data != 2){
+					var obj = eval('(' + data + ')');
+					
+					document.getElementById(id+"_name").value=obj.soft_name;
+					//$('#soft_name').val(obj.soft_name);
+					//$('#my_game').val(obj.category_name);
+				}
+				else
+				{
+				   document.getElementById(id).value="";
+					//$('#soft_name').val('');
+					//$('#my_game').val('');
+					alert("包名不存在");
+					return false;
+				}
+			}
+		});
+		}
+	}
+</script>
+<div class="feedback_replay_wrap">
+	<?php if($_GET['type'] != 1){ ?>
+	<div class="feedback_kf">
+		<h3>安智客服</h3>
+<form name="myform">			
+	<table border="0" cellpadding="0" cellspacing="0" style='font-size:12px;'>	
+		<tr><td>最多字数：
+		<input disabled maxLength="4" name="total1" size="3" value="200" class="inputtext">
+		已用字数：
+		<input disabled maxLength="4" name="used1" size="3" value="0" class="inputtext">
+		剩余字数：
+		<input disabled maxLength="4" name="remain1" size="3" value="200" class="inputtext"></td></tr>
+	<volist name='reason_list' id='reason_list'  key='i'>
+		<tr height="30">
+		<td style="padding-left:10px;">
+		<input id='{$reason_list.id}' type="checkbox" mark='0' name="reject[]" value="{$reason_list.content}" <notempty name="reason_list.content2"> onclick=tip_show("div_{$reason_list.id}")   </notempty> />{$i}&nbsp;&nbsp;&nbsp;
+		<span <notempty name="reason_list.content2"> onclick=tip_show("div_{$reason_list.id}") style="color:#58c5c7;cursor:pointer"  </notempty> > {$reason_list.content}</span></td>
+		</tr>
+		<notempty name="reason_list.content2">
+		<tr id = "div_{$reason_list.id}" style="display:none;padding-left:30px;" ><td>
+		<foreach  name='reason_list.content2' item='content2'>
+		<input type="checkbox" name="reject[]" mark='1' value="{$content2}">{$content2}
+		</foreach >
+		</td></tr>
+		</notempty>
+	</volist>		
+	<tr><td>
+		<textarea name="content" id='content' wrap=PHYSICAL  onKeyDown="gbcount1(this.form.content,this.form.total1,this.form.used1,this.form.remain1);" onKeyUp="gbcount1(this.form.content,this.form.total1,this.form.used1,this.form.remain1);"></textarea>
+	</td></tr>	
+	<tr><td>&nbsp;</td></tr>
+<?php 
+	$f_type = 0;
+	foreach($feed_type as $v){
+		if($v['status'] == 0) continue;
+		$f_type = 1;	
+	}
+	if($_GET['sectiontypeid'] == 2 && $f_type ==1){ 
+?>
+<!-----------游戏运营-------------->
+	<tr><td width="50"><input type="checkbox" name="record" value="1">添加本次处理记录</td></tr>
+	<tr>
+		<td>
+			软件名称：<input type="text" name="soft_name" id="soft_name" class='search_item_text' >
+			<input type="hidden" name="pkg" id="pkg" value="" >
+		</td>
+		<td>
+			<input type="button" style="float:left;" onclick="open_soft()" class="thickbox search_btn" value="从列表中选择"><br/><br/>
+			未在列表中的游戏选择"非合作游戏"即可
+		</td>
+	</tr>
+	<tr>
+		<td>
+			问题类型：
+			<select name="feedback_type" id="feedback_type" class='search_item_text'>
+				<option value="">--请选择--</option>
+				<?php foreach($feed_type as $v){ 
+					if($v['status'] == 0) continue;
+				?>
+					<option rel="<?php echo $v['parent_id']; ?>" value="<?php echo $v['id']; ?>"><?php echo $v['c_name']; ?></option>
+				<?php } ?>
+			</select>
+		</td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+<?php } ?>	
+	<tr>
+	     <td colspan="2"><input type="checkbox" id="recommend_soft"  onclick="check()"  name="recommend_soft" value="">推荐软件</td>
+	</tr>
+	<tr>
+	    <td colspan="2">
+			<div id="recommend_soft_div" style="display:none">	
+				<div>
+					 <label><span style="color:red">*</span>包名：</label>
+					 <input type="text" id="apply_pkg"  name="apply_pkg" onblur="get_softname(this.id);"/>
+					 <input type="text" id="apply_pkg1" name="apply_pkg1" onblur="get_softname(this.id);"/>
+					 <input type="text" id="apply_pkg2" name="apply_pkg2" onblur="get_softname(this.id);"/>
+					 <input type="text" id="apply_pkg3" name="apply_pkg3" onblur="get_softname(this.id);"/>
+					 <input type="text" id="apply_pkg4" name="apply_pkg4" onblur="get_softname(this.id);"/>
+				</div> 
+				<div>		
+					 <label style="display:inline-block;width:43px;"></label>
+					 <input style="border:none;background:none; margin-right:2px" readonly type="text" id="apply_pkg_name" />
+					 <input style="border:none; margin-right:3px; background:none;" readonly type="text" id="apply_pkg1_name" />
+					 <input style="border:none; margin-right:3px; background:none;" readonly type="text" id="apply_pkg2_name" />
+					 <input style="border:none; margin-right:2px;background:none;" readonly type="text" id="apply_pkg3_name" />
+					 <input style="border:none; background:none;" readonly type="text" id="apply_pkg4_name" />
+				</div>
+			</div>
+		</td>
+	</tr>
+    <tr><td>&nbsp;</td></tr>	
+    <tr><td><input type="file" onchange="onFileChange(this);" id="img" name="img" value="" class="inputfile1" style="left:145px;"></td></tr>	
+    <tr><td>&nbsp;</td></tr>	
+</form >	
+	<tr><td>
+		<button type="button" onclick="undercarriage_submit()" style="margin-right:10px;">回复</button>
+	</td></tr>		
+	</table>		
+	</div>
+	<?php } ?>
+	<div class="feedback_kf_cnt">
+		<p>
+			<h4>软件反馈:</h4>{$feedback.submit_tm|date="Y-m-d H:i:s",###} 
+		</p>
+		<p>
+		<?php 
+			$search   = array("[img]", "[/img]");
+			$replace    = array("<img src='".IMGATT_HOST."","'/>");	
+			echo str_replace($search,$replace,$feedback['content']);
+		?>
+		</p>
+	</div>
+	<foreach  name='data' item='content'>
+	<div class="feedback_kf_cnt">
+		<p>
+		<if condition="($content.user_type eq 1)">	
+			<h4>安智（{$username_arr[$content['system_userid']]['admin_user_name']}）回复
+			:{$content.dateline|date="Y-m-d H:i:s",###}
+			<if condition="($feed_type[$content['processing_type']]['c_name'])">	
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			{$feed_type[$content['processing_type']]['c_name']}，已添加处理记录
+			</if>
+			</h4>
+		<elseif condition="($content.user_type eq 2)"/>
+			<h4>开发者回复:{$content.dateline|date="Y-m-d H:i:s",###}</h4>
+		<else/>
+			<h4>软件反馈:{$content.dateline|date="Y-m-d H:i:s",###}</h4>
+		</if>
+		
+		</p>
+		<p>
+		<?php 
+			$search   = array("[img]", "[/img]");
+			$replace    = array("<img src='".IMGATT_HOST."","'/>");	
+			echo str_replace($search,$replace,$content['contents']);
+		?>
+		</p>
+	</div>	
+	</foreach >
+
+	<div class="return_top">
+		<a href="#top">返回顶部</a>
+	</div>
+</div>
+<input type='hidden' name='img_path' id='img_path' value='' />
+<script language="javascript">
+function check()
+{
+	if(document.myform.recommend_soft.checked==true)
+	{
+	  $("#recommend_soft_div").css("display","block");
+	  document.getElementById("recommend_soft").value="1";
+	}
+	if(document.myform.recommend_soft.checked==false)
+	{
+	 $("#recommend_soft_div").css("display","none");
+	}
+}
+
+function gbcount1(message,total,used,remain)
+{
+  var max1;
+  max1 = total.value;
+  if (message.value.length > max1) {
+  message.value = message.value.substring(0,max1);
+  used.value = max1;
+  remain.value = 0;
+ <!-- alert("留言不能超过 200 个字!");-->
+ alert("不能超过"+total.value+"个字!");
+  }
+  else {
+  used.value = message.value.length;
+  remain.value = max1 - used.value;
+  }
+}
+function showOrHide(index,obj)
+{
+	var status_img = $('#feedback_img'+index).css('display');
+	$('#feedback_img'+index).toggle(function(){
+		if(status_img == 'none')
+		{
+			obj.innerHTML = '收起附件';
+		}
+		else{
+			obj.innerHTML = '展开附件';
+		}
+	});
+}
+//回复提交
+function undercarriage_submit() {
+	var rt = '';
+	var mark_type = false;
+	var start_choose = true;
+	var last;
+	var error = 0;
+	$('input:checkbox[name="reject[]"]').each(function(){
+ 		if($(this).attr('mark') == 0){
+ 			if($(this).attr('checked') != 'checked')	last = 1;
+			else	last = 0;
+		}
+ 		if($(this).attr('checked') == 'checked'){
+		if(!mark_type){
+			if( $(this).attr('mark') == 1){
+				if(last == 1){
+					error = 1;					
+				}
+				rt = rt.substring(0,rt.length-1);
+				rt += '('+$.trim($(this).val());
+				mark_type = true;
+			}else{
+				if(start_choose){
+					rt +=  $(this).val();
+					start_choose = false;
+				}else{
+					rt += '\n' + $(this).val();					
+				}				
+				mark_type = false;
+			}			
+		}else{
+			if( $(this).attr('mark') == 1){
+				if(last == 1){
+					error = 1;					
+				}
+				rt += '，' + $.trim($(this).val());
+				mark_type = true;
+			}else{				
+				rt += ')\n'+ $(this).val();
+				mark_type = false;
+			}
+		}
+ 	 }
+	});
+	if(mark_type){
+		if(rt) rt += ')' ;
+	}//else{
+		//if(rt) rt += '\n' ;
+	//}
+	if(error == 1){
+		alert('选择子类原因时，必须选择主原因');
+		return false;
+	}
+	if($('#content').val()!='') {
+		if(rt){
+			rt += '\n';
+		}
+		rt += $('#content').val();
+	}
+	if(!rt) {
+		alert('请选择或填写回复内容！');
+		return false;
+	}
+	 rt = rt.replace(/\&/g, "%26");
+	if(document.myform.recommend_soft.checked==true)
+	{
+	  var a=document.getElementById("apply_pkg").value;
+	  var a1=document.getElementById("apply_pkg1").value;
+	  var a2=document.getElementById("apply_pkg2").value;
+	  var a3=document.getElementById("apply_pkg3").value;
+	  var a4=document.getElementById("apply_pkg4").value;
+	  var recommend_soft=document.getElementById("recommend_soft").value;
+	  var package_all=a+","+a1+","+a2+","+a3+","+a4;
+	  if(a==""&&a1==""&&a2==""&&a3==""&&a4=="")
+		  { 
+			 alert("最少填写一个包名");
+			 return false;
+		  }
+	}
+	if($('#img_path').val()!='') {
+		var img_path = $('#img_path').val();
+	}
+<?php if($_GET['sectiontypeid'] == 2){ ?>	
+	var record = 0;
+	var softname = $("#soft_name").val();
+	var feedback_type = $("#feedback_type").val();
+	var pid = $("#feedback_type").find("option:selected").attr('rel');
+	var pkg = $("#pkg").val();
+	if($("[name='record']").is(':checked')) {
+		if(softname == ''){
+			alert("软件名称不能为空");
+			return false;
+		}
+		if(feedback_type == ''){
+			alert("请选择反馈渠道");
+			return false;
+		}
+		//if(softname && softname == '非合作游戏'){
+			//alert("请选择有效软件");
+			//return false;
+		//}
+		var is_soft = $.inArray(softname, soft_arr);
+		if(is_soft == -1  && softname != '非合作游戏'){
+			alert("软件不存在");
+			return false;
+		}
+		record = 1;
+	}
+	//alert(record)
+	
+	var data = "content="+rt+"&sectiontypeid=<?php echo $_GET['sectiontypeid'];?>&softname="+softname+"&feedback_type="+feedback_type+"&pkg="+pkg+"&record="+record+"&pid="+pid+'&img_path='+img_path;
+<?php }else{ ?>	
+	var data = "content="+rt+"&package_all="+package_all+"&recommend_soft="+recommend_soft+'&img_path='+img_path;
+<?php } ?>
+	$.ajax({
+		url: "__URL__/feedback_reback/id/<?php echo $_GET['id'];?>",
+		data: data,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				console.info(ret['msg']);
+				//location.reload();//加载页面
+				return false;
+			} else if(ret['code']==1) {	//成功
+				//alert(ret['msg']);
+				window.location.href='__URL__/feedback_list/processed/<?php echo $processed; ?>';
+			}
+		}
+	});
+}	
+
+function onFileChange(obj){
+	if( !obj.value.match( /.jpg|.jpeg|.png/i ) ){
+		alert('上传格式出错');
+		var file = $("[name='img']");
+		file.after(file.clone().val(""));
+		file.remove();	
+		return false;
+	}
+	$.ajaxFileUpload({
+		url:'__URL__/pub_uploadfile_to_tmp', 	//你处理上传文件的服务端
+		secureuri:false,
+		fileElementId:'img',
+		dataType: 'json',
+		success: function (data){
+			if(data.code == 1){
+				$('#img_path').val(data.file_path);
+			}else{
+				alert(data.msg);
+				var file = $("[name='img']");
+				file.after(file.clone().val(""));
+				file.remove();					
+				return false;
+			}
+		}
+	})
+}
+</script>
+<?php 
+	$f_type = 0;
+	foreach($feed_type as $v){
+		if($v['status'] == 0) continue;
+		$f_type = 1;	
+	}
+	if($_GET['sectiontypeid'] == 2 && $f_type ==1){ 
+?>
+<include file="../../Public/feed_soft" />
+<?php } ?>

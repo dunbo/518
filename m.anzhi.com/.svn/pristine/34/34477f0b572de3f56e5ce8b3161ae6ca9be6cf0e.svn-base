@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>流量大波送</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v4"></script>
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+
+</head>
+<body>
+<div class="main2">
+	<table cellpadding="0" cellspacing="0" class="log_list">
+		<tr>
+			<td>提取到</td>
+			<td class="right"><!--{$out.list_arr.mobile}--></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="height:auto;">
+				<div class="flow">
+					<p>提取流量</p>
+					<ul class="flow_num">
+						<li class="flow_num1">100M</li>
+						<li class="flow_num2">200M</li>
+						<li class="flow_num3">300M</li>
+						<li class="flow_num4">400M</li>
+						<li class="flow_num5">500M</li>
+						<div class="clear"></div>
+						<span class="flow1 current"></span>
+						<span class="flow2"></span>
+						<span class="flow3"></span>
+						<span class="flow4"></span>
+						<span class="flow5"></span>
+						<div class="line"></div>
+					</ul>
+					<input type="hidden" value="100" id="flow_price_num">
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>当前账户有流量：<span id="flow_num"><!--{$out.res_flow}--></span>M</td>
+			<td></td>
+		</tr>
+	</table>
+	<!--{if $out.res_flow lt 100}-->
+	<a href="javascript:;" class="btn1 gray" style="margin: 0.5rem auto;"  >立即提取</a>
+	<!--{else}-->
+	<a href="javascript:;" class="btn1" style="margin: 0.5rem auto;" onclick="use_flow();" >立即提取</a>
+	<!--{/if}-->
+	<div class="flow_tip">
+		<p>提取流量当月有效，次月自动失效；<br/>移动暂不支持200M流量包兑换</p>
+	</div>
+</div>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box3"  style="display: none;">
+		<div class="wrap tips_wrap">
+			<div class="tip_txt">
+				<p id="notice3">提取<em>100M</em>流量至<em>18646890345</em></p>
+			</div>
+			<div class="btns2">
+				<a href="javascript:;" class="fl" onclick="cloBox('#tip-box3')">取消</a>
+				<a href="javascript:;" class="fr" onclick="use_flow_do();" >确定</a>
+				<div class="clear"></div>
+			</div>
+		</div>
+    </div>
+	
+    <div class="tip-box" id="tip-box5"  style="display: none;">
+		<div class="wrap tips_wrap">
+			<div class="tip_img">
+				<img id='pic' src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tips_07.png" />
+			</div>
+			<div class="tip_txt">
+				<p id="notice5"><span>流量是不会抛弃你的！</span>下个月再来提取也不迟~</p>
+			</div>
+			<a href="javascript:;" class="btns_yellow" onclick="cloBox('#tip-box5')">朕知道了</a>
+		</div>
+    </div>	
+	
+    <div class="tip-loading" id="tip-box8"  style="display: none;">
+		<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/loading.gif" />
+		<p>拼命加载中...</p>
+    </div>	
+</section>	
+</body>
+</html>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var prefix = '<!--{$out.prefix}-->';
+var res_flow = parseInt('<!--{$out.res_flow}-->');
+var ownoperator = '<!--{$out.ascription.ownoperator}-->';
+var is_lastday = parseInt('<!--{$out.is_lastday}-->');	
+//001电信010联通100移动101虚拟运营商
+function use_flow(){
+	if(ownoperator == "101"){
+		window.AnzhiActivitys.showToastForJs("很抱歉，活动目前仅支持联通、移动、电信三大运营商流量包兑换~");	
+		return false;		
+	}
+	if(is_lastday == 1 && ownoperator == "100"){
+		window.AnzhiActivitys.showToastForJs("移动用户月底最后一天暂停提取");	
+		return false;	
+	}
+	var price = parseInt($("#flow_price_num").val());
+	var str = "提取<em>"+price+"M</em>流量至<em><!--{$out.list_arr.mobile}--></em>";
+	pop_tips("",str,"3",1);
+}
+function use_flow_do(){
+	$(".btn1").attr("onclick","");
+	cloBox('#tip-box3');
+	var price = parseInt($("#flow_price_num").val());
+	if(!price){
+		pop_tips("","请选择要提取的流量","2",1);
+		return false;
+	}
+	if(res_flow < price){
+		pop_tips("","提取的流量大于剩余的流量","2",1);
+		return false;
+	}
+	pop_tips("","","8",1);
+	$.ajax({
+		url: "/lottery/"+prefix+"/collection.php",
+		data:"flow_extract=1&aid="+aid+"&sid="+sid+'&price='+price,
+		type:"post",
+		dataType: 'json',
+		success:function(res) {
+			if(res.code == 1){
+				//alert('提取成功');	
+				window.location.href="/lottery/"+prefix+"/my_prize.php?flow_extract_succ=1&from_type=2&aid="+aid+"&sid="+sid+"&price="+price;			
+			}else{
+				var pic_url = "<!--{$out.new_static_url}-->/activity/"+prefix+"/images/tips_08.png";
+				$("#pic").attr("src",pic_url);
+					setTimeout(function(){
+						cloBox('#tip-box8');
+						pop_tips("",res.msg,"5",1);
+						$(".btn1").attr("onclick","use_flow();");
+					}, 1000);				
+				
+				//alert('提取失败');	
+				return false;
+			}
+		},
+	});	
+}
+
+$(function(){
+	var flowNum = document.getElementById('flow_num');
+	var flowNum2 = 0;
+	if(flowNum.innerHTML<=200){
+		flowNum2 = 100;
+		$("#flow_price_num").val(100);
+	}
+	if(flowNum.innerHTML>=200){
+		if(ownoperator == "100"){
+			//移动无200、400
+			$("#flow_price_num").val(100);
+			flowNum2 = 100;
+		}else{	
+			$("#flow_price_num").val(200);
+			$('.flow2').addClass('current');
+			flowNum2 = 200;
+		}
+	}
+	if(flowNum.innerHTML>=300){
+
+		if(ownoperator == "001" || ownoperator == "010" ){
+			//电信、联通无300/400
+			$("#flow_price_num").val(200);
+			$('.flow2').addClass('current');
+			flowNum2 = 200;
+		}else{		
+			$("#flow_price_num").val(300);
+			$('.flow2').addClass('current');
+			$('.flow3').addClass('current');
+			flowNum2 = 300;
+		}
+	}
+	if(flowNum.innerHTML>=400){
+		if(ownoperator == "001" || ownoperator == "010" ){
+			//电信、联通无300/400
+			$("#flow_price_num").val(200);
+			$('.flow2').addClass('current');
+			flowNum2 = 200;
+		}else if(ownoperator == "100"){
+			//移动无200、400
+			$("#flow_price_num").val(300);
+			$('.flow2').addClass('current');
+			$('.flow3').addClass('current');
+			flowNum2 = 300;			
+		}else{	
+			$("#flow_price_num").val(400);
+			$('.flow2').addClass('current');
+			$('.flow3').addClass('current');
+			$('.flow4').addClass('current');
+			flowNum2 = 400;
+		}
+	}
+	if(flowNum.innerHTML >= 500){
+		$("#flow_price_num").val(500);
+		$('.flow2').addClass('current');
+		$('.flow3').addClass('current');
+		$('.flow4').addClass('current');
+		$('.flow5').addClass('current');
+		flowNum2 = 500;
+	}
+	var flowNumValue = flowNum2-100;
+	$('.line').css('width',flowNumValue/400*100+'%');
+	$('.flow1').bind('click',function(){
+		$("#flow_price_num").val(100);
+		flowNumValue = 100 - 100;
+		$('.line').css('width',flowNumValue/400*100+'%');
+		$('.flow1').addClass('current');
+		$('.flow2').removeClass('current');
+		$('.flow3').removeClass('current');
+		$('.flow4').removeClass('current');
+		$('.flow5').removeClass('current');
+		//$('.flow_num span').removeClass('current');
+	})
+	$('.flow2').bind('click',function(){
+		if(ownoperator == "100"){
+			//移动无200、400
+			window.AnzhiActivitys.showToastForJs("移动暂不支持200M流量兑换");	
+			return false;
+		}
+		if(res_flow < 200) return false;
+		$("#flow_price_num").val(200);
+		flowNumValue = 200 - 100;
+		$('.line').css('width',flowNumValue/400*100+'%');
+		$('.flow1').addClass('current');
+		$('.flow2').addClass('current');
+		$('.flow3').removeClass('current');
+		$('.flow4').removeClass('current');
+		$('.flow5').removeClass('current');
+	})
+	$('.flow3').bind('click',function(){
+		if(ownoperator == "001" || ownoperator == "010" ){
+			//电信、联通无300/400
+			window.AnzhiActivitys.showToastForJs("电信、联通暂不支持300M流量兑换");	
+			return false;
+		}	
+		if(res_flow < 300) return false;
+		$("#flow_price_num").val(300);
+		flowNumValue = 300 - 100;
+		$('.line').css('width',flowNumValue/400*100+'%');
+		$('.flow2').addClass('current');
+		$('.flow3').addClass('current');
+		$('.flow4').removeClass('current');
+		$('.flow5').removeClass('current');
+	})
+	$('.flow4').bind('click',function(){	
+		if(ownoperator == "100" || ownoperator == "001" || ownoperator == "010"){
+			//移动无200、400//电信、联通无300/400
+			window.AnzhiActivitys.showToastForJs("移动、电信、联通暂不支持400M流量兑换");	
+			return false;
+		}	
+		if(res_flow < 400) return false;
+		$("#flow_price_num").val(400);
+		flowNumValue = 400 - 100;
+		$('.line').css('width',flowNumValue/400*100+'%');
+		$('.flow2').addClass('current');
+		$('.flow3').addClass('current');
+		$('.flow4').addClass('current');
+		$('.flow5').removeClass('current');
+	})
+	$('.flow5').bind('click',function(){
+		if(res_flow < 500) return false;
+		$("#flow_price_num").val(500);
+		flowNumValue = 500 - 100;
+		$('.line').css('width',flowNumValue/400*100+'%');
+		$('.flow_num span').addClass('current');
+	})
+})
+</script>

@@ -1,0 +1,320 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/js/fancybox/jquery.fancybox-1.3.4.css" />
+<script type="text/javascript" src="/Public/js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+<script type="text/javascript">
+function delcheckit(ids){
+	var cer = '';
+	if(confirm("你确定要删除该数据吗？")){
+		cer = true;
+	}
+    var ids = String(ids);
+	if(cer == true){
+	$.ajax({
+			url: '__URL__/del_list/ids/'+ids,
+			data: '',
+			type: 'get',
+			success: function(data){
+				if(data == 1){
+					var delids = ids.split(",");
+					cnt = delids.length;
+					for(i=0;i<cnt;i++){
+						$("#tr_"+delids[i]).css("color","gray");
+						$("#delstatus_"+delids[i]).html('<p style="text-decoration:underline;color:gray;">编辑</p>&nbsp;&nbsp;<p style="text-decoration:underline;color:gray;">删除</p>');
+						$("#substatus_"+delids[i]).html("<div style='color:gray;'>已删除</div><br/><a href='__URL__/reback_list/{$srcurl}/id/"+delids[i]+"' style='text-decoration:underline;color:blue;'>撤销删除</a>");
+
+						$("#edittag_"+delids[i]+" a" ).remove();
+						$("#edittag_"+delids[i]).append('<p style="text-decoration:underline;color:gray;">编辑</p>');
+					
+					}
+					alert("删除成功");
+				}else{
+					alert("删除失败");
+				}
+			}
+		});
+	}
+	
+}
+
+function selectAll(obj){
+	checkall = document.getElementsByTagName("input");
+if(obj.checked == true){
+	for (i = 0; i < checkall.length; i++)
+	{
+		if(checkall[i].id == 'all' ) continue;
+		if (checkall[i].type == "checkbox" && checkall[i].disabled == false)
+			checkall[i].checked = true;
+	}
+}else{
+	for (i = 0; i < checkall.length; i++)
+	{
+		if(checkall[i].id == 'all' ) continue;
+		if (checkall[i].type == "checkbox" && checkall[i].disabled == false)
+			checkall[i].checked = false;
+	}
+
+}
+}
+
+function passAll(method){
+	var count = 0;
+	var id = new Array();
+	checkall = document.getElementsByTagName("input");
+	for (i = 0; i < checkall.length; i++)
+	{
+		if(checkall[i].id == 'all' ) continue;
+		if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+		{
+			id[count] = checkall[i].id;
+			count++;
+		}
+	}
+	var ids = id.join(',');
+	if(ids == '') {
+		alert('请选择需要操作的数据');
+		return false;
+	}
+	var url;
+	if(method == 'reonline'){
+		url = "__URL__/"+ method +"/advid/"+ids +'?';
+		tb_show("批量重新上线", url, false);
+	}else if(method == 'over'){
+		var com = ok('您确定要结束所选内容吗？');
+		if(com){
+			location.href = "__URL__/"+ method +"/advid/"+ids;
+		}
+	}else if(method == 'back'){
+		var com = ok('您确定要撤回所选内容到待用素材库吗？撤销以后同一TID的所有内容均被撤回。');
+		if(com){
+			location.href = "__URL__/"+ method +"/advid/"+ids;
+		}
+	}else{
+		alert('页面错误');
+		return false;
+	}
+}
+
+function ok(data)
+{
+   if(confirm(data))
+    return true;
+   else return false
+}
+$(document).ready(function() {
+		$("a.zshowbox").fancybox();
+});
+
+function checksearch(){
+	sval = document.getElementById('start_tm').value;
+	eval = document.getElementById('end_tm').value;
+	if(sval > eval){
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+	return true;
+}
+function addTagN(){
+	var id = new Array();
+	var checkall = document.getElementsByName("checkid[]");
+	var length = checkall.length;
+	for (i = 0; i < length; i++)
+	{
+		if (checkall[i].checked)
+		{
+			id.push(checkall[i].value);
+		}
+	}
+	var ids = id.join(',');
+	if(ids == '') {
+		alert('请选择需要操作的数据');
+		return false;
+	}
+	
+	var url = "/index.php/Zhiyoo/Collectresult/tag_list_show_n/from/data/id/"+ids+"/";
+	tb_show("批量添加标签", url, false);
+
+}
+
+function addTagC(){
+	var id = new Array();
+	var checkall = document.getElementsByName("checkid[]");
+	var length = checkall.length;
+	for (i = 0; i < length; i++)
+	{
+		if (checkall[i].checked)
+		{
+			id.push(checkall[i].value);
+		}
+	}
+	var ids = id.join(',');
+	if(ids == '') {
+		alert('请选择需要操作的数据');
+		return false;
+	}
+	
+	var url = "/index.php/Zhiyoo/Collectresult/tag_list_show_c/from/data/id/"+ids+"/";
+	tb_show("批量添加标签组", url, false);
+
+}
+</script>
+<style>
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+<body>
+
+<div style="margin:20px 10px 20px 6px;">
+<form action="__URL__/result_list/platform/{$_GET['platform']|default='0'}/source/{$_GET['source']}/{$srcurl}/" method="get" class="table_list">
+<table>
+	<tr>
+		<td width="100px">标签：			
+			<a id="searchtag" href="/index.php/Zhiyoo/Collectresult/tag_list_show1{$filterurl}" class="thickbox" style="text-decoration:underline;color:blue;">全部</a>
+			<div id="tagselect" style="display: block;">
+			<?php foreach($searchtag as $group){
+				echo $group['name'].'：';
+				$i=0;
+				foreach($group['tag_arr'] as $tagid ){
+					$i++;$point=' ';if($i==1) $point='';echo $point;
+					if($taglist[$taglist[$tagid]['parentid']]['tagname']) echo $taglist[$taglist[$tagid]['parentid']]['tagname'].'>';
+					echo $taglist[$tagid]['tagname'];
+				}
+			echo '<br/>';
+			}?>
+			</div>
+			<input type="hidden" id="searchtagarr" name="tags" value="{$_GET['tags']}">
+			<input type="hidden" id="searchuniquetag" name="uniquetags" value="{$_GET['uniquetags']}">
+		</td>
+		<td>位置：<select name="position">
+			<option value="0">全部</option>
+			<volist name="position" id="list">
+			<option value="{$list.position}" <?php if($_GET['position']==$list['position'])echo 'selected'; ?>>{$list.positionname}</option>
+			</volist>
+		</select></td>
+		<td>标题：<input type="text" name="title" value="{$_GET['title']}" /></td>
+		<td>TID：<input type="text" name="tid" value="{$_GET['tid']}" /></td>
+	</tr>
+	<tr>
+		<td colspan="3">添入排期表时间：<input id="start_tm" name="start_tm" value="{$_GET['start_tm']}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px" />&nbsp;至&nbsp;<input id="end_tm" name="end_tm" value="{$_GET['end_tm']}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"/></td>
+		<td><input type="submit" onclick="return checksearch()" value="搜索" class="search_btn" /></td>
+	</tr>
+</table>
+</form>
+</div>
+
+<div style="margin:20px 10px 20px 6px;"></div>
+
+<div style="margin:10px;">
+		<a href="__URL__/result_list/platform/0{$filterurl}" class="search_btn" style="display:inline-block;<?php if($_GET['platform']>0) echo 'background:#fff;'?>">全部</a>
+		<volist name="platform_list" id="vo">
+		<a href="__URL__/result_list/platform/{$vo.platform}{$filterurl}" class="search_btn" style="display:inline-block;margin-right:3px;<?php if($vo['platform'] != $_GET['platform']) echo 'background:#fff;'?>">{$vo.platformname}</a> 
+		</volist>
+		<div style="float:right;">
+		<a href="javascript:;" onclick="addTagC()" class="search_btn" style="display:inline-block;width:135px;">批量添加标签组</a>
+		<a href="javascript:;" onclick="addTagN()" class="search_btn" style="display:inline-block;width:135px;margin:10px;">批量添加标签</a>
+		<?php if($_GET['source'] == 'online'): ?>
+			<a href="javascript:;" onclick="passAll('over')" class="search_btn" style="display:inline-block;width:135px;">批量结束</a>
+		<?php elseif ($_GET['source'] == 'outline'): ?>
+			<a href="javascript:;" onclick="passAll('reonline')" class="search_btn" style="display:inline-block;width:135px;">批量重新上线</a>
+		<?php else: ?>
+			<a href="javascript:;" onclick="passAll('back')" class="search_btn" style="display:inline-block;width:135px;">批量撤回待用素材库</a>
+		<?php endif; ?>
+		
+		</div>
+	  </div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th style="width: 30px; "><input type="checkbox" id="all" onclick="selectAll(this)"></th>	
+			<th style="width: 50px; "><a href="__URL__/result_list/type/c.id/order/<?php $order = isset($th['c.id']) ? $th['c.id'] : 'asc';echo $order.$filterurl?>">序号↑↓</a></th>
+			<th style="width: 50px; "><a href="__URL__/result_list/type/s.id/order/<?php $order = isset($th['s.id']) ? $th['s.id'] : 'asc';echo $order.$filterurl?>">排期ID↑↓</a></th>
+			<th style="width: 80px; "><a href="__URL__/result_list/type/c.tid/order/<?php  $order = isset($th['c.tid']) ? $th['c.tid'] : 'asc';echo $order.$filterurl?>">TID↑↓</a></th>
+			<th style="width: 120px;"><a href="__URL__/result_list/type/c.title/order/<?php $order = isset($th['c.title']) ? $th['c.title'] : 'asc';echo $order.$filterurl?>">原文图片/标题↑↓</a></th>
+			<th style="width: 120px;"><a href="__URL__/result_list/type/e.ext_title/order/<?php $order = isset($th['e.ext_title']) ? $th['e.ext_title'] : 'asc';echo $order.$filterurl?>">宣传图片/标题↑↓</a></th>
+			<th >推荐理由</th>
+			<th >显示模式</th>
+			<th style="width: 120px;">标签</th>
+			<!--th ><a href="__URL__/result_list/type/c.author/order/<?php  $order = isset($th['c.author']) ? $th['c.author'] : 'asc';echo $order.$filterurl?>">作者↑↓</a></th>
+			<th style="width: 60px;"><a href="__URL__/result_list/type/c.views/order/<?php  $order = isset($th['c.views']) ? $th['c.views'] : 'desc';echo $order.$filterurl?>">点击量↑↓</a></th>
+			<th style="width: 60px;"><a href="__URL__/result_list/type/c.replies/order/<?php  $order = isset($th['c.replies']) ? $th['c.replies'] : 'desc';echo $order.$filterurl?>">回复量↑↓</a></th-->
+			<th style="width: 90px;"><a href="__URL__/result_list/type/s.addschtime/order/<?php  $order = isset($th['s.addschtime']) ? $th['s.addschtime'] : 'desc';echo $order.$filterurl?>">添入排期表时间↑↓</a></th>
+			<th ><a href="__URL__/result_list/type/e.platform/order/<?php  $order = isset($th['e.platform']) ? $th['e.platform'] : 'desc';echo $order.$filterurl?>">平台↑↓</a></th>
+			<th >位置</th>
+			<th style="width: 90px;"><a href="__URL__/result_list/type/s.starttime/order/<?php  $order = isset($th['s.starttime']) ? $th['s.starttime'] : 'asc';echo $order.$filterurl?>">开始时间↑↓</a></th>
+			<th style="width: 90px;"><a href="__URL__/result_list/type/s.endtime/order/<?php  $order = isset($th['s.endtime']) ? $th['s.endtime'] : 'asc';echo $order.$filterurl?>">结束时间↑↓</a></th>
+			<th style="width: 80px;">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr id="tr_{$val.advid}">
+		<td><input type="checkbox" name="checkid[]" value="{$val.id}" id="{$val.advid}"></td>
+		<td>{$val.id}</td>
+		<td>{$val.advid}</td>
+		<td>{$val.tid}</td>
+		<td><?php if($val['img_path']){ ?><div style="width: 100px; max-height: 80px; overflow: hidden;"><a href="{$val.img_path}" class="zshowbox"><img width="100px" src="{$val.img_path}"/></a></div><?php } ?><a href="http://{$address}/thread-{$val.tid}-1-1.html" target="_blank">{$val.title}</a></td>
+		<td><?php if($val['img_path1']){ ?><div style="width: 100px; max-height: 80px; overflow: hidden;"><a href="{$val.img_path1}" class="zshowbox"><img width="100px" src="{$val.img_path1}"/></a></div><?php }elseif($val['img_path2']){ ?><div style="width: 100px; max-height: 80px; overflow: hidden;"><a href="{$val.img_path2}" class="zshowbox"><img width="100px" src="{$val.img_path2}"/></a></div><?php } ?><a href="http://{$address}/thread-{$val.tid}-1-1.html" target="_blank">{$val.ext_title}</a></td>
+		<td><textarea style="width:95%" rows="10" onkeydown="return false;">{$val.description}</textarea></td>
+		<td><if condition="isset($extpos[$val['extpos']])">
+			{$extpos[$val['extpos']]}<br><br>
+		<else />
+			无<br><br>
+		</if>
+		<a class="thickbox" href="__URL__/change_display_type/eid/{$val.eid}/status/1/" style="color:red">编辑</a>
+		</td>
+		<td id="edittag_{$val.id}">
+		<div id="tdlist_{$val.id}">
+		<?php $tagurl = '';
+			foreach($tag_result[$val['advid']] as $group){
+				$tagurl = $group['tag_url'];
+				echo $group['name'].'：';
+				$i=0;
+				foreach($group['tag_arr'] as $tagid ){
+					$i++;$point=',';if($i==1) $point='';echo $point;
+					if($taglist[$taglist[$tagid]['parentid']]['tagname']) echo $taglist[$taglist[$tagid]['parentid']]['tagname'].'>';
+					echo $taglist[$tagid]['tagname'];
+				}
+			echo '<br/>';
+		}?>
+		<?php 
+		if($tagurl) $tagurl ='tags/'.$tagurl.'/'; 
+		?>
+		</div>
+		<br/>
+		<a id="tdurl_{$val.id}" href="/index.php/Zhiyoo/Collectresult/tag_list_show1/from/data/onlyone/yes/id/{$val.id}/{$tagurl}?" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a></td>
+		<!--td>{$val.author}</td>
+		<td>{$val.views}</td>
+		<td>{$val.replies}</td-->
+		<td><?php echo date('Y/n/d',$val['addschtime']).'<br>'.date('H:i:s',$val['addschtime'])?></td>
+		<td><?php if($val['platform'] == 0)echo '全部';else echo $val['platformname'];?></td>
+		<!-- <td><?php if($val['position'] == 0)echo '全部';else echo $val['positionname'];?></td> -->
+		<td><?php if($val['position'] == 0)echo '全部';elseif($val['platform'] == 3 && $val['position'] == 2)echo '精选';else echo $val['positionname'];?></td>
+		<td><?php echo $val['starttime'] == 0 ? '' : date('Y/n/d',$val['starttime']).'<br>'.date('H:i:s',$val['starttime'])?><br><a href="__URL__/reonline/advid/{$val.advid}/" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a></td>
+		<td><?php echo $val['endtime'] == 0 ? '' :date('Y/n/d',$val['endtime']).'<br>'.date('H:i:s',$val['endtime'])?><br><a href="__URL__/reonline/advid/{$val.advid}/" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a></td>
+		<td id="delstatus_{$val.id}">
+		<p><a href="<?php echo BBSLUNTAN_HOST;echo '&anzhirefersalt='.$bbs_model->anzhiauthkey($val['tid']); ?>&fid={$val.fid}&tid={$val.tid}&pid={$val.pid}" style="text-decoration:underline;color:blue;" target="_blank">编辑内容</a>|</p>
+		<p><a href="/index.php/Zhiyoo/Collectresult/edit_content/from/schedule/source/{$_GET['source']|default='waiton'}/advid/{$val.advid}/id/{$val.id}/platform/{$_GET['platform']}" style="text-decoration:underline;color:blue;">编辑</a>|<br/>
+		<?php if($_GET['source'] == 'online'): ?>
+			<a href="__URL__/over/advid/{$val.advid}" style="text-decoration:underline;color:blue;">结束</a>
+		<?php elseif($_GET['source'] == 'outline'): ?>
+			<a href="__URL__/reonline/advid/{$val.advid}/" class="thickbox" style="text-decoration:underline;color:blue;">重新上线</a>
+		<?php else: ?>
+			<a href="__URL__/back/advid/{$val.advid}" onclick="return ok('您确定要撤回同一TID的所有内容到待用素材库吗？');" style="text-decoration:underline;color:blue;">撤回素材库</a>|<br/>
+			<a href="__URL__/back_one/advid/{$val.advid}" onclick="return ok('您确定要撤回该内容到待用素材库吗？');" style="text-decoration:underline;color:blue;">仅删除本条内容</a>|<br/>
+		<?php endif; ?></p>
+		<?php if($_GET['source'] != 'outline'): ?>
+			<p><a href="__URL__/copy/advid/{$val.advid}/" class="thickbox" style="text-decoration:underline;color:blue;">复制内容</a></p>
+		<?php endif; ?>
+		</td>
+	</tr>
+	<?php } ?>
+</table>
+
+<div class="navgition">
+	{$page|default='&nbsp;'}
+</div>
+</body>
+</html>

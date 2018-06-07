@@ -1,0 +1,61 @@
+<include file="../../Public/header"/>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script>
+function checkit()
+{
+    if(confirm("确认执行此操作？"))
+    {
+        return true;
+    }
+    return false;
+}
+</script>
+<body>
+<div style="margin:20px;width:750px;float:left;">
+<form action="__URL__/rate_list" method="get">
+<span>刊例名称：<input type="text" name="rate_name" value="{$rate_name}" /></span>
+<span style="margin-left:20px;">录入时间：<input id="begintime" name="start_tm" value="{$start}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:18px">
+<span style="margin-left:10px;">至：</span><input id="endtime" name="end_tm" value="{$end}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:18px"></span>
+<span style="float:right;"><input type="submit" value="搜索" class="search_btn" /></span>
+</form>
+</div>
+<div style="margin:30px;width:300px;float:left;">
+<span><a href="__URL__/upload_model/id/example">下载刊例价格模板</span>
+<span style="margin-left:30px;"><a href="__URL__/add_rate_show?mm" class="thickbox">上传刊例价格表</a></span>
+</div>
+<div class="clear"></div>
+<div style="margin:20px;">
+<table width="90%" border="1" cellspacing="0" cellpadding="0" class="table_list">
+	<thead>
+	<tr>
+		<th>刊例名称</th>
+		<th>录入时间</th>
+		<th>最近一次编辑时间</th>
+		<th>备注</th>
+		<th>操作</th>
+	</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr>
+		<td><a href="__URL__/rate_card_list/id/{$val.id}">{$val.rate_name}</a></td>
+		<td><?php echo date('Y年m月d日 H:i:s',$val['create_tm']); ?></td>
+		<td><?php echo date('Y年m月d日 H:i:s',$val['update_tm']); ?></td>
+		<td>{$val.comment}</td>
+		<td><?php if($val['is_rate'] == 1 && $val['status'] == 1){ ?>默认刊例价格<?php }elseif($val['status'] == 1 && $val['is_rate'] == 2){ ?><a href="__URL__/change_rate/id/{$val.id}<?php if($rate_name){ ?>/rate_name/{$rate_name}/p/{$p}/lr/{$lr}<?php } ?><?php if($start){ ?>/start/{$start}<?php }?><?php if($end){ ?>/end/{$end}<?php }?>">设为默认刊例价格</a><?php } elseif($val['status'] == 2 && $val['is_rate'] == 2){ ?>设为默认刊例价格<?php } ?>&nbsp;&nbsp;
+		<a href="__URL__/upload_model/id/{$val.id}">下载</a>&nbsp;&nbsp;
+		<a href="__URL__/edit_rate_show/id/{$val.id}/p/{$p}/lr/{$lr}<?php if($rate_name){ ?>/rate_name/{$rate_name}<?php } ?><?php if($start){ ?>/start/{$start}<?php }?><?php if($end){ ?>/end/{$end}<?php }?>?mm" class="thickbox">编辑</a>&nbsp;&nbsp;
+		<?php if($val['is_rate'] == 1 && $val['status'] == 1){ ?>停用&nbsp;&nbsp;删除
+		<?php }elseif($val['status'] == 1 && $val['is_rate'] == 2){ ?><a href="__URL__/change_status/id/{$val.id}/status/2/p/{$p}/lr/{$lr}<?php if($rate_name){ ?>/rate_name/{$rate_name}<?php } ?><?php if($start){ ?>/start/{$start}<?php }?><?php if($end){ ?>/end/{$end}<?php }?>" >停用</a>&nbsp;&nbsp;<a href="__URL__/change_status/id/{$val.id}/status/0/p/{$p}/lr/{$lr}<?php if($rate_name){ ?>/rate_name/{$rate_name}<?php } ?><?php if($start){ ?>/start/{$start}<?php }?><?php if($end){ ?>/end/{$end}<?php }?>" onclick="return checkit();">删除</a>
+		<?php }elseif($val['status'] == 2 && $val['is_rate'] == 2){ ?><a href="__URL__/change_status/id/{$val.id}/status/1/p/{$p}/lr/{$lr}<?php if($rate_name){ ?>/rate_name/{$rate_name}<?php } ?><?php if($start){ ?>/start/{$start}<?php }?><?php if($end){ ?>/end/{$end}<?php }?>" >启用</a>&nbsp;&nbsp;<a href="__URL__/change_status/id/{$val.id}/status/0/p/{$p}/lr/{$lr}<?php if($rate_name){ ?>/rate_name/{$rate_name}<?php } ?><?php if($start){ ?>/start/{$start}<?php }?><?php if($end){ ?>/end/{$end}<?php }?>" onclick="return checkit();">删除</a><?php } ?></td>
+	</tr>
+	<?php } ?>
+</table>
+</div>
+<div style="margin:20px;">
+{$page}
+</div>
+</body>
+</html>

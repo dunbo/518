@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>玩转球球 奖上有奖</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/<!--{$out.prefix}-->/css/common.css?v2"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="http://img4.anzhi.com/static/public/js/activity_public3.js?v4"></script>
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+<script type="text/javascript">
+	$(function(){
+		<!--{if $out['is_has_rad'] == 1}-->
+		var rand_number_json = '<!--{$out.rand_number_json}-->';
+		var rand_number_arr = eval(rand_number_json);
+		if(rand_number_arr.length==7){
+				var str ='<div class="ball_info"><ul style="float:left;" class="select_ball_red"><li>'+rand_number_arr[0]+'</li><li>'+rand_number_arr[1]+'</li><li>'+rand_number_arr[2]+'</li>'
+				+'<li>'+rand_number_arr[3]+'</li><li>'+rand_number_arr[4]+'</li><li>'+rand_number_arr[5]+'</li></ul><ul style="float: left;" class="select_ball_blue">'
+				+'<li>'+rand_number_arr[6]+'</li></ul><div class="ball_control">'+
+				'<span class="reduce_btn"></span><em class="btns ball_control_num">1</em><span class="add_btn"></span></div>'
+				+'<div class="clear"></div></div>'
+				$('.ball_info_wrap').append(str);
+		}
+		<!--{/if}-->
+		function randomNum(n,min,max){
+			var arr =[];
+			for(var i=0; i<n; i++){
+				arr[i]=Math.round(Math.random()*(max-min)+min);
+				for(var j =0; j<i; j++){
+					if(arr[i]==arr[j]){
+						i = i-1;
+					}
+				}
+			}
+			return arr;
+		}
+		$('.begin').on('click',function(){
+			var ballAddNum = $('.ball_info_wrap .ball_info').length;
+			if(ballAddNum<20){
+				var autoArr = randomNum(6,1,33);
+				var autoNum = randomNum(1,1,16);
+				var str ='<div class="ball_info"><ul style="float:left;" class="select_ball_red"><li>'+autoArr[0]+'</li><li>'+autoArr[1]+'</li><li>'+autoArr[2]+'</li>'
+				+'<li>'+autoArr[3]+'</li><li>'+autoArr[4]+'</li><li>'+autoArr[5]+'</li></ul><ul style="float: left;" class="select_ball_blue">'
+				+'<li>'+autoNum[0]+'</li></ul><div class="ball_control">'+
+				'<span class="reduce_btn"></span><em class="btns ball_control_num">1</em><span class="add_btn"></span></div>'
+				+'<div class="clear"></div></div>'
+				$('.ball_info_wrap').append(str);
+				
+			}
+			numControl();
+			$('.select_no').css('display','none');
+			
+		})
+		$('.clean').on('click',function(){
+			$('.ball_info_wrap').html('');
+			$('.select_no').css('display','block');
+			$('#show_azb').html('0安智币');
+		})
+		
+		$('.refresh').on('click',function(){
+			var refreshArr =[];
+			var refreshArr2 = [];
+			var ballWrapNum = $('.ball_info_wrap .ball_info').length;
+			if(ballWrapNum==0){
+				return;
+			}
+			for(var i = 0; i<ballWrapNum; i++){
+				var autoRedArr = randomNum(6,1,33);
+				var autoBlueArr = randomNum(1,1,16);
+				refreshArr.push(autoRedArr);
+				refreshArr2.push(autoBlueArr[0]);
+			}
+			for(var i =0; i<refreshArr.length; i++){
+				for(var j =0; j<refreshArr[i].length; j++){
+					$('.ball_info_wrap .select_ball_red').eq(i).find('li').eq(j).html(refreshArr[i][j]);
+				}
+			}
+			for(var i =0; i<refreshArr2.length; i++){
+				$('.ball_info_wrap .select_ball_blue').eq(i).find('li').eq(0).html(refreshArr2[i]);
+			}
+		})
+		numControl();
+		function numControl(){
+			show_azb();
+			var nowcalue = 0;
+			$('.add_btn').off('click').on('click',function(){
+				nowValue =  $(this).siblings('.ball_control_num').html();
+				nowValue++;
+				$(this).siblings('.ball_control_num').html(nowValue);
+							show_azb();
+			});
+			$('.reduce_btn').off('click').on('click',function(){
+				nowValue =  $(this).siblings('.ball_control_num').html();
+				nowValue--;
+				if(nowValue<=0){
+					nowValue = 0
+				}
+				$(this).siblings('.ball_control_num').html(nowValue);
+				show_azb();
+			})
+		}	
+	})
+</script>
+
+</head>
+<body>
+<div class="main" style="padding-bottom: 0;">
+	<div class="banner">
+		<img src="<!--{$out.new_static_url}-->/<!--{$out.prefix}-->/images/banner3.png"/>
+	</div>
+	<div class="tab_title tab_title2">
+		<ul>
+			<li class="current"><a href="javascript:;">机选</a></li>
+			<li><a href="/lottery/double_color_ball/buy.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->&page=user">自选</a></li>
+		</ul>
+	</div>
+	<div class="select_bg1">
+		<div class="ball_select" style="margin-bottom: 0.2rem;">
+			<img src="<!--{$out.new_static_url}-->/<!--{$out.prefix}-->/images/ball_body2.png" />
+			<a href="javascript:;" class="begin">立即投注</a>
+			<a href="javascript:;" class="refresh">刷新</a>
+			<a href="javascript:;" class="clean">清空</a>
+			<span class="absolute_bg1"></span>
+		</div>
+		<div class="ball_info_wrap">
+		</div>
+		<p class="center select_no" style="display: none">暂无号码</p>
+		<p class="prompt_02">合计：<span id="show_azb">0安智币</span></p>
+		<a href="javascript:;" class="btns2 btns_submit" onclick="confirmorder()">确认投注</a>
+	</div>
+</div>
+<!--{include file="../tpl/lottery/double_color_ball/tips.html"}-->
+</body>
+</html>

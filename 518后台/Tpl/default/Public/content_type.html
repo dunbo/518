@@ -1,0 +1,2424 @@
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+
+<script>
+
+	//获取function_from代表的是那个模块调用的 1、只有灵活运营页面的时候添加运营标识
+	//2、只有定制推送选择软件的时候不显示低版本、未安装、已安装	 全局变量
+	var function_from="{$function_from}";
+	//判断是否来自灵活运营多排
+	var extent_type="{$extent_type}";
+	//获取key
+	var key_value="";
+    // 页面框架加载完后马上执行
+    $(function() {
+		var enabled_content_type = "{$enabled_content_type}";
+		var enabled_content_type_arr = enabled_content_type.split(',');
+        options = {
+            serviceUrl:'/index.php/ContentType/showActivity',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+            }
+        };
+        $('#pubpro_activity_name').autocomplete(options);
+        options = {
+                serviceUrl:'/index.php/ContentType/pub_showGame',
+                minChars:1,
+                width: '300px',
+                deferRequestBy: 0,
+                onSelect: function(value, data){
+                }
+            };
+        $('#pubpro_game_name').autocomplete(options);
+		//v6.4预约添加
+		options = {
+            serviceUrl:'/index.php/ContentType/showOrder',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+            }
+        };
+        $('#pubpro_order_name').autocomplete(options);
+		
+        pid = $("#ppid").val();
+        options = {
+            serviceUrl:'/index.php/ContentType/showFeature/pid/'+pid,
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+            }
+        };
+        $('#pubpro_feature_name').autocomplete(options);
+
+        options = {
+            serviceUrl:'/index.php/ContentType/showCategoryPage/function_from/'+function_from +'/extent_type/'+extent_type,
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value,data){
+				var is_json_string;
+				try{
+					var data = eval(data);//说明传来的是json参数
+					is_json_string=1;
+				}catch(e){
+					is_json_string=2;
+				}
+				if(is_json_string==1)
+				{
+					for(i in data)
+					{
+						var post_name=i;
+						var show_name=data[i][0];
+						var is_have = $("#pubpro_tr_"+post_name+"_show").get(0);
+						if(is_have==undefined)
+						{
+							$('#multi_param tr').css('display','none');//之前已经存在的不显示
+							if(data[i][1]==1)//说明是input类型
+							{
+								//显示一个input
+								str="<tr class='sub_tr' id='pubpro_tr_"+post_name+"_show'> <td>"+show_name+"：</td><td><input name='"+post_name+"' id='"+post_name+"' type='text' value='' /></td><td></td></tr>";
+							}
+							else if(data[i][1]==2) //说明是select类型
+							{
+								data[i][2] = eval(data[i][2]);
+								var option_str="";
+								for(j in data[i][2])
+								{
+									option_str +="<option value='"+j+"'>"+data[i][2][j]+"</option>";
+								}
+								str="<tr class='sub_tr' id='pubpro_tr_"+post_name+"_show'> <td>"+show_name+"：</td><td><select name='"+post_name+"' id='"+post_name+"' >"+option_str+"</select></td><td></td></tr>";
+							}
+							//$('#operate_mark_show').closest('tr').before(str);
+							$('#multi_param').append(str);
+						}
+						else
+						{
+							$('#multi_param tr').css('display','');
+						}
+					}
+				}
+				else
+				{
+					$('#multi_param tr').css('display','none');
+				}
+				if(value=='个人中心' && function_from=="ExPromotion")
+				{
+					document.getElementById("pubpro_tr_person_center_show").style.display="";
+				}
+				else
+				{
+					document.getElementById("pubpro_tr_person_center_show").style.display="none";
+				}
+				if(value=='论坛详情页')
+				{
+					document.getElementById("pubpro_tr_bbs_detail_show").style.display="";
+				}
+				else
+				{
+					document.getElementById("pubpro_tr_bbs_detail_show").style.display="none";
+				}
+				//v6.3所有跳转都可以选择活动列表
+				if(value=='活动列表') //现在是文字快捷入口的推荐内容活动列表展示有  所有的
+				{
+					document.getElementById("pubpro_tr_activity_category_show").style.display="";
+					var activity_category_show_val=$('[name="activity_category_show"]:checked').val();
+					if(activity_category_show ==1)
+					$(".activity_tab_index").show();
+				}
+				else
+				{
+					document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+					$(".activity_tab_index").hide();
+				}
+				if(value=="每日抽奖（兑吧）")
+				{
+					document.getElementById("pubpro_tr_exchange_url_show").style.display="";
+				}
+				else
+				{
+					document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+				}
+				if(value=="内容合作")
+				{
+					document.getElementById("pubpro_tr_content_coop").style.display="";
+					document.getElementById("coop_choose_channel_list").style.display=""; //默认是频道列表
+					document.getElementById("coop_pos").style.display=""; //默认位置是全部
+					if(function_from=='content_cooperation'){
+						$("#coop_category").attr('atl2',1);
+					}
+					show_coop_pos(1);
+				}
+				else
+				{
+					document.getElementById("pubpro_tr_content_coop").style.display="none";
+					document.getElementById("pubpro_tr_coop_choose_show").style.display="none";
+					document.getElementById("coop_choose_channel_list").style.display="none";
+					document.getElementById("coop_choose_label_list").style.display="none";
+					document.getElementById("coop_pos").style.display="none";
+				}
+				//6.5需求
+				if(value=='红包任务列表') {
+					document.getElementById("pubpro_tr_red_task_category_show").style.display="";
+				}else {
+					document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+				}
+            }
+        };
+        $('#pubpro_page_name1').autocomplete(options);
+        
+		//除了普通，标签、常用标签和自定义都是不带参数的。所以出现参数的展现都默认隐藏。
+        // 标签类型
+        options = {
+            serviceUrl:'/index.php/ContentType/showTagPage',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+				$('#multi_param tr').css('display','none');
+				document.getElementById("pubpro_tr_person_center_show").style.display="none";
+				document.getElementById("pubpro_tr_bbs_detail_show").style.display="none";
+				document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+				document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+				document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+            }
+        };
+        $('#pubpro_page_name2').autocomplete(options);
+        
+        // 常用标签类型
+        options = {
+            serviceUrl:'/index.php/ContentType/showCommonTagPage',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+				$('#multi_param tr').css('display','none');
+				document.getElementById("pubpro_tr_person_center_show").style.display="none";
+				document.getElementById("pubpro_tr_bbs_detail_show").style.display="none";
+				document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+				document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+				document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+            }
+        };
+        $('#pubpro_page_name3').autocomplete(options);
+        
+        // 自定义列表类型
+        options = {
+            serviceUrl:'/index.php/ContentType/showCustomList',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+				$('#multi_param tr').css('display','none');
+				document.getElementById("pubpro_tr_person_center_show").style.display="none";
+				document.getElementById("pubpro_tr_bbs_detail_show").style.display="none";
+				document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+				document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+				document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+            }
+        };
+        $('#pubpro_page_name4').autocomplete(options);
+
+        // 自定义频道列表类型
+        options = {
+            serviceUrl:'/index.php/ContentType/showChannelList',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+				$('#multi_param tr').css('display','none');
+				document.getElementById("pubpro_tr_person_center_show").style.display="none";
+				document.getElementById("pubpro_tr_bbs_detail_show").style.display="none";
+				document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+				document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+				document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+            }
+        };
+        $('#pubpro_page_name10').autocomplete(options);
+
+        
+		//V6.4详情页根据标题选择
+		// 详情标题
+        options = {
+            serviceUrl:'/index.php/ContentType/DetailTitleName/id/2', //默认是从站点2开始
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+				var str_span="<div>"+data+"</div>";
+				$("#pubpro_tr_coop_choose_show").find("td div").remove();
+				$("#pubpro_tr_coop_choose_show").find("td").last().append(str_span);
+            }
+        };
+        $('#coop_detail_url3').autocomplete(options);
+		
+		//6.4文字链的时候，选择页面-内容合作-详情页才可以按照标签选择，其他的只能按照标题
+		if(function_from == "textpage")
+		{
+			$("#coop_detail_type option[value='2']").css("display","");
+		}
+		else
+		{
+			$("#coop_detail_type option[value='2']").css("display","none");
+		}
+		
+		if(function_from =="custom_push")
+		{           
+			$("#pubpro_tr_package tr:gt(2)").css("display","none");
+		}
+		//v6.4未安装和低版本的"不进软件详情-自动下载"   在定制推送和返回运营才显示
+		if(function_from =="custom_push"||function_from =="returnback")
+		{
+			$("#no_detail_show_uninstall").css("display","inline-block");
+			$("#no_detail_low").css("display","inline-block");
+		}
+        // 根据用户的配置去动态生成内容类型
+        
+        if (enabled_content_type_arr.length <= 1) {
+            $("#pubpro_content_type").attr("disabled", "disabled");
+        }
+		
+		//V6.4.1 手机清理 软件只选择腾讯手机管家、页面只选择手机清理
+		if(function_from=="phone_cleaning")
+		{
+			$("#apply_pkg").val("com.tencent.qqpimsecure");
+			$("#apply_pkg").attr("disabled","disabled");
+			$("#pubpro_general_page_type").attr("disabled","disabled");
+			$("#my_game").val("腾讯手机管家");
+			$("#pubpro_page_name1").val("手机清理");
+			$("#pubpro_page_name1").attr("disabled","disabled");
+		}
+		//V6.4.1 频道灵活运营——普通——5种类型可配置，新锐游戏/新服列表/活动列表/预约列表/红包助手
+		if(function_from=="content_cooperation")
+		{
+			$("#pubpro_general_page_type").val("1");
+			$("#pubpro_general_page_type").attr("disabled","disabled");
+			$("#pubpro_website_open_type").val("1");
+			$("#pubpro_website_open_type").attr("disabled","disabled");
+			$("#coop_category").val("1");
+			$("#coop_category").attr("disabled","disabled");
+			$("#coop_pos").val("1");
+			$("#coop_pos").attr("disabled","disabled");
+			$("input[name='screen_show'][value='4']").attr('disabled',true);
+			// coop_choose_channel_list  
+			// $("#soft_name").val("腾讯手机管家");
+			// $("#pubpro_page_name1").val("手机清理");
+			// $("#pubpro_page_name1").attr("disabled","disabled");
+		}else{
+			$("input[name='screen_show'][value='4']").attr('disabled',false);
+		}
+		var i;
+		if(function_from=="push")
+		{
+			if(enabled_content_type_arr==4)//编辑
+			{
+				var value = enabled_content_type_arr;
+				pubpro_content_type_select(enabled_content_type_arr);
+				$("#pubpro_content_type").append('<option selected disabled=true value="' + value + '">' + content_type_arr[value] + '</option>');
+			}else{
+				//添加
+				for (i in enabled_content_type_arr) {
+					var value = enabled_content_type_arr[i];
+					if(value==4)//显示的是页面
+					{
+						pubpro_content_type_select(enabled_content_type_arr[i]);
+						$("#pubpro_content_type").append('<option selected disabled=true value="' + value + '">' + content_type_arr[value] + '</option>');
+						return;
+					}
+				}
+			}
+		}else{
+			for (i in enabled_content_type_arr) {
+				var value = enabled_content_type_arr[i];
+				$("#pubpro_content_type").append('<option value="' + value + '">' + content_type_arr[value] + '</option>');
+			}
+		}
+        for (i in enabled_content_type_arr) {
+            pubpro_content_type_select(enabled_content_type_arr[i]);
+            break;
+        }
+		//V6.4 文字链选择关联默认页面-普通-内容合作-详情页
+		var is_auto_connect = $("input[name='auto_connect']").is(':checked');
+		if(function_from=="textpage"&&is_auto_connect)
+		{
+			$("#pubpro_general_page_type option[value='1']").attr("selected",true); //选择普通
+			$("#pubpro_general_page_type").attr("disabled",true);
+			$("#pubpro_page_name1").val("内容合作");
+			$("#pubpro_page_name1").attr("readonly",true);
+			$("#coop_category option[value='3']").attr("selected",true); //详情页
+			$("#coop_category").attr("disabled",true);
+			show_coop_category(3);
+			show_detail_content(1);
+			document.getElementById("pubpro_tr_coop_choose_show").style.display="";
+			document.getElementById("pubpro_tr_content_coop").style.display="";
+		}
+        
+        // 如果是编辑，默认填充指定值
+        var content_arr = {$content_arr};
+        // 先将数组内的值全部decodeURIComponent
+        for (var key in content_arr) {
+            content_arr[key] = decodeURIComponent(content_arr[key]);
+        }
+        var content_type = content_arr['content_type'];
+        if (!content_type)
+            return;
+        $("#pubpro_content_type option[value='" + content_type + "']").attr("selected",true);
+        pubpro_content_type_select(content_type);
+        
+        if (content_type == 1) {
+            var package = content_arr['package'];
+            $("#apply_pkg").val(package);
+            get_softname();
+            // 跳转配置
+            var uninstall_setting = content_arr['uninstall_setting'];
+            $("input[name='pubpro_uninstall_setting'][value='" + uninstall_setting + "'").attr("checked",true);
+            var install_setting = content_arr['install_setting'];
+            $("input[name='pubpro_install_setting'][value='" + install_setting + "'").attr("checked",true);
+            if (install_setting == 4) {
+                var start_to_page = content_arr['start_to_page'];
+                $("#pubpro_start_to_page").val(start_to_page);
+            }
+            var lowversion_setting = content_arr['lowversion_setting'];
+            $("input[name='pubpro_lowversion_setting'][value='" + lowversion_setting + "'").attr("checked",true);
+			if(content_arr['parameter_field']&&content_arr['parameter_field']!='null') 
+			{
+				var param_arr = eval('('+content_arr['parameter_field']+')');
+				if(param_arr['recommend_behavior_id'])
+				{
+					$("#pubpro_recommend_behavior_id").val(param_arr['recommend_behavior_id']);
+				}
+			}
+        } else if (content_type == 2) {
+            var activity_id = content_arr['activity_id'];
+            // 将activity_id转成activity_name
+            var activity_name = convertActivityId2ActivityName(activity_id);
+            $("#pubpro_activity_name").val(activity_name);
+        } else if (content_type == 3) {
+            var feature_id = content_arr['feature_id'];
+            // 将feature_id转成feature_name
+            var feature_name = convertFeatureId2FeatureName(feature_id);
+            $("#pubpro_feature_name").val(feature_name);
+        } else if (content_type == 4) {
+            // 获得页面类型
+            var page_type = content_arr['page_type'];
+            // 获得页面分类
+            var general_page_type = getGeneralPageType(page_type);
+            $("#pubpro_general_page_type option[value='" + general_page_type + "']").attr("selected",true);
+            pubpro_general_page_type_select(general_page_type);
+            // 获得页面名称
+            var page_name = convertPageType2PageName(page_type);
+            $("#pubpro_page_name" + general_page_type).val(page_name);
+			
+			//如果是灵活运营 获得运营标识
+			if(content_arr['operate_mark'])
+			{
+				var operate_mark = content_arr['operate_mark'];
+				$("#operate_mark option[value='" + operate_mark + "']").attr("selected",true);
+				if(operate_mark==30)
+				{
+					$("#custom_operate_mark_div").css("display","");
+					if(content_arr['custom_mark']=="null")
+					{
+						$("#custom_operate_mark").val();
+					}
+					else
+					{
+						$("#custom_operate_mark").val(content_arr['custom_mark']);
+					}
+				}
+			}
+			//如果个人中心 会有是否弹出随机礼包选项
+			if(function_from=='ExPromotion')
+			{
+				if(page_type=='fixed_personal_center')
+				{
+					if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+					{
+						var param_arr = eval('('+content_arr['parameter_field']+')');
+						if(param_arr['is_pop_random_packs'])
+						{
+							$('#pubpro_tr_person_center_show').css('display','');
+							var is_pop_random_packs = param_arr['is_pop_random_packs'];
+							$("#is_pop_random_packs[value='" + is_pop_random_packs + "']").attr("checked",true);
+						}
+					}
+				}
+			}
+			//如果活动列表 会有选择显示 全部或者游戏或者应用  修改为所有跳转
+			//if(function_from=='textquick')
+			//{
+				if(page_type=='otherfixed_activity_list')
+				{
+					if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+					{
+						var param_arr = eval('('+content_arr['parameter_field']+')');
+						//if(param_arr['activity_category_show'])
+						//{
+							$('#pubpro_tr_activity_category_show').css('display','');
+							var activity_category_show = param_arr['activity_category_show'];
+							$("#activity_category_show[value='" + activity_category_show + "']").attr("checked",true);
+							if(activity_category_show==1){
+								$(".activity_tab_index").show();
+								var tab_index = param_arr['tab_index'];
+								$("input[name='tab_index'][value='" + tab_index + "']").attr("checked",true);
+							}
+						//}
+					}
+				}
+			//}
+			//6.5
+			if(page_type=='fixed_red_packet_task_list')
+			{
+				if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+				{
+					var param_arr = eval('('+content_arr['parameter_field']+')');
+					//if(param_arr['TAB_INDEX'])
+					//{
+						$('#pubpro_tr_red_task_category_show').css('display','');
+						var red_task_category_show = param_arr['TAB_INDEX'];
+						$("#red_task_category_show[value='" + red_task_category_show + "']").attr("checked",true);
+					//}
+				}
+			}
+			
+			//论坛详情页TID
+			if(page_type.indexOf('bbs_detailpage_')==0)
+			{
+				var str_arr = new Array();
+				str_arr = page_type.split('_');
+				$('#pubpro_tr_bbs_detail_show').css('display','');
+				$("#bbs_detail_page_id").val(str_arr[2]);
+			}
+			//内容合作展示
+			if(page_type.indexOf('fixed_content_coop_')==0)
+			{
+				var str_arr = new Array();
+				str_arr = page_type.split('_');
+				$('#pubpro_tr_content_coop').css('display','');
+				$("#coop_category option[value='" + str_arr[3] + "']").attr("selected",true);
+		
+				if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+				{
+					var param_arr = eval('('+content_arr['parameter_field']+')');
+					$('#coop_pos').css('display','');
+					$('#pubpro_tr_coop_choose_show').css('display','');
+					var coop_site_id =parseInt(param_arr['coop_site_id']);
+					$("#coop_pos option[value='" + coop_site_id + "']").attr("selected",true);
+					if(str_arr[3]==3)//详情页
+					{
+						$('#coop_detail_type').css('display','');
+						$('#coop_choose_channel_list').css('display','none');
+						$('#coop_choose_label_list').css('display','none');
+						$("#coop_pos option:eq(0)").css("display","none");
+						
+						//V6.4文字链 勾选自动关联
+						if(function_from=="textpage"&&content_arr['is_auto_connect']==1)
+						{
+							$("#pubpro_general_page_type").attr("disabled",true);
+							$("#pubpro_page_name1").attr("readonly",true);
+							$("#coop_category").attr("disabled",true);
+						}
+		
+						if(param_arr['coop_detail_url'])//按照标题
+						{
+							$("#coop_detail_type option[value='1']").attr("selected",true);
+							$('#coop_detail_url3').css('display','');
+							$('#coop_detail_label_list').css('display','none');
+							$('#coop_detail_pos3').css('display','none');
+							var coop_detail_title = detailurl2title(param_arr['coop_detail_url']);
+							var coop_detail_url_id = param_arr['coop_detail_url_id'];
+							var coop_content_id_new = param_arr['coop_content_id_new'];
+							$("#coop_detail_url3").val(coop_detail_url_id+":"+coop_content_id_new+":"+coop_detail_title);
+							//V6.4详情页根据标题选择
+							options = {
+								serviceUrl:'/index.php/ContentType/DetailTitleName/id/'+coop_site_id,
+								minChars:1,
+								width: '300px',
+								deferRequestBy: 0,
+								onSelect: function(value, data){
+								}
+							};
+							$('#coop_detail_url3').autocomplete(options);
+						}
+						if(param_arr['coop_detail_label_id'])//按照标签
+						{
+							$("#coop_detail_type option[value='2']").attr("selected",true);
+							$('#coop_detail_url3').css('display','none');
+							$('#coop_detail_label_list').css('display','');
+							$('#coop_detail_pos3').css('display','');
+							show_coop_pos(coop_site_id);
+							var coop_detail_label_id = param_arr['coop_detail_label_id'];
+							$("#coop_detail_label_list option[value='" + coop_detail_label_id + "']").attr("selected",true);
+							$("#coop_detail_pos3").val(param_arr['coop_detail_pos']);
+						}
+					}
+					else
+					{
+						$('#coop_detail_url3').css('display','none');
+						if(function_from=='content_cooperation'){
+							$("#coop_category").attr('atl2',1);
+						}
+						show_coop_pos(coop_site_id);
+						if(str_arr[3]==1)
+						{
+							$("#coop_choose_channel_list option[value='" + param_arr['coop_channel_tag_id'] + "']").attr("selected",true);
+							$('#coop_choose_channel_list').css('display','');
+						}
+						else
+						{
+							$("#coop_choose_label_list option[value='" + param_arr['coop_channel_tag_id'] + "']").attr("selected",true);
+							$('#coop_choose_label_list').css('display','');
+							$("#coop_pos option:eq(0)").css("display","none");
+						}
+					}
+				}
+			}
+			//每日抽奖（兑吧） 增加地址
+			if(page_type=='otherfixed_daily_lottery_exchange')
+			{
+				if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+				{
+					var param_arr = eval('('+content_arr['parameter_field']+')');
+					if(param_arr['exchange_url'])
+					{
+						$('#pubpro_tr_exchange_url_show').css('display','');
+						var exchange_url_val = param_arr['exchange_url'];
+						$("#pubpro_tr_exchange_url_show #exchange_url").val(exchange_url_val);
+					}
+				}
+			}
+			//动态显示  parameter_field字段的值
+			//根据配置获取是否显示参数并将带参数的返给下一层
+			var new_page_name = convertPageType2PageName(page_type,'js');
+			//返回的值有的是  汉字  有的是json字符串
+			var is_json;
+			try{
+				var con = eval("("+new_page_name+")");//说明传来的是json参数
+				is_json=1;
+			}catch(e){
+				is_json=2;
+			}
+			if(is_json==1)
+			{
+				var arr_page_name = con[0];
+				var config_param_arr = eval(con[1]);
+				for(m in config_param_arr)
+				{						
+					if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+					{
+						var param_arr=eval('('+content_arr['parameter_field']+')'); 
+						//if(param_arr[m])  带参数的可以为非必填项 所以可以显示为空
+						//{
+							if(config_param_arr[m][1]==1)//input的值
+							{
+								//显示一个input
+								str="<tr class='sub_tr' id='pubpro_tr_"+m+"_show'> <td>"+config_param_arr[m][0]+"：</td><td><input name='"+m+"' id='"+m+"' type='text' value='"+param_arr[m]+"' /></td><td></td></tr>";
+							}
+							else if(config_param_arr[m][1]==2)//select的值
+							{
+								var option_str="";
+								for(j in config_param_arr[m][2])
+								{
+									if(j==param_arr[m])
+									{
+										option_str +="<option value='"+j+"' selected>"+config_param_arr[m][2][j]+"</option>";
+									}
+									else
+									{
+										option_str +="<option value='"+j+"'>"+config_param_arr[m][2][j]+"</option>";
+									}
+								}
+								str="<tr class='sub_tr' id='pubpro_tr_"+m+"_show'> <td>"+config_param_arr[m][0]+"：</td><td><select name='"+m+"' id='"+m+"' >"+option_str+"</select></td><td></td></tr>";
+							}
+							//$('#operate_mark_show').closest('tr').before(str);
+							$('#multi_param').append(str);
+						//}
+					}
+				}
+			}
+			else
+			{
+				$('#multi_param tr').css('display','none');
+			}
+        } else if (content_type == 5) {
+            var website = content_arr['website'];
+            $("#pubpro_website").val(website);
+            var website_open_type = content_arr['website_open_type'];
+			if(website_open_type==1){
+				$(".sync_a").css('display','');
+			}else{
+				$(".sync_a").css('display','none');
+			}
+            $("#pubpro_website_open_type option[value='" + website_open_type + "']").attr("selected",true);
+			if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+			{
+				var param_arr = eval('('+content_arr['parameter_field']+')');
+				if(param_arr['website_mobile_config'])
+				{
+					$("input[name='mobile_config'][value="+param_arr['website_mobile_config']+"]").attr("checked",true);
+				}
+				if(param_arr['website_is_sync_accout'])
+				{
+					$("input[name='is_sync_accout'][value="+param_arr['website_is_sync_accout']+"]").attr("checked",true);
+				}
+				if(param_arr['website_is_actionbar'])
+				{
+					$("input[name='is_actionbar'][value="+param_arr['website_is_actionbar']+"]").attr("checked",true);
+				}
+				if(param_arr['website_screen_show'])
+				{
+					$("input[name='screen_show'][value="+param_arr['website_screen_show']+"]").attr("checked",true);
+				}
+				if(param_arr['website_is_h5'])
+				{
+					$("input[name='is_h5'][value="+param_arr['website_is_h5']+"]").attr("checked",true);
+				}
+			}
+			//如果是灵活运营 获得运营标识
+			if(content_arr['operate_mark'])
+			{
+				var operate_mark = content_arr['operate_mark'];
+				$("#operate_mark option[value='" + operate_mark + "']").attr("selected",true);
+				if(operate_mark==30)
+				{
+					$("#custom_operate_mark_div").css("display","");
+					if(content_arr['custom_mark']=="null")
+					{
+						$("#custom_operate_mark").val();
+					}
+					else
+					{
+						$("#custom_operate_mark").val(content_arr['custom_mark']);
+					}
+				}
+			}		
+        }else if (content_type == 6) {
+            var gift_id = content_arr['gift_id'];
+            $("#pubpro_gift_id").val(gift_id);
+        }else if (content_type == 7) {
+            var strategy_id = content_arr['strategy_id'];
+            $("#pubpro_strategy_id").val(strategy_id);
+        }else if (content_type == 8) {
+            var order_id = content_arr['recommend_order_id'];
+            // 将order_id转成title
+            var order_name = convertOrderId2OrderName(order_id);
+            $("#pubpro_order_name").val(order_name);
+        }else if(content_type == 9) {
+        	var used_id	=	content_arr['used_id'];
+        	var used_info = convertUsedId2UsedName(used_id);
+         	var used_obj = eval('(' +  used_info + ')');
+        	var extent_type = "{$extent_type}";
+        	var is_developer = "{$is_developer}";
+        	var data = "query="+used_obj.package;
+        	if(is_developer){
+        		data += "&is_developer="+is_developer+"&extent_type="+extent_type;
+        	}
+        	$.ajax({
+        		type: "GET",
+        		url: '/index.php/ContentType/pub_showUsed',
+        		data: data,
+        		dataType:'Json',
+        		success: function(data){
+        			if(data.code == 0) {
+        				$(this).val('')
+        				var html = "<select id='pubpro_used_title' name='pubpro_used_title' ><option value='0'>未选择</option></select>"
+        				$('#pubpro_used_block').empty().append(html);
+        				alert('该软件未有符合条件的应用预览的内容')
+        			}else {
+        				var html = '<select name="pubpro_used_title" id="pubpro_used_title">';
+        				$.each(data.data, function(k,v){
+        					if(v.id == used_id){
+        						$("#pubpro_used_package").val(v.package);
+        						html += '<option selected value="'+v.id+'">'+v.title+'</option>'
+        					}else{
+        						html += '<option value="'+v.id+'">'+v.title+'</option>'	
+        					}
+        				})
+        				html += '</select>';
+        				$('#pubpro_used_block').empty().append(html)
+        			}
+        		}
+        	});
+        }else if(content_type == 10) {
+        	 var order_id = content_arr['recommend_order_id'];
+        	 // 将order_id转成title
+             var order_name = convertOrderId2OrderName(order_id);
+             $("#pubpro_game_name").val(order_name); 
+        }
+    });
+    
+    function pubpro_content_type_select(value) {
+        if (value == 1) {
+            document.getElementById("pubpro_tr_package").style.display="";
+            document.getElementById("pubpro_tr_activity_name").style.display="none";
+            document.getElementById("pubpro_tr_feature_id").style.display="none";
+            document.getElementById("pubpro_tr_category_type").style.display="none";
+            document.getElementById("pubpro_tr_website").style.display="none";
+			document.getElementById("operate_mark_show").style.display="none";
+			document.getElementById("pubpro_tr_gift").style.display="none";
+			document.getElementById("pubpro_tr_strategy").style.display="none";
+			document.getElementById("pubpro_tr_person_center_show").style.display="none";
+			document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+			document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+			document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+			document.getElementById("pubpro_tr_order_name").style.display="none";
+			document.getElementById("pubpro_tr_used").style.display="none";
+ 			document.getElementById("pubpro_tr_game").style.display="none";
+        } else if (value == 2) {
+            document.getElementById("pubpro_tr_package").style.display="none";
+            document.getElementById("pubpro_tr_activity_name").style.display="";
+            document.getElementById("pubpro_tr_feature_id").style.display="none";
+            document.getElementById("pubpro_tr_category_type").style.display="none";
+            document.getElementById("pubpro_tr_website").style.display="none";
+			document.getElementById("operate_mark_show").style.display="none";
+			document.getElementById("pubpro_tr_gift").style.display="none";
+			document.getElementById("pubpro_tr_strategy").style.display="none";
+			document.getElementById("pubpro_tr_person_center_show").style.display="none";
+			document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+			document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+			document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+			document.getElementById("pubpro_tr_order_name").style.display="none";
+			document.getElementById("pubpro_tr_used").style.display="none";
+ 			document.getElementById("pubpro_tr_game").style.display="none";
+        } else if (value == 3) {
+            document.getElementById("pubpro_tr_package").style.display="none";
+            document.getElementById("pubpro_tr_activity_name").style.display="none";
+            document.getElementById("pubpro_tr_feature_id").style.display="";
+            document.getElementById("pubpro_tr_category_type").style.display="none";
+            document.getElementById("pubpro_tr_website").style.display="none";
+			document.getElementById("operate_mark_show").style.display="none";
+			document.getElementById("pubpro_tr_gift").style.display="none";
+			document.getElementById("pubpro_tr_strategy").style.display="none";
+			document.getElementById("pubpro_tr_person_center_show").style.display="none";
+			document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+			document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+			document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+			document.getElementById("pubpro_tr_order_name").style.display="none";
+			document.getElementById("pubpro_tr_used").style.display="none";
+ 			document.getElementById("pubpro_tr_game").style.display="none";
+        } else if (value == 4) {
+            document.getElementById("pubpro_tr_package").style.display="none";
+            document.getElementById("pubpro_tr_activity_name").style.display="none";
+            document.getElementById("pubpro_tr_feature_id").style.display="none";
+            document.getElementById("pubpro_tr_category_type").style.display="";
+            document.getElementById("pubpro_tr_website").style.display="none";
+			document.getElementById("pubpro_tr_order_name").style.display="none";
+			var page_value = $("#pubpro_page_name1").val();
+			if(function_from=="flexible")
+			{
+				document.getElementById("operate_mark_show").style.display="";
+			}
+			if(function_from=="ExPromotion")//外部推广推荐内容 个人中心时显示是否弹出随机礼包
+			{
+				if(page_value == '个人中心')
+				{
+					document.getElementById("pubpro_tr_person_center_show").style.display="";
+				}
+			}
+			//if(function_from=="textquick")
+			//{
+				if(page_value == '活动列表')
+				{
+					document.getElementById("pubpro_tr_activity_category_show").style.display="";
+				}
+			//}
+			if(page_value=='每日抽奖（兑吧）')
+			{
+				document.getElementById("pubpro_tr_exchange_url_show").style.display="";
+			}
+			if(page_value == '红包任务列表')
+			{
+				document.getElementById("pubpro_tr_red_task_category_show").style.display="";
+			}
+			document.getElementById("pubpro_tr_gift").style.display="none";
+			document.getElementById("pubpro_tr_strategy").style.display="none";
+			document.getElementById("pubpro_tr_used").style.display="none";
+ 			document.getElementById("pubpro_tr_game").style.display="none";
+        } else if(value == 5) {
+            document.getElementById("pubpro_tr_package").style.display="none";
+            document.getElementById("pubpro_tr_activity_name").style.display="none";
+            document.getElementById("pubpro_tr_feature_id").style.display="none";
+            document.getElementById("pubpro_tr_category_type").style.display="none";
+            document.getElementById("pubpro_tr_website").style.display="";
+			if(function_from=="flexible")
+			{
+				document.getElementById("operate_mark_show").style.display="";
+			}
+			document.getElementById("pubpro_tr_gift").style.display="none";
+			document.getElementById("pubpro_tr_strategy").style.display="none";
+			document.getElementById("pubpro_tr_person_center_show").style.display="none";
+			document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+			document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+			document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+			document.getElementById("pubpro_tr_order_name").style.display="none";
+			document.getElementById("pubpro_tr_used").style.display="none";
+ 			document.getElementById("pubpro_tr_game").style.display="none";
+			change_open();
+        }else if (value == 6) {
+            document.getElementById("pubpro_tr_package").style.display="none";
+            document.getElementById("pubpro_tr_activity_name").style.display="none";
+            document.getElementById("pubpro_tr_feature_id").style.display="none";
+            document.getElementById("pubpro_tr_category_type").style.display="none";
+            document.getElementById("pubpro_tr_website").style.display="none";
+			document.getElementById("operate_mark_show").style.display="none";
+			document.getElementById("pubpro_tr_gift").style.display="";
+			document.getElementById("pubpro_tr_strategy").style.display="none";
+			document.getElementById("pubpro_tr_person_center_show").style.display="none";
+			document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+			document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+			document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+			document.getElementById("pubpro_tr_order_name").style.display="none";
+			document.getElementById("pubpro_tr_used").style.display="none";
+ 			document.getElementById("pubpro_tr_game").style.display="none";
+        }else if (value == 7) {
+            document.getElementById("pubpro_tr_package").style.display="none";
+            document.getElementById("pubpro_tr_activity_name").style.display="none";
+            document.getElementById("pubpro_tr_feature_id").style.display="none";
+            document.getElementById("pubpro_tr_category_type").style.display="none";
+            document.getElementById("pubpro_tr_website").style.display="none";
+			document.getElementById("operate_mark_show").style.display="none";
+			document.getElementById("pubpro_tr_gift").style.display="none";
+			document.getElementById("pubpro_tr_strategy").style.display="";
+			document.getElementById("pubpro_tr_person_center_show").style.display="none";
+			document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+			document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+			document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+			document.getElementById("pubpro_tr_order_name").style.display="none";
+			document.getElementById("pubpro_tr_used").style.display="none";
+ 			document.getElementById("pubpro_tr_game").style.display="none";
+        }else if (value == 8) {
+            document.getElementById("pubpro_tr_package").style.display="none";
+            document.getElementById("pubpro_tr_activity_name").style.display="none";
+            document.getElementById("pubpro_tr_feature_id").style.display="none";
+            document.getElementById("pubpro_tr_category_type").style.display="none";
+            document.getElementById("pubpro_tr_website").style.display="none";
+			document.getElementById("operate_mark_show").style.display="none";
+			document.getElementById("pubpro_tr_gift").style.display="none";
+			document.getElementById("pubpro_tr_strategy").style.display="none";
+			document.getElementById("pubpro_tr_person_center_show").style.display="none";
+			document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+			document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+			document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+			document.getElementById("pubpro_tr_order_name").style.display="";
+			document.getElementById("pubpro_tr_used").style.display="none";
+ 			document.getElementById("pubpro_tr_game").style.display="none";
+        }else if( value == 9 ) {
+        	document.getElementById("pubpro_tr_package").style.display="none";
+            document.getElementById("pubpro_tr_activity_name").style.display="none";
+            document.getElementById("pubpro_tr_feature_id").style.display="none";
+            document.getElementById("pubpro_tr_category_type").style.display="none";
+            document.getElementById("pubpro_tr_website").style.display="none";
+ 			document.getElementById("operate_mark_show").style.display="none";
+ 			document.getElementById("pubpro_tr_gift").style.display="none";
+ 			document.getElementById("pubpro_tr_strategy").style.display="none";
+ 			document.getElementById("pubpro_tr_person_center_show").style.display="none";
+ 			document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+ 			document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+ 			document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+ 			document.getElementById("pubpro_tr_order_name").style.display="none";
+ 			document.getElementById("pubpro_tr_game").style.display="none";
+ 			document.getElementById("pubpro_tr_used").style.display="";
+        }else if( value == 10 ) {
+        	document.getElementById("pubpro_tr_package").style.display="none";
+            document.getElementById("pubpro_tr_activity_name").style.display="none";
+            document.getElementById("pubpro_tr_feature_id").style.display="none";
+            document.getElementById("pubpro_tr_category_type").style.display="none";
+            document.getElementById("pubpro_tr_website").style.display="none";
+ 			document.getElementById("operate_mark_show").style.display="none";
+ 			document.getElementById("pubpro_tr_gift").style.display="none";
+ 			document.getElementById("pubpro_tr_strategy").style.display="none";
+ 			document.getElementById("pubpro_tr_person_center_show").style.display="none";
+ 			document.getElementById("pubpro_tr_activity_category_show").style.display="none";
+ 			document.getElementById("pubpro_tr_red_task_category_show").style.display="none";
+ 			document.getElementById("pubpro_tr_exchange_url_show").style.display="none";
+ 			document.getElementById("pubpro_tr_order_name").style.display="none";
+ 			document.getElementById("pubpro_tr_used").style.display="none";
+ 			document.getElementById("pubpro_tr_game").style.display="";
+        }
+		var activity_category_show_val=$('[name="activity_category_show"]:checked').val();
+		if(value==4&&page_value == '活动列表'&&activity_category_show_val==1){
+			$(".activity_tab_index").show();
+		}else{
+			$(".activity_tab_index").hide();
+		}
+    }
+    
+    function pubpro_general_page_type_select(val) {
+        if (val == 1) {
+            document.getElementById("pubpro_page_name1").style.display="";
+            document.getElementById("pubpro_page_name2").style.display="none";
+            document.getElementById("pubpro_page_name3").style.display="none";
+            document.getElementById("pubpro_page_name4").style.display="none";
+            document.getElementById("pubpro_page_name10").style.display="none";
+			document.getElementById("multi_param").style.display="";
+			document.getElementById("page_param").style.display="";
+        } else if (val == 2) {
+            document.getElementById("pubpro_page_name1").style.display="none";
+            document.getElementById("pubpro_page_name2").style.display="";
+            document.getElementById("pubpro_page_name3").style.display="none";
+            document.getElementById("pubpro_page_name4").style.display="none";
+            document.getElementById("pubpro_page_name10").style.display="none";
+			document.getElementById("multi_param").style.display="none";
+			document.getElementById("page_param").style.display="none";
+        } else if (val == 3) {
+            document.getElementById("pubpro_page_name1").style.display="none";
+            document.getElementById("pubpro_page_name2").style.display="none";
+            document.getElementById("pubpro_page_name3").style.display="";
+            document.getElementById("pubpro_page_name4").style.display="none";
+            document.getElementById("pubpro_page_name10").style.display="none";
+			document.getElementById("multi_param").style.display="none";
+			document.getElementById("page_param").style.display="none";
+        } else if (val == 10) {
+            document.getElementById("pubpro_page_name1").style.display="none";
+            document.getElementById("pubpro_page_name2").style.display="none";
+            document.getElementById("pubpro_page_name3").style.display="none";
+            document.getElementById("pubpro_page_name4").style.display="none";
+            document.getElementById("pubpro_page_name10").style.display="";
+			document.getElementById("multi_param").style.display="none";
+			document.getElementById("page_param").style.display="none";
+        } else {
+            document.getElementById("pubpro_page_name1").style.display="none";
+            document.getElementById("pubpro_page_name2").style.display="none";
+            document.getElementById("pubpro_page_name3").style.display="none";
+            document.getElementById("pubpro_page_name4").style.display="";
+            document.getElementById("pubpro_page_name10").style.display="none";
+			document.getElementById("multi_param").style.display="none";
+			document.getElementById("page_param").style.display="none";
+        }
+    }
+    
+    // 点击确定后，将自动生成的元素append下一层页面用户指定位置中
+    function pubpro_callback() {
+        // 存储自定义元素名和元素值的数组
+        var content_arr = {$content_arr};
+		 // 先将数组内的值全部decodeURIComponent
+        for (var key in content_arr) {
+            content_arr[key] = decodeURIComponent(content_arr[key]);
+        }
+        var append_div_id = "{$append_div_id}";
+        $('#'+append_div_id).html('');
+        // 内容类型
+        var content_type = $("#pubpro_content_type").val();
+		//content_type_div_header_scroll_1_1
+		//一个页面有多个推荐内容 根据传递的div的id不同 把传递来的参数作为name的键值
+		if(append_div_id!="content_type_div"&&append_div_id.indexOf('content_type_div')==0)	
+		{
+			var div_param = append_div_id.substring(17);//获取传来的参数
+		}
+		if(div_param)
+		{
+			var content_type_element_name = getElementName(content_arr, "content_type["+div_param+"]");
+		}
+		else
+		{
+			var content_type_element_name = getElementName(content_arr, "content_type");
+		}
+        var select = assemble_hidden_input_element(content_type_element_name, content_type);
+        // 生成form表单提交元素
+        var all_hidden_input = '';
+        var content = '';
+        if (content_type == 1) {
+            content = $.trim($("#apply_pkg").val());
+            if (!content) {
+                alert("包名不能为空！");
+                return false;
+            }
+            // 检查包名是否存在
+            package_exists = checkIfPackagExists(content);
+            if (package_exists == 0) {
+                alert("包名不存在！");
+                return false;
+            }
+			var sub_value = '';
+			
+			// 未安装配置
+			var uninstall_setting = $.trim($('input[name="pubpro_uninstall_setting"]:checked').val());
+			if(div_param)
+			{
+				var uninstall_setting_element_name = getElementName(content_arr, "uninstall_setting["+div_param+"]");
+			}
+			else
+			{
+				var uninstall_setting_element_name = getElementName(content_arr, "uninstall_setting");
+			}
+			sub_value += assemble_hidden_input_element(uninstall_setting_element_name, uninstall_setting);
+			// 已安装配置
+			var install_setting = $.trim($('input[name="pubpro_install_setting"]:checked').val());
+			if(div_param)
+			{
+				var install_setting_element_name = getElementName(content_arr, "install_setting["+div_param+"]");
+			}
+			else
+			{
+				var install_setting_element_name = getElementName(content_arr, "install_setting");
+			}
+			sub_value += assemble_hidden_input_element(install_setting_element_name, install_setting);
+			// 低版本配置
+			var lowversion_setting = $.trim($('input[name="pubpro_lowversion_setting"]:checked').val());
+			if(div_param)
+			{
+				var lowversion_setting_element_name = getElementName(content_arr, "lowversion_setting["+div_param+"]");
+			}
+			else
+			{
+				var lowversion_setting_element_name = getElementName(content_arr, "lowversion_setting");
+			}
+			sub_value += assemble_hidden_input_element(lowversion_setting_element_name, lowversion_setting);
+			
+			if (install_setting == 4) {
+				var start_to_page = $.trim($("#pubpro_start_to_page").val());
+				if (!start_to_page) {
+					alert("请填写启动页面");
+					return false;
+				}
+				if(div_param)
+				{
+					var start_to_page_element_name = getElementName(content_arr, "start_to_page["+div_param+"]");
+				}
+				else
+				{
+					var start_to_page_element_name = getElementName(content_arr, "start_to_page");
+				}
+				sub_value += assemble_hidden_input_element(start_to_page_element_name, start_to_page);
+			}
+			var recommend_behavior_id = $.trim($("#pubpro_recommend_behavior_id").val());
+			if(div_param)
+			{
+				var package_element_name = getElementName(content_arr, "package["+div_param+"]");
+				var behavior_id_element_name = getElementName(content_arr, "recommend_behavior_id["+div_param+"]");
+			}
+			else
+			{
+				var package_element_name = getElementName(content_arr, "package");
+				var behavior_id_element_name = getElementName(content_arr, "recommend_behavior_id");
+			}
+			all_hidden_input += assemble_hidden_input_element(package_element_name, content);
+			all_hidden_input += assemble_hidden_input_element(behavior_id_element_name, recommend_behavior_id);
+			all_hidden_input += sub_value;
+			
+        } else if (content_type == 2) {
+            content = $("#pubpro_activity_name").val();
+            if (!content) {
+                alert("活动名称不能为空！");
+                return false;
+            }
+            // 将活动名称转成活动id
+			var ac_name = new Array();
+			ac_name = content.split('——');
+			if(ac_name[1])
+			{
+				content = ac_name[1];
+			}
+            var activity_id = convertActivityName2ActivityId(content);
+            if (activity_id == 0) {
+                alert("活动名称不存在！");
+                return false;
+            }
+            // 将活动id返回给下层
+			if(div_param)
+			{
+				var activity_id_element_name = getElementName(content_arr, "activity_id["+div_param+"]");
+			}
+			else
+			{
+				var activity_id_element_name = getElementName(content_arr, "activity_id");
+			}
+            all_hidden_input += assemble_hidden_input_element(activity_id_element_name, activity_id);
+        } else if (content_type == 3) {
+            content = $("#pubpro_feature_name").val();
+            ppid = $("#ppid").val();
+            if (!content) {
+                alert("专题名称不能为空！");
+                return false;
+            }
+            // 将专题名称转成专题id
+            var feature_id = convertFeatureName2FeatureId(content,ppid);
+            if (feature_id == 0) {
+                alert("专题名称不存在！");
+                return false;
+            }
+            // 将专题id返回给下层
+			if(div_param)
+			{
+				var feature_id_element_name = getElementName(content_arr, "feature_id["+div_param+"]");
+			}
+			else
+			{
+				var feature_id_element_name = getElementName(content_arr, "feature_id");
+			}
+            all_hidden_input += assemble_hidden_input_element(feature_id_element_name, feature_id);
+        } else if (content_type == 4) {
+			if(function_from=="flexible")
+			{
+				var operate_mark=$("#operate_mark").val();
+				if(operate_mark==0)
+				{
+					alert("请选择一个运营标识");
+					return false;
+				}
+				if(operate_mark==30)
+				{
+					operate_mark=30;
+					var custom_operate_mark=$("#custom_operate_mark").val();
+					if(custom_operate_mark)
+					{
+						if(custom_operate_mark.length>2)
+						{
+							alert("运营标识不能超过两个字");
+							return false;
+						}
+					}
+					else
+					{
+						alert("请填写自定义运营标识");
+						return false;
+					}
+					// 将页面类型返回给下层
+					if(div_param)
+					{
+						var custom_operate_mark1 = getElementName(content_arr, "custom_mark["+div_param+"]");
+					}
+					else
+					{
+						var custom_operate_mark1 = getElementName(content_arr, "custom_mark");
+					}
+					all_hidden_input += assemble_hidden_input_element(custom_operate_mark1, custom_operate_mark);
+				}
+				else
+				{
+
+					// 将页面类型返回给下层
+					if(div_param)
+					{
+						var operate_mark1 = getElementName(content_arr, "operate_mark["+div_param+"]");
+					}
+					else
+					{
+						var operate_mark1 = getElementName(content_arr, "operate_mark");
+					}
+					all_hidden_input += assemble_hidden_input_element(operate_mark1, operate_mark);
+				}
+			}
+			var pubpro_general_page_type = $("#pubpro_general_page_type").val();
+            content = $("#pubpro_page_name" + pubpro_general_page_type).val();
+            if (!content) {
+                alert("页面不能为空！");
+                return false;
+            }
+			//var pubpro_page_name1=$("#pubpro_page_name1").val();
+			if(function_from=='ExPromotion')
+			{
+				var is_pop_random_packs_val=$('[name="is_pop_random_packs"]:checked').val();
+				if(content=="个人中心")
+				{
+					// 是否弹出随机礼包返回给下层
+					if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+					{
+						var param_arr = eval('('+content_arr['parameter_field']+')');
+						if(div_param)
+						{
+							var is_pop_random_packs = getElementName(content_arr, "is_pop_random_packs["+div_param+"]");
+						}
+						else
+						{
+							var is_pop_random_packs = getElementName(content_arr, "is_pop_random_packs");
+						}
+						all_hidden_input += assemble_hidden_input_element(is_pop_random_packs, is_pop_random_packs_val);
+					}
+				}	
+			}
+			//if(function_from=='textquick')//文字快捷入口选择活动列表 出现显示的类型
+			//{
+				if(content=="活动列表")
+				{
+					var activity_category_show_val=$('[name="activity_category_show"]:checked').val();
+					var tab_index_val = $('[name="tab_index"]:checked').val();
+					// 活动列表选择类型的值返回给下层
+					if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+					{
+						var param_arr = eval('('+content_arr['parameter_field']+')');
+						if(div_param)
+						{
+							var activity_category_show = getElementName(content_arr, "activity_category_show["+div_param+"]");
+							var tab_index = getElementName(content_arr, "tab_index["+div_param+"]");
+						}
+						else
+						{
+							var activity_category_show = getElementName(content_arr, "activity_category_show");
+							var tab_index = getElementName(content_arr, "tab_index");
+						}
+						all_hidden_input += assemble_hidden_input_element(activity_category_show, activity_category_show_val);
+						if(activity_category_show_val==1)
+						all_hidden_input += assemble_hidden_input_element(tab_index, tab_index_val);
+					}else {
+						all_hidden_input += assemble_hidden_input_element('activity_category_show', activity_category_show_val);
+						if(activity_category_show_val==1)
+						all_hidden_input += assemble_hidden_input_element('tab_index', tab_index_val);
+					}
+				}	
+			//}
+			if(content=="红包任务列表")
+			{
+				var red_task_category_show_val=$('[name="red_task_category_show"]:checked').val();
+				if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+				{
+					var param_arr = eval('('+content_arr['parameter_field']+')');
+					if(div_param)
+					{
+						var red_task_category_show = getElementName(content_arr, "red_task_category_show["+div_param+"]");
+					}
+					else
+					{
+						var red_task_category_show = getElementName(content_arr, "red_task_category_show");
+					}
+					all_hidden_input += assemble_hidden_input_element(red_task_category_show, red_task_category_show_val);
+				}else {
+					all_hidden_input += assemble_hidden_input_element('red_task_category_show', red_task_category_show_val);
+				}
+			}	
+			if(content=="每日抽奖（兑吧）")
+			{
+				var exchange_url_show_val = $('#exchange_url').val();
+				if(!exchange_url_show_val)
+				{
+					alert("兑吧地址为必填");
+					return false;
+				}
+				// 活动列表选择类型的值返回给下层
+				if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+				{
+					var param_arr = eval('('+content_arr['parameter_field']+')');
+					if(div_param)
+					{
+						var exchange_url_show = getElementName(content_arr, "exchange_url["+div_param+"]");
+					}
+					else
+					{
+						var exchange_url_show = getElementName(content_arr, "exchange_url");
+					}
+					all_hidden_input += assemble_hidden_input_element(exchange_url_show, exchange_url_show_val);
+				}
+			}	
+			//灵活运营样式多排的时候不能跳转发现-汉化页面
+			if(extent_type==5&&content=="发现-汉化")
+			{
+				alert("页面不存在！");
+                return false;
+			}
+			if(content=='论坛详情页')
+			{
+				var bbs_id=$("#bbs_detail_page_id").val();
+				if(!bbs_id)
+				{
+					alert("TID为必填");
+					return false;
+				}
+			}
+			// 将页面名称转成页面编码
+			var page_type = convertPageName2PageType(pubpro_general_page_type, content);
+			if (!page_type) {
+				alert("页面不存在！");
+				return false;
+			}
+			
+            // 将页面类型返回给下层
+			if(div_param)
+			{
+				var page_type_element_name = getElementName(content_arr, "page_type["+div_param+"]");
+			}
+			else
+			{
+				var page_type_element_name = getElementName(content_arr, "page_type");
+			}
+			if(content=='论坛详情页')
+			{
+				var bbs_id=$("#bbs_detail_page_id").val();
+				var bbs_page_type="bbs_detailpage_"+bbs_id;
+				all_hidden_input += assemble_hidden_input_element(page_type_element_name, bbs_page_type);
+			}else if(content=='内容合作'){
+				//内容合作  返回给下一层
+				var coop_category_id=$("#coop_category").val();
+				if(content_arr['parameter_field']&&content_arr['parameter_field']!='null')
+				{
+					var param_arr = eval('('+content_arr['parameter_field']+')');
+				}
+				//判断位置是正整数
+				var coop_pos_val = $('#coop_pos').val();
+				if(div_param)
+				{
+					var coop_site_id_show = getElementName(content_arr, "coop_site_id["+div_param+"]");
+				}
+				else
+				{
+					var coop_site_id_show = getElementName(content_arr, "coop_site_id");
+				}
+				all_hidden_input += assemble_hidden_input_element(coop_site_id_show, coop_pos_val);
+				
+				if(coop_category_id==3)
+				{
+					var coop_page_type="fixed_content_coop_"+coop_category_id;
+					all_hidden_input += assemble_hidden_input_element(page_type_element_name, coop_page_type);
+					var detail_type = $('#coop_detail_type').val();
+					if(detail_type==1)//按照标题来添加的
+					{
+						var coop_detail_url3_val = $('#coop_detail_url3').val();
+						url_arr=coop_detail_url3_val.split(":"); //字符分割
+						url_id = url_arr[0];
+						content_id_new = url_arr[1];
+						if(!coop_detail_url3_val)
+						{
+							alert("详情页面标题必填！");
+							return false;
+						}
+						else
+						{
+							//var url = detailtitle2url(coop_detail_url3_val);
+							var url = detailid2url(url_id);
+							if(!url)
+							{
+								alert("详情页面标题不存在！");
+								return false;
+							}
+							//检查标题和站点是否一致 
+							//var is_same_site_title = check_site2title(coop_pos_val,coop_detail_url3_val);
+							var is_same_site_title = check_site2id(coop_pos_val,url_id);
+							if(!is_same_site_title)
+							{
+								alert("详情页面标题不属于所选站点！");
+								return false;
+							}
+						}
+						if(div_param)
+						{
+							var coop_detail_url3 = getElementName(content_arr, "coop_detail_url["+div_param+"]");
+							var coop_detail_url_id = getElementName(content_arr, "coop_detail_url_id["+div_param+"]");
+							var coop_content_id_new = getElementName(content_arr, "coop_content_id_new["+div_param+"]");
+						}
+						else
+						{
+							var coop_detail_url3 = getElementName(content_arr, "coop_detail_url");
+							var coop_detail_url_id = getElementName(content_arr, "coop_detail_url_id");
+							var coop_content_id_new = getElementName(content_arr, "coop_content_id_new");
+						}
+						var detail_url = detailid2url(url_id);
+						all_hidden_input += assemble_hidden_input_element(coop_detail_url3, detail_url);
+						all_hidden_input += assemble_hidden_input_element(coop_detail_url_id, url_id);
+						all_hidden_input += assemble_hidden_input_element(coop_content_id_new, content_id_new);
+					}
+					else if(detail_type==2)//按照标签来添加的
+					{
+						var coop_detail_label_val = $('#coop_detail_label_list').val();
+						var coop_detail_pos_val = $('#coop_detail_pos3').val();
+						if(!coop_detail_pos_val)
+						{
+							alert("标签第几条必填！");
+							return false;
+						}
+						else
+						{
+							var r=/^[0-9]*[1-9][0-9]*$/;
+							if(r.test(coop_detail_pos_val) == false)			
+							{				
+								alert("位置请填写正整数");						
+								return false;		
+							}
+							else
+							{
+								if(div_param)
+								{
+									var coop_detail_label_id = getElementName(content_arr, "coop_detail_label_id["+div_param+"]");
+									var coop_detail_pos = getElementName(content_arr, "coop_detail_pos["+div_param+"]");
+								}
+								else
+								{
+									var coop_detail_label_id = getElementName(content_arr, "coop_detail_label_id");
+									var coop_detail_pos = getElementName(content_arr, "coop_detail_pos");
+								}
+								all_hidden_input += assemble_hidden_input_element(coop_detail_label_id, coop_detail_label_val);
+								all_hidden_input += assemble_hidden_input_element(coop_detail_pos, coop_detail_pos_val);
+							}
+						}
+					}
+				}
+				else
+				{
+					var coop_pos_type =$('#coop_pos').find("option:selected").attr("alt");
+					var coop_page_type="fixed_content_coop_"+coop_category_id+"_"+coop_pos_type;
+					all_hidden_input += assemble_hidden_input_element(page_type_element_name, coop_page_type);
+				
+					if(coop_category_id==1)
+					{
+						var coop_channel_tag_val = $('#coop_choose_channel_list').val();
+					}
+					else if(coop_category_id==2)
+					{
+						var coop_channel_tag_val = $('#coop_choose_label_list').val();
+					}
+					if(coop_channel_tag_val==0)
+					{
+						alert("请选择有频道或标签的站点！");
+						return false;
+					}
+					if(div_param)
+					{
+						var coop_channel_tag_id_show = getElementName(content_arr, "coop_channel_tag_id["+div_param+"]");
+					}
+					else
+					{
+						var coop_channel_tag_id_show = getElementName(content_arr, "coop_channel_tag_id");
+					}
+					all_hidden_input += assemble_hidden_input_element(coop_channel_tag_id_show, coop_channel_tag_val);
+				}
+			}
+			else
+			{
+				all_hidden_input += assemble_hidden_input_element(page_type_element_name, page_type);
+			}
+			//根据配置获取是否显示参数并将带参数的返给下一层
+			var new_page_name = convertPageType2PageName(page_type,'js');
+			key_value=page_type;//把key值赋值全局变量 方便以后使用
+			//返回的值有的是  汉字  有的是json字符串
+			var is_json;
+			try{
+				var con = eval("("+new_page_name+")");//说明传来的是json参数
+				is_json=1;
+			}catch(e){
+				is_json=2;
+			}
+			if(is_json==1)
+			{
+				var arr_page_name = con[0];
+				var param_arr = eval(con[1]);
+				for(m in param_arr)
+				{
+					var m_val = $("#"+m).val();
+					if(!m_val)
+					{
+						if(param_arr[m][3]==1)
+						{
+							alert(param_arr[m][0]+"不能为空！");
+							return false;
+						}
+						else
+						{
+							if(div_param)
+							{
+								var param_show = getElementName(content_arr, m+"["+div_param+"]");
+							}
+							else
+							{
+								var param_show = getElementName(content_arr, m);
+							}
+							all_hidden_input += assemble_hidden_input_element(param_show, '');
+						}
+					}
+					else
+					{
+						if(div_param)
+						{
+							var param_show = getElementName(content_arr, m+"["+div_param+"]");
+						}
+						else
+						{
+							var param_show = getElementName(content_arr, m);
+						}
+					
+						all_hidden_input += assemble_hidden_input_element(param_show, m_val);
+					}	
+				}
+			}
+        } else if (content_type == 5) {
+		
+			//V6.0灵活运营添加运营标识
+			if(function_from=="flexible")
+			{
+				var operate_mark=$("#operate_mark").val();
+				if(operate_mark==0)
+				{
+					alert("请选择一个运营标识");
+					return false;
+				}
+				if(operate_mark==30)
+				{
+					operate_mark=30;
+					var custom_operate_mark=$("#custom_operate_mark").val();
+					if(custom_operate_mark.length>2)
+					{
+						alert("运营标识不能超过两个字");
+						return false;
+					}
+					// 将页面类型返回给下层
+					if(div_param)
+					{
+						var custom_operate_mark1 = getElementName(content_arr, "custom_mark["+div_param+"]");
+					}
+					else
+					{
+						var custom_operate_mark1 = getElementName(content_arr, "custom_mark");
+					}
+					all_hidden_input += assemble_hidden_input_element(custom_operate_mark1, custom_operate_mark);
+				}
+				else
+				{
+					// 将页面类型返回给下层
+					if(div_param)
+					{
+						var operate_mark1 = getElementName(content_arr, "operate_mark["+div_param+"]");
+					}
+					else
+					{
+						var operate_mark1 = getElementName(content_arr, "operate_mark");
+					}
+					all_hidden_input += assemble_hidden_input_element(operate_mark1, operate_mark);
+				}
+			}
+            var content = $("#pubpro_website").val();
+            if (!content) {
+                alert("网页不能为空！");
+                return false;
+            }
+            // 检查网页格式是否正确
+            var website_ok = checkUrl(content);
+            if (website_ok != 1) {
+                alert("网页格式不正确！");
+                return false;
+            }
+            // 将网页返回给下层
+			if(div_param)
+			{
+				var website_element_name = getElementName(content_arr, "website["+div_param+"]");
+			}
+			else
+			{
+				var website_element_name = getElementName(content_arr, "website");
+			}
+            all_hidden_input += assemble_hidden_input_element(website_element_name, content);
+            // 将网页打开方式返回给下层
+			if(div_param)
+			{
+				var website_open_type_element_name = getElementName(content_arr, "website_open_type["+div_param+"]");
+			}
+			else
+			{
+				var website_open_type_element_name = getElementName(content_arr, "website_open_type");
+			}
+            var website_open_type = $("#pubpro_website_open_type").val();
+			var website_mobile_config = $("input[name='mobile_config']:checked").val();
+			var website_is_sync_accout =  $("input[name='is_sync_accout']:checked").val();
+			var website_is_actionbar = $("input[name='is_actionbar']:checked").val();
+			var website_screen_show = $("input[name='screen_show']:checked").val();
+			var website_is_h5 = $("input[name='is_h5']:checked").val();
+            all_hidden_input += assemble_hidden_input_element(website_open_type_element_name, website_open_type);
+			var my_param = [website_is_actionbar,website_screen_show,website_is_h5];
+			all_hidden_input = website_config(div_param,content_arr,all_hidden_input,website_mobile_config,website_is_sync_accout,website_open_type,my_param);
+        }else if (content_type == 6) {
+            content = $("#pubpro_gift_id").val();
+            if (!content) {
+                alert("礼包ID不能为空！");
+                return false;
+            }
+            // 检验礼包ID是否存在
+            var gift_id = check_gift_id(content);
+            if (gift_id == 0) {
+                alert("礼包ID不存在！");
+                return false;
+            }
+            // 将礼包id返回给下层
+			if(div_param)
+			{
+				var gift_id_element_name = getElementName(content_arr, "gift_id["+div_param+"]");
+			}
+			else
+			{
+				var gift_id_element_name = getElementName(content_arr, "gift_id");
+			}
+            all_hidden_input += assemble_hidden_input_element(gift_id_element_name, content);
+			 // 将页面名称转成页面编码
+            var page_type = 'gift_'+content;
+            if (!page_type) {
+                alert("页面不存在！");
+                return false;
+            }
+            // 将页面类型返回给下层
+			if(div_param)
+			{
+				var page_type_element_name = getElementName(content_arr, "page_type["+div_param+"]");
+			}
+			else
+			{
+				var page_type_element_name = getElementName(content_arr, "page_type");
+			}
+            all_hidden_input += assemble_hidden_input_element(page_type_element_name, page_type);
+			
+        }else if (content_type == 7) {
+            content = $("#pubpro_strategy_id").val();
+            if (!content) {
+                alert("攻略ID不能为空！");
+                return false;
+            }
+            // 检验攻略ID是否存在
+            var strategy_id = check_strategy_id(content);
+            if (strategy_id == 0) {
+                alert("攻略ID不存在！");
+                return false;
+            }
+            // 将礼包id返回给下层
+			if(div_param)
+			{
+				var strategy_id_element_name = getElementName(content_arr, "strategy_id["+div_param+"]");
+			}
+			else
+			{
+				var strategy_id_element_name = getElementName(content_arr, "strategy_id");
+			}
+            all_hidden_input += assemble_hidden_input_element(strategy_id_element_name, content);
+			 // 将页面名称转成页面编码
+            var page_type = 'strategy_'+content;
+            if (!page_type) {
+                alert("页面不存在！");
+                return false;
+            }
+            // 将页面类型返回给下层
+			if(div_param)
+			{
+				var page_type_element_name = getElementName(content_arr, "page_type["+div_param+"]");
+			}
+			else
+			{
+				var page_type_element_name = getElementName(content_arr, "page_type");
+			}
+            all_hidden_input += assemble_hidden_input_element(page_type_element_name, page_type);
+        }else if (content_type == 8) {
+            content = $("#pubpro_order_name").val();
+            if (!content) {
+                alert("预约名称不能为空！");
+                return false;
+            }
+            // 将预约名称转成预约id
+            var order_id = convertOrderName2OrderId(content);
+            if (order_id == 0) {
+                alert("预约名称不存在！");
+                return false;
+            }
+            // 将预约id返回给下层
+			if(div_param)
+			{
+				var order_id_element_name = getElementName(content_arr, "recommend_order_id["+div_param+"]");
+			}
+			else
+			{
+				var order_id_element_name = getElementName(content_arr, "recommend_order_id");
+			}
+            all_hidden_input += assemble_hidden_input_element(order_id_element_name, order_id);
+        }else if(content_type == 9) {
+        	var used_id = $("#pubpro_used_title").val();
+			if (!used_id || used_id==0) {
+                 alert("该软件未有符合条件的应用预览的内容");
+                 return false;
+             }
+			var package = $("#pubpro_used_package").val();
+			var title = $("#pubpro_used_title").find("option:selected").text();
+             if(div_param) {
+            	 var used_id_element_name = getElementName(content_arr, "used_id["+div_param+"]");
+             }else {
+            	 var used_id_element_name = getElementName(content_arr, "used_id");
+             }
+            all_hidden_input += assemble_hidden_input_element(used_id_element_name, used_id);
+        }else if(content_type == 10) {
+             content = $("#pubpro_game_name").val();
+             if (!content) {
+                 alert("预约名称不能为空！");
+                 return false;
+             }
+             // 将预约名称转成预约id
+             var order_id = convertOrderName2OrderId(content);
+             if (order_id == 0) {
+                 alert("预约名称不存在！");
+                 return false;
+             }
+             // 将预约id返回给下层
+ 			if(div_param)
+ 			{
+ 				var order_id_element_name = getElementName(content_arr, "recommend_order_id["+div_param+"]");
+ 			}
+ 			else
+ 			{
+ 				var order_id_element_name = getElementName(content_arr, "recommend_order_id");
+ 			}
+             all_hidden_input += assemble_hidden_input_element(order_id_element_name, order_id);
+        }else{
+            alert("内容类型错误！");
+            return false;
+        }
+        
+        // 展示内容
+        var content_text = '';
+        if (content_type == 1) {
+			content_text += assemble_package_display_text(content, uninstall_setting, install_setting, lowversion_setting, start_to_page,function_from,recommend_behavior_id);
+		
+        } else if (content_type == 2) {
+            content_text += assemble_activity_display_text(content);
+        } else if (content_type == 3) {
+            content_text += assemble_feature_display_text(content);
+        } else if (content_type == 4) {
+            content_text += assemble_page_display_text(pubpro_general_page_type, content);
+			var pubpro_general_page_type = $("#pubpro_general_page_type").val();
+            content = $("#pubpro_page_name" + pubpro_general_page_type).val();
+			
+			//v6.0网页和页面添加运营标识
+			if(function_from=="flexible")
+			{
+				if(operate_mark==30)
+				{
+					content_text +='<label>运营标识：【' + custom_operate_mark + '】</label><br/>';	
+				}
+				else
+				{
+					var operate_mark_display=convertnum2name(operate_mark)
+					content_text +='<label>运营标识：【' + operate_mark_display + '】</label><br/>';
+				}
+			}
+			//var pubpro_page_name1=$("#pubpro_page_name1").val();
+			if(function_from=='ExPromotion')
+			{
+				var is_pop_random_packs_val=$('[name="is_pop_random_packs"]:checked').val();
+				if(content=="个人中心")
+				{
+					if(is_pop_random_packs_val==1)
+					{
+						var is_pop_random_packs_display="是";
+					}
+					else
+					{
+						var is_pop_random_packs_display="否";
+					}
+					content_text +='<label>是否弹出随机礼包：【' + is_pop_random_packs_display + '】</label><br/>';
+				}	
+			}
+			//if(function_from=='textquick')
+			//{
+				if(content=="活动列表")
+				{
+					var activity_category_show_val=$('[name="activity_category_show"]:checked').val();
+					if(activity_category_show_val==1)
+					{
+						var activity_category_show_display="游戏";
+					}
+					else if(activity_category_show_val==2)
+					{
+						var activity_category_show_display="应用";
+					}
+					else
+					{
+						var activity_category_show_display="全部";
+					}
+					content_text +='<label>活动类型：【' + activity_category_show_display + '】</label><br/>';
+					if(activity_category_show_val==1){
+						var activity_tab_index = $('[name="tab_index"]:checked').val();
+						if(activity_tab_index==1){
+							var activity_tab_index_display = '游戏预约tab';
+						}else{
+							var activity_tab_index_display = '热门活动tab';
+						}
+						content_text +='<label>类型：【' + activity_tab_index_display + '】</label><br/>';
+					}
+				}	
+			//}
+			if(content=="红包任务列表")
+			{
+				var red_task_category_show_val=$('[name="red_task_category_show"]:checked').val();
+				if(red_task_category_show_val==1)
+				{
+					var red_task_category_show_display="非软件任务列表";
+				}
+				else
+				{
+					var red_task_category_show_display="软件任务列表";
+				}
+				content_text +='<label>列表类型：【' + red_task_category_show_display + '】</label><br/>';
+			}
+			if(content=='论坛详情页')
+			{
+				var bbs_id=$("#bbs_detail_page_id").val();
+				content_text +='<label>论坛详情页TID：【' + bbs_id + '】</label><br/>';
+			}
+			if(content=='每日抽奖（兑吧）')
+			{
+				var exchange_url=$("#exchange_url").val();
+				content_text +='<label>兑吧页面地址：【' + exchange_url + '】</label><br/>';
+			}
+			if(content=='内容合作')
+			{
+				var coop_category=$("#coop_category").val();
+				var coop_pos_val = $("#coop_pos").find("option:selected").text();
+				content_text +='<label>站点名称：【' + coop_pos_val + '】</label><br/>';
+				if(coop_category==1)
+				{
+					var coop_channel_val = $('#coop_choose_channel_list').find("option:selected").text();
+					content_text +='<label>频道名称：【' + coop_channel_val + '】</label><br/>';
+				}
+				else if(coop_category==2)
+				{
+					var coop_tag_val = $('#coop_choose_label_list').find("option:selected").text();
+					content_text +='<label>标签名称：【' + coop_tag_val + '】</label><br/>';
+				}
+				else if(coop_category==3)
+				{
+					var coop_detail_type=$('#coop_detail_type').val();
+					if(coop_detail_type==1)//按照标题
+					{
+						var coop_detail_url3 = $('#coop_detail_url3').val();
+						content_text +='<label>合作详情页标题：【' + coop_detail_url3 + '】</label><br/>';
+					}
+					else if(coop_detail_type==2)//按照标签
+					{
+						var coop_detail_label_val = $('#coop_detail_label_list').find("option:selected").text();
+						var coop_detail_pos = $('#coop_detail_pos3').val();
+						content_text +='<label>合作详情页标签：【' + coop_detail_label_val + '】</label><br/>';
+						content_text +='<label>合作详情页标签下的位置：【' + coop_detail_pos + '】</label><br/>';
+					}
+					
+				}
+			}
+			//根据配置获取是否显示参数项
+			if(is_json==1)
+			{
+				var arr_page_name = con[0];
+				var param_arr = eval(con[1]);
+				for(m in param_arr)
+				{
+					var m_val = $("#"+m).val();
+					if(param_arr[m][1]==1)//input的值
+					{
+						content_text +='<label>'+param_arr[m][0]+'：【' + m_val + '】</label><br/>';
+					}
+					else if(param_arr[m][1]==2)//select的值
+					{
+						content_text +='<label>'+param_arr[m][0]+'：【' + param_arr[m][2][m_val] + '】</label><br/>';
+					}
+				}
+			}
+        } else if (content_type == 5) {
+			var my_param = [website_is_actionbar,website_screen_show,website_is_h5];
+            content_text += assemble_website_display_text(content, website_open_type,website_mobile_config,website_is_sync_accout,my_param);
+			if(function_from=="flexible")
+			{
+				if(operate_mark==30)
+				{
+					content_text +='<label>运营标识：【' + custom_operate_mark + '】</label><br/>';	
+				}
+				else
+				{
+					var operate_mark_display=convertnum2name(operate_mark)
+					content_text +='<label>运营标识：【' + operate_mark_display + '】</label><br/>';
+				}
+			}
+        }else if (content_type == 6) {
+            content_text += assemble_gift_display_text(content);
+        }
+		else if (content_type == 7) {
+            content_text += assemble_strategy_display_text(content);
+        }else if (content_type == 8) {
+            content_text += assemble_order_display_text(content);
+        }else if(content_type == 9) {
+        	content_text += assemble_used_display_text(package,title);
+        }else if(content_type == 10) {
+        	content_text += assemble_game_display_text(content);
+        }
+        $('#'+append_div_id).append(content_text);
+        $('#'+append_div_id).append(select);
+        $('#'+append_div_id).append(all_hidden_input);
+		
+        //增加 定制推送 提交之后调用一个函数
+		if(function_from == "custom_push")
+		{
+			show_tr();
+		}
+		//文字快捷入口 推荐内容为页面的部分页面和专题的时候显示红点角标
+		if(function_from == "textquick")
+		{
+			show_red_point();
+		}
+        //增加 搜索热词--添加推荐 提交之后调用一个函数
+		if(function_from == "searchkeywords")
+		{
+			post_content();
+		}		
+        tb_remove();
+    }
+	//软件包名验证
+function get_softname(){
+	var pkg = $('#apply_pkg').val();
+	$.ajax({
+		url: '/index.php/Sj/Onlinegame/get_softname/package/'+pkg,
+		type: 'get',
+		success: function(data){
+			if(data != 2){
+				var obj = eval('(' + data + ')');
+				$('#my_game').val(obj.soft_name);
+			}else{
+				$('#apply_pkg').val('');
+				$('#my_game').val('');
+				alert("该软件不存在");
+				return false;
+			}
+		}
+	});
+}
+
+	function website_config(div_param,content_arr,all_hidden_input,website_mobile_config,website_is_sync_accout,website_open_type,my_param){
+		//将高低配,同步账号返回给下层
+		if(div_param)
+		{
+			var website_mobile_config_element_name = getElementName(content_arr, "website_mobile_config["+div_param+"]");
+			var website_is_sync_accout_element_name = getElementName(content_arr, "website_is_sync_accout["+div_param+"]");
+			var website_is_actionbar_element_name = getElementName(content_arr, "website_is_actionbar["+div_param+"]");
+			var website_screen_show_element_name = getElementName(content_arr, "website_screen_show["+div_param+"]");
+			var website_is_h5_element_name = getElementName(content_arr, "website_is_h5["+div_param+"]");
+		}
+		else
+		{
+			var website_mobile_config_element_name = getElementName(content_arr, "website_mobile_config");
+			var website_is_sync_accout_element_name = getElementName(content_arr, "website_is_sync_accout");
+			var website_is_actionbar_element_name = getElementName(content_arr, "website_is_actionbar");
+			var website_screen_show_element_name = getElementName(content_arr, "website_screen_show");
+			var website_is_h5_element_name = getElementName(content_arr, "website_is_h5");
+		}
+		if(website_mobile_config&&website_mobile_config!='undefined'){
+			all_hidden_input += assemble_hidden_input_element(website_mobile_config_element_name, website_mobile_config);
+		}
+		if(website_open_type==1){
+			all_hidden_input += assemble_hidden_input_element(website_is_sync_accout_element_name, website_is_sync_accout);
+			all_hidden_input += assemble_hidden_input_element(website_is_actionbar_element_name, my_param[0]);
+			all_hidden_input += assemble_hidden_input_element(website_screen_show_element_name, my_param[1]);
+			all_hidden_input += assemble_hidden_input_element(website_is_h5_element_name, my_param[2]);
+		}
+		return all_hidden_input;
+	}
+
+    //6.4.4
+    $('#pubpro_used_package').change(function(){
+    	var package = $(this).val();
+    	var extent_type = "{$extent_type}";
+    	var is_developer = "{$is_developer}";
+    	var data = "query="+package;
+    	if(is_developer){
+    		data += "&is_developer="+is_developer+"&extent_type="+extent_type;
+    	}
+    	$.ajax({
+    		type: "GET",
+    		url: '/index.php/ContentType/pub_showUsed',
+    		data: data,
+    		dataType:'Json',
+    		success: function(data){
+    			console.log(data)
+    			if(data.code == 0) {
+    				$(this).val('')
+    				var html = "<select id='pubpro_used_title' name='pubpro_used_title' ><option value='0'>未选择</option></select>"
+    				$('#pubpro_used_block').empty().append(html);
+    				alert('该软件未有符合条件的应用预览的内容')
+    			}else {
+    				var html = '<select name="pubpro_used_title" id="pubpro_used_title">';
+    				$.each(data.data, function(k,v){
+    					html += '<option value="'+v.id+'">'+v.title+'</option>'
+    				})
+    				html += '</select>';
+    				$('#pubpro_used_block').empty().append(html)
+    			}
+    		}
+    		});
+    })
+
+	function change_tab_index(){
+		var activity_category_show_val=$('[name="activity_category_show"]:checked').val();
+		if(activity_category_show_val==1){
+			$(".activity_tab_index").show();
+		}else{
+			$(".activity_tab_index").hide();
+		}
+	}
+</script>
+
+<table class="sub_tab" id="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <input type="hidden" value="{$pid}" id="ppid">
+<tr class="sub_tr">
+    <td>内容类型</td>
+    <td>
+        <select name='pubpro_content_type' id="pubpro_content_type" onchange="pubpro_content_type_select(this.value);">
+            <!-- 改成根据用户配置动态添加
+            <option value="1">软件</option>
+            <option value="2">活动</option>
+            <option value="3">专题</option>
+            <option value="4">页面</option>
+            <option value="5">网页</option>
+			<option value="6">礼包</option>
+			<option value="7">攻略</option>
+			<option value="8">预约</option>
+			<option value="9">应用内览</option>
+			<option value="10">游戏预约</option>
+            -->
+        </select>
+    </td>
+    <td/>
+</tr>
+<!--start，如果类型为软件，配置较多-->
+<tbody id="pubpro_tr_package">
+<tr class="sub_tr">
+    <td>包名</td>
+    <td>
+	<input type="hidden" name="pubpro_search_key" id="pubpro_search_key">
+	<input name='pubpro_package' id="apply_pkg" onchange="get_softname();" type='text'/></td>
+    <td/>
+</tr>
+<tr class="sub_tr">
+	<td>软件名称</td>
+	<td><input type="text" name="soft_name" id="my_game" readonly /></td>
+</tr>
+<tr class="sub_tr">
+    <td>未安装</td>
+    <td>
+        <input name="pubpro_uninstall_setting" id="pubpro_uninstall_setting" type="radio" value="1" checked="checked"/>进软件详情不下载
+        <input name="pubpro_uninstall_setting" id="pubpro_uninstall_setting" type="radio" value="2"/>进软件详情自动下载
+        <input name="pubpro_uninstall_setting" id="pubpro_uninstall_setting" type="radio" value="7"/>不进详情自动下载
+		<div id="no_detail_show_uninstall" style="display:none;">
+			<input name="pubpro_uninstall_setting" id="pubpro_uninstall_setting" type="radio" value="6"/>不进软件详情-自动下载
+		</div>
+    </td>
+    <td/>
+</tr>
+<tr class="sub_tr">
+    <td>已安装</td>
+    <td>
+        <input name="pubpro_install_setting" id="pubpro_install_setting" type="radio" value="3"/>启动软件
+    </td>
+    <td/>
+</tr>
+<tr class="sub_tr">
+    <td></td>
+    <td>
+        <input name="pubpro_install_setting" id="pubpro_install_setting" type="radio" value="4"/>启动软件至某个页面
+        <input name="pubpro_start_to_page" id="pubpro_start_to_page" type="text"/>
+    </td>
+    <td/>
+</tr>
+<tr class="sub_tr">
+    <td></td>
+    <td>
+        <input name="pubpro_install_setting" id="pubpro_install_setting" type="radio" value="1" checked="checked"/>进软件详情不下载
+        <input name="pubpro_install_setting" id="pubpro_install_setting" type="radio" value="2"/>进软件详情自动下载
+        <input name="pubpro_install_setting" id="pubpro_install_setting" type="radio" value="7"/>不进详情自动下载
+    </td>
+    <td/>
+</tr>
+<tr class="sub_tr">
+    <td></td>
+    <td><input name="pubpro_install_setting" id="pubpro_install_setting" type="radio" value="5"/>前端不显示（安智5.3及以前版本正常显示，跳转软件详情不下载）</td>
+    <td/>
+</tr>
+<tr class="sub_tr">
+    <td>低版本</td>
+    <td>
+        <input name="pubpro_lowversion_setting" id="pubpro_lowversion_setting" type="radio" value="3"/>启动软件
+    </td>
+    <td/>
+</tr>
+<tr class="sub_tr">
+    <td></td>
+    <td>
+        <input name="pubpro_lowversion_setting" id="pubpro_lowversion_setting" type="radio" value="1" checked="checked"/>进软件详情不下载
+        <input name="pubpro_lowversion_setting" id="pubpro_lowversion_setting" type="radio" value="2"/>进软件详情自动下载
+        <input name="pubpro_lowversion_setting" id="pubpro_lowversion_setting" type="radio" value="7"/>不进详情自动下载
+		<div id="no_detail_low" style="display:none;">
+			<input name="pubpro_lowversion_setting" id="pubpro_lowversion_setting"  type="radio" value="6"/>不进软件详情-自动下载
+		</div>
+    </td>
+    <td/>
+</tr>
+<tr class="sub_tr">
+    <td></td>
+    <td><input name="pubpro_lowversion_setting" id="pubpro_lowversion_setting" type="radio" value="5"/>前端不显示（安智5.3及以前版本正常显示，跳转软件详情不下载）</td>
+    <td/>
+</tr>
+<tr class="sub_tr">
+	<td>行为ID</td>
+	<td><input type="text" name="recommend_behavior_id" id="pubpro_recommend_behavior_id" value=""/></td>
+</tr>
+</tbody>
+<!--end-->
+<tr class="sub_tr" id="pubpro_tr_activity_name" style="display:none;">
+    <td>活动名称</td>
+    <td><input id="pubpro_activity_name" name='pubpro_activity_name' type='text'/></td>
+    <td/>
+</tr>
+<tr class="sub_tr" id="pubpro_tr_feature_id" style="display:none;">
+    <td>专题名称</td>
+    <td><input type="text" name="pubpro_feature_name" id="pubpro_feature_name"></td>
+    <td/>
+</tr>
+<tr class="sub_tr" id="pubpro_tr_category_type" style="display:none;">
+    <td>页面</td>
+    <td>
+        <select name='pubpro_general_page_type' id="pubpro_general_page_type" onchange="pubpro_general_page_type_select(this.value);">
+            <option value="1">普通</option>
+            <option value="2">标签</option>
+            <option value="3">常用标签</option>
+            <option value="4">自定义列表</option>
+            <option value="10">自定义频道</option>
+        </select>
+    </td>
+    <td>
+        <input type="text" name="pubpro_page_name1" id="pubpro_page_name1"/>
+        <input type="text" name="pubpro_page_name2" id="pubpro_page_name2" style="display:none"/>
+        <input type="text" name="pubpro_page_name3" id="pubpro_page_name3" style="display:none"/>
+        <input type="text" name="pubpro_page_name4" id="pubpro_page_name4" style="display:none"/>
+        <input type="text" name="pubpro_page_name10" id="pubpro_page_name10" style="display:none"/>
+    </td>
+</tr>
+<tbody id="pubpro_tr_website" style="display:none;">
+<tr class="sub_tr">
+    <td style="width:20%;">网页</td>
+    <td style="width:40%"><input type="text" name="pubpro_website" id="pubpro_website"></td>
+    <td style="width:40%"></td>
+</tr>
+
+<?php
+	if($function_from=='content_cooperation'){
+	?>
+	<tr class="sub_tr">
+		<td style="width:20%;">高低配</td>
+		<td style="width:40%">
+			<input name="mobile_config"  type="radio" value="1" checked="checked"/>不区分
+			<input name="mobile_config"  type="radio" value="2" />仅高配
+			<input name="mobile_config"  type="radio" value="3" />仅低配
+		</td>
+		<td style="width:40%"></td>
+	</tr>
+	<?php
+	}
+?>
+
+
+<tr class="sub_tr">
+    <td>打开方式</td>
+    <td>
+        <select name='pubpro_website_open_type' id="pubpro_website_open_type" onchange="change_open()">
+            <option value="1">内置</option>
+            <option value="2">外置</option>
+        </select>
+    </td>
+    <td></td>
+</tr>
+<tr class="sub_tr sync_a" style="display: none">
+	<td style="width:20%;">同步账号</td>
+	<td style="width:40%">
+		<input name="is_sync_accout"  type="radio" value="1"/>是
+		<input name="is_sync_accout"  type="radio" value="2"  checked="checked"/>否
+	</td>
+	<td style="width:40%"></td>
+</tr>
+<tr class="sub_tr sync_a" style="display: none">
+	<td style="width:20%;">是否使用端actionbar</td>
+	<td style="width:40%">
+		<input name="is_actionbar"  type="radio" value="1" checked="checked"/>是
+		<input name="is_actionbar"  type="radio" value="0"  />否
+	</td>
+	<td style="width:40%"></td>
+</tr>
+<tr class="sub_tr sync_a" style="display: none">
+	<td style="width:20%;">横竖屏显示</td>
+	<td style="width:40%">
+		<input name="screen_show"  type="radio" value="4" />横屏
+		<input name="screen_show"  type="radio" value="0" checked />竖屏
+	</td>
+	<td style="width:40%"></td>
+</tr>
+<tr class="sub_tr sync_a" style="display: none">
+	<td style="width:20%;">是否使用h5插件加载</td>
+	<td style="width:40%">
+		<input name="is_h5"  type="radio" value="2" />是
+		<input name="is_h5"  type="radio" value="0"  checked="checked"/>否
+	</td>
+	<td style="width:40%"></td>
+</tr>
+</tbody>
+<tr class="sub_tr" id="pubpro_tr_order_name" style="display:none;">
+    <td>预约名称</td>
+    <td><input id="pubpro_order_name" name='pubpro_order_name' type='text'/></td>
+    <td/>
+</tr>
+<tbody id="multi_param">
+</tbody>
+<tbody id="page_param">
+<tr class="sub_tr" id="pubpro_tr_content_coop" style="display:none;">
+    <td></td>
+    <td>
+		<select name='coop_category' onchange="show_coop_category(this.value)" id="coop_category">
+            <option value="1">频道</option>
+            <option value="2">标签</option>
+			<option value="3">详情页</option>
+        </select>
+    </td>
+    <td>
+		<select name='coop_pos' onchange="show_coop_pos(this.value)" id="coop_pos" style="display:">
+			<volist name="coop_site" id="vo">
+				<option alt="{$vo.type}" value="{$vo.id}">{$vo.website_name}</option>
+			</volist>
+        </select>
+	</td>
+</tr>
+<tr class="sub_tr" id="pubpro_tr_coop_choose_show" style="display:none;">
+    <td></td>
+    <td>
+		<select name='coop_choose_channel_list' id="coop_choose_channel_list">  
+        </select>
+		<select name='coop_choose_label_list' id="coop_choose_label_list" style="display:none;">
+        </select>
+		<select name='coop_detail_type' id="coop_detail_type" onchange="show_detail_content(this.value)" style="display:none;">
+			<option value="1">按详情页标题添加</option>
+            <option value="2">按详情页标签添加</option>
+        </select>
+    </td>
+    <td>
+		<input name="coop_detail_url" id="coop_detail_url3" style="display:none" type="text"  />
+		<select name='coop_detail_label_list' id="coop_detail_label_list" style="display:none;">
+        </select>
+		<input name="coop_detail_pos" id="coop_detail_pos3" style="display:none;" type="text"/>
+	</td>
+</tr>
+<tr class="sub_tr" id="pubpro_tr_person_center_show" style="display:none;">
+    <td>是否弹出随机礼包</td>
+    <td>
+		<input name="is_pop_random_packs" id="is_pop_random_packs" type="radio" value="1"/>是
+        <input name="is_pop_random_packs" id="is_pop_random_packs" type="radio" value="2" checked="checked"/>否
+    </td>
+    <td></td>
+</tr>
+<tr class="sub_tr" id="pubpro_tr_bbs_detail_show" style="display:none;">
+    <td>论坛详情页TID</td>
+    <td>
+		<input name="bbs_detail_page_id" id="bbs_detail_page_id" type="text" value="" onblur="return check_id(this);"/>
+    </td>
+    <td></td>
+</tr>
+<tr class="sub_tr" id="pubpro_tr_activity_category_show" style="display:none;">
+    <td>活动类型</td>
+    <td>
+		<input name="activity_category_show" id="activity_category_show" type="radio" value="0" checked="checked" onclick="change_tab_index()"/>全部
+        <input name="activity_category_show" id="activity_category_show" type="radio" value="1" onclick="change_tab_index()"/>游戏
+		<input name="activity_category_show" id="activity_category_show" type="radio" value="2" onclick="change_tab_index()"/>应用
+    </td>
+    <td></td>
+</tr>
+<tr class="sub_tr activity_tab_index" style="display: none">
+	<td>活动页面</td>
+	<td>
+		<input type="radio" name="tab_index" value="0" checked>热门活动tab
+		<input type="radio" name="tab_index" value="1">游戏预约tab
+	</td>
+	<td></td>
+</tr>
+<tr class="sub_tr" id="pubpro_tr_red_task_category_show" style="display:none;">
+    <td>列表类型</td>
+    <td>
+		<input name="red_task_category_show" id="red_task_category_show" type="radio" value="0" checked="checked"/>软件任务列表
+        <input name="red_task_category_show" id="red_task_category_show" type="radio" value="1"/>非软件任务列表
+    </td>
+    <td></td>
+</tr>
+<tr class="sub_tr" id="pubpro_tr_exchange_url_show" style="display:none;">
+    <td>兑吧页面地址</td>
+    <td>
+		<input name="exchange_url" id="exchange_url" type="text" value="" />
+    </td>
+    <td></td>
+</tr>
+</tbody>
+<tr class="sub_tr" id="pubpro_tr_gift" style="display:none;">
+    <td>礼包ID</td>
+    <td><input type="text" name="pubpro_gitf_id" id="pubpro_gift_id"></td>
+    <td/>
+</tr>
+<tr class="sub_tr" id="pubpro_tr_strategy" style="display:none;">
+    <td>攻略ID</td>
+    <td><input type="text" name="pubpro_strategy_id" id="pubpro_strategy_id"></td>
+    <td/>
+</tr>
+<tr class="sub_tr" style="display:none" id="operate_mark_show">
+    <td style="width:20%"><font style="color:red;">*</font>运营标识</td>
+    <td style="width:40%">
+        <select name='operate_mark' onchange="show_input(this)" id="operate_mark">
+			<option value="0" selected >请选择</option>
+            <option value="1">推广</option>
+            <option value="2">推荐</option>
+			<option value="3">活动</option>
+			<option value="4">专题</option>
+			<option value="5">精选</option>
+			<option value="6">汉化</option>
+			<option value="7">破解</option>
+			<option value="30">自定义</option>
+        </select>
+    </td>
+    <td style="width:40%">
+		<div style="display:none;" id="custom_operate_mark_div" name="custom_operate_mark_div">
+			<input style="width:90px;" id="custom_operate_mark" type="text" name="custom_operate_mark" /><span style="font-size:12px;">限两个字</span>
+		</div>
+    </td>
+</tr>
+
+<tr class="sub_tr" id="pubpro_tr_used" style="display:none;">
+    <td>软件包名</td>
+    <td><input type="text" name="pubpro_used_package" id="pubpro_used_package"></td>
+     <td>内容标题</td>
+    <td id="pubpro_used_block">
+        <select id="pubpro_used_title" name="pubpro_used_title" ><option value='0'>未选择</option></select>
+    </td>
+</tr>
+<tr class="sub_tr" id="pubpro_tr_game" style="display:none;">
+    <td>预约名称</td>
+    <td><input type="text" name="pubpro_game_name" id="pubpro_game_name"></td>
+</tr>
+
+<tr>
+    <td><input type="button" value="确定" onclick="pubpro_callback()"></td>
+    <td><input type="button" value="取消" onclick="tb_remove()"></td>
+    <td/>
+</tr>
+</table>
+<script>
+
+function show_input(obj)
+{
+	var value=obj.value;
+	if(value==30)
+	{
+		$("#custom_operate_mark_div").css("display","");
+	}
+	else
+	{
+		$("#custom_operate_mark_div").css("display","none");
+	}
+}
+function check_id(obj)
+{
+	var val=$(obj).val();
+	if(val)
+	{
+		var r=/^[0-9]*[1-9][0-9]*$/;
+		//var r=/^\d+$/g;
+		if(r.test(val) == false)			
+		{				
+			alert("请填写正整数");			
+			$(obj).attr("value",'');			
+			return false;		
+		}
+	}
+	else
+	{
+		alert("请填写ID");						
+		return false;
+	}
+}
+</script>

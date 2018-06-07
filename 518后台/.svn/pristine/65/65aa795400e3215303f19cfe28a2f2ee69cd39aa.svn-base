@@ -1,0 +1,83 @@
+<include file="../Public/header" />
+<style type="text/css">
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+
+</style>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script src="/Public/js/jquery.validate.min.js"></script>
+<link rel="stylesheet" type="text/css" media="all"
+	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="__PUBLIC__/js/calendar_bak.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-zh.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-setup.js"></script>
+<body>
+
+<script type="text/javascript">
+
+	function display_input(display_type,disable_type){
+		$('#'+display_type+'_select').show();
+		$('#'+disable_type+'_select').hide();	
+	}
+
+</script>
+
+<center>
+	<form method="get" action="__URL__/scanlist">
+		<table>
+			<tr>
+			<td>安全厂商:
+				<select name="ty">
+					<?php foreach($scanpartner as $key => $val){ ?>
+					<option value="<?php echo $val;?>" <?php if($ty == $val) echo "selected"; ?>><?php echo $key; ?></option>
+					<?php } ?>
+				</select>
+			</td>
+			<td>
+				查询类型:
+				<input type="radio" name="select_type" value="1" checked='true' onclick="display_input('cycle','date')"> 按期
+				<input type="radio" name="select_type" value="2" <?php if($select_type=='2') echo "checked ='true'"; ?> onclick="display_input('date','cycle')" /> 按日期
+			</td>
+			<td id="cycle_select"  <?php if($select_type !=2){ ?> style ='display:block' <?php }else{ ?>  style ='display:none' <?php } ?>>
+				第<select name="cycle">
+					<?php foreach($cycle_date as $key => $val){ ?>
+					<option value="<?php echo $key.' '.$val['0'].'---'.$val['1'];?>" <?php if($cycle == $key) echo "selected"; ?>><?php echo $key.' '.$val['0'].'---'.$val['1']; ?></option>
+					<?php } ?>				
+				</select>期
+			</td>
+			<td id="date_select" <?php if($select_type !=1){ ?> style ='display:block' <?php }else{ ?>  style ='display:none' <?php } ?>  >
+					起始时间:
+					<input type="text" value="<?php echo substr($from_value,0,10);?>" id="s_tm" name="s_tm" size="18" /><img src="__PUBLIC__/js/calendar.gif" onclick="return showCalendar('s_tm', 'y-m-d');" style="border:1px solid #000;"/>
+					结束时间:
+					<input type="text" value="<?php echo substr($to_value,0,10);?>" id="e_tm" name="e_tm" size="18" /><img src="__PUBLIC__/js/calendar.gif" onclick="return showCalendar('e_tm', 'y-m-d');" style="border:1px solid #000;"/>
+			</td>
+			<td><input type="submit" name="submit" value="确定"
+			style="height: 22px; vertical-align: middle;" /></td>
+		</tr>
+		<tr>
+			<td>开始时间:{$from_value}</td>
+			<td>结束时间:{$to_value}</td>
+		</tr>
+		</table>
+	</form>
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+			<tr>
+				<th>安全厂商</th>
+				<th>发送总量</th>
+				<th>返回结果总量</th>
+				<th>未返回结果</th>
+				<th>病毒量</th>
+			</tr>
+			<?php foreach($statics as $info){ ?>
+			<tr>
+				<td align="center"><?php echo $scanpartner_arr[$info['provider']]; ?></td>
+				<td align="center"><a href="__URL__/softlist/provider/{$info.provider}/type/1/start_tm/{$from_time}/end_tm/{$to_time}"><?php echo $info['tpl_count']; ?></a></td>
+				<td align="center"><a href="__URL__/softlist/provider/{$info.provider}/type/2/start_tm/{$from_time}/end_tm/{$to_time}"><?php echo $info['resp_count']; ?></a></td>
+				<td align="center"><a href="__URL__/softlist/provider/{$info.provider}/type/3/start_tm/{$from_time}/end_tm/{$to_time}"><?php echo $info['no_resp_count']; ?></a></td>
+				<td align="center"><a href="__URL__/softlist/provider/{$info.provider}/type/4/start_tm/{$from_time}/end_tm/{$to_time}"><?php echo $info['unsafe_count']; ?></a></td>
+			</tr>
+			<?php }?>
+		</table>
+</center>
+
+</body>

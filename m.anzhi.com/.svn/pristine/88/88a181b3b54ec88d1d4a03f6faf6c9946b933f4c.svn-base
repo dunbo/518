@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html style="height:100%">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>猎艳爽翻天，嗨玩无极限！</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/beauty_puzzle/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/beauty_puzzle/js/tween.js"></script>
+<style>
+#puzzle{ width: 300px; height: 300px; margin:0 auto; background: url(<!--{$out.pictrue}-->) no-repeat; background-size:100% 100%; position: relative;  overflow:hidden}
+#puzzle_list li{ width: 100px; height: 100px; display: inline-block; background-image: url(<!--{$out.pictrue}-->); background-position:0 0; position:absolute}
+</style>
+</head>
+<body style="height:100%">
+<div class="puzzle_wrap">
+	<div class="puzzle_wrap_inner">
+		<div id="puzzle">
+			<ul id="puzzle_list"></ul>
+		</div>
+	</div>
+	<div id="process_wrap">
+		<div id="process">
+			<span>0秒</span>	
+		</div>
+		<em>40秒</em>
+	</div>
+	<div class="lottery_info clear">
+		<a id="begin_btn" href="javascript:;">开始拼图</a>
+	</div>
+</div>
+
+<div id="body-bg" style="display: none;"></div>
+<div class="tip-box" id="tip-box1"  style="display: none;">
+	<div class="tip-mid">
+		<img id="tip_img" src="" style="width:112px"/>
+		<div class="tip-con">
+			<p id="tip_words"></p>
+		</div>
+	</div>
+	<div class="tip_hd">
+		<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box1')">关闭</a></div>
+	</div>
+	<a href="/lottery/beauty_puzzle/step.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->&opt=<!--{$out.opt}-->&step=3" class="tips_btn">更多精彩视频</a>
+</div>
+
+<script type="text/javascript">
+var aid = '<!--{$out.aid}-->';
+var sid = '<!--{$out.sid}-->';
+var timer = null;
+var gameOn = true;
+var onOff = true; //此次拼图未停止，禁止点击下一次
+var count = 0;
+window.onload = function(){
+	var oBtn = document.getElementById('begin_btn');
+	var flag = false; //拼图是否成功
+	oBtn.onclick = function(){
+		//计数器
+		$('#puzzle').css('background','none');
+		$('#process span').css('left','0px').css('display','none')
+		if(!onOff)
+		{
+			return;
+		}
+		onOff = false;
+		random();
+		game();
+		//倒计时
+		clearInterval(timer);
+		timer = setInterval(function(){
+			count++;
+			if(count >= 40 || flag){
+				clearInterval(timer);
+				setTimeout(function(){
+					//停止计数器
+					puzzle_sucess()
+				},2000)
+				$('#process span').css('left','0px').css('display','none')
+				 onOff = true;
+				 gameOn = false;
+			}
+			$("#process span").html(count+'s')
+			$('#process').css('width',$('#process').width()+7+'px');
+			$('#process span').css('left',$('#process').width()+'px').css('display','block')
+		},1000)
+	}
+}
+function game(){
+	var zIndex = 1;
+	var aLi = document.getElementById('puzzle_list').getElementsByTagName('li');
+	
+	var disX = 0;
+	var disY = 0;
+	gameOn = true;
+	for(var i =0; i<aLi.length; i++){
+		aLi[i].addEventListener('touchstart',start,false);
+		function start(ev){
+			if(!gameOn)
+			{
+				return;
+			}
+			disX = ev.changedTouches[0].pageX -this.offsetLeft;
+			disY = ev.changedTouches[0].pageY - this.offsetTop;
+			this.addEventListener('touchmove',move,false);
+			this.addEventListener('touchend',end,false);
+			function move(ev){	
+				if(!gameOn)
+				{
+					return;
+				}
+				this.style.left = ev.changedTouches[0].pageX - disX + 'px';
+				this.style.top = ev.changedTouches[0].pageY - disY + 'px';
+				this.style.zIndex =zIndex++;
+			}
+			function end(ev){
+				this.removeEventListener('touchend',end,false);
+				var aColl = [];
+				var value = null;
+				//获取碰到的对象
+				for(var i =0; i<aLi.length; i++){
+					if(isCollision(this,aLi[i])&& this!=aLi[i]){
+						aColl.push(aLi[i]);
+					}	
+				}
+				if(!aColl || aColl.length == 0){ //如果没有撞撞，则弹回原位置
+					animat(this,{left:$(this).attr('initialX'),top:$(this).attr('initialY')},500,4);
+					return;
+				}
+				//遍历碰到的对象，找到最大值
+				for(var i=0; i<aColl.length; i++){ 
+					var value=Math.pow(this.offsetLeft-aColl[i].offsetLeft,2)+Math.pow(this.offsetTop-aColl[i].offsetTop,2);
+					value=Math.sqrt(value);
+					aColl[i].distance=value;
+				}
+				aColl.sort(function(a,b){return a.distance-b.distance});
+				var ele = aColl[0];
+				//交换位置
+				var thisdata_value = $(this).attr('data-value'), tempX = $(this).attr('initialX'), tempY = $(this).attr('initialY'); 
+				animat(this,{left:$(ele).attr('initialx'),top:$(ele).attr('initialy')},500,4);
+				$(this).attr({
+					'initialX':$(ele).attr('initialX'),
+					'initialY':$(ele).attr('initialY'),
+					'data-value' : $(ele).attr('data-value')
+				});
+				animat(ele,{left:tempX,top:tempY},500,4);
+				$(ele).attr({
+					'initialX': tempX,
+					'initialY': tempY,
+					'data-value' : thisdata_value  //交换data-value顺序 检测正确顺序
+				})
+				delete aColl;
+				//判断拼图成功
+				for(var i=0; i<9; i++){
+					if(i!=aLi[i].getAttribute('data-value')){
+						return false;
+					}
+				}
+				flag = true;
+				clearInterval(timer);
+				setTimeout(function(){
+					puzzle_sucess();
+				},800);
+				
+				onOff = true;
+				gameOn = false;
+				
+				this.removeEventListener('touchmove',move,false);
+				this.removeEventListener('touchend',end,false);
+			}
+			ev.preventDefault();
+		}
+	}
+}
+//删除数组中已经随机出来的项
+function remove (arr){ 
+	var newAry = arr[Math.floor(Math.random() * arr.length)];
+	for(var i=0; i<arr.length; i++){
+		if(arr[i] == newAry){
+			arr.splice(i,1);
+			break;
+		}
+	}
+	return newAry;
+}
+//碰撞检测
+function isCollision(r,b){
+	if(r.offsetLeft+r.offsetWidth<b.offsetLeft||r.offsetTop+r.offsetHeight<b.offsetTop||r.offsetLeft>b.offsetLeft+b.offsetWidth||r.offsetTop>b.offsetTop+b.offsetHeight){
+		return false;
+    }else{
+		return true;
+    }
+}
+//随机摆放图片
+function random(){
+	var arr = [0,1,2,3,4,5,6,7,8];
+	var oLi = '';
+	$('#process').css('width','0px');
+	$('#process span').html('0s');
+	$('#puzzle_list').html(''); 
+	for(var i=0; i<9; i++){
+		var newAry = remove(arr);
+		var xpos = 100 * (newAry % 3);
+        var ypos = 100 * Math.floor(newAry / 3);
+		var xImg = 100*(i%3);
+		var yImg = 100*(Math.floor(i/3));
+		var oLi = '<li initialx = "'+ xpos +'"; initialy = "'+ ypos +'"; data-value="' + (newAry) + '" style="background-position:-'+xImg+'px -'+yImg+'px; left:'+xpos+'px; top:'+ypos+'px"></li>';
+		$('#puzzle_list').append(oLi);  //插入
+	}
+}
+
+//拼图成功
+function puzzle_sucess() {
+	
+	$.ajax({
+		url:'/lottery/beauty_puzzle/puzzle.php',
+		data:'aid='+aid+'&sid='+sid+'&count='+count+'&cbm=1',
+		type:'post',
+		dataType:'json',
+		success:function(data){
+			$('#tip_img').attr('src', data.img);
+			$('#tip_words').text(data.word);
+			setTimeout(function(){
+				showOpenBox('#tip-box1');
+			},500);
+		}
+	})
+}
+
+var flags={canMove:true};
+function showOpenBox(obj){
+     var bg_h=$(window).height() + $(document).scrollTop(),
+         top_h= $(obj).height()/ 2 - $(document).scrollTop();
+    $(obj).css("margin-top",-top_h+"px").show();
+    $("#body-bg").css("height",bg_h+"px").show();
+    flags.canMove=false;
+	window.onresize = function(){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+            top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$('#body-bg').css("height",bg_h+"px");
+		$(obj).css("margin-top",-top_h+"px");
+		
+	}
+}
+function cloBox(obj){
+    $(obj).hide();
+    $("#body-bg").hide();
+    flags.canMove=true;
+}
+$(function(){
+    $("body").bind('touchmove', function (e) {
+        if(!flags.canMove){
+            e.preventDefault();
+        }
+    });
+})
+</script>
+</body>
+</html>

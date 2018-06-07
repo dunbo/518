@@ -1,0 +1,94 @@
+<script>
+	function new_data(){
+		var new_pre_income = $('#new_pre_income').val();
+		var cid = $('#cid').val();
+		var income_type = $('#income_type_go').val();
+		var before_deduct_income = $('#before_deduct_income').val();
+		if(parseFloat(new_pre_income) > parseFloat(before_deduct_income)){
+			$('#new_pre_income').css("border","#ff0000 1px solid");
+			$('#before').css("border","#ff0000 1px solid");
+			$('#check_value').val(1);
+			return false;
+		}else{
+			$('#check_value').val(2);
+			$('#new_pre_income').css("border","");
+		}
+	
+		if(parseFloat(new_pre_income)<0 || (new_pre_income.substring(new_pre_income.indexOf("."),new_pre_income.length).length>3 && new_pre_income.indexOf(".") > 0) || isNaN(new_pre_income)){
+			$('#new_pre_income').css("border","#ff0000 1px solid");
+			$('#check_value').val(1);
+			return false;
+		}else{
+			$('#check_value').val(2);
+			$('#new_pre_income').css("border","");
+		}
+		
+		$('#no_click').val(2);
+		$.ajax({
+			url: '__URL__/ajax_edit/income_type/'+income_type+'/cid/'+cid+'/new_pre_income/'+new_pre_income,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){			
+				$('#per_ratio').html(data.pre_yesterday_ratio);
+				$('#sys_ratio').html(data.sys_yesterday_ratio);
+				$('#new_income').html(data.new_income);
+			}
+		});
+	}
+	
+	function check_all(){
+		if($('#no_click').val() == 1){
+			return false;
+		}else if($('#no_click').val() == 2){
+			return true;
+		}
+		var check_value = $('#check_value').val();
+		if(check_value == 1){
+			return false;
+		}else{
+			return true;
+		}
+	}
+</script>
+<div class="newbox" id="adv_income_newbox">
+	<h6><?php if($income_type == 2){ ?>广告<?php }else{ ?>游戏<?php } ?>分成调整面板：</h6>
+	<div class="newbox_cnt">
+		<form method="post" action="__URL__/check_edit_do">
+			<input type="hidden" name="charge" value="{$charge}" />
+			<input type="hidden" name="channel_type" value="{$channel_type}" />
+			<input type="hidden" name="income_types" value="{$income_types}" />
+			<input type="hidden" name="account_name" value="{$account_name}" />
+			<input type="hidden" name="channel_name" value="{$channel_name}" />
+			<input type="hidden" name="edit_status" value="{$edit_status}" />
+			<p>收入值上限：<span id="before">{$all_result[0]['before_deduct_income']}</span></p>
+			<p>原收入：{$all_result[0]['income_num']}</p>
+			<table cellpadding="0" cellspacing="0" border="1">
+				<tr>
+					<td width="33%"></td>
+					<td width="33%">收入值</td>
+					<td width="33%">日环比率</td>
+				</tr>
+				<tr>
+					<td>人工调整值</td>
+					<td><div class="income_value_box"><input type="text" name="adjust_value" id="new_pre_income" value="{$all_result[0]['new_income']}" /><a href="javascript:;"  onclick="new_data();">刷新</a><input type="hidden" name="cid" id="cid" value="{$cid}" /><input type="hidden" name="income_type" id="income_type_go" value="{$income_type}" /><input type="hidden" name="userid" id="userid" value="{$result[0]['userid']}" /><input type="hidden" value="{$all_result[0]['before_deduct_income']}" id="before_deduct_income" /><input type="hidden"  id="check_value" /></div></td>
+					<td><span id="per_ratio">{$all_result[0]['income_ratio']}</span></td>
+				</tr>
+				<tr>
+					<td>系统校正值</td>
+					<td><span id="new_income"></span></td>
+					<td><span id="sys_ratio"></span></td>
+				</tr>
+			</table>
+		<div class="open_close_btn" style="padding-left:100px">
+			<input type="hidden" value="1" id="no_click" />
+			<input type="submit" value="确认" onclick="return check_all();" />
+			<a href="javascript:;" onclick="tb_remove();">取消</a>
+			<div class="clear"></div>
+		</div>
+		</form>
+		<div class="newbox_tips2">
+			<p class="red">注：<br/>1、可输入小于等于收入值上限的金额，保留两位小数<br/>2、人工调整值为输入的要调整金额，系统校正值为计算后的补差结果<br/>3、日环比率为调整后昨日收入与前日收入环比率
+<br/>4、最终生效已系统校正值为准</p>
+		</div>
+	</div>
+</div>

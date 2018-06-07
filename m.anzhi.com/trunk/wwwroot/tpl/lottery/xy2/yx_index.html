@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>汤圆快到碗里来</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/lantern2016/css/common.css?v2"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public.js"></script>
+<script type="text/javascript">
+var share = '<!--{$out.share}-->';
+var sid='<!--{$out.sid}-->';
+var aid='<!--{$out.aid}-->';
+var open_pkg_arr = [];
+
+var port_arr = [12345, 23456, 34567, 45678, 56789, 612345];
+	var listen_failed_max = port_arr.length;
+	var listen_failed_count = 0;
+	var market_installed = false;
+	
+	function share_download() {
+		market_installed = false;
+		listen_failed_count = 0;
+		document.getElementById("az_spirit").innerHTML = "";
+		if (!port_arr) {
+			return;
+		}
+		var arr_len = port_arr.length;
+		for (var i = 0; i < arr_len; i++) {
+			add_async_download_listen_script(port_arr[i]);
+		}
+		return;
+	}
+	
+	function add_async_download_listen_script(port) {
+		var m = document.createElement("script");
+		m.type = 'text/javascript';
+		var url = 'http://127.0.0.1:' + port + '/query?type=action&id='+aid+'&callback=change_install_status&r=' + Math.floor(Math.random() * ( 1000000000 + 1));
+		m.src = url;
+		m.async = "async";
+		m.onload = function() {
+			listen_failed_count++;
+            if (listen_failed_count >= listen_failed_max) {
+                window.location.href= 'http://m.anzhi.com/info_1979088.html';
+            }
+		};
+		m.onerror = function() {
+			listen_failed_count++;
+			if (listen_failed_count >= listen_failed_max) {
+				 window.location.href= 'http://m.anzhi.com/info_1979088.html';
+			}
+		};
+		document.getElementById("az_spirit").appendChild(m);
+	}
+	
+	function change_install_status() {
+		market_installed = true;
+	}
+
+	$(document).ready(function () {
+		if(share == 1){
+			share_download();
+		}
+	});
+
+    $(document).ready(function(){
+            my_soft(aid,sid,8);
+        $("#dumplings_btn").click(function(){
+            var za_num = $("#za_num").html();
+            if(za_num>0){
+                lottery(open_pkg_arr);
+                $(".lottery span").addClass("active");
+            }
+        })
+    })
+
+
+
+</script>
+<script type="text/javascript">
+
+    var flags={canMove:true};
+    function showOpenBox(obj){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+            top_h=  $(obj).height()/2 - $(document).scrollTop();
+        $(obj).css("margin-top",-top_h+"px").show();;
+        $('#body-bg').css("height",bg_h+"px").show();
+        flags.canMove=false;
+		window.onresize = function(){
+			var bg_h=$(window).height() + $(document).scrollTop(),
+                top_h=  $(obj).height()/2 - $(document).scrollTop();
+			$('#body-bg').css("height",bg_h+"px");
+			$(obj).css("margin-top",-top_h+"px");	
+		}
+    }
+    function cloBox(obj){
+        $(obj).hide(); 
+        $('#body-bg').hide();
+        flags.canMove=true;
+    }
+    $(function(){
+        $("body").bind('touchmove', function (e) {
+            if(!flags.canMove){
+                e.preventDefault();
+            }
+        });
+    })
+
+
+
+function lottery(pkg_str){
+                if(is_login==2){//未登录 不能刮
+                    login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+                    return;
+                }
+
+	$.ajax({
+		url: '/lottery/xy2/yx_lottery_egg.php',
+		data: 'type=2&sid='+sid+'&aid='+aid+'&pkg='+pkg_str,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+                        var za_num = $("#za_num").html();
+                        if(za_num==1){
+                            $("#dumplings_btn").addClass('disabled');
+                        }
+                        $("#za_num").html(parseInt(za_num)-1);
+                    if(data.code==0){
+                        showOpenBox('#tip-box2');
+                    }else{
+                            if(data.pid==0){
+                                showOpenBox('#tip-box4');
+                                //location.href="/lottery/xy2/yd_myprize.php?lfrom=1&pid=0&aid="+aid+"&sid="+sid+"&package="+data.package+"&softname="+data.softname+"&gift_num="+data.gift_num;
+                            }else{//实体
+                                //location.href="/lottery/xy2/yd_myprize.php?lfrom=1&aid="+aid+"&sid="+sid+"&pid="+data.pid+"&prizename="+data.prizename;
+                                var pic_src = '<!--{$out.static_url}-->/lantern2016/images/lottery_'+data.pid+'.png';
+                                $("#prize_name").html(data.prizename);
+                                $("#shitipic").attr('src',pic_src);
+                                showOpenBox('#tip-box5');
+                            }
+                    }
+		}
+	});
+}
+
+
+function my_soft(aid,sid,limit) {
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	var soft_lists = soft_list.DATA;
+	var open_list = [];
+	var install_list = [];
+	var down_list = [];
+	for(j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var json_data =  window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(json_data == 0 || json_data == 1 ){
+			open_list.push(soft_lists[j]);
+			open_pkg_arr.push(soft_lists[j][7]);
+		}
+		if(json_data == -2 && soft_status_gos == 5){
+			install_list.push(soft_lists[j]);
+		}
+		if((json_data == -2 && soft_status_gos != 5 ) || json_data == -1){
+			down_list.push(soft_lists[j]);
+		}
+	}
+}
+
+function go_myprize(){
+                        location.href="/lottery/currency/myprize_page.php?tpl=test&lfrom=1&aid="+aid+"&sid="+sid;
+                        /*
+                if(is_login==2){//未登录 不能刮
+                    login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+                    return;
+                }
+	$.ajax({
+		url: '/lottery/xy2/yx_myprize_page.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+                    if(data==1){
+                        showOpenBox('#tip-box1')
+                    }else if(data==2){
+                        location.href="/lottery/currency/myprize_page.php?tpl=test&lfrom=1&aid="+aid+"&sid="+sid;
+                    }
+		}
+	});
+        */
+}
+
+
+	
+
+
+</script>
+
+</head>
+<body>
+<section>
+    <div class="banner"><img src="<!--{$out.static_url}-->/lantern2016/images/banner.png"/></div>
+	<div class="main">
+		<div class="rule">
+			<div class="titles"></div>
+			<p>2016年2月22日0:00-2月24日23:59</p>
+			<div class="titles rule_title2"></div>
+			<p>疯狂闹元宵，汤圆吃到爽！活动期间，可通过在本页面完成刮卡、分享、下载完成指定活动软件，获得抽奖机会！大奖，快到碗里来！</p>
+			<div class="decorate_04"></div>
+			<div class="decorate_05"></div>
+		</div>
+		<div class="notice">
+			<div class="notice_list">
+				<marquee scrollamount="2" scrolldelay="90" direction="left">
+					<span><!--{$out.lunbo}--></span>
+				</marquee>
+			</div>
+		</div>
+		<div class="maininner">
+			
+			<div class="login_wrap">
+                            <!--{if $out['is_login'] == 2}-->
+				<div class="login logined">
+					<div class="logined_l">
+						<p>先登录才能抽奖哦</p>
+					</div>
+					<div class="logined_r">
+                                                <a href="javascript:;" class="btns" onclick="login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');">登 录</a>
+					</div>
+				</div>
+                            <!--{/if}-->
+                            <!--{if $out['is_login'] == 1}-->
+				<div class="logined">
+					<div class="logined_l">
+						<p>您已登录账号为：<!--{$out['username']}--></p>
+					</div>
+					<div class="logined_r">
+                                                <a class="btns" href="/lottery/currency/userinfo.php?tpl=test&pfrom=1&aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->">个人信息</a>
+					</div>
+				</div>
+                            <!--{/if}-->
+			</div>
+			<div class="scratch_wrap">
+				<div class="scratch">
+					<img class="scratch_bg" src="<!--{$out.static_url}-->/lantern2016/images/bg2.png"/>
+					<!--<div class="scratch_01"><img src="images/scratch_01.png"/></div>-->
+                            <!--{if $out['is_sign'] != 1}-->
+					<canvas id="c1" class="scratch_01" width="148" height="148"></canvas>
+                            <!--{/if}-->
+                            <!--{if $out['is_sign'] == 1}-->
+					<canvas id="" class="scratch_01" width="148" height="148"></canvas>
+                            <!--{/if}-->
+					<div class="scratch_02"><img src="<!--{$out.static_url}-->/lantern2016/images/scratch_02.png"/></div>
+				</div>
+				<div class="btns1" id="scratch_btns">
+                            <!--{if $out['is_sign'] != 1}-->
+					<a href="javascript:;" id="scratch_btn1" class="btns fl">开始刮奖</a>
+					<a href="javascript:;" id="scratch_btn2" class="btns fl" style="display:none">今日已刮卡</a>
+                            <!--{/if}-->
+                            <!--{if $out['is_sign'] == 1}-->
+					<a href="javascript:;" id="scratch_btn2" class="btns fl">今日已刮卡</a>
+                            <!--{/if}-->
+                            <!--{if $out['is_login'] == 1}-->
+                                <!--{if $out['is_share'] == 1}-->
+                                            <a href="javascript:;" id="share_lottery_btn"  class="btns fr disabled">今日已分享</a>
+                                <!--{/if}-->
+                                <!--{if $out['is_share'] == 0}-->
+                                        <!--{if $out['is_sign'] == 1}-->
+                                            <a href="javascript:;" id="share_lottery_btn" onclick="go_share();" class="btns green fr">分享此卡</a>
+                                        <!--{/if}-->
+                                        <!--{if $out['is_sign'] != 1}-->
+                                            <a href="javascript:;" id="share_lottery_btn"  class="btns fr green disabled">分享此卡</a>
+                                        <!--{/if}-->
+                                <!--{/if}-->
+                            <!--{/if}-->
+                            <!--{if $out['is_login'] == 2}-->
+                                            <a href="javascript:;" id="share_lottery_btn" onclick="go_share();" class="btns green fr">分享此卡</a>
+                            <!--{/if}-->
+					<div class="clear"></div>
+				</div>
+			</div>
+			<div class="wrap" style="margin-top:60px">
+				<div class="wrap_inner" id="lottery_wrap_inner">
+					<div class="lottery_wrap">
+						<div class="title_04"><img src="<!--{$out.static_url}-->/lantern2016/images/title_04.png"/></div>
+						<div class="lottery_info">
+                            <!--{if $out['is_login'] == 1}-->
+							<p>您账号还有<span id="za_num"><!--{$out.za_num}--></span>碗汤圆！</p>
+                            <!--{/if}-->
+                            <!--{if $out['is_login'] == 2}-->
+							<p>您账号还有<span id="za_num">1</span>碗汤圆！</p>
+                            <!--{/if}-->
+						</div>
+                                                <a class="btns lottery_prize" href="javascript:;" onclick="go_myprize()">我的奖品</a>
+                            <!--{if $out['is_login'] == 1}-->
+						<a class="btns lottery_prize2" href="/lottery/xy2/yx_weixin.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->"><span class="active2"></a>
+                            <!--{/if}-->
+                            <!--{if $out['is_login'] == 2}-->
+						<a class="btns lottery_prize2" href="javascript:;" onclick="go_myprize()"><span class="active2"></a>
+                            <!--{/if}-->
+						<div class="lottery">
+							<img class="dumplings_01" src="<!--{$out.static_url}-->/lantern2016/images/dumplings_01.png"/>
+							<span></span>
+						</div>
+						<div class="lottery_btns clear">
+                            <!--{if $out['is_login'] == 1}-->
+                                                    <!--{if $out['za_num'] == 0}-->
+							<a href="javascript:;" id="dumplings_btn" class="btns fl disabled">开始吃汤圆</a>
+                                                    <!--{/if}-->
+                                                    <!--{if $out['za_num'] > 0}-->
+							<a href="javascript:;" id="dumplings_btn" class="btns fl">开始吃汤圆</a>
+                                                    <!--{/if}-->
+                            <!--{/if}-->
+                            <!--{if $out['is_login'] == 2}-->
+							<a href="javascript:;" id="" class="btns fl" onclick="go_myprize()">开始吃汤圆</a>
+                            <!--{/if}-->
+                            <!--{if $out['is_login'] == 2}-->
+                                                        <span class=""><a class="btns heart" href="javascript:;" onclick="go_myprize()">获取汤圆</a></span>
+                            <!--{/if}-->
+                            <!--{if $out['is_login'] == 1}-->
+                                                        <span class=""><a class="btns heart" href="/lottery/currency/softlist.php?tpl=test&aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->">获取汤圆</a></span>
+                            <!--{/if}-->
+							
+						</div>
+					</div>
+					<div class="decorate_03"></div>
+				</div>
+				<div class="decorate_01"></div>
+				<div class="decorate_02"></div>
+			</div>
+			
+			<div class="titles active_title">活动规则</div>
+			<ul class="active_ctn">
+				<li>
+					<span>1.</span>
+					<p>用户必须在已登录状态下，才能参与此活动。</p>
+				</li>
+				<li>
+					<span>2.</span>
+					<p>同一个设备，最多可在活动期间用2个安智账号刮卡。</p>
+				</li>
+				<li>
+					<span>3.</span>
+					<p>活动期间，每个账号每日只有1次刮卡机会和1次分享机会。</p>
+				</li>
+				<li>
+					<span>4.</span>
+					<p>抽奖机会（汤圆碗数）获取方法：<br/>①在本页面完成1次刮卡，若刮中1碗汤圆，即可获得1次抽奖机会。<br/>②在本页面完成1次分享，则赠送1碗汤圆，获得1次抽奖机会！<br/>③在本页面点击下载按钮，下载完成1款指定活动游戏，则赠送1碗汤圆，增加1次抽奖机会！</p>
+				</li>
+				<li>
+					<span>5.</span>
+					<p>同一用户，同一款软件，只有在本页面首次点击下载按钮，并下载完成后，才赠送抽奖机会哦！</p>
+				</li>
+				<li>
+					<span>6.</span>
+					<p>活动期间，每天每位用户通过在本页面完成刮卡、分享、下载等操作，最多可获取的总抽奖机会为3次。</p>
+				</li>
+				<li>
+					<span>7.</span>
+					<p>用户抽奖后，请及时点击【个人信息】，填写收奖联系方式，以便中奖后给您发放实物奖品。</p>
+				</li>
+				<li>
+					<span>8.</span>
+					<p>获奖名单将在活动结束页公布，所有实物奖品将在活动结束后的15个工作日内寄出。</p>
+				</li>
+				<li>
+					<span>9.</span>
+					<p>本活动派发的礼包有效期30天，请获得的用户尽快使用，以免过期！</p>
+				</li>
+				<div class="clear"></div>
+			</ul>
+		</div>
+		<div class="footer">
+			<span></span>
+			<p>活动最终解释权归安智所有</p>
+			<em></em>
+		</div>
+	</div>
+</section>
+
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box1"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con">
+				<div class="tip_title">
+					<h6>我的奖品</h6>
+				</div>
+				<div class="clear"></div>
+                <p>您现在还未抽奖，快抓紧时间速去抽奖吧！</p>
+				<div class="tips_btns"><a href="javascript:;" class="btns" onclick="cloBox('#tip-box1')">返 回</a></div>
+            </div>
+			
+        </div>
+		
+    </div>
+</section>
+
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box2"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con">
+				<div class="tip_title">
+					<h6>未中奖</h6>
+				</div>
+				<div class="clear"></div>
+                <p>抱歉，您本次暂未中奖，祝您下次抽奖好运临门！加油哦！</p>
+				<div class="tips_btns"><a href="javascript:;" class="btns" onclick="cloBox('#tip-box2')">返 回</a></div>
+            </div>
+        </div>
+		
+    </div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+	<div class="tip-box" id="tip-box4"  style="display: none;">
+		<div class="tip_title">
+			<h6>恭喜中奖啦！</h6>
+		</div>
+		<div class="prize_ok">
+			<div class="prize_okl">
+				<img src="<!--{$out.static_url}-->/lantern2016/images/lottery_05.png"/>
+			</div>
+			<div class="prize_okr">
+				<p>获得1个游戏礼包<br/>请到我的奖品页面查看</p>
+			</div>
+		</div>
+		<div class="tips_btns">
+			<a href="javascript:;" class="btns" onclick="cloBox('#tip-box4')">返回</a>
+		</div>
+	</div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+	<div class="tip-box" id="tip-box5"  style="display: none;">
+		<div class="tip_title">
+			<h6>恭喜中奖啦！</h6>
+		</div>
+		<div class="prize_ok clear">
+			<div class="prize_okl">
+				<img id="shitipic" src="<!--{$out.static_url}-->/lantern2016/images/lottery_04.png"/>
+			</div>
+			<div class="prize_okr">
+                            <p><br/><span id="prize_name"></span></p>
+			</div>
+		</div>
+		<div style="width:70%; margin:0 auto">
+			<div class="prompt_01" style="line-height:18px">请填写领奖地址：</div>
+						<ul class="form-items">
+                                                    <li><label>姓　　名：</label><span><input type="text" id="lxname" value="<!--{$out.contact_name}-->"/></span></li>
+							<li><label>手机号码：</label><span><input type="text" id="mobile_phone" value="<!--{$out.phone}-->"/></span></li>
+						<li><label>邮寄地址：</label><span><input type="text" id="address" value="<!--{$out.address}-->"/></span><font class='form_error' id='name_err' ></font></li>
+						</ul>
+		</div>
+                <div class="tips_btns"><a href="javascript:;" onclick="save()" class="btns">提 交</a></div>
+	</div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box3"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con">
+				<div class="tip_title">
+					<h6>提交成功</h6>
+				</div>
+				<div class="tips_btns"><a href="javascript:;" class="btns" onclick="cloBox('#tip-box3')">返 回</a></div>
+            </div>
+			
+        </div>
+		
+    </div>
+</section>
+<div style="display:none;" id="az_spirit"></div>
+<script type="text/javascript">
+
+var sid='<!--{$out.sid}-->';
+var aid='<!--{$out.aid}-->';
+var is_login ='<!--{$out.is_login}-->';
+//以下刮奖动画
+var oC = $('#c1').get(0);
+var oBtn = true;
+var oGc = oC.getContext('2d');
+var objImg = new Image();
+//objImg.src = '<!--{$out.static_url}-->/lantern2016/images/scratch_01.png';
+objImg.src = '<!--{$out.ppic}-->';
+var width = 148;
+var height= 148;
+objImg.onload = function(){
+	oGc.drawImage(objImg,0,0,width,height);
+	oGc.fillStyle = 'red';
+	oGc.globalCompositeOperation = 'destination-out';
+	oGc.lineWidth = 25;
+	oGc.lineCap = 'round';
+	//点击按钮的时候自动滑开
+	$('#scratch_btn1').on('click',function(ev){
+                if(is_login==2){//未登录 不能刮
+                    login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+                    return;
+                }
+                sign();
+		var x = 10;
+		var y = 40;
+		oGc.moveTo(x,y);
+		oGc.bezierCurveTo(50,80,60,120,100,60,100,20);
+		oGc.bezierCurveTo(110,30,120,60,140,80);	
+		oGc.stroke();
+		setTimeout(function(){
+			$('#c1').animate({opacity:0},1000,function(){
+				$('#c1').remove()
+				$('#scratch_btn1').hide();
+				$('#scratch_btn2').show();
+			});
+		},300)
+	})
+	//手指滑动的时候滑开
+	$('#c1').on('touchstart',function(ev){
+                if(is_login==2){//未登录 不能刮
+                    login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+                    return;
+                }
+		ev.preventDefault();
+		var touch = ev.originalEvent.changedTouches[0];
+		var x = touch.pageX - $(this).offset().left;
+		var y = touch.pageY - $(this).offset().top;
+		if(oBtn){
+			oBtn = false;
+			oGc.moveTo(x,y);
+			oGc.lineTo(x+1,y+1);
+		}
+		else{
+			oGc.lineTo(x,y);
+		}
+		oGc.stroke();
+		$('#c1').on('touchmove.move',function(ev){
+			ev.preventDefault();
+			var touch = ev.originalEvent.changedTouches[0];
+			var x = touch.pageX - $(this).offset().left;
+			var y = touch.pageY - $(this).offset().top;
+			oGc.lineTo(x,y);
+			oGc.stroke();
+		})
+		$('#c1').on('touchend.move',function(ev){
+			//滑开一半的时候自动滑开
+			var dataImg = oGc.getImageData(0,0,oC.width,oC.height);
+			var allPx = dataImg.width * dataImg.height;
+			var iNum = 0;				
+			for(var i=0;i<allPx;i++){
+				if(dataImg.data[i*4+3] == 0){
+					iNum++;
+				}
+			}	
+			if( iNum > allPx/2 ){
+                                sign();
+				$(oC).animate({opacity:0},1000,function(){
+					$(this).remove();
+					$('#scratch_btn1').hide();
+					$('#scratch_btn2').show();
+				});
+			}
+			$('#c1').off('.move');
+		})
+	})
+};
+
+function onLoginComplete(sid,tip){
+	if(tip == "登录成功"){
+		sid_str = sid.replace("PHPSESSID=", "");
+		location.href="/lottery/xy2/yx_index.php?sid="+sid_str+"&aid=<!--{$out.aid}-->";
+	}
+}
+
+function sign(){
+	$.ajax({
+		url: '/lottery/xy2/yx_gua.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+                    if(data==-1){
+                        alert('活动已结束');
+                    }else if(data==2){
+                        alert('页面已失效,请重新进入活动页面');
+                    }else if(data==1){
+                        //showOpenBox('#tip-box3')
+                        var za_num = $("#za_num").html();
+                        $("#za_num").html(parseInt(za_num)+1);
+                        $("#dumplings_btn").removeClass('disabled');
+                        $("#share_lottery_btn").removeClass('disabled');
+                        $("#share_lottery_btn").attr("onclick","go_share();");
+                    }
+		}
+	});
+}
+
+
+var pfrom='<!--{$out.pfrom}-->';
+function trim(str) { //删除左右两端的空格
+	return str.replace(/(^\s*)|(\s*$)/g, ""); //把空格替换为空
+}
+
+/*
+function back_go_lottery(){
+    if(pfrom==1){
+        location.href="/lottery/xy2/yx_index.php?aid="+aid+"&sid="+sid;
+    }
+}*/
+
+function save(){
+	var lxname = trim($("#lxname").val());
+	if(lxname == "") {
+		$('#name_err').html('联系人姓名不能为空');
+		return false;
+	}
+	var name_len = lxname.length;
+	if(name_len > 10){
+		$('#name_err').html('联系人姓名不能超过10个字');
+		return false;	
+	}
+	$('#name_err').html('');
+	var mobile_phone = $("#mobile_phone").val();
+	if(mobile_phone == "") {
+		$('#name_err').html('联系人手机号码不能为空');
+		return false;
+	 }
+	var  re = /^(13|14|15|17|18)\d{9}$/
+	if (!re.test(mobile_phone)){
+		$('#name_err').html('请输入正确手机号');
+		return false;
+	}
+	$('#name_err').html('');
+
+	var address = trim($("#address").val());
+	if(address == "") {
+		$('#name_err').html('邮寄地址不能为空');
+		return false;
+	 }
+	var address_len = address.length;
+	if(address_len > 30){
+		$('#name_err').html('邮寄地址不能超过30个字');
+		return false;	
+	}	 
+	$('#name_err').html('');
+	$.ajax({
+			url: '/lottery/xy2/yx_userinfo.php',
+			data:"aid="+aid+"&sid="+sid+"&lxname="+lxname+"&mobile_phone="+mobile_phone+"&address="+address,
+			type:"post",
+			dataType: 'json',
+			success:function(data) {
+				if(data.code == 1){
+                                        //alert('succ');
+                                        showOpenBox('#tip-box3')
+                                        //cloBox('#tip-box5')
+                                        $("#tip-box5").css('display','none');
+		                        //$('#name_err').html('编辑成功');
+					//showOpenBox('#tip-box');
+				}else if(data.code == 2){
+					location.href= data.url;
+				}else{
+					$('#name_err').html(data.msg);
+					return false;
+				}
+			},
+	});
+}
+
+	function go_share(){
+var share_text='<!--{$out.share_text}-->';
+                if(is_login==2){//未登录 不能刮
+                    login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+                    return;
+                }
+		$.ajax({
+			url: '/lottery/currency/share.php',
+			data: 'sid='+sid+'&aid='+aid,
+			type: 'get',
+			async:false,
+			success:function(data){
+                            var za_num = $("#za_num").html();
+                            $("#za_num").html(parseInt(za_num)+1);
+                            $("#share_lottery_btn").addClass('disabled');
+                            $("#share_lottery_btn").removeAttr('onclick');
+                            $("#share_lottery_btn").html('今日已分享');
+                            $("#dumplings_btn").removeClass('disabled');
+			}
+		});
+
+		var share_json = '{"TEXT":"'+share_text+'","URL":"http://img3.anzhi.com/static/activity/lantern2016/images/other.jpg","ACTIONURL":"http://promotion.anzhi.com/lottery/xy2/yx_index.php?aid='+aid+'&share=1","URLWEIXIN":"http://img3.anzhi.com/static/activity/lantern2016/images/weixin.jpg"}';
+                //setTimeout("window.location.href= '/lottery/lights_down.php?sid='+sid",5000)
+		window.AnzhiActivitys.getShareDialog(share_json);
+	}
+
+
+
+
+</script>
+</body>
+</html>

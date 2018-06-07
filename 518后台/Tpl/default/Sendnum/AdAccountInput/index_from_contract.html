@@ -1,0 +1,178 @@
+<include file="../../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+
+<script>
+    function get_checkbox_ids() {
+        var checkboxs = $("[type]='checkbox'");
+        var idArr = new Array();
+        checkboxs.each(function(){
+            if ($(this).attr("checked") == "checked" && $(this).attr("id") != "check_all") {
+                idArr.push($(this).val());
+            }
+        });
+        if (idArr.length > 0) {
+            //return idArr.join(',');
+            return idArr;
+        }
+        return false; 
+    }
+    
+    // 全选/全不选
+    function toggle_select() {
+        var checked = $("#check_all").attr("checked");
+        if (checked) {
+            $("[type='checkbox']").attr("checked", true);
+            $("[type='checkbox'][disabled='disabled']").attr('checked', false);
+        } else {
+            $("[type='checkbox']").attr("checked", false);
+        }
+    }
+    
+    function generate_batch_input() {
+        var checkboxs_arr = get_checkbox_ids();
+        if (!checkboxs_arr) {
+            alert("请选择记录！");
+            tb_remove();
+            return false;
+        }
+        // 动态生成文本框在batch_input_div里
+        var batch_input_div = $("#batch_input_div");
+        for (var i = 0; i < checkboxs_arr.length; i++) {
+            // 将checkbox_arr[i]分解一下
+            var tmp_arr = new Array();
+            tmp_arr = checkboxs_arr[i].split(':');
+            var client_name = tmp_arr[2];
+            var div_str = '';
+            div_str += '<div class="form_list_one">';
+            div_str += "<label>" + client_name +"</label>";
+            div_str += '</div><div class="clear"></div>';
+            div_str += '<div class="form_list_one">';
+            div_str += "<label>收款时间：</label>";
+            div_str += "<input type='text' class='Wdate input_text widen' ";
+            div_str += " name='account_input_time:" + checkboxs_arr[i] + "' id='account_input_time:" + checkboxs_arr[i] + "'";
+            div_str += "/>";
+            div_str += '</div><div class="clear"></div>';
+            div_str += '<div class="form_list_one">';
+            div_str += "<label>开票时间：</label>";
+            div_str += "<input type='text' class='Wdate input_text widen' ";
+            div_str += " name='invoice_input_time:" + checkboxs_arr[i] + "' id='invoice_input_time:" + checkboxs_arr[i] + "'";
+            div_str += "/>";
+            div_str += '</div><div class="clear"></div>';
+            div_str += '<div class="form_list_one">';
+            div_str += "<label>发票号：</label>";
+            div_str += "<input type='text' class='input_text widen' ";
+            div_str += " name='invoice_number:" + checkboxs_arr[i] + "' id='invoice_number:" + checkboxs_arr[i] + "'";
+            div_str += "/>";
+            div_str += '</div><div class="clear"></div>';
+            div_str += '<div class="form_list_one">';
+            div_str += "<label>备注：</label>";
+            div_str += "<textarea style='width:200px' ";
+            div_str += " name='remark:" + checkboxs_arr[i] + "' id='remark:" + checkboxs_arr[i] + "'";
+            div_str += "/>";
+            div_str += '</div><div class="clear"></div>';
+            batch_input_div.append(div_str);
+        }
+    }
+    
+</script>
+
+
+<ul class="tab_title margin_top">
+    <li class="current"><a href="#">按合同</a></li>
+    <li><a href="__URL__/index_from_channel">按频道</a></li>
+</ul>
+
+<body>
+    <div class="search_box">
+        <form method="get" action="__URL__/index_from_contract" name="index_from_contract" id="index_from_contract">
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="20%">
+                        <label>合同编号：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_contract_number" id="search_contract_number" value="{$search_contract_number}"/>
+                    </td>
+                    <td width="20%">
+                        <label>客户名称：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_client_name" id="search_client_name" value="{$search_client_name}"/>
+                    </td>
+                    <td width="20%">
+                        <label>月份：</label>
+                        <input id="search_start_month" name="search_start_month" value="{$search_start_month}" type="text" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM'})" style="width:140px; height:28px"/>到<input id="search_end_month" name="search_end_month" value="{$search_end_month}" type="text" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM'})" style="width:140px; height:28px"/>
+                    </td>
+                    <td width="10%"><input type="submit" value="搜索" class="search_btn"/></td>
+                </tr>
+                <tr>
+                    <td width="10%"><a href='__URL__/index_from_contract?down=1&{$url_param}' class="search_btn">导出报表</a></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="2%" rowspan="2"><input type="checkbox" name="check_all" id="check_all" onclick="toggle_select()"/></th>
+                    <th width="8%" rowspan="2">月份</th>
+                    <th width="8%" rowspan="2">客户名称</th>
+                    <th width="8%" rowspan="2">合同编号</th>
+                    <th width="8%" rowspan="2">合作软件</th>
+                    <th width="21%" colspan="3">广告排期</th>
+                    <th width="14%" colspan="2">付款</th>
+                    <th width="14%" colspan="2">发票</th>
+                    <th width="5%" rowspan="2">折扣后总价</th>
+                    <th width="20%" rowspan="2">操作</th>
+                </tr>
+                <tr>
+                    <th width="7%">已排期</th>
+                    <th width="7%">未到期未排</th>
+                    <th width="7%">已到期未排</th>
+                    <th width="7%">已付款</th>
+                    <th width="7%">未付款</th>
+                    <th width="7%">已开发票</th>
+                    <th width="7%">未开发票</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="group_list" id="record">
+                    <tr>
+                        <td><input type="checkbox" value="{$record.contract_id}:{$record.month}:{$record.client_name}"/></td>
+                        <td>{$record.month}</td>
+                        <td>{$record.client_name}</td>
+                        <td>{$record.contract_number}</td>
+                        <td><a href="__URL__/ad_detail_percontract?contract_id={$record.contract_id}&month={$record.month}" class="thickbox blue">{$record.soft_count}</a></td>
+                        <td><if condition="$record.scheduled neq 0"><a href="__URL__/schedule_detail_percontract?contract_id={$record.contract_id}&month={$record.month}&schedule_type=1" class="thickbox blue">{$record.scheduled}</a><else/>{$record.scheduled}</if></td>
+                        <td><if condition="$record.unscheduled_feature neq 0"><a href="__URL__/schedule_detail_percontract?contract_id={$record.contract_id}&month={$record.month}&schedule_type=2" class="thickbox blue">{$record.unscheduled_feature}</a><else/>{$record.unscheduled_feature}</if></td>
+                        <td><if condition="$record.unscheduled_past neq 0"><a href="__URL__/schedule_detail_percontract?contract_id={$record.contract_id}&month={$record.month}&schedule_type=3" class="thickbox blue">{$record.unscheduled_past}</a><else/>{$record.unscheduled_past}</if></td>
+                        <td>{$record.payed_account}</td>
+                        <td>{$record.unpayed_account}</td>
+                        <td>{$record.payed_invoice}</td>
+                        <td>{$record.unpayed_invoice}</td>
+                        <td>{$record.expected_account}</td>
+                        <td>
+                            <if condition="$record.unpayed_account elt 0">录入收款
+                            <else/><a href="__URL__/add_account?contract_id={$record.contract_id}&month={$record.month}&modal=true" class="thickbox blue">录入收款</a>
+                            </if><br/>
+                            <if condition="$record.unpayed_invoice elt 0">录入发票
+                            <else/><a href="__URL__/add_invoice?contract_id={$record.contract_id}&month={$record.month}&modal=true&height=600" class="thickbox blue">录入发票</a>
+                            </if><br/>
+                            <if condition="$record.framework_id eq 0"><!--如果合同没有所属框架协议，则没有保证金抵扣-->
+                            <else/>
+                            <if condition="$record.left_amount eq 0">保证金抵扣<else/><a href="__URL__/add_withhold?contract_id={$record.contract_id}&month={$record.month}&modal=true&height=600" class="thickbox blue">保证金抵扣</a></if><br/>
+                            </if>
+                            <a href="__URL__/add_account_detail?contract_id={$record.contract_id}&month={$record.month}" class="blue">结算详情</a>
+                        </td>
+                    </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+    
+</body>
+

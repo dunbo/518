@@ -1,0 +1,101 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script>
+function check_del()
+{
+	if(confirm("你确认删除该条数据吗？"))
+	{
+		return ture;
+	}
+	return false;
+}
+function change_rank(id)
+{
+   var rank = $("#rank_"+id+"").val();
+   if(rank <= 0 || parseInt(rank)!=rank)
+	{
+	 alert("排序值错误");
+	 return false;
+	}
+  $.ajax({
+		url: '__URL__/change_rank',
+		data: 'id='+id+'&rank='+rank,
+		type: 'get',
+		success: function(data)
+		{
+			if(data == 2)
+			{
+				alert("编辑失败");
+			}else{
+				window.location.reload(true);
+			}
+		}
+	});
+}
+</script>
+<style>
+.table thead tr th{ text-align:center;}
+.special_table{height:60px;}
+.special_table tbody tr{margin:10px;}
+.special_table tbody tr td input{ width:200px; height:30px; line-height30px;}
+.navgition {padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display: inline;}
+</style>
+
+	<body>
+	<form action="__URL__/gameapply_list" method="post" class="table_list">
+		<table class="special_table">
+		  <tbody>
+		     <tr>
+			     <td>
+					 专题名称：
+					 <input type="text" value="{$special_title}" name="special_title"  />
+				 </td>
+				 <td>
+				     添加时间：
+					 <input type="text" class="Wdate" name="start_tm" value="{$start_tm}" onclick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})"  >
+					 至
+					 <input type="text" class="Wdate" name="end_tm" value="{$end_tm}" onclick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" >
+				 </td>
+				 <td>
+				     <input style="width:100px; margin:0px 10px;" type="submit" class="search_btn" value="搜索"/> 
+				 </td>
+			 </tr>
+		  </tbody>
+		</table>
+	</form>
+		<div style="margin:10px; width:100px;">
+			 <a class="thickbox search_btn" href="__URL__/add_gameapply?mm">添加</a>	
+		</div>
+		<table class="table_list" cellspacing="0" cellpadding="0" border="0">
+			<thead>
+				<tr>
+					<th width="20%">图片</th>
+					<th width="20%">排序</th>
+					<th width="20%">链接地址</th>
+					<th width="20%">添加时间</th>
+					<th width="20%">操作</th>
+				</tr>
+			</thead>
+		   <tbody>
+			 <?php foreach($result as $key => $val){ ?>
+				<tr>
+					<td><img style="width:200px; height:100px;" src="<?php echo IMGATT_HOST;?>{$val.pic_url}" /><div>{$val.special_title}</div></td>
+					<td><input type="text" onblur="change_rank({$val.id});" id="rank_{$val.id}" value="{$val.rank}" name="rank[]" /><input type="hidden" name="id[]" value="{$val.id}" /></td>
+					<td>{$val.link_address}</td>
+					<td><?php echo date("Y-m-d H:i:s",$val['create_tm']);?></td>
+					<td class="blue"><a class="thickbox" href="__URL__/edit_gameapply/id/{$val.id}">编辑</a>　|　<a href="__URL__/delete_gameapply/id/{$val.id}" onClick="return check_del();">删除</a></td>
+				</tr>
+			  <?php } ?>
+			 </tbody>
+		</table>
+		<div class="yahei navgition">
+		{$page|default='&nbsp;'}
+		</div>
+	</body>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />

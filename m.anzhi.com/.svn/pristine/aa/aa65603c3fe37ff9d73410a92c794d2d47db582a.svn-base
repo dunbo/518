@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>打蚊子</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/forfather_201706/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/activity/forfather_201706/js/soft_share.js"></script>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+
+// 控制弹窗函数
+var flags={canMove:true};
+function showOpenBox(obj){
+     var bg_h=$(window).height() + $(document).scrollTop(),
+            top_h= $(obj).height()/ 2 - $(document).scrollTop();
+    $(obj).css("margin-top",-top_h+"px").show();
+    $("#body-bg").css("height",bg_h+"px").show();
+    flags.canMove=false;
+	window.onresize = function(){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+            top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$('#body-bg').css("height",bg_h+"px");
+		$(obj).css("margin-top",-top_h+"px");
+		
+	}
+}
+function cloBox(obj){
+    $(obj).hide();
+    $("#body-bg").hide();
+    flags.canMove=true;
+}
+$(function(){
+    $("body").bind('touchmove', function (e) {
+        if(!flags.canMove){
+            e.preventDefault();
+        }
+    });
+})
+
+// 编辑信息按钮
+function edit_info(award_id) {
+	var name = $("#name_"+award_id).text();
+	var telephone = $("#telephone_"+award_id).text();
+	var address = $("#address_"+award_id).text();
+	$("#username").val(name);
+	$("#telephone").val(telephone);
+	$("#address").val(address);
+	$("#award_id").val(award_id);
+	$("#prompt").text(''); //清错误提示
+	showOpenBox("#tip-box3");
+}
+
+// 中奖用户提交信息验证函数
+function submit_info() {
+	var name = $.trim($("#username").val());
+	var telephone = $.trim($("#telephone").val());
+	var address = $.trim($("#address").val());
+	var award_id = $.trim($("#award_id").val());
+	if (name == '') {
+		$("#prompt").text('姓名不能为空');
+		return;
+	}
+	if (telephone == '') {
+		$("#prompt").text('请输入手机号');
+		return;
+	}
+	if (address == '') {
+		$("#prompt").text('地址不能为空');
+		return;
+	}
+	var r = Math.random();
+	$.ajax({
+		url:"/lottery/forfather_201706/edit_info.php?aid="+aid+"&sid="+sid,
+		data:{name:name, telephone:telephone, award_id:award_id, address:address,},
+		type:"post",
+		success:function(data){
+			if (data == -1) {
+				$("#prompt").text('请插入sim卡！');
+			} else if (data == 500) {
+				$("#prompt").text('姓名不能为空！');
+			} else if (data == 501) {
+				$("#prompt").text('请输入手机号！');
+			} else if (data == 502) {
+				$("#prompt").text('名字请在10字符内！');
+			} else if (data == 503) {
+				$("#prompt").text('请输入正确的手机号！');
+			} else if (data == 504) {
+				$("#prompt").text('地址不能为空！');
+			} else if (data == 200) {
+				$("#prompt").text('修改成功！');
+				setTimeout(function(){
+					cloBox('#tip-box3');
+					location.href="/lottery/forfather_201706/my_award.php?aid="+aid+"&sid="+sid+"&r="+r;
+				}, 1000);
+			} else {
+				$("#prompt").text('出错啦！');
+			}
+		}
+	});
+}
+</script>
+</head>
+<body>
+<div class="banner"><img src="<!--{$out.new_static_url}-->/activity/forfather_201706/images/banner.png"/></div>
+<div class="titles"><h3>我的奖品</h3></div>
+<div class="main">
+	<!--{foreach from=$out.my_award_list item=i key=k}-->
+	<div class="prize_list">
+		<div class="prize_list_inner">
+			<!--{if !$out.is_overdue}-->
+			<a href="javascript:;" class="prize_btns" onclick="edit_info('<!--{$i.award_id}-->')">编辑</a>
+			<!--{/if}-->
+			<p class="prize-title"><span><!--{$i.award_level_name}--> <!--{$i.award_name}--></span></p>
+			<ul class="prize-text">
+				<li><span>姓名：</span><font id="name_<!--{$i.award_id}-->"><!--{$i.name}--></font></li>
+				<li><span>手机：</span><font id="telephone_<!--{$i.award_id}-->"><!--{$i.telephone}--></font></li>
+				<li><span>地址：</span><font id="address_<!--{$i.award_id}-->"><!--{$i.address}--></font></li>
+			</ul>
+		</div>
+		<div class="prize_top"></div>
+	</div>
+	<!--{/foreach}-->
+</div>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+	<div class="tip-box pbot" id="tip-box3"  style="display: none; height:260px">
+		<form class="form1">
+			<div class="form-item clear">
+				<label for="username">姓名：</label>
+				<div class="textbox"><input type="text" id="username"/> </div>
+			</div>
+			<div class="form-item clear">
+				<label for="telephone">手机：</label>
+				<div class="textbox"><input type="text" id="telephone"/> </div>
+			</div>
+			<div class="form-item clear">
+				<label for="telephone">地址：</label>
+				<div class="textbox"><input type="text" id="address"/> </div>
+			</div>
+			<div style="display:none" id="award_id"></div>
+			<div class="prompt3" id="prompt"></div>
+		</form>
+		 <div class="tip_hd">
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box3')">关闭</a></div>
+        </div>
+		<a class="btns btns_tip" href="javascript:;" onclick="submit_info()" style="margin-top:12px">提交</a>
+	</div>
+</section>
+</body>
+</html>

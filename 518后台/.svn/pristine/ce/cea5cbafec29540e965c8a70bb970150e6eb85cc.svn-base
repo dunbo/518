@@ -1,0 +1,117 @@
+<include file="../Public/header"/>
+
+<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload_anzhi.js?1"></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript">
+    function upload(opt) {
+    	if( opt == 'table_1' ) {
+    		 var import_file = $.trim($("#table_1").val());
+    	}else if( opt == 'table_2' ) {
+    		 var import_file = $.trim($("#table_2").val());
+    	}else if( opt == 'table_3' ) {
+    		 var import_file = $.trim($("#table_3").val());
+    	}
+        if (import_file.length == 0) {
+            alert("请上传文件！");
+            return;
+        }
+        $.ajaxFileUpload({
+            url:'__URL__/csv_count/opt/'+opt,
+            type:'POST',
+			fileElementId:opt,
+			secureuri:false,
+			dataType:'json',
+            success:function(data){
+            	if(data.code == 1) {
+            		if(opt == 'table_1') {
+            			$("#table_error_1").text(data.msg)
+            			$("#table_data_1").val(data.csv_url)
+            		}else if(opt == 'table_2') {
+            			$("#table_error_2").text(data.msg)
+            			$("#table_data_2").val(data.csv_url)
+            		}else if(opt == 'table_3') {
+            			$("#table_error_3").text(data.msg)
+            			$("#table_data_3").val(data.csv_url)
+            		}
+            	}else {
+            		if(opt == 'table_1') {
+            			$("#table_error_1").text(data.msg)
+            			$("#table_data_1").val('')
+            		}else if(opt == 'table_2') {
+            			$("#table_error_2").text(data.msg)
+            			$("#table_data_2").val('')
+            		}else if(opt == 'table_3') {
+            			$("#table_error_3").text(data.msg)
+            			$("#table_data_3").val(data.csv_url)
+            		}
+            	}
+            }
+        });
+    }
+    
+</script>
+
+<body>
+<form action="__URL__/import_keyword" method="post" onSubmit="return check()" enctype="multipart/form-data">
+    <div style="width:97%; margin:10px auto;">
+		<h2>批量投放广告</h2>
+		<label>请选择要操作的产品：</label>
+		<select name='product_id' id="product_id">
+			<option value="0">选择产品</option>
+			<volist name="product_list" id="product" key="k">
+			<option value="{$product.pid}"  <if condition="($product.pid eq $product_id)"> selected = "selected" </if> >{$product.pname}</option>
+			</volist>
+		</select>		
+		<p>您可以通过“CSV文件导入”的方式，批量投放广告</p>
+		<p>(1) 请下载示例CSV文件　(2) 填写信息　(3) 上传CSV并验证</p>
+		<p>目标广告位： 下载推荐</p>
+		<div><a href="/Public/keyword_1.csv">下载表一示例csv</a></div>
+		<div style="margin:10px 0 15px;">
+		表一：<input type="file" id="table_1" name="table_1" style="background:none; border:none;" value="" />
+			 <input type="button" id="upload_csv" value="上传" onclick="upload('table_1')">
+			 <input type="hidden" id="table_data_1" name="table_data_1" value=""/>
+			<br/>
+			<span style="color:red; font-size:14px;" id="table_error_1"></span>
+		</div>
+		<div><a href="/Public/keyword_2.csv">下载表二示例csv</a></div>
+		<div style="margin:10px 0 15px;">
+		表二：<input type="file" id="table_2" name="table_2" style="background:none; border:none;" value="" />
+			 <input type="button" id="table_2" value="上传" onclick="upload('table_2')">
+			 <input type="hidden" id="table_data_2" name="table_data_2" value=""/>
+			<br/>
+			<span style="color:red; font-size:14px;" id="table_error_2"></span>
+		</div>
+		<div><a href="/Public/keyword_3.csv">下载表三示例csv</a></div>
+		<div style="margin:10px 0 15px;">
+		表三：<input type="file" id="table_3" name="table_3" style="background:none; border:none;" value="" />
+			 <input type="button" id="table_3" value="上传" onclick="upload('table_3')">
+			 <input type="hidden" id="table_data_3" name="table_data_3" value=""/>
+			<br/>
+			<span style="color:red; font-size:14px;" id="table_error_3"></span>
+		</div>
+	</div>
+    <!-- error_show_div用来展示文件的错误信息 -->
+    <div id="error_show_div">
+    </div>
+    <input type="submit" value="提交"  class="search_btn" style="float:left; margin-right:15px; display:inline; height:30px;"/>
+    <a href="/index.php/Sj/AdList/index" class="search_btn" style="float:left;">返回</a>
+	<div class="clear"></div>
+</form>
+</body>
+
+<script>
+function check(){
+	var table_data_1 = $("#table_data_1").val()
+	var table_data_2 = $("#table_data_2").val()
+	var table_data_3 = $("#table_data_3").val()
+	if(table_data_1 == "" && table_data_2 == "" && table_data_3 == "") {
+		alert('请先把上表传成功');
+		return false;
+	}
+	return true;
+}
+</script>
+
+

@@ -1,0 +1,83 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<center>
+<table border="1">
+<tr><td colspan="3"><b>输入渠道名或渠道号(现有渠道)</b></td></tr>
+<tr>
+<form action="__URL__/chl_app2sd" method="POST">
+<td>渠道名称:</td>
+<td><input type="text" name="srch_key" id="srchkey" size="64" value="{$search_key}"/><input type="radio" name="type" value="1" checked/>：渠道名&nbsp;<input type="radio" name="type" value="2" />：渠道号</td>
+<td><input type="submit" name="" value="搜索渠道" onclick="return chkinput('srchkey')"/></td>
+</form>
+</tr>
+</table>
+<table border="1">
+<form action="__URL__/chl_add2sd" method="POST">
+<tr><td colspan="4">渠道列表&nbsp;&nbsp;&nbsp;</td><td><a href="__URL__/app2sd_chl_list"><b>app2sd 渠道列表</b></a></td></tr>
+<?php 
+$i=0;
+foreach($chl_list as $chlinfo){
+ $i++;
+ if($i == 0){ echo "<tr>";}
+?>
+<td><input type="checkbox" name="chk_chl[]" value="<?php echo $chlinfo['cid']; ?>"><?php echo $chlinfo['chname']; ?></td>
+<?php 
+if($i == 5){ echo "<tr>"; $i =0;}
+}
+if(count($chl_list) == 0) echo "暂无渠道数据";
+?>
+<tr>
+<td colspan="5">
+全选:<input type="checkbox" onclick="clickAll()">
+<input type="submit" name="" value="添加" onclick="return chkbox()"/>
+</form>
+</td>
+</tr>
+<tr><td colspan="5">{$page}</td></tr>
+</table>
+</center>
+<script>
+var checkflag = false;
+function clickAll(){
+   var chkobj =  document.getElementsByName("chk_chl[]");
+   if(!checkflag){
+       for(var i in chkobj){
+         chkobj[i].checked = true;
+          i++;
+       }
+       checkflag = true;
+       return;
+   }
+   if(checkflag){
+       for(var i in chkobj){
+         chkobj[i].checked = false;
+          i++;
+       }
+       checkflag = false;
+       return;
+   }
+}
+function chkbox(){
+   var chkobj =  document.getElementsByName("chk_chl[]");
+   var sum = 0;
+    for(var i in chkobj){
+        if(chkobj[i].checked){
+            sum++;
+        }
+    }
+    if(sum==0){
+      alert("请选择渠道！！");
+      return false;
+    }
+    return true;
+}
+function  chkinput(id){
+  var ln= document.getElementById(id).value.length;
+  if(ln == 0){
+    alert("搜索框不能为空");
+    return false;
+  }
+   return true;
+}
+</script>
+<include file="../../Public/footer" />

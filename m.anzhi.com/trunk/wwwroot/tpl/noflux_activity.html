@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="Android,安卓,安卓网,安卓市场,安卓游戏,电子市场,安卓软件,Android游戏,安卓手机,游戏汉化,手机游戏,Android软件,软件下载,最新汉化软件,安卓游戏下载,游戏汉化" />
+<meta name="description" content="安智市场,Android,安卓,安卓网,安卓市场,电子市场,安卓游戏,应用商店-国内最专业的Android安卓电子市场，提供海量安卓软件、Android手机游戏、安卓最新汉化软件、汉化游戏资源及最新APK汉化、汉化破解APP、APK免费下载，致力于为用户打造最贴心的Android安卓手机应用商店" />
+<title><!--{$out.result[0]['ap_name']}--></title>
+<link type="text/css" rel="stylesheet" href="/css/noflux_common.css"/>
+<script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript">
+
+var proid_arr = getArgs();
+var aid = proid_arr.aid;
+var sid = proid_arr.sid;
+var skinvc = proid_arr.skinvc;
+
+
+function getArgs() {
+	var args = {};
+	var query = location.search.substring(1);
+	var pairs = query.split("&");
+	for(var i = 0; i < pairs.length; i++) {
+		var pos = pairs[i].indexOf('=');
+		if (pos == -1) continue;
+		var argname = pairs[i].substring(0,pos);
+		var value = pairs[i].substring(pos+1);
+		value = decodeURIComponent(value);
+		args[argname] = value;
+	}
+	return args;
+}
+
+//读取cookies
+function getCookie(name)
+{
+ var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+ 
+ if(arr=document.cookie.match(reg))
+ 
+  return unescape(arr[2]);
+ else
+  return null;
+} 
+
+function getArrayItems(arr, num) {
+    var temp_array = new Array();
+    for (var index in arr) {
+        temp_array.push(arr[index]);
+    }
+    var return_array = new Array();
+    for (var i = 0; i<num; i++) {
+        if (temp_array.length>0) {
+            var arrIndex = Math.floor(Math.random()*temp_array.length);
+            return_array[i] = temp_array[arrIndex];
+            temp_array.splice(arrIndex, 1);
+        } else {
+            break;
+        }
+    }
+    return return_array;
+}
+
+
+function get_fir_str(soft_list){
+	var str = '';
+	var the_soft = [];
+	if(soft_list){
+
+		for(i = 0; i < soft_list.length; i++) {
+			var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_list[i][0]));
+			var cmd = 'var soft_status=' + json_datas;
+			eval(cmd);
+			
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_list[i][0]));
+			window.AnzhiActivitys.registerInstallObserver(soft_list[i][7]);
+			if(soft_status == -1){
+				if(window.AnzhiActivitys.isInstalledApp(soft_list[i][7],parseInt(soft_list[i][13])) == 0 || window.AnzhiActivitys.isInstalledApp(soft_list[i][7],parseInt(soft_list[i][13])) == 1){
+					continue;
+				}else{
+					str = str +'<div class="margin_2 part2"><div class="module_2"><div class="img_A"><img src="'+soft_list[i][1]+'" height="85" border="0" /></div><div class="img_A title_A"><p><span>'+soft_list[i][2]+'</span><small class="icon_mian">免</small></p><p class="icon_score" style=" background-position:0px '+(-18*soft_list[i][3])+'px;"></p><p class="app_size"><span class="line_th">'+soft_list[i][9]+'</span>&nbsp;|&nbsp;<span class="line_no">0M</span></p></div></div><div class="app_intr">'+soft_list[i][23]+'</div><div class="clear"></div></div>';
+				}
+			}else{
+				str = str +'<div class="margin_2 part2"><div class="module_2"><div class="img_A"><img src="'+soft_list[i][1]+'" height="85" border="0" /></div><div class="img_A title_A"><p><span>'+soft_list[i][2]+'</span><small class="icon_mian">免</small></p><p class="icon_score" style=" background-position:0px '+(-18*soft_list[i][3])+'px;"></p><p class="app_size"><span class="line_th">'+soft_list[i][9]+'</span>&nbsp;|&nbsp;<span class="line_no">0M</span></p></div></div><div class="app_intr">'+soft_list[i][23]+'</div><div class="clear"></div></div>';
+			}
+		}
+		
+		if(!str){
+			$('#my_soft').html('<div class="margin_2 part2"><div class="module_2"><p align="center" class="title_B">暂无软件</p></div><div class="app_intr_A">亲，您已安装了所有免流量软件，明天再来看看吧~</div><div class="clear"></div></div>');
+		}else{
+			$('#my_soft').html(str);
+		}
+	}
+}
+
+
+function get_last_str(soft_list){
+	$('#telphone_check').css('display','none');
+	$('#code_checked').css('display','none');
+	$('#download_page').css('display','');
+	//var mobile_phone = $('#mobile_phone').val();
+	
+	$('#my_telphone').html(my_telphone);
+	var str = '';
+	if(soft_list){
+
+		for(i = 0; i < soft_list.length; i++) {
+			window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_list[i][0]));
+			window.AnzhiActivitys.registerInstallObserver(soft_list[i][7]);
+			var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_list[i][0]));
+			var cmd = 'var soft_status=' + json_datas;
+			eval(cmd);
+			if(soft_status == 1){
+				//soft_list[i]['soft_status'] = '下载中';
+				var my_soft = '<input type="button" class="soft_down_A" value="下载中" id="'+soft_list[i][0]+'" onclick="donwload_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',0,1,'+soft_list[i][27]+');">';
+			}else if(soft_status == 2){
+				//soft_list[i]['soft_status'] = '等待中';
+				var my_soft = '<input type="button" class="soft_down_B" value="继续" id="'+soft_list[i][0]+'" onclick="download_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',1,1,'+soft_list[i][27]+');" />';
+			}else if(soft_status == 3){
+				//soft_list[i]['soft_status'] = '暂停';
+				var my_soft = '<input type="button" class="soft_down_B" value="继续" id="'+soft_list[i][0]+'" onclick="download_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',1,1,'+soft_list[i][27]+');" />';
+			}else if(soft_status == 4){
+				//soft_list[i]['soft_status'] = '失败';
+				var my_soft = '<input type="button" class="soft_down_B" value="下载" id="'+soft_list[i][0]+'" onclick="download_apk(parseInt('+aid+'),'+soft_list[i][0]+',"'+soft_list[i][7]+'","'+soft_list[i][2]+'",parseInt('+soft_list[i][13]+'),"'+soft_list[i][27]+'",1,1,'+soft_list[i][27]+');" />';
+			}else if(soft_status == 5){
+				//soft_list[i]['soft_status'] = '完成';
+				var my_soft = '<input type="button" class="soft_down_B" value="安装" id="'+soft_list[i][0]+'" onclick="installApp(parseInt('+soft_list[i][0]+'));"/>';
+			}else if(soft_status == 6){
+				//soft_list[i]['soft_status'] = '安装完成';
+				var my_soft = '<input type="button" class="soft_down_A" value="已下载" id="'+soft_list[i][0]+'" />';
+			}else if(soft_status == 8){
+				//soft_list[i]['soft_status'] = '待校验';
+				var my_soft = '<input type="button" class="soft_down_B" value="继续" id="'+soft_list[i][0]+'" onclick="download_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',1,1,'+soft_list[i][27]+');" />';
+			}else if(soft_status == 9){
+				soft_list[i]['soft_status'] = '校验中';
+				var my_soft = '<input type="button" class="soft_down_A" value="校验中" id="'+soft_list[i][0]+'" />';
+			}else if(soft_status == 10){
+				//soft_list[i]['soft_status'] = '不可安装';
+				var my_soft = '<input type="button" class="soft_down_A" value="已下载" id="'+soft_list[i][0]+'" />';
+			}else if(soft_status == -1){
+				var soft_other_status = window.AnzhiActivitys.isInstalledApp(soft_list[i][7],parseInt(soft_list[i][13]));
+				if(soft_other_status == -2){
+					//soft_list[i]['soft_status'] = '下载';
+					var my_soft = '<input type="button" class="soft_down_B" value="下载" id="'+soft_list[i][0]+'" onclick="download_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',1,1,'+soft_list[i][27]+');" /><input type="hidden" value="'+aid+'" id="'+soft_list[i][0]+'_aid" /><input type="hidden" value="'+soft_list[i][0]+'" id="'+soft_list[i][0]+'_softid" /><input type="hidden" value="'+soft_list[i][7]+'" id="'+soft_list[i][0]+'_pkgname" /><input type="hidden" value="'+soft_list[i][2]+'" id="'+soft_list[i][0]+'_softname" /><input type="hidden" value="'+soft_list[i][13]+'" id="'+soft_list[i][0]+'_versioncode" /><input type="hidden" value="'+soft_list[i][27]+'" id="'+soft_list[i][0]+'_size" />';
+				}else if(soft_other_status == -1){
+					//soft_list[i]['soft_status'] = '更新';
+					var my_soft = '<input type="button" class="soft_down_B" value="更新" id="'+soft_list[i][0]+'" onclick="download_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',1,1,'+soft_list[i][27]+');" /><input type="hidden" value="'+soft_list[i][0]+'" id="'+soft_list[i][0]+'_softid" /><input type="hidden" value="'+soft_list[i][7]+'" id="'+soft_list[i][0]+'_pkgname" /><input type="hidden" value="'+soft_list[i][2]+'" id="'+soft_list[i][0]+'_softname" /><input type="hidden" value="'+soft_list[i][13]+'" id="'+soft_list[i][0]+'_versioncode" /><input type="hidden" value="'+soft_list[i][27]+'" id="'+soft_list[i][0]+'_size" />';
+				}
+			}
+		
+		
+			//构造html
+			if(soft_status == -1){
+				if(window.AnzhiActivitys.isInstalledApp(soft_list[i][7],parseInt(soft_list[i][13])) == 0 || window.AnzhiActivitys.isInstalledApp(soft_list[i][7],parseInt(soft_list[i][13])) == 1){
+					continue;
+				}else{
+					str = str + '<div class="margin_2 part2"><div class="module_2"><div class="img_A"><img src="'+soft_list[i][1]+'" height="85" border="0" /></div><div class="img_A title_A"><p><span>'+soft_list[i][2]+'</span><small class="icon_mian">免</small></p><p class="icon_score" style="background-position:0px '+(-18*soft_list[i][3])+'px;"></p><p class="app_size"><span class="line_th">'+soft_list[i][9]+'</span>&nbsp;|&nbsp;<span class="line_no">0M</span></p></div><div class="margin_top">'+my_soft+'</div></div><div class="app_intr">'+soft_list[i][23]+'</div><div class="clear"></div></div>';
+				}
+			}else{
+				str = str + '<div class="margin_2 part2"><div class="module_2"><div class="img_A"><img src="'+soft_list[i][1]+'" height="85" border="0" /></div><div class="img_A title_A"><p><span>'+soft_list[i][2]+'</span><small class="icon_mian">免</small></p><p class="icon_score" style="background-position:0px '+(-18*soft_list[i][3])+'px;"></p><p class="app_size"><span class="line_th">'+soft_list[i][9]+'</span>&nbsp;|&nbsp;<span class="line_no">0M</span></p></div><div class="margin_top">'+my_soft+'</div></div><div class="app_intr">'+soft_list[i][23]+'</div><div class="clear"></div></div>';
+			}
+		}
+		if(!str){
+			$('#my_soft').html('<div class="margin_2 part2"><div class="module_2"><p align="center" class="title_B">暂无软件</p></div><div class="app_intr_A">亲，您已安装了所有免流量软件，明天再来看看吧~</div><div class="clear"></div></div>');
+		}else{
+			$('#my_soft').html(str);
+		}
+	}
+}
+
+//获取cookie
+var noflux = getCookie('NOFLUX_'+aid+'');
+var my_telphone = getCookie('TELPHONE_'+aid+'');
+var my_imsi = getCookie('IMSI_'+aid+'');
+
+var IMSI = window.AnzhiActivitys.getIMSI();
+var IMEI = window.AnzhiActivitys.getIMEI();
+var TELS = window.AnzhiActivitys.getTel();
+var TEL = TELS.substr(3,11);
+$(document).ready(function(){
+	var noflux = getCookie('NOFLUX_'+aid+'');
+	var my_telphone = getCookie('TELPHONE_'+aid+'');
+	var my_imsi = getCookie('IMSI_'+aid+'');
+	
+	$('.report_list,.report_items ul li span').click(function(){
+		var hdsm_report_list = $("#hdsm .report_list");
+		var hdsm_input = $('#hdsm  .receive_area_A input');
+		if (hdsm_report_list.hasClass("checked")){
+			hdsm_report_list.removeClass("checked");
+			$('#hdsm span').removeClass('checkedbg');
+			hdsm_input.addClass("receive_button_gray");
+			hdsm_input.removeClass("receive_button_blue");
+			
+		}else {
+			hdsm_report_list.addClass("checked");
+			$('#hdsm span').addClass('checkedbg');
+			hdsm_input.addClass("receive_button_blue");
+			hdsm_input.removeClass("receive_button_gray");
+		}
+	});
+
+	if(!IMSI || IMSI == '000000000000000'){
+		$('#no_sim').css('display','');
+		$('#telphone_check').css('display','none');
+		$('#code_checked').css('display','none');
+		$('#download_page').css('display','none');
+	}
+
+	if(TEL && IMSI && IMSI != '000000000000000'){	
+		if(my_imsi && (IMSI == my_imsi)){
+			$('#code_check').css('display','none');
+			$('#telphone_check').css('display','none');
+			$('#code_checked').css('display','none');
+			$('#download_page').css('display','');
+			$('#my_telphone').html(TEL);
+		}else{
+			$.ajax({
+			url:"/noflux_activity.php",
+			data:"TEL="+TEL+"&IMSI="+IMSI+"&aid="+aid+"&sid="+sid,
+			type:"get",
+			success: function(data){
+					if(data == 100){
+						$('#code_check').css('display','none');
+						$('#telphone_check').css('display','none');
+						$('#code_checked').css('display','none');
+						$('#download_page').css('display','');
+						$('#my_telphone').html(TEL);
+					}else if(data == 2){
+						$('#code_check').css('display','none');
+						$('#telphone_check').css('display','none');
+						$('#code_checked').css('display','none');
+						$('#download_page').css('display','none');
+						$('#mobile_phone').css('display','none');
+						$('#no_allow').css('display','');
+						
+					}
+				}
+			});
+		}
+	}
+	
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	
+	if(!json_data){
+		$('#my_soft').html('<div class="margin_2 part2"><div class="module_2"><p align="center" class="title_B">暂无软件</p></div><div class="app_intr_A">亲，您已安装了所有免流量软件，明天再来看看吧~</div><div class="clear"></div></div>');
+	}else{
+		var cmd = 'var soft_lists=' + json_data;
+		eval(cmd);
+		var soft_list = soft_lists.DATA;
+		//获取cookie
+		var noflux = getCookie('NOFLUX_'+aid+'');
+		var my_telphone = getCookie('TELPHONE_'+aid+'');
+		var my_imsi = getCookie('IMSI_'+aid+'');
+		//构造html
+
+		if (noflux != aid || !IMSI || IMSI == '000000000000000' || IMSI != my_imsi) {  
+			get_fir_str(soft_list);
+		}else if(noflux == aid && IMSI && IMSI != '000000000000000'){
+			get_last_str(soft_list);
+		}
+	}
+});	
+
+
+function isMobel(obj)  {
+	//if(/^13\d{9}$/g.test(obj) || /^14\d{9}$/g.test(obj) || /^15\d{9}$/g.test(obj) || /^17\d{9}$/g.test(obj) || /^18\d{9}$/g.test(obj)){  
+	var flag = /^1([34578])\d{9}$/.test(obj);
+	if(flag){  
+		return true;  
+	}else{
+		return false;
+	}  
+}
+
+//验证提交电话
+function _submit(){
+	if($('#my_checked').attr('class') != "checkedbg"){
+		return false;
+	}
+
+	var mobile_phone = $('#mobile_phone').val();
+	if(mobile_phone == '手机号码' || mobile_phone == ''){
+		$('#check_mobile').html("请输入手机号");
+		$('#check_mobile').css('display','');
+		return false;
+	}
+
+	if(!isMobel(mobile_phone)){
+		$('#check_mobile').html("请输入正确的手机号");
+		$('#check_mobile').css('display','');
+		return false;
+	}else{
+		$('#check_mobile').html("");
+		$('#check_mobile').css('display','none');
+	}
+	
+	$.ajax({
+		url:"/noflux_activity.php",
+		data:"telphone="+mobile_phone+"&sid="+sid+"&aid="+aid+'',
+		type:"get",
+		success:function(data) {
+			if(data == 2){
+				$('#check_mobile').html("很抱歉，您的号码不在本次活动范围内");
+				$('#check_mobile').css('display','');
+				return false;
+			}else if(data == 1){
+				$('#code_check').css('display','');
+				$('#code_check').html("验证码发送成功");
+				$('#check_mobile').css('display','none');
+				$('#telphone_check').css('display','none');
+				$('#code_checked').css('display','');
+				setTimeout(function(){$('#code_check').css('display','none');},2000);
+				time(document.getElementById('submit_tel_btn') ,1);
+				return false;
+			}
+		}
+	});	
+	return false;
+}
+
+
+//验证提交验证码和电话号码
+function _submit_code(){
+	var checkcode = $("#checkcode").val();
+	var mobile_phone = $("#mobile_phone").val();
+	$.ajax({
+		url:"/noflux_check.php",
+		data:"telphone="+mobile_phone+"&checkcode="+checkcode+"&aid="+aid+"&IMSI="+IMSI,
+		type:"get",
+		success:function(data) {
+			if(data == 8){
+				$('#code_check').html("验证码输入错误");
+				$('#code_check').css('display','');
+				return false;
+			}else if(data == 6){
+				$('#code_check').css('display','none');
+				$('#telphone_check').css('display','none');
+				$('#code_checked').css('display','none');
+				$('#download_page').css('display','');
+				$('#my_telphone').html(mobile_phone);
+				var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+				var cmd = 'var soft_lists=' + json_data;
+				eval(cmd);
+				var soft_list = soft_lists.DATA;
+				//软件状态
+				var str = '';
+				for(i = 0; i < soft_list.length; i++) {
+					var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_list[i][0]));
+					var cmd = 'var soft_status=' + json_datas;
+					eval(cmd);
+					if(soft_status == 1){
+						//soft_list[i]['soft_status'] = '下载中';
+						var my_soft = '<input type="button" class="soft_down_A" value="下载中" id="'+soft_list[i][0]+'" onclick="donwload_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',0,1,'+soft_list[i][27]+');">';
+					}else if(soft_status == 2){
+						//soft_list[i]['soft_status'] = '等待中';
+						var my_soft = '<input type="button" class="soft_down_B" value="下载" id="'+soft_list[i][0]+'" onclick="download_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',1,1,'+soft_list[i][27]+');" />';
+					}else if(soft_status == 3){
+						//soft_list[i]['soft_status'] = '暂停';
+						var my_soft = '<input type="button" class="soft_down_B" value="下载" id="'+soft_list[i][0]+'" onclick="download_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',1,1,'+soft_list[i][27]+');" />';
+					}else if(soft_status == 4){
+						//soft_list[i]['soft_status'] = '失败';
+						var my_soft = '<input type="button" class="soft_down_B" value="下载" id="'+soft_list[i][0]+'" onclick="download_apk(parseInt('+aid+'),'+soft_list[i][0]+',"'+soft_list[i][7]+'","'+soft_list[i][2]+'",parseInt('+soft_list[i][13]+'),"'+soft_list[i][27]+'",1,1,'+soft_list[i][27]+');" />';
+					}else if(soft_status == 5){
+						//soft_list[i]['soft_status'] = '完成';
+						var my_soft = '<input type="button" class="soft_down_B" value="安装" id="'+soft_list[i][0]+'" onclick="installApp(parseInt('+soft_list[i][0]+'));" />';
+					}else if(soft_status == 6){
+						//soft_list[i]['soft_status'] = '安装完成';
+						var my_soft = '<input type="button" class="soft_down_A" value="已下载" id="'+soft_list[i][0]+'" />';
+					}else if(soft_status == 8){
+						//soft_list[i]['soft_status'] = '待校验';
+						var my_soft = '<input type="button" class="soft_down_B" value="下载" id="'+soft_list[i][0]+'" onclick="download_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',1,1,'+soft_list[i][27]+');" />';
+					}else if(soft_status == 9){
+						soft_list[i]['soft_status'] = '校验中';
+						var my_soft = '<input type="button" class="soft_down_A" value="校验中" id="'+soft_list[i][0]+'" />';
+					}else if(soft_status == 10){
+						//soft_list[i]['soft_status'] = '不可安装';
+						var my_soft = '<input type="button" class="soft_down_A" value="已下载" id="'+soft_list[i][0]+'" />';
+					}else if(soft_status == -1){
+						var soft_other_status = window.AnzhiActivitys.isInstalledApp(soft_list[i][7],parseInt(soft_list[i][13]));
+						if(soft_other_status == -2){
+							//soft_list[i]['soft_status'] = '下载';
+							var my_soft = '<input type="button" class="soft_down_B" value="下载" id="'+soft_list[i][0]+'" onclick="download_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',1,1,'+soft_list[i][27]+');" /><input type="hidden" value="'+aid+'" id="'+soft_list[i][0]+'_aid" /><input type="hidden" value="'+soft_list[i][0]+'" id="'+soft_list[i][0]+'_softid" /><input type="hidden" value="'+soft_list[i][7]+'" id="'+soft_list[i][0]+'_pkgname" /><input type="hidden" value="'+soft_list[i][2]+'" id="'+soft_list[i][0]+'_softname" /><input type="hidden" value="'+soft_list[i][13]+'" id="'+soft_list[i][0]+'_versioncode" /><input type="hidden" value="'+soft_list[i][27]+'" id="'+soft_list[i][0]+'_size" />';
+						}else if(soft_other_status == -1){
+							//soft_list[i]['soft_status'] = '更新';
+							var my_soft = '<input type="button" class="soft_down_B" value="更新" id="'+soft_list[i][0]+'" onclick="download_apk('+aid+','+soft_list[i][0]+',\''+soft_list[i][7]+'\',\''+soft_list[i][2]+'\','+soft_list[i][13]+','+soft_list[i][27]+',1,1,'+soft_list[i][27]+');" /><input type="hidden" value="'+aid+'" id="'+soft_list[i][0]+'_aid" /><input type="hidden" value="'+soft_list[i][0]+'" id="'+soft_list[i][0]+'_softid" /><input type="hidden" value="'+soft_list[i][7]+'" id="'+soft_list[i][0]+'_pkgname" /><input type="hidden" value="'+soft_list[i][2]+'" id="'+soft_list[i][0]+'_softname" /><input type="hidden" value="'+soft_list[i][13]+'" id="'+soft_list[i][0]+'_versioncode" /><input type="hidden" value="'+soft_list[i][27]+'" id="'+soft_list[i][0]+'_size" />';
+						}
+					}
+				
+				
+					//构造html
+					if(soft_status == -1){
+						if(window.AnzhiActivitys.isInstalledApp(soft_list[i][7],parseInt(soft_list[i][13])) == 0){
+							continue;
+						}else{
+							str = str + '<div class="margin_2 part2"><div class="module_2"><div class="img_A"><img src="'+soft_list[i][1]+'" height="85" border="0" /></div><div class="img_A title_A"><p><span>'+soft_list[i][2]+'</span><small class="icon_mian">免</small></p><p class="icon_score" style="background-position:0px '+(-18*soft_list[i][3])+'px;"></p><p class="app_size"><span class="line_th">'+soft_list[i][9]+'</span>&nbsp;|&nbsp;<span class="line_no">0M</span></p></div><div class="margin_top">'+my_soft+'</div></div><div class="app_intr">'+soft_list[i][23]+'</div><div class="clear"></div></div>';
+						}
+						
+					}else{
+						str = str + '<div class="margin_2 part2"><div class="module_2"><div class="img_A"><img src="'+soft_list[i][1]+'" height="85" border="0" /></div><div class="img_A title_A"><p><span>'+soft_list[i][2]+'</span><small class="icon_mian">免</small></p><p class="icon_score" style="background-position:0px '+(-18*soft_list[i][3])+'px;"></p><p class="app_size"><span class="line_th">'+soft_list[i][9]+'</span>&nbsp;|&nbsp;<span class="line_no">0M</span></p></div><div class="margin_top">'+my_soft+'</div></div><div class="app_intr">'+soft_list[i][23]+'</div><div class="clear"></div></div>';
+					}
+					$('#my_soft').html('');
+					$('#my_soft').html(str);
+				}
+			}
+			return false;
+		}
+		
+	});		
+	return false;
+}
+
+
+//下载软件
+function download_apk(aid,softid,pkgname,softname,versionCode,size,flag,noflux,firmware){
+	if(skinvc >= 5400){
+		window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag,1,firmware);
+	}else{
+		window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag,1);
+	}
+	
+}
+
+//更新软件状态（正在下载）
+function onDownloadCreated(softid){
+	$('#'+softid+'').val("下载中");
+	$('#'+softid+'').attr('class','soft_down_A');
+}
+
+//更新软件状态（下载完成/安装）
+function onDownloadStateChanged(softid,newState){
+	var aids = $('#'+softid+'_aid').val();
+	var softid = $('#'+softid+'_softid').val();
+	var pkgname = $('#'+softid+'_pkgname').val();
+	var softname = $('#'+softid+'_softname').val();
+	var versioncode = $('#'+softid+'_versioncode').val();
+	var size = $('#'+softid+'_size').val();
+	if(newState == 1){
+		$('#'+softid+'').val("下载中");
+		$('#'+softid+'').attr('class','soft_down_A');
+	}else if(newState == 2){
+		$('#'+softid+'').val("继续");
+		$('#'+softid+'').attr('class','soft_down_B');
+		//$('#'+softid+'').bind('onclick','download_apk('+aids+','+softid+',\''+pkgname+'\',\''+softname+'\','+versioncode+','+size+',1);');
+		$('#'+softid+'').unbind('click');
+		$('#'+softid+'').bind('click',function(){
+			download_apk(aids,softid,pkgname,softname,versioncode,size,1);
+		});
+	}else if(newState == 3){
+		$('#'+softid+'').val("继续");
+		$('#'+softid+'').attr('class','soft_down_B');
+		//$('#'+softid+'').bind('onclick','download_apk('+aids+','+softid+',\''+pkgname+'\',\''+softname+'\','+versioncode+','+size+',1);');
+		$('#'+softid+'').unbind('click');
+		$('#'+softid+'').bind('click',function(){
+			download_apk(aids,softid,pkgname,softname,versioncode,size,1);
+		});
+	}else if(newState == 4){
+		$('#'+softid+'').val("重试");
+		$('#'+softid+'').attr('class','soft_down_B');
+		//$('#'+softid+'').bind('onclick','download_apk('+aids+','+softid+',\''+pkgname+'\',\''+softname+'\','+versioncode+','+size+',1);');
+		$('#'+softid+'').unbind('click');
+		$('#'+softid+'').bind('click',function(){
+			download_apk(aids,softid,pkgname,softname,versioncode,size,1);
+		});
+	}else if(newState == 5){
+		$('#'+softid+'').val("安装");
+		$('#'+softid+'').attr('class','soft_down_B');
+		$('#'+softid+'').unbind('click');
+		//$('#'+softid+'').bind('onclick','installApp()');
+		$('#'+softid+'').bind('click',function(){
+			installApp(parseInt(softid));
+		});
+		return false;
+	}else if(newState == 6){
+		$('#'+softid+'').val("打开");
+		$('#'+softid+'').attr('class','soft_down_A');
+	}else if(newState == 8){
+		$('#'+softid+'').val("继续");
+		$('#'+softid+'').attr('class','soft_down_B');
+		//$('#'+softid+'').bind('onclick','download_apk('+aids+','+softid+',\''+pkgname+'\',\''+softname+'\','+versioncode+','+size+',1);');
+		$('#'+softid+'').unbind('click');
+		$('#'+softid+'').bind('click',function(){
+			download_apk(aids,softid,pkgname,softname,versioncode,size,1);
+		});
+	}else if(newState == 9){
+		$('#'+softid+'').val("检查中");
+		$('#'+softid+'').attr('class','soft_down_A');
+		
+	}
+}
+
+
+//安装
+function installApp(softid){
+	window.AnzhiActivitys.installAppForActivity(softid);
+}
+
+//取消下载任务，更新软件状态(下载)
+function onDownloadDeleted(softid){
+	var aids = $('#'+softid+'_aid').val();
+	var softid = $('#'+softid+'_softid').val();
+	var pkgname = $('#'+softid+'_pkgname').val();
+	var softname = $('#'+softid+'_softname').val();
+	var versioncode = $('#'+softid+'_versioncode').val();
+	var size = $('#'+softid+'_size').val();
+	
+	if (window.AnzhiActivitys.isInstalledApp(pkgname, parseInt(versioncode)) == -2) {
+		$('#'+softid+'').val("下载");
+		$('#'+softid+'').attr('class','soft_down_B');
+		//$('#'+softid+'').bind('onclick','download_apk('+aids+','+softid+',\''+pkgname+'\',\''+softname+'\','+versioncode+','+size+',1);');
+		$('#'+softid+'').unbind('click');
+		$('#'+softid+'').bind('click',function(){
+			download_apk(aids,softid,pkgname,softname,versioncode,size,1);
+		});
+	} else if (window.AnzhiActivitys.isInstalledApp(pkgname, parseInt(versioncode)) == -1) {
+		$('#'+softid+'').val("更新");
+		$('#'+softid+'').attr('class','soft_down_B');
+		//$('#'+softid+'').bind('onclick','download_apk('+aids+','+softid+',\''+pkgname+'\',\''+softname+'\','+versioncode+','+size+',1);');
+		$('#'+softid+'').unbind('click');
+		$('#'+softid+'').bind('click',function(){
+			download_apk(aids,softid,pkgname,softname,versioncode,size,1);
+		});
+	}
+
+}
+
+//更新软件状态（已下载）
+function onInstalled(pkgname){
+	 location.reload();
+}
+
+//更新软件状态(正在安装)
+function onAppInstalling(softid){
+	$('#'+softid+'').val("正在安装");
+	$('#'+softid+'').attr('class','soft_down_A');
+}
+
+function change_page(){
+	$('#check_mobile').html("");
+	$('#check_mobile').css('display','none');
+	$('#telphone_check').css('display','');
+	$('#code_checked').css('display','none');
+	time(document.getElementById('submit_tel_btn'),2);
+	return false;
+}
+
+$(function() {
+	$("#submit_tel_btn").click(function() {
+		if($('#submit_tel_btn').attr('class') == 'input_butC'){
+			return false;
+		}else{
+			_submit();
+			return false;
+		}
+	});
+	
+	$("#change_telphone").click(function() {
+		change_page();
+		return false;
+	});
+	
+	$("#submit_btn").click(function() {
+		_submit();
+		return false;
+	});
+	
+	$("#input_butB").click(function() {
+		_submit_code();
+		return false;
+	});
+});
+
+
+//倒计时
+var wait=60;  
+function time(obj,i) { 
+	if(i == 1){
+		if (wait == 0) {  
+			obj.removeAttribute("disabled");            
+			obj.innerHTML="重新发送";  
+			obj.setAttribute("class","input_butD");
+			wait = 60;  
+		} else {  
+			obj.setAttribute("class","input_butC");
+			obj.setAttribute("disabled", true);  
+			obj.innerHTML="重新发送(" + wait + ")";  
+			wait--;  
+			setTimeout(function() {  
+				time(obj ,1)  
+			},  
+			1000)  
+		}
+	}else if(i == 2){
+		obj.removeAttribute("disabled");            
+		obj.innerHTML="重新发送";  
+		obj.setAttribute("class","input_butD");
+		wait = 0; 
+	}
+	return false;
+}  
+</script>
+</head>
+
+<body>
+<section class="content">
+<div class="main">
+	 <a name="top" id="top"><div id="banner"><img src="<!--{$out.imgurl}--><!--{$out.result[0]['ap_imgurl']}-->"></div></a>
+	 <div class="margin_1 part1" id="no_sim"  style="display:none;" >
+     	<p class="title_D" style="color:#ff0000; font-size:16px;">请先插入SIM卡后参与本活动</p>
+        <p class="margin_top10 title_B" style="display:none;">验证码错误</p>
+        <p class="title_C margin_top10">规则详见<a href="#hdsms" target="_self" class="title_B">活动说明</a></p>
+        <div class="clear"></div>
+     </div>
+	 <div class="margin_1 part1" id="telphone_check">
+	 <form method="get" action="" onsubmit="return _submit();">
+     	<p class="title_A">输入手机号免费领取权限</p>
+     	<p class="margin_top10"><input type="text" id="mobile_phone" class="input_entA" autocomplete="off" value="请输入手机号" onblur="if(this.value==''){this.value='请输入手机号'}" onFocus="if(this.value=='请输入手机号'){this.value=''}"></p>
+        <p class="margin_top10 title_B" id="check_mobile" style="display:none;">手机号需验证</p>
+        <div id='hdsm' class="report_items margin_top10">
+            <ul>
+              <li>
+                <input type="checkbox" value="18" name="report_id" onclick="my_times();" id="{$v.softid}">
+                <span class="checkedbg" id="my_checked"></span>
+                <label class="report_list checked">我已阅读</label><a href="#hdsms" target="_self" style="color:#fe0000;">活动说明</a>	
+              </li>
+            </ul>
+            <div class="receive_area_A">
+        		<input type="button" id="submit_btn" class="receive_button receive_button_blue" value="领取权限">
+        	</div>
+        </div>
+        <div class="clear"></div>
+	 </form>
+     </div>
+	 
+	 <div class="margin_1 part1" id="code_checked" style="display:none;">
+	 <form method="get" action="" onsubmit="return _submit_code();">
+     	<div>
+			<p>
+        	<label class="lab_name">验证码：</label>
+        	<input type="text" class="input_entB" id="checkcode" autocomplete="off" value="请输入验证码" onblur="if(this.value==''){this.value='请输入验证码'}" onFocus="if(this.value=='请输入验证码'){this.value=''}">
+			<a class="input_butC" id="submit_tel_btn"></a>
+        </div>
+		<p class="margin_top10 title_B" style="display:none;" id="code_check"></p>
+		<div class="receive_area_A">
+        	<input type="button" value="确定" id="input_butB" class="receive_button receive_button_blue">
+            <div class="clear"></div>
+        </div>
+        <p class="title_C margin_top10">规则详见<a href="#hdsms" class="title_B">活动说明</a></p>
+        <div class="clear"></div>
+	 </form>
+     </div>
+	 
+	  <div class="margin_1 part1" id="download_page" style="display:none;">
+     	<p class="title_D margin_top10">仅使用&nbsp;<span id="my_telphone"></span>&nbsp;在本页面联网下载软件免流量</p>
+        <p class="title_C margin_top10">规则详见<a href="#hdsms" class="title_B">活动说明</a></p>
+        <p class="title_E margin_top10">温馨提示：省外漫游状态不能免流量</p>
+        <div class="clear"></div>
+     </div>
+	 
+	 <div class="margin_1 part1" id="no_allow" style="display:none;">
+     	<p class="margin_top10 title_B" >很抱歉，您的号码不在本次活动范围内</p>
+        <div class="clear"></div>
+     </div>
+	 
+	 
+	<div class="margin_3 part3">
+		<p class="title_A">今日免流量软件</p>
+		<div class="clear"></div>
+	</div>
+	<div id="my_soft">
+    
+    </div>
+     <div class="margin_2 part2">
+     	<!--<div style="width:425px; margin:10px auto 0 auto;background-color:#ffffff;border-radius:2px;-moz-border-radius:2px;-webkit-border-radius:2px;-webkit-box-shadow:0 2px 2px #D8D8D8;-moz-box-shadow:0 2px 2px #D8D8D8;box-shadow:0 2px 2px #D8D8D8; padding:10px;">-->
+         <div class="title_B">
+			<a name="hdsms" id="hdsms"></a>
+            <p class="margin_bottom">活动说明：</p>
+        </div>
+        <div class="article">
+        	<!--{$out.result[0]['ap_rule']}-->
+        </div>
+		
+        <div class="clear"></div>
+     <!--</div>-->
+     </div>
+	<!--{if $out.result[0]['back_top'] eq 1}-->
+     <div class="receive_area">
+     <a href="#top" target="_self"><p class="top_button">返回顶部</p></a>
+        	<!--<input name="top_image" type="button" value="返回顶部">-->
+     </div>
+     <!--{/if}-->
+</div>
+</section>
+</body>
+</html>

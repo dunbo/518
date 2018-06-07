@@ -1,0 +1,648 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox1.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/content_type.js?2"></script>
+
+<!--csv文件上传 -->
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js?v2"></script>
+
+<!--使用灵活运营的推荐内容编辑必需添加此js-->
+<script type="text/javascript" src="/Public/js/edit_content_type.js?v3"></script>
+<style>
+.sub_tr {
+    height: 35px;
+    text-align: left;
+}
+</style>
+<script language="JavaScript">
+	
+$(function(){
+    // 推荐内容值
+    /*var content_arr = Array();
+    content_arr['content_type'] = "{$result.0.content_type}";
+    if (content_arr['content_type'] == 1) {
+        content_arr['package'] = "{$result.0.package}";
+        content_arr['uninstall_setting'] = "{$result.0.uninstall_setting}";
+        content_arr['install_setting'] = "{$result.0.install_setting}";
+        if (content_arr['install_setting'] == 4) {
+            content_arr['start_to_page'] = "{$result.0.start_to_page}";
+        }
+        content_arr['lowversion_setting'] = "{$result.0.lowversion_setting}";
+    } else if (content_arr['content_type'] == 2) {
+        content_arr['activity_id'] = "{$result.0.activity_id}";
+    } else if (content_arr['content_type'] == 3) {
+        content_arr['feature_id'] = "{$result.0.feature_id}";
+    } else if (content_arr['content_type'] == 4) {
+        content_arr['page_type'] = "{$result.0.page_type}";
+		content_arr['parameter_field'] = '{$result.0.parameter_field}';
+    } else if (content_arr['content_type'] == 5) {
+        content_arr['website'] = "{$result.0.website}";
+        content_arr['website_open_type'] = "{$result.0.website_open_type}";
+    }else if (content_arr['content_type'] == 6) {
+        content_arr['gift_id'] = "{$result.0.gift_id}";
+    } else if (content_arr['content_type'] == 7) {
+        content_arr['strategy_id'] = "{$result.0.strategy_id}";
+    }*/
+	
+	var soft_arr = {:json_encode($result[0])};
+	var content_arr = edit_load(soft_arr);
+
+    // 生成推荐内容展示
+    generate_append_html("content_type_div", content_arr);
+    // 生成推荐链接
+    href = generate_content_type_href('content_type_div', "{$result.0.content_type}", content_arr);
+    $("#content_type_a").attr("href", href);
+    
+});
+
+
+// 提交前的检查
+function checkPost() {
+    var ad_name = $("#edit_content_form #ad_name").val();
+    if (!ad_name) {
+        alert("广告名称不能为空！");
+        return false;
+    }
+    var image_url = $("#edit_content_form #image_url").val();
+    if (image_url) {
+        // 检查图片后缀
+        var suffix =/\.[^\.]+/.exec(image_url);
+        if (suffix != '.jpg' && suffix != '.png' && suffix != '.gif') {
+            alert("上传图片格式错误");
+            return false;
+        }
+    }
+    var button_name = $("#edit_content_form #button_name").val();
+    if (!button_name) {
+        alert("按钮名称不能为空！");
+        return false;
+    }
+    var pkg=$('#package').val();
+    var enable=true;
+    if(pkg){
+	    	$.ajax({
+			url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					if(!confirm(data)){
+						 enable=false;
+					}
+				}
+			}
+		});
+    	if(!enable){
+    		return false;
+    	}
+    }
+    return checkRcontent("#edit_content_form");
+    
+    var start_at = $("#edit_content_form #start_at").val();
+    if (!start_at) {
+        alert("开始时间不能为空！");
+        return false;
+    }
+    var end_at = $("#edit_content_form #end_at").val();
+    if (!end_at) {
+        alert("结束时间不能为空！");
+        return false;
+    }
+    if (start_at > end_at) {
+        alert("开始时间不能大于结束时间！");
+        return false;
+    }
+	return true;
+}
+
+// 提交前的检查
+function checkPost_two() {
+    var pkg=$('#package').val();
+    var enable=true;
+    if(pkg){
+	    	$.ajax({
+			url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					if(!confirm(data)){
+						 enable=false;
+					}
+				}
+			}
+		});
+    	if(!enable){
+    		return false;
+    	}
+    }
+	return true;
+}
+	
+	$(document).ready(function(){
+		var obj = $('#ad_type').val();
+		if(obj == 1){
+			$('#my_package').css('display','');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+		}else if(obj == 2){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+		}else if(obj == 3){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+		}else if(obj == 4){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','');
+			$('#my_webpage').css('display','none');
+		}else if(obj == 5){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','');
+		}else if(obj == 0){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+		}
+		
+		var objs = $('#page_type').val();
+		if(objs == 1){
+			$('#page_name1').css('display','');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','none');
+		}else if(objs == 2){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','none');
+		}else if(objs == 3){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','');
+			$('#page_name4').css('display','none');
+		}else if(objs == 4){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','');
+		}else{
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','none');
+		}
+	});
+	
+	
+	function select_ad(obj){
+		if(obj == 1){
+			$('#my_package').css('display','');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+		}else if(obj == 2){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+		}else if(obj == 3){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+		}else if(obj == 4){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','');
+			$('#my_webpage').css('display','none');
+		}else if(obj == 5){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','');
+		}else if(obj == 0){
+			$('#my_package').css('display','none');
+			$('#my_activity').css('display','none');
+			$('#my_feature').css('display','none');
+			$('#my_page').css('display','none');
+			$('#my_webpage').css('display','none');
+		}
+		
+	}
+	
+	function select_page(obj){
+		if(obj == 1){
+			$('#page_name1').css('display','');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','none');
+		}else if(obj == 2){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','none');
+		}else if(obj == 3){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','');
+			$('#page_name4').css('display','none');
+		}else if(obj == 4){
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','');
+		}else{
+			$('#page_name1').css('display','none');
+			$('#page_name2').css('display','none');
+			$('#page_name3').css('display','none');
+			$('#page_name4').css('display','none');
+		}
+	
+	}
+	//////// 精准投放thickbox相关函数
+    function count() {
+        $.ajaxFileUpload({
+            url:'__APP__/Public/pub_csv_count',
+            type:'POST',
+			fileElementId:'upload_file',
+			dataType: 'json',
+            secureuri:false,
+            dataType:'json',
+            success:function(data)
+			{
+			    if(data.error1==-1)
+				{
+					alert("请选择导入的CSV文件!");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+					return false;
+				}
+				else if(data.error2==-2)
+				{
+					alert("请上传CSV格式文件！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else if(data.error2==-3)
+				{
+					alert("CSV文件格式不正确,请您参考下载模板！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else
+				{
+					document.getElementById("csv_url").value=data.csv_url;
+					document.getElementById("csv_count").value=data.out_count;
+					document.getElementById("pre_dl_count").value=data.out_count;
+                }				
+            }
+        });
+    }
+	//渠道
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{
+		$('#channel_div').html($('.TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	//机型
+	function onclikDevice()
+	{
+		$('#device_div').html($('.TB_ajaxContent #c_device_res').html());
+	}
+
+	function check_arrs()
+	{
+		$('.TB_ajaxContent #c_device_res').html($('#device_div').html());
+
+		$('#device_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_did_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	function delItem(obj) {
+	$(obj).parent().remove();
+	//  var fatie = $("#channel_div");
+	//	fatie.remove();
+
+	}
+	 function addItem() {
+		var channel_select = $("#device_div");
+		channel_select.clone().appendTo("#device_td");
+	}
+	function submitDevice()
+	{
+		var cids = '';
+		$('#device_div').empty();
+		$(".TB_ajaxContent #c_device_res input:checked").each(function(){
+			var item = $('<label>' + $('#c_device_res .l_did_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			item.find('input').click(function(){
+				$(this).parent().remove();
+			});
+			$('#device_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	//删除csv
+	function del_csv()
+	{
+		$("#csv_count").val("");
+		$("#csv_url").val("");
+		$("#have_pre_dl").val("");
+		$("#pre_dl_count").val("");
+		alert("删除后提交即生效");
+	}
+	$(document).ready(function()
+	{
+		var have_csv="{$result[0]['csv_url']}";
+		var is_upload_csv="{$result[0]['is_upload_csv']}";
+		if(have_csv&&is_upload_csv==1)//添加的时候已经上传过了可以删除
+		{
+			$("#del_csv_value").css("display","");
+			$("#upload_csv").css("display","none");
+			$("#upload_file").css("display","none");
+			$("#have_pre_dl").css("display","");
+		}
+		else if(!have_csv&&is_upload_csv==1)//已经上传过了又删除了什么也不显示
+		{
+			$("#tr_csv").css("display","none");
+		}
+		else if(!have_csv&&is_upload_csv==0)//添加的时候没有上传可以上传
+		{
+			$("#del_csv_value").css("display","none");
+			$("#upload_csv").css("display","");
+			$("#upload_file").css("display","");
+			$("#have_pre_dl").css("display","none");
+		}
+	});
+	function show_activation_date(num){
+		if(num==2){
+			$('#activation_date').show();
+	    }else{
+	   	    $('#activation_date').hide();
+	    }
+	}
+</script>
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<body>
+<div  style="margin:20px;">
+<form action="__URL__/edit_splash_do" method="post" enctype="multipart/form-data" onsubmit="return checkPost_two();">
+<?php if($result[0]['splash_type'] == 1){ ?><h3>编辑普通闪屏</h3><?php }elseif($result[0]['splash_type'] == 2){ ?><h3>编辑广告闪屏</h3><?php } ?>
+<br />
+<br />
+<table border>
+<?php if($result[0]['splash_type'] == 2){ ?>
+<tr>
+<td>闪屏类型：</td>
+<td>
+<?php if($result[0]['pic_type'] == 1){ ?>静态图<?php } ?>
+<?php if($result[0]['pic_type'] == 2){ ?>特效图<?php } ?>
+</select>
+</td>
+</tr>
+<?php } ?>
+<tr>
+	<td>安智品牌banner</td>
+	<td>
+		<label><input type="radio" name="show_az_banner" value="1" <if condition="$result[0]['show_az_banner'] eq '1'">checked</if>>展示</label>
+		<label><input type="radio" name="show_az_banner" value="0" <if condition="$result[0]['show_az_banner'] eq '0'">checked</if>>不展示</label>
+	</td>
+</tr>
+<tr>
+<td>名称：
+<input type="hidden" name="splash_type" value="{$result[0]['splash_type']}" />
+<input type="hidden" name="platform" value="{$result[0]['platform']}" />
+<input type="hidden" name="p" value="{$p}" />
+<input type="hidden" name="lr" value="{$lr}" />
+<input type="hidden" name="my_time" value="{$my_time}" />
+<input type="hidden" name="id" value="{$result[0]['id']}" />
+</td>
+<td><input type="text" name="splash_name" value="{$result[0]['splash_name']}" /></td>
+</tr>
+<tr>
+<td>图片1(648以及以下版本):</td>
+<td><input type="file" name="pic_url" /><br />请上传480*960的JPG/PNG，若不填加该图片，则648及以下版本使用图片2</td>
+</tr>
+<tr>
+	<td><font color="red">*</font>图片2(649)：</td>
+	<td><input type="file" name="pic_url1" /><br />请上传480*960的JPG/PNG</td>
+</tr>
+<?php if($result[0]['splash_type'] == 1){ ?>
+<tr>
+<td>跳过：</td>
+<td>
+<select name="jump">
+<option value="1" <?php if($result[0]['jump'] == 1){ ?>selected<?php } ?>>是</option>
+<option value="0" <?php if($result[0]['jump'] != 1){ ?>selected<?php } ?>>否</option>
+</select>
+</td>
+</tr>
+<?php } ?>
+<?php if($result[0]['splash_type'] == 2){ ?>
+<?php if($result[0]['pic_type'] == 2){ ?>
+<tr id="logo_pic">
+<td>LOGO图：</td>
+<td><input type="file" name="logo_url" /><br />请上传JPG/PNG</td>
+</tr>
+<?php } ?>
+<tr>
+<td>展示频率：</td>
+<td>
+<select name="show_rate">
+<option value="1" <?php if($result[0]['show_rate'] == 1){ ?>selected<?php } ?> >只显示1次</option>
+<option value="2" <?php if($result[0]['show_rate'] == 2){ ?>selected<?php } ?> >只显示2次</option>
+<option value="3" <?php if($result[0]['show_rate'] == 3){ ?>selected<?php } ?> >只显示3次</option>
+</select>
+</td>
+</tr>
+<?php } ?>
+<?php if($result[0]['splash_type'] == 2){ ?>
+<tr class="sub_tr">
+	<td><font color="red">*</font>推荐内容</td>
+	<td>
+		<!--下面a里的href的url里append_div_id参数表示新增内容append的地方-->
+		<a id="content_type_a" href="javascript:void(0)" class="thickbox" style="color:blue">选择推荐内容</a>
+		<!--下面的content_type_div是给showContentType用的-->
+		<div id="content_type_div"/>
+	</td>
+	<td/>
+</tr>
+<tr>
+<td>倒计时：</td>
+<td>
+<select name="count_down">
+<option value="1" <?php if($result[0]['count_down'] == 1){ ?>selected<?php } ?>>是</option>
+<option value="0" <?php if($result[0]['count_down'] != 1){ ?>selected<?php } ?>>否</option>
+</select>
+</td>
+</tr>
+<?php } ?>
+<tr id="tr_csv" class="sub_tr">
+		<td>覆盖用户：</td>
+		<td style="height:70px;">
+		<a href="__APP__/Public/down_moban" class="blue" style="text-decoration:none; color:blue;font-size:14px;">下载csv模板</a><br/>
+		<input type="file" id="upload_file" name="upload_file"  style="background:none; border:none; width:160px;" value="" /><input type="button" id="upload_csv" value="上传" onclick="count()" />
+		
+		<input type="text" id="have_pre_dl" name="have_pre_dl" value="<?php if($result[0]['csv_url']){ echo $result[0]['csv_url']; }?>" readonly /><br>
+		<span style="color:red; font-size:14px;">有效用户数</span><input type="text" id="pre_dl_count" name="pre_dl_count" readonly style="border:none;color:red; background:none;" value="<?php if($result[0]['csv_count']){ echo $result[0]['csv_count'];  }?>"/>
+		<input type='hidden' name='csv_url' id='csv_url' value="">
+		<input type='hidden' name='csv_count' id='csv_count' value="">
+		<input type="button" id="del_csv_value" value="删除" onclick="del_csv()" />
+		</td>
+	</tr>
+	<tr class="sub_tr">
+	<td>选择渠道可见</td>
+	<td align="left" width="300">
+	<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+		<div id="channel_div">
+			<volist id="chl_list_vo" name="chl_list" >
+				&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+			</volist>
+		</div>
+	</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>机型可见</td>
+			<td>
+			<a href="/index.php/Public/showDevice?callback=submitDevice&ready=check_arrs&type=checkbox&reset_device=1" class="thickbox"><font color="blue">选择机型</font></a>
+			<div id="device_div">
+			<volist id="chl_list_vo" name="device_selected" >
+				&nbsp;<label class="l_did_{$chl_list_vo.did}"><input type="checkbox" name="did[]" checked="checked" value="{$chl_list_vo.did}"/>{$chl_list_vo.dname}</label>&nbsp;
+			</volist>
+			</div>
+			</td>
+	</tr>
+	<tr class="sub_tr">
+	  <td>运营商</td>
+	  <td id="operator_td">
+		<div id="operator_div">
+			<?php foreach($operator_list as $k => $v): ?>
+			<label><input name="oid[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		  <br/>
+		</div>
+	  </td>
+	  </tr>
+	<tr class="sub_tr">
+	  <td>固件版本</td>
+	  <td id="channel_td">
+		<div id="abi_div">
+			<?php foreach($firmwarelist as $k => $v): ?>
+			<label><input name="firmware[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		</div>
+	  </td>
+	</tr>
+	<tr class="sub_tr">
+	  <td>市场版本</td>
+	  <td id="channel_td">
+		<div id="abi_div">
+			<?php foreach($version_list as $k => $v): ?>
+				 <label>
+				<input name="version_code[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		</div>
+	  </td>
+	</tr>
+<tr>
+    <td>覆盖用户类型：</td>
+	<td>
+		<input type="radio" name='cover_user_type' id="cover_user_type" value="0"   onclick="show_activation_date(0)" <?php if ($result[0]['cover_user_type'] == 0):?> checked<?php endif; ?>/>全部
+        <span>&nbsp;</span>
+	 	<input type="radio" name='cover_user_type' id="cover_user_type" value="1"  <?php if ($result[0]['cover_user_type'] == 1):?> checked<?php endif; ?> onclick="show_activation_date(1)"/>新用户
+        <span>&nbsp;</span>
+        <input type="radio" name='cover_user_type' id="cover_user_type" value="2" <?php if ($result[0]['cover_user_type'] == 2):?> checked<?php endif; ?> onclick="show_activation_date(2)"/>定向用户
+		<span>&nbsp;</span>
+	</td>
+</tr>
+<tr id='activation_date' <?php if ($result[0]['cover_user_type'] != 2):?> style="display:none;"<?php endif; ?>>
+	<td >激活日期:</td>
+	<td>开始日期： <input name="activation_date_start" id="activation_date_start" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php echo $result[0]['activation_date_start']?date('Y-m-d H:i:s',$result[0]['activation_date_start']):''; ?>" style="width:140px;height:20px;"/><br>结束日期：&nbsp;<input name="activation_date_end" id="activation_date_end" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="<?php echo $result[0]['activation_date_end']?date('Y-m-d H:i:s',$result[0]['activation_date_end']):''; ?>" style="width:140px;height:20px;"/></td>
+</tr>
+<tr>
+	<td>开始时间：</td>
+	<td>
+		<input id="begintime" name="start_tm" type="text" class="Wdate" value="<?php echo date('Y-m-d H:i:s',$result[0]['start_tm']); ?>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" style="width:140px; height:20px" />
+	</td>
+</tr>
+<tr>
+	<td>结束时间：</td>
+	<td>
+		<input id="endtime" name="end_tm" type="text" class="Wdate" value="<?php echo date('Y-m-d H:i:s',$result[0]['end_tm']); ?>" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" style="width:140px; height:20px" />
+	</td>
+</tr>
+<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='co_type'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+</tr>
+</table>
+<table>
+<tr>
+<td><input type='hidden' name="life" value="<?php echo $_GET['life'] ?>" />
+<input type="submit" class="search_btn" value="确定" /></td>
+<td><input type="button" class="search_btn" value="取消" onclick="javascript:history.go(-1);" /></td>
+</tr>
+</table>
+</form>
+</div>
+</body>
+</html>

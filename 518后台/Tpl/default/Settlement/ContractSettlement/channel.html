@@ -1,0 +1,255 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<style type="text/css">
+<!--
+.client_search_div,.client_table_div
+{
+	width:100%;
+
+}
+.client_search_div table td
+{
+	padding:5px 10px;
+}
+.client_table_div th,td{text-align:center !important;vertical-align:middle !important;}
+.client_search_div input{width:180px;height:24px !important;padding:1px;}
+.navgition form
+{
+	display:inline;
+}
+.navgition{text-align:right;padding-right:30px;padding-bottom:20px;}
+.navgition input{padding:0px 15px;}
+-->
+</style>
+
+<link rel="stylesheet" type="text/css" media="all"	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<link rel="stylesheet" href="__PUBLIC__/css/bootstrap.min.css">
+<script type="text/javascript" src="__PUBLIC__/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/bootstrap.min.js"></script>
+<script type="text/javascript" src='__PUBLIC__/js/thickbox-compressed.js' ></script>
+<link rel="stylesheet" href="__PUBLIC__/css/thickbox.css" type="text/css" media="screen" />
+<script>
+function datetime_to_unix(datetime){
+    var tmp_datetime = datetime.replace(/:/g,'-');
+    tmp_datetime = tmp_datetime.replace(/ /g,'-');
+    var arr = tmp_datetime.split("-");
+    var now = new Date(Date.UTC(arr[0],arr[1]-1,arr[2],arr[3]-8,arr[4],arr[5]));
+    return parseInt(now.getTime()/1000);
+}
+function checkBeformSubmit()
+{
+	if($("#input_start").val() != "" && $("#input_end").val() != "" && (datetime_to_unix($("#input_end").val()+ ' 23:59:59') < datetime_to_unix($("#input_start").val()+ ' 00:00:00')))
+	{
+		alert("结束时间必须大于开始时间！");
+		return false;
+	}
+	return true;
+}
+function clearOut()
+{
+	$("input").val("");
+}
+</script>
+<div class="" style="margin-bottom:10px;">
+	<h4 class="yahei">广告结算&gt;&gt;结算录入</h4>
+	<ul class="nav nav-tabs yahei" role="tablist">
+	  <li role="presentation"><a href="__URL__/index">按合同</a></li>
+	  <li role="presentation" class="active"><a href="__URL__/channel">按频道</a></li>
+	  <li role="presentation"><a href="__URL__/schedule">按排期</a></li>
+	</ul>
+</div>
+<div class="client_search_div">
+	<form action="__URL__/channel" >
+		<table class="yahei" cellspacing="0">
+			<tr>
+				<td>刊例</td>
+				<td>
+					<select id="select_ratecard" name="ratecard_id">
+						<option value="0">全部</option>
+						<?php foreach($card as $row){ ?>
+						<?php if($row['id']==$rate_card_id){ ?>
+						<option value="<?php echo $row['id'];?>" selected><?php echo $row['rate_card_name'];?></option>
+						<?php }else{ ?>
+						<option value="<?php echo $row['id'];?>"><?php echo $row['rate_card_name'];?></option>
+						<?php }} ?>
+					</select>
+				</td>
+				<td>广告位</td>
+				<td>
+					<select id="select_advertising" name="advertising_id">
+						<option value="0">请先选择刊例</option>
+						<?php foreach($advert as $row){ ?>
+						<?php if($row['id']==$advertising_id){ ?>
+						<option value="<?php echo $row['id'];?>" selected><?php echo $row['advertising_name'];?></option>
+						<?php }else{ ?>
+						<option value="<?php echo $row['id'];?>"><?php echo $row['advertising_name'];?></option>
+						<?php }} ?>
+					</select>
+				</td>
+				<td></td>
+	       </tr>
+		   <tr>
+				<td>月份</td>
+				<td><input type="text" name="start"  class="Wdate" onClick="WdatePicker({startDate:'%y-%M', dateFmt:'yyyy-MM'})"   id="input_start" value="{$start}"/></td>
+				<td>到</td>
+				<td><input type="text" name="end" class="Wdate" onClick="WdatePicker({startDate:'%y-%M', dateFmt:'yyyy-MM'})"   id="input_end" value="{$end}"/></td>
+				<td>
+					<button class="btn btn-sm btn-success" type="submit" style="padding-left:30px;padding-right:30px;" onClick="javascript:return checkBeformSubmit();"> 搜索 </button>
+					<button class="btn btn-sm btn-default" type="button" style="padding-left:30px;padding-right:30px;margin-left:20px;" onClick="javascript:location.href='__URL__/channel';"> 清空 </button>
+				</td>
+		   </tr>
+		</table>
+	</form>
+</div>
+
+<div style="width:100%;padding:10px 10px;margin-bottom:10px;">
+	<a href="#" class="yahei" id="a_export"><button class=" btn btn-sm btn-default yahei"  style="padding-left:30px;padding-right:30px;">导出报表</button></a>&nbsp;&nbsp;&nbsp;&nbsp;
+</div>
+<div class="client_table_div">
+	<table class="table table-striped table-bordered center middle yahei">
+		<thead>
+			<tr>
+				<th><input type="checkbox" id="checkbox_select_all"/></th>
+				<th>月份</th>
+				<th>刊例</th>
+				<th>广告位</th>
+				<th>合作软件</th>
+				<th>已排期</th>
+				<th>未到期未排</th>
+				<th>已到期未排</th>
+				<th>折扣后总价</th>
+				<th>执行金额</th>
+				<th>未执行金额</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="result" id="row">
+			<tr>
+				<td><input type="checkbox" value="{$row.id}" class="checkbox_select_one"/></td>
+				<td>{$row.month}</td>
+				<td>{$row.rate_card_name}</td>
+				<td>{$row.advertising_name}</td>
+				<td>
+					<?php if($row['app_num_sum']>0){ ?>
+					<a href="/index.php/Settlement/ContractApp/show/type/channel/id/{$row.advertising_id}_{$row.month}/" class="thickbox">{$row.app_num_sum}</a>
+					<?php }else{ ?>
+					{$row.app_num_sum}
+					<?php } ?>
+				</td>
+				<td>
+					<?php if($row['schedule_x']>0){ ?>
+					<a href="/index.php/Settlement/ContractApp/show/type/channel/id/{$row.advertising_id}_{$row.month}/filter/1/" class="thickbox">{$row.schedule_x}</a>
+					<?php }else{ ?>
+					{$row.schedule_x}
+					<?php } ?>
+				</td>
+				<td>
+					<?php if($row['schedule_y']>0){ ?>
+					<a href="/index.php/Settlement/ContractApp/show/type/channel/id/{$row.advertising_id}_{$row.month}/filter/2/" class="thickbox">{$row.schedule_y}</a>
+					<?php }else{ ?>
+					{$row.schedule_y}
+					<?php } ?>
+				</td>
+				<td>
+					<?php if($row['schedule_z']>0){ ?>
+					<a href="/index.php/Settlement/ContractApp/show/type/channel/id/{$row.advertising_id}_{$row.month}/filter/3/" class="thickbox">{$row.schedule_z}</a>
+					<?php }else{ ?>
+					{$row.schedule_z}
+					<?php } ?>
+				</td>
+				<td><?php echo number_format($row['weekday_total_sum']+$row['weekend_total_sum'],2);?></td>
+				<td><?php echo number_format($row['exec_total'],2);?></td>
+				<td><?php echo number_format($row['no_exec_total'],2);?></td>
+			</tr>
+			</volist>
+			
+			<tr>
+				<td>-</td>
+				<td>-</td>
+				<td>合计</td>
+				<td>-</td>
+				<td>{$total.app_num}</td>
+				<td>{$total.schedule_x}</td>
+				<td>{$total.schedule_y}</td>
+				<td>{$total.schedule_z}</td>
+				<td><?php echo number_format($total['discount_total'],2);?></td>
+				<td><?php echo number_format($total['exec_total'],2);?></td>
+				<td><?php echo number_format($total['no_exec_total'],2);?></td>
+			</tr>
+
+		</tbody>
+	</table>
+	<div class="yahei navgition">
+		{$page|default='&nbsp;'}
+	</div>
+</div>
+
+<div class="qtip qtip-stylename">
+   <div class="qtip-tip" rel="cornerValue"></div>
+   <div class="qtip-wrapper">
+      <div class="qtip-borderTop"></div>
+      <div class="qtip-contentWrapper">
+         <div class="qtip-title">
+            <div class="qtip-button"></div>
+         </div>
+         <div class="qtip-content"></div>
+      </div>
+      <div class="qtip-borderBottom"></div>
+   </div>
+</div>
+
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />
+
+<script>
+$(function(){
+	
+	// 选择刊例获取刊例下的所有广告位
+	$('#select_ratecard').change(function(){
+		$.getJSON("/index.php/Settlement/ContractApp/ajax_get_advert/ratecard_id/"+$(this).val(), function(json){
+			var_advert_data = json;
+			
+			$('#select_advertising').empty();
+			$('#select_advertising').append('<option value="0">全部</option>');
+			$.each(json, function(key, val){
+				$('#select_advertising').append("<option value='"+val.id+"'>"+val.advertising_name+"</option>");
+			});
+		});
+	});
+	
+	// 处理checkbox全选
+	$('#checkbox_select_all').click(function(){
+		if($(this).attr("checked")==true){
+			$('.checkbox_select_one').each(function(){
+				$(this).attr('checked', true);
+			});	
+		}else{
+			$('.checkbox_select_one').each(function(){
+				$(this).attr('checked', false);
+			});	
+		}
+	});
+	
+	// 处理导出操作
+	$('#a_export').click(function(){
+		var var_checkbox = [];
+		
+		$('.checkbox_select_one').each(function(){
+			if($(this).attr('checked')==true){
+				var_checkbox.push($(this).val());
+			}
+		});
+		
+		if(var_checkbox.length == 0){
+			alert('请选择要导出的记录');
+			return false;
+		}
+		
+		$(this).attr('href','?export=1&list='+var_checkbox.join('|'));
+		
+		return true;
+	});
+});
+</script>

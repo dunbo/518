@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>倩女幽魂预约抽奖</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/ghost/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="http://img4.anzhi.com/static/public/js/jquery.easing-1.3.min.js"></script>
+<script type="text/javascript" src="http://img4.anzhi.com/static/public/js/jQueryRotate-2.3.js"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/ghost/js/lottery_Rotate.js"></script>
+<script type="text/javascript" src="http://img4.anzhi.com/static/public/js/activity_public2.js"></script>
+</head>
+<body>
+<section>
+    <div class="banner">
+		<img src="<!--{$out.static_url}-->/ghost/images/banner.png"/>
+	</div>
+	<div class="soft">
+		<div class="soft_list">
+			<div class="soft_icon">
+				<img src="<!--{$out.static_url}-->/ghost/images/app_icon.png"/>
+			</div>
+			<div class="soft_info">
+				<h3>《倩女幽魂》</h3>
+				<p>MMORPG 287M<span>公测预约中</span><br/><em>5月19日</em> 公测
+			</div>
+			<div class="clear"></div>
+		</div>
+                <!--{if $out.is_sing == 2 }-->
+		<a href="javacript:;" class="download" onclick="sign_do()">预约</a>
+                <!--{/if}--> 
+
+                <!--{if $out.is_sing == 1 }--> 
+		<a href="javacript:;" class="download registered">已预约</a>
+                <!--{/if}--> 
+
+	</div>
+	<div class="main">
+		<div class="title"><h3>活动介绍</h3></div>
+		<div class="rule">
+			<div class="titles">活动时间：</div>
+			<p class="active_time">即日起——5月16日</p>
+			<div class="titles">活动说明：</div>
+			<p>小手一抖，奖品到手！活动期间，只要在本页面点击【预约】【倩女幽魂】游戏，即可完成游戏预约，获得抽奖机会！人人有份，现在就去来完成预约，去抽奖吧！</p>
+		</div>
+		<div class="lottery_wrap">
+			<div class="prize_index">
+				<p>您账号还有<span id="lottery_num">1</span>次抽奖机会</p>
+				<a href="javascript:;" onclick='my_prize();' >我的奖品</a>
+			</div>
+			<div class="lottery">
+				<div class="rotate">
+					<div class="rotate-con">
+						<img src="<!--{$out.static_url}-->/ghost/images/lottery.png" width="100%"/>
+                                                <div <!--{if $out.lottery_num > 0}-->class="rotate-pointer" id='lottery_but' onclick='lottery_click()' <!--{else}-->class="rotate-pointer pointer-disabled" id='lottery_but' <!--{/if}-->  ></div>	
+					</div>
+					<div class="leaves_center"></div>
+					<div class="lottery_bg2"></div>
+				</div>
+			</div>
+		</div>
+		<div class="title"><h3>游戏插图</h3></div>
+		<div class="imgs_wrap">
+			<ul>
+				<li><img src="<!--{$out.static_url}-->/ghost/images/img_01.jpg"/></li>
+				<li><img src="<!--{$out.static_url}-->/ghost/images/img_02.jpg"/></li>
+				<li><img src="<!--{$out.static_url}-->/ghost/images/img_03.jpg"/></li>
+				<div class="clear"></div>
+			</ul>
+			<p style="display:none;">分享至</p>
+		</div>
+	</div>
+	<div class="footer">
+		<p>本活动最终解释权归安智所有</p>
+	</div>
+</section>
+<script type="text/javascript">
+    	var sid = '<!--{$out.sid}-->',open_num=0;
+	var aid = '<!--{$out.aid}-->',p=0,soft_lists_go = [],open_pkg_arr = [];
+	var lottery_num = "<!--{$out.lottery_num}-->";
+	var is_sing = "<!--{$out.is_sing}-->";
+        var is_user_winning = "<!--{$out.is_user_winning}-->";
+
+$(document).ready(function () {
+    $('#lottery_num').html(lottery_num);
+});
+
+
+function lottery_click(){
+	<!--{if $out['is_login'] == 2}-->
+		//login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+            /*
+	if(parseInt(lottery_num) <= 0 ){
+		$('#lottery_but').attr('class', 'rotate-pointer pointer-disabled');
+		pop_tips("","剩余抽奖次数不足！","",1);			
+		return false;	
+	}
+        */
+
+	$('#lottery_but').attr('onclick', '');
+	$.ajax({
+		url: '/lottery/ghost/lottery.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+			if(data.code == 1){
+				is_user_winning =1;
+				lottery_num = lottery_num-1;
+				$('#lottery_num').html(lottery_num);
+				if(data.pid != 6 && data.pid != -1){
+					setTimeout(
+						function(){
+							location.href="/lottery/ghost/userinfo.php?types=1&sid="+sid+"&aid="+aid;
+						},4000
+					);
+					var a = runzp_new(data.pid);	
+				}else if(data.pid == -1){
+					var a = runzp_new(7);
+				}else{
+					setTimeout(
+						function(){		
+							location.href="/lottery/ghost/userinfo.php?types=1&sid="+sid+"&aid="+aid;
+						},2000
+					);	
+					var a = runzp_new(6);
+				}				
+		
+				$(".rotate-pointer").rotate({
+					duration:2000,
+					angle: 0,
+					animateTo:1800+a.angle,
+					easing: $.easing.easeOutSine,
+					callback: function(){
+							
+					}
+				});
+
+                                //抽完置灰
+                                setTimeout(function(){
+                                        //if(data.pid == -1){
+                                                //pop_tips(data.title,data.msg,"",1);		
+                                        //}
+                                        $('#lottery_but').attr('class', 'rotate-pointer pointer-disabled');
+                                }, 3000);
+
+			}else if(data.code == 2){
+				location.href=data.url+"?sid="+sid+"&aid="+aid;
+			}else{
+				pop_tips("",data.msg,"",1);			
+			}
+		}
+	});
+}
+
+function runzp_new(award) {
+	var index = award - 1;
+	var angle = 0;
+	//修改度数 0-51
+	var angle0 = [10,41];
+	var angle1 = [71,92];
+	var angle2 = [112,143];
+	var angle3 = [163,194];
+	var angle4 = [214,245];
+	var angle5 = [265,296];
+	var angle6 = [316,347];
+	switch (index) {
+	case 0:// 一等奖
+		var r0 = randomnum(angle0[0], angle0[1]);
+		angle = r0;
+		break;
+	case 1:// 二等奖
+		var r1 = randomnum(angle1[0], angle1[1]);
+		angle = r1;
+		break;
+	case 2:// 三等奖
+		var r2 = randomnum(angle2[0], angle2[1]);
+		angle = r2;
+		break;
+	case 3:// 四等奖
+		var r3 = randomnum(angle3[0], angle3[1]);
+		angle = r3;
+		break;
+	case 4:// 五等奖
+		var r4 = randomnum(angle4[0], angle4[1]);
+		angle = r4;
+		break;
+	case 5:// 六等奖
+		var r5 = randomnum(angle5[0], angle5[1]);
+		angle = r5;
+		break;
+	case 6:// 七等奖
+		var r6 = randomnum(angle6[0], angle6[1]);
+		angle = r6;
+		break;
+	}
+	myreturn.angle = angle;
+	return myreturn;
+}
+
+/*
+function runzp_new(award) {
+	var index = award - 1;
+	var angle = 0;
+	//修改度数 0-51
+	var angle0 = [10,50];
+	var angle1 = [75,100];
+	var angle2 = [130,170];
+	var angle3 = [190,230];
+	var angle4 = [250,290];
+	var angle5 = [320,350];
+	switch (index) {
+	case 0:// 一等奖
+		var r0 = randomnum(angle0[0], angle0[1]);
+		angle = r0;
+		break;
+	case 1:// 二等奖
+		var r1 = randomnum(angle1[0], angle1[1]);
+		angle = r1;
+		break;
+	case 2:// 三等奖
+		var r2 = randomnum(angle2[0], angle2[1]);
+		angle = r2;
+		break;
+	case 3:// 四等奖
+		var r3 = randomnum(angle3[0], angle3[1]);
+		angle = r3;
+		break;
+	case 4:// 五等奖
+		var r4 = randomnum(angle4[0], angle4[1]);
+		angle = r4;
+		break;
+	case 5:// 六等奖
+		var r5 = randomnum(angle5[0], angle5[1]);
+		angle = r5;
+		break;
+        }
+	myreturn.angle = angle;
+	return myreturn;
+}*/
+
+function sign_do(){
+
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+
+	$.ajax({
+		url: '/lottery/ghost/sign.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+                    location.reload();
+		}
+	});
+}
+
+function my_prize(){
+	if(is_user_winning == 2){
+            showOpenBox('#tip-box1')
+	}else{
+	<!--{if $out['is_login'] == 1}-->
+		location.href="/lottery/ghost/userinfo.php?types=1&sid="+sid+"&aid="+aid;
+	<!--{else}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+	<!--{/if}-->
+	}
+}
+
+</script>
+
+<script type="text/javascript">
+    var flags={canMove:true};
+    function showOpenBox(obj){
+		$('input').blur();
+		setTimeout(function(){
+			var bg_h=$(window).height() + $(document).scrollTop(),
+            top_h=  $(obj).height()/2 - $(document).scrollTop();
+			$(obj).css("margin-top",-top_h+"px").show();;
+			$('#body-bg').css("height",bg_h+"px").show();
+			flags.canMove=false;
+			window.onresize = function(){
+				var bg_h=$(window).height() + $(document).scrollTop(),
+					top_h=  $(obj).height()/2 - $(document).scrollTop();
+				$('#body-bg').css("height",bg_h+"px");
+				$(obj).css("margin-top",-top_h+"px");	
+			}
+		},200)
+    }
+    function cloBox(obj){
+        $(obj).hide(); 
+        $('#body-bg').hide();
+        flags.canMove=true;
+    }
+    $(function(){
+        $("body").bind('touchmove', function (e) {
+            if(!flags.canMove){
+                e.preventDefault();
+            }
+        });
+    })
+
+function onLoginComplete(sid,tip){
+	sid_str = sid.replace("PHPSESSID=", "");
+	location.href="/lottery/ghost/index.php?lgfrom=1&sid="+sid_str+"&aid=<!--{$out.aid}-->";
+}
+
+</script>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box1"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con">
+				<div class="tip_title">
+					<h6>我的奖品</h6>
+				</div>
+				<div class="clear"></div>
+                <p>您现在还未抽奖，快抓紧时间速去抽奖吧！</p>
+				<div class="tips_btns"><a href="javascript:;" onclick="cloBox('#tip-box1')">返 回</a></div>
+            </div>
+			
+        </div>
+		
+    </div>
+</body>
+</html>

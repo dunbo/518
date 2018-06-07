@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>无标签软件管理</title>
+</head>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/styleV1.css?v4.4" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="/Public/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+<script type="text/javascript">
+$(function(){
+    document.onkeydown = function(e){
+        var ev = document.all ? window.event : e;
+        if(ev.keyCode==13) {
+            search();
+         }
+    }
+});
+function del(soft_id){
+    if(confirm("删除不可恢复！确定要删除此条记录?")){
+        var param = {
+        soft_id : soft_id
+        };
+
+        $.ajax({
+            url:'__URL__/deletepro',
+            type:'POST',
+            data:param,
+            dataType:'json',
+            success:function(data){
+                if(data==1)
+                {
+                    location.href ="/index.php/Sendnum/Product/index";
+                }else
+                {
+                    alert('对不起，权限不足');
+                    location.href ="/index.php/Sendnum/Product/index";
+                }
+            }
+        });
+    }
+};
+
+function search(){
+    var downloaded_s = $("#downloaded_s").val();
+    var downloaded_e = $("#downloaded_e").val();
+
+    $("#search").submit();
+};
+
+//选择类型
+function openw(){
+    $("#open").zxxbox();
+}
+function catid(){
+    refreshCatid();
+}
+function refreshCatid()
+{
+    var ids = '';
+//    $("input[name='catid[]']").each(function(){
+//
+//    }
+    $("#search").submit();
+};
+</script>
+
+<script type="text/javascript">
+//选择类型
+function openw(){
+    $("#open").zxxbox();
+}
+function catid(){
+    refreshCatid();
+}
+function refreshCatid()
+{
+    var ids = '';
+    $("input[name='catid[]']").each(function(){
+            if (this.checked) {
+                    ids+= $(this).val() + ',';
+            }
+            $('#cateid').val(ids);
+
+    });
+}
+var choose_id = new Array();
+function get_choose_id(single){
+    var i = 0;
+    choose_id.splice(0,choose_id.length);//
+    $('input[name^=id]').each(function(){
+        if($(this).attr('checked') == 'checked'){
+            choose_id.push($(this).val());
+            i++;
+        }
+    });
+
+    if(i==0){
+        alert('请选择一个软件');
+        return false;
+    }
+    if(i>1&&single==1){
+        alert('最多选择一个软件');
+        return false;
+    }
+    return true;
+}
+
+function edit_tags(){
+    if(get_choose_id(1)){
+        $("#edit_tags").attr('href',"__URL__/edit_tags?from={$from}&width=400&height=200&id="+choose_id).click();
+    }
+}
+
+    function edit_more_tags(){
+        if(get_choose_id(2)){
+            $("#edit_more_tags").attr('href',"__URL__/edit_tags?from={$from}&width=400&height=200&id="+choose_id).click();
+        }
+    }
+function checkAll(obj)
+{
+    var flag = $(obj).attr('checked') == 'checked';
+    $('input[name^=id_]').attr('checked', flag);
+}
+</script>
+
+
+<body>
+<div style="float: left;width: 100%">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+    <tr height="35">
+        <td align="center" style=<?php if($from == 'notags_soft_de_list'){ echo "background:#FFCC66" ;}?>><a href="__URL__/notags_soft_de_list"><font style="color:#000; font-weight:bold">无标签-新游</font></a></td>
+        <td align="center" style=<?php if($from == 'notags_softlist'){ echo "background:#FFCC66" ;}?>><a href="__URL__/notags_softlist"><font style="color:#000; font-weight:bold">无标签软件</font></a></td>
+        <td align="center" style=<?php if($from == 'tags_softlist'){ echo "background:#FFCC66" ;}?> ><a href="__URL__/tags_softlist"><font style="color:#000; font-weight:bold">有标签软件</font></a></td>
+    </tr>
+</table>
+</div>
+<!-- <div id="open" style="padding:10px; display:none;">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+<tr><td><font size='3' style="color:#000; font-weight:bold">软件类型</font></td><td><input type="checkbox" id="cid_all[]" name="cid_all[]" onclick="cid_selectAll(this);">全选</td></tr><br/>
+</table>
+<volist name='cname' id='vo' key='k'>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+	<tr><td><input type="checkbox" onclick="$('input[rel={$vo.category_id}]').attr('checked', $(this).attr('checked') == 'checked');refreshCatid();"/><strong>{$vo.name}</strong></td></tr>
+	<tr>
+	<td colspan='3'>----------------------------------------------------------------------</td></tr>
+	<tr>
+	<volist name="vo['sub']" id = 'v' key='m'>
+	<td><input rel="{$vo.category_id}" onclick='catid()' type="checkbox" name="catid[]" value="{$v.category_id}" <if condition="isset($cateid[$v['category_id']])">checked='true'</if>/>&nbsp;&nbsp;&nbsp;{$v.name}</td>
+	<if condition="$m % 3 eq 0 "></tr><tr></if>
+	</volist><br/>
+	</volist>
+</table>
+</div> -->
+<!-- <div class="search_box" style="float:left;width: 100%;">
+    <form action="__URL__/notags_softlist" method="get" id="search">
+        <input type='hidden' name='cateid' id='cateid' value="{$init_cateid}"/>
+        <table width="100%" cellpadding="0" cellspacing="0" class="search_table">
+            <tr>
+                <td width="25%">软件名称：<input style="width:150px;" type="text" name="softname" id="softname" value="{.softname}" class="search_item_text"></td>
+                <td width="25%">软件包名：<input style="width:150px;" type="text" name="package" id="package" value="{.package}" class="search_item_text"></td>
+                <td colspan="2">下载量
+                    <input id="downloaded_s" name="downloaded_s" value="{.downloaded_s}" type="text"  style="width:150px; height:28px">到<input id="downloaded_e" name="downloaded_e" value="{.downloaded_e}" type="text" style="width:150px; height:28px">
+                </td>
+                <td rowspan="2">
+                    <button type="button" style="width:80px;" onclick="search();" class="search_btn">搜索</button>
+                </td>
+            </tr>
+            <tr>
+                <td><button type="button" style="width:80px;" onclick="openw();" class="search_btn">软件类型</button></td>
+            </tr>
+            </table>
+    </form>
+</div> -->
+    <div style="float: left;width: 100%;margin-top:10px;margin-bottom: 10px">
+        <a href="javascript:void(0)" style="float:left;margin-left: 10px" class="search_btn" onclick="return edit_tags()">编辑标签</a>
+        <a href='javascript:void(0)' class="thickbox" id="edit_tags">
+        <a href="javascript:void(0)" style="float:left;margin-left: 10px" class="search_btn" onclick="return edit_more_tags()">批量添加标签</a>
+        <a href='javascript:void(0)' class="thickbox" id="edit_more_tags">
+        <a href="__URL__/import_tags?width=350&amp;height=140&amp;from={$from}" style="float:left;margin-left: 10px" class="thickbox search_btn">批量导入</a>
+    </div>
+
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+                <th width="3%" bgcolor="#e3e2fe"><input type="checkbox" name="chk_all" onclick="checkAll(this)"></th>
+				<th width="7%" height="26">软件ID</th>
+				<th width="6%">软件名称</th>
+				<th width="7%">软件包名</th>
+				<th width="7%">软件类型</th>
+                <th width="7%"><if condition="!$order"><a style="color:#0000FF" href="?order=1">软件下载数↑↓</a><elseif condition="($order eq 2)" /><a style="color:#0000FF" href="?order=1">软件下载数↓</a><elseif condition="($order eq 1)" /><a href="?order=2">软件下载数↑</a></if></th>
+                <th width="7%">更新时间</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="list">
+				<tr>
+                    <td align='left'>
+                        <input type="checkbox" name="id_{$list.softid}" value="{$list.package}" /><br/>
+                    </td>
+					<td height="20" align="center"> {$list.softid}</td>
+					<td height="20" align="center"> {$list.softname}</td>
+					<td height="20" align="center"> {$list.package}</td>
+					<td height="20" align="center"> {$category[$list[category_id]]}</td>
+					<td height="20" align="center"> {$list.total_downloaded}</td>
+					<td height="20" align="center"> {$list.last_refresh|date="Y-m-d H:i:s",###}</td>
+				</tr>
+			</volist>
+		</tbody>
+	</table>
+	<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+    <div style="display:none;" id="loading">
+    <p style="position:absolute;left:20%;top:40%;">正在提交中，请稍候......</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/zhiyoo/common.js"></script>
+<style>
+table{border: 0px;}
+table{font:14px Tahoma,Verdana,Helvetica,Arial,sans-serif}
+.search_c{margin:10px;border:1px solid #000; padding:0px;height:120px;line-height:60px;}
+.Search{float:left; margin-left:20px; }
+.Search input {height:20px;line-height:20px;}
+.Search select{width:120px;}
+.Search #submid {width:98px;height:28px;cursor:pointer;line-height:20px;margin-top:18px;}
+.Search span{font-size:14px;}
+.Search_r input{float:right;width:98px;height:28px;cursor:pointer;line-height:20px;margin-top:18px;margin-right:20px;}
+.Wdate{width:150px;}
+.Search a{height:25px;line-height:25px;margin-top:19px;}
+.noData{color:red;font-size:14px;}
+.theme_c{font-size:16px;}
+.exl_c a{float:right;cursor:pointer;margin-top:18px;margin-right:30px;}
+.clear{ clear:both; float:none;}
+h2{margin:10px;}
+
+#prefectureId{float:left;margin-left:10px;}
+#prefectureId a{float:left;margin-right:5px;}
+</style>
+
+<body>
+<h2>当前位置：产品管理  > {$threadfind['subject']} > 众测报告管理</h2>
+<div class="search_c">
+<form method='post' action="__URL__/testContent/tid/{$tid}/" >
+	<div class="Search">
+		<span>用户名：</span><input type="text" name="username" id="username" value="{$username}" />
+	</div>
+	<div class="Search">
+		<span>IP地址：</span><input type="text" name="addr_ip" id="addr_ip" value="{$addr_ip}" />
+	</div>
+	<div class="Search">
+		<span>手机号：</span><input type="text" name="tel" id="tel" value="{$tel}" />
+	</div>
+	<div class="Search">
+		<span>申请时间：</span>
+		<input type="text" name="begintime" id="begintime" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="{$begintime}" />~
+		<input type="text" name="endtime" id="endtime" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" value="{$endtime}" />
+	</div>
+	<!-- 
+	<div class="Search">
+		<span>评测：</span>
+		<input type="text" name="tel" id="tel" size='4' />~
+		<input type="text" name="tel" id="tel" size='4' />
+	</div>
+	 -->
+	<div class="clear"></div>
+	<div class="Search">
+		<span>状态：</span>
+		<select name="p_status" id="p_status">
+			 <option value="">全部</option>
+			 <volist name="statusarr" id="val">
+			 <option value="{$val.id}">{$val.title}</option>
+			 </volist>
+		</select>
+	</div>
+	<div class="Search_r">
+		<input type="submit" id="ss" value="搜  索" class="search_btn" />
+	</div>
+</form>
+	
+</div>
+<div class="clear"></div>
+<form method='post' action="__URL__/batchTreat/tid/{$tid}/" onsubmit="return clickConfirm('确定保存该更改吗？');">
+<input type="hidden" name="action" value="batchTreat" id="actioonId" />
+
+<div  class="Search" >
+
+	<input class="search_btn" style="display:none;height:28px;line-height:28px;" type="submit" id="submid" value="保存优先级">
+	<a class="search_btn" style="display:inline-block;height:28px;line-height:28px;" href="javascript:priority('P_id');" id="priorityid">编辑优先级</a>
+	<a class="search_btn thickbox" style="display:inline-block;height:28px;line-height:28px;" href="__URL__/addReport/productid/{$tid}/" >添加众测报告</a>
+	
+</div>
+<div class="exl_c">
+	<a href="__URL__/testContent/tid/{$tid}/export/1/" class="search_btn" style="display:inline-block;">导出报表</a>
+</div>
+<div class="clear"></div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+	<tr>
+		
+		<th width="65">
+			<a href="__URL__/testContent/tid/{$tid}/field/rank/order/{$order}">优先级↓↑</a>
+		</th>
+		<!-- 
+		<th width="50">TID</th>
+		 -->
+		<th width="60">用户ID</th>
+		<th width="130">用户名</th>
+		<th width="150">手机号/QQ号</th>
+		<th width="150">智豆/金币</th>
+		<th width="80">评测</th>
+		<th>众测报告标题</th>
+		<th width="120">IP</th>
+		<th width="60">状态</th>
+		<th width="90">创建时间</th>
+        <th width="30">操作</th>
+	</tr>
+	</thead>
+	<if condition="$applylist neq ''">
+	<volist name="applylist" id="val">
+	<tr class="tr">
+       
+		<td id="P_id">
+			<a>{$val.rank|default=''}</a>
+			<input type="text" name="level[{$val.tid}]" onkeyup="this.value=replaceNum(this.value);" size="4" id="level" style="display:none;" value="{$val.rank|default=''}" /> 
+		</td>
+		<!-- 
+		<td>{$val.tid}</td>
+		 -->
+		<td>{$val.uid}</td>
+		<td><a href="http://pingce.zhiyoo.com/ucenter.php?uid={$val.uid}" target="_blank">{$val.username}</a></td>
+		<td>
+			手机号：{$val.tel}<br />
+			QQ：{$val.qq}
+		</td>
+		<td>
+			智豆：{$val.Chibeans}<br />
+			金币：{$val.Gold}
+		</td>
+		<td>
+			<if condition="$val.themecount neq 0">
+			<a href="__URL__/themeList/id/{$val.tid}/mark/test/" class="theme_c">{$val.themecount}</a>
+			<else />0</if>
+		</td>
+		<td><a <if condition="$val.statusname eq '已通过'">href="http://pingce.zhiyoo.com/pdetail.php?tid={$val.tid}" <else />href="http://bbs.zhiyoo.com/thread-{$val.tid}-1-1.html" </if> target="_blank">{$val.title}</a></td>
+		<td><a href="__URL__/testContent/tid/{$tid}/addr_ip/{$val.ip}/" >{$val.ip}</a></td>
+		<td <if condition="$val.statusname eq '已通过'">style="color:red;"</if>>{$val.statusname}</td>
+		<td><?php echo date('Y-m-d H:i:s',$val['dateline']); ?></td>
+         <td>
+			<a style="color:blue;" href="__URL__/delReport/reportid/{$val.tid}/" onClick="return confirm('确认删除所选择的报告？')">删除</a>
+		</td>
+		
+	</tr>
+	</volist>
+	<else />
+	<tr>
+		<td colspan="15" class="noData">暂无数据！</td>
+	</tr>
+	</if>
+</table>
+</form>
+<div class="navgition">
+	{$pageList|default='&nbsp;'}
+</div>
+<script type="text/javascript">
+$(function(){
+	 $("#p_status").find("option[value='{$p_status}']").attr("selected",true);
+});
+</script>
+</body>
+</html>

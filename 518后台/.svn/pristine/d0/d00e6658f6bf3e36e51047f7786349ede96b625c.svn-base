@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen"/>
+<link rel="stylesheet" href="/Public/css/tablelist.css?v2" type="text/css" media="screen"/>
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>『Goapk|安智网』管理平台</title>
+    <script type="text/javascript">
+        if (typeof (window.parent) != 'undefined' && (menuFrame = window.parent.document.getElementById('menu-frame').contentWindow)) {
+            try {
+                menuFrame.selectMenu('__ACTION__');
+            } catch (e) {
+            }
+        }
+    </script>
+</head>
+
+<script type="text/javascript">
+    $(function () {
+        document.onkeydown = function (e) {
+            var ev = document.all ? window.event : e;
+            if (ev.keyCode == 13) {
+                search();
+            }
+        }
+    });
+    $(document).ready(function () {
+        $('.getionbtn').mouseover(function () {
+            $(this).parent().find('.position_newbox').show();
+        });
+        $('.getionbtn').mouseout(function () {
+            $(this).parent().find('.position_newbox').hide();
+        });
+    });
+    function del(soft_id) {
+        if (confirm("删除不可恢复！确定要删除此条记录?")) {
+            var param = {
+                soft_id: soft_id
+            };
+            $.ajax({
+                url: '__URL__/deletepro',
+                type: 'POST',
+                data: param,
+                dataType: 'json',
+                success: function (data) {
+                    if (data == 1) {
+                        location.href = "/index.php/Sendnum/Product/index";
+                    } else {
+                        alert('对不起，权限不足');
+                        location.href = "/index.php/Sendnum/Product/index";
+                    }
+                }
+            });
+        }
+    }
+    ;
+
+    function search() {
+        var begintime = $("#cj_begintime").val();
+        var endtime = $("#cj_endtime").val();
+        var add_begintime = $("#add_begintime").val();
+        var add_endtime = $("#add_endtime").val();
+        if (begintime.length > 0 && endtime.length > 0 && endtime < begintime) {
+            alert('采集结束时间不能小于开始时间');
+        } else if (add_begintime.length > 0 && add_endtime.length > 0 && add_endtime < add_begintime) {
+            alert('添加结束时间不能小于开始时间');
+        } else {
+            $("#search").submit();
+        }
+    }
+    ;
+
+    function unauthorized_tb_remove(obj) {
+        var reg = /^\{/;
+        //console.log(reg.test($(obj).html()));
+        if (reg.test($(obj).html())) {
+            $("#TB_overlay").click(tb_remove);
+        }
+    }
+</script>
+<body>
+<form action="/index.php/Caiji/Collection/cooperation" method="get" id="search">
+    <div class="search_box">
+        <table cellpadding="0" cellspacing="0" class="tb2" style="margin-top:10px;">
+            <tr>
+                <td width="60" align="right">包名:</td>
+                <td>
+                    <input type="text" name="package" id="package" value="{$get.package}">
+                </td>
+                <td width="60" align="right">软件名称:</td>
+                <td>
+                    <input type="text" name="softname" id="softname" value="{$get.softname}">
+                </td>
+                <td width="60" align="right">软件分类:</td>
+                <td>
+                    <select name="az_category">
+                        <option value="-1"
+                        <if condition="($get.az_category eq -1)"> selected="selected"</if>
+                        >全部</option>
+                        <option value="2"
+                        <if condition="($get.az_category eq 2)"> selected="selected"</if>
+                        >游戏</option>
+                        <option value="1"
+                        <if condition="($get.az_category eq 1)"> selected="selected"</if>
+                        >应用</option>
+                    </select>
+                </td>
+                <td width="60" align="right">采集时间:</td>
+                <td>
+                <input id="cj_begintime" name="cj_begintime" value="{$get.cj_begintime}" type="text" class="Wdate"
+                       onClick="WdatePicker({startDate: '%y-%M-%d 00:00:00', dateFmt: 'yyyy-MM-dd HH:mm:ss'})"
+                       style="width:140px;">~<input id="cj_endtime" name="cj_endtime"
+                                                                value="{$get.cj_endtime}" type="text" class="Wdate"
+                                                                onClick="WdatePicker({startDate: '%y-%M-%d 23:59:59', dateFmt: 'yyyy-MM-dd HH:mm:ss'})"
+                                                                style="width:140px;"></td>
+            </tr>
+            <tr>
+                <td width="60" align="right">开发者:</td>
+                <td>
+                    <input type="text" name="dev_name" id="dev_name" value="{$get.dev_name}" >
+                </td>
+                <td width="60" align="right">状态:</td>
+                <td>
+                    <select name="status">
+                        <option value="-1"
+                        <if condition="($get.status eq -1)"> selected="selected"</if>
+                        >全部</option>
+                        <option value="3"
+                        <if condition="($get.status eq 3)"> selected="selected"</if>
+                        >开发者未上传</option>
+                        <option value="2"
+                        <if condition="($get.status eq 2)"> selected="selected"</if>
+                        >审核中</option>
+                        <option value="1"
+                        <if condition="($get.status eq 1)"> selected="selected"</if>
+                        >最新版</option>
+                    </select>
+                </td>
+
+                <td width="60" align="right">来源:</td>
+                <td>
+                    <select name="sync_from">
+                        <option value="-1"
+                        <if condition="($get.sync_from eq -1)"> selected="selected"</if>
+                        >全部</option>
+                        <option value="1"
+                        <if condition="($get.sync_from eq 1)"> selected="selected"</if>
+                        >刷量白名单</option>
+                        <option value="2"
+                        <if condition="($get.sync_from eq 2)"> selected="selected"</if>
+                        >运营白名单</option>
+                        <option value="3"
+                        <if condition="($get.sync_from eq 3)"> selected="selected"</if>
+                        >闪屏-通过</option>
+                        <option value="4"
+                        <if condition="($get.sync_from eq 4)"> selected="selected"</if>
+                        >商务白名单</option>
+                    </select>
+                </td>
+                <td width="60" align="right">添加时间:</td>
+                <td>
+                    <input id="add_begintime" name="add_begintime" value="{$get.add_begintime}" type="text"
+                           class="Wdate"
+                           onClick="WdatePicker({startDate: '%y-%M-%d 00:00:00', dateFmt: 'yyyy-MM-dd HH:mm:ss'})"
+                           style="width:140px;">~<input id="add_endtime" name="add_endtime"
+                                                                    value="{$get.add_endtime}" type="text" class="Wdate"
+                                                                    onClick="WdatePicker({startDate: '%y-%M-%d 23:59:59', dateFmt: 'yyyy-MM-dd HH:mm:ss'})"
+                                                                    style="width:140px;">
+                </td>
+            </tr>
+            <tr>
+                <td width="60" align="right">下载量:</td>
+                <td colspan="3"><input type="text" name="down_str" value="{$get.down_str}">
+                    - <input type="text" name="down_end" value="{$get.down_end}">万
+                </td>
+                <td colspan="4" align="right"><input class="search_btn" style="margin-right:26px ; height:30px;" type="button" value="搜索"
+                                       onclick="search()"></td>
+            </tr>
+        </table>
+    </div>
+</form>
+<div class="count_bar">&nbsp;&nbsp;&nbsp;{$count}条<a href="?down=1" class="search_btn" style="float:right; margin-right:37px;">导出</a>
+</div>
+<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+    <thead>
+    <tr align="center">
+        <th width="7%" height="26">软件名称</th>
+        <th width="14%">包名</th>
+        <th width="5%">软件分类</th>
+        <th width="5%">限制条件</th>
+        <th width="5%">下载量</th>
+        <th width="5%">状态</th>
+        <th width="5%">安智版本</th>
+        <th width="7%">采集信息</th>
+        <th width="2%">采集时间</th>
+        <th width="5%">开发者</th>
+        <th width="6%">来源</th>
+        <th width="2%">添加时间</th>
+    </tr>
+    </thead>
+    <tbody>
+    <volist name="list" id="list">
+        <tr>
+            <td height="20" align="center"><a href="http://www.anzhi.com/soft_{$list.softid}.html" target="_blank">{$list.softname}</a>
+            </td>
+            <td height="20" align="center"> {$list.package}</td>
+            <td height="20" align="center"> {$list.az_category}</td>
+            <td height="20" align="center">
+                <if condition="($list.sync_from eq '闪屏-通过')">版本不采集</if>
+                <if condition="($list.sync_from neq '闪屏-通过')">软件不采集</if>
+            </td>
+            <td height="20" align="center"> {$list.az_downloaded}</td>
+            <td height="20" align="center">
+                <if condition="($list.status eq 1)">最新版</if>
+                <if condition="($list.status eq 2)">审核中</if>
+                <if condition="($list.status eq 3)">开发者未上传</if>
+            </td>
+            <td height="20" align="center"> {$list.az_version_code}({$list.az_version_name})</td>
+            <td height="20" align="center"> {$list.cj_info}</td>
+            <td height="20" align="center">
+                <div style="width:70px;">
+                    <if condition="($list.fetch_tm neq null)">{$list.fetch_tm|date="Y-m-d H:i:s",###}</if>
+                </div>
+            </td>
+            <td height="20" align="center"><a href="/index.php/Dev/User/userlists/dev_id/{$list.dev_id}"
+                                              target="_blank">{$list.dev_name}</a></td>
+            <td height="20" align="center"> {$list.sync_from}</td>
+            <td height="20" align="center">
+                <div style="width:70px;">{$list.create_tm|date="Y-m-d H:i:s",###}</div>
+            </td>
+        </tr>
+    </volist>
+    </tbody>
+</table>
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>
+</html>

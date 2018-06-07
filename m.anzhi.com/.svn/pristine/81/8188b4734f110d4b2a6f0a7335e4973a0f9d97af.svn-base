@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>签到送流量</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/soft_list_v1.js?v1"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v4"></script>
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/banner.png" />
+</div>
+<div class="part1">
+	<div class="btn_nav">
+		<a href="/lottery/<!--{$out.prefix}-->/my_prize.php?is_rule=1&aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->" class="btn_nav_l">活动说明</a>
+		<div class="btn_nav_r">
+			<a href="javascript:;" onclick="go_flow_log();" class="btn_log">记录</a>
+			<a href="javascript:;" onclick="go_share();" class="btn_share">分享</a>
+		</div>
+		<div class="clear"></div>
+	</div>
+	<div class="flow_info">
+		<p>流量剩余<span id='res_flow'><!--{$out.res_flow}-->M</span></p>
+		<a href="javascript:;" onclick="go_flow_up();" >提取流量</a>
+	</div>
+	<h2 style="padding:0.1rem 0 0 2.3rem; " >满100M可提取</h2>
+</div>
+<div class="part2">
+	<p>签到领取流量</p>
+	<div class="process_wrap">
+		<div class="process">
+			<span style="width:3.4rem"></span>
+			<em>1/1</em>
+		</div>
+		<!--{if $out.sign_flow}-->
+			<a href="javascript:;"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/icon_01.png"/></a>
+		<!--{else}-->
+			<a href="javascript:;" onclick="sign_flow(1);" id='sign_flow1' >领流量</a>
+		<!--{/if}-->		
+	</div>
+	<p>下载软件领取流量</p>
+	<div class="process_wrap">
+		<div class="process">
+			<!--{assign var='num' value="3.4"}-->
+			<span id="speed" style="width:<!--{$num*$out.down_num/3}-->rem" ></span>
+			<em><font id='flow2'><!--{$out.down_num}--></font>/3</em>
+		</div>
+		<!--{if $out.down_flow gt 2}-->
+			<a href="javascript:;">
+				<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/icon_01.png"/>
+			</a>
+		<!--{elseif $out.down_num eq 0 or ($out.down_flow >= $out.down_num) }-->	
+		<a href="javascript:;" onclick="sign_flow(2);" id='sign_flow2' >去完成</a>
+		<!--{else}-->	
+			<a href="javascript:;" onclick="sign_flow(2);" id='sign_flow2' >领流量</a>
+		<!--{/if}-->			
+	</div>
+</div>
+<div class="soft_wrap">
+	<div class="title">下载软件可增加领流量机会</div>
+		<ul class="soft-list clear"  id="soft-list">
+		</ul>
+	<div class="bg4">
+		<a  onclick="change_soft2();" href="javascript:;" class="btn1">换一批</a>	
+	</div>
+</div>
+<div class="footer">
+	<p>＊本次活动最终解释权归安智所有</p>
+</div>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box"  style="display: none;">
+		<div class="wrap tips_wrap">
+			<div class="tips_form">
+				<p>需要绑定手机号才可参加活动哦~</p>
+				<div class="form_item">
+					<label>手机号</label>
+					<input  class="inputtext" id='mobile_r'  maxlength='11' type="tel"  placeholder="手机号"  />
+				</div>
+				<div class="form_item">
+					<label>验证码</label>
+					<input class="inputtext shortinput" id='code'  maxlength='6' type="tel"  placeholder="验证码" />
+					<span class="code"  id="code_tm" value="获取验证码" onclick="get_code();" >获取验证码</span>
+					<br/><font id="userinfo_err" color="red" ></font>
+				</div>
+				<a href="javascript:;" class="btns" onclick="binding_moblie();">提交</a>
+			</div>
+		</div>
+    </div>
+	
+    <div class="tip-box" id="tip-box2"  style="display: none;">
+		<div class="wrap tips_wrap">
+			<div class="tip_img">
+				<img id="tip_img2" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tips_04.png" />
+			</div>
+			<div class="tip_txt">
+				<p id="notice2" ></p>
+			</div>
+			<a href="javascript:;" class="btns_yellow" onclick="cloBox('#tip-box2');scrollWindow();">继续任务</a>
+		</div>
+    </div>	
+    <div class="tip-box" id="tip-box4"  style="display: none;">
+		<div class="wrap tips_wrap">
+			<div class="tip_img">
+				<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tips_05.png" />
+			</div>
+			<div class="tip_txt">
+				<p><span>5M流量已到账，请查收~</span></p>
+			</div>
+			<a href="javascript:;" class="btns_yellow" onclick="cloBox('#tip-box4');scrollWindow();">继续任务</a>
+		</div>
+    </div>	
+</section>
+</body>
+</html>
+
+<script>
+function scrollWindow(){
+	window.scrollTo(100,1250);
+}
+
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->',p=0,soft_lists_go = [],open_pkg_arr = [];
+var prefix = '<!--{$out.prefix}-->';
+var down_flow = parseInt('<!--{$out.down_flow}-->');	
+var down_num = parseInt('<!--{$out.down_num}-->');	
+var res_flow = parseInt('<!--{$out.res_flow}-->');	
+var log_price_total = parseInt('<!--{$out.log_price_total}-->');	
+var sign_num = parseInt('<!--{$out.sign_num}-->');	
+
+function go_flow_up(){
+
+	if(res_flow < 100){
+		window.AnzhiActivitys.showToastForJs("需满100M才可以提取流量哦~");	
+		return false;
+	}
+	window.location.href="/lottery/"+prefix+"/my_prize.php?flow_up=1&aid="+aid+"&sid="+sid;			
+}
+function go_flow_log(){
+	if(log_price_total <= 0){
+		window.AnzhiActivitys.showToastForJs("没有相关记录，快去做任务兑换流量吧");
+		return false;
+	}
+	window.location.href="/lottery/"+prefix+"/my_prize.php?aid="+aid+"&sid="+sid;
+}
+
+$(document).ready(function () {
+	setTimeout(function(){
+		//go_from 1排行榜（无软件名称、状态按钮） 2抽奖页面（有软件名称、和状态按钮）
+		var go_from =2;
+		my_soft(aid,sid,8,go_from);
+	}, 500);
+	<!--{if !$out.bind_status}-->	
+		pop_tips("","","",1);
+	<!--{/if}-->	
+});
+function change_soft2(){
+	$('#soft-list').html('');
+	get_soft(aid,sid,8,2);
+}
+
+function go_softinfo_down(softid,my_package,softname,versioncode,size,aid,sid,details){
+	setTimeout(function(){
+		$.ajax({
+			url: "/lottery/"+prefix+"/index.php",
+			data:"down=1&aid="+aid+"&sid="+sid+"&pkg="+my_package,
+			type:"post",
+			dataType: 'json',
+			success:function(data) {
+				if(data.code == 1){
+					down_num = down_num+1;
+					$("#sign_flow2").html("领流量");
+					$("#speed").attr("style","width:"+(down_num*3.4/3)+"rem");
+					$("#flow2").html(down_num);			
+				}else{
+					//alert(data.msg);	
+					return false;
+				}
+			},
+		});	
+	}, 3000);
+	$.ajax({
+		url: '/lottery/year_feedback_download.php',  //supwater  点击详情 点击下载
+		data:"softid="+softid+"&sid="+sid+"&aid="+aid+"&pkgname="+my_package, 
+		type:"post",
+		success:function(data) {
+			if(details == 1){
+				details =1;
+			}else{
+				details = 0
+			}
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),softid,my_package,softname,versioncode,size,details);
+		},
+	});
+}
+
+function get_code(){
+
+	var mobile_phone = $("#mobile_r").val();
+	if(mobile_phone == "") {
+		$('#userinfo_err').html('手机号码不能为空');
+		return false;
+	}
+
+	var  re = /^(13|14|15|17|18)\d{9}$/
+	if (!re.test(mobile_phone)){
+		$('#userinfo_err').html('请输入正确手机号');
+		return false;
+	} 
+	$('#userinfo_err').html('');
+	$.ajax({
+		url: "/lottery/"+prefix+"/index.php",
+		data:"send_code=1&aid="+aid+"&sid="+sid+"&mobile_phone="+mobile_phone,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if(data.code == 1){
+				//alert(data.msg);	
+				time2();
+				window.AnzhiActivitys.showToastForJs(data.msg);
+			}else{
+				$('#userinfo_err').html(data.msg);
+				return false;
+			}
+		},
+	});	
+}
+function binding_moblie(){
+	var mobile_phone = $("#mobile_r").val();
+	if(mobile_phone == "") {
+		$('#userinfo_err').html('请输入手机号');
+		return false;
+	}
+	var  re = /^(13|14|15|17|18)\d{9}$/
+	if (!re.test(mobile_phone)){
+		$('#userinfo_err').html('请输入正确手机号');
+		return false;
+	} 
+	var code = $("#code").val();
+	if(code == "") {
+		$('#userinfo_err').html('请输入验证码');
+		return false;
+	}	
+	$('#userinfo_err').html('');
+	$.ajax({
+		url: "/lottery/"+prefix+"/index.php",
+		data:"binding=1&aid="+aid+"&sid="+sid+"&mobile_phone="+mobile_phone+"&code="+code,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if(data.code == 1){
+				//alert(data.msg);	
+			    window.AnzhiActivitys.showToastForJs(data.msg);
+				setTimeout(function(){
+					location.reload();//加载页面			
+				},1000);				
+			}else{
+				$('#userinfo_err').html(data.msg);
+				return false;
+			}
+		},
+	});	
+}
+
+var wait= 60;  
+function time2(){ 
+	if (wait == 0) {  
+		document.getElementById("code_tm").removeAttribute("disabled");            
+		//document.getElementById("code_tm").html="获取验证码";  
+		$("#code_tm").html("获取验证码");  
+		wait = 60;  
+	} else {  
+		document.getElementById("code_tm").setAttribute("disabled", true);  
+		$("#code_tm").html("重新发送(" + wait + ")");  
+		wait--;  
+		setTimeout(function() { time2() }, 1000) 
+	}  
+} 
+
+function sign_flow(type){
+	var pic = '<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/icon_01.png"/>';
+	if(type == 1){
+		$("#sign_flow"+type).attr("onclick","").html(pic);
+	}else{
+		if(down_flow > 3){
+			$("#sign_flow"+type).attr("onclick","").html(pic);
+			return false;
+		}
+		if(down_num == 0 || (down_flow >= down_num)){
+			$("#sign_flow"+type).html("去完成");
+			scrollWindow();
+			return false;
+		}
+		$("#down_flow_num").html(down_flow+1);
+		$("#sign_flow"+type).attr("onclick","");
+	}
+	$.ajax({
+		url: "/lottery/"+prefix+"/index.php",
+		data:"sign_flow="+type+"&aid="+aid+"&sid="+sid,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if(data.code == 1){
+				if(type == 1){
+					res_flow = res_flow+data.price;
+					log_price_total = log_price_total+data.price;
+					var  tip_img2 = "<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/";
+					if(data.price == 30){
+						$("#tip_img2").attr("src",tip_img2+"tips_11.png");
+					}else if(data.price == 20){
+						$("#tip_img2").attr("src",tip_img2+"tips_10.png");
+					}else{
+						$("#tip_img2").attr("src",tip_img2+"tips_09.png");
+					}
+					$("#res_flow").html(res_flow);
+					var str = "<span>"+data.price+"M流量已收入囊中！</span>下载软件也可以领流量哦！";
+					pop_tips("",str,"2",1);
+				}else{
+					res_flow = res_flow+5;
+					log_price_total = log_price_total+5;
+					$("#res_flow").html(res_flow);
+					down_flow = down_flow+1;
+					if(down_flow < 3){
+						if(down_flow >= down_num){
+							$("#sign_flow"+type).html("去完成");
+						}					
+						$("#sign_flow"+type).attr("onclick","sign_flow("+type+")");
+					}else{
+						$("#sign_flow"+type).attr("onclick","").html(pic);
+					}					
+					pop_tips("","","4",1);
+				}
+			
+			}else{
+				 window.AnzhiActivitys.showToastForJs(data.msg);
+				//$('#userinfo_err').html(data.msg);
+				return false;
+			}
+		},
+	});	
+} 
+
+
+//分享
+function go_share(){
+	$.ajax({
+		url: '/lottery/my_name_MT3_new/share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+		}
+	});
+	var share_text="这里的流量不要钱！月月送你1GB！";	
+	var share_url='<!--{$out.activity_host}-->/lottery/'+prefix+'/index.php?is_share=1&aid='+aid;	
+	
+<!--{if $out['is_test'] == 1}-->
+	var icon_url = 	"<!--{$out.activity_host}-->/static/activity/"+prefix+"/images/share_icon.png";
+<!--{else}-->
+	var icon_url = 	"http://img3.anzhi.com/static/activity/"+prefix+"/images/share_icon.png";
+<!--{/if}-->
+	var share_json = '{"TEXT":"'+share_text+'","URL":"'+icon_url+'","ACTIONURL":"'+share_url+'","URLWEIXIN":"'+icon_url+'"}';
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+	
+
+<!--{if $out['is_share'] == 1}-->
+document.write(unescape("%3Cscript src='/js/anzhi-fd-min1.js?v"+Math.round(Math.random()*100)+"' type='text/javascript'%3E%3C/script%3E"));
+var js_param = {type:'action', id:aid, callback:invite_callback};
+var php_param = {type:'action', aid:aid};
+$(document).ready(function () {
+	Azfd.share_download(js_param, php_param);
+});	
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6200){
+			js_param = {type:'action', id:aid, callback:null};
+			Azfd.lock = false;
+			share_download(js_param, php_param);			
+		}else {
+			setTimeout(function(){
+				var php_url = 'fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;			
+			},1000);		
+		} 
+	}else{
+		setTimeout(function(){
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;			
+		},1000);		
+	}
+}
+function is_null(){}
+<!--{/if}-->	
+</script>

@@ -1,0 +1,231 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript">
+var  tagsinfo = <?php echo $taglist_json;?>;
+var tagsgroup = <?php echo $grouplist_json;?>;
+var tagpinfo = <?php echo $tagpinfo_json;?>;
+var checkedparentid = [];
+var urlfrom = "{$_GET['from']}";
+function subtags(dotype){
+	var tagsobj = document.getElementsByName("tags[]");
+	var taglen = tagsobj.length;
+	var txt = new Array();
+	var checkedtag = [];
+	var checkedtaglist = [];
+	var checkedparent = [];
+	var checkedgroup = [];
+	var checkedtotalcontent = [];
+	//--------线上不能没有标签判断-----------
+	var onlyone='<?php echo $_GET['onlyone'];?>';
+	var on_url='';
+	if(onlyone == 'yes'){
+		var on_tag = document.getElementsByName('tags[]');
+		var on_tag_length = on_tag.length;
+		var on_tag_only = false;
+		for(var i =0;i<on_tag_length;i++){
+			if(on_tag[i].checked){
+				on_tag_only = true;
+				break;
+			}
+		}
+		if(on_tag_only != true){
+			alert('请至少保留一个标签！');
+			return false;
+		}
+		on_url = '/onlyone/yes/';
+	}
+	//---------------END---------------------
+	for(var i =0;i<taglen;i++){
+		if(tagsobj[i].checked == true){
+			var checktaginfo = {};
+			var tagid = tagsobj[i].value;
+			var searchtag = gettagobj('searchtagid');
+			searchtag.value += tagid+'_';
+			var groupid = tagsinfo[tagid].group;
+			var parentid = tagsinfo[tagid].parentid;
+			if(parentid > 0){				
+				checktaginfo['parentname'] = tagsinfo[parentid].tagname;
+				checkedparentid[parentid] = 1;
+			}else{
+				checkedparentid[parentid] = 0;
+			}
+			checkedgroup[groupid] = groupid;
+			checktaginfo['parentid'] = parentid;
+			checktaginfo['tag'] = tagid;
+			checktaginfo['tagname'] =  tagsinfo[tagid].tagname;
+			checktaginfo['group'] =  groupid;
+			checktaginfo['groupname'] =  tagsgroup[groupid];
+			checkedtag.push(checktaginfo);
+		}
+	}
+	var txt = [] ;
+	var uniquetagid='';
+	for(var i = 0;i < checkedtag.length;i++){
+		if(checkedtag[i].parentid == 0 && checkedparentid[checkedtag[i].tag] == 1) continue;
+		var checkgroup = checkedtag[i].group;
+		if(typeof(txt[checkgroup]) == "undefined" ){
+			txt[checkgroup]  = checkedtag[i].groupname+" : ";
+		}
+		var tag = checkedtag[i].parentid == 0 ? checkedtag[i].tagname : checkedtag[i].parentname +" > "+checkedtag[i].tagname
+		//保存去掉有子标签的标签的tagid
+		uniquetagid += checkedtag[i].tag + '_';
+		txt[checkgroup] += ' ' + tag;
+	}
+	var txtstr = '';
+	for(var i =0; i< txt.length;i++){		
+		txtstr += txt[i] ? txt[i]+"</br>" : '';
+	};
+
+	var tagidurl = gettagobj('searchtagid').value;
+	if(dotype == 'search'){
+		document.getElementById('tagselect').innerHTML = txtstr;
+		var obj = document.getElementById('searchtag');
+		obj.href = '__URL__/tag_list_show1/tags/' +tagidurl;
+		var searchobj = document.getElementById('searchtagarr');
+		var searchuniqueobj = document.getElementById('searchuniquetag');
+		searchobj.value = tagidurl;
+		searchuniqueobj.value = uniquetagid;
+		gettagobj('searchtagid').value = '';
+		return tb_remove();
+	}else if(dotype == 'edit'){
+		location.href = "__URL__/add_tags/source/{$source}/id/{$tid}/tags/"+tagidurl;
+	}else if(dotype == 'editajax'){	
+	var xmlhttp;
+		if (window.XMLHttpRequest){
+			xmlhttp=new XMLHttpRequest();
+		}else{
+			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.onreadystatechange=function(){
+			if (xmlhttp.readyState==4 && xmlhttp.status==200){
+				var data  = xmlhttp.responseText;
+				if(data == 1||data == 0){
+					alert("编辑标签成功");
+					document.getElementById("tdlist_{$tid}").innerHTML = txtstr;
+					document.getElementById("tdurl_{$tid}").href = '__URL__/tag_list_show1/from/'+urlfrom+'/source/{$source}/id/{$tid}/tags/'+tagidurl+on_url;
+					if(urlfrom == 'result_list' && data == 1){
+						var statusobj = document.getElementById("substatus_{$tid}");
+						statusobj.innerHTML = '<a href="/index.php/Zhiyoo/Collectresult/sub_thread/ids/{$tid}/source/{$source}" style="text-decoration:underline;color:blue;">提交到待用素材库</a>';
+					}
+					if(urlfrom == 'result_list' && data == 0){
+						var statusobj = document.getElementById("substatus_{$tid}");
+						statusobj.innerHTML = '未添加标签不可提交待用素材库';
+					}
+					return tb_remove();
+					}else{
+						alert("编辑失败");
+						return tb_remove();
+					}
+				}
+		  }
+		xmlhttp.open("GET","__URL__/add_tags/source/{$source}/id/{$tid}/from/edit_content/tags/"+tagidurl,true);
+		xmlhttp.send();
+
+	}
+	
+}
+
+var checkedtag = new Array();
+function showchild(parentid){
+	if(typeof(tagpinfo[parentid]) == "undefined") return false;
+	var childobj = document.getElementById('tagparnetid_'+parentid);
+	if(gettagobj('tag_'+parentid).checked == true){
+		childobj.style.display = 'block';	
+	}else{
+		childobj.style.display = 'none';
+		var childs = childobj.getElementsByTagName('input');
+		var cnt = childs.length;
+		for(var i=0;i < cnt; i++){
+			if (childs[i].checked == true) childs[i].checked = false;
+		}	
+	}
+}
+
+function checkparentid(obj,childtagid){
+	var tid = tagsinfo[childtagid].parentid;
+	if(tid == 0) return false;
+	if(obj.checked == true){
+		checkedparentid[tid] = 1;
+	}else{
+		checkedparentid[tid] = 0;
+	}
+}
+
+function gettagobj(id){
+	return document.getElementById(id);	
+}
+
+function createtag(tag){
+	return document.createElement(tag);
+}
+
+</script>
+<div>
+	<h3>筛选标签</h3>
+	
+<?php 
+	foreach($cat as $groupid=>$name){ ?>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+		<tr id="group_{$groupid}"><th>{$name}</th></tr>
+		<?php
+		$i =0;
+		foreach($taginfo[$groupid] as $tag){
+			if($tag['parentid'] != 0){
+				continue;	
+			}
+			$i++;
+			if($i%5==1) echo "<tr>";
+			$checked='';
+			if(in_array($tag['tagid'],$tags)) $checked='checked';
+			?>
+			<td width="100px">
+			<input type="checkbox" name="tags[]" id="tag_{$tag.tagid}" class="ck" onclick="showchild({$tag.tagid})" value="{$tag.tagid}" {$checked}/>
+			{$tag['tagname']}
+			</td>
+			<?php
+			if($i%5==0) echo "</tr>";
+		}
+		?>
+		</tr>
+	</table>
+	
+	
+		<?php 
+		//foreach($tagpinfo as $key => $tagslist){
+			foreach($taginfo[$groupid] as $tag){
+				if($tag['parentid'] != 0) continue;	
+				$tagslist = $tagpinfo[$tag['tagid']]; 
+				if(empty($tagslist)) continue;
+				$key = $tag['tagid'];
+				$j =0;
+				if(in_array($key,$tags)) $display='block'; else $display='none';
+				echo "<table id=\"tagparnetid_".$key."\" style=\"display:".$display."\"  class=\"table_list\">";
+				echo "<th>".$taglist[$key]['tagname']."</th>";
+				foreach($tagslist as $info){
+					$j++;
+					if($j%5==1) echo "<tr>";
+					$checked='';
+					if(in_array($info['tagid'],$tags)) $checked='checked';
+					?>
+					<td width="100px"><input type="checkbox" name="tags[]" id="tag_{$info['tagid']}" value="{$info['tagid']}" onclick="checkparentid(this,{$info['tagid']})" {$checked}/>{$info['tagname']}</td>
+					
+					<?php
+					
+					if($i%5==0) echo "</tr>";
+				}
+				echo "</table>";
+			
+		}
+	} 
+?>
+<div id="gettags">
+
+</div>
+<div id="getid">
+	
+</div>
+
+<input type="hidden" name="searchtagid" id="searchtagid" value=""/>
+<a href="javascript:;"  class="search_btn" onclick="subtags('<?php if($_GET['from']) echo 'editajax';elseif($_GET['id']) echo 'edit'; else echo 'search';?>')" style="display:inline-block;">提交</a>
+<a href="javascript:;"  class="search_btn" style="display:inline-block;" onclick="tb_remove();">取消</a>
+</div>
+

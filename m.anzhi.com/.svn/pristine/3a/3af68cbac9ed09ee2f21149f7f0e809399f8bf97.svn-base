@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title><!--{$out.a_name}--></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/commentreply_875/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<style type="text/css">
+body{<!--{if $out.list['bg_img']}-->background:url(<!--{$out.imgurl}--><!--{$out.list['bg_img']}-->) no-repeat;background-size:100% auto;<!--{elseif $out.list['bg_color'] && !$out.list['bg_img']}-->background-color: <!--{$out.list['bg_color']}-->;<!--{/if}--> color: <!--{$out.list['ap_notice']}-->;}
+.wrap{background:url(<!--{$out.imgurl}--><!--{$out.list['popup_bg_pic']}-->) no-repeat; color:<!--{$out.list['ap_notice']}-->; background-size:100% 100%;}
+.titles{background:url(<!--{$out.imgurl}--><!--{$out.list['warning_bgcolor']}-->) no-repeat; color:<!--{$out.list['ap_notice']}-->; background-size:100% 100%; line-height:43px; font-weight:normal;}
+.input_text{background:url(<!--{$out.imgurl}--><!--{$out.list['rule_pic']}-->) no-repeat; background-size:100% 100%; background-clip: padding-box; color:<!--{$out.list['text_color']}-->}
+.form_btn a{background:url(<!--{$out.imgurl}--><!--{$out.list['button_pic']}-->) no-repeat; background-size:100% 100%; color:<!--{$out.list['button_text_color']}-->; line-height:45px; text-shadow:none;}
+.soft_list li{<!--{if $out.list['soft_style'] eq 1}-->width: 98%<!--{elseif $out.list['soft_style'] eq 2}-->width: 48%<!--{elseif $out.list['soft_style'] eq 3}-->width: 31.3%<!--{/if}-->;}
+.soft_list li p{color:<!--{$out.list['ap_notice']}-->}
+.soft_list li a.soft_btn{background:url(<!--{$out.imgurl}--><!--{$out.list['button_pic']}-->) no-repeat; background-size:100% 100%; color:<!--{$out.list['button_text_color']}-->; line-height:37px; text-shadow:none;}
+.footer p{background:<!--{$out.list['button_color']}-->; background-size:100% 100%; color:<!--{$out.list['ap_notice']}-->}
+</style>
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.imgurl}--><!--{$out.list['ap_imgurl']}-->"/>
+</div>
+<div class="wrap">
+	<div class="titles">
+		<h3>参与步骤</h3>
+	</div>
+	<ul>
+		<!--{$out.list['ap_desc']}-->
+	</ul>
+</div>
+<div class="wrap">
+	<form action="" class="phone_form">
+		<p>请填写手机号码</p>
+		<div class="form_item">
+			<input type="text" id="telephone_input" placeholder="请输入手机号领取" class="input_text"/>
+            <span class="propmt"></span>
+		</div>
+		<div class="form_btn">
+			<a href="javascript:;" id="telephone_submit_btn">提交</a>
+		</div>
+	</form>
+</div>
+<div class="wrap">
+	<div class="titles">
+		<h3>活动软件</h3>
+	</div>
+	<ul class="soft_list clear" id="my_softs">
+	</ul>
+</div>
+<div class="wrap">
+	<div class="titles">
+		<h3>活动奖品</h3>
+	</div>
+	<ul class="prize_list clear">
+	<!--{foreach from=$out.list['award_color'] item=val}-->
+		<li><img src="<!--{$out.imgurl}--><!--{$val}-->"/></li>
+	<!--{/foreach}-->
+		<div class="clear"></div>
+	</ul>
+</div>
+<div class="wrap">
+	<div class="titles">
+		<h3>活动规则</h3>
+	</div>
+	<div class="rule">
+		<!--{$out.list['ap_rule']}-->
+	</div>
+</div>
+<div class="footer">
+	<img src="<!--{$out.imgurl}--><!--{$out.list['bottom_color']}-->"/>
+	<p>本次活动最终解释权归安智所有</p>
+</div>
+</body>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+
+var clickable = true;
+
+$(function(){
+	$("#telephone_submit_btn").bind('click', function() {
+		if (!clickable) {
+			return false;
+		}
+		clickable = false;
+		var telephone = $.trim($("#telephone_input").val());
+		if (telephone == '') {
+			$('.propmt').html('请输入手机号');
+			clickable = true;
+			return false;
+		}
+		var reg = /^1[34578][0-9]{9}$/
+		if (!reg.test(telephone)) {
+			$('.propmt').html('请输入正确的手机号');
+			clickable = true;
+			return false;
+		}
+		$('.propmt').html('');
+		$.ajax({
+			url:'/lottery/cmt_reply/get_telephone.php?aid='+aid+'&sid='+sid,
+			data:'telephone='+telephone,
+			type:'post',
+			dataType:'json',
+			success:function(data) {
+				var status = data.status;
+				var msg = data.msg;
+				$('.propmt').html(msg);
+				clickable = false;
+			},
+			error:function(){
+				$('.propmt').html('提交失败');
+				clickable = true;
+			}
+		});
+	});
+});
+
+setTimeout(function(){
+	my_soft(aid,sid,6,1);
+}, 500);
+
+var p=0,soft_lists_go = [];
+var open_pkg_arr = [];
+function my_soft(aid,sid,limit,go_from) {
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	var soft_lists = soft_list.DATA;
+	var open_list = [];
+	var install_list = [];
+	var down_list = [];
+	for(var j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var json_data =  window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(json_data == 0 || json_data == 1 ){
+			open_list.push(soft_lists[j]);
+			open_pkg_arr.push(soft_lists[j][7]);
+		}
+		if(json_data == -2 && soft_status_gos == 5){
+			install_list.push(soft_lists[j]);
+		}
+		if((json_data == -2 && soft_status_gos != 5 ) || json_data == -1){
+			down_list.push(soft_lists[j]);
+		}
+	}      
+  	for(var ii in open_list) {
+		soft_lists_go.push(open_list[ii]);
+	}  
+  	for(var ii in install_list) {
+		soft_lists_go.push(install_list[ii]);
+	}
+  	for(var ii in down_list) {
+		soft_lists_go.push(down_list[ii]);
+	}
+	get_soft(aid,sid,limit,go_from);
+}
+
+
+function get_soft(aid,sid,limit,go_from){
+	var pagemax= Math.floor(soft_lists_go.length/limit);
+	if(soft_lists_go.length%limit==0){
+		pagemax = pagemax-1;
+	}
+	var data = soft_lists_go.slice(p*limit,limit*(p+1));
+	if(data.length == 0){
+		p = 0;
+		data = soft_lists_go.slice(p*limit,limit*(p+1));
+	}
+	var str = '';
+	for(i = 0; i < data.length; i++) {
+		if(data[i][2].length > 5){
+			var softname = data[i][2].substring(0,4)+'...';
+		}else{
+			var softname = data[i][2];
+		}
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);		
+		if(data[i][2].length > 5){
+			var softname = data[i][2].substring(0,4)+'...';
+		}else{
+			var softname = data[i][2];
+		}	
+		if(go_from == 1){
+			//排行榜（无软件名称、状态按钮）
+			str += get_soft_li(aid,sid,soft_status,parseInt(data[i][0]),data[i][7],softname,parseInt(data[i][13]),parseInt(data[i][27]),data[i][1],data[i][9]);
+		}
+	}
+	
+	str += '<div class="clear"></div>';
+	$('#my_softs').html(str);
+
+	if(p==pagemax){
+		p=0;
+	}else{
+		p=p+1;
+	}
+}
+//排行榜（无软件名称、状态按钮）
+function get_soft_li(aid,sid,soft_status,softid,my_package,softname,versioncode,size,src,formated_size){
+	if(soft_status == 1){
+		var soft_li = '<a id="'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+','+aid+',\''+sid+'\')" class="soft_btn">下载中</a>';
+	}else if(soft_status == 2 || soft_status == 3 || soft_status == 8){
+		var soft_li = '<a id="'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+','+aid+',\''+sid+'\')" class="soft_btn">继续</a>';
+	}else if(soft_status == 4){
+		var soft_li = '<a id="'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+','+aid+',\''+sid+'\')" class="soft_btn">下载</a>';
+	}else if(soft_status == 5){
+		var soft_li = '<a id="'+softid+'" onclick="installApp('+softid+',\''+my_package+'\','+aid+',\''+sid+'\')" class="soft_btn">安装</a>';
+	}else if(soft_status == 6){
+		var soft_li = '<a id="'+softid+'" onclick="openApp('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+','+aid+',\''+sid+'\')" class="soft_btn">打开</a>';
+	}else if(soft_status == 9){
+		var soft_li = '<a id="'+softid+'" onclick="installApp('+softid+',\''+my_package+'\','+aid+',\''+sid+'\')" class="soft_btn">校验中</a>';
+	}else if(soft_status == 10){
+		var soft_li = '<a  id="'+softid+'" class="soft_btn" >已下载</a>';
+	}else if(soft_status == -1){
+		var soft_other_status = window.AnzhiActivitys.isInstalledApp(my_package,parseInt(versioncode));
+		if(soft_other_status == -2){
+			var soft_li = '<a id="'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+','+aid+',\''+sid+'\')" class="soft_btn">下载</a>';
+		}else if(soft_other_status == -1){
+			var soft_li = '<a id="'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+','+aid+',\''+sid+'\')" class="soft_btn">更新</a>';
+		}else if(soft_other_status == 0){
+			var soft_li = '<a id="'+softid+'" onclick="openApp('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+','+aid+',\''+sid+'\')" class="soft_btn">打开</a>';
+		}else if(soft_other_status == 1){
+			var soft_li = '<a class="soft_btn">已下载</a>';
+		}
+	}
+	var str = '<li><p class="soft_icon"><img src="'+src+'"/></p><p class="soft_name">'+softname+'</p><p class="soft_size">'+formated_size+'</p>'+soft_li+'</li>';
+	return str;
+}
+
+
+function openApp(softid,my_package,softname,versioncode,size,aid,sid,details){
+	var soft_status_gos = window.AnzhiActivitys.isInstalledApp(my_package,parseInt(versioncode));
+	if(soft_status_gos==0||soft_status_gos==1) {
+		window.AnzhiActivitys.inDetailByPackageName(my_package,aid,0);	
+	} else {
+		window.AnzhiActivitys.downloadForActivity(aid,softid,my_package,softname,versioncode,size,1);
+	}
+	$.ajax({
+		url:'/lottery/cmt_reply/download_api.php?aid='+aid+'&sid='+sid,
+		data:'pkgname='+my_package+'&softid='+softid+'&type=3',
+		type:'post',
+		success:function(){
+		}
+	});
+}
+
+function go_softinfo_down(softid,my_package,softname,versioncode,size,aid,sid,details){
+	var soft_status_gos = window.AnzhiActivitys.isInstalledApp(my_package,parseInt(versioncode));
+	if(soft_status_gos==0||soft_status_gos==1) {
+		window.AnzhiActivitys.inDetailByPackageName(my_package,aid,0);	
+	} else {
+		window.AnzhiActivitys.downloadForActivity(aid,softid,my_package,softname,versioncode,size,1);
+	}
+	$.ajax({
+		url:'/lottery/cmt_reply/download_api.php?aid='+aid+'&sid='+sid,
+		data:'pkgname='+my_package+'&softid='+softid+'&type=1',
+		type:'post',
+		success:function(a){
+		}
+	});
+}
+
+function installApp(softid,pkgname,aid,sid){
+	window.AnzhiActivitys.installAppForActivity(softid);
+	$.ajax({
+		url:'/lottery/cmt_reply/download_api.php?aid='+aid+'&sid='+sid,
+		data:'pkgname='+pkgname+'&softid='+softid+'&type=2',
+		type:'post',
+		success:function(){}
+	});
+}
+
+function onDownloadStateChanged(softid,newState){
+	var newState = parseInt(newState);
+	var softid = parseInt(softid);
+	if(newState == 1){
+		$('#'+softid).text("下载中");
+		$('#'+softid).removeAttr("onclick");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				$('#'+softid).attr('onclick',"go_softinfo_down("+parseInt(softid)+",'"+soft_lists_go[i][7]+"','"+soft_lists_go[i][2]+"',"+soft_lists_go[i][13]+","+soft_lists_go[i][27]+","+parseInt(aid)+",'"+sid+"')");
+			}
+		}
+	}else if(newState == 2){
+		$('#'+softid).text("继续");
+	}else if(newState == 3){
+		$('#'+softid).text("继续");
+	}else if(newState == 4){
+		$('#'+softid).text("重试");
+	}else if(newState == 5){
+		$('#'+softid).text("安装").removeAttr("onclick");
+		$('#'+softid).removeAttr("onclick");
+		for(var i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				$('#'+softid).attr('onclick',"installApp("+parseInt(softid)+",'"+soft_lists_go[i][7]+"',"+parseInt(aid)+",'"+sid+"')");
+                break;
+			}
+		}
+	}else if(newState == 6){
+		$('#'+softid).text("打开").removeAttr("onclick");
+		for(var i=0;i < soft_lists_go.length;i++){		
+			if(soft_lists_go[i][0] == softid){
+				$('#'+softid).attr('onclick',"openApp("+parseInt(softid)+",'"+soft_lists_go[i][7]+"','"+soft_lists_go[i][2]+"',"+soft_lists_go[i][13]+","+soft_lists_go[i][27]+","+parseInt(aid)+",'"+sid+"')");
+                break;
+			}
+		}
+	}else if(newState == 8){
+		$('#'+softid).text("继续");
+	}else if(newState == 9){
+		$('#'+softid).text("检查中");
+	}
+}
+function onDownloadDeleted(softid)
+{
+	location.reload();
+}
+</script>
+</html>

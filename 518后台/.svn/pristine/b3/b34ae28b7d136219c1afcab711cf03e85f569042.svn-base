@@ -1,0 +1,104 @@
+<include file="./Tpl/default/Public/header.html" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script src="/Public/js/thickbox-compressed.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+    <script type="text/javascript">
+        function upload(){
+
+            if($("#uploadFile1").val().length==false&&$("#upload_buy").val().length==0)
+            {
+                alert('买家版banner图片不能为空');
+                return;
+            }
+            if($("#uploadFile0").val().length==false&&$("#upload_sale").val().length==0)
+            {
+                alert('卖家版banner图片不能为空');
+                return;
+            }
+
+
+            if($("#explain").val().length==0)
+            {
+                alert('活动说明不能为空');
+                return;
+            }
+
+            if($("#explain").val().length>1000)
+            {
+                alert('活动说明请在1000字以内');
+                return;
+            }
+
+            var param = {
+                explain : $("#explain").val()
+            };
+            $.ajaxFileUpload({
+                url:'__URL__/save_config',
+                type:'POST',
+                data:param,
+                files:[$('#uploadFile0'),$('#uploadFile1')],
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                   if(data==1)
+                   {
+                        alert('保存成功');
+                        location.reload();
+                   }else if(data==3)
+                   {
+                        alert('程序忙，上传失败，请稍候重试');
+                   }else if(data==4)
+                   {
+                        alert('只允许上传jpg,png的格式');
+                   }else if(data==5)
+                   {
+                        alert('只允许上传640*270的图片');
+                   }else if(data==6)
+                   {
+                        alert('只允许上传200k以内的图片');
+                   }
+                }
+            });
+        };
+    </script>
+<table border="0"  width="40%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr height="35">
+		<td align="center" style="background:#FFCC66";>
+			<a href="/index.php/Sendnum/Store/index" class="ssearch_btn"><b>活动配置</b></a>
+		</td>
+		<td align="center">
+			<a href="/index.php/Sendnum/Store/salerlist"><b>商户管理</b></a>
+		</td>
+		<td align="center">
+			<a href="/index.php/Sendnum/Store/orderlist"><b>兑换查询</b></a>
+		</td>
+	</tr>
+</table>
+<table border="0"  width="80%" cellpadding="1"  cellspacing="1" class="tb">
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">买家版banner图片:</td>
+         <td align="left" bgcolor="#FFFFFF">
+           <input id="upload_buy" type="hidden" value="{$res.buy_img}">
+             <input id="uploadFile1" type="file" name="upload[]" value="{$res.buy_img}"/>图片尺寸640*270,图片大小200k以内<font color="red"></font>
+        </td>
+    </tr>
+    <tr>
+        <td height="20" align="right" bgcolor="#FFFFFF">活动说明:</td>
+        <td bgcolor="#FFFFFF">
+            <textarea id="explain" rows="20" cols="100">{$res.explain}</textarea>
+        </td>
+    </tr>
+    <tr>
+        <td height="20" align="right" bgcolor="#FFFFFF">卖家版banner图片:</td>
+        <td bgcolor="#FFFFFF">
+           <input id="upload_sale" type="hidden" value="{$res.sale_img}">
+           <input id="uploadFile0" type="file" name="upload[]" value="{$res.sale_img}"/>图片尺寸640*270<span id="s2"><font color="red"></font></span>
+        </td>
+    </tr>
+   <tr>
+        <td height="20" colspan="3" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="保存" onclick="upload()"/></td>
+      </tr>
+</table>
+	</body>
+	</html>

@@ -1,0 +1,317 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+    function submitChannel() {
+        var cids = '';
+        $('#channel_div').html('');
+        $(".TB_ajaxContent #channel_selected input:checked").each(function(){
+            var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+            item.find('input').attr('checked', 'true');
+            $('#channel_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+        tb_remove();
+    }
+    //主层动态变化数据
+    function onclikChannel() {	
+        $('#channel_div').html('');
+        $(".TB_ajaxContent #channel_selected input:checked").each(function(){
+            var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+            item.find('input').attr('checked', 'true');
+            item.find('input').unbind("click");
+            item.find('input').attr("onclick", '');
+            $('#channel_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+    }
+
+    function check_arr() {
+        $('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+    }
+    
+    function checkPost() {
+        var extent_name = $("#add_extent_form #extent_name").val();
+		var entrance=$("#entrance_count").val();
+		var entrance_type=$("#entrance_type").val();
+        if (!extent_name) {
+            alert("区间名称不能为空！");
+            return false;
+        }
+		if (entrance==0) {
+            alert("入口数量不能为空！");
+            return false;
+        }
+		if(entrance_type==0)
+		{
+			alert("入口样式不能为空！");
+            return false;
+		}
+		//市场版本必填
+		var ver_type = $("#add_extent_form input[name='type']:checked").val();
+		if(ver_type==1)
+		{
+			var ver = $("#add_extent_form #ver_big_input").val();
+		}
+		else if(ver_type==2)
+		{
+			var ver = $("#add_extent_form #ver_small_input").val();
+		}
+		else
+		{
+			var ver = $("#add_extent_form #force_update_version").val();
+		}
+		/*if(!ver)
+		{
+			alert("市场版本不能为空!");
+			return false;
+		}*/
+		if(ver)
+		{
+			/*if(entrance_type==1)
+			{
+				if(ver_type==1)
+				{
+					alert("该版本不支持该快捷入口");
+					return false;
+				}
+				else if(ver_type==2)
+				{
+					if(ver>6110)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+				else
+				{
+					var ver_arr = ver.split(",");
+					var max_ver=Math.max.apply(null,ver_arr);
+					if(max_ver>6110)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+			}*/
+			if(entrance_type==2)
+			{
+				if(ver_type==1)
+				{
+					if(ver<6200)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+				else if(ver_type==2)
+				{
+					alert("该版本不支持该快捷入口");
+					return false;
+				}
+				else
+				{
+					if (ver.substr(0,1)==',')
+						ver=ver.substr(1);
+					if (ver.substr(-1,1)==',')
+						ver=ver.substr(0,ver.length-1);
+					var ver_arr = ver.split(",");
+					var min_ver=Math.min.apply(null,ver_arr);
+					if(min_ver<6200)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+			}
+			else if(entrance_type==3)
+			{
+				if(ver_type==1)
+				{
+					if(ver<6400)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+				else if(ver_type==2)
+				{
+					alert("该版本不支持该快捷入口");
+					return false;
+				}
+				else
+				{
+					if (ver.substr(0,1)==',')
+						ver=ver.substr(1);
+					if (ver.substr(-1,1)==',')
+						ver=ver.substr(0,ver.length-1);
+					var ver_arr = ver.split(",");
+					var min_ver=Math.min.apply(null,ver_arr);
+					if(min_ver<6400)
+					{
+						alert("该版本不支持该快捷入口");
+						return false;
+					}
+				}
+			}
+		}
+    }
+	function remind_info(obj)
+	{
+		var count=$(obj).val(); 
+		var page = $("#belong_page_type").val();
+		if(page=="top_1_hot"||page=="top_2_hot")
+		{
+			if(count==2||count==3)
+			{
+				$("#reminds").html("6.0以下版本入口数小于4时不显示");
+			}
+			else if(count==5)
+			{
+				$("#reminds").html("6.0以下版本仅显示前4个快捷入口");
+			}
+			else
+			{
+				$("#reminds").html("");
+			}
+		}
+		else
+		{
+			if(count==3||count==5||count==7)
+			{
+				$("#reminds").html("6.0以下版本入口数仅支持双数，多余的一个不显示");
+			}
+			else
+			{
+				$("#reminds").html("");
+			}
+		}
+	}
+	function show_entrance_counts(obj)
+	{
+		//var entrance_type=$(obj).val(); 
+		var entrance_type=obj; 
+		if(entrance_type==3||entrance_type==4)
+		{
+			$("#entrance_count option[value='3']").css("display","none");  //删除Select中Value='3'的Option
+			$("#entrance_count option[value='2']").css("display","none"); 
+		}
+		else
+		{
+			$("#entrance_count option[value='3']").css("display",""); 
+			$("#entrance_count option[value='2']").css("display",""); 
+		}
+		var belong_page_type = '{$belong_page_type}';
+		if(belong_page_type=='fixed_personal_center'){
+			var num = 5;
+		}else{
+			var num = 9;
+		}
+		if(entrance_type == 4){
+			for(var i = num;i<=16;i++){
+				var str = '<option value="'+i+'">'+i+'</option>';
+				$("#entrance_count").append(str);
+			}
+		}else{
+			for(var i = num;i<=16;i++){
+				$("#entrance_count option[value='"+i+"']").remove();
+			}
+		}
+	}
+</script>
+
+<FORM id="add_extent_form" method="POST" action="/index.php/Sj/TextQuickEntry/add_extent" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr">
+		<td style="width:100px;"><font color="red">*</font>区间名称</td>
+		<td><input name='extent_name' id="extent_name" type='text' onKeyUp="checkLen(this)"/></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>样式</td>
+		<td>
+			<?php /* if($entrance_type!=0) { ?><input type="hidden" name="entrance_type" value="{$entrance_type}" /><?php }*/?>
+			<select name="entrance_type" id="entrance_type" onchange="show_entrance_counts($(this).val())" <?php /*if($entrance_type!=0) echo "disabled";*/ ?>>
+				<option value="0">请选择</option>
+				<option value="1" selected <?php /*if($entrance_type==1) echo "selected";*/ ?>>6.0样式</option>
+				<option value="2" <?php /*if($entrance_type==2) echo "selected";*/ ?>>6.2样式</option>
+				<option value="3" >6.4样式（圆）</option>
+				<option value="4" >6.4.8样式（圆滑动）</option>
+			</select>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>入口数量</td>
+		<td>
+			<select name="entrance_count" id="entrance_count" onchange="remind_info(this)">
+				<option value="0">请选择</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+				<?php if($belong_page_type!="fixed_personal_center") { ?>
+				<option value="5">5</option>
+				<option value="6">6</option>
+				<option value="7">7</option>
+				<option value="8">8</option>
+				<?php } ?>
+			</select>
+			<span id="reminds" style="font-size:12px; color:red;"></span>
+		</td>
+	</tr>
+    <tr class="sub_tr">
+		<td>运营商</td>
+		<td>
+			<SELECT name='oid'>
+				<option value='0'>不限制</option>
+				<?php foreach($operating_list as $val): ?>
+					<option value='<?php echo $val['oid']?>'><?php echo $val['mname']?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+    <tr class="sub_tr">
+		<td>渠道</td>
+		<td>
+		<a href="__APP__/Public/showChannel?callback=submitChannel&type=radio&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+		<div id="channel_div">
+		</div>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>市场版本：</td>
+		<td>
+			 <input id="ver_big" type='radio' name='type' value='1'>大于等于
+			 <input id="ver_big_input" type='text' name='version_code1' value=""/>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td></td>
+		<td>
+			 <input id="ver_small" type='radio' name='type' value='2'>小于等于
+			 <input id="ver_small_input" type='text' name='version_code2' value=""/>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td></td>
+		<td>
+			<input id="ver_eq" type='radio' name='type' value='3' checked="checked">等于
+			<a style="color:blue;" href="__APP__/Public/showVersion?append_id=selected_versions" class="thickbox">请选择安智市场版本</a>
+			<div id="selected_versions">
+			</div>
+		</td>
+	</tr>
+    <tr>
+		<td colspan="2">
+            <input type='hidden' name="pid" value='<?php echo $pid?>' />
+            <input type='hidden' id="belong_page_type" name="belong_page_type" value='<?php echo $belong_page_type?>' />
+            <input type='submit' value="&nbsp;&nbsp;提交&nbsp;&nbsp;"/>
+            <input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+	</tr>
+</table>

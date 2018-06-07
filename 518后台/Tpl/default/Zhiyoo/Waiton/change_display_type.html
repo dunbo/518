@@ -1,0 +1,123 @@
+<script type="text/javascript">
+function validateforum(theform){
+	if(theform.imgonly.value === ''){
+		alert('没有选择显示模式');
+		return false;
+	}
+	if(theform.imgonly.value == 3 && theform.videotime.value == ''){
+		alert('没有配置视频时长，请点击获取视频信息获取');
+		return false;
+	}
+	if(theform.imgonly.value == 2 && !document.getElementById('resimgsrc') && theform.resimg.value == ''){
+		alert('资源须上传图标');
+		return false;
+	}
+    if((theform.imgonly.value == 7||theform.imgonly.value == 6) && theform.softtag.value.length>3){
+         alert('标签文字长度不能超过3个字');
+         return false;
+    }
+	/*if(theform.imgonly.value == 3 &&!theform.videotime.value.match(/\d{1,2}:\d{1,2}\d{1,2}/)){
+		alert('时间格式错误');
+		return false;
+	}*/
+	document.getElementById('formsubmit').disabled = true;
+	theform.submit();
+	return false;
+}
+
+function getvideoinfo(){
+	$.get("__URL__/getvideoinfo/tid/{$tid}/",function(result){
+		var data = JSON.parse(result);
+		if(data.state == 0){
+			alert(data.msg);
+			$("#vbutton").attr('disabled',true);
+			$("#vbutton").attr('checked',false);
+		}else{
+			$("#vtime").html(data.duration+'秒');
+			$("#videotime").attr('value',data.duration);
+			$("#vimg").html("<img src='"+data.img+"'/>");
+			$("#videoimg").attr('value',data.img);
+		}
+		
+	});
+
+}
+
+</script>
+<div>
+	<h3>选择显示模式</h3>
+	<form action="__URL__/change_display_type/eid/{$eid}/" method="post" enctype="multipart/form-data" onsubmit="return validateforum(this)">
+	<table class="table_list">
+		<tr>
+			<td><span width="80px">精选模式</span></td>
+            <if condition="in_array(1,$extpos)">
+			<td>
+			<input type="radio" value="1" name="imgonly"  <if condition="$type eq 1">checked</if>/><span style="margin-left:15px;">置顶</span>
+			</td>			
+            </if>
+            <if condition="in_array(2,$extpos)">
+			<td>
+			<input type="radio" value="2" name="imgonly"  <if condition="$type eq 2">checked</if>/><span style="margin-left:15px;">资源</span>
+			</td>			
+            </if>	
+			
+		</tr>
+        <if condition="in_array(2,$extpos)">
+		<tr>
+			<td>资源图标尺寸为78X78像素</td>
+			<td colspan="2">
+				<if condition="$res.img_path3 neq ''"><img id="resimgsrc" src="<?php echo IMGATT_HOST;?>{$res.img_path3}"></if><br/>
+			<input type="file" id="resimgin" name="resimg">
+			</td>
+		</tr>			
+        </if>
+		<tr>
+			<td><span width="80px">显示模式</span></td>
+			<td>
+			<input type="radio" value="0" name="imgonly" <if condition="$type eq 0">checked</if>/><span style="margin-left:15px;">无</span>
+			</td>
+            <if condition="in_array(5,$extpos)">
+			<td>
+			<input type="radio" value="5" name="imgonly"  <if condition="$type eq 5">checked</if>/><span style="margin-left:15px;">读图</span>
+			</td>			
+            </if>
+            <if condition="in_array(4,$extpos)">
+			<td>
+			<input type="radio" value="4" name="imgonly"  <if condition="$type eq 4">checked</if>/><span style="margin-left:15px;">大V</span>
+			</td>			
+            </if>	
+			
+		</tr>
+        <if condition="in_array(3,$extpos)">
+		<tr>
+			<td><input type="radio" value="3" name="imgonly" id="vbutton" <if condition="$type eq 3">checked</if>/><span style="margin-left:15px;">视频</span>
+			</td>
+		</tr>
+		<tr>
+			<td><span width="80px"><a href="javascript:;" onclick="getvideoinfo()" style="color:blue;">获取视频信息</span></td>
+			<td>视频时长：<span id="vtime"><if condition="$time neq 0">{$time}秒</if></span>
+			<input type="hidden" value="{$time}" id="videotime" name="videotime">
+			</td>
+			<td colspan="2">
+				视频缩略图：<span id="vimg"><if condition="$videoimg neq ''"><img src="{$videoimg}"></if></span>
+			<input type="hidden" value="{$videoimg}" id="videoimg" name="videoimg">
+			</td>
+		</tr>			
+        </if>
+		<tr>
+            <td><input type="radio" value="6" name="imgonly" <if condition="$type eq 6">checked</if>/><span style="margin-left:15px;">软件</span></td>
+            <td><input type="radio" value="7" name="imgonly" <if condition="$type eq 7">checked</if>/><span style="margin-left:15px;">游戏</span></td>
+	
+			<td colspan="2">
+				标签：<span id="softtag"><input type="text" value="{$res.softtag}" id="softtxt" name="softtag"></span>
+			</td>
+		</tr>
+		<tr>
+		<input name="formsubmit" value="true" type="hidden">
+			<td colspan="2" width="50%" ><input type="submit" id="formsubmit"  class="search_btn" value="修改" style="margin: 0px auto;"/></td><td colspan="2">
+			<input type="button" class="search_btn" value="取消" onclick="tb_remove();" style="
+    margin: 0px auto;"/></td>
+		</tr>
+	</table>	
+	</form>
+</div>

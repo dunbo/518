@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>竞猜世界杯赢话费</title>
+<link href="/css/worldcup.css?v=2" type="text/css" rel="stylesheet">
+<script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+</head>
+<script>
+var sid = '<!--{$out.sid}-->'
+var img_url = '<!--{$out.img_url}-->'
+var proid_arr = getArgs();
+var aid = proid_arr.aid;
+
+function getArgs() {
+	var args = {};
+	var query = location.search.substring(1);
+	var pairs = query.split("&");
+
+	for(var i = 0; i < pairs.length; i++) {
+		var pos = pairs[i].indexOf('=');
+		if (pos == -1) continue;
+		var argname = pairs[i].substring(0,pos);
+		var value = pairs[i].substring(pos+1);
+		value = decodeURIComponent(value);
+		args[argname] = value;
+	}
+	return args;
+}
+
+
+function change_soft(status){
+	$.ajax({
+		url:"/changesoft.php",
+		data:"status="+status+'&sid='+sid,
+		type:'get',
+		success:function(data){
+			if(data){
+				data = eval('('+data+')');
+				var str = '';
+				for(i=0;i<data.length;i++){
+					if(data[i]['softname'].length > 3){
+						var softname = data[i]['softname'].substr(0,3)+'...';
+					}else{
+						var softname = data[i]['softname'];
+					}
+					
+					if(status == 300){
+						str += '<li><dl><dt><img src="'+img_url+''+data[i]['icon_72']+'" width="43" height="43" border="0"></dt><dd><p class="name">'+softname+'</p><p class="size">'+data[i]['size']+'</p><p class="download_bg"><a onclick="download_apk(1,'+data[i]['softid']+',\''+data[i]['package']+'\',\''+data[i]['softname']+'\',\''+data[i]['version_code']+'\',\''+data[i]['size']+'\',0);"><span id="'+data[i]['softid']+'">下载</span></a></p></dd></dl></li>';
+					}else{
+						str += '<li><dl><dt><img src="'+img_url+''+data[i]['icon_72']+'" width="43" height="43" border="0"></dt><dd><p class="name">'+softname+'</p><p class="size">'+data[i]['size']+'</p><p class="download_bg"><a href="#">下载</a></p></dd></dl></li>';
+					}
+				}
+				$('#my_soft').html('');
+				$('#my_soft').html(str);
+				
+			}
+		}
+	});
+}
+
+function _submit(){
+	var telphone = $('#telphone').val();
+	if(telphone.length != 11 || isNaN(telphone)){
+		$('#error_1').css('display','none');
+		$('#error_2').css('display','');
+		return false;
+	}else{
+		$('#error_1').css('display','');
+		$('#error_2').css('display','none');
+	}
+	
+	$.ajax({
+		url: '/submit_telphone.php',
+		data: 'telphone='+telphone+'&sid='+sid,
+		type: 'get',
+		success: function(data){
+			if(data == 2){
+				$('#prompt_1').css('display','none');
+				$('#prompt_2').css('display','');
+				$('#prompt_3').css('display','none');
+				$('#error_1').css('display','none');
+				$('#error_2').css('display','');
+			}else {
+				$('#prompt_1').css('display','none');
+				$('#prompt_2').css('display','none');
+				$('#prompt_3').css('display','');
+				$('#error_1').css('display','none');
+				$('#error_2').css('display','none');
+				$('#my_telphone').html(telphone);
+				$('#my_num').html(2);
+				location.reload();
+			}
+		}
+	});
+
+}
+
+
+function user_guess(match_id,my_guess){
+	$.ajax({
+		url: '/user_guess.php',
+		data: 'match_id='+match_id+'&my_guess='+my_guess+'&sid='+sid+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			if(data == 200){
+				$('#game_limit_'+match_id+'').css('display','');
+				$('#game_limits_'+match_id+'').html('比赛已开始不能进行竞猜');
+			}else if(data == 300){
+				$('#game_limit_'+match_id+'').css('display','');
+				$('#game_limits_'+match_id+'').html('您已参与过本场比赛竞猜');
+			}else if(data == 400){
+				$('#game_limit_'+match_id+'').css('display','');
+				$('#game_limits_'+match_id+'').html('<a href="#no_guess" style="text-decoration:none;"><font style="color:#ff0000;">竞猜次数为0</font>，<font style="color:blue;">点此获取更多竞猜机会</font></a>');
+			}else {
+				$('#my_num').html(data);
+				$('#dd_'+match_id+'_'+my_guess+'').attr('class','cursor');
+			}
+		}
+	});
+}
+
+
+//下载软件
+function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag){
+	window.AnzhiActivitys.registerDownloadObserver(parseInt(softid));
+
+	window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+}
+
+//更新软件状态（正在下载）
+function onDownloadCreated(softid){
+	$('#'+softid+'').html("下载中");
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		$('#'+softid+'').html("下载中");
+	}else if(newState == 2){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 3){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 4){
+		$('#'+softid+'').html("重试");
+	}else if(newState == 5){
+		$('#'+softid+'').html("已下载");
+		$.ajax({
+		url: '/cup_download.php',
+		data: 'softid='+softid+'&sid='+sid,
+		type: 'get',
+		success: function(data){
+				if(data){
+					$('#my_num').html(data);
+				}
+			}
+		});
+	}else if(newState == 6){
+		$('#'+softid+'').html("打开");
+	}else if(newState == 8){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 9){
+		$('#'+softid+'').html("检查中");
+	}
+}
+
+
+function go_guess(){
+	window.location.href = "/guess_log.php?sid="+sid;
+}
+
+function go_award(){
+	window.location.href = "/award_log.php?sid="+sid;
+}
+
+$(function() {
+	$("#submit_btn").click(function() {
+		_submit();
+		return false;
+	});
+});
+</script>
+<body>
+<section class="main">
+	
+<!--banner-->
+        <!--border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;
+        filter:alpha(opacity=30);-moz-opacity:0.3;-khtml-opacity: 0.3;opacity: 0.3; <img src="/images/banner_description_bg.png" border="0">-->
+            
+    <div class="banner">
+    	<p><img src="/images/banner.jpg" width="320" height="115" border="0">
+         <a href="#hdsm_1" class="explan" target="_self"></a>
+        </p>
+    </div>
+<!--banner.end-->
+<!--gundong-->
+    <div id="kuaixun">
+        <marquee onMouseOut="start()" onMouseOver="stop()" scrollamount="2">
+		<!--{foreach from=$out.guess_result item=v key=k}-->
+        <a target="_blank" href="" style=""><!--{$v.telphone}-->  刮出<!--{$v.award_money}-->元话费<font style="padding:0 10px; color:#CCC;"><!--{$v.the_time}--></font></a>
+		<!--{/foreach}-->
+        <!--end 7996653-5017071-1-->
+    </marquee>
+    </div>
+<!--gundong.end-->
+<!--phone prompt-->
+    <div class="prompt" id="prompt_1" <!--{if $out['status'] != 100}-->style="display:none;"<!--{/if}-->>
+		<a name="no_imsi" id="no_imsi"></a>
+        <p>您的手机未插入SIM卡，无法参与本次活动。</p>
+        <p>请先插入SIM卡，然后重启安智市场</p>
+    </div>
+	<div class="prompt_phone_module" id="prompt_2" <!--{if $out['status'] != 200}-->style="display:none;"<!--{/if}-->>
+		<form action="" method="get" onsubmit="return _submit();"> 
+		<span id="error_1"><p>请填写本机号码，获取活动参与资格，中奖后话费将直接充入该手机号</p></span>
+		<span id="error_2" style="display:none;"><p style="color:#f00;">手机号码格式不正确</p></span>
+        <p>
+        <label for="">手机号：</label>
+        <input type="text" id="telphone" class="input_number" autocomplete="off" >
+        <input type="submit" id="submit_btn" class="input_submit" value="获取资格">
+        </p>
+    </div>
+	<div class="prompt">
+        <p style="font-size:18px;">该活动已结束</p>
+    </div>
+	<div class="prompt_phone_module" id="prompt_3" <!--{if $out['status'] != 300}-->style="display:none;"<!--{else}--> style="margin-top:10px; margin-bottom:10px;"<!--{/if}-->>
+        <p class="winner">您的手机号是：<span id="my_telphone"><!--{$out['user_result']['mobile']}--></span></p>
+        <p>
+        <label for="">当前可用竞猜数：<span id="my_num"><!--{$out['user_result']['guess_num']}--></span></label>
+        <input type="submit" class="input_submit margin_left_12" value="竞猜记录" onclick="go_guess();">
+        <input type="submit" class="input_submit margin_left_12" value="中奖记录" onclick="go_award();">
+        </p>
+    </div>
+<!--phone prompt.end-->
+<!--Prompt-->
+    <div class="promp_title" style="display:none;">
+        <p class="promp_title_con"></p>
+    </div>
+<!--Prompt.end-->
+<!-- Time-->
+<!--{foreach from=$out.match_result item=v key=k}-->
+<div style="display:none;" class="game_part1" <!--{if $k==0}-->style="margin:0px auto;"<!--{else}-->style="margin:10px auto 0 auto;"<!--{/if}-->>
+	<p class="time_title"><!--{$v.the_time}-->  周<!--{$v.the_week}--></p>
+	<div class="host_sides">
+    	<div class="twofold">
+        	<div class="rank_A">
+            	<p class="country_1"><img src="<!--{$out.img_url}--><!--{$v.home_pic}-->" width="70" height="47" border="0"></p>
+                <p class="name"><!--{$v.home_name}--></p>
+            </div>
+            <div class="rank_B">
+            	<p class="country_2"><img src="<!--{$out.img_url}--><!--{$v.client_pic}-->" width="70" height="47" border="0"></p>
+                <p class="name"><!--{$v.client_name}--></p>
+            </div>
+        </div>
+    </div>
+    <div class="support_sides">
+    	<ul>
+        	<li>
+            	<dl id="match_<!--{$v.id}-->_1" >
+            		<dt><!--{$v.ratio_home}-->%支持</dt>
+            		<dd <!--{if $out['status'] == 300}-->onclick="user_guess(<!--{$v.id}-->,1);"<!--{/if}--><!--{if $v.guess_content == 1 && $out['status'] == 300}-->class="cursor"<!--{/if}--> id="dd_<!--{$v.id}-->_1"><!--{if $out['status'] != 300}--><a href="javascript:window.scrollTo(0,0);"><!--{/if}--><span><!--{$v.home_name}-->胜<!--{if $out['status'] != 300}--></a><!--{/if}--></span></dd>
+            	</dl>
+            </li>
+            <li class="middle">
+            	<dl id="match_<!--{$v.id}-->_3" >
+            		<dt><!--{$v.ratio_draw}-->%支持</dt>
+            		<dd <!--{if $out['status'] == 300}-->onclick="user_guess(<!--{$v.id}-->,3);"<!--{/if}--><!--{if $v.guess_content == 3 && $out['status'] == 300}-->class="cursor"<!--{/if}--> id="dd_<!--{$v.id}-->_3"><!--{if $out['status'] != 300}--><a href="javascript:window.scrollTo(0,0);"><!--{/if}--><span>平局</span><!--{if $out['status'] != 300}--></a><!--{/if}--></dd>
+            	</dl>
+             </li>
+            <li>
+            	<dl id="match_<!--{$v.id}-->_2" >
+            		<dt><!--{$v.ratio_client}-->%支持</dt>
+            		<dd <!--{if $out['status'] == 300}-->onclick="user_guess(<!--{$v.id}-->,2);"<!--{/if}--><!--{if $v.guess_content == 2 && $out['status'] == 300}-->class="cursor"<!--{/if}--> id="dd_<!--{$v.id}-->_2"><!--{if $out['status'] != 300}--><a href="javascript:window.scrollTo(0,0);"><!--{/if}--><span><!--{$v.client_name}-->胜</span><!--{if $out['status'] != 300}--></a><!--{/if}--></dd>
+            	</dl>
+            </li>
+			<div class="clear"></div>
+			<div class="game_limit" id="game_limit_<!--{$v.id}-->" style="display:none;">
+				<p id="game_limits_<!--{$v.id}-->"></p>
+			</div>
+        </ul>
+    </div>
+    <div class="clear"></div>
+</div>
+<!--{/foreach}-->
+<!--app downloads-->
+<div class="app_part2" style="display:none;">
+	<a name="no_guess" id="no_guess"></a>
+	<p class="app_part2_title">每下载并安装一个主题软件额外获得一次竞猜机会</p>
+    <div class="app_down_module">
+    	<ul id="my_soft">
+			<!--{foreach from=$out.my_soft item=v key=k}-->
+        	<li>
+            	<dl>
+                <dt><img src="<!--{$out.img_url}--><!--{$v.icon_72}-->" width="43" height="43" border="0"></dt>
+                <dd>
+                	<p class="name"><!--{$v.softname|sub_str:3|escape:html}--></p>
+                	<p class="size"><!--{$v.size}--></p>
+                    <p class="download_bg"><a href="<!--{if $out['status'] == 300}-->javascript:;<!--{else}-->javascript:window.scrollTo(0,0);<!--{/if}-->" <!--{if $out['status'] == 300}-->onclick="download_apk('',<!--{$v.softid}-->,'<!--{$v.package}-->','<!--{$v.softname}-->','<!--{$v.version_code}-->','<!--{$v.size}-->',0);"<!--{/if}-->><span id="<!--{$v.softid}-->">下载</span></a></p></dd>
+                </dl>
+            </li>
+           <!--{/foreach}-->
+        </ul>
+    </div>
+    <div class="clear"></div>
+</div>
+<div class="app_change" style="display:none;">
+	<p class="change_menu" onclick="change_soft(<!--{$out.status}-->);">换一换</p>
+</div>
+<!--app downloads.end-->
+<!--Activity Description -->
+<div class="act_part3">
+	<p class="act_part3_title_module">
+    	<a class="act_part3_title" name="hdsm_1" id="hdsm_1">活动说明：</a>
+    </p>
+    <div class="act_sides">
+        <p>1.时间：2014年6月19日—2014年7月14日。</p>
+        <p>2.用户必须输入本机手机号获取活动资格。</p>
+        <p>3.用户可对比赛的胜负进行竞猜，竞猜一次消耗一次竞猜机会，一场比赛只能竞猜一次。</p>
+        <p>4.初始为每位用户赠送2次竞猜机会，每下载一个主题软件获赠一次竞猜机会。每天最多获得6次竞猜机会。</p>
+        <p>5.当比赛结果公布后，猜对比赛结果的用户会获得一张刮刮卡。</p>
+        <p>6.结果选取：所有竞猜赛事，均以常规比赛时间内（90分钟，包括补时）的结果为准，加时赛及以点球决胜负的赛果均不予计算。</p>
+        <p>7.刮刮卡有几率刮出5元、10元、20元、100元话费。</p>
+        <p>8.客服会在中奖后10个工作日内，将话费直接充入用户参与活动时填写的手机号。</p>
+        <p>9.如果发现有作弊行为，将会取消该用户的中奖资格。</p>
+        <p>10.本次活动的解释权归安智市场所有。</p>
+
+    </div>
+    <p class="act_blank"></p>
+    <div class="clear"></div>
+</div>
+<div class="prizes_part4">
+	<p class="title_module border_bot">
+    	<span class="prizes">奖品说明：</span>
+    </p>
+    <ul class="art_btn">
+    	<li>一等奖：100元话费</li>
+        <li>二等奖：20元话费</li>
+        <li>三等奖：10元话费</li>
+        <li>四等奖：5元话费</li>
+    </ul>
+</div>
+<!--Activity Description.end -->
+<div class="top_part7">
+	<a href="javascript:window.scrollTo(0,0);" style="text-decoration:none;"><p>返回顶部</p></a>
+</div>
+   
+</section>
+</body>
+</html>

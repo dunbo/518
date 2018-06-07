@@ -1,0 +1,2629 @@
+
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script type="text/javascript" src='/Public/js/cn_area.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload_anzhi.js?1"></script>
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?v4"></script>
+<script>
+$(function(){
+	//V6.5 加载桌面红包
+	var desk_red_val=$("#desk_red_div").html();
+	if(desk_red_val=="")
+	{
+		$.ajax({
+			url:'/index.php/Public/showDeskRed',
+			type: 'POST',
+			dataType:'html',
+			success: function(data)
+			{
+				$("#desk_red_div").html(data);
+				$("#desk_red_div #think_page_trace").remove();
+				$("#desk_red_div #think_run_time").remove();
+				//tb_init('#choose_div_id a.thickbox');//pass where to apply thickbox
+				//imgLoader = new Image();// preload image
+				//imgLoader.src = tb_pathToImage;
+			}
+		});
+	}
+});
+var  function_from="push";
+var ChannelCallback = (function () {
+		function Construct() {
+			this.submitCo_Channel = function(obj){
+				var div_id ="new_add_table"+obj;
+				var cids = '';
+				$('#'+div_id+' #co_channel_div').html('');
+				$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+					var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+					item.find('input').attr('checked', 'true');
+					item.find('input').attr('name', 'co_cid['+obj+'][]');
+					$('#'+div_id+' #co_channel_div').append(item);
+				})
+				//$.cookie('cids', '', {path: '/'});
+				tb_remove();
+			};
+			this.onclikCo_Channel = function(obj){
+				var div_id ="new_add_table"+obj;
+				$('#'+div_id+'#co_channel_div').html($('#TB_ajaxContent #channel_selected').html());
+			};
+			this.onclikCo_Channel_c = function(obj){
+				var div_id ="new_add_table"+obj;
+				$('#'+div_id+'#co_channel_div .l_cid_' + cid).remove();
+			};
+			this.checkCo_arr = function(obj){
+				var div_id ="new_add_table"+obj;
+				$('#TB_ajaxContent #channel_selected').html($('#'+div_id+' #co_channel_div').html());
+
+				$('#'+div_id+' #co_channel_div input:checked').each(function(){
+					$('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+				});
+			};
+		}
+		var obj_o = new Construct();
+		return obj_o;
+	})();
+$(function() {
+	//克隆一个push内容 追加在模板后面 
+	var obj = $("#push_table").clone(true).attr("id","new_add_table0").insertBefore($("#push_table"));
+	$("#new_add_table0").attr({"style":"width:600px;"});//去掉display:none
+	//修改radio的name 同名的radio只会选择一个 所以要修改一下名字
+	$('#new_add_table0 input:radio[name="open_type"]').attr("name","open_type0");
+	$('#new_add_table0 input:radio[name="is_sync_accout1"]').attr("name","is_sync_accout10");
+	$('#new_add_table0 input:radio[name="is_actionbar1"]').attr("name","is_actionbar10");
+	$('#new_add_table0 input:radio[name="screen_show1"]').attr("name","screen_show10");
+	$('#new_add_table0 input:radio[name="is_h5_1"]').attr("name","is_h5_10");
+	$('#new_add_table0 input:radio[name="uninstalled_download"]').attr("name","uninstalled_download0");
+	$('#new_add_table0 input:radio[name="installed_select"]').attr("name","installed_select0");
+	$('#new_add_table0 input:radio[name="lower_version_select"]').attr("name","lower_version_select0");
+	
+	//恢复母本的radio默认选项 
+	$('#push_table input:radio[name="open_type"][value=1]').attr("checked","checked");
+	$('#push_table input:radio[name="is_sync_accout1"][value=2]').attr("checked","checked");
+	$('#push_table input:radio[name="is_actionbar1"][value=1]').attr("checked","checked");
+	$('#push_table input:radio[name="screen_show1"][value=0]').attr("checked","checked");
+	$('#push_table input:radio[name="is_h5_1"][value=0]').attr("checked","checked");
+	$('#push_table input:radio[name="uninstalled_download"][value=1]').attr("checked","checked");
+	$('#push_table input:radio[name="installed_select"][value=1]').attr("checked","checked");
+	$('#push_table input:radio[name="lower_version_select"][value=1]').attr("checked","checked");
+		 
+	var my_value = $('#notice_type').val();
+	select_notice(my_value);
+
+	var push_type = $('[name="push_type"]:checked').val();
+	if(push_type == 1){
+		my_push();
+	}
+	else if(push_type==2)
+	{
+		my_pushs();
+	}
+	else if(push_type==3)
+	{
+		my_push_down();
+	}
+	else if(push_type==5)//V6.5增加桌面红包
+	{
+		my_push_red_package();
+	}
+	else if(push_type==6)//V6.4.9增加预约闹钟
+	{
+		my_push_clock();
+	}
+	var info_type = $('#info_type').val();
+	showDiv(info_type);
+	var notice_types = $('#notice_types').val();
+	select_cpm(notice_types);
+	select_soft();
+	select_softs()
+
+	var pop = document.getElementsByName("pop_type");
+    var pop_value;
+    for(var i=0;i<pop.length;i++) 
+	{
+      if(pop[i].checked)
+	  {
+		pop_value = pop[i].value;
+		break;
+	  }
+    }
+	select_pop(pop_value);
+	
+	var activation_time= $('#activation_time').val();
+	activation_time_select(activation_time);
+	
+	var download_finished_select = $('#download_finished_select').val();
+	download_finished_do(download_finished_select);
+	//修改合作渠道的href
+	ChannelCallback['submitCo_Channel0'] = function(){
+		ChannelCallback.submitCo_Channel("0");
+	}
+	ChannelCallback['checkCo_arr0'] = function(){
+		ChannelCallback.checkCo_arr("0");
+	}
+	ChannelCallback['onclikCo_Channel0'] = function(){
+		ChannelCallback.onclikCo_Channel("0");
+	}
+	var href_new ="__APP__/Public/showChannel?callback=ChannelCallback.submitCo_Channel0&ready=ChannelCallback.checkCo_arr0&selected=ChannelCallback.onclikCo_Channel0";
+	$('#new_add_table0 #ch_a_href').attr('href',href_new);
+		
+});
+//被动预下载 覆盖人数  added by shitingting
+function count(type) {
+		if(type=="fugai")
+		{
+			$.ajaxFileUpload({
+				url:'__URL__/csv_count',
+				type:'POST',
+				fileElementId:'upload_file',
+				dataType: 'json',
+				secureuri:false,
+				success:function(data)
+				{
+					if(data.error1==-1)
+					{
+						alert("请选择导入的CSV文件!");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("pre_dl_count").value=""; 
+						return false;
+					}
+					else if(data.error2==-2)
+					{
+						alert("请上传CSV格式文件！");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("pre_dl_count").value=""; 
+						return false;					
+					}
+					else if(data.error2==-3)
+					{
+						alert("CSV文件格式不正确,请您参考下载模板！");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("pre_dl_count").value=""; 
+						return false;					
+					}else if(data.error2==-4) {
+						alert("CSV文件数据不对,请您参考下载模板！");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("pre_dl_count").value=""; 
+					}else{
+						document.getElementById("csv_url").value=data.csv_url;
+						document.getElementById("csv_count").value=data.out_count;
+						document.getElementById("pre_dl_count").value="有效用户数"+data.out_count;
+					}				
+				}
+			});
+		}
+		if(type=="paichu")
+		{
+			$.ajaxFileUpload({
+				url:'__URL__/csv_count',
+				type:'POST',
+				fileElementId:'paichu_upload_file',
+				dataType: 'json',
+				secureuri:false,
+				success:function(data)
+				{
+					if(data.error1==-1)
+					{
+						alert("请选择导入的CSV文件!");
+						document.getElementById("paichu_csv_url").value="";
+						document.getElementById("paichu_csv_count").value="";
+						document.getElementById("paichu_count").value=""; 
+						return false;
+					}
+					else if(data.error2==-2)
+					{
+						alert("请上传CSV格式文件！");
+						document.getElementById("paichu_csv_url").value="";
+						document.getElementById("paichu_csv_count").value="";
+						document.getElementById("paichu_count").value=""; 
+						return false;					
+					}
+					else if(data.error2==-3)
+					{
+						alert("CSV文件格式不正确,请您参考下载模板！");
+						document.getElementById("paichu_csv_url").value="";
+						document.getElementById("paichu_csv_count").value="";
+						document.getElementById("paichu_count").value=""; 
+						return false;					
+					}else if(data.error2==-4) {
+						alert("CSV文件数据不对,请您参考下载模板！");
+						document.getElementById("csv_url").value="";
+						document.getElementById("csv_count").value="";
+						document.getElementById("pre_dl_count").value=""; 
+					}else{
+						document.getElementById("paichu_csv_url").value=data.csv_url;
+						document.getElementById("paichu_csv_count").value=data.out_count;
+						document.getElementById("paichu_count").value="有效用户数"+data.out_count;
+					}				
+				}
+			});
+		}
+    }
+	
+function checkit(){
+    var choise = confirm("你确定你的操作吗？");
+    if(!choise){
+    return false;
+    }else{
+     return true;
+    }
+}
+
+function check_area()
+{
+	var area=document.getElementById("area_value").value;
+	var area_arr=new Array;
+	area_arr=area.split(";");
+	var s = area_arr.join(";")+";";
+	for(i=0;i<area_arr.length;i++)
+	{
+		if(area_arr[i].split(",")[1]=="")
+		{
+		 var pro=area_arr[i].split(",")[0];
+		 for(j=0;j<area_arr.length;j++)
+		 {
+			 if(area_arr[j].split(",")[0]==pro&&j!=i)
+			 {
+				 alert("您选择的有冲突，请重新选择");
+					return false;
+			 }
+		 }
+		}
+
+		else if(s.replace(area_arr[i]+";","").indexOf(area_arr[i]+";")>-1)
+		{
+			alert("您选择了重复的省市，请重新选择");
+			return false;
+			}
+	}
+	//push 推送提交的时候进行简单判断
+	var push_type = $('[name="push_type"]:checked').val();
+	if(push_type==1)
+	{
+		// //标题必填
+		// var title0=$("#new_add_table0").find("textarea[name^='info_title']").val();
+		// alert(title0);
+		// if(!title0)
+		// {
+		// 	alert("标题信息为必填项");
+		// 	return false;
+		// }
+		// //信息内容为必填
+		// var info0=$("#new_add_table0").find("textarea[name^='info_content']").val();
+		// if(!info0)
+		// {
+		// 	alert("信息内容为必填项");
+		// 	return false;
+		// }
+		//公告按钮名称8个字
+		var button0=$("#new_add_table0").find("input[name^='notice_name']").val();
+		var info_type0 = $("#new_add_table0").find("select[name^='info_type']").val();
+		var notice_type0 = $("#new_add_table0").find("select[name^='notice_type']").val();
+		if(info_type0==1 || info_type0==5)
+		{
+			if(button0)
+			{
+				var len = strlen(button0);
+				if(len >24)
+				{
+					alert("请填写8个汉字以内的公告按钮名称");
+					return false;
+				}
+			}
+			else
+			{
+				alert("请填写8个汉字以内的公告按钮名称");
+				return false;
+			}
+		}
+		//页面url链接判断
+		if(info_type0 == 8 || notice_type0 == 4)
+		{
+			var  page_name=$("#new_add_table0").find("input[name^='page_name']").val();
+			var  web_url=$("#new_add_table0").find("input[name^='page_link']").val();
+			if(!page_name)
+			{
+				alert("请填写页面标题");
+				return false;
+			}
+			if(web_url)
+			{
+				var r=/^http:\/\/[A-Za-z0-9]+\.[A-Za-z0-9]+[\/=\?%\-&_~`@[\]\':+!]*([^<>\"\"])*$/;
+				if(r.test(web_url) == false)
+				{
+					alert("请填写有效的链接地址");
+					return false;
+				}
+			}
+			else
+			{
+				alert("请填写有效的链接地址");
+				return false;
+			}
+		}
+		//活动判断
+		if(info_type0 == 6 || notice_type0 == 3)
+		{
+			var  activity_id=$("#new_add_table0").find("input[name^='activity_id']").val();
+			if(!activity_id)
+			{
+				alert("请填写活动ID");
+				return false;
+			}
+		}
+		//专题判断
+		if(info_type0 == 2 || notice_type0 == 2)
+		{
+			var  feature_id=$("#new_add_table0").find("input[name^='feature_id']").val();
+			if(!feature_id)
+			{
+				alert("请填写专题ID");
+				return false;
+			}
+		}
+		//包名判断
+		if(info_type0 == 3 || (info_type0 == 1 && notice_type0 == 1)||(info_type0 == 5 && notice_type0 == 1))
+		{
+			var  soft_package0=$("#new_add_table0").find("input[name^='soft_package']").val();
+			if(!soft_package0)
+			{
+				alert("请填写包名");
+				return false;
+			}else{
+				var pkg = soft_package0;
+				var enable=true;
+				$.ajax({
+					url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+					type: 'get',
+					async:false,
+					success: function(data){
+						if(data){
+							if(!confirm(data)){
+								istrue = false;
+								 enable=false;
+							}
+						}
+					}
+				});
+				if(!enable){
+					return enable;
+				}
+				
+			}
+		}
+		
+		//开始时间和结束时间
+		var start_time = $("#fromdate").val();
+		var end_time = $("#todate").val();
+		if(!start_time)
+		{
+			alert("开始时间不能为空");
+			return false;
+		}
+		if(!end_time)
+		{
+			alert("结束时间不能为空");
+			return false;
+		}
+		
+		//将字符串转换为日期
+		var begin=new Date($("#fromdate").val().replace(/-/g,"/"));
+		var end=new Date($("#todate").val().replace(/-/g,"/"));
+		//js判断日期
+		if(begin-end>0)
+		{
+			alert("开始日期要在结束时间之前!");  
+			return false;
+		}
+		
+		//多条push 判断概率、标题等
+		var istrue=true;
+		var table = $("#new_add_table").html();
+		if(table) 
+		{
+			//概率的判断
+			var odds =0;
+			var odds0=$("#new_add_table0").find("input[name^='odds']").val();
+			if(odds0)
+			{
+				odds+=parseInt(odds0);
+			}
+			$("#new_add_table div[id^='new_add_table']").each(function(){
+				if($(this).find("input[name^='odds']").val())
+				{
+					odds+=parseInt($(this).find("input[name^='odds']").val());
+				}
+			});	
+			if(odds !=100 && odds !=0)
+			{
+				alert("概率都填或者都不填，如果填写加起来等于100");
+				return false;
+			}	
+			//多条标题、内容等
+			$("#new_add_table div[id^='new_add_table']").each(function(){
+				var info_type = $(this).find("select[name^='info_type']").val();
+				var notice_type = $(this).find("select[name^='notice_type']").val();
+				//标题信息
+				// var title = $(this).find("textarea[name^='info_title']").val();
+				// if(!title)
+				// {	
+				// 	istrue = false;
+				// 	alert("标题信息为必填项");
+				// 	return false;
+				// }
+				// //信息内容
+				// var info = $(this).find("textarea[name^='info_content']").val();
+				// if(!info)
+				// {	
+				// 	istrue = false;
+				// 	alert("信息内容为必填项");
+				// 	return false;
+				// }
+				//公告按钮名称8个字
+				if(info_type == 1 || info_type == 5)
+				{
+					var button = $(this).find("input[name^='notice_name']").val();
+					if(button)
+					{
+						var len = strlen(button);
+						if(len >24)
+						{
+							istrue = false;
+							alert("请填写8个汉字以内的公告按钮名称");
+							return false;
+						}
+					}
+					else
+					{
+						istrue = false;
+						alert("请填写8个汉字以内的公告按钮名称");
+						return false;
+					}
+				}
+				//页面判断
+				if(info_type == 8 ||notice_type == 4)
+				{
+					var  page_name=$(this).find("input[name^='page_name']").val();
+					if(!page_name)
+					{
+						istrue = false;
+						alert("请填写页面标题");
+						return false;
+					}
+					//网页链接地址
+					var web_url=$(this).find("input[name^='page_link']").val();
+					if(web_url)
+					{
+						var r= /^http:\/\/[A-Za-z0-9]+\.[A-Za-z0-9]+[\/=\?%\-&_~`@[\]\':+!]*([^<>\"\"])*$/;
+						if(r.test(web_url) == false)
+						{
+							istrue = false;
+							alert("请填写有效的链接地址");
+							return false;
+						}
+					}
+					else
+					{
+						istrue = false;
+						alert("请填写有效的链接地址");
+						return false;
+					}
+				}	
+				//活动判断
+				if(info_type == 6 || notice_type == 3)
+				{
+					var activity_id=$(this).find("input[name^='activity_id']").val();
+					if(!activity_id)
+					{
+						istrue = false;
+						alert("请填写活动ID");
+						return false;
+					}
+				}
+				//专题判断
+				if(info_type == 2 || notice_type == 2)
+				{
+					var feature_id=$(this).find("input[name^='feature_id']").val();
+					if(!feature_id)
+					{
+						istrue = false;
+						alert("请填写专题ID");
+						return false;
+					}
+				}
+				//包名判断
+				if(info_type == 3 || (info_type == 1 && notice_type == 1)||(info_type == 5 && notice_type == 1))
+				{
+					var soft_package=$(this).find("input[name^='soft_package']").val();
+					if(!soft_package)
+					{
+						istrue = false;
+						alert("请填写包名");
+						return false;
+					}else{
+						var pkg = soft_package;
+						var enable=true;
+						$.ajax({
+							url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+							type: 'get',
+							async:false,
+							success: function(data){
+								if(data){
+									if(!confirm(data)){
+										istrue = false;
+										enable=false;
+									}
+								}
+							}
+						});
+						if(!enable){
+							return enable;
+						}
+						
+					}
+				}
+			});
+			if(!istrue)
+			{
+				return false;
+			}
+		}
+	}
+	else if(push_type==2) //弹窗
+	{
+		var soft_package=$("#soft_packages").val();
+	}
+	else if(push_type==3)//预下载
+	{
+		var soft_package=$("#pre_soft_package").val();
+	}
+	//判断没有错误 提交的最后时刻删除模板 PUSH多条去掉模板push内容  这样传递的值就没有模板的值
+	$("#push_table").remove();
+}
+//计算公告按钮的字数的函数 不能超过8个汉字
+function strlen(str){
+    var len = 0;
+    for (var i=0; i<str.length; i++) { 
+     var c = str.charCodeAt(i); 
+    //单字节加1 
+     if ((c >= 0x0001 && c <= 0x007e) || (0xff60<=c && c<=0xff9f)) { 
+       len++; 
+     } 
+     else { 
+      len+=3;//为了和php一直 汉字是3个字节 
+     } 
+    } 
+    return len;
+}
+
+	//选择指定渠道
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{
+		$('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+
+function delItem(obj) {
+$(obj).parent().remove();
+//  var fatie = $("#channel_div");
+//	fatie.remove();
+
+}
+ function addItem() {
+	var channel_select = $("#device_div");
+	channel_select.clone().appendTo("#device_td");
+}
+function submitDevice()
+{
+	var cids = '';
+	$('#device_div').empty();
+	$("#TB_ajaxContent #c_device_res input:checked").each(function(){
+		var item = $('<label>' + $('#c_device_res .l_did_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		item.find('input').click(function(){
+			$(this).parent().remove();
+		});
+		$('#device_div').append(item);
+	})
+	$.cookie('cids', '', {path: '/'});
+	tb_remove();
+}
+var area_num = 1;
+function addArea()
+{
+	var html = '<div id="area_div_' + area_num + '">';
+	html += '<select name="push_area[]" id="push_area_'+area_num+'" class="push_area" onchange="showSubArea(this)">';
+	html += '<option value="">请选择</option>';
+	for(var i in area_list){
+		if (i == 990000) continue ;//海外排除
+		var item = area_list[i]['name'].split("\t");
+		html += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+	}
+	html += '</select>';
+	html += '<span class="sub_area"></span>';
+	html += '<input type="button" value="删除" onclick="delArea(this)" class="act_btn"/>';
+	html += '</div>';
+	$('#push_td').append(html);
+	var obj = $('#push_area_' + area_num);
+	area_num++;
+	return obj;
+}
+function delArea(obj)
+{
+	$(obj).parent().remove();
+	refreshArea();
+}
+
+function showSubArea(obj)
+{
+	var sub_id = $(obj).attr('id').replace('push_area_', 'push_city_');
+	var sub_select = "<select name='push_city[]' id='"+sub_id+"' onchange='refreshArea()'><option value=''>请选择</option>";
+	var value = $(obj).children('option:selected').val();
+	var arr = value.split(':');
+	var code = arr[0];
+	if (typeof(area_list[code]) == 'undefined') {
+		$(obj).parent().find('.sub_area').html('');
+		return false;
+	}
+	var sub_area = area_list[code]['sub'];
+	for(var i in sub_area){
+		var item = sub_area[i].split("\t");
+		sub_select += "<option value='" + i + ':' + item[0] + "'>" + item[0] + "</option>";
+	}
+	sub_select += "</select>";
+	$(obj).parent().find('.sub_area').html(sub_select);
+	refreshArea();
+}
+
+function refreshArea()
+{
+	var area_value = '';
+	$('.push_area').each(function(){
+		var sub_id = $(this).attr('id').replace('push_area_', 'push_city_');
+		if ($(this).val() !='') {
+			area_value += $(this).find('option:selected').html() + ',';
+			if ($('#' + sub_id).val() !='') {
+				area_value += $('#' + sub_id).find('option:selected').html();
+			}
+			area_value += ';';
+		}
+	});
+	area_value = area_value.replace(/;$/, '');
+	$('#area_value').val(area_value);
+}
+
+	function select_notice(my_value,obj){
+		var div_id = $(obj).closest("div").attr("id");
+		if(typeof(div_id) =='undefined')
+		{
+			div_id = 'new_add_table0';
+		}
+		if(my_value == 1){
+			$('#'+div_id+' #pic_package').css("display","");
+			$('#'+div_id+' #pic_uninstalled').css("display","");
+			$('#'+div_id+' #pic_installed').css("display","");
+			$('#'+div_id+' #pic_lower').css("display","");
+			$('#'+div_id+' #pic_page').css("display","none");
+			$('#'+div_id+' #pic_title').css("display","none");
+			$('#'+div_id+' #pic_open').css("display","none");
+			$('#'+div_id+' #pic_active').css("display","none");
+			$('#'+div_id+' #pic_feature').css("display","none");
+			$('#'+div_id+' #pic_beid').css("display","");
+		}else if(my_value == 4){
+			$('#'+div_id+' #pic_package').css("display","none");
+			$('#'+div_id+' #pic_uninstalled').css("display","none");
+			$('#'+div_id+' #pic_installed').css("display","none");
+			$('#'+div_id+' #pic_lower').css("display","none");
+			$('#'+div_id+' #pic_page').css("display","");
+			$('#'+div_id+' #pic_open').css("display","");
+			$('#'+div_id+' #pic_title').css("display","");
+			$('#'+div_id+' #pic_active').css("display","none");
+			$('#'+div_id+' #pic_feature').css("display","none");
+			$('#'+div_id+' #pic_beid').css("display","");
+		}else if(my_value == 3){
+			$('#'+div_id+' #pic_package').css("display","none");
+			$('#'+div_id+' #pic_uninstalled').css("display","none");
+			$('#'+div_id+' #pic_installed').css("display","none");
+			$('#'+div_id+' #pic_lower').css("display","none");
+			$('#'+div_id+' #pic_page').css("display","none");
+			$('#'+div_id+' #pic_title').css("display","none");
+			$('#'+div_id+' #pic_open').css("display","none");
+			$('#'+div_id+' #pic_active').css("display","");
+			$('#'+div_id+' #pic_feature').css("display","none");
+			$('#'+div_id+' #pic_beid').css("display","");
+		}else if(my_value == 2){
+			$('#'+div_id+' #pic_package').css("display","none");
+			$('#'+div_id+' #pic_uninstalled').css("display","none");
+			$('#'+div_id+' #pic_installed').css("display","none");
+			$('#'+div_id+' #pic_installed').css("display","none");
+			$('#'+div_id+' #pic_lower').css("display","none");
+			$('#'+div_id+' #pic_page').css("display","none");
+			$('#'+div_id+' #pic_title').css("display","none");
+			$('#'+div_id+' #pic_open').css("display","none");
+			$('#'+div_id+' #pic_active').css("display","none");
+			$('#'+div_id+' #pic_feature').css("display","");
+			$('#'+div_id+' #pic_beid').css("display","");
+		}else if(my_value == 5){
+			$('#'+div_id+' #pic_package').css("display","none");
+			$('#'+div_id+' #pic_uninstalled').css("display","none");
+			$('#'+div_id+' #pic_installed').css("display","none");
+			$('#'+div_id+' #pic_lower').css("display","none");
+			$('#'+div_id+' #pic_page').css("display","none");
+			$('#'+div_id+' #pic_title').css("display","none");
+			$('#'+div_id+' #pic_open').css("display","none");
+			$('#'+div_id+' #pic_active').css("display","none");
+			$('#'+div_id+' #pic_feature').css("display","none");
+			$('#'+div_id+' #pic_beid').css("display","none");
+		}
+	}
+
+
+
+
+	function showDiv(my_value,obj){
+		var div_id = $(obj).closest("div").attr("id");
+		if(typeof(div_id) =='undefined')
+		{
+			div_id = 'push_table';
+		}
+		if(my_value == 1){
+			$('#'+div_id+' #pic_notice_name').css("display","");
+			$('#'+div_id+' #pic_notice_type').css("display","");
+			if($('#'+div_id+' #notice_type').val() == 1){
+				$('#'+div_id+' #pic_package').css("display","");
+				$('#'+div_id+' #pic_uninstalled').css("display","");
+				$('#'+div_id+' #pic_installed').css("display","");
+				$('#'+div_id+' #pic_lower').css("display","");
+				$('#'+div_id+' #pic_page').css("display","none");
+				$('#'+div_id+' #pic_title').css("display","none");
+				$('#'+div_id+' #pic_open').css("display","none");
+				$('#'+div_id+' #pic_active').css("display","none");
+				$('#'+div_id+' #pic_feature').css("display","none");
+				$('#'+div_id+' #pic_beid').css("display","");
+				$('#'+div_id+' #pic_market_page').css("display","none");
+			}else if($('#'+div_id+' #notice_type').val() == 2){
+				$('#'+div_id+' #pic_package').css("display","none");
+				$('#'+div_id+' #pic_uninstalled').css("display","none");
+				$('#'+div_id+' #pic_installed').css("display","none");
+				$('#'+div_id+' #pic_lower').css("display","none");
+				$('#'+div_id+' #pic_page').css("display","none");
+				$('#'+div_id+' #pic_title').css("display","none");
+				$('#'+div_id+' #pic_open').css("display","none");
+				$('#'+div_id+' #pic_active').css("display","none");
+				$('#'+div_id+' #pic_feature').css("display","");
+				$('#'+div_id+' #pic_beid').css("display","");
+				$('#'+div_id+' #pic_market_page').css("display","none");
+			}else if($('#'+div_id+' #notice_type').val() == 3){
+				$('#'+div_id+' #pic_package').css("display","none");
+				$('#'+div_id+' #pic_uninstalled').css("display","none");
+				$('#'+div_id+' #pic_installed').css("display","none");
+				$('#'+div_id+' #pic_lower').css("display","none");
+				$('#'+div_id+' #pic_page').css("display","none");
+				$('#'+div_id+' #pic_title').css("display","none");
+				$('#'+div_id+' #pic_open').css("display","none");
+				$('#'+div_id+' #pic_active').css("display","");
+				$('#'+div_id+' #pic_feature').css("display","none");
+				$('#'+div_id+' #pic_beid').css("display","");
+				$('#'+div_id+' #pic_market_page').css("display","none");
+			}else if($('#'+div_id+' #notice_type').val() == 4){
+				$('#'+div_id+' #pic_package').css("display","none");
+				$('#'+div_id+' #pic_uninstalled').css("display","none");
+				$('#'+div_id+' #pic_installed').css("display","none");
+				$('#'+div_id+' #pic_lower').css("display","none");
+				$('#'+div_id+' #pic_page').css("display","");
+				$('#'+div_id+' #pic_title').css("display","");
+				$('#'+div_id+' #pic_open').css("display","none");
+				$('#'+div_id+' #pic_active').css("display","none");
+				$('#'+div_id+' #pic_feature').css("display","none");
+				$('#'+div_id+' #pic_beid').css("display","");
+				$('#'+div_id+' #pic_market_page').css("display","none");
+			}else if($('#'+div_id+' #notice_type').val() == 5){
+				$('#'+div_id+' #pic_package').css("display","none");
+				$('#'+div_id+' #pic_uninstalled').css("display","none");
+				$('#'+div_id+' #pic_installed').css("display","none");
+				$('#'+div_id+' #pic_lower').css("display","none");
+				$('#'+div_id+' #pic_page').css("display","none");
+				$('#'+div_id+' #pic_title').css("display","none");
+				$('#'+div_id+' #pic_open').css("display","none");
+				$('#'+div_id+' #pic_active').css("display","none");
+				$('#'+div_id+' #pic_feature').css("display","none");
+				$('#'+div_id+' #pic_beid').css("display","none");
+				$('#'+div_id+' #pic_market_page').css("display","none");
+			}
+
+		}else if(my_value == 2){
+			$('#'+div_id+' #pic_notice_name').css("display","none");
+			$('#'+div_id+' #pic_notice_type').css("display","none");
+			$('#'+div_id+' #pic_package').css("display","none");
+			$('#'+div_id+' #pic_uninstalled').css("display","none");
+			$('#'+div_id+' #pic_installed').css("display","none");
+			$('#'+div_id+' #pic_lower').css("display","none");
+			$('#'+div_id+' #pic_page').css("display","none");
+			$('#'+div_id+' #pic_title').css("display","none");
+			$('#'+div_id+' #pic_open').css("display","none");
+			$('#'+div_id+' #pic_active').css("display","none");
+			$('#'+div_id+' #pic_feature').css("display","");
+			$('#'+div_id+' #pic_beid').css("display","");
+			$('#'+div_id+' #pic_market_page').css("display","none");
+		}else if(my_value == 3){
+			$('#'+div_id+' #pic_notice_name').css("display","none");
+			$('#'+div_id+' #pic_notice_type').css("display","none");
+			$('#'+div_id+' #pic_package').css("display","");
+			$('#'+div_id+' #pic_uninstalled').css("display","");
+			$('#'+div_id+' #pic_installed').css("display","");
+			$('#'+div_id+' #pic_lower').css("display","");
+			$('#'+div_id+' #pic_page').css("display","none");
+			$('#'+div_id+' #pic_title').css("display","none");
+			$('#'+div_id+' #pic_open').css("display","none");
+			$('#'+div_id+' #pic_active').css("display","none");
+			$('#'+div_id+' #pic_feature').css("display","none");
+			$('#'+div_id+' #pic_beid').css("display","");
+			$('#'+div_id+' #pic_market_page').css("display","none");
+		}else if(my_value == 5){
+			$('#'+div_id+' #pic_notice_name').css("display","");
+			$('#'+div_id+' #pic_notice_type').css("display","");
+
+			if($('#'+div_id+' #notice_type').val() == 1){
+				$('#'+div_id+' #pic_package').css("display","");
+				$('#'+div_id+' #pic_uninstalled').css("display","");
+				$('#'+div_id+' #pic_installed').css("display","");
+				$('#'+div_id+' #pic_lower').css("display","");
+				$('#'+div_id+' #pic_page').css("display","none");
+				$('#'+div_id+' #pic_title').css("display","none");
+				$('#'+div_id+' #pic_open').css("display","none");
+				$('#'+div_id+' #pic_active').css("display","none");
+				$('#'+div_id+' #pic_feature').css("display","none");
+				$('#'+div_id+' #pic_beid').css("display","");
+				$('#'+div_id+' #pic_market_page').css("display","none");
+			}else if($('#'+div_id+' #notice_type').val() == 2){
+				$('#'+div_id+' #pic_package').css("display","none");
+				$('#'+div_id+' #pic_uninstalled').css("display","none");
+				$('#'+div_id+' #pic_installed').css("display","none");
+				$('#'+div_id+' #pic_lower').css("display","none");
+				$('#'+div_id+' #pic_page').css("display","none");
+				$('#'+div_id+' #pic_title').css("display","none");
+				$('#'+div_id+' #pic_open').css("display","none");
+				$('#'+div_id+' #pic_active').css("display","none");
+				$('#'+div_id+' #pic_feature').css("display","");
+				$('#'+div_id+' #pic_beid').css("display","");
+				$('#'+div_id+' #pic_market_page').css("display","none");
+			}else if($('#'+div_id+' #notice_type').val() == 3){
+				$('#'+div_id+' #pic_package').css("display","none");
+				$('#'+div_id+' #pic_uninstalled').css("display","none");
+				$('#'+div_id+' #pic_installed').css("display","none");
+				$('#'+div_id+' #pic_lower').css("display","none");
+				$('#'+div_id+' #pic_page').css("display","none");
+				$('#'+div_id+' #pic_title').css("display","none");
+				$('#'+div_id+' #pic_open').css("display","none");
+				$('#'+div_id+' #pic_active').css("display","");
+				$('#'+div_id+' #pic_feature').css("display","none");
+				$('#'+div_id+' #pic_beid').css("display","");
+				$('#'+div_id+' #pic_market_page').css("display","none");
+			}else if($('#'+div_id+' #notice_type').val() == 4){
+				$('#'+div_id+' #pic_package').css("display","none");
+				$('#'+div_id+' #pic_uninstalled').css("display","none");
+				$('#'+div_id+' #pic_installed').css("display","none");
+				$('#'+div_id+' #pic_lower').css("display","none");
+				$('#'+div_id+' #pic_page').css("display","");
+				$('#'+div_id+' #pic_title').css("display","");
+				$('#'+div_id+' #pic_open').css("display","none");
+				$('#'+div_id+' #pic_active').css("display","none");
+				$('#'+div_id+' #pic_feature').css("display","none");
+				$('#'+div_id+' #pic_beid').css("display","");
+				$('#'+div_id+' #pic_market_page').css("display","none");
+			}else if($('#'+div_id+' #notice_type').val() == 5){
+				$('#'+div_id+' #pic_package').css("display","none");
+				$('#'+div_id+' #pic_uninstalled').css("display","none");
+				$('#'+div_id+' #pic_installed').css("display","none");
+				$('#'+div_id+' #pic_lower').css("display","none");
+				$('#'+div_id+' #pic_page').css("display","none");
+				$('#'+div_id+' #pic_title').css("display","none");
+				$('#'+div_id+' #pic_open').css("display","none");
+				$('#'+div_id+' #pic_active').css("display","none");
+				$('#'+div_id+' #pic_feature').css("display","none");
+				$('#'+div_id+' #pic_beid').css("display","none");
+				$('#'+div_id+' #pic_market_page').css("display","none");
+			}
+		}else if(my_value == 6){
+			$('#'+div_id+' #pic_notice_name').css("display","none");
+			$('#'+div_id+' #pic_notice_type').css("display","none");
+			$('#'+div_id+' #pic_package').css("display","none");
+			$('#'+div_id+' #pic_uninstalled').css("display","none");
+			$('#'+div_id+' #pic_installed').css("display","none");
+			$('#'+div_id+' #pic_lower').css("display","none");
+			$('#'+div_id+' #pic_page').css("display","none");
+			$('#'+div_id+' #pic_title').css("display","none");
+			$('#'+div_id+' #pic_open').css("display","none");
+			$('#'+div_id+' #pic_active').css("display","");
+			$('#'+div_id+' #pic_feature').css("display","none");
+			$('#'+div_id+' #pic_beid').css("display","");
+			$('#'+div_id+' #pic_market_page').css("display","none");
+		}else if(my_value == 8){
+			$('#'+div_id+' #pic_notice_name').css("display","none");
+			$('#'+div_id+' #pic_notice_type').css("display","none");
+			$('#'+div_id+' #pic_package').css("display","none");
+			$('#'+div_id+' #pic_uninstalled').css("display","none");
+			$('#'+div_id+' #pic_installed').css("display","none");
+			$('#'+div_id+' #pic_lower').css("display","none");
+			$('#'+div_id+' #pic_page').css("display","");
+			$('#'+div_id+' #pic_title').css("display","");
+			$('#'+div_id+' #pic_open').css("display","");
+			$('#'+div_id+' #pic_active').css("display","none");
+			$('#'+div_id+' #pic_feature').css("display","none");
+			$('#'+div_id+' #pic_beid').css("display","");
+			$('#'+div_id+' #pic_market_page').css("display","none");
+		}else if(my_value == 10){
+			$('#'+div_id+' #pic_notice_name').css("display","none");
+			$('#'+div_id+' #pic_notice_type').css("display","none");
+			$('#'+div_id+' #pic_package').css("display","none");
+			$('#'+div_id+' #pic_uninstalled').css("display","none");
+			$('#'+div_id+' #pic_installed').css("display","none");
+			$('#'+div_id+' #pic_lower').css("display","none");
+			$('#'+div_id+' #pic_page').css("display","none");
+			$('#'+div_id+' #pic_title').css("display","none");
+			$('#'+div_id+' #pic_open').css("display","none");
+			$('#'+div_id+' #pic_active').css("display","none");
+			$('#'+div_id+' #pic_feature').css("display","none");
+			$('#'+div_id+' #pic_beid').css("display","none");
+			$('#'+div_id+' #pic_market_page').css("display","");
+		}
+
+		if(my_value==8){
+			$(obj).parent().parent().parent().find(".sync_a").css('display','');
+		}else{
+			$(obj).parent().parent().parent().find(".sync_a").css('display','none');
+		}
+
+	}
+	function show_push_type_info(my_value,obj)
+	{
+		var div_id = $(obj).closest("div").attr("id");
+		if(typeof(div_id) =='undefined')
+		{
+			div_id = 'push_table';
+		}
+		//推送类型为商务活跃的时候 增加合作渠道
+		if(my_value == 6)
+		{
+			$('#'+div_id+' #co_channel').css("display","");
+		}
+		else
+		{
+			$('#'+div_id+' #co_channel').css("display","none");
+		}
+	}
+
+	function my_push(){
+		$("#platform_select").show();
+		$('#push_type').css("display","");
+		$('#cpm_name').css("display","none");
+		$('#cpm_type').css("display","none");
+		$('#page_content_div').css('display','none');
+		$('#push_div').css("display","");
+		//push内容设置单独放在一个div里
+		$('#push_set_div').css("display","");
+		$('.push_div').css("display","");
+		$('.push_div_time').css("display","");
+		$('.push_div_tm').css("display","");
+		var activation_time = $('#activation_time').val();
+		activation_time_select(activation_time);
+		$('#cpm_div').css("display","none");
+		$('#pre_dl_div').css("display","none");
+		$('#abi_div_ver').css("display","");
+		$('#abi_div_3').css("display","none");
+		$('#red_div').css("display","none");
+		if($('[name="need_limit"]:checked').val()==1)
+		{
+			$('#tr_csv').css("display","");
+			$('#tr_paichu_csv').css("display","none");
+		}
+		else if($('[name="need_limit"]:checked').val()==2)
+		{
+			$('#tr_csv').css("display","none");
+			$('#tr_paichu_csv').css("display","");
+		}
+		else
+		{
+			$('#tr_csv').css("display","none");
+			$('#tr_paichu_csv').css("display","none");
+		}
+		$('#popup_style').css("display","none");
+		$('#pop_table').css("display","none");
+		$('#pre_clock_div').css('display', 'none');
+		//v6.4.9 预约闹钟限制类型为网页、活动、页面  页面内容类型限制游戏预约
+		href_cpm = generate_content_type_href('content_type_div_cpm','4,9','','');
+		$("#cpm_market_page #content_type_a").attr("href", href_cpm);
+		$('#notice_types').html('<option value="1">软件</option><option value="4">网页</option><option value="3">活动</option><option value="2">专题</option><option value="5">页面</option>');
+		select_cpm(1);
+	}
+
+	function my_pushs()
+	{
+		$("#platform_select").show();
+		$('#push_type').css("display","none");
+		$('#cpm_name').css("display","");
+		$('#cpm_type').css("display","");
+		$('#page_content_div').css('display','');
+		$('#push_div').css("display","none");
+		//push内容设置单独放在一个div里
+		$('#push_set_div').css("display","");
+		$('.push_div').css("display","none");
+		$('.push_div_time').css("display","none");
+		$('.push_div_tm').css("display","");
+		var activation_time = $('#activation_time').val();
+		activation_time_select(activation_time);
+		$('#cpm_div').css("display","");
+		$('#pre_dl_div').css("display","none");
+		$('#abi_div_ver').css("display","");
+		$('#abi_div_3').css("display","none");
+		$('#red_div').css("display","none");
+		if($('[name="need_limit"]:checked').val()==1)
+		{
+			$('#tr_csv').css("display","");
+			$('#tr_paichu_csv').css("display","none");
+		}
+		else if($('[name="need_limit"]:checked').val()==2)
+		{
+			$('#tr_csv').css("display","none");
+			$('#tr_paichu_csv').css("display","");
+		}
+		else
+		{
+			$('#tr_csv').css("display","none");
+			$('#tr_paichu_csv').css("display","none");
+		}
+		//$('#tr_csv').css("display","");
+		//$('#tr_paichu_csv').css("display","");
+		$('#popup_style').css("display","");
+		$('#pop_table').css("display","");
+		$('#pre_clock_div').css('display', 'none');
+		//v6.4.9 预约闹钟限制类型为网页、活动、页面  页面内容类型限制游戏预约
+		href_cpm = generate_content_type_href('content_type_div_cpm','4,9','','');
+		$("#cpm_market_page #content_type_a").attr("href", href_cpm);
+		$('#notice_types').html('<option value="1">软件</option><option value="4">网页</option><option value="3">活动</option><option value="2">专题</option><option value="5">页面</option>');
+		select_cpm(1);
+	}
+	
+	function my_push_down()
+	{
+		$("#platform_select").hide();
+		$('#push_type').css("display","none");
+		$('#cpm_name').css("display","none");
+		$('#cpm_type').css("display","none");
+		$('#page_content_div').css('display','none');
+		$('#push_div').css("display","none");
+		//push内容设置单独放在一个div里
+		$('#push_set_div').css("display","none");
+		$('.push_div').css("display","none");
+		$('.push_div_time').css("display","none");
+		$('.push_div_tm').css("display","none");
+		activation_time_select(0);
+		$('#cpm_div').css("display","none");
+		$('#pre_dl_div').css("display","");
+		$('#abi_div_ver').css("display","none");
+		$('#abi_div_3').css("display","");	
+		$('#red_div').css("display","none");
+		if($('[name="need_limit"]:checked').val()==1)
+		{
+			$('#tr_csv').css("display","");
+			$('#tr_paichu_csv').css("display","none");
+		}
+		else if($('[name="need_limit"]:checked').val()==2)
+		{
+			$('#tr_csv').css("display","none");
+			$('#tr_paichu_csv').css("display","");
+		}
+		else if($('[name="need_limit"]:checked').val()==3)
+		{
+			$('#tr_csv').css("display","none");
+			$('#tr_paichu_csv').css("display","none");
+		}
+		else
+		{
+			
+		}
+		//$('#tr_csv').css("display","");
+		//$('#tr_paichu_csv').css("display","");
+		$('#popup_style').css("display","none");
+		$('#pop_table').css("display","none");
+		$('#pre_clock_div').css('display', 'none');
+		//v6.4.9 预约闹钟限制类型为网页、活动、页面  页面内容类型限制游戏预约
+		href_cpm = generate_content_type_href('content_type_div_cpm','4,9','','');
+		$("#cpm_market_page #content_type_a").attr("href", href_cpm);
+		$('#notice_types').html('<option value="1">软件</option><option value="4">网页</option><option value="3">活动</option><option value="2">专题</option><option value="5">页面</option>');
+		select_cpm(1);
+	} 
+	
+	function my_push_red_package()
+	{
+		$("#platform_select").hide();
+		$('#push_type').css("display","none");
+		$('#cpm_name').css("display","");
+		//$('#cpm_type').css("display","none");
+		$('#push_div').css("display","none");
+		//push内容设置单独放在一个div里
+		$('#push_set_div').css("display","");
+		$('.push_div').css("display","");
+		$('.push_div_time').css("display","");
+		$('.push_div_tm').css("display","");
+		var activation_time = $('#activation_time').val();
+		activation_time_select(activation_time);
+		$('#cpm_div').css("display","none");
+		$('#pre_dl_div').css("display","none");
+		//$('#abi_div_ver').css("display","none");
+		$('#abi_div_3').css("display","none");
+		$('#red_div').css("display","");
+		if($('[name="need_limit"]:checked').val()==1)
+		{
+			$('#tr_csv').css("display","");
+			$('#tr_paichu_csv').css("display","none");
+		}
+		else if($('[name="need_limit"]:checked').val()==2)
+		{
+			$('#tr_csv').css("display","none");
+			$('#tr_paichu_csv').css("display","");
+		}
+		else
+		{
+			$('#tr_csv').css("display","none");
+			$('#tr_paichu_csv').css("display","none");
+		}
+		//$('#tr_csv').css("display","");
+		//$('#tr_paichu_csv').css("display","");
+		$('#popup_style').css("display","none");
+		
+		$('#cpm_type').css("display","");
+		$('#page_content_div').css("display","");
+		//获取红包的条件
+		/* setTimeout(function(){
+			var red_type	=	$("#red_type").val();
+			if( red_type == 1 ) {
+				$('.red_id_block').show();
+				$('.red_task_block').hide();
+				//显示市场内页面类型
+				$('#cpm_type').css("display","");
+				$('#page_content_div').css("display","");
+				//定制推送  显示推荐内容
+				$("#recommend_content_tr").css('display','');
+			}else if( red_type == 2 ) {
+				$('.red_id_block').hide();
+				$('.red_task_block').show();
+				//显示市场内页面类型
+				$('#cpm_type').css("display","none");
+				$('#page_content_div').css("display","none");
+				//定制推送 不显示推荐内容
+				$("#recommend_content_tr").css('display','none');
+			}
+		},1000); */
+		$('#pop_table').css("display","");
+		$('#pre_clock_div').css('display', 'none');
+		//v6.4.9 预约闹钟限制类型为网页、活动、页面  页面内容类型限制游戏预约
+		href_cpm = generate_content_type_href('content_type_div_cpm','4,9','','');
+		$("#cpm_market_page #content_type_a").attr("href", href_cpm);
+		$('#notice_types').html('<option value="1">软件</option><option value="4">网页</option><option value="3">活动</option><option value="2">专题</option><option value="5">页面</option>');
+		select_cpm(1);
+	}
+
+	//v6.4.9新增预约闹钟
+	function my_push_clock(){
+		$('#pre_clock_div').css('display', '');
+		$("#platform_select").show();
+		$('#push_type').css("display","none");
+		$('#push_div').css("display","none");
+		$('.push_div').css("display","none");
+		$('.push_div_time').css("display","");
+		$('.push_div_tm').css("display","none");
+		activation_time_select(0);
+		$('#cpm_name').css("display","none");
+		$('#cpm_type').css("display","");
+		$('#page_content_div').css('display','');
+		$('#pre_dl_div').css('display', 'none');
+		//push内容设置单独放在一个div里
+		$('#push_set_div').css("display","");
+		$('#cpm_div').css("display","none");
+		$('#abi_div_ver').css("display","");
+		$('#abi_div_3').css("display","none");
+		$('#red_div').css("display","none");
+		if($('[name="need_limit"]:checked').val()==1){
+			$('#tr_csv').css("display","");
+			$('#tr_paichu_csv').css("display","none");
+		}
+		else if($('[name="need_limit"]:checked').val()==2){
+			$('#tr_csv').css("display","none");
+			$('#tr_paichu_csv').css("display","");
+		}else{
+			$('#tr_csv').css("display","none");
+			$('#tr_paichu_csv').css("display","none");
+		}
+		$('#popup_style').css("display","none");
+		$('#pop_table').css("display","");
+		//v6.4.9 预约闹钟限制类型为网页、活动、页面  页面内容类型限制游戏预约		
+		href_cpm = generate_content_type_href('content_type_div_cpm','10','','');
+		$("#cpm_market_page #content_type_a").attr("href", href_cpm);
+		$('#notice_types').html('<option value="4">网页</option>	<option value="3">活动</option><option value="5">页面</option>');
+		select_cpm(4);
+	}
+	
+	function select_cpm(my_value){
+		$('#cpm_package').css("display","none");
+		$('#cpm_uninstalled').css("display","none");
+		$('#cpm_installed').css("display","none");
+		$('#cpm_lower').css("display","none");
+		$('#cpm_page').css("display","none");
+		$('#cpm_title').css("display","none");
+		$('#cpm_open').css("display","none");
+		$('#cpm_active').css("display","none");
+		$('#cpm_feature').css("display","none");
+		$('#cpm_market_page').css("display","none");
+		if(my_value == 1){
+			$('#cpm_package').css("display","");
+			$('#cpm_uninstalled').css("display","");
+			$('#cpm_installed').css("display","");
+			$('#cpm_lower').css("display","");
+		}else if(my_value == 4){
+			$('#cpm_page').css("display","");
+			$('#cpm_title').css("display","");
+			$('#cpm_open').css("display","");
+		}else if(my_value == 3){
+			$('#cpm_active').css("display","");
+		}else if(my_value == 2){
+			$('#cpm_feature').css("display","");
+		}
+		else if(my_value == 5){
+			$('#cpm_market_page').css("display","");
+		}
+		if(my_value==4){
+			$(".cpm_sync_a").css('display','');
+		}else{
+			$(".cpm_sync_a").css('display','none');
+		}
+	}
+
+	function select_pop(value)
+	{
+		$("#big_pop").css("display","none");
+		$("#high_big_pop").css("display","none");
+		$("#low_big_pop").css("display","none");
+		$("#high_small_pop").css("display","none");
+		$("#low_small_pop").css("display","none");
+		$("#high_btn_pop").css("display","none");
+		$("#low_btn_pop").css("display","none");
+		$("#btn_des").css("display","none");
+		$("#btn_name").css("display","none");
+		if(value==1) {
+			$("#big_pop").css("display","");
+			$("#high_big_pop").css("display","");
+			$("#low_big_pop").css("display","");
+		}else if(value==2) {
+			$("#high_small_pop").css("display","");
+			$("#low_small_pop").css("display","");
+		}else if(value==3) {
+			$("#high_btn_pop").css("display","");
+			$("#low_btn_pop").css("display","");
+			$("#btn_des").css("display","");
+			$("#btn_name").css("display","");
+		}else if(value==4) {
+			$("#big_pop").css("display","");
+			$("#high_big_pop").css("display","");
+			$("#low_big_pop").css("display","");
+		}
+	}
+	
+	function package_check(obj){
+		var div_id = $(obj).closest("div").attr("id");
+		var soft_package = $('#'+div_id+' #soft_package').val();
+		$.ajax({
+			url: '__URL__/package_check/soft_package/'+soft_package,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){
+				if(data == 1){
+					alert("该软件包名不存在！");
+				}else{
+					$('#'+div_id+' #softname').html(data);
+				}
+			}
+		});
+
+	}
+
+	function package_checks(){
+		var soft_packages = $('#soft_packages').val();
+		$.ajax({
+			url: '__URL__/package_check/soft_package/'+soft_packages,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){
+				if(data == 1){
+					alert("该软件包名不存在！");
+				}else{
+					$.ajax({
+						url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+soft_packages,
+						type: 'get',
+						async:false,
+						success: function(data){
+							if(data){
+								if(!confirm(data)){
+									 $('#soft_packages').val('');
+								}
+							}
+						}
+					});
+					$('#softnames').html(data);
+				}
+			}
+		});
+
+	}
+	function pre_package_check(){
+		var pre_soft_package = $('#pre_soft_package').val();
+		$.ajax({
+			url: '__URL__/package_check/soft_package/'+pre_soft_package,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){
+				if(data == 1){
+				    document.getElementById("pre_soft_package").value="";
+				    document.getElementById("pre_softname").value="";
+					alert("该软件包名不存在！");
+				}else{
+					$.ajax({
+						url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pre_soft_package,
+						type: 'get',
+						async:false,
+						success: function(data){
+							if(data){
+								if(!confirm(data)){
+									 $('#pre_soft_package').val('');
+								}
+							}
+						}
+					});
+					$('#pre_softname').val(data);
+				}
+			}
+		});
+	}
+
+	//v6.4.9预约闹钟包名认证
+	function clock_soft_check(){
+		var clock_package = $('#clock_package').val();
+		$.ajax({
+			url: '__URL__/package_check/soft_package/'+clock_package,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){
+				if(data == 1){
+					alert("该软件包名不存在！");
+				}else{
+					alert('包名可用');
+				}
+			}
+		});
+	}
+
+	function select_soft(){
+		if($('[name="lower_version_select"]:checked').val() == 1){
+			$('#lower_version_silent').attr('checked',false);
+			$('#lower_version_silent').attr('disabled',true);
+		}else{
+			$('#lower_version_silent').attr('disabled',false);
+		}
+	}
+
+	function select_softs(){
+		if($('[name="lower_version_selects"]:checked').val() == 1){
+			$('#lower_version_silents').attr('checked',false);
+			$('#lower_version_silents').attr('disabled',true);
+		}else{
+			$('#lower_version_silents').attr('disabled',false);
+		}
+	}
+	function show_csv()
+	{
+		if($('[name="need_limit"]:checked').val()==1)//覆盖用户
+		{
+			$('#tr_csv').css("display","");
+			$('#tr_paichu_csv').css("display","none");
+		}
+		else if($('[name="need_limit"]:checked').val()==2) //排除用户
+		{
+			$('#tr_paichu_csv').css("display","");
+			$('#tr_csv').css("display","none");
+		}
+		else
+		{
+			$('#tr_csv').css("display","none");
+			$('#tr_paichu_csv').css("display","none");
+		}
+	}
+	function pic_market_page_type_select(val,obj) {
+		var div_id = $(obj).closest("div").attr("id");
+		if(typeof(div_id) =='undefined')
+		{
+			div_id = 'new_add_table0';
+		}
+        if (val == 1) {
+			$('#'+div_id+' #pic_page_name1').css("display","");
+			$('#'+div_id+' #pic_page_name4').css("display","none");
+        } else {
+			$('#'+div_id+' #pic_page_name1').css("display","none");
+			$('#'+div_id+' #pic_page_name4').css("display","");
+        }
+    }
+	function cpm_market_page_type_select(val) 
+	{
+        if (val == 1) {
+            document.getElementById("cpm_page_name1").style.display="";
+            document.getElementById("cpm_page_name4").style.display="none";
+        } else {
+            document.getElementById("cpm_page_name1").style.display="none";
+            document.getElementById("cpm_page_name4").style.display="";
+        }
+    }
+	//激活时间设置
+	function activation_time_select(val) 
+	{
+        if (val == 1) 
+		{
+            document.getElementById("activation_days").style.display="";
+            document.getElementById("activation_date").style.display="none";
+        } 
+		else if(val == 2)
+		{
+            document.getElementById("activation_days").style.display="none";
+            document.getElementById("activation_date").style.display="";
+        }
+		else
+		{
+			document.getElementById("activation_days").style.display="none";
+            document.getElementById("activation_date").style.display="none";
+		}
+    }
+	
+	 // 页面框架加载完后马上执行
+    $(function() 
+	{      
+		$('#new_add_table0 .user_div').attr('id','content_type_div_0');
+		href = generate_content_type_href('content_type_div_0','4,9','','');
+		$("#new_add_table0 #content_type_a").attr("href", href);
+		
+		$('#cpm_market_page .user_div').attr('id','content_type_div_cpm');
+		//v6.4.9 预约闹钟限制类型为网页、活动、页面  页面内容类型限制游戏预约
+		<if condition="$push_type eq 6">
+			$('#notice_types').html('<option value="4">网页</option><option value="3">活动</option><option value="5">页面</option>');
+			select_cpm(4);
+			href_cpm = generate_content_type_href('content_type_div_cpm','10','','');
+		<else />
+			href_cpm = generate_content_type_href('content_type_div_cpm','4,9','','');
+		</if>
+		
+		$("#cpm_market_page #content_type_a").attr("href", href_cpm);
+		
+		//预下载添加两个  页面和活动 
+		var pre_from = "pre_download";
+		var enabled_content_type = '2,3,4';
+		$('#after_page_do .user_div').attr('id','content_type_div_pre');
+		href_pre = generate_content_type_href('content_type_div_pre',enabled_content_type,'',pre_from);
+		$("#after_page_do #content_type_a").attr("href", href_pre);
+	
+		
+        options = {
+            serviceUrl:'/index.php/ContentType/showCategoryPage',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value,data){
+			
+            }
+        };
+		//多条复制一个 直接是new_add_table0
+		$('#pic_page_name1').autocomplete(options); 
+		$('#new_add_table0 #pic_page_name1').autocomplete(options); 
+        $('#cpm_page_name1').autocomplete(options); 
+		
+        // 自定义列表类型
+        options = {
+            serviceUrl:'/index.php/ContentType/showCustomList',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+            }
+        };
+		
+		$('#pic_page_name4').autocomplete(options);
+		$('#new_add_table0 #pic_page_name4').autocomplete(options); 
+		$('#cpm_page_name4').autocomplete(options);
+	});
+	
+	//添加push内容
+	var table_num=1;
+	function addtable()
+	{
+		$("#new_add_table0 #odds_div").css("display","inline-block");
+		var html = '<div style="width:600px;" id="new_add_table' + table_num + '">';
+		html += '<br /><span>PUSH内容</span><span>&nbsp&nbsp&nbsp&nbsp概率：</span><input type="text" value="" name="odds[]" onblur="return check_odds(this)"><span>1-100的数字</span><input style="float:right;" type="button" value="删除" onclick="deltable(this)" class="act_btn"/> <br />';
+		$('#new_add_table'+ table_num).append(html);
+		html += '</div>';
+		$('#new_add_table').append(html);
+
+		$('#push_table').children('table').eq(0).clone(true).appendTo('#new_add_table'+table_num);
+		$('#new_add_table'+ table_num+' .user_div').attr('id','content_type_div_'+table_num);
+		$('#new_add_table'+ table_num+' .sync_a').css('display','none');
+		//修改radio的name
+		$('#new_add_table'+table_num+' input:radio[name="open_type"]').attr("name","open_type"+table_num);
+		$('#new_add_table'+table_num+' input:radio[name="is_sync_accout1"]').attr("name","is_sync_accout1"+table_num);
+		$('#new_add_table'+table_num+' input:radio[name="is_actionbar1"]').attr("name","is_actionbar1"+table_num);
+		$('#new_add_table'+table_num+' input:radio[name="screen_show1"]').attr("name","screen_show1"+table_num);
+		$('#new_add_table'+table_num+' input:radio[name="is_h5_1"]').attr("name","is_h5_1"+table_num);
+		$('#new_add_table'+table_num+' input:radio[name="uninstalled_download"]').attr("name","uninstalled_download"+table_num);
+		$('#new_add_table'+table_num+' input:radio[name="installed_select"]').attr("name","installed_select"+table_num);
+		$('#new_add_table'+table_num+' input:radio[name="lower_version_select"]').attr("name","lower_version_select"+table_num);
+
+		$('#new_add_table'+table_num+' #info_content').attr("id","info_content"+table_num);
+		$('#new_add_table'+table_num+' #info_title').attr("id","info_title"+table_num);
+		 show_editor(table_num);
+		 show_editor(table_num);
+
+		//恢复母本的radio默认选项
+		$('#push_table input:radio[name="open_type"][value=1]').attr("checked","checked");
+		$('#push_table input:radio[name="is_sync_accout1"][value=2]').attr("checked","checked");
+		$('#push_table input:radio[name="is_actionbar1"][value=1]').attr("checked","checked");
+		$('#push_table input:radio[name="screen_show1"][value=0]').attr("checked","checked");
+		$('#push_table input:radio[name="is_h5_1"][value=0]').attr("checked","checked");
+		$('#push_table input:radio[name="uninstalled_download"][value=1]').attr("checked","checked");
+		$('#push_table input:radio[name="installed_select"][value=1]').attr("checked","checked");
+		$('#push_table input:radio[name="lower_version_select"][value=1]').attr("checked","checked");
+		
+		href1 = generate_content_type_href('content_type_div_'+ table_num,'','',function_from);
+		$('#new_add_table'+ table_num +' #content_type_a').attr("href", href1);
+		
+		//页面的时候自动匹配
+		options = {
+            serviceUrl:'/index.php/ContentType/showCategoryPage',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value,data){
+            }
+        };
+	
+		$('#new_add_table'+ table_num +' #pic_page_name1').autocomplete(options);
+		// 自定义列表类型
+        options1 = {
+            serviceUrl:'/index.php/ContentType/showCustomList',
+            minChars:1,
+            width: '300px',
+            deferRequestBy: 0,
+            onSelect: function(value, data){
+            }
+        };
+		$('#new_add_table'+ table_num +' #pic_page_name4').autocomplete(options1);
+
+		var obj = $('#new_add_table' + table_num);
+		
+		//修改合作渠道的href
+		var tid=table_num;
+		ChannelCallback['submitCo_Channel'+table_num] = function(){
+			ChannelCallback.submitCo_Channel(tid);
+		};
+		ChannelCallback['checkCo_arr'+table_num] = function(){
+			ChannelCallback.checkCo_arr(tid);
+		};
+		ChannelCallback['onclikCo_Channel'+table_num] = function(){
+			ChannelCallback.onclikCo_Channel(tid);
+		};
+		var href_new ="__APP__/Public/showChannel?callback=ChannelCallback.submitCo_Channel"+table_num+"&ready=ChannelCallback.checkCo_arr"+table_num+"&selected=ChannelCallback.onclikCo_Channel"+table_num;
+		$('#new_add_table'+table_num+' #ch_a_href').attr('href',href_new);
+			
+		table_num++;
+		return obj;
+	}
+	function deltable(obj)
+	{
+		$(obj).parent().remove();
+		var table = $("#new_add_table").html();
+		if(!table)
+		{
+			$("#new_add_table0 #odds_div").css("display","none");
+		}
+	}
+	function check_odds(obj)
+	{
+		var val = $(obj).val();
+		if(val !== "")
+		{
+			if(val>100 || val <1)
+			{
+				alert("请填写1到100的整数");
+				$(obj).attr("value",'');
+				return false;
+			}
+			var r=/^[0-9]*[1-9][0-9]*$/;
+			if(r.test(val) == false)
+			{
+				alert("请填写1到100的整数");
+				$(obj).attr("value",'');
+				return false;
+			}
+		}
+	}
+	function download_finished_do(val)
+	{
+        if (val == 1) 
+		{
+            document.getElementById("after_time_do").style.display="none";
+            document.getElementById("after_page_do").style.display="none";
+			document.getElementById("after_more_package").style.display="";
+        } 
+		else if(val == 2)
+		{
+            document.getElementById("after_time_do").style.display="none";
+            document.getElementById("after_page_do").style.display="";
+			document.getElementById("after_more_package").style.display="none";
+        }
+		else if(val == 3)
+		{
+			document.getElementById("after_time_do").style.display="";
+            document.getElementById("after_page_do").style.display="none";
+			document.getElementById("after_more_package").style.display="none";
+		}
+		else
+		{
+			document.getElementById("after_time_do").style.display="none";
+            document.getElementById("after_page_do").style.display="none";
+			document.getElementById("after_more_package").style.display="none";
+		}
+	}
+	function change_open(val,type,obj){
+		var info_type = $(obj).parent().parent().parent().find("#info_type").val();
+		if(val==1){
+			if(type==1){
+				if(info_type==8){
+					$(obj).parent().parent().parent().find(".sync_a").css('display','');
+				}
+			}else{
+				$(".cpm_sync_a").css('display','');
+			}
+		}else{
+			if(type==1){
+				if(info_type==8) {
+					$(obj).parent().parent().parent().find(".sync_a").css('display', 'none');
+				}
+			}else{
+				$(".cpm_sync_a").css('display','none');
+			}
+
+		}
+	}
+</script>
+<body onload="showDiv();select_notice();">
+<br />
+<div style="margin-top:10px;margin-left:20px;">
+<h3>添加PUSH</h3>
+<BR />
+<form action ="__URL__/market_push_addto"  method="post" onsubmit="return check_area()" enctype="multipart/form-data">
+<table width="600" height="30" border="1">
+	<tr>
+		<td>PUSH类型：</td>
+		<td><input type="radio" name="push_type" value="1" onclick="my_push();" <?php if($push_type == 1 || !$push_type){ ?>checked<?php } ?> />PUSH通知栏&nbsp;&nbsp;<input type="radio" name="push_type" value="2" onclick="my_pushs();" <?php if($push_type == 2){ ?>checked<?php } ?> />弹窗广告&nbsp;&nbsp;<input type="radio" name="push_type" value="3" onclick="my_push_down();" <?php if($push_type == 3){ ?>checked<?php } ?> />被动预下载&nbsp;&nbsp;<input type="radio" name="push_type" value="5" onclick="my_push_red_package();" <?php if($push_type == 5){ ?>checked<?php } ?> />桌面红包&nbsp;&nbsp;<input type="radio" name="push_type" value="6" onclick="my_push_clock();" <?php if($push_type == 6){ ?>checked<?php } ?> />预约闹钟</td>
+	</tr>
+	<tr id="platform_select">
+		<td>平台选择:</td>
+		<td>
+            <select name="pid" id="pid">
+                <?php foreach($product_list as $k => $v): ?>
+                <option value="<?php echo $k;?>"<?php if ($v[1] == true):?> selected="true"<?php endif; ?> ><?php echo $v[0] ?></option>
+                <?php endforeach; ?>
+            </select>
+		</td>
+	</tr>
+	<tr id="cpm_name" style="display:none;">
+		<td>名称：</td>
+		<td><input type="text" name="cpm_name" /></td>
+	</tr>
+</tr>
+</table>
+<div id="red_div" style="display:none;">
+	<div id="desk_red_div"></div>
+	<div>
+		<table width="600" height="30" border="1">
+			<tr>
+				<td>覆盖人数：</td>
+				<td><input type="text" name="red_cover_num" onblur="if(this.value==''){this.value='全部'}" onkeyup="tran(this)" onFocus="if(this.value=='全部'){this.value=''}" value="全部" /><span>为空将默认所有用户</span></td>
+			</tr>
+			<tr>
+				<td>合作形式</td>
+				<td>
+					<SELECT name='co_type_desk'>
+						<?php foreach($typelist as $key => $val): ?>
+							<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+						<?php endforeach; ?>				
+					</SELECT>
+				</td>
+			</tr>
+		</table>
+	</div><br />
+</div>
+<table width="600" height="30" border="1" id="pop_table" >
+	<if condition="$push_type eq 5">
+		<tr id="cpm_type">
+	<else />
+		<tr id="cpm_type" style="display:none;">
+	</if>
+		<td style="width:115px;">类型：</td>
+		<td>
+			<select name="notice_types" id="notice_types" onchange="select_cpm(this.value);">
+				<option value="1">软件</option>
+				<option value="4">网页</option>
+				<option value="3">活动</option>
+				<option value="2">专题</option>
+				<option value="5">页面</option>
+			</select>
+		</td>
+	</tr>
+	<tr id="popup_style" style="display:none;">
+		<td>弹窗样式：</td>
+		<td>
+			<input type="radio" name="pop_type" checked value="1" onclick="select_pop(this.value);"/> 大图弹窗 
+			<input type="radio" name="pop_type" value="2" onclick="select_pop(this.value);"/> 小图弹窗
+			<input type="radio" name="pop_type" value="3" onclick="select_pop(this.value);"/> 按钮弹窗
+			<input type="radio" name="pop_type" value="4" onclick="select_pop(this.value);"/> 大图弹窗（下侧关闭）
+		</td>
+	</tr>
+</table>
+<br />
+<div id="push_div">
+<div id="push_table" style="width:600px; display:none;">
+	<span>PUSH内容</span>
+	<div id="odds_div" style="display:none">
+	<span>&nbsp&nbsp&nbsp&nbsp概率：</span>
+	<input type="text" value="" onblur="return check_odds(this)" name="odds[]">
+	<span>1-100的数字</span>
+	</div>
+	<input style="float:right" type="button" value="新增" onclick="addtable()" class="act_btn"/>
+	<table width="600" height="30" border="1">
+		<tr id="push_type">
+			<td>信息类型：</td>
+			<td align="left">
+			<select name="info_type[]" id="info_type"  onChange="showDiv(this.value,this)">
+				<option value="1">安智市场公告信息</option>
+				<option value="2">专题信息</option>
+				<option value="3">广告软件信息 </option>
+				<option value="5">安智市场公告信息(带html格式)</option>
+				<option value="6">活动Push</option>
+				<option value="8">网页Push</option>
+				<option value="10">页面</option>
+			</select>
+		</tr>
+		<tr>
+			<td>推送类型：</td>
+			<td align="left">
+			<select name="push_info_type[]" onChange="show_push_type_info(this.value,this)">
+				<option value="1">游戏</option>
+				<option value="2">游戏平台活动</option>
+				<option value="3">换量商务</option>
+				<option value="4">品牌</option>
+				<option value="5">广告商务</option>
+				<option value="6">商务活跃</option>
+				<option value="0">其他</option>
+			</select>
+		</tr>
+		<tr id="co_channel" style="display:none;">
+			<td>合作渠道</td>
+			<td align="left" width="300">
+			<a id="ch_a_href" href="__APP__/Public/showChannel?callback=submitCo_Channel&ready=check_Co_arr&selected=onclikCo_Channel" class="thickbox">选择渠道</a><br />
+				<div id="co_channel_div"></div>
+			</td>
+		</tr>
+		<tr>
+			<td>推送分类：</td>
+			<td align="left">
+			<select name="push_info_category[]">
+				<option value="1">文字</option>
+				<option value="2">图片-高清</option>
+				<option value="3">图片-普通</option>
+				<option value="0">其他</option>
+			</select>
+		</tr>
+		<tr>
+			<td>信息标题：</td>
+			<td align="left">
+				<!-- <input type="text" name="info_title[]" id='info_title'> -->
+				<textarea id="info_title" name="info_title[]" rows="3" cols="15"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>信息内容：</td>
+			<td align="left">
+				<textarea id="info_content" name="info_content[]" rows="3" cols="15"></textarea>
+			</td>
+		</tr>
+		<tr id="info_icon_pic">
+			<td>信息图标({$info_icon_width}*{$info_icon_height})选填：</td>
+			<td><input type="file" name="push_info_icon[]" /></td>
+		</tr>
+		<tr id="single_low_pic">
+			<td>单行低分图片({$single_low_width}*{$single_low_height})选填：</td>
+			<td><input type="file" name="push_single_low[]" /></td>
+		</tr>
+		<tr id="single_high_pic">
+			<td>单行高分图片({$single_high_width}*{$single_high_height})选填：</td>
+			<td><input type="file" name="push_single_high[]" /></td>
+		</tr>
+		<tr id="multiple_low_pic">
+			<td>多行低分图片({$multiple_low_width}*{$multiple_low_height})选填：</td>
+			<td><input type="file" name="push_multiple_low[]" /></td>
+		</tr>
+		<tr id="multiple_high_pic">
+			<td>多行高分图片({$multiple_high_width}*{$multiple_high_height})选填：</td>
+			<td><input type="file" name="push_multiple_high[]" /></td>
+		</tr>
+		<tr id="pic_notice_name">
+			<td>公告按钮名称：</td>
+			<td><input type="text" name="notice_name[]" /></td>
+		</tr>
+		<tr id="pic_notice_type">
+			<td>公告按钮跳转：</td>
+			<td>
+				<select name="notice_type[]" id="notice_type" onchange="select_notice(this.value,this);">
+					<option value="1">软件</option>
+					<option value="4">网页</option>
+					<option value="3">活动</option>
+					<option value="2">专题</option>
+					<option value="5" selected>普通</option>
+				</select>
+			</td>
+		</tr>
+		<tr id="pic_package">
+			<td>包名：</td>
+			<td align="left"><input type="text" name="soft_package[]" id="soft_package">&nbsp;&nbsp;<input type="button" value="认证" onclick="package_check(this);" />&nbsp;&nbsp;<span id="softname"></span></td>
+		</tr>
+		<tr id="pic_title" style="display:none;">
+			<td>页面标题：</td>
+			<td><input type="text" name="page_name[]" /></td>
+		</tr>
+		<tr id="pic_page" style="display:none;">
+			<td>页面链接：</td>
+			<td><input type="text" name="page_link[]" /></td>
+		</tr>
+		<tr id="pic_open" style="display:none;">
+			<td>打开方式：</td>
+			<td>
+				<input type="radio" name="open_type" checked value="1" onclick="change_open(1,1,this)"/>内置&nbsp;&nbsp;
+				<input type="radio" name="open_type" value="2" onclick="change_open(2,1,this)"/>外置
+			</td>
+		</tr>
+		<tr class="sync_a" style="display: none">
+			<td>同步账号：</td>
+			<td>
+				<input name="is_sync_accout1"  type="radio" value="1"/>是
+				<input name="is_sync_accout1"  type="radio" value="2"  checked />否
+			</td>
+		</tr>
+		<tr class="sync_a" style="display: none">
+			<td style="width:20%;">是否使用端actionbar</td>
+			<td style="width:40%">
+				<input name="is_actionbar1"  type="radio" value="1"  checked="checked"/>是
+				<input name="is_actionbar1"  type="radio" value="0" />否
+			</td>
+		</tr>
+		<tr class="sync_a" style="display: none">
+			<td style="width:20%;">横竖屏显示</td>
+			<td style="width:40%">
+				<input name="screen_show1"  type="radio" value="4" />横屏
+				<input name="screen_show1"  type="radio" value="0"  checked="checked"/>竖屏
+			</td>
+		</tr>
+		<tr class="sync_a" style="display: none">
+			<td style="width:20%;">是否h5加载</td>
+			<td style="width:40%">
+				<input name="is_h5_1"  type="radio" value="2" />是
+				<input name="is_h5_1"  type="radio" value="0" checked="checked" />否
+			</td>
+		</tr>
+		<tr id="pic_active" style="display:none;">
+			<td>活动ID：</td>
+			<td><input type="text" name="activity_id[]" /></td>
+		</tr>
+		<tr id="pic_feature" style="display:none;">
+			<td>专题ID：</td>
+			<td><input type="text" name="feature_id[]" /></td>
+		</tr>
+		<tr id="pic_beid">
+			<td>行为ID：</td>
+			<td><input type="text" name="beid[]" /></td>
+		</tr>
+		<tr id="pic_market_page" style="display:none;">
+			<td><font color="red">*</font>页面</td>
+			<td>
+				<!--下面a里的href的url会在ready函数里自动生成-->
+				<a id="content_type_a" href="javascript:void(0)" class="thickbox user_a"><font color="blue">选择推荐内容</font></a>
+				<!--下面的content_type_div是选择推荐内容后append的地方-->
+				<div id="content_type_div" class="user_div"/>
+			</td>
+			<td/>
+			<!--<td>页面：</td>
+			<td><select name='pic_market_page_type[]' id="pic_market_page_type" onchange="pic_market_page_type_select(this.value,this);">
+					<option value="1">普通</option>
+					<option value="4">自定义列表</option>
+				</select>
+				<input type="text" name="pic_page_name1[]" value="" id="pic_page_name1" />
+				<input type="text" name="pic_page_name4[]" value="" id="pic_page_name4" style="display:none"/>
+			</td><!-->
+		</tr>
+		<tr id="pic_uninstalled">
+			<td>未安装：</td>
+			<td><input type="radio" name="uninstalled_download" value="1"  checked />进软件详情不下载&nbsp;&nbsp;<input type="radio" name="uninstalled_download" value="2" />进软件详情下载<br />
+			<!--
+				<input type="checkbox" name="uninstalled_silent" value="1" />静默下载
+			-->
+			<td>
+		</tr>
+		<tr id="pic_installed">
+			<td>已安装：</td>
+			<td>
+				<input type="radio" name="installed_select" value="1" checked />启动软件<br />
+				<input type="radio" name="installed_select" value="2" />启动软件至某个页面<input type="text" name="detail_page[]" /><br />
+				<input type="radio" name="installed_select" value="3" />进软件详情不下载<br />
+				<input type="radio" name="installed_select" value="4" />进软件详情自动下载<br />
+				<input type="radio" name="installed_select" value="5" />前端不显示(安智5.3及以前版本正常显示，跳转软件详情不下载)<br />
+			</td>
+		</tr>
+		<tr id="pic_lower">
+			<td>低版本：</td>
+			<td>
+				<input type="radio" name="lower_version_select" value="1"  checked onclick="select_soft();" />启动软件&nbsp;&nbsp;
+				<input type="radio" name="lower_version_select" value="2" onclick="select_soft();" />进软件详情不下载<br />
+				<input type="radio" name="lower_version_select" value="3" onclick="select_soft();" />进软件详情自动下载&nbsp;&nbsp;<br/><input type="radio" name="lower_version_select" value="4" onclick="select_soft();" />前端不显示(安智5.3及以前版本正常显示，跳转软件详情不下载)
+				<!--
+					<input type="checkbox" name="lower_version_silent" value="1" id="lower_version_silent" />静默下载
+				-->
+			</td>
+		</tr>
+		<tr class="sub_tr">
+			<td>合作形式</td>
+			<td>
+				<SELECT name='co_type_push[]'>
+					<?php foreach($typelist as $key => $val): ?>
+						<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+					<?php endforeach; ?>				
+				</SELECT>
+			</td>
+		</tr>
+		<tr>
+			<td>覆盖人数：</td>
+			<td><input type="text" name="cover_num" onblur="if(value==''){value='全部'}" onfocus="if(this.value=='全部'){this.value=''}" value="全部"><span>为空将默认所有用户</span></td>
+		</tr>
+		<tr>
+			<td>勾起包名：</td>
+			<td><input type="text" name="hook_package[]" /></td>
+		</tr>
+	</table>
+</div><br />
+<div id="new_add_table"></div><br />
+</div>
+
+<div id="page_content_div" style="display:none">
+<table width="600" height='30' border="1">
+	<tr id="cpm_package">
+		<td>软件包名：</td>
+		<td align="left"><input type="text" name="soft_packages" id="soft_packages">&nbsp;&nbsp;<input type="button" value="认证" onclick="package_checks();" />&nbsp;&nbsp;<span id="softnames"></span></td>
+	</tr>
+	<tr id="cpm_title" style="display:none;">
+		<td>网页标题：</td>
+		<td><input type="text" name="page_names" /></td>
+	</tr>
+	<tr id="cpm_page" style="display:none;">
+		<td>网页链接：</td>
+		<td><input type="text" name="page_links" /></td>
+	</tr>
+	<tr id="cpm_open" style="display:none;">
+		<td>打开方式：</td>
+		<td><input type="radio" name="open_types" value="1" checked onclick="change_open(1,2,this)"/>内置&nbsp;&nbsp;
+			<input type="radio" name="open_types" value="2" onclick="change_open(2,2,this)"/>外置</td>
+	</tr>
+		<tr class="cpm_sync_a" style="display: none">
+			<td>同步账号</td>
+			<td>
+				<input name="is_sync_accout2"   type="radio" value="1"/>是
+				<input name="is_sync_accout2"   type="radio" value="2" checked />否
+			</td>
+		</tr>
+		<tr class="cpm_sync_a" style="display: none">
+			<td style="width:20%;">是否使用端actionbar</td>
+			<td style="width:40%">
+				<input name="is_actionbar2"  type="radio" value="1" checked="checked"/>是
+				<input name="is_actionbar2"  type="radio" value="0"  />否
+			</td>
+		</tr>
+		<tr class="cpm_sync_a" style="display: none">
+			<td style="width:20%;">横竖屏显示</td>
+			<td style="width:40%">
+				<input name="screen_show2"  type="radio" value="4" />横屏
+				<input name="screen_show2"  type="radio" value="0"  checked="checked"/>竖屏
+			</td>
+		</tr>
+		<tr class="cpm_sync_a" style="display: none">
+			<td style="width:20%;">是否使用h5加载</td>
+			<td style="width:40%">
+				<input name="is_h5_2"  type="radio" value="2" />是
+				<input name="is_h5_2"  type="radio" value="0"  checked="checked" />否
+			</td>
+		</tr>
+	<tr id="cpm_active" style="display:none;">
+		<td>活动ID：</td>
+		<td><input type="text" name="activity_ids" /></td>
+	</tr>
+	<tr id="cpm_feature" style="display:none;">
+		<td>专题ID：</td>
+		<td><input type="text" name="feature_ids" /></td>
+	</tr>
+	<tr id="cpm_market_page" style="display:none;">
+		<td><font color="red">*</font>页面</td>
+		<td>
+			<!--下面a里的href的url会在ready函数里自动生成-->
+			<a id="content_type_a" href="javascript:void(0)" class="thickbox user_a"><font color="blue">选择推荐内容</font></a>
+			<!--下面的content_type_div是选择推荐内容后append的地方-->
+			<div id="content_type_div" class="user_div"/>
+		</td>
+				
+		<!--<td>页面：</td>
+		<td><select name='cpm_market_page_type' id="cpm_market_page_type" onchange="cpm_market_page_type_select(this.value);">
+	            <option value="1">普通</option>
+	            <option value="4">自定义列表</option>
+	        </select>
+			<input type="text" name="cpm_page_name1" value="" id="cpm_page_name1"/>
+			<input type="text" name="cpm_page_name4" value="" id="cpm_page_name4" style="display:none"/>
+		</td><!-->
+	</tr>
+	<tr>
+		<td>行为ID：</td>
+		<td><input type="text" name="beids" /></td>
+	</tr>
+	<tr id="cpm_uninstalled">
+		<td>未安装：</td>
+		<td><input type="radio" name="uninstalled_downloads" value="1"  checked />进软件详情不下载&nbsp;&nbsp;<input type="radio" name="uninstalled_downloads" value="2" />进软件详情下载<br />
+		<!--
+			<input type="checkbox" name="uninstalled_silents" value="1" />静默下载
+		-->
+		</td>
+	</tr>
+	<tr id="cpm_installed">
+		<td>已安装：</td>
+		<td>
+			<input type="radio" name="installed_selects" value="1" checked />启动软件<br />
+			<input type="radio" name="installed_selects" value="2" />启动软件至某个页面<input type="text" name="detail_pages" /><br />
+			<input type="radio" name="installed_selects" value="3" />进软件详情不下载<br />
+			<input type="radio" name="installed_selects" value="4" />进软件详情自动下载<br />
+	                <input type="radio" name="installed_selects" value="5" />前端不显示(安智5.3及以前版本正常显示，跳转软件详情不下载)<br />
+		</td>
+	</tr>
+	<tr id="cpm_lower">
+		<td>低版本：</td>
+		<td>
+			<input type="radio" name="lower_version_selects" value="1"  checked onclick="select_softs();" />启动软件&nbsp;&nbsp;<input type="radio" name="lower_version_selects" value="2" onclick="select_softs();" />进软件详情不下载<br /><input type="radio" name="lower_version_selects" value="3" onclick="select_softs();" />进软件详情自动下载&nbsp;&nbsp;<br/><input type="radio" name="lower_version_selects" value="4" onclick="select_softs();" />前端不显示(安智5.3及以前版本正常显示，跳转软件详情不下载)
+			<!--
+				<input type="checkbox" name="lower_version_silents" id="lower_version_silents" value="1" />静默下载
+			-->
+		</td>
+	</tr>
+</table>
+</div>
+<div id="cpm_div" style="display:none;">
+<span>推荐内容</span>
+<table width="600" height="30" border="1">
+	<tr>
+		<td>覆盖人数：</td>
+		<td><input type="text" name="cover_num" onblur="if(value==''){value='全部'}" onFocus="if(this.value=='全部'){this.value=''}" value="全部" /><span>为空将默认所有用户</span></td>
+	</tr>
+	<tr id="big_pop">
+		<td>弹窗图片({$big_pic_width}*{$big_pic_height}):</td>
+		<td><input type="file" name="cpm_pic_big" /></td>
+	</tr>
+	<tr id="high_big_pop">
+		<td>高分图片({$big_pic_width_high}*{$big_pic_height_high}):</td>
+		<td><input type="file" name="cpm_pic_big_high" /></td>
+	</tr>
+	<tr id="low_big_pop">
+		<td>低分图片({$big_pic_width_low}*{$big_pic_height_low}):</td>
+		<td><input type="file" name="cpm_pic_big_low" /></td>
+	</tr>
+	<tr id="high_small_pop" style="display:none">
+		<td>高分图片({$small_pic_width_high}*{$small_pic_height_high}):</td>
+		<td><input type="file" name="cpm_pic_small_high" /></td>
+	</tr>
+	<tr id="low_small_pop" style="display:none">
+		<td>低分图片({$small_pic_width_low}*{$small_pic_height_low}):</td>
+		<td><input type="file" name="cpm_pic_small_low" /></td>
+	</tr>
+
+	<tr id="high_btn_pop" style="display:none">
+		<td>高分图片({$btn_pic_width_high}*{$btn_pic_height_high}):</td>
+		<td><input type="file" name="cpm_pic_btn_high" /></td>
+	</tr>
+	<tr id="low_btn_pop" style="display:none">
+		<td>低分图片({$btn_pic_width_low}*{$btn_pic_height_low}):</td>
+		<td><input type="file" name="cpm_pic_btn_low" /></td>
+	</tr>
+
+	<tr id="btn_des" style="display:none">
+		<td>描述（选填）:</td>
+		<td><input type="text" name="btn_des" /><span>限制{$btn_pic_des_limit}字以内</span></td>
+	</tr>
+	<tr id="btn_name" style="display:none">
+		<td>按钮名称：</td>
+		<td><input type="text" name="btn_name" /><span>限制{$btn_pic_name_limit}字以内</span></td>
+	</tr>
+
+	<tr>
+		<td>开始时间 </td>
+		<td align="left">
+			<input id="start_tm" name="start_tm" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})">
+			</td>
+	</tr>
+	<tr>
+		<td>结束时间</td>
+		<td align="left">
+			<input id="end_tm" name="end_tm" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})">
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='co_type_pop'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+</table><br />
+</div>
+<div id="pre_dl_div" style="display:none;">
+<span>预下载内容</span>
+<table width="600" height="30" border="1">
+	<tr id="cpm_package">
+		<td style="width:100px;">软件包名：</td>
+		<td align="left"><input type="text" name="pre_soft_package" id="pre_soft_package" onblur="pre_package_check()">&nbsp;&nbsp;<input type="text" id="pre_softname" readonly name="pre_soft_name" style="border:none;background:none;" value=""/>
+		</td>
+	</tr>
+	<tr>
+		<td>覆盖人数：</td>
+		<td><input type="text" name="cover_num" onblur="if(value==''){value='全部'}" onFocus="if(this.value=='全部'){this.value=''}" value="全部" /><span>为空将默认所有用户</span></td>
+	</tr>
+	<tr>
+		<td>行为ID：</td>
+		<td><input type="text" name="pre_beid" /></td>
+	</tr>
+	<tr id="pre_uninstalled">
+		<td>未安装：</td>
+		<td>
+			<input type="checkbox" name="pre_uninstalled_silent" checked value="1" />静默下载
+		</td>
+	</tr>
+	<tr id="pre_lower">
+		<td>低版本：</td>
+		<td>
+			<input type="checkbox" name="pre_lower_version_silent" checked id="pre_lower_version_silent" value="1" />静默下载
+		</td>
+	</tr>
+	<tr>
+		<td>下载完成后：</td>
+		<td align="left" width="200">
+			<select name='download_finished_select' id="download_finished_select" onchange="download_finished_do(this.value);">
+	            <option value="0">无操作</option>
+	            <option value="1">安装某软件后调起安装</option>
+				<option value="2">打开某页面后调起安装</option>
+				<option value="3">启动市场指定时间后调起安装</option>
+	        </select>
+			<span id="after_time_do" style="display:none"><br/><input type="text" name="set_time_do" value="3" style="width:80px;"/>秒 时间默认3s，可手动修改，单位为s</span><br/>
+			<div id="after_page_do" style="display:none">
+				<!--下面a里的href的url会在ready函数里自动生成-->
+				<a id="content_type_a" href="javascript:void(0)" class="thickbox user_a"><font color="blue">选择推荐内容</font></a>
+				<!--下面的content_type_div是选择推荐内容后append的地方-->
+				<div id="content_type_div" class="user_div"></div>
+			</div>
+			<div id="after_more_package" style="display:none;">
+				<input  name="more_package" placeholder="录入多软件包名,逗号分隔" style="width:200px;" value=""/>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td>相同软件相邻两次安装间隔时间：</td>
+		<td><input type="text" name="interval_time" placeholder="录入整数,按小时算" /></td>
+	</tr>
+	<tr>
+		<td>该软件累计最多弹安装界面次数：</td>
+		<td><input type="text" name="max_nums_pop" placeholder="录入整数，单位次" /></td>
+	</tr>
+	<tr>
+		<td>分版本调用安装界面：</td>
+		<td>
+			<?php foreach($version_list as $k => $v): ?>
+				<?php if($k>=6400 ) { ?>
+					<label>
+						<input name="choose_version_code[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> >
+						<?php echo $v[0]; ?>
+					</label> <br>
+				<?php } ?> 
+	        <?php endforeach; ?>
+		</td>
+	</tr>
+	<tr>
+		<td>开始时间 </td>
+		<td align="left">
+			<input id="pre_start_tm" name="pre_start_tm" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})">
+			</td>
+	</tr>
+	<tr>
+		<td>结束时间</td>
+		<td align="left">
+			<input id="pre_end_tm" name="pre_end_tm" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})">
+		</td>
+	</tr>
+	<tr>
+		<td>每日推送时间段</td>
+		<td align="left" width="200">
+			<input id="pre_daily_fromtime" name="pre_daily_fromtime" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'HH:mm:ss',startDate:'00:00:00'})" > 至 <input id="pre_daily_totime" name="pre_daily_totime" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'HH:mm:ss'})">
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='co_type_pre'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+</table><br />
+</div>
+
+<div id="pre_clock_div" style="display:none;"><br>
+<span>预约闹钟</span>
+<table width="600" height="30" border="1">
+	<tr>
+		<td>名称：</td>
+		<td><input type="text" name="clock_name"></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>开始时间 </td>
+		<td align="left">
+			<input id="clock_start_tm" name="clock_start_tm" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})">
+		</td>
+		<td></td>
+	</tr>
+	<!-- <tr>
+		<td>结束时间</td>
+		<td align="left">
+			<input id="clock_end_tm" name="clock_end_tm" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})">
+		</td>
+		<td></td>
+	</tr> -->
+	<tr>
+		<td>提示语:</td>
+		<td><input type="text" name="clock_des" /></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>背景图:</td>
+		<td><input type="file" name="clock_img" /></td>
+		<td>444*150</td>
+	</tr>
+	<tr>
+		<td>logo:</td>
+		<td><input type="file" name="clock_logo" /></td>
+		<td>74*74</td>
+	</tr>
+	<tr>
+		<td>预约游戏包名:</td>
+		<td><input type="text" name="clock_package" id="clock_package" />&nbsp;&nbsp;<!-- <input type="button" value="认证" onclick="clock_soft_check()"> --></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>合作形式</td>
+		<td>
+			<SELECT name='co_type_clock'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+</table>
+</div><br />
+
+<div id="push_set_div" style="display:none;">
+<span>PUSH设置</span>
+<table width="600" height="30" border="1">
+<!-- <tr>
+	<td>是否为新用户推送：</td>
+	<td align="left" width="200">是<input type="radio" name="is_newuser_push" value="1">关<input type="radio" name="is_newuser_push" value="0" checked="checked"></td>
+</tr> -->
+<tr class='push_div'>
+	<td>是否个推：</td>
+	<td align="left" width="200">是<input type="radio" name="is_getui" value="1">关<input type="radio" name="is_getui" value="0" checked="checked"></td>
+</tr>
+<tr class='push_div'>
+	<td>市场不启动时推送：</td>
+	<td align="left" width="200">开<input type="radio" name="offline_push" value="1" checked="checked">关<input type="radio" name="offline_push" value="0"></td>
+</tr>
+<tr class='push_div'>
+	<td>推送方式：</td>
+	<td><input type="radio" name="push_way" value="1" checked />一次推送&nbsp;&nbsp;<input type="radio" name="push_way" value="2" />不点击继续推送</td>
+</tr>
+<tr class='push_div_time'>
+	<td>开始时间 </td>
+	<td align="left" width="200">
+		<input id="fromdate" name="fromdate" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})">
+	</td>
+</tr>
+<tr class='push_div_time'>
+	<td>结束时间</td>
+	<td align="left" width="200">
+		<input id="todate" name="todate" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})">
+	</td>
+</tr>
+<tr class='push_div'>
+	<td>每日推送时间段</td>
+	<td align="left" width="200">
+		<input id="daily_fromtime" name="daily_fromtime" value="" type="text"  class="Wdate" onClick="WdatePicker({dateFmt:'HH:mm:ss',startDate:'00:00:00'})" > 至 <input id="daily_totime" name="daily_totime" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'HH:mm:ss'})" >
+	</td>
+</tr>
+<tr class="push_div_tm">
+	<td>激活时间</td>
+	<td align="left" width="200">
+		<select name='activation_time' id="activation_time" onchange="activation_time_select(this.value);">
+            <option value="0">不限</option>
+            <option value="1">按激活天数</option>
+			<option value="2">按激活日期</option>
+        </select>
+	</td>
+</tr>
+<tr id="activation_days" style="display:none">
+	<td>激活天数</td>
+	<td align="left" width="200">
+		<input name="activation_day_start"/>到<input name="activation_day_end" />天内
+	</td>
+</tr>
+<tr id="activation_date" style="display:none">
+	<td>激活日期</td>
+	<td align="left" width="200">
+		<input id="activation_date_start" name="activation_date_start" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})">到
+		<input id="activation_date_end" name="activation_date_end" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})">
+	</td>
+</tr>
+</table><br />
+</div>
+
+<span>PUSH渠道</span>
+<table width="600" height="30" border="1">
+<tr>
+	<td>是否限制</td>
+	<td align="left" width="200">覆盖用户
+	<input type="radio" name="need_limit"  value="1" onclick="show_csv()"/>排除用户
+	<input type="radio" name="need_limit" value="2"  onclick="show_csv()"/>关
+	<input type="radio" name="need_limit" value="0" checked="checked" onclick="show_csv()"/>
+	</td>
+</tr>
+<tr id="tr_csv" style="display:none" >
+	<td>覆盖用户：</td> 
+	<td style="height:70px;">
+	<a href="__PUBLIC__/paichuyonghu.csv" class="blue" style="text-decoration:none;font-size:14px;">下载csv模板</a><br>
+	<input type="file" id="upload_file" name="upload_file" style="background:none; border:none; width:170px;"/><input type="button" value="上传" onclick="count('fugai')"/><br>
+	<input type="text" id="pre_dl_count" name="pre_dl_count" style="border:none;background:none; color:red;" readonly value=""/>
+	</td>
+	<div id="error_show_div"></div>
+	<input type='hidden' name='csv_url' id='csv_url' value="">
+	<input type='hidden' name='csv_count' id='csv_count' value="">
+</tr>
+<tr id="tr_paichu_csv" style="display:none">
+	<td>排除用户：</td> 
+	<td style="height:70px;">
+	<a href="__PUBLIC__/paichuyonghu.csv" class="blue" style="text-decoration:none;font-size:14px;">下载csv模板</a><br>
+	<input type="file" id="paichu_upload_file" name="paichu_upload_file" style="background:none; border:none; width:170px;"/>
+	<input type="button" value="上传" onclick="count('paichu')"/><br>
+	<input type="text" id="paichu_count" name="paichu_count" style="border:none;background:none; color:red;" readonly value=""/>
+	</td>
+	<div id="paichu_error_show_div"></div>
+	<input type='hidden' name='paichu_csv_url' id='paichu_csv_url' value="">
+	<input type='hidden' name='paichu_csv_count' id='paichu_csv_count' value="">
+</tr>
+<tr>
+<td>选择渠道可见</td>
+<td align="left" width="300">
+<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox">选择指定渠道</a><br />
+	<div id="channel_div"></div>
+</td>
+</tr>
+
+
+<tr>
+	<td>机型可见</td>
+	<td><a href="/index.php/Public/showDevice?callback=submitDevice&type=checkbox&reset_device=1" class="thickbox">选择机型</a>
+	<div id="device_div"></div>
+	</td>
+</tr>
+<tr>
+	<td>推送区域</td>
+	<td align="left" id="push_td">
+	<input type="button" value="添加" onclick="addArea()" class="act_btn"/>
+	<input type="hidden" value="" name="area_value" id="area_value"/>
+	</td>
+</tr>
+<tr>
+  <td>运营商</td>
+  <td id="operator_td">
+    <div id="operator_div">
+        <?php foreach($operator_list as $k => $v): ?>
+		<label><input name="oid[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+        <?php endforeach; ?>
+      <br/>
+    </div>
+  </td>
+  </tr>
+<tr>
+  <td>固件版本</td>
+  <td id="channel_td">
+    <div id="abi_div">
+        <?php foreach($firmwarelist as $k => $v): ?>
+		<label><input name="firmware[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+        <?php endforeach; ?>
+    </div>
+  </td>
+</tr>
+<tr>
+  <td>ABI</td>
+  <td id="channel_td">
+    <div id="abi_div">
+        <?php foreach($abilist as $k => $v): ?>
+		<label><input name="abi[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+        <?php endforeach; ?>
+    </div>
+  </td>
+</tr>
+<tr>
+  <td>市场版本</td>
+  <td id="channel_td">
+    <div id="abi_div_ver">
+        <?php foreach($version_list as $k => $v): ?>
+			<?php if($push_type == 3 && $k>=5500 ) { ?>
+				<label>
+					<input name="version_code[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> >
+					<?php echo $v[0]; ?>
+				</label> <br>
+			<?php }  else { ?> 
+			    <label>
+					<input name="version_code[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> >
+					<?php echo $v[0]; ?>
+				</label> <br>
+			<?php } ?>
+        <?php endforeach; ?>
+    </div>
+	<div id="abi_div_3" style="display:none;">
+        <?php foreach($version_list as $k => $v): ?>
+			<?php if($k>=5500) { ?>
+				<label>
+					<input name="version_code[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> >
+					<?php echo $v[0]; ?>
+				</label> <br>
+			<?php } ?> 
+        <?php endforeach; ?>
+    </div>
+  </td>
+</tr>
+
+<tr>
+	<td colspan="2" align="center">
+		<input type="submit" name="submit"  value="提交">
+		<input type="button" value='取消' onclick="location.href='<?php if($push_type == 1){ ?>/index.php/Webmarket/marketPush/market_push_list/push_type/1<?php }elseif($push_type == 2){ ?>/index.php/Webmarket/marketPush/market_cpm_list/push_type/2<?php } elseif($push_type == 3) { ?>/index.php/Webmarket/marketPush/market_pre_dl_list/push_type/3 <?php } elseif($push_type == 5) { ?>/index.php/Webmarket/marketPush/market_desk_red_list/push_type/5 <?php } elseif($push_type == 6) { ?>/index.php/Webmarket/marketPush/market_pre_clock_list/push_type/6<?php } ?>'"/>
+	</td>
+</tr>
+</table>
+</form>
+
+</div>
+<include file="../Public/footer" />
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script>
+KindEditor.ready(function(K) {
+		window.editor = K.create('#info_content',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'forecolor'
+			],
+			width:"100%"
+		});
+		window.editor = K.create('#info_title',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'forecolor'
+			],
+			width:"100%"
+		});
+});
+
+KindEditor.options.cssData = 'body { font-size: 14px;}';
+function show_editor(table_num){
+		window.editor = KindEditor.create('#info_content'+table_num,{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'forecolor'
+			],
+			width:"100%"
+		});
+		window.editor = KindEditor.create('#info_title'+table_num,{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'forecolor'
+			],
+			width:"100%"
+		});
+}
+
+//桌面红包中的覆盖人数格式化显示
+function tran(obj)
+{
+	var v, j, sj, rv = "";
+	v = obj.value.replace(/,/g,"").split(".");
+	j = v[0].length % 3;
+	sj = v[0].substr(j).toString();
+	for (var i = 0; i < sj.length; i++)
+	{
+		rv = (i % 3 == 0) ? rv + "," + sj.substr(i, 1): rv + sj.substr(i, 1);
+	}
+	var rvalue = (v[1] == undefined) ? v[0].substr(0, j) + rv: v[0].substr(0, j) + rv + "." + v[1];
+	if (rvalue.charCodeAt(0) == 44)
+	{
+		rvalue = rvalue.substr(1);
+	}
+	obj.value = rvalue;
+}
+</script>

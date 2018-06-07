@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>11.11给你一个脱单的机会</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/common.css"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+</head>
+<body>
+<div class="banner"><img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/banner.png"/></div>
+<div class="notice">
+	<div class="notice_list">
+		<marquee scrollamount="2" scrolldelay="90" direction="left">
+	<!--{if $out.lottery_prize}-->
+		<!--{foreach from=$out.lottery_prize item='val' key='k'}-->
+			<span ><!--{$val}--></span >
+		<!--{/foreach}-->
+	<!--{else}-->		
+			<span >少年，要加油才能拿大奖喔！</span>
+	<!--{/if}-->					
+		</marquee>
+	</div>
+</div>
+<div class="main">
+	<div class="main_inner">
+		<div class="titles"><h3>我的奖品</h3></div>
+<!--{if $out.list_prize}-->
+	<!--{foreach from=$out.list_prize item='val' key='k'}-->
+		<div class="prize_list wrap">
+			<span class="icon"></span>
+			<div class="prize_list_inner">
+				<!--{if $out.stop != 1}-->
+				<a href="javascript:;" class="prize_btns" onclick="info_edit('<!--{$k}-->');" >编辑</a>
+				<!--{/if}-->
+				<p class="prize-title">
+					<span id="prize_name_<!--{$k}-->" ><!--{$val.prize_name}--></span>
+				</p>
+				<ul class="prize-text">
+					<li>
+						<span>姓名：</span>
+						<font id="name_<!--{$k}-->"><!--{$val.name}--></font>
+					</li>
+					<li>
+						<span>手机：</span>
+						<font id="telephone_<!--{$k}-->"><!--{$val.telephone}--></font>
+					</li>
+					<li>
+						<span>地址：</span>
+						<font id="address_<!--{$k}-->"><!--{$val.address}--></font>
+					</li>
+					<div class="clear"></div>
+				</ul>
+			</div>
+			<div class="prize_top"></div>
+		</div>		
+	<!--{/foreach}-->	
+<!--{else}-->	
+	<div class="main_inner">
+		<div class="tips_p wrap" style="padding-bottom: 40px;">
+			<p>少年，你木有奖品哦～</p>
+			<div class="tips_img">
+				<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/tip_hd_04.png">
+			</div>
+		</div>
+	</div>
+	<a href="/lottery/<!--{$out.prefix}-->/my_prize.php?is_rule=1&aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->" class="rule_btn">【活动规则】</a>		
+<!--{/if}-->			
+	</div>
+</div>
+<div class="footer">
+	<p>＊本次活动最终解释权归安智所有</p>
+</div>
+</body>
+<section>
+	<div class="tip-box wrap" id="tip-box1"  style="display: none; height:260px">
+		<span class="icon">&nbsp;</span>
+		<div class="prompt2">&nbsp;</div>
+		<div class="form-item clear">
+			<label for="username">姓名：</label>
+			<div class="textbox">
+				<input id='lxname_r' type="text" placeholder="姓名" />
+			</div>
+		</div>
+		<div class="form-item clear">
+			<label for="telephone">手机：</label>
+			<div class="textbox">
+				<input id='mobile_r'  maxlength='11' type="tel"  placeholder="手机号" />
+			</div>
+		</div>
+		<div class="form-item clear">
+			<label for="telephone">地址：</label>
+			<div class="textbox">
+				<input id='address_r' type="text" placeholder="收货地址" />
+			</div>
+		</div>
+		<div class="prompt3" id='userinfo_err'></div>
+
+		 <div class="tip_hd">
+            <div class="clo"></div>
+        </div>
+		<div class="btns2">
+			<input id='award_id' type="hidden" value='432' />
+			<a class="btns_orange fl" href="javascript:;" style="margin-top:12px" onclick="resubmit_do();" >提交</a>
+			<a class="btns_orange fr" style="margin:12px 10px;" href="javascript:;" onclick="cloBox('#tip-box1')">取消</a>
+			<div class="clear"></div>
+		</div>
+	</div>	
+</section>	
+</html>
+<script>
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var prefix = '<!--{$out.prefix}-->';
+var lottery_num = '<!--{$out.lottery_num}-->';
+var flags={canMove:true};
+function showOpenBox(obj){
+	setTimeout(function(){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+		top_h=  $(obj).height()/2 - $(document).scrollTop();
+		$(obj).css("margin-top",-top_h+"px").show();
+		$('#body-bg').css("height",bg_h+"px").show();
+		flags.canMove=false;
+		if($('.tip-con').height()>=150){
+			flags.canMove = true;
+		}
+		window.onresize = function(){
+			var bg_h=$(window).height() + $(document).scrollTop(),
+				top_h=  $(obj).height()/2 - $(document).scrollTop();
+			$('#body-bg').css("height",bg_h+"px");
+			$(obj).css("margin-top",-top_h+"px");	
+		}
+	},200)
+}
+function cloBox(obj){
+	$(obj).hide(); 
+	$('#body-bg').hide();
+	flags.canMove=true;
+}
+$(function(){
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+})
+
+function info_edit(id){
+	$("#award_id").val(id);
+	$("#mobile_r").val($("#telephone_"+id).html());
+	$("#lxname_r").val($("#name_"+id).html());
+	$("#address_r").val($("#address_"+id).html());
+	showOpenBox('#tip-box1');
+}
+
+
+function resubmit_do(){
+	var lxname = $("#lxname_r").val();
+	if(lxname == "") {
+		$('#userinfo_err').html('联系人姓名不能为空');
+		return false;
+	}
+	var name_len = lxname.length;
+	if(name_len > 10){
+		$('#userinfo_err').html('联系人姓名不能超过10个字');
+		return false;	
+	}
+	var mobile_phone = $("#mobile_r").val();
+	if(mobile_phone == "") {
+		$('#userinfo_err').html('联系人手机号码不能为空');
+		return false;
+	 }
+	var  re = /^(13|14|15|17|18)\d{9}$/
+	if (!re.test(mobile_phone)){
+		$('#userinfo_err').html('请输入正确手机号');
+		return false;
+	}
+	var address = $("#address_r").val();
+	if(address == "") {
+		$('#userinfo_err').html('邮寄地址不能为空');
+		return false;
+	 }
+	var address_len = address.length;
+	if(address_len > 30){
+		$('#userinfo_err').html('邮寄地址不能超过30个字');
+		return false;	
+	}	 
+	$('#userinfo_err').html('');
+	var award_id = $("#award_id").val();
+	//cloBox('#tip-box1');	
+	$.ajax({
+			url: "/lottery/"+prefix+"/my_prize.php",
+			data:"is_address=1&aid="+aid+"&sid="+sid+"&lxname="+lxname+"&mobile_phone="+mobile_phone+"&address="+address+'&id='+award_id,
+			type:"post",
+			dataType: 'json',
+			success:function(data) {
+				if(data.code == 1){
+					$("#telephone_"+award_id).html(mobile_phone);
+					$("#name_"+award_id).html(lxname);
+					$("#address_"+award_id).html(address);
+					$('#userinfo_err').html(data.msg);
+					setTimeout(function(){
+						cloBox('#tip-box1');
+					},2000)					
+				}else{
+					$('#userinfo_err').html(data.msg);
+					return false;
+				}
+			},
+	});	
+}
+</script>

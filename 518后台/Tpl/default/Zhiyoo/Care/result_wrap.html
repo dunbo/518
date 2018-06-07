@@ -1,0 +1,224 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/js/fancybox/jquery.fancybox-1.3.4.css" />
+<script type="text/javascript" src="/Public/js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+<script type="text/javascript">
+function ok(data)
+{
+   if(confirm(data))
+    return true;
+   else return false
+}
+function checkinput(){
+	var objs = document.getElementsByClassName('inputbox');
+	var cnt = objs.length;
+	for(var i=0;i<cnt;i++){
+		if(isNaN(objs[i].value)){
+			alert('排序值不能为非数字，提交失败');
+			return false;
+		}
+	}
+	return true;
+}
+$(document).ready(function() {
+		$("a.zshowbox").fancybox();
+});
+function checksearch(){
+	sval = document.getElementById('start_tm').value;
+	eval = document.getElementById('end_tm').value;
+	if(sval > eval){
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+	return true;
+}
+</script>
+<style>
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+<body>
+
+<div style="margin:20px 10px 20px 6px;">
+<form action="__URL__/result_wrap/{$srcurl}{$postimeurl}" method="get" class="table_list">
+<table>
+	<tr>
+		<td >平台：
+			<select name="platform">
+				<option value='0'>全部</option>
+				<volist name="platform" id="list">
+				<option value='{$list.platform}' <?php if($list['platform'] == $_GET['platform']) echo 'selected'; ?>>{$list.platformname}</option>
+				</volist>
+			</select>
+		</td>
+		<td>添入时间：<input id="start_tm" name="start_tm" value="{$_GET['start_tm']}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px" />&nbsp;至&nbsp;<input id="end_tm" name="end_tm" value="{$_GET['end_tm']}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"/></td>
+		<td>标题：<input type="text" name="title" value="{$_GET['title']}" /></td>
+		<td>TID：<input type="text" name="tid" value="{$_GET['tid']}" /></td>
+		<td><input type="submit" onclick="return checksearch()" value="搜索" class="search_btn" /></td>
+	</tr>
+</table>
+</form>
+</div>
+
+<div style="margin:20px 10px 20px 6px;"></div>
+<?php if($_GET['action']=='editlevel'):  ?>
+	<form action="__URL__/doeditlevel/position/wrap" method="post">
+	<input type="hidden" name="url" value="{$filterurl}{$postimeurl}" />
+<?php endif; ?>
+<div style="margin:10px;">
+		<a href="__URL__/result_wrap{$filterurl}" class="search_btn" style="display:inline-block;<?php if($_GET['postime'] && $_GET['postime']!=='online') echo 'background:#fff;'?>">已上线</a>
+		<a href="__URL__/result_wrap/postime/waiton{$filterurl}" class="search_btn" style="display:inline-block;<?php if($_GET['postime']!=='waiton') echo 'background:#fff;'?>">待上线</a>
+		<a href="__URL__/result_wrap/postime/outline{$filterurl}" class="search_btn" style="display:inline-block;<?php if($_GET['postime']!=='outline') echo 'background:#fff;'?>">已过期</a>
+		<div style="float:right;">
+		<?php if($_GET['action']=='editlevel'): ?>
+			<input type="submit" name="submit" style="display:inline-block;width:135px;" class="search_btn" onclick="return checkinput()" value="修改优先级" />
+			<a href="__URL__/result_wrap{$filterurl}{$postimeurl}" class="search_btn" style="display:inline-block;width:135px;">取消编辑优先级</a>
+		<?php else: ?>
+			<a href="__URL__/result_wrap/action/editlevel{$filterurl}{$postimeurl}" class="search_btn" style="display:inline-block;width:135px;">编辑优先级</a>
+		<?php endif; ?>
+		</div>
+	  </div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th ><a href="__URL__/result_wrap/type/pos.level/order/<?php $order = isset($th['pos.level']) ? $th['pos.level'] : 'asc';echo $order.$filterurl.$postimeurl?>">优先级↑↓</a></th>	
+			<!--th style="width: 50px; "><a href="__URL__/result_wrap/type/pos.posid/order/<?php $order = isset($th['pos.posid']) ? $th['pos.posid'] : 'asc';echo $order.$filterurl.$postimeurl?>">轮播图ID↑↓</a></th-->
+			<th style="width: 50px; "><a href="__URL__/result_wrap/type/pos.advid/order/<?php $order = isset($th['pos.advid']) ? $th['pos.advid'] : 'asc';echo $order.$filterurl.$postimeurl?>">排期ID↑↓</a></th>
+			<th style="width: 80px;"><a href="__URL__/result_wrap/type/pos.tid/order/<?php  $order = isset($th['pos.tid']) ? $th['pos.tid'] : 'asc';echo $order.$filterurl.$postimeurl?>">TID↑↓</a></th>
+			<!--th style="width: 200px;"><a href="__URL__/result_wrap/type/c.title/order/<?php $order = isset($th['c.title']) ? $th['c.title'] : 'asc';echo $order.$filterurl.$postimeurl?>">原文图片/标题↑↓</a></th-->
+			<th style="width: 120px;"><!--a href="__URL__/result_wrap/type/e.ext_title/order/<?php $order = isset($th['e.ext_title']) ? $th['e.ext_title'] : 'asc';echo $order.$filterurl.$postimeurl?>"-->宣传图片/标题</th>
+			<th >链接地址</th>
+			<th >推荐理由</th>
+			<th style="width: 120px;">标签</th>
+			<th ><!--a href="__URL__/result_wrap/type/c.author/order/<?php  $order = isset($th['c.author']) ? $th['c.author'] : 'asc';echo $order.$filterurl.$postimeurl?>"-->作者</th>
+			<!--th style="width: 60px;"><a href="__URL__/result_wrap/type/c.views/order/<?php  $order = isset($th['c.views']) ? $th['c.views'] : 'desc';echo $order.$filterurl?>">点击量↑↓</a></th>
+			<th style="width: 60px;"><a href="__URL__/result_wrap/type/c.replies/order/<?php  $order = isset($th['c.replies']) ? $th['c.replies'] : 'desc';echo $order.$filterurl?>">回复量↑↓</a></th>
+			<th ><a href="__URL__/result_wrap/type/c.author/order/<?php  $order = isset($th['c.author']) ? $th['c.author'] : 'asc';echo $order.$filterurl.$postimeurl?>">链接栏目↑↓</a></th-->
+			<th style="width: 90px;"><a href="__URL__/result_wrap/type/pos.addtime/order/<?php  $order = isset($th['pos.addtime']) ? $th['pos.addtime'] : 'desc';echo $order.$filterurl.$postimeurl?>">添入时间↑↓</a></th>
+			<th ><a href="__URL__/result_wrap/type/pos.platform/order/<?php  $order = isset($th['pos.platform']) ? $th['pos.platform'] : 'desc';echo $order.$filterurl.$postimeurl?>">平台↑↓</a></th>
+			<th style="width: 90px;"><a href="__URL__/result_wrap/type/pos.starttime/order/<?php  $order = isset($th['pos.starttime']) ? $th['pos.starttime'] : 'asc';echo $order.$filterurl.$postimeurl?>">开始时间↑↓</a></th>
+			<th style="width: 90px;"><a href="__URL__/result_wrap/type/pos.endtime/order/<?php  $order = isset($th['pos.endtime']) ? $th['pos.endtime'] : 'asc';echo $order.$filterurl.$postimeurl?>">结束时间↑↓</a></th>
+			<th style="width: 80px;">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr id="tr_{$val.advid}">
+		<td>
+		<?php if($_GET['action']=='editlevel'): ?>
+			<input size="5" type="text" onkeyup="this.value=this.value.replace(/\D/g,'')" class="inputbox" name="level[{$val.posid}]" value="{$val.level}" />
+		<?php else: ?>
+			{$val.level}
+		<?php endif; ?>
+		</td>
+		<!--td>{$val.posid}</td-->
+		<td>{$val.advid}</td>
+		<td>{$val.tid}</td>
+		<!--td><a href="{$val.url}" target="_blank"><?php if($val['img_path']){ ?><img width="100px" src="{$val.img_path}"/><br/><?php } ?>{$val.title}</a></td-->
+		
+		<td>
+		<?php if($val['img_path2']){ ?>
+			<div style="width: 100px; max-height: 80px; overflow: hidden;">
+				<a href="{$val.img_path2}" class="zshowbox"><img width="100px" src="{$val.img_path2}"/></a>
+			</div>
+		<?php }elseif($val['img_path1']){ ?>
+			<div style="width: 100px; max-height: 80px; overflow: hidden;">
+				<a href="{$val.img_path1}" class="zshowbox"><img width="100px" src="{$val.img_path1}"/></a>
+			</div>
+		<?php } ?>
+		<a href="<?php if(isset($val['tid'])): ?>http://{$address}/thread-{$val.tid}-1-1.html<?php else:?>{$val.url}<?php endif;?>" target="_blank">{$val.ext_title}</a></td>
+		<td><a target="_blank" href="<?php if(isset($val['tid'])): ?>http://{$address}/thread-{$val.tid}-1-1.html<?php else:?>{$val.url}<?php endif;?>"><?php if(isset($val['tid'])): ?>http://{$address}/thread-{$val.tid}-1-1.html<?php else:?>{$val.url}<?php endif;?></a></td>
+		<td><textarea style="width:95%" rows="10" onkeydown="return false;">{$val.description}</textarea></td>
+		<td id="edittag_{$val.id}">
+		<div id="tdlist_{$val.id}">
+		<?php 
+			if($val['psource'] == '1'){
+			$tagurl = '';
+			foreach($tag_result[$val['posid']] as $group){
+				$tagurl = $group['tag_url'];
+				echo $group['name'].'：';
+				$i=0;
+				foreach($group['tag_arr'] as $tagid ){
+					$i++;$point=',';if($i==1) $point='';echo $point;
+					if($taglist[$taglist[$tagid]['parentid']]['tagname']) echo $taglist[$taglist[$tagid]['parentid']]['tagname'].'>';
+					echo $taglist[$tagid]['tagname'];
+				}
+				echo '<br/>';
+			}
+			}else{
+				echo '分类标签：广告';
+			}
+		?><br/>
+		<?php 
+		if($tagurl) $tagurl ='tags/'.$tagurl.'/'; 
+		?>
+		</div>
+		<!--br/>
+		<a id="tdurl_{$val.id}" href="/index.php/Zhiyoo/Collectresult/tag_list_show1/from/data/onlyone/yes/id/{$val.id}/{$tagurl}" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a></td-->
+		<td>{$val.author}</td>
+		<!--td>{$val.views}</td>
+		<td>{$val.replies}</td>
+		<td >
+		<div >
+		{$val.name}
+		</div>
+		<br/>
+		<a href="__URL__/editcolumn/posid/{$val.posid}/postime/{$_GET['postime']}?" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a></td-->
+		<td><?php echo date('Y/n/d',$val['addtime']).'<br>'.date('H:i:s',$val['addtime'])?></td>
+		<td>{$val['platformname']}</td>
+		<td><?php echo $val['starttime'] == 0 ? '' : date('Y/n/d',$val['starttime']).'<br>'.date('H:i:s',$val['starttime'])?><br><?php if($val['psource'] == '1'): ?>
+			<a href="/index.php/Zhiyoo/Waiton/reonline/advid/{$val.advid}/" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a>
+			<?php elseif($val['psource'] == '2'): ?>
+			<a href="/index.php/Zhiyoo/Advdata/reonline/posid/{$val.posid}/" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a>
+			<?php endif; ?></td>
+		<td><?php echo $val['endtime'] == 0 ? '' :date('Y/n/d',$val['endtime']).'<br>'.date('H:i:s',$val['endtime'])?><br><?php if($val['psource'] == '1'): ?>
+			<a href="/index.php/Zhiyoo/Waiton/reonline/advid/{$val.advid}/" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a>
+			<?php elseif($val['psource'] == '2'): ?>
+			<a href="/index.php/Zhiyoo/Advdata/reonline/posid/{$val.posid}/" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a>
+			<?php endif; ?></td></td>
+		<td id="delstatus_{$val.id}">
+		<!--p><a href="<?php echo BBSLUNTAN_HOST; ?>&fid={$val.fid}&tid={$val.tid}&pid={$val.pid}" style="text-decoration:underline;color:blue;" target="_blank">编辑内容</a>|</p-->
+		<p><?php if($val['psource'] == '1'): ?>
+		<a href="/index.php/Zhiyoo/Collectresult/edit_content/from/wrap/source/{$_GET['postime']|default='online'}/advid/{$val.advid}/id/{$val.id}/" style="text-decoration:underline;color:blue;">编辑</a>
+		<?php elseif($val['psource'] == '2'): ?>
+		<a href="/index.php/Zhiyoo/Advdata/edit/from/wrap/source/{$_GET['postime']|default='online'}/advdid/{$val.advid}/" style="text-decoration:underline;color:blue;">编辑</a>
+		<?php endif; ?>|<br/>
+		<?php if($_GET['postime'] == 'waiton'): ?>
+			<?php if($val['psource'] == '1'): ?>
+			<a href="/index.php/Zhiyoo/Waiton/back/advid/{$val.advid}" onclick="return ok('您确定要撤回同一TID的所有内容到待用素材库吗？');" style="text-decoration:underline;color:blue;">撤回素材库</a>|<br/>
+			<a href="/index.php/Zhiyoo/Waiton/back_one/advid/{$val.advid}" onclick="return ok('您确定要撤回该内容到待用素材库吗？');" style="text-decoration:underline;color:blue;">仅删除本条内容</a>
+			<?php elseif($val['psource'] == '2'): ?>
+			<a href="/index.php/Zhiyoo/Advdata/del_list/posid/{$val.posid}" onclick="return ok('删除后不可恢复，是否确认删除？');" style="text-decoration:underline;color:blue;">删除</a>
+			<?php endif; ?>
+		<?php elseif($_GET['postime'] == 'outline'): ?>
+			<?php if($val['psource'] == '1'): ?>
+			<a href="/index.php/Zhiyoo/Waiton/reonline/advid/{$val.advid}/" class="thickbox" style="text-decoration:underline;color:blue;">重新上线</a>
+			<?php elseif($val['psource'] == '2'): ?>
+			<a href="/index.php/Zhiyoo/Advdata/reonline/posid/{$val.posid}/" class="thickbox" style="text-decoration:underline;color:blue;">重新上线</a>
+			<?php endif; ?>
+		<?php else: ?>
+			<?php if($val['psource'] == '1'): ?>
+				<a href="/index.php/Zhiyoo/Waiton/over/advid/{$val.advid}" style="text-decoration:underline;color:blue;">结束</a>
+			<?php elseif($val['psource'] == '2'): ?>
+				<a href="/index.php/Zhiyoo/Advdata/over/posid/{$val.posid}" style="text-decoration:underline;color:blue;">结束</a>
+			<?php endif; ?>
+		<?php endif; ?></p>
+		<?php /*if($_GET['source'] != 'outline'): ?>
+			<p><a href="/index.php/Zhiyoo/Waiton/copy/advid/{$val.advid}/" class="thickbox" style="text-decoration:underline;color:blue;">复制内容</a></p>
+		<?php endif;*/ ?>
+		</td>
+		
+	</tr>
+	<?php } ?>
+</table>
+<?php if($_GET['action']=='editlevel'): ?>
+	</form>
+<?php endif; ?>
+<div class="navgition">
+	{$page|default='&nbsp;'}
+</div>
+</body>
+</html>

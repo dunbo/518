@@ -1,0 +1,158 @@
+<include file="../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript">
+function checkit()
+{
+    if(confirm("确定要这么执行该操作吗？"))
+    {
+        return true;
+    }
+    return false;
+}
+
+function select_all()
+{
+	$("input[name='mid[]']").attr("checked",true);
+}
+function selectUnAll(){
+
+}
+function select_again()
+{	
+	$("input[name='mid[]']").each(function () {  
+		$(this).attr("checked", !$(this).attr("checked"));  
+	});       
+}
+  
+function refuse(){
+
+ if(!confirm("确定要这么执行该操作吗？"))
+    {
+        return false;
+	}
+	
+var mid = document.getElementsByName("mid[]");
+	var id = "";
+	var is_select = false;
+	for ( i = 0 ; i < mid.length ; i++ ) {
+		if ( mid[i].checked == true ) {
+			id += "," + mid[i].value;
+			is_select = true;
+		}
+	}
+	if (is_select) {
+		window.location = "__URL__/refuse/mid/"+id;
+	}else{
+		alert( "请至少选择一个条目，才能进行操作" );
+		return false;
+	}
+}
+
+function delete_go(){
+ if(!confirm("确定要这么执行该操作吗？"))
+    {
+        return false;
+    }
+	
+var mid = document.getElementsByName("mid[]");
+	var id = "";
+	var is_select = false;
+	for ( i = 0 ; i < mid.length ; i++ ) {
+		if ( mid[i].checked == true ) {
+			id += "," + mid[i].value;
+			is_select = true;
+		}
+	}
+	if (is_select) {
+		window.location = "__URL__/delete_go/mid/"+id;
+	}else{
+		alert( "请至少选择一个条目，才能进行操作" );
+		return false;
+	}
+}
+
+function transit_go(){
+ if(!confirm("确定要这么执行该操作吗？"))
+    {
+        return false;
+    }
+	
+var mid = document.getElementsByName("mid[]");
+	var id = "";
+	var is_select = false;
+	for ( i = 0 ; i < mid.length ; i++ ) {
+		if ( mid[i].checked == true ) {
+			id += "," + mid[i].value;
+			is_select = true;
+		}
+	}
+	if (is_select) {
+		window.location = "__URL__/transit_go/mid/"+id;
+	}else{
+		alert( "请至少选择一个条目，才能进行操作" );
+		return false;
+	}
+}
+
+</script>
+<body>
+	<div>
+		<table border="1">
+		<?php if($state == 1){ ?> <td bgcolor="yellow"><?php }else{ ?><td><?php } ?><a href="__URL__/frendly_link_list/state/1">通过列表</a><td>
+		<?php if($state == 3){ ?> <td bgcolor="yellow"><?php }else{ ?><td><?php } ?><a href="__URL__/frendly_link_list/state/3">拒绝列表</a><td>
+		
+		<td colspan='8'><a href="__URL__/frendly_link_add/" class="thickbox">添加友链</a></td>
+		</table>
+		
+	</div>
+	<div>
+		<table border="1" cellspacing="0" cellpadding="0">
+			<tr>
+				<td width="4%">选择</td>
+				<?php if($state == 1){ ?>
+				<td width="5%">排序</td>
+				<?php } ?> 
+				<td width="10%"  align="center">链接名称</td>
+				<td width="10%"  align="center">链接地址</td>
+				<td width="10%"  align="center">联系qq</td>
+				<td width="10%"  align="center">电子邮件</td>
+				<td width="8%" align="center">申请时间</td>
+				<td width="8%"  align="center">更新时间</td>
+				<td width="5%"  align="center">是否显示在首页</td>
+				<td width="10%"  align="center">状态</td>
+				<td width="18%"  align="center">操作</td>
+			<tr>
+			<?php foreach($link_list as $key => $val){ ?>
+			<tr>
+				<td><input type="checkbox" name="mid[]" value="<?php echo $val['id'];?>"></td>
+				<?php if($val['state'] == 1){ ?>
+				<form action="__URL__/frendly_link_rank" method="get" name="contest_form_{$key}">
+				<input type="hidden" name="rid" value="<?php echo $val['id'];?>">
+				<td>
+					<select name="rank" id="rank" onChange="javascript:contest_form_{$key}.submit();">
+						<?php foreach($rank_all as $k => $v){ ?>
+						<option value="<?php echo $v;?>" <?php if($val['rank'] == $v){ ?>selected<?php } ?>><?php echo $v;?></option>
+						<?php } ?>
+					</select>
+				</td>
+				</form>
+				<?php } ?>
+				<td><?php echo $val['link_name'];?>&nbsp;</td>
+				<td><?php echo $val['link_url'];?>&nbsp;</td>
+				<td><?php if($val['qq'] == 0 || $val['qq'] == ''){ echo "";}else{echo $val['qq'];}?>&nbsp;</td>
+				<td><?php echo $val['email'];?>&nbsp;</td>
+				<td><?php echo date('Y/m/d H:i:s',$val['create_tm']);?>&nbsp;</td>
+				<td><?php echo date('Y/m/d H:i:s',$val['update_tm']);?>&nbsp;</td>
+				<td><if condition="$val['type'] eq 1" >显示</if>
+				<if condition="$val['type'] eq 0" >不显示</if></td>
+				<td><?php if($val['state'] == 1){echo "通过";}elseif($val['state'] == 2){echo "待审核";}elseif($val['state'] == 3){echo "拒绝";}?></td>
+				<td><?php if($val['state'] == 1 || $val['state'] == 2){ ?><a href="__URL__/frendly_link_edit_do/state/3/mid/<?php echo $val['id'];?>" onclick="return checkit();">拒绝</a>&nbsp;|<?php } ?>&nbsp;<?php if($val['state'] == 2 || $val['state'] == 3){ ?><a href="__URL__/frendly_link_edit_do/state/1/mid/<?php echo $val['id'];?>" onclick="return checkit();">通过</a>&nbsp;|&nbsp;<?php } ?><?php if($val['state'] == 1 || $val['state'] == 3){ ?><a href="__URL__/frendly_link_edit_do/status/0/sid/<?php echo $val['id'];?>" onclick="return checkit();">删除</a>&nbsp;|&nbsp;<?php } ?><a href="__URL__/frendly_link_edit/id/<?php echo $val['id'];?>" class="thickbox">编辑</a></td>
+			</tr>
+			<?php } ?>
+		</table>
+	</div>
+	{$page}
+	<div><input type="button" value="全选" onclick="select_all()"/>&nbsp;<input type="button" value="反选" onclick="select_again()"/>&nbsp;&nbsp;&nbsp;批量操作：<?php if($state != 3){ ?><input type="button" value="批量拒绝" onclick="return refuse()" /><?php } ?>&nbsp;<?php if($state != 2){ ?><input type="button" value="批量删除" onclick="return delete_go()" /><?php } ?>&nbsp;<?php if($state != 1){ ?><input type="button" value="批量通过" onclick="return transit_go()" /><?php } ?><div>
+</body>

@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src='/Public/js/soft.js?v3'></script>
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<table  width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+<tr height="35">
+	<td align="center"  style=<?php if($status ==2){ echo "background:#FFCC66"; } ?>>
+		<a href="__URL__/audit_new_server/status/2"><font style="color:#000; font-weight:bold">待审核</font></a>
+	</td>
+	<td align="center" style=<?php if($status ==1){ echo "background:#FFCC66"; } ?>>
+		<a href="__URL__/audit_new_server/status/1"><font style="color:#000; font-weight:bold">发布中</font></a>
+	</td>
+	<td align="center" style=<?php if($status ==100){ echo "background:#FFCC66"; } ?>>
+		<a href="__URL__/audit_new_server/status/100"><font style="color:#000; font-weight:bold">已过期</font></a>
+	</td>
+	<td align="center" style=<?php if($status ==3){ echo "background:#FFCC66"; } ?>>
+		<a href="__URL__/audit_new_server/status/3"><font style="color:#000; font-weight:bold">驳回列表</font></a>
+	</td>
+	<td align="center" style=<?php if($status ==4){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/audit_new_server/status/4"><font style="color:#000; font-weight:bold">取消列表</font></a>
+	</td>
+</tr>
+</table>
+
+	<table style='margin-top:30px;float:left;' width="100%" cellspacing="0" cellpadding="0" class="search_table">
+		<tbody>
+		<form method='get' action="__URL__/audit_new_server" >
+			<tr>
+				<td width="10%">软件ID:<input type="text" size='9' class="softid" value="{$softid}" id="softid" name="softid"></td>
+				<td width="20%">软件名称：<input type="text"  value="{$softname}" id="softname" name="softname"></td>
+				<td width="20%">软件包名：<input type="text"  value="{$pack_name}" id="pack_name" name="pack_name"></td>
+				<td width="40%" width="300" colspan='3' >开服时间：<span><input type="text" name="begintime" id="begintime" value="{$begintime}" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>~
+				<span><input id="endtime" name="endtime" style="cursor: hand; width: 150px;"
+				 value="{$endtime}" size="15" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>
+				</td>	
+			</tr>	
+			<tr>
+				<td width="20%">服务器类型：
+					<select name="server_type" id="server_type">
+						<option value="">--请选择--</option>
+						<option value="1" <if condition="$server_type eq 1">selected</if>>新服</option>
+						<option value="2" <if condition="$server_type eq 2">selected</if>>内测服</option>
+					</select>
+				</td>
+				<td width="20%" width="300" colspan='3' >提交时间：
+				<span><input type="text" name="start_tm" id="start_tm" value="{$start_tm}" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>	~
+				<span><input id="end_tm" name="end_tm" style="cursor: hand; width: 150px;"
+				 value="{$end_tm}" size="15" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>
+				</td>
+				<td align='right' width="10%" colspan='5'><input type="submit" class="search_btn" value="搜索"></td>
+			</tr>	
+			<input type="hidden" id="status" name="status" value="<?php echo $status; ?>" />
+		</form>
+		 </tbody>
+	</table>
+
+
+<table style='float:left;' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="5%" bgcolor="#e3e2fe"><input type="checkbox" id="id_all[]" name="id_all[]" onclick="selectAlls();" />序号</th>
+			<th width="20%">软件信息</th>
+			<th width="8%">服务器类型</th>
+			<th width="6%">内测类型</th>
+			<th width="8%">开服时间</th>
+			<th width="8%">结束时间</th>
+			<!--<th width="8%">激活码</th><!-->
+			<th width="8%">使用方法</th>
+			<th width="8%">服务器名称</th>
+			<th width="8%">简介</th>
+			<th width="8%">提交时间</th>
+			<th width="5%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='list' id='softlist'>
+		<tr id='tr{$softlist.id}'>
+			<td align='left'>
+				<input type="checkbox" name="id[]" value="{$softlist.id}" /><br/>
+				{$softlist.id|default=''}<br/><br/>
+			</td>
+				
+			<td>
+				<table style="border:0;" class="noborder">
+					<tr>
+						<td>{$softlist.softid|default=''}</td>
+						<td rowspan="2">
+							<a target='_blank'  href='http://www.anzhi.com/soft_{$softlist.softid}.html'><b>{$softlist.softname}</b></a><br/>
+							{$softlist.package}<br/>
+							{$softlist.category_name}<br>
+							下载量：{$softlist.total_downloaded}
+						</td>
+					</tr>
+					<tr>
+						<td><img src='<?php echo IMGATT_HOST;?>{$softlist.iconurl}' width="48" height="48"/></td>
+					</tr>
+					<tr colspan="2">
+						
+					</tr>
+				</table>			
+			</td>
+			<td><if condition="$softlist.server_type eq 1">新服<else />内测服</if></td>
+			<td><if condition="$softlist.del_type eq 1">删档内测<elseif condition="$softlist.del_type eq 2" />不删档内测</if></td>
+			<td align='center' >
+				<div style="width:70px;">
+					{$softlist.begin}
+				</div>
+			</td>
+			<td align='center' >
+				<div style="width:70px;">
+					{$softlist.end}
+				</div>
+			</td>
+			<!--<td><a href="__URL__/down_load_csv?file_path=<?php echo base64_encode($softlist['up_file_path']) ?>" title="{$softlist.up_file}">{$softlist.up_file}</a></td><!-->
+			<td>{$softlist.method}</td>
+			<td>{$softlist.new_server_name}</td>
+			<td>{$softlist.comment}</td>
+
+			<td align='center' >
+				<div style="width:70px;">
+					{$softlist.add_tm}
+				</div>
+			</td>
+			<td>
+			<?php if($status ==2){ ?>
+				<if condition="$softlist.softname neq ''">
+					<a href="#" onclick="pass_newserver('{$softlist.id}')" class="blue">通过</a><br/>
+				<else/>
+					<font color="gray">通过</font><br/>
+				</if>	
+				<a  href="#" onclick="undercarriage('{$softlist.id}')" class="blue">驳回</a>
+			<?php }else{ ?>	
+				<a href="#" onclick="del('{$softlist.id}')" class="blue">删除</a><br/>
+			<?php } ?>
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='10'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+  <tr height='50px' >
+	<td style='text-align:left' colspan='8'>
+	<input type="checkbox" id="id_all[]" name="id_all[]" onclick="selectAlls();" />
+	<?php if($status ==2){ ?>
+	<button onclick="batch_pass()">批量通过</button>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<button onclick="undercarriage_arr()">批量驳回</button>
+	<?php }else{ ?>
+	<button onclick="del_arr()">批量删除</button>
+	<?php } ?>
+	</td>
+  </tr>	
+</table>
+</body>
+</html>
+<script>
+//删除
+function del(id){
+	if(id){
+		tb_show('删除','/index.php/Sj/Onlinegame/del_new_server?type=1&from=expired&id='+id+'&height=300&width=400',false);
+	}
+}
+//批量删除
+function del_arr() {
+	id_str = Selected_check();
+	if(id_str){
+		del(id_str);
+	}
+}
+
+//通过
+function pass_newserver(id) {
+	if(confirm('确定通过审核吗？')) {
+		$.ajax({
+			url: '__URL__/pass_new_server',
+			data: 'id='+id,
+			type: 'post',
+			dataType: 'json',
+			success: function(ret) {
+				if(ret['status'] == 0){
+					alert(ret['info']);
+					return false;
+				}
+				if(ret['code']==0) {	//失败
+					alert(ret['msg']);
+					location.reload();//加载页面
+					return false;
+				} else if(ret['code']==1) {	//成功
+					//变灰不可点击处理
+					gray_processing(ret['msg']);
+				}
+			}
+		});
+	}
+}
+//批量通过
+function batch_pass() {
+	id_str = Selected_check();
+	if(id_str){
+		pass_newserver(id_str);
+	}
+}
+</script>
+<include file="./new_server_public"/>

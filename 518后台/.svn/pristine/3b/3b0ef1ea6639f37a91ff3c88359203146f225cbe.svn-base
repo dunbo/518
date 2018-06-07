@@ -1,0 +1,92 @@
+<include file="../../Public/new_header" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<div class="main" >
+    <div class="content">
+        <div class="search_box" style="margin-top:10px;height: 37px">
+            <form method="get" action="__URL__/extend_game_position">
+                <table cellspacing="0" cellpadding="0" width="99%" class="search_table">
+                    <tbody>
+                    <tr>
+                        <td >选择频道
+                            <select name="position"  id="position" class="search_item_text">
+                                <option value="1" <if condition="$position eq '1'">selected ="selected"</if>>热门</option>
+                                <option value="2" <if condition="$position eq '2'">selected ="selected"</if>>吸金</option>
+                                <option value="3" <if condition="$position eq '3'">selected ="selected"</if>>最新</option>
+                                <option value="4" <if condition="$position eq '4'">selected ="selected"</if>>所有</option>
+                            </select>
+                        </td>
+                        <td >游戏名称
+                            <input type="text" style="width:140px" name="softname" id="softname" value="{$softname}" class="search_item_text">
+                        </td>
+                        <td >游戏包名
+                            <input type="text" style="width:140px" name="package" id="package" value="{$package}" class="search_item_text">
+                        </td>
+                        <td>
+                            <input type="submit" onclick="" value="查询" style="float:left; height:30px;" class="search_btn">
+                        </td>
+                    </tr>
+
+                    </tbody></table>
+                <input type="hidden" value="5580cb87fc83ace494fd9e28f5eecfa7" name="__hash__"></form>
+        </div>
+        <div style="float:left;margin-top:10px;margin-left:5px">
+            <a href='javascript:void(0);' onclick="add_pro()" style="float:left;" title="添加产品" class="thickbox search_btn" id="add">添加产品</a>
+        </div>
+        <div style="margin-top:50px;width:auto;overflow:visible;">
+            <table class="table_list" >
+                <th width="2%">排序</th><th width="15%">游戏名称</th><th width="20%">游戏包名</th><th width="10%">游戏类型</th><th width="15%">更新时间</th><th width="15%">上架时间</th><th width="8%">游戏大小</th><th width="10%">版本号</th><th width="8%">操作</th>
+                <volist name="res" id="vo">
+                    <tr>
+                        <td ><input type="text" name="rank" value="{$vo.rank}" onblur="edit_rank(this,{$vo.id},{$vo.rank})" style="width:50px"></td>
+                        <td>{$vo.softname}</td>
+                        <td>{$vo.package}</td>
+                        <td>{$vo.p_leixing}</td>
+                        <td><if condition="$pass_info[$vo['package']]['review_tm']">{$pass_info[$vo['package']]['review_tm']|date="Y-m-d H:i:s",###}</if></td>
+                        <td><if condition="$extend_game[$vo['package']]['add_tm']">{$extend_game[$vo['package']]['add_tm']|date="Y-m-d H:i:s",###}</if></td>
+                        <td>{$file_info[$vo['package']]['filesize']}</td>
+                        <td>{$pass_info[$vo['package']]['version']}/{$pass_info[$vo['package']]['version_code']}</td>
+                        <td><a href="__URL__/del_game?id={$vo.id}">删除</a></td>
+                    </tr>
+                </volist>
+
+            </table>
+        </div>
+        <div>
+            {$page}
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function add_pro(){
+        var position = $("#position").val();
+        $("#add").attr("href","__URL__/related_game?position="+position+"&width=800&from=position");
+    }
+
+    function edit_rank(target,id,now_rank){
+        var rank = $(target).val();
+        if(rank!=now_rank){
+            var url = "__URL__/edit_extend_position_rank?id=" + id + "&rank=" + rank;
+            var position = $("#position").val();
+            var softname = $("#softname").val();
+            var package = $("#package").val();
+            var jumpUrl = "__URL__/extend_game_position?position="+position+"&softname="+softname+"&package="+package;
+            $.ajax({
+                type: "GET",
+                url: url,
+                dataType:"json",
+                success: function(data) {
+                    if(data.code!=1){
+                        alert(data.msg);
+                    }else{
+                        window.location.href = jumpUrl;
+                    }
+                }
+            });
+        }
+
+    }
+</script>

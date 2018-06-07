@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js?1'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style>
+.search_table{
+	border:solid 2px #D1D1D1;
+}
+.search_table td{
+	border:none !important;
+}
+.search_table input[type=text]{
+	height:20px;
+}
+.txt-left{
+	text-align: left !important;
+}
+</style>
+</head>
+<body>
+	<FORM method="POST" action="/index.php/Sj/Sign/award_record" id='search_forum'>
+		<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list search_table">
+			<thead>
+			<tr>
+				<td width="10%"></td>
+				<td width="40%"></td>
+				<td width="5%"></td>
+			</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						&nbsp;&nbsp;&nbsp;用户名：<input type="text" name="username" value="{$username}" />
+					</td>
+					<td class="txt-left">
+						&nbsp;&nbsp;&nbsp;手机号：<input type="text" name="phone" value="{$phone}" />
+					</td>
+					<td>
+						<input type="button" onclick="exportUrl('')" value="搜索" style="width:100px;" />
+					</td>
+				</tr>
+				<tr>
+					<td>
+						奖品名称：<input type="text" name="prizename" value="{$prizename}"/>
+					</td>
+					<td class="txt-left">
+						奖品类型：
+						<select type="text" name="type">
+							<option value="0">全部</option>
+							<option <?php echo $type==1?'selected':'' ?> value="1">实物奖</option> 
+							<option <?php echo $type==2?'selected':'' ?> value="2">充值卡</option> 
+							<option <?php echo $type==3?'selected':'' ?> value="3">礼券</option> 
+							<option <?php echo $type==4?'selected':'' ?> value="4">礼包</option> 
+							<option <?php echo $type==5?'selected':'' ?> value="5">礼包（直接发放）</option> 
+							<!-- <option <?php echo $type==6?'selected':'' ?> value="6">谢谢参与</option>  -->
+						</select>
+					</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td  class="txt-left">
+						&nbsp;&nbsp;&nbsp;&nbsp;发奖状态：
+						<select type="text" name="is_pub">
+							<option value="-1">请选择</option>
+							<option <?php echo $is_pub==0?'selected':'' ?> value="0">待发奖</option> 
+							<option <?php echo $is_pub==1?'selected':'' ?> value="1">已发奖</option>
+							<option <?php echo $is_pub==2?'selected':'' ?> value="2">已过期</option> 
+						</select>
+					</td>
+					<td class="txt-left">
+						中奖时间：
+								<input id="start_at2" name="start_time"
+								style="width: 130px;" value="<?php echo $start_time?$start_time:''?>"
+								size="15" type="text"><img src="/Public/js/calendar.gif"
+								class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+								style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+						至
+								<input id="end_at2" name="end_time"
+								style="width: 130px;" value="<?php echo $end_time?$end_time:''?>"
+								size="15" type="text"><img src="/Public/js/calendar.gif"
+								class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+								style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+					</td>
+					<td></td>
+				</tr>
+			</tbody>
+		</table>
+	</FORM>
+		<div style="width:100%;margin:auto;overflow:hidden;">
+			<div style="width:50%;float: left;">
+				<input type="button" onclick="pub_award()" value="发奖" style="width:100px;margin-left:10px"/>
+			</div>
+			<div style="width:50%;float: left;text-align:right;">
+				<input type="button" onclick="exportUrl('/batch_export/1/', 1)" value="导出选中" style="display:inline;width:100px;" />
+				<input type="button" onclick="exportUrl('/export/1/')" value="导出全部" style="display:inline;width:100px;margin-right:10px"/>
+			</div>
+		</div>
+		
+       <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+	        <thead >
+				<tr>
+					<th width="5%"><input type="checkbox" name="soft_allSelect" onclick="$('input[name^=ids]').attr('checked', $(this).attr('checked')=='checked')" />序号</th>
+					<th width="10%">IMEI及IP</th>
+					<th width="10%">用户名</th>
+					<th width="10%">奖品名称</th>
+					<th width="5%">奖品类型</th>
+					<th width="10%">个人信息</th>
+					<th width="10%">中奖时间</th>
+					<th width="5%">发奖状态</th>
+					<th width="10%">发奖时间</th>
+					<th width="10%">备注</th>
+				</tr>
+	        </thead>
+            <tbody>
+				<?php foreach($list as $key => $val){ ?>
+				<tr>
+					
+					<td>
+						<input name="ids[]" value="<?php echo $val['id'] ?>" type="checkbox" alt="del"/>
+						{$key+1}
+					</td>
+					<td>
+						IMEI:{$val.imei}<br/>
+						IP:{$val.ip}
+					</td>
+					<td>{$val.username}</td>
+					<td>{$val.prizename}</td>
+					<td>
+						<if condition="$val['type'] eq 1">
+						实物奖
+						<elseif condition="$val['type'] eq 2"/>
+						充值卡
+						<elseif condition="$val['type'] eq 3"/>
+						礼券
+						<elseif condition="$val['type'] eq 4"/>
+						礼包
+						<elseif condition="$val['type'] eq 5"/>
+						礼包（直接发放）
+						<elseif condition="$val['type'] eq 6"/>
+						谢谢参与
+						</if>
+					</td>
+					<td>
+						<if condition="$val['type'] eq 1 ">
+							<if condition="$val['contact_name'] || $val['contact_phone'] || $val['address']">
+								姓名:{$val.contact_name}<br/>
+								手机号:{$val.contact_phone}<br/>
+								地址:{$val.address}
+							<else />
+								未填写
+							</if>
+						<elseif condition="$val['type'] eq 2"/>
+							<if condition="$val['phone']">
+								手机号:{$val.phone}<br/>
+							<else />
+								未填写
+							</if>
+						<else />
+						————
+						</if>
+					</td>
+					<td><?php echo $val['create_tm']?date('Y-m-d H:i:s', $val['create_tm']):'' ?></td>
+					<td>
+						<if condition="$val.is_pub eq 0">
+							待发奖
+						<elseif condition="$val.is_pub eq 1" />
+							已发奖
+						<elseif condition="$val.is_pub eq 2" />
+							已过期
+						</if>
+					</td>
+					<td><?php echo $val['pub_tm']?date('Y-m-d H:i:s', $val['pub_tm']):'' ?></td>
+					<td>
+						<a class="thickbox" href="/index.php/Sj/Sign/award_record_remark/id/{$val.id}/" style="color:blue">修改</a>
+					</td>
+				</tr>
+				<?php } ?>
+           </tbody>
+         </table>
+         
+<div style="width:92%; padding-top:4px; text-align:right">
+ {$page}
+</div>
+ </body>
+ <script>
+ function pub_award(){
+	 if(!confirm("是否修改为已发奖？"))
+	 {
+		return false;
+	 }
+	var chks=$("input[alt='del']:checked");
+	var ids = new Array();
+	var i=0;
+	$(chks).each(function(){
+		ids.push(this.value);
+		i++;
+	});
+	if(i==0) {
+		alert('请选择要发奖的奖品');
+		return;
+	}
+     var url = "__URL__/award_record_operation";
+     $.ajax({
+         type: "POST",
+         url: url,
+         data:{ids:ids},
+         success: function(data) {
+             var data = eval("("+data+")");
+             if(data['code']==1){
+                 alert(data['msg']);
+                 window.location.href = "__URL__/award_record";
+             }else{ 
+                  alert(data['msg']);
+             }
+         }
+     });
+ }
+ 
+ function checkAll(obj)
+ {
+     var flag = $(obj).attr('checked') == 'checked';
+     $('input[name^=id_]').attr('checked', flag);
+ }
+ 
+ 
+ 
+ function exportUrl(b,c)
+ {
+ 	if(c) {
+ 		var chks=$("input[alt='del']:checked");
+ 		var ids="";
+ 		var i=0;
+ 		$(chks).each(function(){
+ 			ids+=','+this.value;
+ 			i++;
+ 		});
+ 		var biaoshi=0;
+ 		if(i==0) {
+ 			alert('请选择要批量导出的报表');
+ 			return;
+ 		}
+ 		b += "batch_id/"+ids; 
+ 	}
+ 	var obj   = $("#search_forum");
+ 	var  url  = obj.attr('action');
+ 	var epUrl =  url+b;
+ 	obj.attr('action', epUrl);
+ 	obj.submit();
+ 	obj.attr('action', url);
+ }
+ 
+ </script>
+ 
+</html>

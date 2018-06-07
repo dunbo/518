@@ -1,0 +1,184 @@
+<style type="text/css">
+
+.title {
+	font-weight: bold;
+}
+</style>
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<div class="main" >
+  <div class="content">
+        <table width="600" cellspacing="20">
+			<tr>
+				<td class="title">游戏测试不通过邮件抄送人 </td>
+				<td class="title"><a class="thickbox search_btn" title="添加邮件" style="float:left;" href="/index.php/Sendnum/SdkChannel/SdkConfigure_email?width=800&type=reject">添加邮件</a></td>
+			</tr>
+			<tr>
+				<td colspan="2">
+            	<span id="select_text">
+                	<php>
+						foreach($SdkConfigure[3]['configcontent'] as $k => $v){
+						if($v){
+					</php>
+                    		<php>echo $v</php>  <a onclick="del_email('<php>echo $v</php>','reject')" href="javascript:;"><img src="/Public/images/delete_icon.png"></a>&nbsp;&nbsp;
+                    <php>
+						}
+						}
+					</php>
+          		</span>
+				</td>
+			</tr>
+          <tr>
+            <td class="title">游戏测试邮件通用抄送人 </td>
+            <td class="title"><a class="thickbox search_btn" title="添加邮件" style="float:left;" href="/index.php/Sendnum/SdkChannel/SdkConfigure_email?width=800">添加邮件</a></td>
+          </tr>
+          <tr>
+            <td colspan="2">
+            	<span id="select_text">
+                	<php>
+                    	foreach($SdkConfigure[0]['configcontent'] as $k => $v){
+                        	if($v){
+                    </php>
+                    		<php>echo $v</php>  <a onclick="del_email('<php>echo $v</php>')" href="javascript:;"><img src="/Public/images/delete_icon.png"></a>&nbsp;&nbsp;
+                    <php>   	
+                           	}
+                        }
+                    </php>      
+          		</span>
+          	</td>
+          </tr>
+          <tr>
+            <td colspan="2" class="title">邮件发送时间&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          </tr>
+          <tr>
+            <td>
+              <label for="email_time"></label>
+              <input id="email_time" value="<php>echo $SdkConfigure[1]['configcontent']</php>" class="Wdate" type="text" onClick="WdatePicker({dateFmt:'HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value="" name="email_time">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="title">&nbsp;</span></td>
+            <td><span id="edit" class="title" ><a class="search_btn" title="编辑 " onclick="bj1()" href="javascript:;">编辑</a></span>
+            	<span id="edit_do" class="title" style="float:left"><a class="search_btn" title="编辑 " onclick="edit_times()" href="javascript:;">保存</a></span>
+                <span id="edit_no" class="title" style="float:left; margin-left:5px;"><a class="search_btn" title="编辑 "  href="/index.php/Sendnum/SdkChannel/SdkConfigure">取消</a></span>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2"><span class="title">更新测试随机概率控制</span></td>
+          </tr>
+          <tr>
+            <td><input name="probability" type="text"  id="probability" value="<php>echo $SdkConfigure[2]['configcontent']</php>" />
+              %
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="title">&nbsp;</span></td>
+            <td>
+            	<span id="edit1" class="title" ><a class="search_btn" title="编辑 " onclick="bj2()" href="javascript:;">编辑</a></span>
+            	<span id="edit_do1" class="title" style="float:left"><a class="search_btn" title="编辑 " onclick="edit_probability()" href="javascript:;">保存</a></span>
+                <span id="edit_no1" class="title" style="float:left; margin-left:5px;"><a class="search_btn" title="编辑 " href="/index.php/Sendnum/SdkChannel/SdkConfigure">取消</a></span>
+            </td>
+          </tr>
+        </table>
+<script>
+$(function(){
+	$("#edit_do").hide();
+	$("#edit_no").hide();	
+	
+	$("#edit_do1").hide();
+	$("#edit_no1").hide();
+	$("#email_time").attr("disabled","disabled");
+	$("#probability").attr("disabled","disabled");
+});
+function bj1(){
+	$("#edit").hide();
+	$("#edit_do").show();
+	$("#edit_no").show();	
+	$("#email_time").removeAttr("disabled");
+}
+function bj2(){
+	$("#edit1").hide();
+	$("#edit_do1").show();
+	$("#edit_no1").show();	
+	$("#probability").removeAttr("disabled");
+}
+
+function qx1(){
+	$("#edit").show();
+	$("#edit_do").hide();
+	$("#edit_no").hide();	
+}
+function qx2(){
+	$("#edit1").show();
+	$("#edit_do1").hide();
+	$("#edit_no1").hide();	
+}
+function del_email(email,type){
+	$.post(
+		'__URL__/del_email',
+		{email:email,type:type},
+		function(data){
+			alert(data.msg);
+			$("#select_text").html(data.arr);
+			window.location.reload();
+		},'json'
+	)
+	
+}
+function edit_times(){
+		email_time = $("#email_time").val();
+		if(!$("#email_time").val())
+		{
+			alert('邮件发送时间不能为空');
+			$("#email_time").focus();
+			return false;
+		}
+		$.post(
+		   "__URL__/edit_times", 
+		   { email_time: email_time },
+		   function(data){
+			 if(data == 1){
+			 	alert("修改成功");
+				window.location.href = '/index.php/Sendnum/SdkChannel/SdkConfigure';
+			 }else if(data == 2){
+			 	alert("没有修改");
+			 }
+		   },'json'
+		);
+}
+function edit_probability(){
+		probability = $("#probability").val();
+		if($("#probability").val().indexOf(".") > 0 )
+		{
+			alert('更新测试随机概率控制只能整数');
+			$("#probability").focus();
+			return false;
+		}
+		if(isNaN($("#probability").val())){
+			alert("更新测试随机概率控制只能整数");
+			$("#probability").focus();
+            return false;
+		}
+		if(!($("#probability").val()<=100 && $("#probability").val()>=0)){
+			alert("更新测试随机概率控制只能在0~100之间");
+			$("#probability").focus();
+			return false;
+		}
+		$.post(
+		   "__URL__/edit_probability", 
+		   { probability: probability },
+		   function(data){
+			 if(data == 1){
+			 	alert("修改成功");
+				window.location.href = '/index.php/Sendnum/SdkChannel/SdkConfigure';
+			 }else if(data == 2){
+			 	alert("没有修改");
+			 }
+		   },'json'
+		);
+}
+</script>
+  </div>
+</div>
+

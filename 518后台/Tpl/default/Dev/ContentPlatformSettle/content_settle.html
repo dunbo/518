@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+{//时间插件结束}
+
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<if condition="$month">
+	<div style="font-weight: bold;font-size: 15px;margin: 10px">
+		月份：{$month}<br>
+		用户名：{$username}
+	</div>
+</if>
+<if condition="$content_type neq 3">
+<table style='margin-top:10px;float:left;width:100%' cellspacing="0" cellpadding="0" class="search_table">
+	<tbody>
+	<form method='get' action="" >
+		<tr>
+			<if condition="!$month">
+			<td>发布时间：
+				<span><input type="text" name="begintime" id="begintime" value="{$begintime}" style="cursor: hand; width: 150px;" class="Wdate" onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",dateFmt:"yyyy-MM-dd HH:mm:ss"})' /></span>	~
+			<span><input id="endtime" name="endtime" style="cursor: hand; width: 150px;"
+						 value="{$endtime}" size="15" type="text" class="Wdate" onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",dateFmt:"yyyy-MM-dd HH:mm:ss"})' /></span>
+			</td>
+			<td>用户：
+				<input type="text" name="username" id="username" value="{$username}">
+			</td>
+			<td>标题：
+				<input type="text" name="title" id="title" value="{$title}">
+			</td>
+			</if>
+			<td>结算系数：
+				<select name="parm_status" id="parm_status">
+					<option value="">全部</option>
+					<option value="0" <if condition="$parm_status eq '0'">selected</if>>未配置</option>
+					<option value="1" <if condition="$parm_status eq '1'">selected</if>>已配置</option>
+				</select>
+			</td>
+			<td>内容类型：
+				<select name="type" id="type">
+					<option value="1" <if condition="$type eq 1">selected</if>>文章</option>
+					<option value="2" <if condition="$type eq 2">selected</if>>视频</option>
+				</select>
+			</td>
+			<td align='right'><input type="submit" class="search_btn" value="确定"></td>
+		</tr>
+	</form>
+	 </tbody>
+</table>
+<div style="clear: both"></div>
+</if>
+<table style='float:left;width:100%' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th>发布时间</th>
+			<th>用户</th>
+			<th>图片</th>
+			<th>标题</th>
+			<th>类型</th>
+			<th>预览</th>
+			<th>配置系数</th>
+			<th>结算金额</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='list' id='vo'>
+		<tr>
+			<td>
+				{$vo['pass_tm']|date='Y-m-d H:i',###}
+			</td>
+			<td>{$users[$vo['user_id']]['username']}</td>
+			<td>
+				<img src='
+				<if condition="$vo.type eq 1">
+				{$content[$vo['content_id']]['pic']}
+				<else />
+				{$video[$vo['content_id']]['pic']}
+				</if>' height=100 width=200>
+
+			</td>
+			<td><if condition="$vo.type eq 1">{$content[$vo['content_id']]['title']}<else />{$video[$vo['content_id']]['video_title']}</if></td>
+			<td>
+				<if condition="$vo.type eq 1">文章<else />视频</if>
+			</td>
+			<td>
+				<if condition="$vo.type eq 1">
+					<a href="/index.php/Sj/ContentExplicit/preview_content_explicit/id/{$vo.content_id}" target="_blank">查看</a>
+					<else />
+					<a href="/index.php/Dev/VideoManage/video_edit?id={$vo.content_id}&show_video=1&width=540&height=420" class="thickbox">查看</a>
+				</if>
+			</td>
+			<td style="text-align: left">
+				<if condition="$vo.parm_status eq 1">
+					基础价值：{$param[$vo['month']]['value'][1][$config[$vo['type']][$vo['content_id']]['value'][1]]['name']}<br>
+					手动加权：{$param[$vo['month']]['value'][2][$config[$vo['type']][$vo['content_id']]['value'][2]]['name']}<br>
+					额外奖励：
+					<?php foreach($config[$vo['type']][$vo['content_id']]['value'][4] as $k=>$v): ?>
+					{$param[$vo['month']]['value'][4][$v]['name']}
+					<?php endforeach; ?>
+				</if>
+			</td>
+			<td>{$settle_arr[$vo['id']]}
+				<if condition="$settle_arr[$vo['id']] neq 0">
+					<br><a href="__URL__/settle_moreinfo/content_id/{$vo.id}/type/{$vo.type}">查看详情</a>
+				</if>
+			</td>
+			<td>
+				<if condition="$param[$vo['month']]['complete_status'] neq 1">
+					<a href="/index.php/Dev/ContentPlatformSettle/edit_param/id/{$param[$vo['month']]['id']}">系数补全</a>
+				<else />
+					<if condition="$vo.parm_status neq 1">
+						<a href="__URL__/grade_content/id/{$vo.id}<if condition='$month'>/month/{$month}</if><if condition='$username'>/username/{$username}</if>">配置系数</a>
+						<else />
+						--
+					</if>
+				</if>
+
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='12'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+</html>
+<script>
+	function pass(id){
+		if(confirm("确认通过审核？")){
+			$.ajax({
+				url: '__URL__/compensation',
+				type: 'post',
+				data: {id:id,type:2},
+				dataType: 'json',
+				success: function(ret) {
+					if(ret.code == 200){
+						alert('通过成功');
+						window.location.reload();
+					}else{
+						alert('通过失败');
+					}
+				}
+			});
+		}
+	}
+</script>

@@ -1,0 +1,213 @@
+<include file="../../Public/header"  />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<style>
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+<body>
+    <div class="search_box">
+        <form method="get" action="__URL__/index" >
+            <table width="100%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="15%">
+                        <label>活动期号：</label>
+						<select name="issue" id="issue">
+						<option value="" >请选择</option>
+						<volist name="issue_config" id="vo">
+							<option value="{$vo.id}" <?php if($vo['id']==$issue){echo "selected=''selected";}?>>{$vo.id}</option>
+						</volist>
+						</select>
+                    </td>				
+                    <td width="15%">
+                        <label>用户uid：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="uid" id="uid" value="{$uid}"/>
+                    </td>
+                    <td width="15%">
+                        <label>发奖状态：</label>
+						<select name="is_send" id="is_send">
+							<option value="" >请选择</option>
+							<option value="0" <?php if(isset($is_send) && $is_send==0){echo "selected=''selected";}?>>未发奖</option>
+							<option value="1" <?php if($is_send==1){echo "selected=''selected";}?>>已发奖</option>
+							<option value="2" <?php if($is_send==2){echo "selected=''selected";}?>>指定发奖</option>
+						</select>						
+                    </td>
+                    <td width="10%">	
+						<a href='javascript:void(0);' onclick="open_award();" class="search_btn">开奖</a>
+					</td>			
+                    <td width="10%">
+						<!-- <a href='__URL__/pub_send_task' class="search_btn">发奖</a> -->
+						<a onclick="export_data2(1,'');" href='javascript:void(0);' class="search_btn">导出</a>
+					</td>						
+                    <td width="10%" rowspan="2" >
+						<input type="submit" value="搜索" class="search_btn" style="line-height:20px;"/>
+					</td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>中奖类型：</label>
+						<select name="prizelevel" id="prizelevel">
+						<option value="" >请选择</option>
+						<?php foreach($prizelevel_config as $k => $vo){ ?>
+							<option value="<?php echo $k; ?>" <?php if(isset($prizelevel) && $k==$prizelevel){echo "selected=''selected";}?>>{$vo}</option>
+						<?php } ?>
+						</select>
+                    </td>					
+                    <td width="20%">
+                       <label>购买时间：</label>
+                       <input type="text" style="width:150px;" class="search_item_text" name="startDate" value="{$startDate}" id="startDate"placeholder="格式:2018-01-01"/><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"startDate",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;vertical-align:middle;line-height:30px;"/>
+					   至</td>
+					<td width="15%">
+                        <input type="text" style="width:150px;" class="search_item_text" name="endDate" value="{$endDate}" id="endDate" placeholder="格式:2018-02-07"/><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"endDate",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;vertical-align:middle;line-height:30px;"/>
+                    </td>				
+                    <td width="10%">	
+						<a href='javascript:void(0);' onclick="con_user_award();" class="search_btn">配置中奖</a>
+					</td>
+                    <td width="10%">
+						<a href='javascript:void(0);' onclick="injection_azb();" class="search_btn">添加安智币</a>
+					</td>			
+                </tr>
+				
+            </table>
+        </form>
+		<table width="99%" cellpadding="0" cellspacing="0" >
+			<tr>
+				<td colspan="10" style="text-align:left;padding:17px;">
+				奖池剩余安智币：{$res_azb} &nbsp;&nbsp;&nbsp;分成后剩余安智币:<?php echo $res_azb*0.8; ?>
+				</td>
+			</tr>
+		</table>	
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="5%">序号</th>
+                    <th width="10%">用户id</th>
+                    <th width="5%">活动期号</th>
+					<th width="15%">购买号码</th>
+                    <th width="5%">购买注数</th>
+					<th width="5%">购买时间</th>
+					<th width="10%">开奖号码</th>
+					<th width="5%">中奖类型</th>
+					<th width="5%">中奖礼券金额（元）</th>
+					<th width="5%">开奖时间</th>
+					<th width="5%">发奖状态</th>
+					<th width="5%">发奖时间</th>
+                    <th width="12%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="vo">
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.uid}</td>
+                    <td>{$vo.issue}</td>
+                    <td>{$vo.red_num}{$vo.blue_num}</td>
+                    <td>{$vo.buynumber}</td>
+                    <td>
+						<div style="width:70px;">
+						<?php echo date("Y-m-d H:i:s",$vo['add_time'])?>
+						</div>
+					</td>
+                    <td><?php echo $kai_num[$vo['issue']]['kai_number'] ? $kai_num[$vo['issue']]['kai_number'] : ''; ?></td>
+                    
+                    <td><?php echo $prizelevel_config[$vo['prizelevel']]; ?></td>
+                    <td>{$vo.prizenum}</td>
+                    <td>
+						<div style="width:70px;">
+						<?php echo $kai_num[$vo['issue']]['kai_time'] ? date("Y-m-d H:i:s",$kai_num[$vo['issue']]['kai_time']) : ''; ?>
+						</div>
+					</td>
+                    <td>
+						<?php 
+							if($vo['admin_id']){
+								echo '指定发奖';
+							}else{
+								echo $vo['is_send'] == 1 ? "已发奖" : "未发奖"; 
+							}
+						?>
+					</td>
+                    <td>
+						<div style="width:70px;">
+						<?php echo $vo['send_time'] ? date("Y-m-d H:i:s",$vo['send_time']) : "---"; ?>
+						</div>					
+					</td>
+                    <td>
+						<?php if($vo['admin_id']){ ?>
+						<button onclick="con_user_award_save({$vo.id});" >配置中奖</button>
+							<?php if(empty($kai_num[$vo['issue']]['kai_number'])){ ?>
+							<span>&nbsp;</span>|<span>&nbsp;</span>
+							<button onClick="del_user_award({$vo.id});" >删除</button>
+							<?php } ?>
+						<?php } ?>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>
+<script>
+function open_award(){
+	var urls ="__URL__/open_award_num?width=500&height=400";
+	tb_show('开奖',urls,"thickbox");
+}
+function con_user_award(){
+	var urls ="__URL__/con_user_award?width=500&height=400";
+	tb_show('配置中奖',urls,"thickbox");
+}
+function con_user_award_save(id){
+	var urls ="__URL__/con_user_award_save?id="+id+"&width=500&height=400";
+	tb_show('配置中奖',urls,"thickbox");
+}
+function injection_azb(){
+	var urls ="__URL__/injection_azb?width=500&height=400";
+	tb_show('配置中奖',urls,"thickbox");
+}
+function del_user_award(id){
+	if(confirm('确定要删除此条记录吗？')){
+		location.href = "__URL__/del_user_award?id="+id;
+	}
+	return false;
+}
+//导出数据
+function export_data2(pp,fid){
+	var exp_sql = "<?php echo $exp_sql; ?>";
+	var total = "<?php echo $total; ?>";
+	//进度条显示开始
+	popup('await');
+//	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+	$.ajax({
+		url: "__URL__/export_data",
+		data: 'total='+total+'&exp_sql='+exp_sql+"&pp="+pp+"&fid="+fid,
+		type: 'post',
+		dataType: 'json',
+		success : function(res){
+			console.log(res);
+			if(res.status == 0){
+				alert(res.info);
+				return false;
+			}
+			if (res.type == 'pager') {
+				//console.log(res.type);
+				//console.log(res.url);
+				//进行下一页请求
+				return export_data2(res.pp,res.fid);
+			}else if (res.type == 'file') {
+				//完成以后关闭进度条显示
+				popclose('await');
+				//进行文件下载
+				location.href = res.url;
+			}
+		}
+	});
+}
+</script>
+<include file="../../Caiji/Collection/export_data" />

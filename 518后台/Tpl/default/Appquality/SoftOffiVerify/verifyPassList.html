@@ -1,0 +1,67 @@
+<include file="./common_header" />
+	<script>
+		$(function() {
+			$("[act='verifyrestore']").click(function() {
+				var url;
+				if ($(this).attr('sign') == 'single') {
+					var softid = $(this).parent().attr("softid");
+					if (confirm("是否撤销官方认证标识？\n撤销后该记录将返回至待审核列表")) {
+						url = "__URL__/verifyRestore/softid/" + softid
+						ajaxGet(url, softid);
+					}
+				} else if ($(this).attr('sign') == 'multiple') {
+					var restoreid;
+					if (!(restoreid = checkbox())) {
+						alert('请选择要操作的对象');
+					} else {
+						if (confirm("是否撤销官方认证标识？\n撤销后该记录将返回至待审核列表")) {
+							url = "__URL__/verifyAction/actType/restore/app/" + restoreid;
+							ajaxGet(url, restoreid);
+						}
+					}
+				}
+			});
+		});
+	</script>
+	<form id="verifyAction" action="__URL__/verifyAction" method="POST">
+	<input type="hidden" id="actType" name="actType"/>
+	<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+		<thead>
+			<tr>
+				<th width="4%"><input ajaxSign="ajaxClear" type="checkbox" class="checkAll" /></th>
+				<th width="8%">软件id</th>
+				<th width="22%">软件信息</th>
+				<th width="16%">开发者</th>
+				<th width="10%"><a val="{$Val}" id="downloadOrder" href="javascript:void();">下载量</a></th>
+				<th width="10%">软件状态</th>
+				<th width="10%"><a val="{$Val}" id="updatetmOrder" href="javascript:void();">通过时间</a></th>
+				<th width="10%">来源详情</th>
+				<th width="10%">操作</th>
+			</tr>
+		</thead>
+			<tbody>
+			<?php foreach($verifyPassData as $info):?>
+				<tr line="<?php echo $info['softid'];?>" align="center" height="30px">
+					<td><input ajaxSign="ajaxClear" btn="<?php echo $info['softid'];?>" name="app[]" value="<?php echo $info['softid'];?>" type="checkbox" /></td>
+					<td class="iconimg">
+						<a href="__URL__/verifyPassList/searchMainStr/{$info.softid}/searchMainType/3">
+							<?php echo $info['softid_reset'];?></a></td>
+					<td class="left"><?php echo $info['softinfo_reset'];?></td>
+					<td class="left"><?php echo $info['developer_reset'];?></td>
+					<td><?php echo $info['download_reset'];?></td>
+					<td><?php echo $info['hide_reset'];?></td>
+					<td><?php echo str_replace(' ', '<br/>', $info['updatetm_reset']);?></td>
+					<td><?php echo $info['offidesc_reset'];?></td>
+					<td softid="<?php echo $info['softid'];?>">
+						<input btn="<?php echo $info['softid'];?>" sign="single" act="verifyrestore" value="撤销" type="button" class="verify" />
+					</td>
+				</tr>
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+	<div style="margin-top:10px; margin-bottom:10px; text-align:left; padding-left:20px;">
+		<input ajaxSign="ajaxClear" class="checkAll" type="checkbox" />
+		<input act="verifyrestore" sign="multiple" value="撤销" type="button" />
+	</div>
+	</form>
+<include file="./common_footer" />

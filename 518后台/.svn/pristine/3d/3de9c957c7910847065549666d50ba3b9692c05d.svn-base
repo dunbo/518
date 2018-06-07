@@ -1,0 +1,414 @@
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<style type="text/css">
+.white_content{display:none;position:absolute;top:50%;left:25%;width:50%;padding:16px;background-color:#FBFBFC;z-index:1002;border:2px solid #9DA0A0;overflow:auto;word-wrap:break-word}.white_content p{height:20px;margin:0;border-bottom:1px solid #9DA0A0;}.white_content a{float:right;text-decoration:none}.white_content .content{margin-top:5px;min-height: 150px;} .white_content .opertion{text-align:center;} .white_content .opertion input{width:60px;height:30px}                   
+</style>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/cn_area.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+<script>
+	jQuery(function(){
+		// 推荐内容值
+		var content_arr = Array();
+		content_arr['content_type'] = "{$custom_list.content_type}";
+		if (content_arr['content_type'] == 1) {
+			content_arr['package'] = "{$custom_list.package}";
+			content_arr['uninstall_setting'] = "{$custom_list.uninstall_setting}";
+			content_arr['install_setting'] = "{$custom_list.install_setting}";
+			if (content_arr['install_setting'] == 4) {
+				content_arr['start_to_page'] = "{$custom_list.start_to_page}";
+			}
+			content_arr['lowversion_setting'] = "{$custom_list.lowversion_setting}";
+			content_arr['function_from'] = "custom_push";
+		} else if (content_arr['content_type'] == 2) {
+			content_arr['activity_id'] = "{$custom_list.activity_id}";
+		} else if (content_arr['content_type'] == 3) {
+			content_arr['feature_id'] = "{$custom_list.feature_id}";
+		} else if (content_arr['content_type'] == 4) {
+			content_arr['page_type'] = "{$custom_list.page_type}";
+		} else if (content_arr['content_type'] == 5) {
+			content_arr['website'] = "{$custom_list.website}";
+			content_arr['website_open_type'] = "{$custom_list.website_open_type}";
+		} else if (content_arr['content_type'] == 6) {
+			content_arr['gift_id'] = "{$custom_list.gift_id}";
+			content_arr['page_type'] = "{$custom_list.page_type}";
+		} else if (content_arr['content_type'] == 7) {
+			content_arr['strategy_id'] = "{$custom_list.strategy_id}";
+			content_arr['page_type'] = "{$custom_list.page_type}";
+		}
+		// 生成推荐内容展示
+		generate_append_html("content_type_div", content_arr);
+		// 生成推荐链接
+		var function_from="custom_push";
+		href = generate_content_type_href('content_type_div', "{$custom_list.content_type}", content_arr, function_from);
+		$("#content_type_a").attr("href", href);
+
+		var data_push = "csv_url=" + "{$custom_list.csv_url}" + "&csv_count=" + "{$custom_list.csv_count}" + "&cid=" + "{$custom_list.cid}" + "&oid=" + "{$custom_list.oid}" + "&device_did=" + "{$custom_list.device_did}" + "&firmware=" + "{$custom_list.firmware}" + "&abi=" + "{$custom_list.abi}" + "&version_code=" + "{$custom_list.version_code}" + "&push_area=" + "{$custom_list.push_area}"+"&paichu_area=" + "{$custom_list.paichu_area}"+ "&is_upload_csv=" + "{$custom_list.is_upload_csv}";
+		$.ajax({
+			url:'/index.php/Public/showEditPush',
+			type: 'POST',
+			dataType:'html',
+			data:data_push,
+			success: function(data)
+			{
+				$("#choose_div_id").html(data);
+				$("#choose_div_id #push_area").css("display","");
+				$("#choose_div_id #paichu_area").css("display","");
+				$("#choose_div_id #push_abi").css("display","");
+				$("#choose_div_id #abi_div_ver").css("display","none");
+				$("#choose_div_id #abi_div_big").css("display","");
+				$("#choose_div_id #think_page_trace").remove();
+				$("#choose_div_id #think_run_time").remove();
+				tb_init('#choose_div_id a.thickbox');//pass where to apply thickbox
+				imgLoader = new Image();// preload image
+				imgLoader.src = tb_pathToImage;
+			}
+		});
+		//加载的时候 根据推送方式是否显示 推送内容和推送文本
+		var push_type = $("#push_type").val();
+		if(push_type==1)
+		{
+			$("#recommend_content_tr").css('display','');
+			$("#recommend_text_tr").css('display','');
+			$("#push_node_tr").css('display','');
+			$("#pop_show_time_tr").css('display','');
+			$("#my_soft_package_tr").css('display','none');
+			$("#my_soft_name_tr").css('display','none');
+		}
+		else
+		{
+			$("#recommend_content_tr").css('display','none');
+			$("#recommend_text_tr").css('display','none');
+			$("#push_node_tr").css('display','none');
+			$("#pop_show_time_tr").css('display','none');
+			$("#my_soft_package_tr").css('display','');
+			$("#my_soft_name_tr").css('display','');
+		}
+	});
+    
+    function checkLen(obj, maxChars, hint_id) {
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+        $("#" + hint_id).html(obj.value.length + "/" + maxChars);
+    };
+    
+
+    function checkPost() {
+        var soft_package = $("#add_content_form #package").val();
+        if (!soft_package) {
+            alert("监控包名不能为空！");
+            return false;
+        }
+		var jinmo_package = $("#add_content_form #silence_package").val();
+		if (!jinmo_package) {
+			alert("静默包名不能为空！");
+			return false;
+		}
+//        var soft_name = $("#add_content_form #silence_softname").val();
+//        if (!soft_name) {
+//            alert("静默软件名称不能为空！");
+//            return false;
+//        }
+
+        var start_time = $("#add_content_form #fromdate").val();
+        if (!start_time) {
+            alert("开始时间不能为空！");
+            return false;
+        }
+        var end_time = $("#add_content_form #todate").val();
+        if (!end_time) {
+            alert("结束时间不能为空！");
+            return false;
+        }
+        if (start_time > end_time) {
+            alert("开始时间不能大于结束时间！");
+            return false;
+        }
+        var jinmo_packages = jinmo_package.split(",");
+        var enable = true;
+		for (var i=0 ; i< jinmo_packages.length ; i++)
+		{
+			$.ajax({
+				url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+jinmo_packages[i],
+				// url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg+'/start_at/'+start_at+'/end_at/'+end_at,
+				type: 'get',
+				async:false,
+				success: function(data){
+					if(data){
+						if(data==1){
+							alert('开始时间不能大于结束时间');
+							enable=false;
+						}else{
+							if(!confirm(data)){
+								enable=false;
+							}
+						}
+						
+					}
+				}
+			});
+		} 
+		if(!enable){
+			return enable;
+		}
+		return check_area();
+		//return checkRcontent("#add_content_form");
+    }
+	
+function checkit(){
+    var choise = confirm("你确定你的操作吗？");
+    if(!choise){
+    return false;
+    }else{
+     return true;
+    }
+}
+	//监控任意包 V6.2选择安智市场手机助手的时候用
+	function package_check()
+	{
+		var soft_package = $('#my_soft_package').val();
+		$.ajax({
+			url: '/index.php/Public/package_check/soft_package/'+soft_package,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){
+				if(data == 1){
+					alert("该软件包名不存在！");
+				}else{
+					$('#my_soft_name').val(data);
+				}
+			}
+		});
+
+	}
+	//这个函数  在content_type.html中提交所选的内容后加载
+	function show_tr()
+	{
+		var type = $('#content_type').val();
+		if(type ==1)
+		{
+			$('#soft_show_positon').css("display","");
+			$('#soft_show_icon').css("display","");
+		}
+		else
+		{
+			$('#soft_show_positon').css("display","none");
+			$('#soft_show_icon').css("display","none");
+		}
+	}
+	//判断概率
+	function check_odds(obj)
+	{
+		var val = $(obj).val();
+		if(val !== "")
+		{
+			if(val>100 || val <1)
+			{
+				alert("请填写1到100的整数");
+				$(obj).attr("value",'');
+				return false;
+			}
+			var r=/^[0-9]*[1-9][0-9]*$/;
+			if(r.test(val) == false)
+			{
+				alert("请填写1到100的整数");
+				$(obj).attr("value",'');
+				return false;
+			}
+		}
+	}
+	function add_daily_time()
+	{
+		var html = '<div style="display:inline-block;">';
+		html += '<input name="daily_fromtime[]" value="" type="text"> 至 <input name="daily_totime[]" value="" type="text">';
+		html += '<input type="button" value="删除" onclick="del_daily_time(this)" class="act_btn"/>';
+		html += '</div>';
+		$('#daily_time').append(html);
+	}
+	
+	function del_daily_time(obj)
+	{
+		$(obj).parent().remove();
+	}
+	function select_choose_show(val)
+	{
+		if(val==2)
+		{
+			$("#recommend_content_tr").css('display','none');
+			$("#recommend_text_tr").css('display','none');
+			$("#push_node_tr").css('display','none');
+			$("#pop_show_time_tr").css('display','none');
+			$("#my_soft_package_tr").css('display','');
+			$("#my_soft_name_tr").css('display','');
+		}
+		else
+		{
+			$("#recommend_content_tr").css('display','');
+			$("#recommend_text_tr").css('display','');
+			$("#push_node_tr").css('display','');
+			$("#pop_show_time_tr").css('display','');
+			$("#my_soft_package_tr").css('display','none');
+			$("#my_soft_name_tr").css('display','none');
+		}
+	}
+	
+	//检查监控的软件包名是否在当前时间访问内是否有静默下载
+	function checkMonitor(obj) {
+		var id = $("input[name='id']").val();
+			id = id ? id : 0;
+		var start_at = $('#fromdate').val();
+		var end_at   = $(obj).val();
+		//监控
+		var pk = $('#package').val();
+		//静默
+		var sp = $('#silence_package').val();
+		if( !start_at ) {
+			$(obj).val('');
+			alert('请先填写开始时间');
+			return false;
+		}else if( !end_at ) {
+			alert('请填写结束时间');
+			return false;
+		}else if( !pk ) {
+			$(obj).val('');
+			alert('监控软件包名不能为空');
+			return false;
+		}else if( !sp ) {
+			$(obj).val('');
+			alert('静默下载包名不能为空');
+			return false;
+		}
+		
+		$.ajax({
+			url: '__URL__/pub_custom_push_silence_ajax_info/id/'+id+'/package/'+pk+'/start_at/'+start_at+'/end_at/'+end_at,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){
+				if(data['code'] == 1){
+					var str = '';
+					$.each(data['data'],function(k,v){
+						str += "软件包名("+v['package']+")"+'<br/>';
+						str += "已配置在"+v['start_at']+'至'+v['end_at']+"<br/>";
+						str += "静默下载("+v['silence_package']+')'+"<br/><br/>";
+					})
+					str += "确定要同时下载多款软件吗?"+"<br/><br/>";
+					$('#content').empty().append(str);;
+					$('#light').show();
+				}
+			}
+		});
+		
+	}
+	
+	function closeWindow(){
+		document.getElementById('light').style.display='none';
+	  }
+</script>
+<body>
+<br />
+<div style="margin-top:10px;margin-left:20px;">
+<h3><?php if($custom_list['id']){echo '编辑';}else{echo '添加';}?>监控软件</h3>
+<BR />
+<form id="add_content_form" action ="__URL__/custom_push_silence_save"  method="post" onsubmit="return checkPost()" enctype="multipart/form-data">
+<span>定制推送内容</span>
+<table width="700" height="30" border="1" style="margin:10px 0px;">
+<tr>
+	<td><font style="color:red;">*</font>监控软件包名:</td>
+	<td>
+
+		<textarea cols ='80' rows="10" name="package" id="package">{$custom_list.package}</textarea>
+		<input type="hidden" name="id" value="{$custom_list.id}" />
+		<input type="hidden" name="pid" value="{$pid}" />
+	</td>
+</tr>
+<tr>
+	<td><font style="color:red;">*</font>静默下载包名:</td>
+	<td><textarea cols ='80' rows="10" name="silence_package" id="silence_package">{$custom_list.silence_package}</textarea></td>
+</tr>
+<!--<tr>-->
+	<!--<td><font style="color:red;">*</font>静默下载软件名称:</td>-->
+	<!--<td><input name="silence_softname" type="text" id="silence_softname" value="{$custom_list.silence_softname}"/></td>-->
+<!--</tr>-->
+
+</table>
+<span>定制推送设置</span>
+<table width="700" height="30" border="1" style="margin:10px 0px;">
+<tr>
+	<td>非ROOT用户：</td>
+	<td align="left" width="200">
+		<input type="radio" name="no_root" value="1" <?php if($custom_list['no_root'] == 1 || !$custom_list['no_root']){ ?>checked<?php } ?> />不下载&nbsp;&nbsp;<input type="radio" name="no_root" value="2"  <?php if($custom_list['no_root'] == 2){ ?>checked<?php } ?> />下载&nbsp;&nbsp;
+	</td>
+</tr>
+<tr>
+	<td>ROOT用户：</td>
+	<td align="left" width="200">
+		<input type="radio" name="root" value="1" <?php if($custom_list['root'] == 1){ ?>checked<?php } ?> />下载&nbsp;&nbsp;<input type="radio" name="root" value="2"  <?php if($custom_list['root'] == 2 || !$custom_list['root']){ ?>checked<?php } ?> />安装&nbsp;&nbsp;
+	</td>
+</tr>
+<tr>
+	<td>非ROOT用户下载方式：</td>
+	<td align="left" width="200">
+		<input type="radio" name="no_root_down" value="1" <?php if($custom_list['no_root_down'] == 1 || !$custom_list['no_root_down']){ ?>checked<?php } ?> />静默下载&nbsp;&nbsp;<input type="radio" name="no_root_down" value="2"  <?php if($custom_list['no_root_down'] == 2){ ?>checked<?php } ?> />普通下载（下载任务中可见）&nbsp;&nbsp;
+	</td>
+</tr>
+<tr>
+	<td><font color="red">*</font>开始时间 </td>
+	<td align="left" width="200">
+		<input id="fromdate" name="fromdate" value="{$custom_list.start_tms}" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})">
+		</td>
+</tr>
+<tr>
+	<td><font color="red">*</font>结束时间</td>
+	<td align="left" width="200">
+		<input id="todate" name="todate" onchange="checkMonitor(this)" value="{$custom_list.end_tms}" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})">
+	</td>
+</tr>
+<tr>
+	<td>行为id</td>
+	<td><input type="text" name="beid"  value="{$custom_list.beid}"/></td>
+</tr>
+<tr id="soft_show_positon" style="display:none;">
+	<td><font style="color:red;">*</font>展示位置:</td>
+	<td>
+		<select name="show_positon">
+			<option value="1">顶部</option>
+			<option value="2">居中</option>
+		</select>
+	</td>
+</tr>
+<tr id="soft_show_icon" style="display:none;">
+	<td>展示ICON</td>
+	<td><input type="file" name="show_icon" style="width:150px;"/>
+		<span style="font-size:12px; color:red;">jpg,png,{$icon_width}*{$icon_height}不上传则默认显示软件自身ICON</span>
+	</td>
+</tr>
+<tr class="sub_tr" >
+		<td>精准投放</td>
+		<td>
+			<div id="choose_div_id"></div>
+		</td>
+	</tr>
+ 
+<tr>
+	<td colspan="2" align="center">
+		<input type="submit" name="submit" value="提交">
+		<input type="button" value='取消' onclick="location.href='/index.php/Webmarket/CustomPush/custom_push_list_silence'"/>
+	</td>
+</tr>
+</table>
+</form>
+</div>
+<!-- 弹层 -->
+<div id="light" class="white_content">
+<p>温馨提示</p>
+<div id="content" class="content">
+</div>
+<div class="opertion">
+<input type="button" value="确定" onClick="closeWindow()" />
+<input type="button" value="取消" onClick="closeWindow()" />
+</div>
+</div>
+<include file="../Public/footer" />

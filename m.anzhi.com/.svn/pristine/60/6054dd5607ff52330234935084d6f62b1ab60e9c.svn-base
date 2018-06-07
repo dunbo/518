@@ -1,0 +1,222 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>打蚊子</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/forfather_201706/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/activity/forfather_201706/js/soft_share.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v4"></script>
+<script type="text/javascript">
+	var sid = '<!--{$out.sid}-->';
+	var aid = '<!--{$out.aid}-->';
+$(document).ready(function(){
+	var clientW = $(window).width();
+	var clientH = $(window).height();
+	$('body').css('width',clientW+'px');
+	$('body').css('height',clientH+'px');
+	$('.begin_btn').bind('click',function(){
+		game_start();
+	});
+});
+
+// 控制弹窗函数
+var flags={canMove:true};
+function showOpenBox(obj){
+     var bg_h=$(window).height() + $(document).scrollTop(),
+            top_h= $(obj).height()/ 2 - $(document).scrollTop();
+    $(obj).css("margin-top",-top_h+"px").show();
+    $("#body-bg").css("height",bg_h+"px").show();
+    flags.canMove=false;
+	window.onresize = function(){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+            top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$('#body-bg').css("height",bg_h+"px");
+		$(obj).css("margin-top",-top_h+"px");
+		
+	}
+}
+function cloBox(obj){
+    $(obj).hide();
+    $("#body-bg").hide();
+    flags.canMove=true;
+}
+$(function(){
+    $("body").bind('touchmove', function (e) {
+        if(!flags.canMove){
+            e.preventDefault();
+        }
+    });
+})
+
+// 游戏开始函数
+function game_start()
+{
+	$.ajax({
+		url:'/lottery/forfather_201706/game_start.php?aid='+aid+'&sid='+sid,
+		dataType:'json',
+		success:function(data) {
+			var status = data.status;
+			if (status == '301') {
+				//游戏次数上限
+				showOpenBox('#tip-box6');
+			} else if (status == '200') {
+				$('.mark').css('display','block')
+				var iCount = 3;
+				var str = "<img src='<!--{$out.new_static_url}-->/activity/forfather_201706/images/start-"+iCount+".png'/>";
+				$('.mark').html(str);
+				var timer = null;
+				timer = setInterval(function(){
+					console.log(1);
+					if(iCount>=1){
+						iCount--;
+						str = "<img src='<!--{$out.new_static_url}-->/activity/forfather_201706/images/start-"+iCount+".png'/>";
+						$('.mark').html(str);
+						if(iCount ==0){
+							$('.game1').css('display','none');
+							$('.banner').css('display','none');
+							$('.notice').css('display','none');
+							$('.game2').css('display','block');
+							setTimeout(function(){
+								var count = 10;
+								var bitCount = 0;
+								var timer1 = setInterval(function(){
+									count--;
+									$('#time').html('还剩<span>'+count+'</span>秒')
+									if(count <= 0){
+										clearInterval(timer);
+										clearInterval(timer1);
+										clearInterval(timer2);
+										$.ajax({
+											url:'/lottery/forfather_201706/game_end.php?aid='+aid+'&sid='+sid+'&bitCount='+bitCount,
+											dataType:'json',
+											success:function(data) {
+												var code = data.status;
+												if (code == '201') {
+													//灭蚊成功
+													showOpenBox('#tip-box4');
+												} else if (code == '202') {
+													//灭蚊失败
+													showOpenBox('#tip-box5');
+												}
+											}
+										});
+									}
+								},1000)
+								var left1 = 0;
+								var timer2 = setInterval(function () {
+									var left = Math.ceil(Math.random() * (70 - 0) + 0);
+									var top = Math.ceil(Math.random() * (70 - 0) + 0);
+									var shu = Math.ceil(Math.random() * (5 - 1) + 1);		
+									var img = $("<div class='spirte_wrap'>").css({'left':left+'%','top':top+'%','background-image': 'url(<!--{$out.new_static_url}-->/activity/forfather_201706/images/' + shu + '.png)'}).appendTo('.game2');		
+									img.click(function () {
+										//alert('success');
+										//$(this).css('background','url(<!--{$out.new_static_url}-->/activity/forfather_201706/images/click'+shu+'.png)');
+										//$(this).css('backgroundSize','100% 100%');
+										bitCount++;
+										img.html('<span class="addnum"><em>+1</em>打死一只</span>');
+										setTimeout(function(){
+											$(this).remove();
+										},1000)
+									});
+									setTimeout(function() {
+										$('.spirte_wrap').eq(0).fadeOut(400);
+										img.remove();
+									},1000)
+								}, 400);
+							},1000)
+						}
+					}
+				},1000)
+			}
+		}
+	});
+}
+</script>
+</head>
+<body>
+<div class="banner"><img src="<!--{$out.new_static_url}-->/activity/forfather_201706/images/banner.png"/></div>
+<div class="notice">
+	<div class="notice_list">
+		<marquee scrollamount="2" scrolldelay="90" direction="left">
+		<!--{if $out.people_award_list}-->
+			<!--{foreach from=$out.people_award_list item=i}-->
+				<span><!--{$i.telephone}-->获得<!--{$i.award_name}--><em>　<!--{$i.date}-->　</em></span>
+			<!--{/foreach}-->
+		<!--{else}-->
+			<span>少年，要加油才能拿大奖喔！</span>
+		<!--{/if}-->
+		</marquee>
+	</div>
+</div>
+<div class="game1">
+	<div class="game1_01"><img src="<!--{$out.new_static_url}-->/activity/forfather_201706/images/bg2.png"/></div>
+	<a href="javascript:;" class="begin_btn"></a>
+	<div class="mark"></div>
+</div>
+<div class="game2" style="display:none">
+	<div class="game1_01"><img src="<!--{$out.new_static_url}-->/activity/forfather_201706/images/bg3.png"/></div>
+	<p id="time">还剩<span>10</span>秒</p>
+</div>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box4"  style="display: none;">
+		<div class="tip-mid">
+            <div class="tip-con">
+            	<img src="<!--{$out.new_static_url}-->/activity/forfather_201706/images/tips_04.png" style="margin:-40px auto 10px; width:200px" />
+                <p>报告少年,蚊虫大军已被全部消灭!</p>
+            </div>
+        </div>
+        <div class="tip_hd">
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box4');window.location.reload()">关闭</a></div>
+        </div>
+		<div class="btns2 btns3">
+			<a href="javascript:;" onclick="cloBox('#tip-box4');window.location.reload();" class="again">再打一次</a>
+			<a href="/lottery/forfather_201706/lottery_page.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->" class="lottery_tips">去抽奖</a>
+			<a href="javascript:;" onclick="go_share()" class="share_tips">分享战果</a>
+		</div>
+    </div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box5"  style="display: none;">
+		<div class="tip-mid">
+            <div class="tip-con">
+            	<img src="<!--{$out.new_static_url}-->/activity/forfather_201706/images/tips_03.png" />
+                <p>老爸已醒,灭蚊大战宣告失败......</p>
+            </div>
+        </div>
+        <div class="tip_hd">
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box5');window.location.reload()">关闭</a></div>
+        </div>
+		<div class="btns2">
+			<a href="javascript:;" onclick="cloBox('#tip-box5');window.location.reload();" class="return_index" class="again">再打一次</a>
+			<a href="javascript:;" onclick="go_share()" class="help">搬救兵</a>
+		</div>
+    </div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box6"  style="height:220px; display: none;">
+    	<div class="prompt2">偷偷告诉你，下载APP增加抽奖机会呦～</div>
+		<div class="tip-mid">
+            <div class="tip-con">
+            	<img src="<!--{$out.new_static_url}-->/activity/forfather_201706/images/tips_05.png" style="margin:-40px auto 10px" />
+                <p>少年,今天的机会用完啦！<br/>明天继续啪啪啪～</p>
+            </div>
+        </div>
+        <div class="tip_hd">
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box6')">关闭</a></div>
+        </div>
+		<div class="btns2">
+			<a href="/lottery/forfather_201706/lottery_page.php?sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->" class="download">去下载</a>
+			<a href="javascript:;" onclick="cloBox('#tip-box6');" class="return_index">返回首页</a>
+		</div>
+    </div>
+</section>
+</body>
+</html>

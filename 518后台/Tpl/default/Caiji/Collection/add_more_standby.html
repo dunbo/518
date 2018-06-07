@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+    <script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+    <script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+    <script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript">
+function checkpackage(){
+    if($("#ppackage").val().length==0){
+        return;
+    }
+    var param = {
+        package : $("#ppackage").val()
+    };
+    $.ajax({
+        url:'__URL__/checkmorepackage',
+        type:'POST',
+        data:param,
+        dataType:'json',
+        success:function(data){
+            if(data.status==2){
+                $("#package_mess").html("包名"+data.data+"已在待采集列表，不可重复添加");
+                $("#iserror").val(2);
+            }else if(data.status==3)
+            {
+                $("#package_mess").html("包名"+data.data+"在黑名单中，不能添加");
+                $("#iserror").val(2);
+            }else if(data.status==4)
+            {
+                $("#package_mess").html("包名"+data.data+"属于合作软件，不能添加");
+                $("#iserror").val(2);
+            }else if(data.status==5)
+            {
+                $("#package_mess").html("包名"+data.data+"不在已上架或者审核中列表，不能添加");
+                $("#iserror").val(2);
+            }else if(data.status==1){
+                $("#psoftname").val(data.data);
+                $("#package_mess").html("");
+                $("#iserror").val(1);
+            }
+        }
+    });
+}
+
+        function save(){
+            var iserror = $("#iserror").val();
+
+            if($("#ppackage").val().trim().length==0)
+            {
+                $("#package_mess").html("包名不能为空");
+                return;
+            }
+
+            if($('input[name="examine"]:checked').val()==null)
+            {
+                alert('请选择审核流程');
+                return;
+            }
+
+            if(iserror==1)
+            {
+                var param = {
+                    package: $("#ppackage").val(),
+                    softname : $("#psoftname").val(),
+                    examine : $('input[name="examine"]:checked').val(),
+                    desc : $("#desc").val()
+                };
+
+                $.ajax({
+                    url:'__URL__/add_more_standby',
+                    type:'POST',
+                    data:param,
+                    secureuri:false,
+                    dataType:'json',
+                    success:function(data){
+                            //location.reload();
+                            self.parent.window.location.reload();
+                    }
+                });
+            }
+        };
+    </script>
+</head>
+<body>
+<div style="width:45; margin-top:4px">
+	 <form id="form1" name="form1" method="post" action="__URL__/add/">
+             <table>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">*采集包名:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <textarea id="ppackage" cols="30" rows="3" onblur="checkpackage()" >{$info.ppackage}</textarea><font color="red"><span id="package_mess"></span></font></td>
+             <input type="hidden" id="pid" value="{$info.id}" />        </td>
+             <input type="hidden" id="ptype" value="{$type}" />        </td>
+             <input type="hidden" id="iserror" value="1" />        </td>
+   </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">*软件名称:</td>
+         <td align="left" bgcolor="#FFFFFF">
+           <textarea id="psoftname" cols="30" rows="3" readonly="true">{$info.softname}</textarea>        </td>
+    </tr>
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">*审核流程:</td>
+         <td align="left" bgcolor="#FFFFFF">
+<input type="radio"  name="examine" value="1" <if condition="($info.examine_type eq 1 ||$info.examine_type eq 0)"> checked="checked" </if> />普通审核
+<input type="radio"  name="examine" value="2" <if condition="($info.examine_type eq 2)"> checked="checked" </if> />快速审核 
+<input type="radio"  name="examine" value="3" <if condition="($info.examine_type eq 3)"> checked="checked" </if> />免审
+</td>
+    </tr>
+    <tr>
+        <td height="20" align="right" bgcolor="#FFFFFF">备注:</td>
+        <td align="left" bgcolor="#FFFFFF"> 
+            <textarea id="desc" cols="30" rows="8" >{$info.desc}</textarea> <font color="red"><span id="desc_mess"></span></font>       </td>
+    </tr>
+   <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="提交" onClick="save()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onClick="self.parent.tb_remove();"/></td>
+      </tr>
+</table>
+  </form>
+</div>
+</body>
+</html>

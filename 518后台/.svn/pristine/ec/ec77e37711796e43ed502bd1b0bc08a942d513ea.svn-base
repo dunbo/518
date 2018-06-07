@@ -1,0 +1,252 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style type="text/css">
+.tbspan{font-size:15px;margin:20px 6px;padding-bottom:20px;}
+.tbdiv{font-size:15px;margin:6px 0px;padding-bottom:20px;clear:both;}
+#_length{color:blue;}
+#_imglength{color:blue;}
+</style>
+<script type="text/javascript">
+function checkjpurl(){
+	var checkboxobj = document.getElementsByName('jumpstatus')[0];
+	var inputobj = document.getElementsByName('jumpurl')[0];
+	var ext_title = document.getElementsByName('ext_title')[0];
+	//获取宣传标题判断其长度
+	var ext = $("#ext").val();
+	var curlen = 0;
+	for(var i = 0; i < ext.length; i++) {
+		if((ext.charCodeAt(i)) < 0 || (ext.charCodeAt(i) > 255)) {
+			curlen += 2;
+		}else{
+			curlen += 1;
+		}
+	}
+	
+	if(curlen > 50){
+		// $("#_length").html(" 汉字小于23个，英文小于46个");
+		alert('宣传标题最多可添加50个字符');
+		return false;
+
+	}
+	//获取轮播图标题判断其长度
+	var _img = $("#_img").val();
+	var _curlen = 0;
+	for(var i = 0; i < _img.length; i++) {
+		if((_img.charCodeAt(i)) < 0 || (_img.charCodeAt(i) > 255)) {
+			_curlen += 2;
+		}else{
+			_curlen += 1;
+		}
+	}
+	
+	if(_curlen > 46){
+		// $("#_imglength").html(" 汉字小于23个，英文小于46个");
+		alert('轮播图标题最多可添加50个字符');
+		return false;
+
+	}
+	return true;
+
+}
+function checkjpstatus(){
+var checkboxobj = document.getElementsByName('jumpstatus')[0];
+var inputobj = document.getElementsByName('jumpurl')[0];
+	if(checkboxobj.checked==true){
+		inputobj.disabled = '';
+	}else{
+		inputobj.disabled = 'disabled';
+	}
+
+
+}
+
+</script>
+<body>
+
+	<h3>编辑内容</h3>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+<form method="post" action="__URL__/edit_content_sub/" enctype="multipart/form-data">
+<tr>
+	<?php if($advid){ ?><input type="hidden" value="{$advid}" name="advid"> <?php } ?>
+	<?php if($cid){ ?><input type="hidden" value="{$cid}" name="cid"> <?php } ?>
+	<?php if(isset($_GET['substatus'])){ ?><input type="hidden" value="{$_GET['substatus']}" name="substatus"> <?php } ?>
+	<?php if(isset($_GET['tagstatus'])){ ?><input type="hidden" value="{$_GET['tagstatus']}" name="tagstatus"> <?php } ?>
+	<?php if(isset($_GET['status'])){ ?><input type="hidden" value="{$_GET['status']}" name="status"> <?php } ?>
+	<?php if(isset($_GET['platform'])){ ?><input type="hidden" value="{$_GET['platform']}" name="platform"> <?php } ?>
+	<?php if(isset($_GET['tagid'])){ ?><input type="hidden" value="{$_GET['tagid']}" name="tagid"> <?php } ?>
+	<input type="hidden" value="{$source}" name="source">
+	<input type="hidden" value="{$id}" name="id">
+	<input type="hidden" value="{$from}" name="from">
+	<input type="hidden" value="{$referer}" name="referer">
+	<td>宣传标题：</td>
+	<td><input type="text" id="ext" name="ext_title" size="50" value="{$result.ext_title}"><span id="_length"> 汉字小于23个，英文小于46个</span><br/></td>
+</tr>
+<?php if(in_array($from,array('data','result_list','outer_result'))){ ?>
+<tr>
+	<td>轮播图标题：</td>
+	<td><input type="text" id="_img" name="img_title" size="50" value="{$result.img_title}"><span id="_imglength"> 汉字小于23个，英文小于46个</span><br/></td>
+</tr>
+<?php } ?>	
+<tr>
+	<td>原文标题：</td>
+	<td>{$result.title}</td>
+</tr>
+<tr>
+	<td>发帖人：</td>
+	<td>{$result.author}</td>
+</tr>	
+<!--tr>
+	<td>链接地址：</td>
+	<td><input type="text" size="30" name="jumpurl" value="{$result.jump_url}" <?php if(!$result['jump_status']) echo 'disabled="disabled"' ?>> 点击后跳转到链接地址：
+	<input type="checkbox" name="jumpstatus" value="1" onclick="checkjpstatus()"<?php if($result['jump_status']) echo 'checked'; ?>></td>
+</tr-->
+<?php if(in_array($from,array('care','wrap'))): ?>
+	<tr style="display:none;">
+      <td>平台</td>
+      <td height="25" align="center">
+		<volist name="platform" id="list">
+        <label><input type="checkbox" name="pp[]" value="{$list.platform}_{$result['position']}" <?php if(in_array($list['platform'].'_'.$result['position'],$checked)){ echo 'checked="checked"'; if(in_array($list['platform'].'_'.$result['position'],$disable)) echo ' disabled="disabled"';} ?> />
+		{$list.platformname} </label>
+		</volist>
+      </td>
+	</tr>
+<?php elseif(!in_array($from,array('result_list','outer_result','data','care','wrap'))): ?>
+	<?php if($from == 'taglist' && intval($_GET['substatus']) !== 2):;else: ?>
+<tr style="border:1px solid black !important;">
+	<td>平台</td>
+	<td>位置</td>
+</tr>
+<volist name="platform" id="list1">
+	<tr>
+      <td width="30%" align="center">
+		{$list1.platformname}
+	  </td>
+      <td height="25" align="center">
+		<volist name="position" id="list2">
+        <label><input type="checkbox" name="pp[]" value="{$list1.platform}_{$list2.position}" <?php if(in_array($list1['platform'].'_'.$list2['position'],$checked)) {echo 'checked="checked"';if(in_array($list1['platform'].'_'.$list2['position'],$disable)) echo ' disabled="disabled"';} ?> />
+        <?php if($list1['platform'] == 3 && $list2['position'] == 2)echo '精选' ;else echo $list2['positionname'];?> </label>
+		</volist>
+      </td>
+	</tr>
+</volist>
+	<?php endif; ?>
+<?php endif; ?>
+<tr>
+	<td>标签：</td>
+	<td><div id = "tdlist_{$id}"><?php $tagurl = '';
+			foreach($tag_result as $group){
+				$tagurl = $group['tag_url'];
+				echo $group['name'].'：';
+				$i=0;
+				foreach($group['tag_arr'] as $tagid ){
+					$i++;$point=',';if($i==1) $point='';echo $point;
+					if($taglist[$taglist[$tagid]['parentid']]['tagname']) echo $taglist[$taglist[$tagid]['parentid']]['tagname'].'>';
+					echo $taglist[$tagid]['tagname'];
+				}
+			echo '<br/>';
+		}?>
+		<?php 
+		if($tagurl) $tagurl ='tags/'.$tagurl.'/'; 
+		?>
+		</div>
+		<a href="__URL__/tag_list_show1/id/{$id}/from/edit_content/{$tagurl}" id="tdurl_{$id}" class="thickbox" style="text-decoration:underline;color:blue;" >编辑</a>
+		</td>
+</tr>
+<tr>
+	<td>推荐理由：</td>
+	<td><textarea name="description"  style="width: 600px;height: 200px;">{$result.description}</textarea></td>
+</tr>
+<tr>
+	<td>宣传图片上传（小图）：</td>
+	<td><?php if($result['img_path1']){ ?>
+		<img src="<?php echo IMGATT_HOST;?>/{$result.img_path1}" >
+        <a href="__URL__/delimg/path/1/advid/{$advid|default=0}/colid/{$id|default=0}/" onclick="return confirm('确实要删除图片吗?');">删除</a>
+	<?php } ?>
+		<br/>
+	<span>尺寸1（列表图）：最大宽度200像素<input type="file" name="img1"> </span></td>
+</tr>
+<tr>
+	<td>宣传图片上传（大图）：
+    <br><span style="color:red;">视频贴列表显示该大图</span>
+    </td>
+	<td><?php if($result['img_path2']){ ?>
+		<img src="<?php echo IMGATT_HOST;?>/{$result.img_path2}" >
+        <a href="__URL__/delimg/path/2/advid/{$advid|default=0}/colid/{$id|default=0}/" onclick="return confirm('确实要删除图片吗?');">删除</a>
+	<?php } ?>
+	<br/>
+	<span class="tbspan">尺寸2（轮播图）：最大宽度700像素<input type="file" name="img2"></span></td>
+</tr>
+<tr>
+	
+	<td>宣传图片上传（市场旧版-1000x219）：
+    <br>
+    </td>
+	<td><?php if($result['img_path4']){ ?>
+		<img src="<?php echo IMGATT_HOST;?>/{$result.img_path4}" >
+        <a href="__URL__/delimg/path/4/advid/{$advid|default=0}/colid/{$id|default=0}/" onclick="return confirm('确实要删除图片吗?');">删除</a>
+	<?php } ?>
+	<br/>
+	<span class="tbspan">尺寸2（轮播图）：最大宽度700像素<input type="file" name="img4"></span></td>
+</tr>
+<?php if(in_array($from,array('data','result_list','outer_result'))){ ?>
+	<tr>	
+		<td>宣传图片上传（PC平台）：
+	    <br>
+	    </td>
+		<td><?php if($result['img_path5']){ ?>
+			<img src="<?php echo IMGATT_HOST;?>/{$result.img_path5}" >
+	        <a href="__URL__/delimg/path/5/advid/{$advid|default=0}/colid/{$id|default=0}/" onclick="return confirm('确实要删除图片吗?');">删除</a>
+		<?php } ?>
+		<br/>
+		<span class="tbspan">尺寸3（轮播图）：最大宽度700像素<input type="file" name="img5"></span></td>
+	</tr>
+	<tr>	
+		<td>宣传图片上传（市场V6.4.5及以上）：
+	    <br>
+	    </td>
+		<td><?php if($result['img_path6']){ ?>
+			<img src="<?php echo IMGATT_HOST;?>/{$result.img_path6}" >
+	        <a href="__URL__/delimg/path/6/advid/{$advid|default=0}/colid/{$id|default=0}/" onclick="return confirm('确实要删除图片吗?');">删除</a>
+		<?php } ?>
+		<br/>
+		<span class="tbspan">尺寸3（轮播图）：最大宽度700像素<input type="file" name="img6"></span></td>
+	</tr>
+<?php } ?>
+<tr>	
+	<td colspan="2"><input type="submit" name="sub" value="提交" style="display:inline-block;margin:10px auto" onclick="return checkjpurl()" class="search_btn">
+	<?php if($_GET['from'] == 'data'): ?>
+		<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Data/result_list/substatus/{$_GET['substatus']}<?php if($_GET['status'])echo '/status/'.$_GET['status']; ?>">取消</a>
+	<?php elseif($_GET['from'] == 'result_list'): ?>
+		<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Collectresult/result_list/tagstatus/{$_GET['tagstatus']}<?php if($_GET['status'])echo '/status/'.$_GET['status']; ?>">取消</a>
+	<?php elseif($_GET['from'] == 'outer_result'): ?>
+		<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Collectresult/outer_result/tagstatus/{$_GET['tagstatus']}<?php if($_GET['status'])echo '/status/'.$_GET['status']; ?>">取消</a>
+	<?php elseif($_GET['from'] == 'column_content'): ?>
+		<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Column/content_list/cid/{$cid}">取消</a>
+	<?php elseif($_GET['from'] == 'content_list_filter'): ?>
+		<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Column/content_list_filter/cid/{$cid}">取消</a>
+	<?php elseif($_GET['from'] == 'schedule'): ?>
+		<?php if($_GET['source'] == 'online'): ?>
+			<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Waiton/result_online/source/online/platform/{$_GET['platform']}">取消</a>
+		<?php elseif($_GET['source'] == 'outline'): ?>
+			<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Waiton/result_outline/source/outline/platform/{$_GET['platform']}">取消</a>
+		<?php else: ?>
+			<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Waiton/result_list/platform/{$_GET['platform']}">取消</a>
+		<?php endif;?>
+	<?php elseif($_GET['from'] == 'care'): ?>
+		<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Care/result_list/postime/{$_GET['source']}">取消</a>
+	<?php elseif($_GET['from'] == 'wrap'): ?>
+		<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Care/result_wrap/postime/{$_GET['source']}">取消</a>
+	<?php elseif($_GET['from'] == 'dailyrecom'): ?>
+		<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Care/dailyrecom/postime/{$_GET['source']}">取消</a>
+	<?php elseif($_GET['from'] == 'taglist'): ?>
+		<a style="display:inline-block;margin:10px auto" class="search_btn" href="/index.php/Zhiyoo/Tag/result_list/tagid/{$_GET['tagid']}">取消</a>
+	<?php endif;?>
+	</td>
+</tr>
+</form>
+<table>
+</body>
+</html>

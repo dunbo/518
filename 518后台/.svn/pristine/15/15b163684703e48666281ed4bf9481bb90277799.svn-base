@@ -1,0 +1,86 @@
+
+<div>
+<form method="post" action="/index.php/Sl/Activate/AnzhiSoftList_edit"  name="add_form">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<td class="add_td">软件名称：</td><input type="hidden" name="edit_id" id="id" value="{$result.id}"><td class="add_td" style="text-align:left;padding-left:5px;width:60%;"><input type="text" name="edit_name" id="edit_name" class="add_inpt" value="{$result.name}" /></td>
+	</tr>
+	<tr>
+		<td class="add_td">显示的软件名称：</td><td class="add_td" style="text-align:left;padding-left:5px;width:60%;"><input type="text" name="edit_name_show" id="edit_name_show" class="add_inpt" value="{$result.name_show}" /></td>
+	</tr>
+	<tr>
+		<td class="add_td">包名：</td><td class="add_td" style="text-align:left;padding-left:5px;width:60%;"><input type="text" name="edit_package" id="edit_package" class="add_inpt" onblur="get_package();" value="{$result.package}" /></td>
+	</tr>
+	<tr>
+		<td class="add_td">所属类别：</td><td class="add_td" style="text-align:left;padding-left:5px;width:60%;"><input type="text" name="edit_sort_name" id="edit_sort_name" class="add_inpt" value="{$result.sort_name}" /></td>
+	</tr>
+	<tr>
+		<td class="add_td">所属年度{$result['year']}：</td>
+		<td class="add_td" style="text-align:left;padding-left:5px;width:60%;">
+		<select name="edit_the_year" id="edit_my_year" onchange="add_year();">
+		<?php foreach($year_list as $key => $val){ ?><option value="{$val.id}" <?php if($result['year'] == $val['id']){ ?>selected<?php } ?> >{$val.year}</option><?php } ?>
+		</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="add_td">所属频道列表：</td><td class="add_td" style="text-align:left;padding-left:5px;width:60%;">
+		<div id="edit_change_channel">
+		<select id="edit_channel" name="edit_channel">
+		<?php foreach($channel_list as $key => $val){ ?>
+			<option value="{$val.channel_id}" <if condition="$result['channel'] eq $val['channel_id']"> selected</if>>{$val.channel}</option>
+		<?php } ?>
+		</select>
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" class="add_td" style="text-align:center;"><button type="submit">提交</button><button type="button" style="margin-left:10px;" onclick="tb_remove();">取消</button></td>
+	</tr>
+</table>
+</form>
+</div>
+<script language="javascript">
+function get_package(){
+	var my_package = $('#edit_package').val();
+	var my_year = $('#my_year').val();
+	var my_channel = $('#channel').val();
+	var my_id = $('#id').val();
+	$.ajax({
+		type: "GET",
+		url : '/index.php/Sl/Activate/AnzhiSoftList/from/2/edit/edit/id/'+my_id+'/my_package/'+my_package+'/year/'+my_year+'/channel/'+my_channel,
+		dataType: 'json',
+		success: function(data){
+			if(data == 'no'){
+				alert('包名不存在');
+				$('#edit_name').val('');
+				$('#edit_name_show').val('');
+				$('#edit_sort_name').val('');
+			}else{
+				$('#edit_name').val(data.softname);
+				$('#edit_name_show').val(data.softname);
+				$('#edit_sort_name').val(data.category_name);
+			}
+		}
+	});
+
+}
+
+function add_year(){
+	var the_year = $('#edit_my_year').val();
+	
+	$.ajax({
+		type: "GET",
+		url : '/index.php/Sl/Activate/AnzhiSoftList/the_year/'+the_year+'/from/1',
+		dataType: 'json',
+		success: function(data){
+			var str = '';
+			for(i=0;i<data.length;i++){
+				str += '<option value="'+data[i].channel_id+'" <if condition="$_GET['_channel'] eq '+data[i].channel_id+'"> selected</if>>'+data[i].channel+'</option>';
+			}
+
+			$('#edit_change_channel').html("<select id='channel' name='channel'>"+str+"</select>");
+		}
+	});
+
+}
+</script>

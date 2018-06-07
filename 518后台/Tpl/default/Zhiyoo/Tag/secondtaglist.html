@@ -1,0 +1,65 @@
+<style>
+a {
+color:blue !important;
+}
+</style>
+<div class="tags_s{$_GET['tagid']}">
+<form method='post' action="__URL__/edit_rank" onsubmit="return clickConfirm('确定保存优先级更改吗？');">
+<div style="margin:5px;float:right">
+		<input class="search_btn" style="display:none;float:left;" type="submit" id="submid_s{$_GET['tagid']}" value="保存优先级">
+		<a class="search_btn" style="display:inline-block;" href="javascript:priority('s{$_GET['tagid']}');" id="priorityid_s{$_GET['tagid']}">编辑优先级</a>
+<span style="margin:10px;padding:3px;background-color:white"><a href="__URL__/addtag?action=sec&tagid={$val.tag.tagid}" class="thickbox search_btn" style="display:inline-block;">添加标签</a></span>
+</div>
+
+<div>{$val.tag.tagname|default=' '}（共{$val.count|default='0'}个） </div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th ><a class="thickbox" href="__URL__/secondtaglist?tagid={$_GET['tagid']}&type=rank&order={$order}">优先级↓↑</a></th>
+			<th ><a class="thickbox" href="__URL__/secondtaglist?tagid={$_GET['tagid']}&type=id&order={$order}">标签ID↓↑</a></th>
+			<th ><a class="thickbox" href="__URL__/secondtaglist?tagid={$_GET['tagid']}&type=name&order={$order}">标签名称↓↑</a></th>
+			<th ><a class="thickbox" href="__URL__/secondtaglist?tagid={$_GET['tagid']}&type=count&order={$order}">内容个数↓↑</a></th>
+            <th >图标</th>
+			<th >操作</th>
+			<th ><a class="thickbox" href="__URL__/secondtaglist?tagid={$_GET['tagid']}&type=status&order={$order}">使用状态↓↑</a></th>
+		</tr>
+	</thead>
+	<volist name="list" id="tags">
+	<tr>
+		<td id="P_id_s{$_GET['tagid']}">
+			<a>{$tags.rank|default=''}</a>
+			<input type="text" name="level[{$tags.tagid}]" onkeyup="this.value=replaceNum(this.value);" size="4" class="level_s{$_GET['tagid']}" style="display:none;" value="{$tags.rank|default=''}" /> 
+		</td>
+		<td>{$tags.tagid|default=' '}</td>
+		<td>{$tags.tagname|default='&nbsp;'}</td>
+		<td><a href="__URL__/result_list/tagid/{$tags.tagid|default='0'}">{$tags.pcount|default='0'}</a></td>
+        <td><if condition="$tags.img_path neq ''"><img src="{$tags.img_path}" style="max-height:100px;max-width:100px;" /><else />无</if></td>
+		<td><a href="__URL__/edit?tagid={$tags.tagid}&action=edit" class="thickbox">编辑</a>|<a href="__URL__/edit?tagid={$tags.tagid}&action=del" onclick="return del();">删除</a></td>
+		<td><if condition="$tags.status eq 1"> <a href="__URL__/edit?tagid={$tags.tagid}&status=0&action=status" onclick="return change();" title="点击切换状态为停用">使用</a>
+		<elseif condition="$tags.status eq 0"/><a href="__URL__/edit?tagid={$tags.tagid}&status=1&action=status" <?php if($val['tag']['status']== 1): ?> onclick="return change();" <?php elseif($val['tag']['status']== 0): ?> onclick="return donot();" <?php endif; ?> style="color:red !important" title="点击切换状态为使用">停用</a>
+		</if></td>
+	</tr>
+	</volist>
+	<tr><td colspan="7"><input type="button" class="search_btn" style="display:inline-block;" onclick="tb_remove();" value="关闭" /></td>
+	</tr>
+</table>
+</form>
+<script>
+function del()
+  {
+   if(confirm("你确定要删除该标签吗，删除后内容已有的该标签同时删除？"))
+    return true;
+   else return false
+  }
+  function change()
+  {
+   if(confirm("确定要更改状态吗？"))
+    return true;
+   else return false
+  }
+  function donot(){
+	alert('主标签已停用，子标签不能被启用！');
+	return false;
+  }
+</script>
+</div>

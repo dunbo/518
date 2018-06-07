@@ -1,0 +1,200 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+<link rel="stylesheet" type="text/css" href="/Public/img/common.css" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<!-- <script type="text/javascript" src='__PUBLIC__/js/sensitive.js'></script> -->
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src='__PUBLIC__/js/thickbox-compressed.js' ></script>
+<script type="text/javascript" src='__PUBLIC__/js/modal.js' ></script>
+<link rel="stylesheet" href="__PUBLIC__/css/thickbox.css" type="text/css" media="screen" />
+
+<div class="main" >
+<div class="content">
+<center>
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="tb">
+<tr>
+<td align='left'>
+
+<h3 style='float:left'><?php echo $c_id;?>：<?php echo $category_name;?></h3>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<a class="thickbox" href="/index.php/Dev/TagManage/cat_tag_add/c_id/<?php echo $c_id;?>/add/1/width/200px/height/100px">
+	<button style='float:right'>添加标签</button>
+</a>
+</td>
+</tr>
+<br />
+</table>
+
+<table width="100%" height="60" border="0" cellpadding="0" cellspacing="0" class="tb words">
+		<tr>
+			<th>
+				<input type="checkbox" value="全选" onclick="selectAll();"><input type='button' value='批量删除' id='del_all' />
+			</th>
+			<th>
+				标签id
+			</th>
+			<th>
+				标签名称
+			</th>
+			<th>
+				软件数量<if condition="($order eq 1)">
+                            <a href="__URL__/cat_tag_list/c_id/<?php echo $c_id?>/order/<?php echo $order?>" >↑↓</a>
+                        <else/>  
+                        	 <a href="__URL__/cat_tag_list/c_id/<?php echo $c_id?>/order/<?php echo $order?>" >↓↑</a>
+                        </if>
+			</th>
+			<th>
+				权重
+			</th>
+			<th>
+				操作
+			</th>
+		</tr>
+		
+			<?php foreach($list as $v) :?>
+				<tr>
+				<td align="center">
+					<input type="checkbox" name="check_id"  value="<?php  echo $v['id']; ?>" >
+				</td>
+				<td align="center">
+					<?php  echo $v['tag_id']; ?>
+				</td>
+				<td align="center">
+					<?php  echo $v['tag_name']; ?>
+				</td>
+				<td align="center">
+					<a href="/index.php/Dev/TagPackage/tags_softlist/tag_name/<?php  echo $v['tag_name']; ?>"><?php  echo $v['soft_num']; ?></a>
+				</td>
+				<td align="center">
+					<?php  echo $v['weight']; ?>
+				</td>
+				<td align="center">
+					<a href="javascript:void(0);" onclick="javascript:$('#edit_box').zxxbox();$('#weight').val(<?php echo $v['weight'];?>);$('#edit_id').val(<?php echo $v['id'];?>);">编辑</a> | <a  href="javascript:if(confirm('确实要删除吗?'))location='__URL__/cancel_cat_tag_link/c_id/<?php echo $c_id;?>/id/<?php echo $v['id'];?>'">删除</a>
+				</td>
+			</tr>
+			<?php endforeach;?>
+		
+	</table>
+</center>
+</div>
+</div>
+
+<div id="edit_box" style="padding:10px; width:200px; height:100px;   display:none;">
+	<h2>编辑标签</h2><br />
+	<input type="hidden" name='edit_id' id="edit_id"/>
+	权重&nbsp;&nbsp;<input size='19' type="text" name="weight" id="weight" value="" /><br /><br />
+	<input type='button'  id='sub_edit' value="确定" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='button'  onclick="javascript:$.zxxbox.hide();" value="取消" />
+</div>
+<div id="batch_add_box" style="padding:10px; width:300px; height:200px;   display:none;">
+	<form id="upload" method='post' action="__URL__/tag_add/batch/1" enctype="multipart/form-data" onsubmit="return checkPostbatch()">
+		<h2>批量导入</h2><br />
+		请按照上传模板的要求添加内容<a href='__PUBLIC__/sample.csv'>下载csv模版</a>
+		<input type="file" name="batch_add_file" id="batch_add_file" value=""/><br /><br />
+		<input type="submit" name="button" id="button" value="&nbsp;上传&nbsp;"  />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='button'  onclick="javascript:$.zxxbox.hide();" value="取消" />
+	</form>
+</div>
+<div id="url_str_box" style="padding:10px; width:200px; height:100px;   display:none;">
+	<form id="down_csv" method='post' action="__URL__/tag_add/" enctype="multipart/form-data">
+	<input type="hidden" value='<?php echo $error_list?>' name='error_list'>
+	<h2>导入结果</h2><br />
+	<div style="float:left;">导入成功：{$t_count}<br>
+	导入失败：{$f_count}</div>
+	<div style="float:right;"><button onclick="javascript:$('#down_csv').submit();">下载失败内容</button></div>
+	</form>
+</div>
+
+<script>
+	var flag = false;
+	function selectAll(){
+		if(!flag){
+			$("[name='check_id']").each(function(){
+				$(this).attr('checked',true);
+			});
+			flag = true;
+			return;
+		}
+		if(flag){
+			$("[name='check_id']").each(function(){
+				$(this).attr('checked',false);
+			});
+			flag = false;
+			return;
+		}	
+	}
+	$('#del_all').click(function(){
+
+		if(!window.confirm('确定批量删除吗？')){
+			return;
+		}
+		var str = '';
+		
+	    $("[name='check_id']").each(function(){
+	    	if($(this).attr('checked')){
+	    		str+=$(this).val()+',';
+	    	}
+		});
+
+	    var id = str=str.substring(0,str.length-1);
+	    if(id.length<1){
+	    	alert('请选择要删除的标签！');
+	    	return false;
+	    	
+	    }
+	    var url = '__URL__/cancel_cat_tag_link';
+	    var data = '&id='+id+'&c_id='+<?php echo $c_id;?>;
+	    $.ajax({
+			url: url,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function(data){
+					if(!!data && data.success){ 
+						alert(data.msg);
+						window.location.href="__URL__/cat_tag_list/c_id/<?php echo $c_id;?>";
+
+					}else{
+						alert(data.msg);
+						window.location.href="__URL__/cat_tag_list/c_id/<?php echo $c_id;?>";
+
+					}
+			}
+	     })
+  	
+	});
+
+	$('#sub_edit').click(function(){
+		var url = '__URL__/cat_tag_add';
+
+
+	    var id =$('#edit_id').val();
+	    var weight =$('#weight').val();
+	    var re=/^[0-9]+$/ ;
+		if(!re.test(weight)){
+			alert('权重必须是正整数');
+			return false;
+		}
+	    
+	    
+	    var data = '&weight='+weight+'&id='+id;       
+	    $.ajax({
+			url: url,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function(data){
+					if(data && data.success){ 
+						alert(data.msg);
+						window.location.href="__URL__/cat_tag_list/c_id/<?php echo $c_id;?>";
+						closes();
+					}else{
+						alert(data.msg);
+					}
+			},
+		    error: function(){
+		    	
+		    	  alert('对不起，服务器错误，请联系管理员！');
+		    }
+	     });
+	});
+
+</script>

@@ -1,0 +1,378 @@
+<include file="../../Public/header"/>
+
+<body>
+
+<p>客户名称：{$client.client_name}</p>
+<p>合同编号：{$contract.contract_code}</p>
+
+<?php if($result){ ?>
+<table>
+	<tr>
+		<td>录入时间</td>
+		<td>软件名称</td>
+		<td>软件包名</td>
+		<td>软件类别</td>
+		<td>广告位</td>
+		<td>平日</td>
+		<td>周末/月初</td>
+		<td>折扣后总价</td>
+		<td>刊例总价</td>
+		<td>操作</td>
+	</tr>
+	<volist name="result" id="app">
+	<tr>
+		<td><?php echo date('Y-m-d',$app['create_tm']).'<br/>'.date('H:i:s',$app['create_tm']);?></td>
+		<td>{$app.app_name}</td>
+		<td>{$app.app_package}</td>
+		<td><?php echo $app_type_key[$app['app_type']];?></td>
+		<td></td>
+		<td>{$app.weekdays}</td>
+		<td>{$app.weekends}</td>
+		<td><?php echo $app['weekday_total']+$app['weekend_total'];?></td>
+		<td><?php echo $app['weekday_original_total']+$app['weekend_original_total'];?></td>
+		<td><a href="">编辑</a>|<a href="">删除</a></td>
+	</tr>
+	</volist>
+</table>
+<?php } ?>
+
+<form id="form_contract_app" name="form_contract_app" action="__URL__/add/contract_id/{$contract.id}" method="POST">
+<div>
+	<p>软件包名：<input type="text" name="app_package" id="input_app_package"/></p>
+	<p>软件名称：<input type="text" name="app_name" id="input_app_name"/></p>
+	<p>软件类别：<select id="select_app_type"><option value="0">请选择</option><option value="1">应用</option><option value="2">游戏</option></select></p>
+	<p>刊例价格名称：
+		<select id="select_ratecard">
+			<option value="0">请选择</option>
+			<volist name="cards" id="card">
+			<option value="{$card.id}">{$card.rate_card_name}</option>
+			</volist>
+		</select>
+	</p>
+	<p>广告位：<select id="select_advertising"><option value="0">请先选择刊例</option></select></p>
+	<div id="div_keyword" style="display:none;">关键字：<input type="text" name="app_keyword" id="input_app_keyword"/></div>
+	<p>投放日期：
+		<input type="text" name="input_put_date_1" class="input_put_date"/>
+		<input type="text" name="input_put_date_2" class="input_put_date"/>
+		<input type="text" name="input_put_date_3" class="input_put_date"/>
+		<input type="text" name="input_put_date_4" class="input_put_date"/>
+		<input type="text" name="input_put_date_5" class="input_put_date"/>
+		<input type="text" name="input_put_date_6" class="input_put_date"/>
+		<input type="text" name="input_put_date_7" class="input_put_date"/>
+		<input type="text" name="input_put_date_8" class="input_put_date"/>
+		<button id="button_put_date">选择日期</button>
+	</p>
+</div>
+
+<div id="div_price_area" style="display:none;">
+<table>
+	<tr>
+		<td>平日：</td>
+		<td><span id="span_weekdays"></span>天<input type="hidden" id="input_weekdays" value="0"/></td>
+		<td>平日单价：</td>
+		<td><input type="text" id="input_adv_weekday_price" />元</td>
+		<td>折扣：</td>
+		<td><input type="text" id="input_weekday_discount"/>%</td>
+		<td>折扣后单价：</td>
+		<td><input type="text" id="input_weekday_price"/>元</td>
+		<td>折扣后总价：</td>
+		<td><input type="text" id="input_weekday_total"/>元</td>
+	</tr>
+	<tr>
+		<td>周末/月初：</td>
+		<td><span id="span_weekends"></span>天<input type="hidden" id="input_weekends" value="0"/></td>
+		<td>周末/月初单价：</td>
+		<td><input type="text" id="input_adv_weekend_price"/>元</td>
+		<td>折扣：</td>
+		<td><input type="text" id="input_weekend_discount"/>%</td>
+		<td>折扣后单价：</td>
+		<td><input type="text" id="input_weekend_price"/>元</td>
+		<td>折扣后总价：</td>
+		<td><input type="text" id="input_weekend_total"/>元</td>
+	</tr>
+</table>
+</div>
+<button id="button_add" type="submit">添加</button>
+</form>
+
+<script>
+$(function(){
+	
+	var var_advert_data = []; //用于存储广告位信息
+	var var_weekday_date = []; //用于存储平日日期的选择
+	var var_weekend_date = []; //用于存储周末月初的选择
+	var var_app_type = 0; //软件类型 1-应用；2-游戏
+	
+	var var_is_type_selected = false; //是否已经选择软件类型
+	var var_is_advert_selected = false; //是否已经选择广告位
+	var var_is_date_selected = false; //是否已经选择日期
+	
+	// 选择刊例获取刊例下的所有广告位
+	$('#select_ratecard').change(function(){
+		$.getJSON("__URL__/ajax_get_advert/ratecard_id/"+$(this).val(), function(json){
+			var_advert_data = json; // AJAX调用结果直接赋给广告位数组
+			
+			$('#select_advertising').empty();
+			$('#select_advertising').append("<option value='0'>请选择</option>");
+			$.each(json, function(key, val){
+				$('#select_advertising').append("<option value='"+val.id+"'>"+val.advertising_name+"</option>");
+			});
+		});
+	});
+	
+	// 用户选择广告位的时候将报价赋给页面上的输入框待用
+	$('#select_advertising').change(function(){
+		if( 0 == var_app_type ){
+			alert('请先选择软件类别！');
+			return false;
+		}
+		
+		var var_index = $(this).get(0).selectedIndex+1; //因为增加了“请选择”的条目，此处偏移+1
+		var var_channel = var_advert_data[var_index].channel;
+		
+		// 判断是否是关键词广告
+		if(var_channel == 'SK' || var_channel=='SKH' || var_channel=='SKD' ){
+			$('#div_keyword').show();
+		}else{
+			$('#div_keyword').hide();
+		}
+		
+
+		if(var_app_type==2){ //游戏价格
+			$('#input_adv_weekday_price').val(var_advert_data[var_index].game_weekday_price);
+			$('#input_adv_weekend_price').val(var_advert_data[var_index].game_weekend_price);
+		}else{ //应用价格
+			$('#input_adv_weekday_price').val(var_advert_data[var_index].app_weekday_price);
+			$('#input_adv_weekend_price').val(var_advert_data[var_index].app_weekend_price);
+		}
+		
+		if(var_is_type_selected && var_is_advert_selected && var_is_date_selected)
+			$.calculatePrice();
+		
+		var_is_advert_selected = true; //已选择广告位标志设为真
+	});
+	
+	// 临时方法，到时候用多选日期控件替换
+	// 将选择的日期赋给相应的数组
+	$('#button_put_date').click(function(){
+		
+		if( $('#input_adv_weekday_price').val()=='' || $('#input_adv_weekend_price').val()=='' ) {
+			alert('请先选择广告位！');
+			return false;
+		}
+			
+
+		var_weekday_date = [];
+		var_weekend_date = [];
+		
+		$('.input_put_date').each(function(){
+			if(isDate($(this).val())) { //判断是否是日期
+				var var_date = new Date( Date.parse( $(this).val().replace(/-/g, "/")));
+			
+				if(var_date.getDate() <= 5){ //判断是否是月初，每月的1～5日
+					var_weekend_date.push( $(this).val() );
+				}
+				else if(var_date.getDay()==0 || var_date.getDay()==6) { //判断是否是周末，周六日
+					var_weekend_date.push( $(this).val() );
+				}
+				else {
+					var_weekday_date.push( $(this).val() );
+				}
+			}
+		});
+		
+		if( 0 == var_weekday_date.length + var_weekend_date.length ){
+			alert('没有选择有效日期');
+			return false;
+		}
+
+		$('#span_weekdays').html(var_weekday_date.length);
+		$('#span_weekends').html(var_weekend_date.length);
+		$('#input_weekdays').val(var_weekday_date.length);
+		$('#input_weekends').val(var_weekend_date.length);
+		
+		if(var_is_type_selected && var_is_advert_selected && var_is_date_selected)
+			$.calculatePrice();
+		
+		var_is_date_selected = true; //以选择日期标志设为真
+		
+		$('#div_price_area').show(); //显示价格输入区域
+		
+		/*
+		$.each(var_weekday_date, function(key, val){
+			alert('平日：'+val);
+		});
+		$.each(var_weekend_date, function(key, val){
+			alert('周末/月初'+val);
+		});
+		*/
+
+		return false;
+	});
+	
+	// 处理周末月初的折扣率计算
+	$('#input_weekend_discount').blur(function(){
+		if(var_is_type_selected && var_is_advert_selected && var_is_date_selected)
+			$.calculatePrice();
+	});
+	
+	
+	// 处理平日的折扣率计算
+	$('#input_weekday_discount').blur(function(){
+		if(var_is_type_selected && var_is_advert_selected && var_is_date_selected)
+			$.calculatePrice();
+	});
+	
+	// 处理软件类型设置
+	$('#select_app_type').change(function(){
+		if( $(this).val()==1 || $(this).val()==2 )
+			var_app_type = $(this).val();
+		
+		if(var_is_type_selected && var_is_advert_selected && var_is_date_selected)
+			$.calculatePrice();
+		
+		var_is_type_selected = true; //已选择软件类型标志设为真
+	});
+	
+	// 处理提交
+	$('#form_contract_app').submit(function(){
+		if($('#input_app_name').val()==''){
+			alert('请输入软件名称！');
+			return false;
+		}
+		
+		if($('#input_app_package').val()==''){
+			alert('请输入软件包名！');
+			return false;
+		}
+		
+		
+		if($.calculatePrice()==false)
+			return false;
+		
+		var var_data = { 
+				'app_package':$('#input_app_package').val(),
+				'app_name':$('#input_app_name').val(),
+				'app_type':$('#select_app_type').val(),
+				'app_keyword':$('#input_app_keyword').val(),
+				'rate_card_id':$('#select_ratecard').val(),
+				'advertising_id':$('#select_advertising').val(),
+				'weekdays':$('#input_weekdays').val(),
+				'weekends':$('#input_weekends').val(),
+				'weekday_date':var_weekday_date.join('|'),
+				'weekend_date':var_weekend_date.join('|'),
+				'weekday_discount':$('#input_weekday_discount').val(),
+				'weekend_discount':$('#input_weekend_discount').val()
+		};
+		
+		$.post(	$(this).attr('action'), var_data, function(json){
+			if(json.result_no > 0){
+				alert('成功！');
+			}else{
+				alert(json.result_msg);
+			}
+		}, "json");
+		
+		return false;
+	});
+	
+	// 计算价格函数
+	$.calculatePrice = function(){
+		
+		if(var_app_type==0){
+			alert('请选择软件类别！');
+			return false;
+		}
+		
+		if( $('#input_adv_weekday_price').val()=='' || $('#input_adv_weekend_price').val()=='' ) {
+			alert('请先选择广告位！');
+			return false;
+		}
+		
+		if( 0 == var_weekday_date.length + var_weekend_date.length ) {
+			alert('没有选择有效日期！');
+			return false;
+		}
+		
+		// 平日天数大于0，则验证平日折扣率的输入
+		if( $('#input_weekdays').val()>0 ){
+			if( $('#input_weekday_discount').val() == '') {
+				alert('请输入平日折扣率！');
+				return false;
+			}
+				
+			if( isNaN( $('#input_weekday_discount').val() ) ){
+				alert('平日折扣请输入0～100的数字！');
+				return false;
+			}
+			
+			if ( $('#input_weekday_discount').val() < 0 ||$('#input_weekday_discount').val() >= 100 ) {
+				alert('平日折扣请输入0～100的数字！');
+				return false;
+			}
+			
+			$('#input_weekday_price').val( changeTwoDecimal($('#input_adv_weekday_price').val() * $('#input_weekday_discount').val() * 0.01) );
+			$('#input_weekday_total').val( changeTwoDecimal($('#input_weekdays').val() * $('#input_adv_weekday_price').val() * $('#input_weekday_discount').val() * 0.01) );
+		}else{
+			$('#input_weekday_discount').val('');
+			$('#input_weekday_price').val('');
+			$('#input_weekday_total').val('');
+		}
+		
+
+		// 周末月初天数大于0，则验证周末月初的折扣率输入
+		if( $('#input_weekends').val() > 0 ){
+			if( $('#input_weekend_discount').val() == '') {
+				alert('请输入周末月初折扣率！');
+				return false;
+			}
+				
+			if( isNaN( $('#input_weekend_discount').val() ) ){
+				alert('周末月初折扣请输入0～100的数字！');
+				return false;
+			}
+			
+			if ( $('#input_weekend_discount').val() < 0 ||$('#input_weekend_discount').val() >= 100 ) {
+				alert('周末月初折扣请输入0～100的数字！');
+				return false;
+			}
+			
+			$('#input_weekend_price').val( changeTwoDecimal($('#input_adv_weekend_price').val() * $('#input_weekend_discount').val() * 0.01) );
+			$('#input_weekend_total').val( changeTwoDecimal($('#input_weekends').val() * $('#input_adv_weekend_price').val() * $('#input_weekend_discount').val() * 0.01) );
+		}else{
+			$('#input_weekend_discount').val('');
+			$('#input_weekend_price').val('');
+			$('#input_weekend_total').val('');
+		}
+		
+		return true;
+	}
+});
+
+function isDate(dateString){
+    if(dateString.trim()=="")return false;
+    var r=dateString.match(/^(\d{1,4})(-|\/)(\d{1,2})\2(\d{1,2})$/); 
+    if(r==null){
+      //alert("请输入格式正确的日期\n\r日期格式：yyyy-mm-dd\n\r例    如：2008-08-08\n\r");
+    return false;
+    }
+    var d=new Date(r[1],r[3]-1,r[4]);   
+    var num = (d.getFullYear()==r[1]&&(d.getMonth()+1)==r[3]&&d.getDate()==r[4]);
+    if(num==0){
+      //alert("请输入格式正确的日期\n\r日期格式：yyyy-mm-dd\n\r例    如：2008-08-08\n\r");
+    }
+    return (num!=0);
+ } 
+ 
+function changeTwoDecimal(floatvar){
+var f_x = parseFloat(floatvar);
+if (isNaN(f_x))
+{
+//alert('function:changeTwoDecimal->parameter error');
+return false;
+}
+var f_x = Math.round(floatvar*100)/100;
+return f_x;
+}
+</script>
+</body></html>

@@ -1,0 +1,79 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<body style="overflow-x: hidden; overflow-y: auto; ">
+
+<div style="position:relative;margin:5px;"><h2>我的页面模块配置</h2></div>
+<div  style="float:right;margin:5px;">
+<?php if($_GET['edit_rank']): ?>
+	<form action="__URL__/edit_rank" method="post">
+	<input type="submit" name="submit" class="search_btn" onclick="return checkrank();" style="display:inline-block;" value="保存优先级" />
+	<a class="search_btn" style="display:inline-block;" href="__URL__/index">取消编辑优先级</a>
+<?php else: ?>
+	<a class="search_btn" style="display:inline-block;" href="__URL__/index/edit_rank/1">编辑优先级</a>
+<?php endif; ?></div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th style="width:100px"><a href="__URL__/index?order={$order}&edit_rank={$_GET['edit_rank']}">优先级↓↑</a></th>
+			<th style="width:100px">模块</th>
+			<th style="width:100px">前台展示状态</th>
+		</tr>
+	</thead>
+	<volist name="result" id="val">
+	<tr>
+		<td><?php if($_GET['edit_rank']): ?>
+				<?php if($val['modid'] > 2): ?><!------------可以编辑优先级的-------------------->
+					<input type="text" name="id[{$val.modid}]" value="{$val.rank|default=' '}" />
+				<?php else: ?>
+					<span style="color:gray" title="不可更改优先级">{$val.rank|default=' '}</span>
+				<?php endif; ?>
+			<?php else: ?>
+				<?php if($val['modid'] > 2): ?><!------------可以编辑优先级的-------------------->
+					{$val.rank|default=' '}
+				<?php else: ?>
+					<span style="color:gray" title="不可更改优先级">{$val.rank|default=' '}</span>
+				<?php endif; ?>
+			<?php endif; ?>
+		</td>
+		<td>{$val.modname|default='&nbsp;'}</td>
+		<td><if condition="$val.status eq 1"> <a href="__URL__/status?modid={$val.modid}&status=0" title="点击切换状态为停用" style="color:blue" onclick="return change();">启用</a>
+		<elseif condition="$val.status eq 0"/><a href="__URL__/status?modid={$val.modid}&status=1" style="color:red" title="点击切换状态为使用" onclick="return change();">停用</a>
+		<elseif condition="$val.status eq 2"/><span style="color:gray" title="不可更改状态">停用</span>
+		<elseif condition="$val.status eq 3"/><span style="color:gray" title="不可更改状态">启用</span>
+		</if></td>
+	</tr>
+	</volist>
+</table>
+<?php if($_GET['edit_rank']): ?>
+</form>
+<?php endif; ?>
+<script>
+function del()
+{
+	if(confirm("确定要删除数据吗？"))
+	return true;
+	else return false
+}
+function change()
+{
+	if(confirm("确定要更改状态吗？"))
+	return true;
+	else return false
+}
+
+function checkrank(){
+	var inp = document.querySelectorAll('input[type=text]');
+	for(i=0;i<=inp.length;i++){
+		if(isNaN(inp[i].value) || inp[i].value <= 2){
+			alert('优先级必须大于2！');
+			return false;
+		}
+	}
+	return true;
+}
+</script>
+</body>
+</html>

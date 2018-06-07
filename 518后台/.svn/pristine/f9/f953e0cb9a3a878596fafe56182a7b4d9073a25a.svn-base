@@ -1,0 +1,113 @@
+<script>
+    function submit_check() {
+        var account_input = $.trim($("#account_input").val());
+        var account_input_time = $.trim($("#account_input_time").val());
+        
+        if (!account_input) {
+            $("#account_input_hint").html('<br/><label>&nbsp;</label><label style="width:200px;text-align:left"><font color="red">请输入收款金额</font></label>');
+            return false;
+        } else {
+            var ret = check_input(false, 1);
+            if (!ret)
+                return false;
+            $("#account_input_hint").html('');
+        }
+        
+        if (!account_input_time) {
+            $("#account_input_time_hint").html('<br/><label>&nbsp;</label><label style="width:200px;text-align:left"><font color="red">请输入收款时间</font></label>');
+            return false;
+        } else {
+            $("#account_input_time_hint").html('');
+        }
+        
+        return true;
+    }
+    
+    // 检查金额是否合理    
+    function check_input(b_async, type) {
+        var input = 0;
+        if (type == 1)
+            input = trim($("#account_input").val());
+        else
+            input = trim($("#invoice_input").val());
+        if (!input)
+            return true;
+        var id = trim($("#id").val());
+        var contract_id = trim($("#contract_id").val());
+        var month = trim($("#month").val());
+        var ret = true;
+        var param = {
+            id : id,
+            contract_id : contract_id,
+            month : month,
+            input : input
+        };
+        var url = "__URL__/";
+        var hint_id = '';
+        if (type == 1) {
+            url += 'check_account_input';
+            hint_id = "#account_input_hint";
+        } else {
+            url += 'check_invoice_input';
+            hint_id = "#invoice_input_hint";
+        }
+        
+        $.ajax({
+            url:url,
+            type:'POST',
+            async:b_async,
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data) {
+                if(data.status != 0) {
+                    $(hint_id).html('<br/><label>&nbsp;</label><label style="width:200px;text-align:left"><font color="red">' + data.info + '</font></label>');
+                    ret = false;
+                } else {
+                    $(hint_id).html('');
+                    ret = true;
+                }
+            }
+        });
+        return ret;
+    }
+    
+    
+</script>
+
+<div>
+    <form action="__URL__/edit_account" method="post">
+        <div class="form_list_one">
+            <label>协议编号：</label>
+            <label style="text-align:left;">{$record.framework_number}</label>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>客户名称：</label>
+            <label style="text-align:left;">{$record.client_name}</label>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label><font color="red">*</font>收款金额：</label>
+            <input type="text" class="input_text widen" name="account_input" id="account_input" onblur="check_input(true, 1)" value="{$record.account_input}"/>
+            <span id="account_input_hint"></span>
+        </div>
+        <div class="clear"></div>      
+        <div class="form_list_one">
+            <label><font color="red">*</font>收款时间：</label>
+            <input type="text" class="Wdate input_text widen" name="account_input_time" id="account_input_time" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" value="{$record.account_input_time|date='Y-m-d',###}"/>
+            <span id="account_input_time_hint"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>备注：</label>
+            <textarea style="width:200px" name="remark" id="remark">{$record.remark}</textarea>
+        </div>
+        <div class="clear"></div>
+        <input type="hidden" name="id" id="id" value="{$record.id}">
+        <div class="form_btns_box">
+            <input type="submit" value="确定" onclick="return submit_check();" style="margin-left:155px"/>
+            <input type="button" onclick="tb_remove()" value="取消"/>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>抓取官方软件认证</title>
+<style type="text/css">
+	body, td, th {
+		font-size: 12px;
+	}
+	element.style {
+		 position: fixed;
+	}
+</style>
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<script type="text/javascript" src="/Public/js/json2.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__PUBLIC__/school/css/common.css" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript">
+	function selectAll()
+	{
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].disabled == false)
+				checkall[i].checked = true;
+		}
+	}
+	
+	function selectRev()
+	{
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox"  && checkall[i].disabled == false)
+				checkall[i].checked = !checkall[i].checked;
+		}
+	}
+	
+	function passAll()
+	{
+		var count = 0;
+		var ids = '';
+		checkall = document.getElementsByTagName("input");
+		var start_tm = document.getElementById("begintime").value;
+		var end_tm = document.getElementById("endtime").value;
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+			{
+				//id[count] = checkall[i].id;
+				ids +=  checkall[i].id + ',';
+				count++;
+			}
+		}
+		if(count == 0){
+			alert("请选择软件");
+			return false;
+		}
+		//url = encodeURI(JSON.stringify(ids));
+		//alert(url);
+		url = "/index.php/Sj/SoftOfficial/official_soft_confirm_pass/fals/list/id/" + ids + '/start_at/'+start_tm +'/end_at/'+ end_tm,
+		//url = "/index.php/Sj/SoftOfficial/confirm_timelist_one/ids/"+ids;
+		window.location.href = url;
+	}
+	
+	function rejectAll()
+	{
+		var count = 0;
+		var id = new Array();
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+			{
+				id[count] = checkall[i].id;
+				count++;
+			}
+		}
+		url = encodeURI(JSON.stringify(id));
+		//alert(url);
+		url = "/index.php/Sj/SoftOfficial/official_soft_confirm_reject/id/" + url;
+		window.location = url;
+	}
+	
+	function openw(){
+	//alert("openw_"+softid);
+		$("#openw").zxxbox();  
+	}
+	
+	function checkit(){
+		var choise = confirm("你确定进行拒绝操作吗？");
+		if(!choise){
+			return false;
+		}else{
+			return true;
+		}
+	}
+</script>
+</head>
+
+<body>
+<div style="width:99%; margin-top:4px">
+	<form action="__URL__/confirm" method="get">
+		<table width="99%" border="1" align="center" cellpadding="0" cellspacing="0">
+			<tbody align="middle">
+				<td width="10%">软件名称：</td>
+				<td width="15%"><input type="text" name="softname" id="softname" value="{$softname}"></td>
+				<td width="10%">软件包名：</td>
+				<td width="15%"><input type="text" name="package" id="package" value="{$package}"></td>
+				<td width="10%">来源：
+					<select name="from" id="from">
+						<option value="all" <eq name="from" value="all">selected="selected"</eq>>全部</option>
+						<option value="0" <eq name="from" value="0">selected="selected"</eq>>未知来源</option>
+						<option value="1" <eq name="from" value="1">selected="selected"</eq>>百度</option>
+						<option value="2" <eq name="from" value="2">selected="selected"</eq>>安卓</option>
+					</select>
+				</td>
+				<td width="10%">状态：
+					<select name="status" id="status">
+						<option value="all" <eq name="status" value="all">selected="selected"</eq>>全部</option>
+						<option value="0" <eq name="status" value="0">selected="selected"</eq>>未审核</option>
+						<option value="1" <eq name="status" value="1">selected="selected"</eq>>已通过</option>
+						<option value="2" <?php if($status==2) echo "selected";?>>已拒绝</option>
+					</select>
+				</td>
+				<td width="5%"><input type="submit" value="搜索"></td>
+			</tbody>
+		</table>
+	</form>
+	<table width="99%" border="1" align="center" cellpadding="0" cellspacing="0" style="margin-top:10px">
+		<thead>
+			<tr align="center">
+				<th width="3%" height="26" bgcolor="#E3E2FE">&nbsp;</th>
+				<th width="7%" bgcolor="#E3E2FE">ID</th>
+				<th width="10%" bgcolor="#E3E2FE">软件名称</th>
+				<th width="20%" bgcolor="#E3E2FE">软件包名</th>
+				<th width="10%" bgcolor="#E3E2FE">版本名称</th>
+				<th width="10%" bgcolor="#E3E2FE">版本号包</th>
+				<th width="10%" bgcolor="#E3E2FE">来源</th>
+				<th width="10%" bgcolor="#E3E2FE">抓取时间</th>
+				<th width="10%" bgcolor="#E3E2FE">状态</th>
+				<th width="10%" bgcolor="#E3E2FE">操 作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="officialfetch" id="officialfetch">
+				<tr <if condition="$officialfetch.status eq 3">style="color:#707070; background-color:#EEEEEE"</if>>
+					<td><input value="1" name="chick" type="checkbox" id="{$officialfetch.id}" <if condition="$officialfetch.status eq 3">disabled="disabled"</if>> </td>
+					<td height="20" align="center"> {$officialfetch.id}</td>
+					<td>{$officialfetch.softname}</td>
+					<td align="center">{$officialfetch.package}</td>
+					<td align="center">{$officialfetch.version}</td>
+					<td align="center">{$officialfetch.version_code}</td>
+					<td align="center">
+						<if condition="$officialfetch.from eq 0">未知来源</if>
+						<if condition="$officialfetch.from eq 1">百度</if>
+						<if condition="$officialfetch.from eq 2">安卓</if>
+					</td>
+					<td align="center"> {$officialfetch.create_at|date='Y-m-d H:i:s',###|default='&nbsp;'} </td>
+					<td align="center">
+						<if condition="$officialfetch.status eq 0">未审核</if>
+						<if condition="$officialfetch.status eq 1">已通过</if>
+						<if condition="$officialfetch.status eq 2">已拒绝</if>
+						<if condition="$officialfetch.status eq 3">未审核</if>
+					</td>
+					<td align="center">
+						<if condition="$officialfetch.status eq 0"><a href="__URL__/confirm_timelist/id/{$officialfetch.id}/?height=300&width=300" class="thickbox" >通过</a> <a onclick="return checkit()" href="__URL__/official_soft_confirm_reject/id/%5b%22{$officialfetch.id}%22%5d">拒绝</a></if>
+						<if condition="$officialfetch.status eq 1"><a onclick="return checkit()" href="__URL__/official_soft_confirm_reject/id/%5b%22{$officialfetch.id}%22%5d">拒绝</a></if>
+						<if condition="$officialfetch.status eq 2"><a href="__URL__/confirm_timelist/id/{$officialfetch.id}/?height=300&width=300" class="thickbox">通过</a></if>
+						<if condition="$officialfetch.status eq 3">无此软件</if>
+					</td>
+				</tr>
+			</volist>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="10">
+					<input type="button" value="全选" onclick="selectAll();">
+					<input type="button" value="反选" onclick="selectRev();">
+				<!-- 	<input type="button" id="pass" class="thickbox" value="批量通过" alt="/index.php/Sj/SoftOfficial/confirm_timelist_one/id/{$ssid}" onclick="passAll();"> -->
+					<input type="button"onclick="openw();" value="批量通过">
+					<input  type="button" value="批量拒绝" onclick="rejectAll();">
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>
+	<div id="openw" style="padding:50px; width:200px; height:100px;   display:none;">
+		<h2>认证为官方</h2>
+		<p><font color="red">注：官方认证若有时间限制，请设置具体时间，若无时间限制，按默认时间</font></p>
+		开始时间:<input id="begintime" name="begintime"
+				style="cursor: hand; width: 100px; border: none 0px black;"
+				value="{$begintime}" size="15" type="text"><img
+				src="/Public/js/calendar.gif"
+				onclick="return showCalendar('begintime', 'y-m-d');"
+				style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+				height="15px"></br>
+		结束时间:<input id="endtime" name="endtime"
+				style="border: 0px none black; width: 100px;" value="{$endtime}"
+				size="15" type="text"><img src="/Public/js/calendar.gif"
+				onclick="return showCalendar('endtime', 'y-m-d');"
+				style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		<p><button id="cancelBtn" onclick="passAll()" >提交</button></p>	
+	</div>
+</html>

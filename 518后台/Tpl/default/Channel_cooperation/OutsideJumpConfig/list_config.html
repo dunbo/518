@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css?version1" />
+
+<link rel="stylesheet" href="/Public/css/tablelist.css?1" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+
+<script>
+	
+	function checkit(){
+		if(confirm("是否确认删除该条内容，点击确认删除"))
+		{
+			return true;
+		}
+		return false;
+	}
+	function search() {
+        var search_start_time = $.trim($("#start_tm").val());
+        var search_end_time = $.trim($("#end_tm").val());
+        if (search_start_time && search_end_time && search_start_time > search_end_time) {
+            alert('结束时间不能小于或等于开始时间');
+            return false;
+        }
+        $("#index").submit();
+    }
+	
+</script>
+<div class="search_box">
+    <form method="post" action="" name="index" id="index">
+        <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+            <tr>
+                <td width="13%">
+                    <label>开始时间：</label>
+                    <input id="start_tm" name="start_tm" type="text" class="search_item_text Wdate" style="width:150px" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})" value="{$start_tm}"/>
+                </td>
+                <td width="13%">
+                    <label>结束时间：</label>
+                    <input id="end_tm" name="end_tm" type="text" class="search_item_text Wdate" style="width:150px" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})" value="{$end_tm}"/>
+                </td>
+                <td width="13%">
+                    <label>渠道名称：</label>
+                    <input type="text" class="search_item_text" style="width:150px" name="chname" id="chname" value="{$chname}"/>
+                </td>
+                <td width="5%" align="right"><input type="button" value="搜索" onclick="search()" class="search_btn"/></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div style="padding:20px;">
+&nbsp;&nbsp;<a href="__URL__/add_config?1/1" class="thickbox search_btn" style="float:left; margin:0 10px 0 6px; display:inline">添加</a>
+<div class="clear"></div>
+<table width="99%" cellpadding="0" cellspacing="0" border="1" class="table_list">
+	<thead>
+		<tr>
+			
+			<th>序号</th>
+			<th>渠道</th>
+			<th>跳转位置</th>
+			<th>跳转详情</th>
+			<th width="20%">生成链接地址</th>
+			<th>添加时间</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach($list as $key => $val){ ?>
+		<tr <?php if($val['starts_tm'] > time()){ ?>style="background-color:#ccc;"<?php } ?>>
+			
+			<td><span class="normal">{$val.id}</span></td>
+			<td>
+				<span>{$val['chname_str']}</span>
+			</td>
+			<td>
+				<span><?php if($val['type']==1){ echo "市场外投专用首页"; }else{echo "推荐内容";} ?></span>
+			</td>
+			<td>
+				<?php if($val['type'] == 1){ ?>
+						软件包名：{$val['package']}<br>
+						软件名称：{$val['softname']}<br>
+						推荐内容标题：{$val['flexible_title']}<br>
+						是否展示提示：<?php if($val['is_show_tip']==1){ echo "是"; }else{echo "否";} ?><br>
+						推荐视频软件：{$val['video_title']}<br>
+						多排推荐标题：{$val['rows_title']}<br>
+				<?php }else if($val['type'] == 2){ ?>
+						<font color="black" id='content_type_{$val.id}' >{$val.content_type}</font>
+						<script>
+							<?php if($val['content_type'] == 2){ ?>
+								var activity_name = convertActivityId2ActivityName({$val.activity_id});
+								$("#content_type_<?php echo $val['id']; ?>").html("活动-"+activity_name);	
+							<?php }else if($val['content_type'] == 3){ ?>
+								var feature_name = convertFeatureId2FeatureName({$val.feature_id});
+								$("#content_type_<?php echo $val['id']; ?>").html("专题-"+feature_name);	
+							<?php }else if($val['content_type'] == 4){ ?>
+								// var page_name = convertPageType2PageName('{$val.page_type}');
+								// $("#content_type_<?php echo $val['id']; ?>").html("页面-"+page_name);	
+								var page_name = convertPageType2PageName('{$val.page_type}');
+								var re_keyword = '{$val.re_keyword}';
+								var str = "页面-"+page_name;
+								if(re_keyword!=''){
+									str += '-'+re_keyword;
+								}
+								$("#content_type_<?php echo $val['id']; ?>").html(str);
+							<?php }else if($val['content_type'] == 8 || $val['content_type'] == 10){ ?>
+								var order_name = convertOrderId2OrderName({$val.activity_id});
+								$("#content_type_<?php echo $val['id']; ?>").html("预约-"+order_name);	 
+							<?php } ?>
+						</script>
+				<?php } ?>
+				
+			</td>
+			<td>{$val.chname_link}</td>
+			<td><?php if($val['add_tm']){ ?>{$val.add_tm}<?php } ?>
+			</td>
+			<td><a href="__URL__/del_config/id/{$val.id}/content_id/{$val.content_id}/custom_id/{$val.custom_id}/1/1" onclick="return checkit();" style='color:blue;'>删除</a></td>
+		</tr>
+		<?php } ?>
+	</tbody>
+</table>
+<center>{$page}</center>
+<!-- </form> -->
+</div>
+</body>
+</html>

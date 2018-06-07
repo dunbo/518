@@ -1,0 +1,454 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<style>
+.intb td {
+border-right:none;
+border-bottom: none;
+}
+.fixlong {
+  table-layout: fixed;
+}
+.fixlong td {
+  word-break: break-all;
+}
+.currentselected{font-weight:bold;}
+</style>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+<link rel="stylesheet" type="text/css" href="/Public/img/common.css" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<div class="main" >
+<div class="content">
+<center>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr height="35">
+		<td align="center" style=<?php if($status == 2 && $sdk_status == 2) echo "background:#FFCC66"; ?>><a href="__URL__/sdk_test_list/form_type/sdk_test/status/2/sdk_status/2/safe/0"><font style="color:#000; font-weight:bold">待&nbsp;审&nbsp;核</font></a></td>
+		<td align="center" style=<?php if($status == 2 && $sdk_status == 1) echo "background:#FFCC66"; ?>><a href="__URL__/sdk_test_list/form_type/sdk_test/status/2/sdk_status/1/safe/0"><font style="color:#000; font-weight:bold">通过</font></a></td>
+		<td align="center" style=<?php if($status == 3) echo "background:#FFCC66"; ?> ><a href="__URL__/sdk_test_list/form_type/sdk_test/status/3/safe/0"><font style="color:#000; font-weight:bold">未&nbsp;通&nbsp;过</font></a></td>
+			
+	</tr>
+</table>
+<form id="upload" method='get' action="__URL__/sdk_test_list" >
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="tb">
+<!--   <tr>
+    <td colspan="20">待审核开发者-搜索用户：</td>
+  </tr> -->
+  <tr>
+
+    <td width="99">软件ID：</td>
+    <td width="100"><input size='9' type="text" name="update_from" id="update_from"  value="{$update_from}" /></td>
+    <td width="99">软件名称：</td>
+    <td width="100"><input size='9' type="text" name="softname" id="softname"  value="{$softname}" /></td>
+	<td width="99">软件包名：</td>
+    <td width="100"><input size='9' type="text" name="package" id="package"  value="{$package}" /></td>
+	<td width="99">开发者名称：</td>
+    <td width="100"><input size='9' type="text" name="dev_name" id="dev_name" value="{$dev_name}" /></td>
+    <td width="99">注册邮箱：</td>
+    <td width="100"><input size='9' type="text" name="email" id="email"  value="{$email}" /></td>
+	<td width="99">开发者类型：</td>
+    <td width="100">
+	<select id="dev_type" name="dev_type">
+		<option value="" selected="selected" >全部</option>
+		<option value="0"<if condition="$dev_type eq '0'">selected="selected"</if>>公司</option>
+		<option value="1"<if condition="$dev_type eq '1'">selected="selected"</if>>个人</option>
+	</select></td>		
+	<td width="100" rowspan="2" align="center"><input type="submit" name="button" id="button" value="&nbsp;搜 索&nbsp;"  onclick="return checkinput()"/></td>	
+  </tr>
+  <tr>
+	<td width="99">定时上架时间：</td>
+    <td width="300" colspan='4'><?php showDatePicker('begintime','endtime', $begintime,$endtime);?></td>	
+	<?php if($status ==2){ ?>
+	<td width="99">提交时间：</td>
+    <td width="300" colspan='4'><?php showDatePicker('begintime_up','endtime_up', $begintime_up,$endtime_up);?></td>	
+	<?php }else{ ?>
+	<td width="99">驳回时间：</td>
+	<td width="300" colspan='4'><?php showDatePicker('begintime_a','endtime_a', $begintime_a,$endtime_a);?></td>	
+	<?php } ?>
+	<td align="center">sdk接入：</td>
+	<td>
+		<select style='width:85px' name="sdk" id="sdk ">
+			<option value="" <if condition="$sdk  eq ''">selected</if>>全部</option>
+			<option value="1" <if condition="$sdk  eq '1'">selected</if>>是</option>
+			<option value="2" <if condition="$sdk  eq '2'">selected</if>>否</option>
+		</select>
+	</td>	
+  </tr>
+  <tr>
+
+  	<td width="100" colspan="1"><button type="button" onclick="openw();" >软件类型</button></td>	
+    <td width="100" colspan="4"><a href="javascript:void(0)" onclick="open_sdk()">sdk最新版本配置</a></td>
+	<td width="100" colspan="2">
+		测试类型：
+		<select name="test_type" id="test_type">
+			<option value="" <if condition="$test_type  eq ''">selected</if>>全部</option>
+			<if condition='$sdk_status eq 2'>
+			<option value="1" <if condition="$test_type  eq '1'">selected</if>>新接入-无SDK</option>
+			<option value="2" <if condition="$test_type  eq '2'">selected</if>>新接入-SDK</option>
+			<option value="3" <if condition="$test_type  eq '3'">selected</if>>新接入-QA</option>
+			<option value="4" <if condition="$test_type  eq '4'">selected</if>>升级-无SDK</option>
+			<option value="5" <if condition="$test_type  eq '5'">selected</if>>升级-SDK</option>
+			<option value="6" <if condition="$test_type  eq '6'">selected</if>>升级-QA</option>
+			<else />
+			<option value="1" <if condition="$test_type  eq '1'">selected</if>>新接入</option>
+			<option value="2" <if condition="$test_type  eq '2'">selected</if>>升级</option>
+			</if>
+		</select>
+	</td>
+	<td width="100" colspan="2">
+		账号接入：
+		<select name="accept_account_status" id="accept_account_status">
+			<option value="" <if condition="$accept_account_status  eq ''">selected</if>>全部</option>
+			<option value="1" <if condition="$accept_account_status  eq '1'">selected</if>>接账号</option>
+			<option value="0" <if condition="$accept_account_status  eq '0'">selected</if>>不接账号</option>
+		</select>
+	</td>
+  </tr>  
+</table>
+	<input type='hidden' name='ad_id' id='ad_id' value="{$ad_id_str}"/>
+	<input type='hidden' name='cateid' id='cateid' value="{$init_cateid}"/>
+	<input type='hidden' name='form_type' id='form_type' value="{$form_type}"/>	
+	<input type='hidden' name='status' id='status' value="{$status}"/>	
+	<input type='hidden' name='sdk_status' id='sdk_status' value="{$sdk_status}"/>	
+	<input type='hidden' name='safe' id='safe' value="0"/>	
+</form>
+
+<table  width="100%" border="0" cellpadding="0" cellspacing="0" style="margin:8px 0 0">
+</table>
+<table  width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr  bgcolor="" height='30'><td colspan='6' align='left' >{$total}条记录</td></tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+  <tr>
+	<td width="5%" bgcolor="#e3e2fe"><input type="checkbox" id="id_all[]" name="id_all[]" onclick="selectAlls();"></td>
+    <td align='center' width="25%" height="30" bgcolor="#e3e2fe" > <font style="color:#000; font-weight:bold">软件信息</font></td>
+    <td align='center' width="15%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">开发者</font></td>
+    <td align='center' width="5%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">sdk接入</font></td>
+    <td align='center' width="5%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">sdk版本</font></td>
+    <td align='center' width="8%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">游戏类型</font></td>
+    <td align='center' width="8%" height="30" bgcolor="#e3e2fe"><a href='__URL__/sdk_test_list/form_type/sdk_test/orderby/shelves_tm/order/d/?{$param}'><font style="color:#000; font-weight:bold">定时上架时间<if condition="$order eq 'a'">&uarr;<else/>&darr;</if></font></a></td>
+	<td align='center' width="6%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">测试类型</font></td>
+    <td align='center' width="13%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">
+	<?php if($status ==2){ echo "上次审核结果"; }else{ echo "驳回原因"; } ?>
+	</font></td>
+	<?php if($status ==2){ ?>
+    <td align='center' width="10%" height="30" bgcolor="#e3e2fe"><a href='__URL__/sdk_test_list/form_type/sdk_test/orderby/upload_tm/order/d/?{$param}'><font style="color:#000; font-weight:bold">提交时间<if condition="$order1 eq 'a'">&uarr;<else/>&darr;</if></font></a></td>
+	<?php }else{ ?>
+	 <td align='center' width="10%" height="30" bgcolor="#e3e2fe"><a href='__URL__/sdk_test_list/form_type/sdk_test/orderby/time/order/d/?{$param}'><font style="color:#000; font-weight:bold">驳回时间<if condition="$order1 eq 'a'">&uarr;<else/>&darr;</if></font></a></td>
+	<?php }?>
+	
+    <td align='center' width="8%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">操作</font></td>
+  </tr>
+  <volist name='list' id='softlist'>
+  <tr id='tr{$softlist.id}' onclick="onc_('{$softlist.id}');"<if condition="$softlist.package_adapter neq '' ">style=" background:#ffff9b" </if>>
+	<td align='left'><input type="checkbox" name="id[]" value="{$softlist.id}" /><br/>
+	{$softlist.update_from|default=''}&nbsp;&nbsp;<br/><br/>
+	<img src='<?php echo IMGATT_HOST;?>{$softlist.iconurl}' width="48" height="48"/> 
+	</td>
+
+	<td align='left'><a target='_blank' href='__URL__/soft_information_view/softid/{$softlist.softid}/id/{$softlist.id}/record_type/{$softlist.record_type}'>
+	<b>{$softlist.softname}</b></a> 
+	<if condition="$softlist.softname_mark neq ''">
+	&nbsp; &nbsp; <a target='_blank' style="color:red" href='http://m.baidu.com/s?st=10a001&tn=webmkt&pre=web_am_index&word={$softlist.softname_mark}'>含标点</a>
+	</if>
+	<br/>
+	
+	<font <if condition="$softlist.package_highlight neq '' ">style=" background:#ffff9b;color:#009600""<else/>style="color:#009600"</if>>
+	{$softlist.package}<br/><br/>
+	</font>
+	
+	<font style="color:#009600">
+	{$softlist.category_name}&nbsp;&nbsp;</font>|
+	<if condition="$softlist.language eq 1">中文<elseif condition="$softlist.language eq 2 " />英文 <else /> 其他 </if>
+	<br/>
+	版本号：{$softlist.version_code} | 版本名：{$softlist.version}|
+	</td>
+	
+    <td  align='left' >
+	<!----------通过---------->
+	<if condition="$softlist.dev_status eq 0">
+	<a target='_blank' href='/index.php/Dev/User/userlists/dev_id/{$softlist.dev_id}'>
+	<!----------审核中---------->
+	<elseif condition="$softlist.dev_status eq 1" />
+	<a target='_blank' href='/index.php/Dev/User/auditforuser/dev_id/{$softlist.dev_id}'>
+	<!----------驳回---------->
+	<elseif condition="$softlist.dev_status eq '-1' " />
+	<a target='_blank' href='/index.php/Dev/User/reject_users/dev_id/{$softlist.dev_id}'>
+	<!----------屏蔽---------->
+	<elseif condition="$softlist.dev_status eq '-2' " />
+	<a target='_blank' href='/index.php/Dev/User/shield_users/dev_id/{$softlist.dev_id}'>
+	</if>		
+	{$softlist.dev_name|default=''}</a><br />
+	<if condition="$softlist.dev_type eq 0 and $softlist.dev_type neq ''">公司
+	<elseif condition="$softlist.dev_type eq 1" />个人
+	<else>&nbsp;</if><br />
+	<a target='_blank' href='__URL__/newsoft_audit_list/email/{$softlist.dever_email}'>
+	{$softlist.dever_email|default=''}</a>
+	</td>
+	<td  align='center' >
+	<?php if($softlist['anzhi_sdk']){ echo "是"; } else { echo "否";}?>	
+	</td>
+                  <td  align='center' >
+                      {$softlist.sdk_version}
+	</td>
+	<td  align='center' id='sdk_type_{$softlist.id}'>
+		&nbsp;
+	</td>
+	<td align='center'>
+		<div style="width:70px;">
+		{$softlist.pass_time|default=''}
+		</div>
+	</td>
+	
+	<td  align='center' >
+		<?php if($softlist['sdk_type'] == '0'){ echo "新接入<br>"; } else if($softlist['sdk_type'] == '1') { echo "升级<br>";}?>	
+		<if condition="$softlist.single_sdk eq '2'">SDK<br>
+		<elseif condition="$softlist.single_sdk eq '0'&&$softlist.is_accept_sdk eq '0'" />无SDK<br>
+		<elseif condition="$softlist.single_sdk eq '0'&&$softlist.is_accept_sdk eq '1'" />QA<br>
+		</if>
+		
+		<if condition="$softlist.is_accept_account eq '1'">接账号<elseif condition="$softlist.is_accept_account eq '0'" />不接账号<br></if>
+	</td>
+	
+	<td align='left' style="vertical-align:top;">
+	<div style="height:120px; overflow-x:auto; overflow-y:auto">
+		<a href="javascript:;" onclick="open_msg('{$softlist.id}');">
+		<?php if($status ==2 && $softlist['record_type'] != 1){	?>
+			<?php if($softlist['pre_status'] ==3){ ?>
+			{$softlist.reason|msubstr=###,0,50}<br>
+			{$softlist.create_tm}
+			<?php }else{ ?>
+				<?php if($softlist['record_type'] != 1 && $softlist['record_type'] != 8){ ?>
+				<?php if($softlist['review_time']){	?> 通过<br>
+				{$softlist.review_time|default=''} <?php } ?>
+				<?php } ?>
+			<?php } ?>
+		<?php }else if($status ==3){ ?>
+			<?php if($softlist['reason']){ ?>
+			{$softlist.last_refresh|default=''}<br>
+			{$softlist.reason|default=''}
+			<?php }else if($softlist['deny_msg']){ ?>
+			{$softlist.last_refresh|default=''}<br>
+			{$softlist.deny_msg|msubstr=###,0,30}
+			<?php } ?>
+		<?php } ?>
+		</a>
+	</div>
+	</td>
+	
+	<div id="msg_{$softlist.id}" style="padding:20px; width:250px;  display:none; word-break:break-all; word-wrap:break-word;">
+		<?php if($status ==2){	?>
+			<?php if($softlist['pre_status'] ==3){ ?>
+			{$softlist.reason}<br>
+			{$softlist.create_tm}
+			<?php }else{ ?>
+				<?php if($softlist['record_type'] != 1 ){ ?>
+				<?php if($softlist['review_time']){	?> 通过<br>
+				{$softlist.review_time|default=''} <?php } ?>
+				<?php } ?>
+			<?php } ?>
+		<?php }else{ ?>
+			<?php if($softlist['reason']){ ?>
+			{$softlist.last_refresh|default=''}<br>
+			{$softlist.reason|default=''}
+			<?php }else if($softlist['deny_msg']){ ?>
+			{$softlist.last_refresh|default=''}<br>
+			{$softlist.deny_msg}
+			<?php } ?>
+		<?php } ?>
+	</div>
+	
+	<td align='center'>
+	<div style="width:70px;">
+<?php if($status ==2){ ?>	
+	{$softlist.upload_tm|default=''}
+<?php }else{ ?>	
+	{$softlist.last_refresh|default=''}
+<?php } ?>
+	</div>
+	</td>
+	
+    <td  align="center" valign="middle">
+	
+		<?php if($softlist['test_report']){ ?>
+		<button onclick="window.location.href='<?php echo IMGATT_HOST .$softlist['test_report'] ;?>'" >下载测试报告</button>	
+		<?php } ?>	
+		<?php if($softlist['type_report']){ ?>
+		<button onclick="window.location.href='<?php echo IMGATT_HOST .$softlist['type_report'] ;?>'" >机型测试报告</button>	
+		<?php } ?>
+	<?php if($status ==2 &&  $sdk_status ==2){ ?>
+		<button onclick="pass_x86('{$softlist.id}')" >&nbsp;通&nbsp;过&nbsp;</button>
+		<p style="padding-bottom: 8px;"></p>
+		<button onclick="reject('{$softlist.id}')">&nbsp;驳&nbsp;回&nbsp;</button>
+	<?php }else if( $status ==3){ ?>
+			<button onclick="newsoft_cancel_do('{$softlist.id}')" >&nbsp;撤&nbsp;销&nbsp;</button>
+			<p style="padding-bottom: 8px;"></p>
+			<button onclick="del('{$softlist.id}')" >&nbsp;删&nbsp;除&nbsp;</button>	
+	<?php } ?> 
+	</td>
+  </tr>
+  </volist>
+  
+  <tr height='50px' >
+	<td align='left' colspan='11'>
+	<input type="checkbox" id="id_all[]" name="id_all[]" onclick="selectAlls();">
+	<?php if($status ==2 &&  $sdk_status ==2){ ?>
+		<button  style="margin-left:20px;" onclick="batch_pass()">批量通过</button>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<button style="margin-left:15px;" onclick="batch_reject()">批量驳回</button>
+	<?php }else if($status ==3){ ?>
+		<button  style="margin-left:20px;" onclick="del_str()">批量删除</button>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<button style="margin-left:15px;" onclick="cancel_str()">批量撤销</button>
+	<?php } ?>
+	</td>
+  </tr>
+
+</table>
+<div align='left'>{$page}</div>
+</center>
+</div>
+</div>
+<input type="hidden" name="tmp_id" id="tmp_id" />
+<div id="sdk_config" style="height:80px;width:200px;text-align:center;display:none;">
+	<div style='margin-top:20px'>
+		sdk版本：<input type="text" id="sdk_version" value="{$sdk_version}">
+	</div>
+    <div style='margin-top:20px'>
+		<input type="button" value="保存" onclick="save_sdkver()">
+		<input type="button" value="取消" onclick="$.zxxbox.hide();">
+	</div>
+    
+</div>
+<script type="text/javascript">
+<?php
+$tmpid = array();
+foreach($list as $v) {
+	$tmpid[] = $v['id'];
+}
+$info = json_encode($tmpid);
+?>
+//sdk类型
+$(document).ready(function(){
+	var param = {data:<?php echo $info; ?>};
+	$.ajax({
+		url: '__URL__/pub_sdk_type',
+		data: param,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			for(var i in ret){
+				$('#sdk_type_'+i).html(ret[i]);
+			}
+		}
+	});
+});
+//撤销	
+function newsoft_cancel_do(id){
+	open_color(id);
+	if(confirm('您确定要执行该操作吗？')) {
+		var buid = '#tr'+id+' td button';
+		$(buid).attr({disabled:'disabled', name:'disabled'});
+		$.ajax({
+			url: '__URL__/sdk_cancel/id/'+id,
+			data: '',
+			type: 'post',
+			dataType: 'json',
+			success: function(ret) {
+				if(ret['code']==0) {	//失败
+					alert(ret['msg']);
+					location.reload();//加载页面
+					return false;
+				} else if(ret['code']==1 || ret['code']==2) {	//成功
+					if(ret['code']==2){
+						alert(ret['error']);
+					}
+					//变灰不可点击处理
+					gray_processing(ret['msg']);
+				}
+			}
+		});
+	}else{
+		remove_color(id);
+	}
+}
+//批量撤销
+function cancel_str() {
+	id_str = Selected_check();
+	if(id_str){
+		newsoft_cancel_do(id_str);
+	}
+}	
+
+//删除
+function del(id) {
+	open_color(id);
+	if(confirm('您确定要执行该操作吗？')) {
+		$.ajax({
+			url: '__URL__/del_sdk/id/'+id,
+			data: '',
+			type: 'post',
+			dataType: 'json',
+			success: function(ret) {
+				if(ret['code']==0) {	//失败
+					alert(ret['msg']);
+					location.reload();//加载页面
+					return false;
+				} else if(ret['code']==1) {	//成功
+					//变灰不可点击处理
+					gray_processing(ret['msg']);
+				}
+			}
+		});
+	}else{
+		remove_color(id);
+	}
+}
+//批量删除
+function del_str() {
+	id_str = Selected_check();
+	if(id_str){
+		del(id_str);
+	}
+}
+function open_msg(id){	
+	$("#msg_"+id).zxxbox();
+}
+function scan_res(id){	
+	$("#scan_res"+id).zxxbox();
+}
+
+function open_sdk(){
+    $("#sdk_config").zxxbox();
+}
+function save_sdkver(){
+    var sdk_version = $('#sdk_version').val();
+    if(sdk_version==''){
+        alert('请输入版本号');
+        return false;
+    }else{
+        $.post(
+                    "__URL__/save_sdk_version",
+                    {sdk_version:sdk_version},
+                    function(data){
+                        if(!data.error){
+                            $('#sdk_version').val(sdk_version);
+                            alert('保存成功');
+                        }else{
+                            alert('保存失败');
+                        }
+                        $.zxxbox.hide();
+                    },'json'
+                );
+    }
+}
+var action_url = 'sdk_reject';
+var pass_url = 'sdk_pass';
+</script>
+<include file="../../Public/check_reject" />
+<include file="../../Public/category" />
+<include file="../../Public/ad_list" />
+<include file="../../Public/pass_x86" />

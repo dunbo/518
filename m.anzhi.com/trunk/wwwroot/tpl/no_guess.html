@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>竞猜次数不足</title>
+<link href="/css/worldcup.css" type="text/css" rel="stylesheet">
+<script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+</head>
+<script>
+var img_url = '<!--{$out.img_url}-->'
+var sid = '<!--{$out.sid}-->'
+var aid = '<!--{$out.aid}-->'
+function change_soft(status){
+	status = 300;
+	$.ajax({
+		url:"/changesoft.php",
+		data:"status="+status+'&sid='+sid,
+		type:'get',
+		success:function(data){
+			if(data){
+				data = eval('('+data+')');
+				var str = '';
+				for(i=0;i<data.length;i++){
+					if(data[i]['softname'].length > 3){
+						var softname = data[i]['softname'].substr(0,3)+'...';
+					}else{
+						var softname = data[i]['softname'];
+					}
+					if(status == 300){
+						str += '<li><dl><dt><img src="'+img_url+''+data[i]['icon_72']+'" width="43" height="43" border="0"></dt><dd><p class="name">'+softname+'</p><p class="size">'+data[i]['size']+'</p><p class="download_bg"><a onclick="download_apk(1,'+data[i]['softid']+',\''+data[i]['package']+'\',\''+data[i]['softname']+'\',\''+data[i]['version_code']+'\',\''+data[i]['size']+'\',0);"><span id="'+data[i]['softid']+'">下载</span></a></p></dd></dl></li>';
+					}else{
+						str += '<li><dl><dt><img src="'+img_url+''+data[i]['icon_72']+'" width="43" height="43" border="0"></dt><dd><p class="name">'+softname+'</p><p class="size">'+data[i]['size']+'</p><p class="download_bg"><a href="">下载</a></p></dd></dl></li>';
+					}
+				}
+				$('#my_soft').html('');
+				$('#my_soft').html(str);
+				
+			}
+		}
+	});
+}
+
+//下载软件
+function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag){
+	window.AnzhiActivitys.registerDownloadObserver(parseInt(softid));
+
+	window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+}
+
+//更新软件状态（正在下载）
+function onDownloadCreated(softid){
+	$('#'+softid+'').html("下载中");
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		$('#'+softid+'').html("下载中");
+	}else if(newState == 2){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 3){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 4){
+		$('#'+softid+'').html("重试");
+	}else if(newState == 5){
+		$('#'+softid+'').html("已下载");
+		$.ajax({
+		url: '/cup_download.php',
+		data: 'softid='+softid+'&sid='+sid,
+		type: 'get',
+		success: function(data){
+				if(data){
+					$('#my_num').html(data);
+				}
+			}
+		});
+	}else if(newState == 6){
+		$('#'+softid+'').html("打开");
+	}else if(newState == 8){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 9){
+		$('#'+softid+'').html("检查中");
+	}
+}
+
+</script>
+<body>
+<section class="main">
+	<div class="main_part">
+<div class="app_part2" style="margin: auto;">
+    <div class="res_part5">
+        <p class="remind">您的当前可用竞猜数为0，不能竞猜。</p>
+        <p class="comment">提示：每下载并安装一个主题软件额外获得一次竞猜机会。</p>
+    </div>	
+    <div class="app_down_module">
+    	<ul id="my_soft">
+        	<!--{foreach from=$out.my_soft item=v key=k}-->
+        	<li>
+            	<dl>
+                <dt><img src="<!--{$out.img_url}--><!--{$v.icon_72}-->" width="43" height="43" border="0"></dt>
+                <dd>
+                	<p class="name"><!--{$v.softname|sub_str:3|escape:html}--></p>
+                	<p class="size"><!--{$v.size}--></p>
+                    <p class="download_bg"><a href="javascript:;" onclick="download_apk('',<!--{$v.softid}-->,'<!--{$v.package}-->','<!--{$v.softname}-->','<!--{$v.version_code}-->','<!--{$v.size}-->',0);"><span id="<!--{$v.softid}-->">下载</span></a></p></dd>
+                </dl>
+            </li>
+           <!--{/foreach}-->
+        </ul>
+    </div>
+    <div class="clear"></div>
+</div>
+<div class="app_change">
+	<a style="cursor:pointer;"><p class="change_menu" onclick="change_soft(<!--{$out.status}-->);">换一换</p></a>
+</div>
+
+    </div>
+</section>
+</body>
+</html>

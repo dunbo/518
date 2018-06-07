@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title><!--{if $out.is_expired eq 1}-->已过期<!--{else}-->我的奖品<!--{/if}--></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/<!--{$out.prefix}-->/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+</head>
+<body>
+
+<!--{if $out.prize_list}-->
+<div class="prize_wrap" style="margin:0 0 10px">
+	<ul class="prize_list2 <!--{if $out.is_expired eq 1}-->prize_list_end<!--{/if}-->">
+	<!--{foreach from=$out.prize_list item='val' key='k'}-->
+		<li onclick='prize_info("<!--{$val.id}-->","<!--{$val.type}-->");' >
+			<div class="prize_list2_l">
+				<img src="<!--{$out.img_url}--><!--{$val.pic_path}-->" />
+			</div>
+			<div class="prize_list2_c">
+				<h6><!--{$val.prizename}--></h6>
+				<!--{if $out.is_expired eq 0}-->
+				<p>有效期：	<!--{$val.create_tm}-->	</p>
+				<!--{/if}-->
+			</div>
+			<div class="prize_list2_r"></div>
+			<!--{if $out.is_expired eq 1}-->
+			<i></i>
+			<!--{else}-->
+			<a href="javascript:;"  ></a>
+			<!--{/if}-->			
+		</li>	
+	<!--{/foreach}-->	
+		<div class="clear"></div>
+	</ul>
+</div>
+<!--{else}-->
+<div class="main">
+	<div class="prize_no">
+		<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/sign_prompt_01.png" />
+		<p>页面空空的，没有内容呀</p>
+		<p><a onclick='back_pre()' >去首页看看</a></p>
+	</div>
+</div>	
+<!--{/if}-->
+</body>
+</html>
+<script>
+var sid='<!--{$out.sid}-->';
+var prefix = "<!--{$out.prefix}-->";
+var stop = "<!--{$out.stop}-->";
+var is_expired = "<!--{$out.is_expired}-->";
+var activity_host = "<!--{$out.activity_host}-->";
+
+<!--{if $out['is_login'] == 1 && $out.is_expired ==0 && $out.is_expired ==0}-->
+
+	//修改右侧actionBar,紧支持文本
+	if(is_expired == 1){
+		var text = "我的奖品";
+		var is_status = 0;
+	}else{
+		var text = "已过期";
+		var is_status = 1;
+	}
+	var rightaction_url = activity_host+"/"+prefix+"/my_prize.php?sid="+sid+"&is_expired="+is_status;
+	var rightaction_json = '{"text":"'+text+'","url":"'+rightaction_url+'"}';
+	window.AnzhiActivitys.updateRightActionBar(rightaction_json);
+<!--{/if}-->
+
+//单个奖品信息
+function prize_info(id,type){
+	var url = activity_host+"/"+prefix+"/my_prize.php?from=1&sid="+sid+"&id="+id+"&type="+type+"&is_expired="+is_expired;
+	//"isFinish":"0 默认 不关闭签到页面，1 打开新页面时关闭之前的签到页面，2从打开的页面返回后刷新页面"
+	var url_json = '{"text":"","url":"'+url+'","isFinish":"0"}';
+	window.AnzhiActivitys.loadUrlNextPage(url_json);		
+}
+//返回首页
+function back_pre(){
+	var url = activity_host+"/"+prefix+"/index.php?sid="+sid;
+	var url_json = '{"text":"每日签到","url":"'+url+'","isFinish":"1"}';
+	window.AnzhiActivitys.loadUrlNextPage(url_json);	
+}
+//复制
+function copytext(text){
+	window.AnzhiActivitys.copyText(text);
+    window.AnzhiActivitys.showToastForJs('复制成功');
+}
+</script>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>愚人节开心七天乐</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/<!--{$out.prefix}-->/css/common.css"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/TouchSlide.1.1.js"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/coactivity/js/jquery.easing.min.js"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/coactivity/js/lottery_Rotate.js?v1"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/coactivity/js/jQueryRotate.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<!--{/if}-->
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/soft_list_v1.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public.js"></script>
+</head>
+<body>
+<section>
+    <div class="banner"><img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/banner.png"/></div>
+	<div class="main">
+		<div class="person"></div>
+		<div class="rule">
+			<div class="titles"></div>
+			<p class="active_time">2016年4月1日0:00-4月7日23:59</p>
+			<div class="titles rule_title2"></div>
+			<p><span>每日签到：</span>七天同乐！连续签到7天，即赠送7元现金红包哦！累积签到5天以上的用户，可得4元现金红包，3天以上的可得2元现金红包【不叠加赠送哦】！<br/><span>充值抽奖：</span>充值专享活动！单日游戏内累积充值，每满50元获得一次抽奖机会，单日最高可获得抽奖次数为5次，活动结束之后未抽奖次数作废；<br/><span>下载抽奖：</span>每日送大奖！单用户每天下载一款软件，即可获得1次抽奖机会，单日最多获得3次抽奖机会哦！</p>
+		</div>
+		<div id="login_wrap">
+		<!--{if $out['is_login'] == 1}-->
+			<div class="logined" >
+				<div class="logined_l">
+					<p>您已登录账号为：<!--{$out.username}--></p>
+					<div class="star_list clear">
+				<!--{foreach from=$out.tm_config item='val' key='k'}-->
+					<!--{if $val.time <= $out.now }--> 
+						<!--{if $val.status == 1 }--> 
+						<span class="star_gold"><!--{$val.num}--></span>
+							<!--{if $val.num < 7 }-->
+							<em class="spot_gold"></em>	
+							<!--{/if}-->								
+						<!--{else}-->
+						<span class="star_gray" id='day_num<!--{$val.num}-->' ><!--{$val.num}--></span>
+							<!--{if $val.num < 7 }-->
+							<em class="spot_gray" id='day_num_s<!--{$val.num}-->' ></em>	
+							<!--{/if}-->	
+						<!--{/if}-->
+					<!--{else}-->						
+						<span class="star_lightgray"><!--{$val.num}--></span>
+						<!--{if $val.num < 7 }-->
+						<em class="spot_gray"></em>	
+						<!--{/if}-->
+					<!--{/if}-->
+				<!--{/foreach}-->						
+					</div>
+				</div>
+				<div class="logined_r">
+					<a href="/lottery/april_fool/userinfo.php?types=3&sid=<!--{$out.sid}-->&aid=<!--{$out.aid}-->">个人信息</a> 
+					<!--{if $out.is_sing == 1 }--> 
+					<a class="login_sign disabled"  id="sign" href="javascript:;">已签到</a>
+					<!--{else}-->	
+					<a class="login_sign" onclick="sign_do();" id="sign" href="javascript:;">签到</a><!--{/if}-->						
+				</div>
+			</div>
+			<!--{else}-->
+			<div class="login logined">
+				<div class="logined_l">
+					<p>先登录才能抽奖哦！</p>
+				</div>
+				<div class="logined_r">
+					<a href="javascript:;"  class="login_btn" onclick="login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');" >登 录</a>
+				</div>
+			</div>
+			<!--{/if}-->	
+			<div class="coin_01"></div>
+			<div class="coin_02"></div>
+		</div>
+		<div class="notice">
+			<div class="notice_list">
+				<marquee scrollamount="2" scrolldelay="90" direction="left">
+					<!--{if $out.top10_lottery}-->
+					<!--{foreach from=$out.top10_lottery item=v}-->
+					<span>恭喜用户<!--{$v.username}-->，好运爆表，充值抽奖获得<!--{$v.prizename}--></span>
+					<!--{/foreach}-->
+					<!--{else}-->
+					活动已开启，赶紧参与抽奖吧！
+					<!--{/if}-->
+				</marquee>
+			</div>
+		</div>
+		<div class="maininner">
+			<img class="decorate_01" src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/decorate_01.png"/>
+			<div class="prize_index">
+				<p>
+				<!--{if $out['is_login'] == 1}-->
+				今日充值金额：<span><!--{$out.today_money}--></span>元
+				<!--{/if}-->
+				<br/>剩余抽奖机会<span id='lottery_num' ><!--{$out.lottery_num}--></span>次</p>
+				<p class="prize_tips">Tips：充值新增的抽奖次数15分钟刷新一次哦！</p>
+				<a href="javascript:;" onclick='my_prize();' >我的奖品</a>
+			</div>
+			<div class="lottery">
+				<div class="rotate">
+					<div class="rotate-con">
+						<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/lottery.png" width="100%"/>
+						<!--{if $out['lottery_num'] <= 0}-->
+						<div class="rotate-pointer pointer-disabled"></div>
+						<!--{else}-->
+						<div class="rotate-pointer" id='lottery_but' onclick='lottery_click()' ></div>
+						<!--{/if}-->
+					</div>
+					<div class="leaves_center"></div>
+					<div class="lottery_bg2"></div>
+				</div>
+				<a class="lottery_btn  lottery_btn2" onclick="lottery_go(2);" href="javascript:;" >下载拼人品</a>
+				<div class="clear"></div>
+				<div class="lottery_txt">
+					<p>活动范围：通过安智市场下载的，且用安智账号登陆的游戏</p>
+					<p>活动说明：单日累积充值每满50元获得一次抽奖机会，单日最高可通过充值获得抽奖次数为5次，活动结束之后未抽奖次数作废；</p>
+				</div>
+			</div>
+			<div class="titles active_title"></div>
+			<ul class="active_ctn">
+				<li>
+					<span>1.</span>
+					<p>用户必须在已登录状态下，才能参与此活动。</p>
+				</li>
+				<li>
+					<span>2.</span>
+					<p>同一个设备，最多可在活动期间用2个安智账号签到。</p>
+				</li>
+				<li>
+					<span>3.</span>
+					<p>签到规则：活动期间，签到7天的用户，可获赠7元现金红包，签到5天或6天的用户，可获得4元的现金红包，签到3天或4天的用户，可获得2元的现金红包，同一用户不重复获奖，以最高的为准；</p>
+				</li>
+				<li>
+					<span>4.</span>
+					<p>活动中获得的所有的现金红包均为礼券的形式，将会在4月11日进行发放，发放的礼券的有效期为7天，请尽快使用，避免过期哦！</p>
+				</li>
+				<li>
+					<span>5.</span>
+					<p>“充值不停歇 好运转转转”抽奖次数获取方法：单日内累积充值每满50元获得一次抽奖机会，单日通过充值最高获取5次抽奖机会，同时，充值新增的抽奖机会每隔15分钟刷新一次；</p>
+				</li>
+				<li>
+					<span>6.</span>
+					<p>“下载大抽奖 愚人共联欢”抽奖次数获取方法：同一用户，同一款软件，只有在本页面首次点击下载按钮，并下载完成后，才赠送抽奖机会哦！单日可通过下载获取至多3次抽奖机会；</p>
+				</li>
+				<li>
+					<span>7.</span>
+					<p>用户中奖后，请及时点击【个人信息】，填写收奖联系方式，以便中奖后给您发放实物奖品。</p>
+				</li>
+				<li>
+					<span>8.</span>
+					<p>获奖名单将在活动结束页公布，所有实物奖品将在活动结束后的15个工作日内寄出。</p>
+				</li>
+				<li>
+					<span>9.</span>
+					<p>本活动派发的礼包有效期30天，请获得的用户尽快使用，以免过期！</p>
+				</li>
+				<div class="clear"></div>
+			</ul>
+			<div class="footer">
+				<p>活动最终解释权归安智所有</p>
+			</div>
+		</div>
+	</div>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con">
+				<div class="tip_title">
+					<h6  id='title' >我的奖品</h6>
+				</div>
+				<div class="clear"></div>
+                <p id='notice' >您现在还未抽奖，快抓紧时间去抽奖吧！</p>
+				<div class="tips_btns"><a href="javascript:;" onclick="cloBox('#tip-box')">返 回</a></div>
+            </div>
+			
+        </div>
+    </div>	
+</section>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var is_login = '<!--{$out.is_login}-->';
+var is_user_winning = "<!--{$out.is_user_winning}-->";
+var lottery_num = "<!--{$out.lottery_num}-->";
+function onLoginComplete(sid,tip){
+	if(tip == "登录成功"){
+		sid_str = sid.replace("PHPSESSID=", "");
+		location.href="/lottery/april_fool/lottery.php?sid="+sid_str+"&aid=<!--{$out.aid}-->";
+	}
+}
+
+function my_prize(){
+	if(is_user_winning == 2){
+		pop_tips("我的奖品","您现在还未抽奖，快抓紧时间速去抽奖吧！","",1);	
+		setTimeout(
+			function(){
+				cloBox('#tip-box');
+			},3000
+		);		
+	}else{
+		if(is_login == 1){
+			location.href="/lottery/april_fool/userinfo.php?types=1&sid="+sid+"&aid="+aid;
+		}else{
+			login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		}
+	}
+}
+function lottery_click(){
+	if(is_login == 2){
+		$.ajax({
+			url: '/lottery/april_fool/lottery_go.php',
+			data: 'sid='+sid+'&aid='+aid+'&no_login=1&is_luxury=1',
+			type: 'get',
+			success: function(data){
+
+			}
+		});	
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	}
+	if(parseInt(lottery_num) <= 0 ){
+		$('#lottery_but').attr('class', 'rotate-pointer pointer-disabled');
+		pop_tips("抽奖次数已用完","抱歉，您账号今日可用抽奖次数已用完！","",1);		
+		setTimeout(
+			function(){
+				cloBox('#tip-box');
+			},3000
+		);			
+		return false;	
+	}
+	$('#lottery_but').attr('onclick', '');
+	$.ajax({
+		url: '/lottery/april_fool/lottery.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+			if(data.code == 1){
+				is_user_winning =1;
+				lottery_num = lottery_num-1;
+				$('#lottery_num').html(lottery_num);
+				setTimeout(
+					function(){
+						location.href="/lottery/april_fool/userinfo.php?types=2&sid="+sid+"&aid="+aid+"&prizename="+data.prizename+"&prize_rank="+data.pid+"&is_luxury=1";
+					},4000
+				);
+				var a = runzp(data.pid);	
+			
+				$(".rotate-pointer").rotate({
+					duration:2000,
+					angle: 0,
+					animateTo:1800+a.angle,
+					easing: $.easing.easeOutSine,
+					callback: function(){
+							
+					}
+				});				
+				if(lottery_num > 0){
+					$('#lottery_but').attr('class', 'rotate-pointer');
+				}else{
+					setTimeout(function(){
+						$('#lottery_but').attr('class', 'rotate-pointer pointer-disabled');
+					}, 3000);
+				}				
+				//pop_tips(data);
+			}else if(data.code == 2){
+				location.href=data.url+"?sid="+sid+"&aid="+aid;
+			}else{
+				pop_tips(data.title,data.msg,"",1);
+				return false;
+			}
+		}
+	});	
+}
+
+//转盘跳转日志
+function lottery_go(is_luxury){
+	$.ajax({
+		url: '/lottery/april_fool/lottery_go.php',
+		data: 'sid='+sid+'&aid='+aid+'&is_luxury='+is_luxury,
+		type: 'get',
+		success: function(data){
+			if(is_luxury == 2){
+				location.href="/lottery/april_fool/down_lottery.php?sid="+sid+"&aid="+aid;
+			}else{
+				location.href="/lottery/april_fool/lottery.php?sid="+sid+"&aid="+aid;
+			}
+		}
+	});
+}
+var is_sing = "<!--{$out.is_sing}-->";
+var num = "<!--{$out.num}-->";
+var sign_num = "<!--{$out.sign_num}-->";
+function sign_do(){
+	$.ajax({
+		url: '/lottery/april_fool/sign.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'post',
+		dataType: 'json',				
+		success: function(data){
+			if(data.code == 1){
+				$("#day_num"+num).attr('class', "star_gold");
+				$("#day_num_s"+num).attr('class', "spot_gold");
+				$("#sign").attr('class', "login_sign disabled").attr('onclick', "").html("已签到");			
+				if(sign_num == 2){
+					var str = "您累积已签到3天了，可获得2元现金红包哦！再签到2天，可升级为4元现金红包！";
+				}else if(sign_num == 4){
+					var str = "您累积已签到5天了，可获得4元现金红包哦！再签到2天，可升级为7元现金红包！";
+				}else if(sign_num == 6){
+					var str = "您累积已签到7天了，可获得7元现金红包哦！再接再厉，期待下次活动吧！";
+				}else{
+					var str = "";
+				}
+				pop_tips("签到成功",str,"",1);
+				setTimeout(function(){
+					cloBox('#tip-box');
+				}, 4000);				
+				return false;
+			}else if(data.code == 2){
+				location.href=data.url;
+				return false;
+			}					
+		}
+	});
+}
+</script>
+</body>
+</html>

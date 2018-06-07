@@ -1,0 +1,119 @@
+<include file="../../Public/new_header"/>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery-1.4.2.min.js'></script>
+<script src="/Public/js/thickbox-compressed.js"></script>
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<script>
+function change_rank(rank,id){
+	var p = $('#p').val();
+	var lr = $('#lr').val();
+	location.href="__URL__/change_soft_rank/rank/"+rank+"/id/"+id+"/p/"+p+"/lr/"+lr;
+}
+
+function checkit(){
+	if(confirm("确定要删除此软件？"))
+	{
+		return true;
+	}else{
+		return false;
+	}
+}
+function onFileChange(obj){
+	var index = $(obj).attr('name');
+	if(index == 'csv'){
+		if( !obj.value.match( /.csv/i ) ){
+			alert('上传格式出错');
+			var file = $("#csv");
+			file.after(file.clone().val(""));
+			file.remove();	
+			return false;
+		}
+	}
+	var ap_id = "<?php echo $id; ?>";
+	$.ajaxFileUpload(
+		{
+			url:'__URL__/batch_add_soft/ap_id/'+ap_id, 
+			//你处理上传文件的服务端
+			secureuri:false,
+			fileElementId:'csv',
+			dataType: 'json',
+			success: function (data,status){
+				if(data.code == 0){
+					$('#err').html(data.msg);
+				}else{
+					$('#err').html('');
+					alert(data.msg);
+					location.reload();//加载页面	
+				}
+			},
+			error: function(data, status, e){
+			//	alert(data.responseText);
+				alert(status);
+				//alert(e);
+			}			
+		}
+	)
+}
+</script>
+<body>
+<div style="margin:20px;">
+<table>
+	<tr>
+		<td>
+			<!-- <a href="javascript:history.go(-1);" id='referer_url' class="search_btn">返回</a> -->
+			<a href="{$referer_url}" id='referer_url' class="search_btn">返回</a>
+			&nbsp;&nbsp;
+		</td>
+		<td>
+			<a href="__URL__/add_soft_show/id/{$id}/p/{$p}/lr/{$lr}?mm" class="thickbox search_btn">添加软件</a>&nbsp;&nbsp;
+			<input type="hidden" value="{$p}" id="p" />
+			<input type="hidden" value="{$lr}" id="lr" />
+		</td>
+		<td>
+			<input class="search_btn" type="file" id='csv' name="csv" value="上传csv文件" onchange="onFileChange(this)" />&nbsp;&nbsp;
+		</td>	
+		<td>
+			<a href='__PUBLIC__/csv_template/sample.csv'>下载csv模版</a>
+		</td>
+		<td>
+			<font style="color:red; font-size: 12px"><b>提示：</b>格式csv；文件名称可自定义；只读取第一列数据；每行一个包名；包名内容格式：不能输入中文;</font>
+		</td>
+	</tr>
+	<tr>
+		<td colspan='5'  >
+			<font id='err' style="color:red; font-size: 12px"></font>
+		</td>
+	</tr>
+</table>
+</div>
+<div style="margin:20px;">
+	<table border="1" cellspacing="0" cellspacing="0" class="table_list" width="80%">
+		<tr>
+			<th style="text-align:center;">排序</th>
+			<th style="text-align:center;">软件名称</th>
+			<th style="text-align:center;">软件包名</th>
+			<th style="text-align:center;">一句话推荐</th>
+			<th style="text-align:center;">操作</th>
+		</tr>
+		<?php foreach($soft_result as $key => $val){ ?>
+		<tr>
+			<td style="text-align:center;">
+			<select name="rank" onchange="change_rank(this.value,{$val.id});" id="rank">
+				<?php foreach($rank as $k => $v){ ?>
+					<option value="{$v}" <?php if($val['rank'] == $v){ ?>selected<?php } ?>>{$v}</option>
+				<?php } ?>
+			</select>
+			</td>
+			<td style="text-align:center;">{$val.soft_name}</td>
+			<td style="text-align:center;">{$val.package}</td>
+			<td style="text-align:center;">{$val.recomment}</td>
+			<td style="text-align:center;"><a href="__URL__/edit_soft_show/id/{$val.id}/p/{$p}/lr/{$lr}" class="thickbox">编辑</a>&nbsp;&nbsp;<a href="__URL__/del_soft/id/{$val.id}/p/{$p}/lr/{$lr}" onclick="return checkit();">删除软件</a></td>
+		</tr>
+		<?php } ?>
+	</table>
+</div>
+</body>
+</html>

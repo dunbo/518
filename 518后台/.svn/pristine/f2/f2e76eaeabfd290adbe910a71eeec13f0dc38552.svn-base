@@ -1,0 +1,188 @@
+﻿#前期相关修改
+[TOC]
+#淘号信息相关备注
+
+##前提(Detailed)：
+>新旧版本区分，市场3.0添加的淘号，预定一直有，SDK淘号和预定都是新加的
+
+>所有该渠道的所有礼包都被领取后的两个小时
+>最后一个礼包领取后，加一个标示位last_time
+>定时脚本跑标示位后两个小时后触发礼包生成程序，并加标示位，is_pool
+>若在两个小时内有增加礼包则删除last_time标示
+
+生成对应渠道礼包池
+>生成对应渠道的礼包池(生成前校验该渠道是否还有未领取的礼包)
+
+##具体步骤
+1，在礼包页面显示游戏礼包状态为淘号状态
+>最后一个礼包领取后，加一个标示位last_time
+	task\worker\send_number_v55_worker.php
+>定时脚本判断时间后，将礼包的状态修改为可淘状态
+>生成淘号池
+	cron_market\cache\gift\activity_init.php
+
+2，进入淘号页面，进入后先判断该淘号状态，
+>新增礼包时不可淘号，
+>有未领取的礼包时不可淘号，
+>礼包发放结束后不可淘号
+
+3，从礼包池取出一条礼包
+>礼包池列表跟用户已领列表去重后取出一条
+
+4，将礼包和用户信息保存
+>更新用户和礼包的对应关系表
+>同步礼包信息
+
+
+##字段说明：
+```
+ACTIVE:$activity_id:status 淘号状态(0为未初始，1为已初始，正在进行淘号，3不可淘号)
+ACTIVE:$active_id:COMPLETE_DATE   	最后一个号码的领取时间
+ACTIVE:COMPLETE_LIST 				已领完的活动id列表
+NUMBER_LIST:{$active_id}; 		活动的奖品池
+ACTIVE_SEND:$activity_id:list 		已发送的奖品集合
+ACTIVE:NUMBERS:$activity_id:$userid:MY  		某人已经领取过的号码集合
+ACTIVE:NUMBERS:$activity_id:$userid:NO 			某人还未领取的集合(每次重新生成)
+```
+----------------------
+```
+	Other
+	Redis 集合(Set)
+
+	sadd          //添加元素
+	srem          //删除集合内的指定元素
+	spop(key) 	  //随机返回并删除名称为key的set中一个元素
+	smembers 	  //读取列表
+	SRANDMEMBER   //返回一个元素，不删除
+	SDIFFSTORE    //返回差集，并保存到指定元素内
+
+	礼包状态：淘号成功(淘到的号不保证一定能兑换，请尽快使用) | 该礼包今日淘号次数已达上限 | 已没有剩余的号可淘
+```
+----------------------
+##新旧版淘号信息的展示
+###旧版本
+>不显示未开始的活动，即预定礼包
+>在生成缓存列表时过滤掉的
+
+###新版本
+>显示预定礼包
+>生成缓存时不过滤
+>在前台展示时，根据版本号来加过滤条件
+
+###注：
+    市场：vr >=3  时有淘号，预定一直都有                   
+    SDK ：vr >=3  时有预定和淘号功能
+
+###改动的地方
+`model/gift.php` 根据接口过滤预定和滤淘号数据
+`modules/gift/giftmore` 根据接口过滤预定和滤淘号数据
+`modules/gift/giftlist` 根据接口过滤预定和滤淘号数据
+`cron_market/cache/gift/cache_gift_lis`t 生成缓存时不加时间过滤
+
+
+---------------------------------
+
+##待定需确认：
+
+	全部号码淘完之后的用户提示？
+
+##改动的地方
+	领取礼包，判断是否为最后一个
+	礼包信息初始化
+	礼包列表
+	礼包详情
+	新增的淘号功能
+
+---------------------------------
+#网易接口
+
+	sdk_channel_game //渠道和包的对应关系，通过渠道取得相应渠道已签名的包
+	sdk_soft_thumb   //软件缩略图
+
+	全量，20页，每页50条 
+```mysql	
+ALTER TABLE `sj_comment_statistics`
+ADD COLUMN `comment`  int(11) NOT NULL COMMENT '评论数' AFTER `pid`;
+```
+----------------------------------------
+
+#搜狗接口
+
+
+
+--------------------------
+#礼包领取限制(修改)
+	
+	添加设备领取限制，网游类每天10次，单机类1次
+
+###具体要修改的地方
+
+	1.后台在生成表的时候添加设备标示字段
+	2.领取队列插入设备标示
+	3.定时脚本生成礼包列表时添加礼包类型
+	4.领取时先判断礼包的类型单机1次，网游10次
+	5.领取成功后更新缓存
+
+**更新文件**
+`GOGETGIFT` 领取礼包进队列时添加设备标示信息
+`worker/update_sendnum_db_worker.php` 处理队列时将设备标示入库
+`GOGETGIFT` 领取礼包时判断设备之前的领取次数
+`model/soft` 添加获取软件类型的方法(getSoftType)默认为单机
+`cron/cache/gift/cache_game_gift_list.php` 生成礼包列表时添加分类信息
+    
+    
+**数据修改**
+>sendnum_number_$actitity_id 每个礼包表都添加一个字段 `drive_id`
+```mysql
+ALTER TABLE `sendnum_number_1` ADD COLUMN `device_id`  varchar(100) NOT NULL COMMENT '设备标示';
+```
+#评论优化
+
+##查询
+> 每个soft做一个comment_list缓存，评论是追加缓存
+> 每一个comment_detail做一个缓存，回复时更新
+> 
+
+#后台广告搜索优化（需求：916）
+
+**主要修改**
+>添加搜索范围
+>添加按状态搜索
+>优化跳转状态
+>优化展示数据
+
+**修改文件**
+`Lib/Action/Sj/AdSearchAction.class.php` 搜索逻辑修改
+`Lib/Action/Sj/AdDetailAction.class.php` 搜索时添加渠道过滤
+`Lib/Action/Sj/AdextentAction.class.php` 添加广告时修改活动排序
+
+`Tpl/default/Sj/AdSearch/index.html` 搜索模板修改
+`Tpl/default/Sj/AnimationAd/index.html` 将‘弹窗’修改为‘图片’
+`Tpl/default/Sj/AnimationAd/add_content.html` 将‘弹窗’修改为‘图片’
+`Tpl/default/Sj/AnimationAd/edit_content.html` 将‘弹窗’修改为‘图片’
+`Tpl/default/Sj/CPMmanage/add_cpm_show.html` 将‘弹窗’修改为‘图片’
+`Tpl/default/Sj/CPMmanage/edit_cpm_show.html` 将‘弹窗’修改为‘图片’
+
+#屏蔽后台已删除的评论及回复
+
+**主要修改**
+>评论列表页添加状态判断
+>评论详情页添加状态判断
+>消息列表添加状态判断
+
+**修改文件**
+`modules/v60/CommentDetail.php`
+`modules/v60/CommentList.php`
+`modules/v60/MsgList.php`
+
+##记录
+
+#增量垃圾数据过滤
+表 ：`sj_soft_patch`
+
+
+
+
+
+
+

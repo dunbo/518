@@ -1,0 +1,133 @@
+{// 加载头部公共文件 }
+<include file="../Public/header" />
+<div class="main" >
+<div class="content">
+<center>
+<form id="upload" method='get' action="__URL__/incremental_update_list" >
+<table width="100%" height="89" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td colspan="8">软件列表-搜索软件：</td>
+  </tr>
+  <tr>
+    <td>软件名称：</td>
+    <td><input type="text" name="soft_name" id="soft_name" value="{$soft_name}"/></td>
+    <td>软件包名：</td>
+    <td><input type="text" name="package" id="package" value="{$package}"/></td>
+    <td><select name="status">
+      <option value="0">未处理</option>
+      <option value="1">已通过</option>
+      <option value="2">已拒绝</option>
+    </select>
+    </td>
+    <td><input type="submit" name="button" id="button" value="搜索" /></td>
+  </tr>	
+</table>
+</form>
+<br/>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr rowspan="2">
+   <td colspan="4">增量更新审核列表</td>
+   <td colspan="1"><a href="/index.php/Sj/Soft/channel_config">配置设定</a></td>
+   <td colspan="1">是否进行人工审核：<input type="radio" name="check" id="checked_true"  value="1" checked> 是  
+<input type="radio" name="check" id= "checked_false" value="0" > 否  </td>
+   <td colspan="1"><a href="/index.php/Sj/Soft/incremental_update_whitelist">白名单</a></td>
+   <td colspan="1"><a href="/index.php/Sj/Soft/incremental_rule_make">规则设定</a></td>
+  </tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb" id="incremental_table">
+    <tr>
+    <td rowspan="2">软件名称</td>
+    <td rowspan="2">软件包名</td>
+    <td colspan="4">新版本</td>
+    <td colspan="4">旧版本</td>
+    <td colspan="3">增量包</td>
+    <td rowspan="2">更新时间</td>
+    <td rowspan="2">增量包状态</td>
+  </tr>
+  <tr>
+    <td>软件ID</td>
+    <td>版本号</td>
+    <td>MD5</td>
+    <td>大小</td>
+    <td>软件ID</td>
+    <td>版本号</td>
+    <td>MD5</td>
+    <td>大小</td>
+    <td>ID</td>
+    <td>MD5</td>
+    <td>大小</td>
+  </tr>
+  <volist name="soft_list" id="softlist">
+   <tr>
+    <td>{$softlist.softname}</td>
+    <td >{$softlist.package}</td>
+    <td>{$softlist.new_softid}</td>
+    <td>{$softlist.new_version_code}</td>
+    <td>{$softlist.new_md5}</td>
+    <td>{$softlist.new_fileid}</td>
+    <td>{$softlist.old_softid}</td>
+    <td>{$softlist.old_version_code}</td>
+    <td>{$softlist.old_fileid}</td>
+    <td>{$softlist.old_md5}</td>
+    <td>{$softlist.id}</td>
+    <td>{$softlist.filesize}</td>
+    <td>{$softlist.md5_file}</td>
+    <td>{$softlist.update_at|date="Y-m-d H:m:s",###}</td>
+    <td><?php 
+        if($softlist['status'] == 1){echo '已通过';}else{echo '<a href="/index.php/Sj/Soft/incremental_update_process/id/'.$softlist[id].'/status/1">通过</a></br><a href="/index.php/Sj/Soft/incremental_update_process/id/'.$softlist['id'].'/status/2">拒绝</a>';}
+		?>
+    </td>
+   </tr>
+  </volist>
+</table>
+
+
+</table>
+{$page}
+</center>
+</div>
+</div>
+<script><!--
+function allow(u, id){
+	var r=confirm("你确认执行此操作！");
+	if (r==true){
+		$.ajax({
+			type: 'GET',
+			url: u,
+			dataType: 'json', 
+			success:function(res){
+				if(res.status == 1){
+					var newid = '#' + id ;
+					var aid = '#' + id + ' a';
+					var iid = '#' + id + ' input';
+					alert(iid);
+					//alert(newid);
+					$(newid + ' td').removeAttr('bgcolor');
+					$(newid).css({ color: "#bcbcbc", background: "#ececec" });
+					$(aid).css('color', '#bcbcbc');
+					$(aid).removeAttr('href');
+					$(aid).removeAttr('onclick');
+					$(iid).attr({disabled:'disabled', name:'disabled'});
+					$(iid).attr('checked', false);
+				} else {
+					alert(res.info);
+				}
+			}
+		});		
+	}
+}
+
+$(document).ready(function(){
+	check_id = $('#checked_false');
+	incremental_show = $('#incremental_table');
+	check_id.click(function(){
+		 incremental_show.css({color:"#bcbcbc",background:"#ececec"});
+		 //alert("1q21231");
+	});
+	check_true_id = $('#checked_true');
+	check_true_id.click (function(){
+		incremental_show.css({color:"#000",background:"#fff"});
+	});
+	
+});
+--></script>

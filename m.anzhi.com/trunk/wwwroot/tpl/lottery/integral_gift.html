@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>充值送积分</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/integral/css/common_v1.css"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/TouchSlide.1.1.js"></script>
+</head>
+<body>
+<div class="prize_main">
+	<div class="mod" id="tip-box" style="min-height:400px">
+		<div class="prize_title">【 请选择你想兑换的游戏尊贵礼包 】</div>
+		<div class="mod2">
+			<p>*注意，同一帐号同一游戏只能使用一个礼包哦！</p>
+			<ul class="prize_list">
+				<!--{foreach from=$out.gift_arr item='val' key='k'}-->
+                <li>
+					<span><!--{$val}--></span>
+					<a href="javacript:;" onclick="exchange_gift('<!--{$k}-->','<!--{$val}-->');"  >兑换</a>
+				</li>
+				<!--{/foreach}-->
+				<div class="clear"></div>
+			</ul>
+		</div>
+		<a class="btns" id="btns_04" href="/lottery/integral.php?sid=<!--{$out.sid}-->" >返回</a>
+	</div>
+	<div class="mod" id="tip-box2" style="display: none;">
+		<div class="mod2">
+			<p id="notice3" ></p>
+		</div>
+		<a class="btns" id="btns_03" href="/lottery/integral.php?sid=<!--{$out.sid}-->" >返回</a>
+	</div>	
+</div>
+</body>
+</html>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box mod" id="tip-box_gift"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con">
+                <p id="notice_gift" ></p>
+				<a href="javascript:;" onclick="cloBox('#tip-box_gift',1)" class="btns" id="clobox">返回</a>
+            </div>
+			
+        </div>
+    </div>
+</section>
+<script>
+var sid='<!--{$out.sid}-->';
+	var flags={canMove:true};
+	function showOpenBox(obj){
+		var bg_h=$("#body-bg").height()+$(document).scrollTop(),
+			top_h= $(obj).height()/ 2-$(document).scrollTop();
+		$(obj).css("margin-top",-top_h+"px").show();
+		$("#body-bg").css("height",bg_h+"px").show();
+		flags.canMove=false;
+	}
+    function cloBox(obj,type){
+        $(obj).hide();
+        $("#body-bg").hide();
+        flags.canMove=true;
+		if(type == 1)	location.reload(true);//加载页面	
+    }	
+	$(function(){
+		$("body").bind('touchmove', function (e) {
+			if(!flags.canMove){
+				e.preventDefault();
+			}
+		});
+	})
+	
+function exchange_gift(pkg,softname){
+	$.ajax({
+			url: '/lottery/integral_gift.php',
+			data:"sid="+sid+"&pkg="+pkg,
+			type:"post",
+			dataType: 'json',
+			success:function(data) {
+				if(data.code == 1){
+					var str = "恭喜您兑换《"+softname+"》"+"尊贵礼包一份";
+					    str += "<br/>礼包码："+data.gift_number;
+					$('#notice3').html(str);
+					$('#tip-box2').css('display','block');
+					$('#tip-box').css('display','none');
+				}else{
+					$('#notice_gift').html(data.msg);
+					showOpenBox('#tip-box_gift');		
+					return false;
+				}
+			},
+	});
+}
+</script>

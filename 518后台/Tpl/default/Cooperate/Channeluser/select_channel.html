@@ -1,0 +1,87 @@
+<include file="../Public/header" />
+</head>
+<script>
+function checkit()
+{
+    if(confirm("确定要这么执行该操作吗？"))
+    {
+        return true;
+    }
+    return false;
+}
+</script>
+<body>
+<div  style="padding-left:50px">
+<form action="__URL__/select_channel" method="get">
+<h2>选择渠道</h2>&nbsp;&nbsp;&nbsp;所属账号:<span/><?php echo $username; ?></span><input type="hidden" name="uid" value="<?php echo $uid; ?>" /><br />
+<div>
+<input type="hidden" name="from" value="{$from}">
+<input type="text" name="key_word" id="key_word" onblur="if(value==''){value='请输入渠道名进行搜索'}" onFocus="if(this.value=='请输入渠道名进行搜索'){this.value=''}" <?php if($key_word){ ?>value="{$key_word}"<?php }else{ ?>value="请输入渠道名进行搜索"<?php } ?> />&nbsp;&nbsp;<input  type="submit" value="搜索">
+</form>
+<br />
+</div>
+<div>
+已选择渠道列表:<br />
+<table border="1" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>操作</td>
+		<td>渠道编号</td>
+		<td>渠道名</td>
+		<td>平台类型</td>
+		<td>渠道=运营商-厂商-型号</td>
+		<td>类别名称</td>
+		<td>渠道用途</td>
+		<td>创建时间</td>
+		<td>备注</td>
+	</tr>
+	<?php foreach($ineed_channel as $key => $val){ ?>
+	<tr>
+		<td><a href="__URL__/fake_channel_del/cid/{$val['cid']}/uid/{$uid}<?php if(!empty($key_word)){ ?>/key_word/{$key_word}<?php } ?>/<?php if($from){ ?>from/{$from}<?php } ?>" onclick="return checkit();">去除</a></td>
+		<td>{$val['cid']|default='&nbsp;'}</td>
+		<td>{$val['chname']|default='&nbsp;'}</td>
+		<td><?php if($val['platform'] == 1){ ?>手机<?php }elseif($val['platform'] == 2){ ?>平板<?php } ?></td>
+		<td>{$val.oid|getoidname}-{$val.mid|getmidname}-{$val.did|getdidname|default='&nbsp;'}</td>
+		<td>{$val['category_name']|default='&nbsp;'}</td>
+		<td>{$val['activation_type_name']|default='&nbsp;'}</td>
+		<td><?php echo date('Y-m-d H:i:s',$val['submit_tm']); ?></td>
+		<td>{$val['note']|default='&nbsp;'}</td>
+	</tr>
+	<?php } ?>
+</table>
+</div>
+<br /><br />
+<div>
+搜索渠道列表:<br />
+<table border="1" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>操作</td>
+		<td>渠道编号</td>
+		<td>渠道名</td>
+		<td>平台类型</td>
+		<td>渠道=运营商-厂商-型号</td>
+		<td>类别名称</td>
+		<td>渠道用途</td>
+		<td>创建时间</td>
+		<td>备注</td>
+	</tr>
+	<?php foreach($need_channel as $key => $val){ ?>
+	<tr>
+		<td><a href="__URL__/fake_channel_add/cid/{$val['cid']}/key_word/{$key_word}/uid/{$uid}/from/{$from}/">添加</a></td>
+		<td>{$val['cid']|default='&nbsp;'}</td>
+		<td>{$val['chname']|default='&nbsp;'}</td>
+		<td><?php if($val['platform'] == 1){ ?>手机<?php }elseif($val['platform'] == 2){ ?>平板<?php } ?></td>
+		<td>{$val.oid|getoidname}-{$val.mid|getmidname}-{$val.did|getdidname|default='&nbsp;'}</td>
+		<td>{$val['category_name']|default='&nbsp;'}</td>
+		<td>{$val['activation_type_name']|default='&nbsp;'}</td>
+		<td><?php echo date('Y-m-d H:i',$val['submit_tm']); ?></td>
+		<td>{$val['note']|default='&nbsp;'}</td>
+	</tr>
+	<?php } ?>
+</table>
+{$page}
+</div>
+<br />
+<a href="__URL__/add_channel/uid/{$uid}/from/{$from}/">下一步</a><?php if(!$from){ ?>&nbsp;&nbsp;&nbsp;&nbsp;<a href="__URL__/create_channel_user/uid/{$uid}">返回上一步</a><?php } ?>&nbsp;&nbsp;&nbsp;&nbsp;<a href="<?php if($status == 2){ ?>__URL__/give_up/uid/{$uid}<?php }else{ ?>__URL__/give_up_edit/uid/{$uid}<?php } ?>" onclick="return checkit();" >放弃</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="__URL__/reset_channel/uid/{$uid}/from/{$from}/" onclick="return checkit();" >重置</a>
+</div>
+</body>
+</html>

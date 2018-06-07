@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>渠道软件管理</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+</head>
+<body>
+<div class="main_r">
+	<form action="__URL__/ch_count" method="GET" id='search_forum' >
+	<table width="100%">
+		<tr>
+			<td>
+				渠道名称：
+				<select name="channel_id" id="channel_id" style="width:80px">
+					<?php 
+						$str .= "<option value='0'>全部</option>";
+						foreach($channel_list as $v) {
+						if( $v['id'] == $channel_id ) {
+							$checked = "selected";
+						}else {
+							$checked = "";
+						}
+						$str .= "<option ".$checked." value='".$v['id']."' >".$v['name']."</option>";
+						}
+						echo $str;
+					?>
+				</select>
+			</td>
+			<td>
+				软件名称：<input type="text" class="search_item_text" style="width:150px" name="soft_name" id="soft_name" value="<?php echo $soft_name?>">
+			</td>
+			<td>
+				软件包名：<input type="text" class="search_item_text" style="width:150px" name="package" id="package" value="<?php echo $package?>">
+			</td>
+			<td>日期：<span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 154px;">
+		<input id="start_at2" name="start_time"
+			style="border: 0px none black; width: 130px;" value="<?php echo $start_time?$start_time:''?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span> 
+			至 <span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 154px;">
+		<input id="end_at2" name="end_time"
+			style="border: 0px none black; width: 130px;" value="<?php echo $end_time?$end_time:''?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at2",dateFmt:"yyyy-MM-dd HH:mm:ss"})'
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span>
+			<input type="button" onclick="exportUrl('')" value="搜索" style="width:100px;" />
+			</td>
+		</tr>
+	</table>
+	<table width="100%">
+		<tr>
+			<td style="width:10px">
+				<input type="button" onclick="exportUrl('/batch_export/1/', 1)" value="批量导出报表" style="width:100px;" />
+				<input type="button" onclick="exportUrl('/export/1/')" value="导出全部报表" style="width:100px;" />
+				合作类型：
+				<select name="co_type" style="width:130px">
+					<option <?php if($co_type==0){echo 'selected';} ?> value='0'>全部</option>
+					<option <?php if($co_type==1){echo 'selected';} ?> value='1'>按下载请求计费</option>
+					<option <?php if($co_type==2){echo 'selected';} ?> value='2'>按下载完成计费</option>
+				</select>
+			</td>
+		</tr>
+	</table>
+	</form>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="softlist_tab">
+		<thead>
+			<tr>
+				<td width="4%"><input type="checkbox" name="soft_allSelect" onclick="$('input[name^=ids]').attr('checked', $(this).attr('checked')=='checked')"  /></td>
+				<td width="8%">日期</td>
+				<td width="10%">渠道名称</td>
+				<td width="8%">合作类型</td>
+				<td width="5%">已关联cps渠道</td>
+				<td width="10%">软件名称</td>
+				<td width="10%">软件包名</td>
+				<td width="5%">下载量</td>
+				<td width="5%">下载完成量</td>
+				<td width="5%">扣量系数</td>
+				<td width="5%">计费量（扣量前）</td>
+				<td width="5%">计费量（扣量后）</td>
+				<td width="5%">单价</td>
+				<td width="5%">分成比例(渠道)</td>
+				<td width="5%">分成单价(渠道)</td>
+				<td width="5%">渠道分成</td>
+			</tr>
+		</thead>
+		<tbody>
+<?php foreach($list as $val) :?>
+	<tr>
+		<td><input name="ids[]" value="<?php echo $val['id'] ?>" type="checkbox" alt="del"/></td>
+		<td><?php echo $val['date'] ?></td>
+		<td><?php echo $val['channel_name'] ?></td>
+		<td><?php if($val['co_type']==1){echo '按下载请求计费';}else if($val['co_type']==2){echo '按下载完成计费';} ?></td>
+		<td><?php echo $val['cps_name'] ?></td>
+		<td><?php echo $val['softname'] ?></td>
+		<td><?php echo $val['package'] ?></td>
+		<td><?php echo $val['download_num'] ?></td>
+		<td><?php if($val['co_type']==1){ echo '-';}elseif($val['co_type']==2){echo $val['downloaded_num'];} ?></td>
+		<td><?php echo $val['kou_set']? $val['kou_set'].'%' : '0%'?></td>
+		<td><?php echo $val['downum_front'] ?></td>
+		<td><?php echo $val['downum_after'] ?></td>
+		<td><?php echo $val['price'] ?></td>
+		<td><?php echo $val['other_fc'] ?></td>
+		<td><?php echo $val['price_fc']?></td>
+		<td><?php echo $val['other_val']?></td>
+	</tr>
+<?php endforeach;?>
+		</tbody>
+	</table>
+{$page}
+</div>
+
+<script>
+function exportUrl(b,c)
+{
+	if(c) {
+		var chks=$("input[alt='del']:checked");
+		var ids="";
+		var i=0;
+		$(chks).each(function(){
+			ids+=','+this.value;
+			i++;
+		});
+		var biaoshi=0;
+		if(i==0) {
+			alert('请选择要批量导出的报表');
+			return;
+		}
+		b += "batch_id/"+ids; 
+	}
+	
+	var obj   = $("#search_forum");
+	var  url  = obj.attr('action');
+	var epUrl =  url+b;
+	obj.attr('action', epUrl);
+	obj.submit();
+	obj.attr('action', url);
+}
+</script>
+</body>
+</html>

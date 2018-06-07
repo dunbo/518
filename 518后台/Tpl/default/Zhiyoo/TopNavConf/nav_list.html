@@ -1,0 +1,109 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+function ok(data)
+  {
+   if(confirm(data))
+    return true;
+   else return false
+  }
+function checkrank(){
+	var status = true;
+	$(".ranktxt").each(function(){
+		if(isNaN($(this).val().trim()) || $(this).val().trim() < 1){
+			status = false;
+			alert('排序值必须是正整数');
+			return false;
+		}
+	})
+	return status;
+}
+
+
+</script>
+<style type="text/css">
+.tbspan{font-size:15px;margin:20px 6px;font-weight: bold;height:30px;background: #cdd;}
+.radiotype{margin:3px;}
+.table_list img{max-width:200px}
+</style>
+<body>
+<div style="position:relative;margin:5px;"><h2>众测顶部导航管理</h2></div>
+<div>
+<a href="__URL__/nav_list/" class="search_btn" style="display:inline-block;<?php if(isset($_GET['position'])) echo 'background:#fff;'?>">首页导航管理</a>
+<a href="__URL__/nav_list/position/2/" class="search_btn" style="display:inline-block;<?php if($_GET['position']!=2) echo 'background:#fff;'?>">众测导航管理</a>
+</div>
+<form action="__URL__/edit_rank/position/{$_GET['position']}/" method="post">
+<div style="margin:10px;">
+		<div style="float:right;">
+		<if condition="!$editrank"><a href="__URL__/nav_list/editrank/1<if condition="isset($_GET['position'])">/position/{$_GET['position']}/</if>"  class="search_btn" style="display:inline-block;margin-right:40px">编辑优先级</a>
+		<a href="__URL__/add/<if condition="isset($_GET['position'])">position/{$_GET['position']}/</if>"  class="search_btn" style="display:inline-block;width:135px;">添加</a>
+		</if>
+		<if condition="$editrank"><input type="submit" onclick="return checkrank()" class="search_btn" style="display:inline-block;width:135px;margin-right:40px" value="保存优先级"><a href="__URL__/nav_list/<if condition="isset($_GET['position'])">position/{$_GET['position']}/</if>"  class="search_btn" style="display:inline-block;width:135px;">取消优先级</a></if>
+		</div>
+</div>
+<br/>
+<br/>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+		
+			<th style="width: 80px;">优先级</th>
+			<th style="width: 80px;">显示名称</th>
+			<th style="width: 80px;">配置链接</th>
+			<th style="width: 80px;">是否允许发表内容</th>
+			<!--<th style="width: 80px;">是否是众测栏目</th>-->
+			<if condition="$_GET.position eq 2"><th style="width: 80px;">图标</th></if>
+			<th style="width: 80px;">状态</th>
+			<th style="width: 80px;">操作</th>
+		</tr>
+	</thead>
+	<volist name='navlist' id='list'>
+	<tr>
+	<td>
+	<notempty name="editrank"><input class="ranktxt" type="text" name="rank[{$list.id}]" value="{$list.rank}"><else />{$list.rank}</notempty><br/>
+	</td>
+	<td>
+	{$list.navname}<br/>
+	</td>
+	<td>
+	{$list.jumptxt}<br/>
+	</td>
+	<td>
+	<if condition="$list['poststatus'] eq 1"><a href="__URL__/changepstatus/id/{$list.id}/pstatus/{$list.poststatus}" style="color:blue">是</a>
+	<br>对应版块：<span id="forumlist_{$list.id}" style="margin-right: 20px;">{$list.refname}</span><a id="furl_{$list.id}" href='__URL__/forum_list/id/{$list.id}/ref/1/<if condition="$list['ref_fid']">fid/{$list.ref_fid}/</if>' class="thickbox" style="text-decoration: underline;color: red;"><br>选择版块</a>
+	<br/>对应分类：<span id="typelist_{$list.id}" style="margin-right: 20px;">{$list.ref_type}</span><a id="typeurl_{$list.id}" href='__URL__/show_type/id/{$list.id}/ref/1/<if condition="$list['ref_typeid']">typeid/{$list.ref_typeid}/</if>' class="thickbox" style="text-decoration: underline;color: red;"><br/>选择分类</a> 
+	<elseif condition="$list['poststatus'] eq 0" /><a href="__URL__/changepstatus/id/{$list.id}/pstatus/{$list.poststatus}" style="color:red">否</a><else />不能配置</if><br/>
+	</td>
+	<!--
+	<td>
+	<if condition="$list['type'] eq 3">
+		<if condition="$list['istest'] eq 1"><a href="__URL__/changetest/id/{$list.id}/istest/{$list.istest}" style="color:blue">是</a><elseif condition="$list['istest'] eq 0" /><a href="__URL__/changetest/id/{$list.id}/istest/{$list.istest}" style="color:red">否</a></if>
+	<else />
+		不能配置
+	</if>
+	<br/>
+	</td>
+	-->
+    <if condition="$_GET.position eq 2"><td><img src="{$imghost}{$list.img}"/></td></if>
+	<td>
+	<if condition="$list['status'] eq 1"><a href="__URL__/changestatus/id/{$list.id}/status/{$list['status']}/" style="color:blue" onclick="return ok('确定要停用吗？');">启用</a><else /><a href="__URL__/changestatus/id/{$list.id}/status/{$list['status']}/"  style="color:red" onclick="return ok('确定要启用吗？');">停用</a></if><br/>
+	</td>
+	<td>
+	<a href="__URL__/edit/id/{$list.id}/" style="color:blue">编辑</a>
+	<a href="__URL__/del/id/{$list.id}/" onclick="return ok('确定要删除数据吗？');" style="color:blue">| 删除</a>
+	</td>
+
+	</tr>
+	</volist>
+	
+	
+			
+
+</table>
+</form>
+<!--<div style="color: red;font-size: 15px;">注： 众测栏目只能选择【一个】【版块】，用来存放众测报告</div>-->
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>有标签软件管理</title>
+</head>
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript">
+$(function(){
+    document.onkeydown = function(e){
+        var ev = document.all ? window.event : e;
+        if(ev.keyCode==13) {
+            search();
+         }
+    }
+});
+
+function del(soft_id){
+    if(confirm("删除不可恢复！确定要删除此条记录?")){
+        var param = {
+        soft_id : soft_id
+        };
+
+        $.ajax({
+            url:'__URL__/deletepro',
+            type:'POST',
+            data:param,
+            dataType:'json',
+            success:function(data){
+                if(data==1)
+                {
+                    location.href ="/index.php/Sendnum/Product/index";
+                }else
+                {
+                    alert('对不起，权限不足');
+                    location.href ="/index.php/Sendnum/Product/index";
+                }
+            }
+        });
+    }
+};
+
+function search(){
+    var begintime = $("#begintime").val();
+    var endtime = $("#endtime").val();
+    if(begintime.length>0&&endtime.length==0)
+    {
+        alert('请输入结束时间');
+        return;
+    }
+    if(begintime.length==0&&endtime.length>0)
+    {
+        alert('请输入开始时间');
+        return;
+    }
+    $("#search").submit();
+};
+</script>
+
+<script type="text/javascript">
+//选择类型
+function openw(){
+    $("#open").zxxbox();
+}
+function catid(){
+    refreshCatid();
+}
+function refreshCatid()
+{
+    var ids = '';
+    $("input[name='catid[]']").each(function(){
+            if (this.checked) {
+                    ids+= $(this).val() + ',';
+            }
+            $('#cateid').val(ids);
+
+    });
+}
+</script>
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+<body>
+
+<div id="open" style="padding:10px; display:none;">
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td><font size='3' style="color:#000; font-weight:bold">软件类型</font></td><td><input type="checkbox" id="cid_all[]" name="cid_all[]" onclick="cid_selectAll(this);">全选</td></tr><br/>
+</table>		
+<volist name='cname' id='vo' key='k'>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+	<tr><td><input type="checkbox" onclick="$('input[rel={$vo.category_id}]').attr('checked', $(this).attr('checked') == 'checked');refreshCatid();"/><strong>{$vo.name}</strong></td></tr>
+	<tr>
+	<td colspan='3'>----------------------------------------------------------------------</td></tr>
+	<tr>
+	<volist name="vo['sub']" id = 'v' key='m'> 
+	<td><input rel="{$vo.category_id}" onclick='catid()' type="checkbox" name="catid[]" value="{$v.category_id}" <if condition="isset($cateid[$v['category_id']])">checked='true'</if>/>&nbsp;&nbsp;&nbsp;{$v.name}</td>
+	<if condition="$m % 3 eq 0 "></tr><tr></if>
+	</volist><br/>
+	</volist>
+</table>
+</div>
+
+
+    	<div class="currentNav_r" style="float:right;">
+		<a class="recBtn_bg"  href="__URL__/tags_list">标签管理</a>&nbsp;&nbsp;<a class="recBtn_bg" href="__URL__/notags_softlist">无标签软件</a>
+	</div>
+        <br>
+        <br>
+	<form action="/index.php/Sj/Systemmanage/tags_softlist" method="get" id="search">
+<input type='hidden' name='cateid' id='cateid' value="{$init_cateid}"/>
+		<div class="search_box">
+			<table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                                <tr>
+                                    <td width="16%">软件名称：<input type="text" name="softname" id="softname" value="{.softname}" class="search_item_text"></td>
+                                    <td width="30%">软件包名：<input style="width:200px;" type="text" name="package" id="package" value="{.package}" class="search_item_text"></td>
+									<td colspan="2">更新时间
+									<input id="begintime" name="begintime" value="{.begintime}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px">到<input id="endtime" name="endtime" value="{.endtime}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"></td>
+                            </tr>
+                            <tr>
+								<td colspan="1">标签名称
+									<input type="text" name="tags" id="tags" value="{.tags}" class="search_item_text"></td>
+                                <td><button type="button" onclick="openw();" >软件类型</button></td>						
+                                <td colspan="1"><input class="search_btn" style="float:left; height:30px;" type="button" value="搜索" onclick="search()"></td>
+								<td><a href="__URL__/import_tags" style="float:left" class="search_btn">批量运营</a></td>
+                            </tr>
+                </table>
+		</div>
+	</form>
+        <br>
+        共有{$count}个软件
+
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+		<thead>
+			<tr align="center">
+				<th width="7%" height="26">软件ID</th>
+				<th width="6%">软件名称</th>
+				<th width="7%">软件包名</th>
+				<th width="8%">标签</th>
+				<th width="7%">软件分类</th>
+                                <!--<th width="7%"><if condition="($order neq 1)"><a href="?order=1">软件下载数↓</a></if><if condition="($order eq 1)">软件下载数↓</if></th>
+                                <th width="7%"><if condition="($order neq 2)"><a href="?order=2">更新时间↓</a></if><if condition="($order eq 2)">更新时间↓</if></th>-->
+<th width="7%"><if condition="($order neq 1)"><a style="color:#0000FF" href="?order=1">软件下载数↓</a></if><if condition="($order eq 1)"><a href="?order=1">软件下载数↓</a></if></th>
+                                <th width="7%"><if condition="($order neq 2)"><a style="color:#0000FF" href="?order=2">更新时间↓</a></if><if condition="($order eq 2)"><a href="?order=2">更新时间↓</a></if></th>
+				<th width="7%">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="list">
+				<tr>
+					<td height="20" align="center" id="st[]"> {$list.softid}</td>
+					<td height="20" align="center"> {$list.softname}</td>
+					<td height="20" align="center"> {$list.package}</td>
+					<td height="20" align="center" id="tag_{$list.softid}"> {$list.tags}</td>
+					<td height="20" align="center"> {$list.name}</td>
+					<td height="20" align="center"> {$list.total_downloaded}</td>
+					<td height="20" align="center"> {$list.last_refresh|date="Y-m-d H:i:s",###}</td>
+                                        <td height="20" align="center"><a href="__URL__/edit_soft_tag?width=350&height=360&modal=true&softid={$list.softid}&cname={$list.name}" class="thickbox blue">修改标签</a></td>
+				</tr>
+			</volist>
+		</tbody>
+                <input type="hidden" value="{$softids}" id="softids">
+	</table>
+	<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+        <div style="display:none;" id="loading">
+    <p style="position:absolute;left:20%;top:40%;">正在提交中，请稍候......</p></div>
+</body>
+</html>
+<script type="text/javascript">
+    $(function(){
+            softids = $("#softids").val();
+            var param = {
+                softids : softids
+            };
+            $.ajax({
+            url:'__URL__/tags_softlist',
+            type:'POST',
+            data:param,
+            dataType:'json',
+            success:function(data){
+                for (var i = 0; i < data.data.length; i++) {
+                    key = data.data[i]['key'];
+                    $("#"+key+"").html(data.data[i]['value']);
+                }
+            }
+        });
+});
+
+</script>

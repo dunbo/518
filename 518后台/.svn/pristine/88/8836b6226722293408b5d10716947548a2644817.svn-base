@@ -1,0 +1,135 @@
+<!--<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>-->
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+
+<link rel="stylesheet" href="/Public/css/jquery.autocomplete.css" type="text/css" media="screen" />
+<script type="text/javascript" src="/Public/js/jquery.autocomplete.js"></script>
+
+<div class="main" >
+<div class="content">
+    <form name="fml" action="__URL__/stop_contract"  method="post">
+    <div style="float:left;margin-left: 80px">
+
+        软件包名：<input type="text" style="width:140px" name="package" id="package" value="{$cpd_info.package}" class="search_item_text" onblur="get_soft()" <?php if($cpd_info&&$cpd_info['start_tm']<=time()){echo 'disabled';}?>>
+        <?php if($cpd_info&&$cpd_info['start_tm']<=time()){ ?>
+            <input type="hidden" name="package" value="{$cpd_info.package}"><br>
+
+        <?php } ?>
+        <input type="hidden" name="id" id="id" value="{$cpd_info.id}">
+        <input type="hidden" name="softname" id="softname" value="{$cpd_info.softname}">
+        <input type="hidden" name="category_id" id="category_id" value="{$cpd_info.category_id}">
+        <input type="hidden" name="category_name" id="category_name" value="{$cpd_info.category_name}">
+        <div id="package_info"></div><div id="package_error" style="margin-left: 60px;color:red">{$cpd_info.softname}<br>
+        {$cpd_info.category_name}</div>
+    </div>
+    <div style="float:left;margin-top: 10px;margin-left: 80px">
+        所属客户：<input type="text" style="width:140px" name="custom_name" id="custom_name" value="{$cpd_info.custom_name}" class="search_item_text" <?php if($cpd_info&&$cpd_info['start_tm']<=time()){echo 'disabled';}?>>
+        <div id="custom_error" style="margin-left: 60px;color:red"></div>
+    </div>
+    <div style="float:left;margin-top: 10px;margin-left: 80px">
+        终止时间：<input type="text" style="width:140px" name="stop_tm" id="stop_tm" value="<?php  if($cpd_info['stop_tm']) echo date($tm_formate,$cpd_info['stop_tm']);?>" class="search_item_text Wdate"  onclick="WdatePicker({$end_formate})" >
+        <div id="stop_tm_error" style="margin-left: 60px;color:red"></div>
+    </div>
+
+    <div style="float:left;margin-top:10px;" id="confirm_game">
+        <div style="float:left;margin-left:70px"><input type="submit" value="确定" class="search_btn" onclick="return check_contract()"></div>
+        <div style="float:left;margin-left:20px"><input type="button" value="取消" class="search_btn " onclick="tb_remove();"></div>
+    </div>
+
+</form>
+</div>
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        var client = [{$all_clients}];
+        $("#custom_name").autocomplete(client,{
+            minChars: 0,//自动完成激活之前填入的最小字符
+            max:12,//列表条目数
+            width: 400,//提示的宽度
+            scrollHeight: 300,//提示的高度
+            matchContains: true,//是否只要包含文本框里的就可以
+        });
+    })
+
+
+    function get_soft(){
+        var package = $("#package").val();
+        if(package!=''){
+            $.ajax({
+                type: "POST",
+                url: "__URL__/get_soft_info",
+                data: "package="+package,
+                dataType:"json",
+                success:function(data){
+                    if(data.code==0){
+                        alert(data.msg);
+                        $("#package_info").html('');
+                        $("#softname").val('');
+                        $('#category_id').val('');
+                        $('#category_name').val('');
+                    }else{
+                        var str = '软件名称：'+data.softname+'<br>软件分类：'+data.category_name;
+                        $("#package_info").html(str);
+                        $("#softname").val(data.softname);
+                        $('#category_id').val(data.category_id);
+                        $('#category_name').val(data.category_name);
+                        $("#package_error").html("");
+                    }
+                }
+            });
+        }else{
+            $("#package_error").html('包名不能为空');
+            $("#package_info").html('');
+            $("#softname").val('');
+            $('#category_id').val('');
+            $('#category_name').val('');
+        }
+    }
+
+    function check_contract(){
+        var stop_tm = $("#stop_tm").val();
+
+        if(stop_tm==''){
+            $("#stop_tm_error").html('时间不能为空');
+            return false;
+        }else{
+            $("#stop_tm_error").html('');
+        }
+        window.fml.submit();
+    }
+
+    $("#custom_name").blur(function(){
+        check_custom();
+    });
+
+    function check_time(id){
+        if($("#"+id).val()==''){
+            $("#"+id+'_error').html('时间不能为空');
+        }else{
+            $("#"+id+'_error').html('');
+        }
+
+    }
+    function check_custom(){
+        var custom = $("#custom_name").val();
+        $.ajax({
+            type: "POST",
+            url: "__URL__/check_custom",
+            data: "custom="+custom,
+            dataType:"json",
+            success:function(data){
+                if(data.code==0){
+                    $("#custom_error").html('客户名称不能为空');
+                }else if(data.code==2){
+                    $("#custom_error").html('未找到该客户，可以手动创建');
+                }else{
+                    $("#custom_error").html('');
+                }
+            }
+        });
+    }
+</script>
+

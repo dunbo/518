@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>答题进行时</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v4"></script>
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/banner.jpg" />
+</div>
+<div class="main">
+	<div class="relive">
+		<span id="res_num" ><!--{$out.res_num}--></span>
+	</div>
+	<div class="begin" style="height:3rem;padding-top:0.75rem;">
+		<a class="user_prize" href="javascript:;" onclick="go_url('my_prize');"  >我的奖金</a>
+		<div class="clear"></div>
+		<img class="begin_img01" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/begin_img_01.png" />
+		<div class="begin_txt" style="padding:0;">
+			<!--{if $out.screenings == 1 || $out.screenings == 3}-->
+			<span><!--{$out.limit_list}-->万<i>G流量</i></span>
+			<!--{else}-->
+			<span><!--{$out.limit_list}-->万<i>游戏礼券</i></span>
+			<!--{/if}-->
+			<em><!--{$out.time}--></em>
+			<div class="clear"></div>
+		</div>		
+		<img class="begin_img01" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/begin_img_02.png" />
+		<div class="begin_txt begin_txt2"  style="padding:0;">
+		<p id="colockbox1">
+			<b class="hour">00</b>:<b class="minute">00</b>:<b class="second">00</b>
+		</p>		
+		</div>
+		<img class="begin_img01" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images/begin_img_03.png" />
+	</div>
+	<div class="btns2">
+		<a href="javascript:;" class="fl" onclick="go_url('down');" >获取更多复活机会</a>
+		<a href="javascript:;" class="fr" onclick="go_share();" >分享</a>
+		<div class="clear"></div>
+	</div>
+	<div class="btns3">
+		<a href="javascript:;" class="fl" onclick="go_url('top_list');" >英雄榜</a>
+		<a href="/lottery/<!--{$out.prefix}-->/my_prize.php?rule=1&aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->" class="fr">活动规则</a>
+		<div class="clear"></div>
+	</div>
+</div>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box tip-box6"  id="tip-box"  style="display: none;">
+    	<div class="wrap">
+			<div class="wrap_inner">
+				<div class="wrap_inner2">
+					<div class="wrap_inner3">
+						<div class="wrap_inner4">
+							<div class="tip_hd">
+					    		<h4>需要绑定手机号才可参加活动哦~</h4>
+					        </div>
+					        <div class="tip-mid">
+					            <div class="tip-con">
+					            	<ul class="form-items">
+										<li>
+											<label>手机号</label>
+											<span><input id='mobile_r'  maxlength='11' type="tel"  placeholder="手机号"  /></span>
+											
+										</li>
+										<li>
+											<label>验证码</label>
+											<span class="input_short">
+												<input id='code'  maxlength='6' type="tel"  placeholder="验证码" />
+											</span>
+											<i  id="code_tm"  onclick="get_code();"  ><em></em></i>
+											<div class="clear"></div>
+											<div id="userinfo_err" style="margin:0.1rem 0 0 1rem; color:red"></div>									
+											<div class="clear"></div>
+										</li>
+									</ul>
+					            </div>
+					            <a href="javascript:;" class="btns" onclick="binding_moblie();" >提交</a>
+					       </div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>	
+</section>
+</body>
+</html>
+<script>
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var now_tm = '<!--{$out.now_tm}-->000';
+var prefix = '<!--{$out.prefix}-->';
+var screenings = '<!--{$out.screenings}-->';
+var is_bind_user = '<!--{$out.is_bind_user}-->';
+
+$(document).ready(function () {
+	//if(screenings == 1 || screenings == 3 || screenings == -1|| screenings == -3){
+	<!--{if !$out.bind_status}-->	
+		pop_tips("","","",1);
+		return false;
+	<!--{/if}-->
+	//}
+	if(screenings == 2 || screenings == 4 || screenings == 5|| screenings == -2){
+		<!--{if $out['is_login'] == 2}-->
+			login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+			return false;
+		<!--{/if}-->
+	}
+	countDown("<!--{$out.countdown_tm}-->000","#colockbox1");
+});
+function countDown(time,id){
+//	var day_elem = $(id).find('.day');
+	var hour_elem = $(id).find('.hour');
+	var minute_elem = $(id).find('.minute');
+	var second_elem = $(id).find('.second');
+	var end_time = time,
+	//var end_time = new Date(time).getTime(),//月份是实际月份-1
+	//console.log(end_time);
+	sys_second = (end_time-now_tm)/1000;
+	var timer = setInterval(function(){
+		if (sys_second > 1) {
+			sys_second -= 1;
+			//var day = Math.floor((sys_second / 3600) / 24);
+			//如果计算到天就得24小时整除
+		//	var hour = Math.floor((sys_second / 3600) % 24);
+			//计算小时
+			var hour=Math.floor(sys_second/3600); 
+			var minute = Math.floor((sys_second / 60) % 60);
+			//var minute = Math.floor(sys_second / 60);
+			var second = Math.floor(sys_second % 60);
+			//day_elem && $(day_elem).text(day);//计算天
+			$(hour_elem).text(hour<10?"0"+hour:hour);//计算小时
+			$(minute_elem).text(minute<10?"0"+minute:minute);//计算分钟
+			$(second_elem).text(second<10?"0"+second:second);//计算秒杀
+		} else { 
+			clearInterval(timer);
+			//location.reload();
+			window.location.href="/lottery/cddh/index.php?aid="+aid+"&sid="+sid;	
+		}
+	}, 1000);
+}
+
+function get_code(){
+
+	var mobile_phone = $("#mobile_r").val();
+	if(mobile_phone == "") {
+		$('#userinfo_err').html('手机号码不能为空');
+		return false;
+	}
+
+	var  re = /^(13|14|15|17|18)\d{9}$/
+	if (!re.test(mobile_phone)){
+		$('#userinfo_err').html('请输入正确手机号');
+		return false;
+	} 
+	$('#userinfo_err').html('');
+	$.ajax({
+		url: "/lottery/"+prefix+"/index.php",
+		data:"send_code=1&aid="+aid+"&sid="+sid+"&mobile_phone="+mobile_phone,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if(data.code == 1){
+				//alert(data.msg);	
+				time2();
+				window.AnzhiActivitys.showToastForJs(data.msg);
+			}else{
+				$('#userinfo_err').html(data.msg);
+				return false;
+			}
+		},
+	});	
+}
+function binding_moblie(){
+	var mobile_phone = $("#mobile_r").val();
+	if(mobile_phone == "") {
+		$('#userinfo_err').html('请输入手机号');
+		return false;
+	}
+	var  re = /^(13|14|15|17|18)\d{9}$/
+	if (!re.test(mobile_phone)){
+		$('#userinfo_err').html('请输入正确手机号');
+		return false;
+	} 
+	var code = $("#code").val();
+	if(code == "") {
+		$('#userinfo_err').html('请输入验证码');
+		return false;
+	}	
+	$('#userinfo_err').html('');
+	$.ajax({
+		url: "/lottery/"+prefix+"/index.php",
+		data:"binding=1&aid="+aid+"&sid="+sid+"&mobile_phone="+mobile_phone+"&code="+code,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if(data.code == 1){
+				//alert(data.msg);	
+			    window.AnzhiActivitys.showToastForJs(data.msg);
+				setTimeout(function(){
+					location.reload();//加载页面			
+				},1000);				
+			}else{
+				$('#userinfo_err').html(data.msg);
+				return false;
+			}
+		},
+	});	
+}
+
+var wait= 60;  
+function time2(){ 
+	if (wait == 0) {  
+		document.getElementById("code_tm").removeAttribute("disabled");            
+		//document.getElementById("code_tm").html="获取验证码";  
+		$("#code_tm").html("获取验证码");  
+		wait = 60;  
+	} else {  
+		document.getElementById("code_tm").setAttribute("disabled", true);  
+		$("#code_tm").html("重新发送(" + wait + ")");  
+		wait--;  
+		setTimeout(function() { time2() }, 1000) 
+	}  
+} 
+
+
+//分享
+function go_share(){
+	$.ajax({
+		url: '/lottery/my_name_MT3_new/share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+		}
+	});
+	var share_text="答题赢流量，每天五场，等你来挑战~";	
+	var share_url='<!--{$out.activity_host}-->/lottery/'+prefix+'/index.php?is_share=1&aid='+aid;	
+	
+<!--{if $out['is_test'] == 1}-->
+	var icon_url = 	"<!--{$out.activity_host}-->/static/activity/"+prefix+"/images/share_icon.png";
+<!--{else}-->
+	var icon_url = 	"http://img3.anzhi.com/static/activity/"+prefix+"/images/share_icon.png";
+<!--{/if}-->
+	var share_json = '{"TEXT":"'+share_text+'","URL":"'+icon_url+'","ACTIONURL":"'+share_url+'","URLWEIXIN":"'+icon_url+'"}';
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+	
+
+<!--{if $out['is_share'] == 1}-->
+document.write(unescape("%3Cscript src='/js/anzhi-fd-min1.js?v"+Math.round(Math.random()*100)+"' type='text/javascript'%3E%3C/script%3E"));
+var js_param = {type:'action', id:aid, callback:invite_callback};
+var php_param = {type:'action', aid:aid};
+$(document).ready(function () {
+	Azfd.share_download(js_param, php_param);
+});	
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6200){
+			js_param = {type:'action', id:aid, callback:null};
+			Azfd.lock = false;
+			share_download(js_param, php_param);			
+		}else {
+			setTimeout(function(){
+				var php_url = 'fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;			
+			},1000);		
+		} 
+	}else{
+		setTimeout(function(){
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;			
+		},1000);		
+	}
+}
+function is_null(){}
+<!--{/if}-->	
+
+//answer开始答题 down复活页面 my_prize我的奖品页面
+function go_url(type){
+	if(screenings == 2 || screenings == 4 || screenings == 5){
+		<!--{if $out['is_login'] eq 2}-->
+			login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+			return false;
+		<!--{/if}-->
+		if(is_bind_user == 0){
+			window.AnzhiActivitys.showToastForJs("每个设备仅可参加一次活动，不要贪心哦~");
+			return false;
+		}
+	}
+	if(type == 'top_list'){
+		//英雄榜
+		window.location.href="/lottery/"+prefix+"/my_prize.php?top_list=1&aid="+aid+"&sid="+sid;
+	}else{
+		window.location.href="/lottery/"+prefix+"/"+type+".php?aid="+aid+"&sid="+sid;
+	}
+}
+
+function onLoginComplete(sid,tip){
+	var is_register = 0;
+	if(tip == "注册成功"){
+		var is_register = 1;
+	}
+	sid_str = sid.replace("PHPSESSID=", "");
+	location.href="/lottery/"+prefix+"/index.php?sid="+sid_str+"&aid="+aid+"&is_register="+is_register;
+}
+
+//监听浏览器tab切换
+document.addEventListener('visibilitychange',function(){ 
+	if(document.visibilityState=='hidden') { 
+		normal_title=document.title; 
+		document.title="跳出tab";
+	}else{
+		document.title=normal_title;
+		document.title='回来tab';
+		location.reload();
+	}	
+});
+
+</script>

@@ -1,0 +1,150 @@
+
+<style>
+table{
+    border: 0px;
+}
+td{
+    border: 0px solid #000;
+}
+#t_tags{
+   display: none;
+}
+</style>
+ 
+<body>
+
+<form method='post' action="__URL__/doedit/action/add" >
+<input type="hidden" id="tagsid" name="tagsid" value="">
+</br></br>
+<span >标签组名称：</span>
+  <input type="text" id="classname" name="classname" value="" placeholder="请输入想要添加的名字"/></br></br>
+  
+<span >配置标签：</span><a href="javascript:checktagsid()">编辑<a/></br></br>
+
+<div id="t_tags" >
+<?php 
+  foreach($cat as $groupid=>$name){ ?>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+    <tr id="group_{$groupid}"><th>{$name}</th></tr>
+    <?php
+    $i =0;
+    foreach($taginfo[$groupid] as $tag){
+      if($tag['parentid'] != 0){
+        continue; 
+      }
+      $i++;
+      if($i%5==1) echo "<tr>";
+      $checked='';
+      if(in_array($tag['tagid'],$tags)) $checked='checked';
+      ?>
+      <td width="100px">
+      <input type="checkbox" name="tags[]" id="tag_{$tag.tagid}" class="ck" onclick="showchild({$tag.tagid})" value="{$tag.tagid}" {$checked}/>
+      {$tag['tagname']}
+      </td>
+      <?php
+      if($i%5==0) echo "</tr>";
+    }
+    ?>
+    </tr>
+  </table>
+  
+  
+    <?php 
+    //foreach($tagpinfo as $key => $tagslist){
+      foreach($taginfo[$groupid] as $tag){
+        if($tag['parentid'] != 0) continue; 
+        $tagslist = $tagpinfo[$tag['tagid']]; 
+        if(empty($tagslist)) continue;
+        $key = $tag['tagid'];
+        $j =0;
+        if(in_array($key,$tags)) $display='block'; else $display='none';
+        echo "<table id=\"tagparnetid_".$key."\" style=\"display:".$display."\"  class=\"table_list\">";
+        echo "<th>".$taglist[$key]['tagname']."</th>";
+        foreach($tagslist as $info){
+          $j++;
+          if($j%5==1) echo "<tr>";
+          $checked='';
+          if(in_array($info['tagid'],$tags)) $checked='checked';
+          ?>
+          <td width="100px"><input type="checkbox" name="tags[]" id="tag_{$info['tagid']}" value="{$info['tagid']}" onclick="checkparentid(this,{$info['tagid']})" {$checked}/>{$info['tagname']}</td>
+          
+          <?php
+          
+          if($i%5==0) echo "</tr>";
+        }
+        echo "</table>";
+      
+    }
+  } 
+?>
+</div>
+<span >备注：</span>
+<input type="text" id="remake" name="remake" value="" placeholder="请输备注信息"/></br></br>
+
+<input type="submit" name="submit"  onclick="return check()" class="search_btn" style="display:inline-block;" value="提交" /> <input type="button" class="search_btn" style="display:inline-block;" onclick="tb_remove();" value="取消" />
+</form>
+<script type="text/javascript">
+var  tagsinfo = <?php echo $taglist_json;?>;
+var tagsgroup = <?php echo $grouplist_json;?>;
+var tagpinfo = <?php echo $tagpinfo_json;?>;
+function showchild(parentid){
+  if(typeof(tagpinfo[parentid]) == "undefined") return false;
+  var childobj = document.getElementById('tagparnetid_'+parentid);
+  if(gettagobj('tag_'+parentid).checked == true){
+    childobj.style.display = 'block'; 
+  }else{
+    childobj.style.display = 'none';
+    var childs = childobj.getElementsByTagName('input');
+    var cnt = childs.length;
+    for(var i=0;i < cnt; i++){
+      if (childs[i].checked == true) childs[i].checked = false;
+    } 
+  }
+}
+function gettagobj(id){
+  return document.getElementById(id); 
+}
+function checkparentid(obj,childtagid){
+  var tid = tagsinfo[childtagid].parentid;
+  if(tid == 0) return false;
+  if(obj.checked == true){
+    checkedparentid = 1;
+  }else{
+    checkedparentid = 0;
+  }
+}
+// ===============================================
+function check(){
+//标签选择
+var obj = document.getElementsByName("tags[]");
+var tagsid = [];
+  for(k in obj){
+      if(obj[k].checked)
+          tagsid.push(obj[k].value);
+  }
+if(tagsid.length < 1){
+  alert("标签数量至少选1个");
+  return false;
+}  
+if(tagsid.length > 10){
+  alert("标签数量最多可选10个");
+  return false;
+}
+document.getElementById("tagsid").value = tagsid;
+
+var check =  document.getElementById("classname").value;
+if(trim(check) == '' || check.length == 0){
+	alert('标签组名称不能为空');
+	return false;
+}
+
+}
+function checktagsid(){
+  var t_div = document.getElementById("t_tags").style.display;
+  if(t_div == 'block'){
+    $("#t_tags").css('display','none');
+  }else{
+    $("#t_tags").css('display','block');
+  }
+}
+</script>

@@ -1,0 +1,138 @@
+{// 加载头部公共文件 }
+<include file="../../Public/header" />
+<style type=text/css>
+.intb td {
+border-right:none;
+border-bottom: none;
+}
+.fixlong {
+  table-layout: fixed;
+}
+.fixlong td {
+  word-break: break-all;
+}
+</style>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+<div class="main" >
+<div class="content">
+<center>
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" >
+<tr><td align='left' colspan='11'>
+<select id="platform_type" name="platform_type">
+		<option value="0" <?php if($type==0) echo "selected";?> >开发者</option>
+		<option value="1" <?php if($type==1) echo "selected";?> >手游渠道合作</option>
+		<option value="2" <?php if($type==2) echo "selected";?> >new手游渠道合作</option>
+	</select>&nbsp;&nbsp;&nbsp;&nbsp;<button  onclick="window.location.href='__URL__/bulletin_edit_add/type/<?php echo $type?$type:0; ?>'">添加公告</button></td></tr>
+</table>
+<form method='get' action="__URL__/bulletin_list/type/{$type}" >
+<table width="100%" height="39" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td width="99">内容：</td>
+    <td width="100"><input size='15' type="text" name="content" id="content" value="{$content}" /></td>
+	<td width="99">状态：</td>
+    <td width="100">
+	<select id="zh_type" name="zh_type">
+		<option value=""selected="selected">全部</option>
+		<option value="1" <?php if($zh_type==1) echo "selected";?>>正常</option>
+		<option value="2" <?php if($zh_type==2) echo "selected";?>>过期</option>
+		<option value="3" <?php if($zh_type==3) echo "selected";?>>未开始</option> 
+
+	</select></td>
+
+	<td width="99">起止日期：</td>
+    <td width="300" colspan='4'><?php showDatePicker('begintime','endtime', $begintime,$endtime);?></td>				
+	<td width="100" colspan="1"><input type="submit" name="button" id="button" value="&nbsp;搜 索&nbsp;"  onclick="return checkinput()" /></td>
+  </tr>	
+</table>
+	<input type='hidden' name='cateid' id='cateid' value="{$init_cateid}"/>
+</form>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr align='left' bgcolor="" height='30'>
+  <td><?php echo $total;?>条</td>
+</tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb fixlong">
+  <tr>
+	<td width="6%" bgcolor="#e3e2fe">排序</td>
+    <td align='center' width="20%" height="30" bgcolor="#e3e2fe" > <font style="color:#000; font-weight:bold">公告内容</font></td>
+    <td align='center' width="15%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">开始时间</font></td>
+    <td align='center' width="15%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">结束时间</font></td>
+    <td align='center' width="15%" height="30" bgcolor="#e3e2fe">
+	<font style="color:#000; font-weight:bold">添加时间</font></td> 
+	<td align='center' width="15%" height="30" bgcolor="#e3e2fe">
+	<font style="color:#000; font-weight:bold">状态</font></td>
+    <td align='center' width="25%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">操作</font></td>
+  </tr>
+  <volist name='list' id='bulletin'>
+  <tr id='tr{$bulletin.id}'>
+	<td align='left'>
+	{$bulletin.pos_str}
+	</td>
+	<td align='left'>
+	{$bulletin.content}
+	</td>
+	<td align='left'>
+	{$bulletin.start_tm}
+	</td>
+	<td align='left'>
+	{$bulletin.end_tm}
+	</td>
+	<td align='left'>
+	{$bulletin.create_tm}
+	</td>
+
+	<if condition="$bulletin.type eq 1">
+	<td align="center" style="color:green">正常</td>
+	<elseif condition="$bulletin.type eq 3"/>
+	<td align="center">未开始</td>
+	<elseif condition="$bulletin.type eq 2"/>
+	<td align="center" style="color:red" >已过期</td>
+	</if>
+
+    <td width='100px' align="center" valign="middle">
+	<button  onclick="window.location.href='__URL__/bulletin_edit_add/id/{$bulletin.id}'" >&nbsp;编&nbsp;辑&nbsp;</button>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<button onclick="javascript:checkit('__URL__/bulletin_del/id/{$bulletin.id}');return false">&nbsp;删&nbsp;除&nbsp;</button> 
+	</td>
+  </tr>
+  </volist>
+</table>
+<form method="post" action="" id="tmp_form">
+<input type="hidden" name="preurl" id="preurl" />
+</form>
+<div  align='left'>{$page}</div>
+</center>
+</div>
+</div>
+
+<script language="javascript">
+//排序
+$('.extent_rank').change(function(){
+	var url = '/index.php/Dev/Anzhiremind/reason_sequence/id/'+$(this).attr('rel')+'/pos/'+$(this).val()+'/type/'+<?php echo $type?$type:0; ?>;
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+			var url     = eval("("+response+")");
+			var jumpUrl = '/index.php/Dev/Anzhiremind/bulletin_list/p/<?php echo is_numeric($_GET['p']) ? $_GET['p'] : '1'; ?>/lr/<?php echo is_numeric($_GET['lr']) ? $_GET['lr'] : '10'; ?>'+'/type/<?php echo $type;?>';
+			window.location.href = jumpUrl;
+			if(window.ActiveXObject) window.event.returnValue = false;
+		}
+	});
+});
+$('#platform_type').change(function(){
+	var type=this.options[this.options.selectedIndex].value;
+	var url = '/index.php/Dev/Anzhiremind/bulletin_list/type/'+type;
+	window.location.href = url;
+});
+function checkit(url){
+	if(confirm('确定要这么执行该操作吗？')) {
+		$('#tmp_form')[0].action = url;
+		$('#preurl').val(location.pathname);
+		$('#tmp_form').submit();
+	}
+}
+</script>

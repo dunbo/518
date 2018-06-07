@@ -1,0 +1,122 @@
+<include file="../Public/header" /><body>
+<link rel="stylesheet" type="text/css" media="all"
+	href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="__PUBLIC__/js/calendar_bak.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-zh.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-setup.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/result.js"></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/js/action.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/Util/swfobject.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script>
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{	
+		$('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{	
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	
+	function get_params(){
+	var cid=document.getElementById("zh_cid_str").value;
+	var url='__URL__/channelDownloadStatic_game';
+	if(cid){
+		url=url + "/cid/"+cid; 
+	}
+	var fromdate=document.getElementById("fromdate").value;
+	if(fromdate){
+		url=url + "/fromdate/"+fromdate; 
+	}
+	var todate=document.getElementById("todate").value;
+	if(todate){
+		url=url + "/todate/"+todate; 
+	}
+	document.form1.action=url;
+	return true;
+}
+</script>
+<div id="titletable">
+<center>
+<form method="post" action="__URL__/channelDownloadStatic_game">
+<table width="800" border="1"> 
+	<tr>
+	<td width="20%">渠道名：</td>
+	<td><span>
+		<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox">选择指定渠道</a><br />
+		<div id="channel_div">
+			<volist id="chl_list_vo" name="channel_selected" >
+			&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+			</volist>
+		</div>
+		</span>
+	</td>
+	</tr>
+	<tr><td width="20%">选择查看日期(双击日期确定)：</td><td> <span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 124px; padding: 1px">
+		<input id="fromdate" name="fromdate"
+			style="cursor: hand; width: 100px; border: none 0px black;"
+			value="{$from_value}" size="15" type="text"><img
+			src="__PUBLIC__/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"fromdate",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span> <span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 124px;">
+		<input id="todate" name="todate"
+			style="border: 0px none black; width: 100px;" value="{$to_value}"
+			size="15" type="text"><img src="__PUBLIC__/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"todate",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span> <input type="submit" name="submit" value="确定"
+			style="height: 22px; vertical-align: middle;" />
+			<input type="hidden" value="{$zh_cid_arra}" name="zh_cid_str" id="zh_cid_str">
+		</td>
+	</tr>
+</table>
+</form>
+</center>
+<hr>
+<center>
+<table>
+<tr><th>渠道名</th><th>激活量</th><th>游戏下载量</th><th>应用下载量</th><th>下载总量</th></tr>
+<volist name="result" id="voresult">
+      <tr>
+      <td><a href="__URL__/channel2mobileStatic_new/cid/{$voresult.chl}/date/{$from_value}+{$to_value}" class="thickbox">{$voresult.chname}</a></td>
+	  <td style="color:red">{$voresult.actsum}</td>
+      <td>{$voresult.gamesum}</td>
+      <td>{$voresult.appsum}</td>
+      <td>{$voresult.sum}</td>
+      </tr>
+</volist>
+</table>
+{$page}
+</center>
+</div>
+<br>
+</body>

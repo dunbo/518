@@ -1,0 +1,203 @@
+<include file="../../Public/header"/>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+function info_len(type, len) {
+	var content, info, origdom = $('#' + type);
+	var tl = $('#' + type + '_len');
+	tl.remove();
+	origdom.after('<span id="' + type + '_len">' + origdom.val().length + '/'+len+'</span>');
+	info = $('#' + type + '_len');	
+	if (origdom.val().length > len) {
+		info.css("color", "red");
+	}
+	origdom.keyup(function() {
+		if ( $(this).val().length > len) {
+			info.css("color", "red");	
+		} else {
+			info.css("color", "black");	
+			info.next().text("");
+		}
+		content = $(this).val().length + '/'+len;	
+		info.text(content);
+	});	
+}
+
+$(document).ready(function(){
+	info_len('ap_name',30);
+	info_len('title',8);
+	info_len('describe',20);
+	info_len('prize_1',8);
+	info_len('prize_2',8);
+	info_len('prize_3',8);
+	info_len('prize_4',8);
+	info_len('prize_5',8);
+	info_len('share_text',30);
+	info_len('ap_rule',1000);
+	info_len('telephone_warning',20);
+	select_grade();
+});
+
+function select_grade(){
+	var grade = $('#like_grade').val();
+	if(grade == 3){
+		$('#4_grades').css('display','none');
+		$('#5_grades').css('display','none');
+	}else if(grade == 4){
+		$('#4_grades').css('display','');
+		$('#5_grades').css('display','none');
+	}else if(grade == 5){
+		$('#4_grades').css('display','');
+		$('#5_grades').css('display','');
+	}
+}
+
+function get_softname(){
+	var pkgname = $('#package').val();
+	$.ajax({
+		url: '__URL__/get_softname',
+		data: 'package='+pkgname,
+		type: 'get',
+		success: function(data){
+			var data = eval(''+data+'');
+			$('#soft_name').html(data);
+		}
+	});
+}
+
+</script>
+<body>
+<form action="__URL__/add_activity_do" method="post" enctype="multipart/form-data">
+<div style="margin:20px;">
+<h2><span class="my_activate">添加活动页面</span></h2>
+<table border="1" cellpadding="0" cellspacing="0" style="margin-top:40px;margin-left:40px;">
+<tr>
+	<td colspan="2"><span class="my_activate">添加活动页面</span><input type="hidden" name="p" value="{$p}" /><input type="hidden" name="lr" value="{$lr}" /></td>
+</tr>
+<tr>
+	<td>*活动名称：</td>
+	<td><input type="text" name="ap_name" id="ap_name" /></td>
+</tr>
+<tr>
+	<td>*软件包名：</td>
+	<td><input type="text" name="package" id="package" onblur="get_softname();" />&nbsp;&nbsp;<span id="soft_name"></span></td>
+</tr>
+<tr>
+	<td>*特殊渠道包：</td>
+	<td>
+	<select name="is_channel">
+		<option value="0">否</option>
+		<option value="1">是</option>
+	</select>
+	</td>
+</tr>
+<tr>
+	<td>*活动banner图片：</td>
+	<td><input type="file" name="ap_imgurl" />&nbsp;&nbsp;尺寸：640宽,建议640*300 ,格式：jpg、png</td>
+</tr>
+<tr>
+	<td>*软件背景颜色值：</td>
+	<td><input type="text" name="soft_bg" value="#FFFFFF" /></td>
+</tr>
+<tr>
+	<td>中间背景图片：</td>
+	<td><input type="file" name="bg_img" />&nbsp;&nbsp;格式：jpg、png,建议尺寸：480*684 </td>
+</tr>
+<tr>
+	<td>*中间背景颜色值</td>
+	<td><input type="text" name="bg_color" value="#FFFFFF" /></td>
+</tr>
+<tr>
+	<td>底部图片：</td>
+	<td><input type="file" name="ap_imgurl_bg" />&nbsp;&nbsp;格式：jpg、png,建议尺寸：480*636 </td>
+</tr>
+<tr>
+	<td>*底部背景颜色值</td>
+	<td><input type="text" name="bottom_color" value="#FFFFFF" /></td>
+</tr>
+<tr>
+	<td>*活动规则背景颜色值</td>
+	<td><input type="text" name="rule_color" value="#FFFFFF" /></td>
+</tr>
+<tr>
+	<td>*标题：</td>
+	<td><input type="text" name="title" id="title" /></td>
+</tr>
+<tr>
+	<td>*描述：</td>
+	<td><input type="text" name="describe" id="describe" /></td>
+</tr>
+<tr>
+	<td>*集赞等级：</td>
+	<td>
+	<select name="like_grade" id="like_grade" onchange="select_grade();">
+		<option value="3">三级</option>
+		<option value="4">四级</option>
+		<option value="5">五级</option>
+	</select>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" id="max_1" name="is_max" value="0" checked />不设置集赞结果
+	</td>
+</tr>
+<tr>
+	<td>*一级(最低)：</td>
+	<td><input type="text" name="grade_1" />万赞&nbsp;&nbsp;&nbsp;&nbsp;*获得奖励：<input type="text" name="prize_1" id="prize_1" />&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" id="max_1" name="is_max" value="1" />设为集赞结果</td>
+</tr>
+<tr>
+	<td>*二级：</td>
+	<td><input type="text" name="grade_2" />万赞&nbsp;&nbsp;&nbsp;&nbsp;*获得奖励：<input type="text" name="prize_2" id="prize_2" />&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" id="max_2" name="is_max" value="2" />设为集赞结果</td>
+</tr>
+<tr>
+	<td>*三级：</td>
+	<td><input type="text" name="grade_3" />万赞&nbsp;&nbsp;&nbsp;&nbsp;*获得奖励：<input type="text" name="prize_3" id="prize_3" />&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" id="max_3" name="is_max" value="3" />设为集赞结果</td>
+</tr>
+<tr id="4_grades">
+	<td>*四级：</td>
+	<td><input type="text" name="grade_4" />万赞&nbsp;&nbsp;&nbsp;&nbsp;*获得奖励：<input type="text" name="prize_4" id="prize_4" />&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" id="max_4" name="is_max" value="4" />设为集赞结果</td>
+</tr>
+<tr id="5_grades">
+	<td>*五级：</td>
+	<td><input type="text" name="grade_5" />万赞&nbsp;&nbsp;&nbsp;&nbsp;*获得奖励：<input type="text" name="prize_5" id="prize_5" />&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" id="max_5" name="is_max" value="5" />设为集赞结果</td>
+</tr>
+<tr>
+	<td>*集赞时间：</td>
+	<td><input type="text" name="start_tm" id="act_start_tm" /><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"act_start_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;"/>&nbsp;&nbsp;~&nbsp;&nbsp;<input type="text" name="end_tm" id="act_end_tm" /><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"act_end_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  style="border:1px solid #000;"/></td>
+</tr>
+<tr>
+	<td>*每人每日可点赞：</td>
+	<td><input type="text" name="like_limit" />&nbsp;&nbsp;次&nbsp;&nbsp;(1-10)</td>
+</tr>
+<tr>
+	<td>*分享文案：</td>
+	<td><textarea name="share_text" id="share_text" rows="5" cols="80"></textarea></td>
+</tr>
+<tr>
+	<td>*活动规则：</td>
+	<td><textarea name="ap_rule" id="ap_rule" rows="5" cols="80"></textarea></td>
+</tr>
+<tr>
+	<td>*填写手机号参与活动：</td>
+	<td>
+	<select name="is_telephone">
+		<option value="0">否</option>
+		<option value="1">是</option>
+	</select>
+	&nbsp;&nbsp;无法自动获取手机号时，用户下载软件后需手动填写手机号
+	</td>
+</tr>
+<tr>
+	<td>*输入手机号文字提示：</td>
+	<td><input name="telephone_warning" value="提交手机号获得领奖权限" id="telephone_warning" /></td>
+</tr>
+</table>
+</div>
+<div style="margin-top:20px;margin-left:100px;">
+	<table>
+		<tr>
+			<td><input type="submit" class="search_btn" value="确定" /></td>
+			<td><a href="javascript:;" onclick="javascript:history.go(-1);" class="search_btn" >取消</a></td>
+		</tr>
+	</table>
+</div>
+</form>
+</body>
+</html>

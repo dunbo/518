@@ -1,0 +1,148 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+<script>
+function checkPost()
+{
+	if ($.trim($('input[name=prob]').val()) > 100) {
+		alert('概率不能大于100');
+		return false;
+	}
+	
+	if ($.trim($('input[name=prob]').val()) == '') {
+		alert('请填写概率');
+		return false;
+	}
+	
+	if ($.trim($('#start_at').val()) == '') {
+		alert('请填写开始时间');
+		return false;
+	}
+	if ($.trim($('#end_at').val()) == '') {
+		alert('请填写结束时间');
+		return false;
+	}
+	
+	if (Date.parse($('#start_at').val()) > Date.parse($('#end_at').val()) ) {
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+	
+	var enable = true;
+	$.getJSON('/index.php/Sj/CategoryExtent/index/act/checkProp/extent_id/<?php echo $soft['extent_id']?>/id/<?php echo $soft['id']?>', function(data){
+		var total = parseInt(data.total)
+		var max = parseInt(data.max)
+		var now = parseInt($('#prob').val());
+	
+		if (total + now > max) {
+			alert('概率总和不能大于区间(位置数*100)');
+			return false;
+		}
+	});
+	var enable_two = true;
+	var pkg = $("#apply_pkg").val();
+	$.ajax({
+		url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+		type: 'get',
+		async:false,
+		success: function(data){
+			
+			if(data){
+				if(!confirm(data)){
+					enable_two = false;
+				}
+			}
+		}
+	});
+	return enable_two;
+}
+
+function no_select(value_select){
+	if(value_select == 1){
+		document.getElementById('old_phone').disabled = true;
+		$('#old_phone').attr('checked',false);
+	}else if(value_select == 2 || value_select == 3){
+		document.getElementById('old_phone').disabled = false;
+	}
+}
+
+</script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+<FORM method="POST" action="/index.php/Sj/CategoryExtent/edit_soft" enctype='multipart/form-data' onsubmit="return checkPost();">
+<input name='p' value='<?php echo $p; ?>' type='hidde' style='display: none;' />
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr">
+		<td>包名</td>
+		<td><input type='text' value='<?php echo $soft['package'];?>' disabled="true"/><input name='package' type='hidden' value='{$soft.package}' readonly id='apply_pkg'/></td>
+        <td/>
+	</tr>
+	<?php if($_GET['list_display'] == 1){ ?>
+	<tr class="sub_tr">
+		<td>一句话点评</td>
+		<td><input type="text" name="description" id="description" value='<?php echo $soft['description'];?>' />该项目非必填项，不填写则使用软件本身内容</td>
+	</tr>	
+	<?php } ?>
+
+    <tr class="sub_tr">
+		<td>高低配区分展示</td>
+		<td><input type="radio" name="phone_dis" value="1" id="no_dis" onclick="no_select(1);" <?php if($soft['phone_dis'] == 1){ ?>checked<?php } ?> />不做区分<br /><input type="radio" name="phone_dis" value="2" onclick="no_select(2);" <?php if($soft['phone_dis'] == 2){ ?>checked<?php } ?> />仅高配手机展示<br /><input type="radio" name="phone_dis" value="3" onclick="no_select(3)" <?php if($soft['phone_dis'] == 3){ ?>checked<?php } ?> />仅低配手机展示<br /><input type="checkbox" name="old_phone" id="old_phone" value="1" <?php if($soft['phone_dis'] == 1){ ?>disabled<?php } ?> <?php if($soft['old_phone'] == 1){ ?>checked<?php } ?> />显示在旧版本中(低于V4.4.1)
+		</td>
+        <td/>
+	</tr>
+
+	<tr class="sub_tr">
+		<td>显示概率</td>
+		<td><input id="prob" name='prob' type='text' value='<?php echo $soft['prob'];?>'/></td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td>开始时间</td>
+		<td>
+            <input id="start_at" name="start_at" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value="{$soft.start_at|date='Y-m-d H:i:s',###}"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td>结束时间</td>
+		<td>
+            <input id="end_at" name="end_at" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" value="{$soft.end_at|date='Y-m-d H:i:s',###}"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='type'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+	<?php if($show_sdk5 != 1){ ?>
+	<tr class="sub_tr">
+		<td>行为id</td>
+		<td>
+			<input type="text" name="beid" value="<?php if($soft['beid']) echo $soft['beid'];?>">
+		</td>
+	</tr>
+	<?php } ?>
+	<tr class="sub_tr">
+		<td colspan="3">
+        <input type='hidden' name="id" value='<?php echo $soft['id']?>'/>
+		<input type='hidden' name="life" value="<?php echo $_GET['life'] ?>" />
+		<input type='hidden' name="list_display" value="<?php echo $_GET['list_display'] ?>" />
+        <input type='submit'/>
+        <input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</FORM>	

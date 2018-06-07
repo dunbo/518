@@ -1,0 +1,83 @@
+<include file="../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script>
+	function been_show(){
+		$("#no_release").css('display','none');
+		$("#been_release").css('display','block');
+		$("#bt_been").css("background","#949494");
+		$("#bt_no").css("background","#e4e4e4");
+	}
+	
+	function no_show(){
+		$("#no_release").css('display','block');
+		$("#been_release").css('display','none');
+		$("#bt_been").css("background","#e4e4e4");
+		$("#bt_no").css("background","#949494");
+	}
+</script>
+<div  style="padding-left:50px">
+	<table border="1" cellspacing="0" cellpadding="0">
+		<tr>
+		<td width="1%"><input type="button" value="已发布" onclick="been_show();" id="bt_been" <?php if($from != 1){ ?>style="background:#949494"<?php } ?> /></td>
+		<td width="1%"><input type="button" value="未发布" onclick="no_show();" id="bt_no"  <?php if($from == 1){ ?>style="background:#949494"<?php } ?> /></td>
+		<td width="97%"></td>
+		<td width="1%"><input type="button" value="添加资讯" onclick="javascript:location.href='__URL__/news_add_show'" /></td>
+		</tr>
+	</table>
+	<table border="1" cellpadding="0" cellspacing="0" id="been_release" <?php if($from == 1){ ?>style="border-collapse: collapse;display:none;"<?php } ?> >
+		<tr>
+			<td width="10%">序号</td>
+			<td width="10%">资讯名称</td>
+			<td width="15%">资讯图片</td>
+			<td width="7%">作者</td>
+			<td width="10%">发布时间</td>
+			<td width="10%">操作</td>
+			<td width="15%">预览/发布</td>
+			<td width="10%">排序</td>
+		</tr>
+		<?php foreach($been_result as $key => $val){ ?>
+		<tr>
+			<td>{$val.rank}</td>
+			<td>{$val.news_name}</td>
+			<td><img src="<?php echo IMGATT_HOST; ?>{$val.news_pic}" /></td>
+			<td>{$val.author}</td>
+			<td><?php echo date('Y-m-d H:i:s',$val['release_tm']); ?></td>
+			<td><a href="__URL__/news_edit_show/id/{$val.id}">[编辑]</a>&nbsp;&nbsp;<a href="__URL__/game_news_del/id/{$val.id}" onclick="return checkit();">[删除]</a>&nbsp;&nbsp;</td>
+			<td><?php if($val['status'] == 1){ ?><a href="__URL__/news_profile/id/{$val.id}?width=480" class="thickbox">[预览]</a>&nbsp;&nbsp;<a href="__URL__/news_release/id/{$val.id}" onclick="return checkit();">[发布]</a>
+			<?php }elseif($val['status'] == 2 && ($val['release_tm'] >= $val['update_tm'])){ ?><a href="__URL__/news_release/id/{$val.id}/cancel/1" onclick="return checkit();">[取消发布]</a>
+			<?php }elseif($val['status'] == 2 && $val['release_tm'] < $val['update_tm'] && $val['rerelease_tm'] < $val['update_tm']){  ?><a href="__URL__/news_profile/id/{$val.id}?width=480" class="thickbox">[预览]</a>&nbsp;&nbsp;<a href="__URL__/news_release/id/{$val.id}" onclick="return checkit();">[重新发布]</a>&nbsp;&nbsp;<a href="__URL__/news_release/id/{$val.id}/cancel/1" onclick="return checkit();">[取消发布]</a>
+			<?php }elseif($val['status'] == 2 && $val['rerelease_tm'] > $val['update_tm']){ ?><a href="__URL__/news_release/id/{$val.id}/cancel/1" onclick="return checkit();">[取消发布]</a><?php } ?></td>
+			<td><?php if($val['rank'] == 1 && $val['status'] == 2){ ?><a href="__URL__/news_rank_stick/id/{$val.id}">[置顶]</a>&nbsp;&nbsp;<a href="__URL__/news_rank_change/id/{$val.id}/change/down">[下移]</a>
+			<?php }elseif($val['rank'] != 1 && $val['rank'] != $count && $val['status'] == 2 ){ ?><a href="__URL__/news_rank_stick/id/{$val.id}">[置顶]</a>&nbsp;&nbsp;<a href="__URL__/news_rank_change/id/{$val.id}/change/up">[上移]</a>&nbsp;&nbsp;<a href="__URL__/news_rank_change/id/{$val.id}/change/down">[下移]</a>
+			<?php }elseif($val['rank'] == $count && $val['status'] == 2){ ?><a href="__URL__/news_rank_stick/id/{$val.id}">[置顶]</a>&nbsp;&nbsp;<a href="__URL__/news_rank_change/id/{$val.id}/change/up">[上移]</a><?php }else{ ?>&nbsp;<?php } ?></td>
+		</tr>
+		<?php } ?>
+	</table>
+	<table border="1" cellpadding="0" cellspacing="0" id="no_release" <?php if($from != 1){ ?>style="border-collapse: collapse;display:none;"<?php } ?> >
+		<tr>
+			<td width="10%">序号</td>
+			<td width="10%">资讯名称</td>
+			<td width="25%">资讯图片</td>
+			<td width="7%">作者</td>
+			<td>创建时间</td>
+			<td width="10%">操作</td>
+			<td width="25%">预览/发布</td>
+		</tr>
+		<?php foreach($no_result as $key => $val){ ?>
+		<tr>
+			<td>{$val.num}</td>
+			<td>{$val.news_name}</td>
+			<td><img src="<?php echo IMGATT_HOST; ?>{$val.news_pic}" /></td>
+			<td>{$val.author}</td>
+			<td><?php echo date('Y-m-d H:i:s',$val['create_tm']); ?></td>
+			<td><a href="__URL__/news_edit_show/id/{$val.id}">[编辑]</a>&nbsp;&nbsp;<a href="__URL__/game_news_del/id/{$val.id}" onclick="return checkit();">[删除]</a>&nbsp;&nbsp;</td>
+			<td><?php if($val['status'] == 1){ ?><a href="__URL__/news_profile/id/{$val.id}?width=480" class="thickbox">[预览]</a>&nbsp;&nbsp;<a href="__URL__/news_release/id/{$val.id}" onclick="return checkit();">[发布]</a>
+			<?php }elseif($val['status'] == 2 && ($val['release_tm'] >= $val['update_tm'])){ ?><a href="__URL__/news_release/id/{$val.id}/cancel/1" onclick="return checkit();">[取消发布]</a>
+			<?php }elseif($val['status'] == 2 && ($val['release_tm'] < $val['update_tm'])){  ?><a href="__URL__/news_profile/id/{$val.id}?width=480" class="thickbox">[预览]</a>&nbsp;&nbsp;<a href="__URL__/news_release/id/{$val.id}" onclick="return checkit();">[重新发布]</a>&nbsp;&nbsp;<a href="__URL__/news_release/id/{$val.id}/cancel/1" onclick="return checkit();">[取消发布]</a><?php } ?></td>
+		</tr>
+		<?php } ?>
+	</table>
+</div>
+</body>
+</html>

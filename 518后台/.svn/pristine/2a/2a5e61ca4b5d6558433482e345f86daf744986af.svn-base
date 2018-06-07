@@ -1,0 +1,456 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+<!--csv文件上传 -->
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+
+<!--使用灵活运营的推荐内容编辑必需添加此js-->
+<script type="text/javascript" src="/Public/js/edit_content_type.js?v3"></script>
+<style>
+.sub_tr {
+    height: 35px;
+    text-align: left;
+}
+</style>
+
+<script>
+
+$(function(){
+    // 推荐内容值
+    /*var content_arr = Array();
+    content_arr['content_type'] = "{$list.content_type}";
+    if (content_arr['content_type'] == 1) {
+        content_arr['package'] = "{$list.package}";
+        content_arr['uninstall_setting'] = "{$list.uninstall_setting}";
+        content_arr['install_setting'] = "{$list.install_setting}";
+        if (content_arr['install_setting'] == 4) {
+            content_arr['start_to_page'] = "{$list.start_to_page}";
+        }
+        content_arr['lowversion_setting'] = "{$list.lowversion_setting}";
+    } else if (content_arr['content_type'] == 2) {
+        content_arr['activity_id'] = "{$list.activity_id}";
+    } else if (content_arr['content_type'] == 3) {
+        content_arr['feature_id'] = "{$list.feature_id}";
+    } else if (content_arr['content_type'] == 4) {
+        content_arr['page_type'] = "{$list.page_type}";
+		content_arr['parameter_field'] = '{$list.parameter_field}';
+    } else if (content_arr['content_type'] == 5) {
+        content_arr['website'] = "{$list.website}";
+        content_arr['website_open_type'] = "{$list.website_open_type}";
+    } else if (content_arr['content_type'] == 6) {
+        content_arr['gift_id'] = "{$list.gift_id}";
+		content_arr['page_type'] = "{$list.page_type}";
+    } else if (content_arr['content_type'] == 7) {
+        content_arr['strategy_id'] = "{$list.strategy_id}";
+		content_arr['page_type'] = "{$list.page_type}";
+    }*/
+	var soft_arr = {:json_encode($list)};
+	var content_arr = edit_load(soft_arr);
+    // 生成推荐内容展示
+	var function_from="returnback";
+    generate_append_html("content_type_div", content_arr);
+    // 生成推荐链接
+    href = generate_content_type_href('content_type_div', "{$list.content_type}", content_arr,function_from);
+    $("#content_type_a").attr("href", href);
+    
+});
+
+// 提交前的检查
+function checkPost() {
+    var ad_name = $("#edit_content_form #ad_name").val();
+    if (!ad_name) {
+        alert("广告名称不能为空！");
+        return false;
+    }
+    var image_url = $("#edit_content_form #image_url").val();
+    if (image_url) {
+        // 检查图片后缀
+        var suffix =/\.[^\.]+/.exec(image_url);
+        if (suffix != '.jpg' && suffix != '.png' && suffix != '.gif') {
+            alert("上传图片格式错误");
+            return false;
+        }
+    }
+    var button_name = $("#edit_content_form #button_name").val();
+    if (!button_name) {
+        alert("按钮名称不能为空！");
+        return false;
+    }
+    var pkg=$('#package').val();
+    var enable=true;
+    if(pkg){
+    	 $.ajax({
+	        url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+	        type: 'get',
+	        async:false,
+	        success: function(data){
+	        	if(data){
+	        		if(!confirm(data)){
+		                enable=false;
+		            }
+	        	}
+	            
+	        }
+	    });
+	    if(!enable){
+	    	return false;
+	    }
+    }
+    return checkRcontent("#edit_content_form");
+    
+    var start_at = $("#edit_content_form #start_at").val();
+    if (!start_at) {
+        alert("开始时间不能为空！");
+        return false;
+    }
+    var end_at = $("#edit_content_form #end_at").val();
+    if (!end_at) {
+        alert("结束时间不能为空！");
+        return false;
+    }
+    if (start_at > end_at) {
+        alert("开始时间不能大于结束时间！");
+        return false;
+    }
+}
+function checkPri()
+{
+	var r =/^([1-9][0-9]?|100)$/;
+	var priority = $("#priority").val();
+	if(r.test(priority)==false)
+	{
+		alert("优先级数必须是1-100整数");
+		return false;
+	}
+}
+
+//////// 精准投放thickbox相关函数
+    function count() {
+        $.ajaxFileUpload({
+            url:'__APP__/Public/pub_csv_count',
+            type:'POST',
+			fileElementId:'upload_file',
+			dataType: 'json',
+            secureuri:false,
+            dataType:'json',
+            success:function(data)
+			{
+			    if(data.error1==-1)
+				{
+					alert("请选择导入的CSV文件!");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+					return false;
+				}
+				else if(data.error2==-2)
+				{
+					alert("请上传CSV格式文件！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else if(data.error2==-3)
+				{
+					alert("CSV文件格式不正确,请您参考下载模板！");
+					document.getElementById("csv_url").value="";
+					document.getElementById("csv_count").value="";
+					document.getElementById("pre_dl_count").value=""; 
+                    return false;					
+				}
+				else
+				{
+					document.getElementById("csv_url").value=data.csv_url;
+					document.getElementById("csv_count").value=data.out_count;
+					document.getElementById("pre_dl_count").value=data.out_count;
+                }				
+            }
+        });
+    }
+	//渠道
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	function onclikChannel()
+	{
+		$('#channel_div').html($('.TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	//机型
+	function onclikDevice()
+	{
+		$('#device_div').html($('.TB_ajaxContent #c_device_res').html());
+	}
+
+	function check_arrs()
+	{
+		$('.TB_ajaxContent #c_device_res').html($('#device_div').html());
+
+		$('#device_div input:checked').each(function(){
+			$('.TB_ajaxContent .l_did_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	function delItem(obj) {
+	$(obj).parent().remove();
+	//  var fatie = $("#channel_div");
+	//	fatie.remove();
+
+	}
+	 function addItem() {
+		var channel_select = $("#device_div");
+		channel_select.clone().appendTo("#device_td");
+	}
+	function submitDevice()
+	{
+		var cids = '';
+		$('#device_div').empty();
+		$(".TB_ajaxContent #c_device_res input:checked").each(function(){
+			var item = $('<label>' + $('#c_device_res .l_did_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			item.find('input').click(function(){
+				$(this).parent().remove();
+			});
+			$('#device_div').append(item);
+		})
+		//$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+	//删除csv
+	function del_csv()
+	{
+		$("#csv_count").val("");
+		$("#csv_url").val("");
+		$("#have_pre_dl").val("");
+		$("#pre_dl_count").val("");
+		alert("删除后提交即生效");
+	}
+	$(document).ready(function()
+	{
+		var have_csv="{$list.csv_url}";
+		var is_upload_csv="{$list.is_upload_csv}";
+		if(have_csv&&is_upload_csv==1)//添加的时候已经上传过了可以删除
+		{
+			$("#del_csv_value").css("display","");
+			$("#upload_csv").css("display","none");
+			$("#upload_file").css("display","none");
+			$("#have_pre_dl").css("display","");
+		}
+		else if(!have_csv&&is_upload_csv==1)//已经上传过了又删除了什么也不显示
+		{
+			$("#tr_csv").css("display","none");
+		}
+		else if(!have_csv&&is_upload_csv==0)//添加的时候没有上传可以上传
+		{
+			$("#del_csv_value").css("display","none");
+			$("#upload_csv").css("display","");
+			$("#upload_file").css("display","");
+			$("#have_pre_dl").css("display","none");
+		}
+	});
+</script>
+
+<form id="edit_content_form" method="POST" action="__URL__/edit_content" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr">
+        <td><font color="red">*</font>广告名称</td>
+        <td>
+            <input type="text" name="ad_name" id="ad_name" value="{$list.ad_name}"/>
+        </td>
+        <td></td>
+    </tr>
+	<!-- <tr class="sub_tr">
+		<td>站点</td>
+        <td>
+            <select name="site_type">
+				<option value="0">安智市场</option>
+				<?php foreach($coop_site_list as $k => $v): ?>
+				<option value='<?php echo $v['id']?>' <?php if($list['site_type']==$v['id']) echo "selected" ?>><?php echo $v['website_name']?></option>
+				<?php endforeach; ?>
+			</select>
+        </td>
+	</tr> -->
+    <tr class="sub_tr">
+        <td><font color="red">*</font>图片</td>
+        <td><input name='image_url' id="image_url" type='file'/></td>
+        <td class="image_size_hint">限制上传{$image_width}*{$image_height}的JPG/PNG图片</td>
+    </tr>
+	<tr class="sub_tr">
+        <td><font color="red">*</font>高分图片</td>
+        <td><input name='image_url_high' id="image_url_high" type='file'/></td>
+        <td class="image_size_hint">限制上传{$image_width_high}*{$image_height_high}的JPG/PNG图片</td>
+    </tr>
+	<tr class="sub_tr">
+        <td><font color="red">*</font>低分图片</td>
+        <td><input name='image_url_low' id="image_url_low" type='file'/></td>
+        <td class="image_size_hint">限制上传{$image_width_low}*{$image_height_low}的JPG/PNG图片</td>
+    </tr>
+    <tr class="sub_tr">
+        <td>描述</td>
+        <td>
+            <input type="text" name="description" id="description" value="{$list.description}" onkeyup="checkLen(this, {$des_limit})" onblur="checkLen(this, {$des_limit})"/>
+        </td>
+        <td>限制{$des_limit}字以内</td>
+    </tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>按钮名称</td>
+        <td>
+            <input type="text" name="button_name" id="button_name" value="{$list.button_name}" onkeyup="checkLen(this, 6)" onblur="checkLen(this, 6)"/>
+        </td>
+        <td>限制6字以内</td>
+    </tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>推荐内容</td>
+        <td>
+            <!--下面a里的href的url会在ready函数里自动生成-->
+            <a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+            <!--下面的content_type_div是选择推荐内容后append的地方-->
+            <div id="content_type_div"/>
+        </td>
+        <td/>
+    </tr>
+    <tr id="tr_csv" class="sub_tr">
+		<td>覆盖用户：</td>
+		<td style="height:70px;">
+			<a href="__APP__/Public/down_moban" class="blue" style="text-decoration:none; color:blue;font-size:14px;">下载csv模板</a><br/>
+			<input type="file" id="upload_file" name="upload_file"  style="background:none; border:none; width:160px;" value="" /><input type="button" id="upload_csv" value="上传" onclick="count()" />
+		
+			<input type="text" id="have_pre_dl" name="have_pre_dl" value="<?php if($list['csv_url']){ ?>{$list.csv_url}<?php } ?>" readonly /><br>
+			<span id="csv_count_show_span" style="color:red; font-size:14px;">有效用户数</span><input type="text" id="pre_dl_count" name="pre_dl_count" readonly style="border:none;color:red; background:none;" value="<?php if($list['csv_count']){ ?>{$list.csv_count}<?php } ?>"/>
+			<input type='hidden' name='csv_url' id='csv_url' value="">
+			<input type='hidden' name='csv_count' id='csv_count' value="">
+			<input type="button" id="del_csv_value" value="删除" onclick="del_csv()" />
+		</td>
+	</tr>
+	<tr class="sub_tr">
+	<td>选择渠道可见</td>
+	<td align="left" width="300">
+	<a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">选择指定渠道</font></a><br />
+		<div id="channel_div">
+			<volist id="chl_list_vo" name="chl_list" >
+				&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+			</volist>
+		</div>
+	</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>机型可见</td>
+			<td>
+			<a href="/index.php/Public/showDevice?callback=submitDevice&ready=check_arrs&type=checkbox&reset_device=1" class="thickbox"><font color="blue">选择机型</font></a>
+			<div id="device_div">
+			<volist id="chl_list_vo" name="device_selected" >
+				&nbsp;<label class="l_did_{$chl_list_vo.did}"><input type="checkbox" name="did[]" checked="checked" value="{$chl_list_vo.did}"/>{$chl_list_vo.dname}</label>&nbsp;
+			</volist>
+			</div>
+			</td>
+	</tr>
+	<tr class="sub_tr">
+	  <td>运营商</td>
+	  <td id="operator_td">
+		<div id="operator_div">
+			<?php foreach($operator_list as $k => $v): ?>
+			<label><input name="oid[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		  <br/>
+		</div>
+	  </td>
+	  </tr>
+	<tr class="sub_tr">
+	  <td>固件版本</td>
+	  <td id="channel_td">
+		<div id="abi_div">
+			<?php foreach($firmwarelist as $k => $v): ?>
+			<label><input name="firmware[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		</div>
+	  </td>
+	</tr>
+	<tr class="sub_tr">
+	  <td>市场版本</td>
+	  <td id="channel_td">
+		<div id="abi_div">
+			<?php foreach($version_list as $k => $v): ?>
+				 <label>
+				<input name="version_code[]" value="<?php echo $k;?>" type="checkbox" <?php if ($v[1] == true):?> checked="true"<?php endif; ?> ><?php echo $v[0]; ?></label> <br>
+			<?php endforeach; ?>
+		</div>
+	  </td>
+	</tr>
+    <tr class="sub_tr">
+		<td><font color="red">*</font>开始时间</td>
+		<td>
+            <input id="start_at" name="start_at" type="text" class="Wdate" style="float:left" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  value="{$list.start_at|date='Y-m-d H:i:s',###}"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>结束时间</td>
+		<td>
+            <input id="end_at" name="end_at" type="text" class="Wdate" style="float:left" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})'  value="{$list.end_at|date='Y-m-d H:i:s',###}"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>优先级</td>
+        <td>
+            <input type="text" name="priority" value="{$list.priority}" id="priority" onblur="checkPri()"/>
+        </td>
+        <td>请填写1-100的整数</td>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>展示频次</td>
+        <td>
+            <select name="frequency">
+				<option value=0 <?php if($list['frequency'] == 0) echo "selected"?> >不限</option>
+				<option value=1 <?php if($list['frequency'] == 1) echo "selected"?> >只展示一次</option>
+				<option value=2 <?php if($list['frequency'] == 2) echo "selected"?> >只展示二次</option>
+				<option value=3  <?php if($list['frequency'] ==3) echo "selected"?> >只展示三次</option>
+			</select>
+        </td>
+	</tr>
+	<tr class="sub_tr">
+		<td>合作形式</td>
+		<td>
+			<SELECT name='co_type'>
+				<?php foreach($typelist as $key => $val): ?>
+					<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+				<?php endforeach; ?>				
+			</SELECT>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="pid" value="{$list.pid}"/>
+            <input type='hidden' name="id" id="id" value="{$list.id}"/>
+			<input type='hidden' name="life" value="<?php echo $_GET['life'] ?>" />
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/>
+            <input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

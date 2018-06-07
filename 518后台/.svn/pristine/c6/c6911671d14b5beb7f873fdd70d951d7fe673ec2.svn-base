@@ -1,0 +1,186 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+
+<script>
+	$(function(){
+		document.onkeydown = function(e){
+			var ev = document.all ? window.event : e;
+			if(ev.keyCode==13) {
+				$('#game_news_unreleased_list').submit();
+			 }
+		}
+	});
+	function select_all()
+	{
+		$("input[name='nid[]']").attr("checked",true);
+	}
+	function select_again()
+	{	
+		$("input[name='nid[]']").each(function () {  
+			$(this).attr("checked", !$(this).attr("checked"));  
+		});       
+	}
+	function release()
+	{
+		if(!confirm("确定要这么执行该操作吗？"))
+		{
+			return false;
+		}
+		var nid = $("input[name='nid[]']");
+		var id = "";
+		var is_select = false;
+		for ( i = 0 ; i < nid.length ; i++ ) 
+		{
+			if ( nid[i].checked == true ) 
+			{
+				id += "," + nid[i].value;
+				is_select = true;
+			}
+		}
+		if (is_select) 
+		{
+			window.location = "__URL__/news_release/id/"+id;
+		}
+		else
+		{
+			alert( "请至少选择一个条目，才能进行操作" );
+			return false;
+		}
+	}
+	function delete_go()
+	{
+		if(!confirm("确定要这么执行该操作吗？"))
+		{
+			return false;
+		}
+		var nid = document.getElementsByName("nid[]");
+		var id = "";
+		var is_select = false;
+		for ( i = 0 ; i < nid.length ; i++ ) 
+		{
+			if ( nid[i].checked == true ) 
+			{
+				id += "," + nid[i].value;
+				is_select = true;
+			}
+		}
+		if (is_select) 
+		{
+			window.location = "__URL__/game_news_del/id/"+id;
+		}
+		else
+		{
+			alert( "请至少选择一个条目，才能进行操作" );
+			return false;
+		}
+	}
+</script>
+
+<ul class="tab_title margin_top">
+    <li class="current"><a href="#">未发布</a></li>
+    <li><a href="__URL__/game_news_released_list">已发布</a></li>
+</ul>
+
+<body>
+    <div class="search_box">
+        <form method="get" action="__URL__/game_news_unreleased_list" name="game_news_unreleased_list" id="game_news_unreleased_list">
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="19%">
+                        <label>游戏名称：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_softname" id="search_softname" value="{$search_softname}"/>
+                    </td>
+                    <td width="19%">
+                        <label>资讯标题：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_news_name" id="search_news_name" value="{$search_news_name}"/>
+                    </td>
+                    <td width="18%">
+                        <label>资讯类型：</label>
+                        <select name="search_info_type" id="search_info_type">
+                            <option value="-1" selected>全部</option>
+                            <option value="1" <if condition="$search_info_type eq 1">selected</if>>资讯</option>
+                            <option value="2" <if condition="$search_info_type eq 2">selected</if>>评测</option>
+                            <option value="3" <if condition="$search_info_type eq 3">selected</if>>攻略</option>
+                        </select>
+                    </td>
+                    <td width="10%"><input type="submit" value="搜索" class="search_btn"/></td>
+                    <td width="10%"><a href='__URL__/news_add_show?from={$function_name}&{$url_param}' class="search_btn">添加资讯</a></td>
+                </tr>
+				<tr>
+					<td width="19%">
+                        <label>游戏包名：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_pckname" id="search_pckname" value="{$search_pckname}"/>
+                    </td>
+					<td width="19%">
+                        <label>采集站点：</label>
+                        <input type="text" class="search_item_text" style="width:150px" name="search_website" id="search_website" value="{$search_website}"/>
+                    </td>
+				</tr>
+            </table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+					<th width="3%">选择</th>
+                    <th width="5%">ID</th>
+                    <th width="10%">资讯标题</th>
+                    <th width="14%">资讯默认图片</th>
+                    <th width="8%">游戏名称</th>
+					<th width="9%">游戏包名</th>
+                    <th width="5%">采集站点</th>
+                    <th width="5%">作者</th>
+                    <th width="5%">资讯类型</th>
+                    <th width="8%">抓取时间</th>
+                    <th width="8%">创建时间</th>
+                    <th width="20%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+					<td><input type="checkbox" name="nid[]" value="{$list.id}"/></td>
+                    <td>{$list.id}</td>
+                    <td>{$list.news_name}</td>
+                    <td><if condition='$list.news_pic eq null'>-<else/><a href='{$apkurl}{$list.news_pic|default='&nbsp;'}' target="_blank"><img height="80" width="130" src="{$apkurl}{$list.news_pic|default='&nbsp;'}"/></a></if></td>
+                    <td>{$list.softname}</td>
+					<td>{$list.apply_pkg}</td>
+                    <td>{$list.website_name}</td>
+                    <td>{$list.author}</td>
+                    <td>
+                        <switch name="list.info_type">
+                            <case value="1">资讯</case>
+                            <case value="2">评测</case>
+                            <case value="3">攻略</case>
+                        </switch>
+                    </td>
+                    <td><if condition="$list.catch_tm eq 0"><else/>{$list.catch_tm|date="Y-m-d H:i:s",###}</if></td>
+                    <td><if condition="$list.create_tm eq 0"><else/>{$list.create_tm|date="Y-m-d H:i:s",###}</if></td>
+                    <td>
+                        <a href="__URL__/news_profile?id={$list.id}&width=480" class="thickbox">预览</a>
+                        <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                        <a href="__URL__/news_release?id={$list.id}" onClick="return confirm('确定要发布此条记录吗？');">发布</a>
+                        <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                        <a href="__URL__/news_edit_show?from={$function_name}&id={$list.id}&{$url_param}">编辑</a>
+                        <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                        <a href="__URL__/game_news_del?id={$list.id}" onClick="return confirm('确定要删除此条记录吗？');">删除</a>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+		<div style="margin:10px;">
+			<input type="button" value="全选" onclick="select_all()"/>&nbsp;
+			<input type="button" value="反选" onclick="select_again()"/>&nbsp;&nbsp;&nbsp;
+			批量操作：<input type="button" value="批量发布" onclick="return release()" />
+			<input type="button" value="批量删除" onclick="return delete_go()" />
+		<div>
+        <center>{$page}</center>
+    </div>
+</body>

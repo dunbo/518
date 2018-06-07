@@ -1,0 +1,128 @@
+<style type="text/css">
+<!--
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666; padding: 0  4px;}
+#channel_table1{font-size:12px;}
+#channel_table1 td{overflow:hidden;}
+-->
+</style>
+<include file="../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<body>
+<form id="upload" method='get' action="__URL__/channels" >
+<table width="98%" height="89"  border="0" cellpadding="0" cellspacing="0" class="tb" style="margin-bottom:15px; font-size:12px">
+  <tr>
+    <td colspan="13">渠道列表：</td>
+  </tr>
+  <tr>
+    <td width="7%">渠道号：</td>
+    <td width="10%"><input type="text" name="chl" id="chl" value="{$chl}"/></td>
+    <td width="7%">渠道名：</td>
+    <td width="9%"><input type="text" name="chname" id="chname" value="{$chname}"/></td>
+	<td width="7%">渠道编号：</td>
+    <td width="9%"><input type="text" name="chl_cid" id="chl_cid" value="{$chl_cid}"/></td>
+    <td width="9%">渠道类型：</td>
+    <td width="8%">
+<select id="category_id" name="category_id" >
+    <option value="">--请选择--</option>
+    <?php foreach ($category_list as $key => $value): ?>
+    <option value="<?php echo $key?>" <?php if($category_id != '' && $category_id == $key):?>selected <?php endif; ?> ><?php echo $value['name']?></option>
+  <?php endforeach; ?>
+</select>
+    </td>
+    <td width="9%">软件显示：</td>
+    <td width="8%">
+	<select id="only_auth" name="only_auth" >
+		<option value="">--请选择--</option>
+		<option value="0" <?php if($only_auth != '' && $only_auth == 0):?>selected <?php endif; ?>>显示未授权软件</option>
+		<option value="1" <?php if($only_auth != '' && $only_auth == 1):?>selected <?php endif; ?>>不显示未授权软件</option>
+	</select>
+	</td>
+	</tr>
+	<tr>
+	<td width="10%">是否独立更新</td>
+	<td width="7%">
+		<select name="update_select">
+			<option value="">--请选择--</option>
+			<option value="1" <?php if($update_select != '' && $update_select == 1){ echo "selected";}?> >独立更新</option>
+			<option value="0" <?php if($update_select != '' && $update_select == 0){ echo "selected";}?> >不独立更新</option>
+		</select>
+	</td>
+	<td width="4%">平台</td>
+	<td width="5%">
+<select name="platform">
+<option value="">全部</option>
+	<?php foreach($product_list as $key => $val):?>
+	<option value="<?php echo $key?>" <?php if($val[1]):?>selected="selected"<?php endif;?> ><?php echo $val[0]?></option>
+	<?php endforeach;?>
+</select>
+</td>
+	
+	<td width="10%">渠道用途选择&nbsp;：&nbsp;</td>
+	<td width="7%">
+	<select  name="activation_type" >
+	    <option value="0" <if condition="$activation_type eq 0">selected="selected"</if> >全部</option>
+		<option value="5" <if condition="$activation_type eq 5">selected="selected"</if> >普通非山寨</option>
+		<option value="9" <if condition="$activation_type eq 9">selected="selected"</if>>普通山寨</option>
+	</select>
+	</td>
+	<td width="10%">软件更新选项</td>
+	<td width="7%">
+		<select name="soft_update_select">
+			<option value="">全部</option>
+			<option value="1" <?php if($soft_update_select != '' && $soft_update_select == 1){ echo "selected";}?> >更新</option>
+			<option value="0" <?php if($soft_update_select != '' && $soft_update_select == 0){ echo "selected";}?> >不更新</option>
+		</select>
+	</td>
+    <td width="5%" rowspan="2"><input type="submit" name="button" id="button" value="搜索" /></td>
+  </tr>
+</table>
+</form>
+<P>
+<P>
+<table  height="80%"  border="0" cellpadding="0" cellspacing="0" class="tb" id="channel_table1">
+		<tr> 
+		<td width= "3%"><if condition="$show_chl eq true" >渠道号</if></td>
+          <td width="9%">渠道编号</td>
+          <td width="9%">渠道名</td>
+          <td width="7%">平台类型</td>
+          <td width="5%">渠道查看用户名</td> 
+          <td width="7%">渠道查看密码</td> 
+          <td width="9%">渠道=运营商-厂商-型号</td>
+          <td width="8%">软件显示</td>
+          <td width="9%">独立更新选项</td>
+          <td width="9%">软件更新选项</td>
+          <td width="6%">类别名称</td>
+          <td width="8%">渠道用途</td>
+          <td width="5%">备注</td>
+          <td width="4%">操作</td>
+		  <td width="8%">运营商绑定</td>
+		</tr>
+	
+	<volist name="list" id="vo">
+		<tr>
+		<td><if condition="$show_chl eq true" >{$vo.chl|default='&nbsp;'|default='&nbsp;'}</if></td>
+        <td>{$vo.chl_cid|default='&nbsp;'|default='&nbsp;'}</td>
+        <td>{$vo.chname|default='&nbsp;'|default='&nbsp;'}</td>
+        <td><?php echo $product_list[$vo['platform']][0]; ?></td>
+        <td>{$vo.checkname|default='&nbsp;'|default='&nbsp;'}</td>
+        <td>{$vo.checkpassword|default='&nbsp;'}</td>
+        <td>{$vo.oid|getoidname}-{$vo.mid|getmidname}-{$vo.did|getdidname|default='&nbsp;'}</td>
+        <td>{$vo.only_auth|default='&nbsp;'}</td>
+        <td>{$vo.alone_update|default='&nbsp;'}</td>
+        <td>{$vo.soft_update|default='&nbsp;'}</td>
+        <td>{$vo.category_name|default='未分类'}</td>
+        <td>{$vo.activation_type_name|default='未分类'}</td>
+        <td <if condition="$vo.note neq null" > onclick="alert('{$vo.note}')" </if> ><if condition="$vo.note neq null" ><a href="#">{$vo.note|mb_substr=0,21,'utf-8'|default="&nbsp;"}</a><else />&nbsp;</if></td>
+        <td><a href="__URL__/channels_edit/cid/{$vo.cid}">编辑</td>
+		<td><a href="__URL__/channels_bounding/cid/{$vo.cid}" class="thickbox">绑定运营商</a></td>
+		</tr>
+	</volist>
+</table>
+<br/>
+	<tr>{$page}</tr>
+<br/>
+</body>
+

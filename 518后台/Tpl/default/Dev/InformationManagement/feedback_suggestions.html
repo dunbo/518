@@ -1,0 +1,346 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" href="__PUBLIC__/school/ss/common.css" type="text/css" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>	
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js?30'></script>
+<div class="main" >
+<div class="content">
+<center>
+
+<table width="100%"  border="0" cellpadding="0" cellspacing="0" class="tb">
+	<tr height="35">
+		<td align="center" <?php if($last_status==2) { ?>style="background:#FFCC66"<?php } ?>><a href="__URL__/feedback_suggestions/last_status/2/status/1"><font style="color:#000; font-weight:bold">未处理</font></a></td>
+		<td align="center" <?php if($last_status==1) { ?>style="background:#FFCC66"<?php } ?>><a href="__URL__/feedback_suggestions/last_status/1/status/1"><font style="color:#000; font-weight:bold">已处理</font></a></td>
+		<td align="center" <?php if($status==0) { ?>style="background:#FFCC66"<?php } ?>><a href="__URL__/feedback_suggestions/status/0"><font style="color:#000; font-weight:bold">已删除</font></a></td>
+	</tr>
+</table>
+
+<form action="__URL__/feedback_suggestions" method="GET">
+<table width="100%" height="29" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr align='left'>
+	<td>反馈内容:</td>
+    <td><input type="text" name="content" value="{$content}" ></td>
+	<td>起止日期:</td>
+    <td width="300" colspan='4'><?php showDatePicker('start_at','end_at', $start_at,$end_at);?></td>	
+  	<td width="99">开发者名称：</td>
+	<td width="100"><input size='15' type="text" name="dev_name" id="dev_name" value="{$dev_name}" /></td>
+	<td width="99">注册邮箱：</td>
+	<td width="100"><input size='15' type="text" name="email" id="email"  value="{$email}" /></td>
+        <?php if($status == 0){ ?>
+	<td width="99">操作人员：</td>
+	<td width="100"><input size='15' type="text" name="operator" id="operator"  value="{$operator}" /></td>        
+        <?php } ?>
+	<td align='center'><input type="submit" value="搜索"/></td>	
+	<input type='hidden' name='status' id='status' value="{$status}"/>
+	<?php if($status != 0) { ?>
+	<input type='hidden' name='last_status' id='last_status' value="{$last_status}"/>
+	<?php } ?>
+  <!-- <td>处理状态:</td>
+  <td colspan="3" >
+  <select name="last_status" id="last_status" style="width:100px;height:25px;font-size:12px;">
+  <option value="" selected="selected" >全部</option>
+  <option value="1"<?php if($last_status==1) { ?> selected="selected"<?php } ?>>已处理</option>
+  <option value="2"<?php if($last_status==2) { ?> selected="selected"<?php } ?>>未处理</option>
+  </select>
+  </td>   
+  <td>读取状态:</td>
+  <td colspan="3" >
+  <select name="stat" id="stat" style="width:100px;height:25px;font-size:12px;">
+  <option value="" selected="selected" >全部</option>
+  <option value="1"<?php if($stat==1) { ?> selected="selected"<?php } ?>>已读</option>
+  <option value="2"<?php if($stat==2) { ?> selected="selected"<?php } ?>>未读</option>
+  </select>
+  </td>  -->
+  </tr>
+</table>
+</form>
+<div style="float:left">{$count}条记录</div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr align='left' bgcolor="" height='30'>
+<?php if($count > 0) { ?>
+	<td align='right'><a onclick="export_data('__URL__/feedback_suggestions_export/count/{$count}/?{$param}');">导出</a></td>
+<?php } ?>
+</tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr height='30px'>
+    <td width="5%" align="center" bgcolor="#e3e2fe"><input type="checkbox" id="selectAll[]" name="selectAll[]" onclick="SelectAll(this)" /><strong>选择</strong></td>
+    <td width="15%" align="center" bgcolor="#e3e2fe"><strong>开发者</strong></td>
+    <td width="20%" align="center" bgcolor="#e3e2fe"><strong>反馈内容</strong></td>
+	<?php if($last_status==2) { ?>
+    <td width="15%" align="center" bgcolor="#e3e2fe"><strong>反馈时间</strong></td>
+	<?php }else if($last_status==1 || $status ==0) { ?>
+    <td width="15%" align="center" bgcolor="#e3e2fe"><strong>最新回复内容</strong></td>
+		<?php if($status ==0){ ?>
+                        <td width="10%" align="center" bgcolor="#e3e2fe"><strong>操作人员</strong></td>
+			<td width="15%" align="center" bgcolor="#e3e2fe"><strong>删除时间</strong></td>
+		<?php }else{ ?>
+			<td width="10%" align="center" bgcolor="#e3e2fe"><strong>备注</strong></td>
+			<td width="10%" align="center" bgcolor="#e3e2fe"><strong>回复时间</strong></td>
+		<?php } ?>
+	<?php } ?>
+    <td width="15%" align="center" bgcolor="#e3e2fe"><strong>标签</strong></td>
+<!--     <td width="10%" align="center" bgcolor="#e3e2fe"><strong>读取状态</strong></td>
+    <td width="10%" align="center" bgcolor="#e3e2fe"><strong>处理状态</strong></td> -->
+    <td width="10%" align="center" bgcolor="#e3e2fe"><strong>操作</strong></td>
+  </tr>
+  <tr>
+  <volist name='feedbacklist' id='vo'>
+    <tr id='tr{$vo.id}'>
+    <td align="center"><input type="checkbox" name="id[]" value="{$vo.id}" /></td>
+    <td align="left">
+	<if condition="$vo.dev_name neq ''">
+	<a  target='_blank' href='/index.php/Dev/User/userlists/dev_id/{$vo.dev_id}'>	
+	{$vo.dev_name|default=''}</a><br />
+	<p><if condition="$vo.dev_type eq 0">公司<p/>
+	<p><elseif condition="$vo.dev_type eq 1" />个人<p/>
+	<p><else/>&nbsp;</if><p/>
+	{$vo.dever_email|default=''}
+	</if>
+	</td>
+    <td align="left">
+	<a href="javascript:;" onclick="opencountent('{$vo.id}');">
+	{$vo.content|msubstr=0,50,'utf-8',true}<br>
+	</a>
+	<a href="javascript:;" onclick="opencountent2('{$vo.id}');">
+	<if condition="$vo.desc_content2 neq ''">
+	<b>最新反馈：</b>{$vo.desc_content2|msubstr=0,50,'utf-8',true}<br>
+	</if>
+	</a>
+	</td>
+	<div id="opencontent_{$vo.id}" style="padding:20px; width:250px; display:none; word-break:break-all; word-wrap:break-word;">
+	{$vo.content}<br>
+	{$vo.create_tm}<br/>
+	</div>
+	<div id="opencontent2_{$vo.id}" style="padding:20px; width:250px; display:none; word-break:break-all; word-wrap:break-word;">
+	<if condition="$vo.desc_content2 neq ''">
+	<b>最新反馈：</b>{$vo.desc_content2}<br/>
+	{$vo.reply_tm2}
+	</if>
+	</div>
+	<?php if($last_status==2) { ?>
+		<td align="center">
+		<if condition="$vo.desc_content2 neq '' && $vo.reply_tm2 neq ''">
+			最新反馈时间：{$vo.reply_tm2}
+		<else/>	
+			{$vo.create_tm}<br/>
+		</if>
+		</td>
+	<?php }else if($last_status==1 || $status ==0 ) { ?>
+	<if condition="$vo.desc_content neq ''  ">
+    <td align="left">
+	<a href="javascript:;" onclick="open_desc_countent('{$vo.id}');">
+	{$vo.desc_content|msubstr=0,100,'utf-8',true}<br>
+	</a>
+	</td>
+	<div id="content_{$vo.id}" style="padding:20px; width:250px; display:none; word-break:break-all; word-wrap:break-word;">
+		{$vo.desc_content}<br>{$vo.reply_tm}
+	</div>
+	<else/>
+	<td align="center">-------</td>
+	</if>
+		<?php if($status ==0){ ?>
+                        <td align="center"><?php echo $vo['operator']; ?></td>
+			<td align="center"><?php echo $vo['last_tm']; ?></td>
+		<?php }else{ ?>
+			<div id="remark_{$vo.id}" style="padding:20px; width:250px; display:none; word-break:break-all; word-wrap:break-word;">
+				{$vo.remark}
+			</div>
+			<td align="center">
+				<a href="javascript:;" onclick="open_remark('{$vo.id}');">{$vo.remark|msubstr=0,100,'utf-8',true}</a>
+			</td>
+			<td align="center">{$vo.reply_tm}</td>
+		<?php } ?>
+	<?php } ?>
+	<td><input type="text" id="tag_{$vo.id}" value="{$vo.tag}" onblur="edittag({$vo.id})"></td>
+<!-- 	<if condition="$vo.last_status eq 0">
+		<td align="center">-------</td>
+	<else/>
+		<if condition="$vo.stat neq 0">
+	    <td align="center"><font color='red'>未读</font></td>
+		<else/>
+		<td align="center"><font color='green'>已读</font></td>
+		</if>
+	</if>
+	
+	<if condition="$vo.last_status eq 0">
+    <td align="center">未处理</td>
+	<else/>
+	<td align="center">已处理</td>
+	</if> -->
+	<?php if($status==0) { ?>
+		<td align="center"><button onclick="window.location.href='__URL__/feedback_reply/id/{$vo.id}/type/1'">查看</button></td>
+	<?php } else { ?>
+    <td align="center">
+	<button onclick="window.location.href='__URL__/feedback_reply/id/{$vo.id}/last_status/{$last_status}'">回复</button><br/>
+		<?php if($last_status ==2){ ?>
+		<button onclick="handle_status_list('{$vo.id}')">已处理</button><br/>
+		<?php } ?>
+	<button onclick="del('{$vo.id}')" >删&nbsp;除</button>
+	</td>
+	<?php } ?>
+</tr>
+  </volist>
+<tr height='50px'>
+    <td colspan="7" align='left'>
+	<input type="button" id="selectAll[]" name="selectAll[]" value="全选"  onclick="SelectAll(this)" /> &nbsp;&nbsp;
+	<input type="button" id="delete" value="批量删除"  onClick="delAll2()"  />
+</td>
+  </tr> 
+</table>
+<div  align='left'>{$page}</div>
+</center>
+</div>
+</div>
+	<div id="handle_list" style="padding:20px; width:300px; display:none; word-break:break-all; word-wrap:break-word;">
+		<table>
+			<tr><td colspan='2'>确定转到已处理列表吗？如果确定，可添加备注信息</td></tr>
+			<tr>
+				<td colspan='2'>
+				<textarea name="remark"  id='remark' style="width: 300px; height: 58px;"></textarea>
+				</td>
+			</tr>
+			<tr>	
+				<td><button id="cancelBtn" onclick="handle_status();" >提交</button></td>
+				<td >
+				<button id="cancelBtn1" onclick="zxxbox_hide();" >取消</button>
+				</td>
+			</tr>
+		</table>
+		<input type='hidden' name='tmpid' id='tmpid' value=""/>
+	</div>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+ <script>
+function edittag(id){
+	var tag = '';
+	tag = $("#tag_"+id).val();
+	if(tag){
+		$.ajax({
+			url: '__URL__/edittag/id/'+id+'/tag/'+tag,
+			data: '',
+			type: 'get',
+			dataType: 'json',
+			success: function(ret) {
+				if(ret['code']==0) {	//失败
+					alert("失败");
+					return false;
+				} else if(ret['code']==1) {	//成功
+					alert("成功");
+				}
+			}
+		});
+	}
+}
+function opencountent(ids){
+	$("#opencontent_"+ids).zxxbox();  
+}
+function opencountent2(ids){
+	$("#opencontent2_"+ids).zxxbox();  
+}
+function open_desc_countent(ids){
+	$("#content_"+ids).zxxbox();  
+}
+ //全选
+function SelectAll(obj) {
+	var sid = document.getElementsByName("id[]");
+	var selectAll = document.getElementsByName("selectAll[]");
+	if ( obj.value == "全选" ) {
+		obj.value = "反选";
+		Select( sid , true );
+		Select( selectAll , true );
+	} else {
+		obj.value = "全选";
+		Select( sid , false );
+		Select( selectAll , false );
+	}
+}
+
+function Select( obj , check ) {
+	for ( i = 0 ; i < obj.length ; i++ ) {
+		obj[i].checked = check;
+	}
+	return;
+}
+function delAll2()
+{	
+	id_str = Selected_check();
+	if(id_str){
+		if(!confirm("确定要这么执行该操作吗？")) {
+			return false;
+		}	
+		window.location = "__URL__/feedback_del/feed_id/"+id_str;
+	}
+}
+//删除
+function del(id) {
+	if(confirm('您确定要执行该操作吗？')) {
+		if(!id) {
+			alert('请选择要通过的对象！');
+			return false;
+		}
+		$.ajax({
+			url: '__URL__/feedback_del/id/'+id,
+			data: '',
+			type: 'get',
+			dataType: 'json',
+			success: function(ret) {
+				if(ret['code']==0) {	//失败
+					alert(ret['msg']);
+					location.reload();//加载页面
+					return false;
+				} else if(ret['code']==1) {	//成功
+					//变灰不可点击处理
+					gray_processing(ret['msg']);
+				}
+			}
+		});
+	}
+}
+function open_remark(id){
+	$("#remark_"+id).zxxbox();  
+}
+//已处理展示
+function handle_status_list(id){
+	$("#handle_list").zxxbox();  
+	$("#tmpid").val(id);
+}
+//已处理
+function handle_status() {
+	var id = $("#tmpid").val();
+	var remark = $("#remark").val();
+	$.ajax({
+		url: '__URL__/handle_status/id/'+id+'?remark='+remark,
+		type: 'get',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['status']==0){
+				alert(ret['info']);
+				return false;
+			}
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				location.reload();//加载页面
+				return false;
+			} else if(ret['code']==1) {	//成功
+				//关闭层
+				zxxbox_hide();
+				//变灰不可点击处理
+				gray_processing(ret['msg']);
+			}
+		}
+	});
+}
+//批量处理
+function handle_status_arr() {
+	id_str = Selected_check();
+	if(id_str){
+		handle_status_list(id_str);
+	}
+}
+ </script>
+ <include file="../../Public/await" />

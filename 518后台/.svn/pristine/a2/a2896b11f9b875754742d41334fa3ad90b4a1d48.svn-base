@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+</head>
+<div style="margin:20px;">
+<h2>编辑</h2>
+<div style="margin:20px;">
+<form action="__URL__/sign_template_edit" method="post" enctype="multipart/form-data">
+<table class="table_list">
+	<input type="hidden" name='id' value="<?php echo $id;?>" />
+	<input type="hidden" value="<?php echo $list['aid'] ?>" name='aid'/>
+	<input type="hidden" value="<?php echo $_GET['level'] ?>" name='level'/>
+	<input type="hidden"  name='update_tm' value="<?php echo $list['update_tm'] ?>"/>
+	<input type="hidden"  name='is_telephone' value="<?php echo $is_telephone ?>"/>
+	<tr>
+		<td>已签到icon:
+		</td>
+		<td>
+		<input type="file" name="icon_in" id='icon_in' value="<?php echo $list['icon_in']?>" <?php if($start_tm && $start_tm < time()) echo 'disabled'?>/>
+		<span style="color:red"> <?php if($is_telephone == 1){echo '68*68';}else{echo '125*125';}?> </span>
+		</td>
+	</tr>
+	<tr>
+		<td>未签到icon:
+		</td>
+		<td>
+		<input type="file" name="icon_not_in" id='icon_not_in' value="<?php echo $list['icon_not_in']?>" <?php if($start_tm && $start_tm < time()) echo 'disabled'?>/>
+		<span style="color:red"> <?php if($is_telephone == 1){echo '68*68';}else{echo '125*125';}?> </span>
+		</td>
+	</tr>
+	<tr>
+		<td>已过期icon/补签icon:
+		</td>
+		<td>
+		<input type="file" name="icon_be_over" id='icon_be_over' value="<?php echo $list['icon_be_over']?>" <?php if($start_tm && $start_tm < time()) echo 'disabled'?>/>
+		<span style="color:red"> <?php if($is_telephone == 1){echo '68*68';}else{echo '125*125';}?> </span>
+		</td>
+	</tr>
+	<tr>
+		<td>未开始icon:
+		</td>
+		<td>
+		<input type="file" name="icon_not_start" id='icon_not_start' value="<?php echo $list['icon_not_start']?>" <?php if($start_tm && $start_tm < time()) echo 'disabled'?>/>
+		<span style="color:red"> <?php if($is_telephone == 1){echo '68*68';}else{echo '125*125';}?> </span>
+		</td>
+	</tr>
+	<tr>
+		<td>奖品名称:
+		</td>
+		<td><input type="text" name="name" id='name' value="<?php echo $list['name']?>" <?php if($start_tm && $start_tm < time()) echo 'disabled'?>/></td>
+	</tr>
+	<tr>
+		<td>奖品数量:
+		</td>
+		<td><input type="text" name="prize_num" id='prize_num' value="<?php echo $list['num']?>" <?php if($start_tm && $start_tm < time()) echo 'disabled'?> /></td>
+	</tr>
+	
+	<tr >
+		<td>礼包类型</td>
+		<td>
+		<select name='type' id='type' <?php if($start_tm && $start_tm < time()) echo 'disabled'?>>
+			<option value="1" <?php if($list['type'] == 1) echo 'selected'; ?> >实物奖</option>
+			<option value="4" <?php if($list['type'] == 4) echo 'selected'; ?> >礼券</option>
+			<option value="5" <?php if($list['type'] == 5) echo 'selected'; ?> >礼包（直接发放）</option>
+		</select>
+		</td>
+	</tr>
+	
+	<tr id='gift_tr'>
+		<td id='gift_id'>
+		礼券id:
+		</td>
+		<td><input type="text" name="couponid" id='couponid' value="<?php echo $list['gift_file']?>" <?php if($start_tm && $start_tm < time()) echo 'disabled'?> /></td>
+	</tr>
+	<?php if($_GET['level'] == 1){ ?>
+	<tr >
+		<td>复制到全部签到icon:</td>
+		<td >
+			<input type="radio" name="is_copy" value="1"  /> 是&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="is_copy" value="2"  /> 否
+			<span style="color:red">勾选后全部签到icon将被覆盖为本次上传文件</span>
+		</td>
+	</tr>
+	<?php } ?>
+	<tr>
+		<td><input type="submit" value="提交" class="search_btn"  <?php if($start_tm && $start_tm < time()) echo 'disabled'?> /></td>
+		<td><input type="button" value="取消" class="search_btn" onclick="tb_remove();" /></td>
+	</tr>
+</table>
+</form>
+</div>
+</div>
+
+<script>
+$(document).ready(function () {
+	//console.log($('#ap_type').html());
+	var obj = document.getElementById("type");
+	sel_type(obj);
+});
+$("#type").change(function(){
+	sel_type(this);
+});
+function sel_type(obj){
+	var ap_type = obj.value;
+	if(ap_type == 4){
+		$('#gift_tr').css('display','');
+		$('#gift_id').text('礼券id');
+	}else if(ap_type==5) {
+		$('#gift_tr').css('display','');
+		$('#gift_id').text('礼包id');
+	}else{
+		$('#gift_tr').css('display','none');
+	}
+}
+//礼包验证
+function ajaxFileUpload(){
+	$.ajaxFileUpload(
+	{
+		url:'__URL__/pub_gift_check', //你处理上传文件的服务端
+		secureuri:false,
+		fileElementId:'gift',
+		dataType: 'json',
+		success: function (data){
+			if(data.code == 1){
+				return false;
+			}else{
+				alert(data.msg);
+				remove_file('gift');
+				return false;
+			}
+		//	consloe.log(data);
+	   }
+	})
+}
+
+function remove_file(file){
+	var file = $("#"+file);
+	file.after(file.clone().val(""));
+	file.remove();	
+	return false;   	
+}
+</script>

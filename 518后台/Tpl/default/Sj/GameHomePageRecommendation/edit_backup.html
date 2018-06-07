@@ -1,0 +1,116 @@
+<include file="../Public/header" />
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+
+<script>
+    function trim(str){ //删除左右两端的空格 
+        return str.replace(/(^\s*)|(\s*$)/g, ""); 
+    };
+    function checkLen(obj) {
+        var maxChars = 70;//最多字符数
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+    };
+    function edit_backup() {
+        var package_backup = trim($("#package_backup").val());
+        if(package_backup == "") {
+            $("#s9").html('<font color="red">软件（包名）不能为空<font>');
+            return;
+        } else {
+            $("#s9").html('');
+        }
+        if(trim($("#note_backup").val()) == "") {
+            $("#s10").html('<font color="red">软件（简介）不能为空<font>');
+            return;
+        } else {
+            $("#s10").html('');
+        }
+        if (trim($("#note_backup").val()).length>70) {
+            $("#s10").html('<font color="red">软件（简介）限制在70字以内<font>');
+            return;
+        }
+        
+        // 最后检查填写的包名是否可用
+        var package_backup_exists = check_package(false, package_backup, "org_package_backup", "s9");
+        if (!package_backup_exists) {
+            return;
+        }
+        
+        $('#edit_backup').submit();
+    }
+    
+    // 检查包名是否可用，传入参数b_async如果为true，表示设置ajax请求为异步，false为同步
+    function check_package(b_async, package_name, org_id, s_id) {
+        var package_name = $.trim(package_name);
+        var org_package_name = $.trim($("#"+org_id).val());
+        var ret = true;
+        $("#"+s_id).html('');
+        if (package_name != "" && package_name != org_package_name) {
+            var param = {
+                package_name : package_name
+            };
+            $.ajax({
+                url:'__URL__/check_package',
+                type:'POST',
+                async:b_async,
+                data:param,
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    if(data == 1) {
+                        $("#"+s_id).html('<font color="red">包名不存在<font>');
+                        ret = false;
+                    } else if (data == 2) {
+                        $("#"+s_id).html('<font color="red">包名已添加<font>');
+                        ret = false;
+                    } else {
+                        $("#"+s_id).html('');
+                        ret = true;
+                    }
+                }
+            });
+        }
+        return ret;
+    }
+</script>
+
+<body>
+<h2>首页推荐配置</h2>
+<form method="post" action="__URL__/edit_backup" id="edit_backup">
+    <div class="form_list">
+        <label><font color="red">*</font>配置选择：</label>
+        <select id="config" name="config" onChange="config_select(this.value);" disabled="disabled">
+            <option id="op1" name="op1" value="1">首页推荐</option>
+            <option id="op2" name="op2" value="2" selected="selected">备选库</option>
+        </select>
+    </div>
+    <div class="clear"></div>
+    <div id="div_backup" name="div_backup">
+        <input type="hidden" id="id" name="id" value="{$list.id}"/>
+        <div class="form_list">
+            <label><font color="red">*</font>软件（包名）：</label>
+            <input id="org_package_backup" name="org_package_backup" type="hidden" value="{$list.package}"/>
+            <input id="package_backup" name="package_backup" type="text" value="{$list.package}" onblur='check_package(true, this.value, "org_package_backup", "s9")' class="input_text"/>
+            <span id="s9" class="prompt_infor" style="padding-left:155px"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list">
+            <label><font color="red">*</font>软件（简介）：</label>
+            <textarea id="note_backup" type="text" name="note_backup" onKeyUp="checkLen(this)" class="input_text">{$list.note}</textarea>
+            <span style="padding-left:155px">限制在70字以内</span>
+            <span id="s10" class="prompt_infor" style="padding-left:155px"></span>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <div class="clear"></div>
+    <div class="form_btns_box">
+		<a href="#" onClick="edit_backup()">提交</a>
+		<a href="__URL__/backup_list">取消</a>
+	</div>
+</form>
+
+
+</body>

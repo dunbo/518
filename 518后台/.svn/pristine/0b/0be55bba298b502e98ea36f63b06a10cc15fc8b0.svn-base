@@ -1,0 +1,133 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/Public/js/calendar_bak.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-zh.js"></script>
+<script type="text/javascript" src="/Public/js/calendar-setup.js"></script>
+
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+
+<script>
+$(function(){
+    var package = "{$record.package}";
+    searchSoftName(package);
+});
+
+function checkPost() {
+    var package = $("#package").val();
+    if (!package) {
+        alert("包名不能为空！");
+        return false;
+    }
+    // 包名是否存在
+    var softname = searchSoftName(package, false);
+    if (softname == '') {
+        alert("包名不存在！");
+        return false;
+    }
+    var beid = $('#beid').val();
+    if (!/^\d+$/.test(beid) && beid) {
+        alert('行为id请填写大于等于0的整数');
+        return false;
+    }
+    var rank = $("#rank").val();
+    if (!rank) {
+        alert("排序不能为空！");
+        return false;
+    }
+    rank_re = /^[1-9]\d*$/;
+    if (!rank_re.test(rank)) {
+        alert("排序值需为正整数！");
+        return false;
+    }
+    var start_time = $("#start_time").val();
+    if (!start_time) {
+        alert("开始时间不能为空！");
+        return false;
+    }
+    var end_time = $("#end_time").val();
+    if (!end_time) {
+        alert("结束时间不能为空！");
+        return false;
+    }
+    if (start_time > end_time) {
+        alert("开始时间不能大于结束时间！");
+        return false;
+    }
+}
+
+function searchSoftName(package, async) {
+    var softname = '';
+    var param = {package:package};
+    $.ajax({
+        url : "/index.php/ContentType/convertPackage2Softname",
+        type : "post",
+        data : param,
+        async : async,
+        success : function(data) {
+            softname = data;
+            $("#softname").html(softname);
+        }
+    });
+    return softname;
+}
+</script>
+
+<form method="POST" action="__URL__/edit_content" enctype="multipart/form-data" onsubmit="return checkPost()">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+    <tr class="sub_tr">
+        <td><font color="red">*</font>软件包名</td>
+        <td>
+            <input type="text" name="package" id="package" onblur="searchSoftName(this.value, true)" value="{$record.package}"/>
+        </td>
+        <td/>
+    </tr>
+    <tr class="sub_tr">
+        <td>软件名称</td>
+        <td>
+            <label type="text" name="softname" id="softname"/>
+        </td>
+        <td/>
+    </tr>
+    <tr class="sub_tr">
+        <td>行为id</td>
+        <td>
+            <input type="text" name="beid" id="beid" value="{$record.beid}" />
+        </td>
+        <td/>
+    </tr>
+    <tr class="sub_tr">
+        <td><font color="red">*</font>排序</td>
+        <td>
+            <input type="text" name="rank" id="rank" value="{$record.rank}"/>
+        </td>
+        <td/>
+    </tr>
+    <tr class="sub_tr">
+		<td><font color="red">*</font>开始时间</td>
+		<td>
+            <input id="start_time" name="start_time" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value="{$record.start_time|date='Y-m-d H:m:s',###}"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td><font color="red">*</font>结束时间</td>
+		<td>
+            <input id="end_time" name="end_time" type="text" class="Wdate" style="float:left" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" value="{$record.end_time|date='Y-m-d H:m:s',###}"/>
+        </td>
+        <td/>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="3">
+            <input type='hidden' name="id" value='{$record.id}'/>
+			<input type='hidden' name="life" value="<?php echo $_GET['life'] ?>" />
+            <input type='submit' value="&nbsp;&nbsp;确定&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+        </td>
+	</tr>
+</table>
+</form>

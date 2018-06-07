@@ -1,0 +1,138 @@
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	<tr><td><font style="color:red">{$msg}</font></td></tr>
+	<tr><td align='left' colspan= '4'  ><h2>设定软件屏蔽状态</td></h2></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td colspan= '4' align='left'>	
+		<input type="radio" id="shield_2" name="shield" value="2"  />正常
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type="radio" id="shield_1" name="shield" value="1" checked />屏蔽
+	</td></tr>
+	<tr><td>&nbsp;</td></tr>
+
+<table id="shield_tm" style="display:block;"  border="0" cellpadding="0" cellspacing="0" >
+	<tr>
+	<td colspan= '4' align='left'>
+	开始时间:<input id="shield_start_time" name="shield_start_time" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+			style="border: 0px none black; width: 150px;" value="{$shield_start_time}"
+			size="15" type="text"></td>
+	</tr>
+	
+	<tr><td>&nbsp;</td></tr>
+	<tr>
+	<td colspan= '4' align='left'>
+	结束时间:<input id="shield_end_time" name="shield_end_time" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+			style="border: 0px none black; width: 150px;" value="{$shield_end_time}"
+			size="15" type="text"></td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td colspan= '4' align='left'>屏蔽原因：
+	<input type="checkbox" name="shield_content[]" value="山寨风险"/>山寨风险
+	<input type="checkbox" name="shield_content[]" value="盗版风险"/>盗版风险
+	<br/>
+	<input type="text" name="shield_content_other" value="其他" onblur="if(value==''){value='其他';}" onfocus="if(value=='其他'){value=''}" />
+	</td></tr>
+	<tr><td>&nbsp;<br/></td></tr>
+</table>
+
+	
+	<tr>
+	<input type='hidden' name='is_tmp' id='is_tmp' value="{$type}"/>	
+	<input type='hidden' name='act' id='act' value="{$act}"/>	
+	<td><button  onclick="shield_add();" >提交</button></td>
+	<td style="padding-left: 100px;">
+	<button  onclick="self.tb_remove()" >取消</button></td>
+	</tr>
+	</table>
+<div style="display:none;" id='shield_error'></div>
+<script>
+$('#shield_2').click(function(){
+	$('#shield_2').each(function(){
+		if($(this).is(':checked')) {
+			$('#shield_tm').hide();
+		}
+	});
+	//yss 新增
+	$('#shield_error').html("");
+	$('#shield_error').css('display','none');
+});
+$('#shield_1').click(function(){
+	$('#shield_1').each(function(){
+		if($(this).is(':checked')) {
+			$('#shield_tm').show();
+		}
+	});
+});
+//屏蔽提交
+function shield_add() {
+	var is_tmp = $('#is_tmp').val();
+	var act = $('#act').val();
+	$("[name='shield']").each(function(){
+		if($(this).is(':checked')) {
+			shield = $(this).val();
+		}
+	});
+	var shield_content = new Array();
+	var i = 0;
+	$("[name='shield_content[]']").each(function(){
+		if($(this).is(':checked')) {
+			shield_content[i] = $(this).val();
+			i++;
+		}
+	});
+	var shield_content_other = $("[name='shield_content_other']").val();
+	if(shield_content_other == '其他'){
+		shield_content_other = '';
+	}else{
+		shield_content_other  = ","+$("[name='shield_content_other']").val();
+	}
+	if(shield_content=='' && shield_content_other == '' && shield == 1){
+		alert('请填写屏蔽原因');
+		return false;
+	}
+	var shield_start_time = $('#shield_start_time').val();
+	var shield_end_time = $('#shield_end_time').val();
+	id_str = Selected_check();
+	$.ajax({
+		url: '/index.php/Dev/Soft/shield_soft_do?id='+id_str+'&type='+is_tmp+'&shield='+shield+'&start_tm='+shield_start_time+'&end_tm='+shield_end_time+'&shield_content='+shield_content+shield_content_other+'&act='+act,
+		type: 'get',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				if(ret['shield_soft']!=1){
+					alert(ret['msg']);
+				}else{
+					var str='<table id="shield_tm"  border="1" cellpadding="0" cellspacing="0">';
+					$('#shield_error').html("");
+					$('#shield_error').css('display','none');
+					str+="<tr>";
+					str+="<th><font style='color:red'>软件包名</font></th>";
+					str+="<th><font style='color:red'>软件屏蔽失败原因</font></th>";
+					str+="</tr>";
+					for (x in ret['ad_msg'])
+					{
+						str+="<tr>";
+						str+="<td><font style='color:red'>"+ret['ad_msg'][x]['package']+"</font></td>";
+						str+="<td><font style='color:red'>"+ret['ad_msg'][x]['cause']+"</font></td>";
+						str+="</tr>";
+					}
+					str+="<tr>";
+					str+="<td colspan='2' align='center'><a  style='color:blue;' href='/index.php/Dev/Soft/pub_down_shield_csv?file_name="+ret['msg']+"'>导出列表</a></td>";
+					str+="</tr>";
+					str+="</table>";
+					$('#shield_error').html(str);
+					$('#shield_error').css('display','');
+					// if(confirm("点击确定下载屏蔽失败的csv文件")){
+					// 	window.location.href="/index.php/Dev/Soft/down_shield_csv?file_name="+ret['msg']; 
+					// }
+				}
+				
+				return false;
+			} else if(ret['code']==1) {	//成功
+				tb_remove();
+				//变灰不可点击处理
+				gray_processing(ret['msg']);
+			}
+		}
+	});
+}
+</script>	

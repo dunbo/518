@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>信息管理编辑</title>
+<style type="text/css">
+body, td, th {font-size: 12px;height:35px;}
+</style>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<script type="text/javascript" src="/Public/js/json2.js"></script>
+<script type='text/javascript' >
+function editdiv_close(){
+	tb_remove();
+}
+</script>
+</head>
+<body>
+
+
+<div >
+
+<form id='form_edit' action="__URL__/editremind" method="post"   >
+<input type='hidden' name='word' value='{$data.word}' />
+<input type='hidden' name='type' value='{$data.type}' />
+
+<table>
+<tr><td width='25%'>所属类型:</td><td colspan='3'><if condition="$data.type eq '1' "> 反馈
+<elseif condition="$data.type eq '2' "/>举报
+<elseif condition="$data.type eq '3' "/>评论
+</if></td></tr>
+<tr><td width='25%'>监控词语:</td><td colspan='3'>{$data.word}</td></tr>
+<tr><td width='25%'>每天发送频率:</td><td colspan='2' >
+<select name='mailnum'>
+<option value='1' <if condition="$data.mailnum eq '1' "> selected </if> >1</option>
+<option value='2' <if condition="$data.mailnum eq '2' "> selected </if> >2</option>
+<option value='3' <if condition="$data.mailnum eq '3' "> selected </if> >3</option>
+<option value='4' <if condition="$data.mailnum eq '4' "> selected </if> >4</option>
+<option value='5' <if condition="$data.mailnum eq '5' "> selected </if> >5</option>
+<option value='6' <if condition="$data.mailnum eq '6' "> selected </if> >6</option>
+<option value='7' <if condition="$data.mailnum eq '7' "> selected </if> >7</option>
+</select>次/天</td><td>　单个提醒词超量上限>=<input type='text' id='maxnum_edit' name='maxnum' value='{$data.maxnum}'>次</td></tr>
+<tr>
+<table id='add_table3' >
+<tr><td>监测人员：</td><td><input mark='1' type='text' id='user_edit' name='user[]' value='{$usermail[0][0]}'></td>
+<td>　邮件地址：</td><td><input type='text' id='email_edit' name='email[]' value='{$usermail[0][1]}'></td><td>
+<a href="javascript:;" onclick='add_table_tr()'  style="font-size:30px;text-decoration: none;color:#000" rel="">+</a></td></tr>
+
+<if condition="$usermail_num gt 1 ">
+<volist name="usermail" id="v_user" offset="1" >
+<tr><td >监测人员：</td>
+<td ><input type='text' mark='1' name='user[]' value='{$v_user[0]}'></td>
+<td >　邮件地址：</td><td ><input type='text' name='email[]' value='{$v_user[1]}'>
+</td><td  onClick='getDel(this)'><a href='#'>删除</a></td></tr>
+</volist>
+</if>
+</table></tr>
+<tr><td colspan=2><button onclick="form_chk2()"  type="button" > 确定</button></td>
+<td colspan=2><button type='button' onclick='editdiv_close()'  >取消 </button></td></tr>
+</table>
+
+</form> 
+</div>
+ <script type='text/javascript' >
+
+function form_chk2(){
+	if(!$("#maxnum_edit").val()>0){
+		alert('请填写提醒词超量上限');
+		return false;
+
+	}
+	if(!$("#user_edit").val()){
+		alert('请填写监控人员');
+		return false;
+	}
+	if(!$("#email_edit").val()){
+		alert('请填写接收邮件');
+		return false;
+	}
+	var user = $("input[name='user[]']").val();
+	var url = '__URL__/checkuser';
+	var data = '&user='+user;
+	var _this = $(this);
+	var bo = true;
+	$.ajax({
+		url: url,
+		type: 'POST',
+		data: data,
+		dataType: 'json',
+		async: false,
+		success: function(ret){
+			if(ret == '0'){
+				alert('这个账号不属于开发后台账号！');
+				_this.focus();
+				_this.attr('mark','0');
+				bo = false;
+			}else{
+				_this.attr('mark','1');
+			}
+		}
+	})
+	if(bo)
+	$('#form_edit').submit();
+}
+function  add_table_tr(){ 
+	if($("#add_table3 tr").length >=5){
+		alert('最多只能添加5个监测人员');
+		return false;
+	}else{
+		var str = "<tr><td>监测人员：</td><td><input type='text' mark='1' name='user[]' value=''></td><td>邮件地址：</td><td><input type='text' name='email[]' value=''></td><td onClick='getDel(this)'><a href='#'>删除</a></td><tr>";
+		$("#add_table3").append(str);
+		$("#add_table3 tr:last").remove();
+	}
+}
+function getDel(k){
+		$(k).parent().remove();    
+}
+$("input[name='user[]']").blur(function(){
+	var user = $(this).val();
+	var url = '__URL__/checkuser';
+	var data = '&user='+user;
+	var _this = $(this);
+	 $.ajax({
+			url: url,
+			type: 'POST',
+			data: data,
+			dataType: 'json',
+			success: function(ret){
+				if(ret == '0'){
+					alert('这个账号不属于开发后台账号！');
+					_this.focus();
+					_this.attr('mark','0');
+
+				}else{
+					_this.attr('mark','1');
+				}
+			}
+		})
+
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+
+<script>
+    function check_package(async) {
+        var package = $.trim($("#package").val());
+        if (package == '') {
+            return 0;
+        }
+        var param = {
+            package : package
+        }
+        var ret = 0;
+        $.ajax({
+            url:'__URL__/check_package',
+            type:'POST',
+            async:async,
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data) {
+                ret = data.status;
+            }
+        });
+        return ret;
+    }
+    
+    function form_action() {
+        var package = $.trim($("#package").val());
+        if (package == '') {
+            alert("包名不能为空！");
+            $("#package")[0].focus();
+            return false;
+        }
+        // 检查包名
+        var exists = check_package(false);
+        if (!exists) {
+            alert("包名不存在，请重新填写！");
+            $("#package")[0].focus();
+            return false;
+        }
+        $("#form_action").submit();
+    }
+</script>
+
+<div>
+    <br/><h2>添加</h2><br/>
+    <hr size="1" color="#ffffff" noshade><br/><br/>
+    <form method="post" action="__URL__/add" id="form_action">
+        <div>
+            <label><font color="red">* </font>推广名称：</label>
+            <input type="text" id="promotion_name" name="promotion_name" style="width:200px"/>
+        </div>
+        <br/><br/>
+        <div>
+            <label><font color="red">* </font>包名：<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></label>
+            <input type="text" id="package" name="package" onblur="check_package(true)" style="width:200px"/>
+        </div>
+        <input type="hidden" id="url_param" name="url_param" value="{$url_param}"/>
+        <br/><br/>
+        <div class="form_btns_box">
+            <a href="javascript:void(0)" onclick="form_action()">提交</a>
+            <a href="javascript:void(0)" onclick="tb_remove()">取消</a>
+        </div>
+        <div class="clear"></div>
+    </form>
+</div>

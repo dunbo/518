@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>玩转球球 奖上有奖</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/<!--{$out.prefix}-->/css/common.css?v2"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="http://img4.anzhi.com/static/public/js/activity_public3.js?v4"></script>
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            if(clientWidth>=640){
+				docEl.style.fontSize = '100px';
+			}else{
+				docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+			}
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表100像素
+	})(document, window);
+</script>
+<script type="text/javascript">
+	$(function(){
+		//随机出来1-33的整数
+		//Math.round(Math.random()*32+1);
+		function randomNum(n,min,max){
+			var arr =[];
+			for(var i=0; i<n; i++){
+				arr[i]=Math.round(Math.random()*(max-min)+min);
+				for(var j =0; j<i; j++){
+					if(arr[i]==arr[j]){
+						i = i-1;
+						break;
+					}
+				}
+			}
+			return arr;
+		}
+		var selectArr = [];
+		$('.btns2_red').bind('click',function(){
+			selectArr = randomNum(6,1,33);
+			$('.ball_list_red li').each(function(index){
+				$(this).removeClass('gray');
+				for(var i=0; i<selectArr.length; i++){
+					if(selectArr[i]==$(this).html()){
+						$(this).addClass('gray')
+					}
+				}
+			})
+			if(selectArr.length>=6){
+				$('.ball_list_red li').off('click');
+				$('.ball_list_red li.gray').on('click',function(){
+					for(var i=0; i<selectArr.length; i++){
+						if(selectArr[i]==$(this).html()){
+							selectArr.splice(i,1);
+							$('.select_ball_red li').eq(i).remove()
+						}
+					}
+					$(this).removeClass('gray');	
+					selectBall()
+				})
+				$('.select_bg2 .ball_control').eq(0).css('display','block')
+			}
+			//a()
+			$('.select_ball_red').html('');
+			for(var i=0; i<selectArr.length; i++){
+				$('.select_ball_red').append('<li>'+selectArr[i]+'</li>')
+			}
+			if($('.select_bg2 li').length>=7){
+				$('.select_bg2 .btns2').removeClass('btn_disabled').on('click',confirmorder);
+			}
+			else{
+				$('.select_bg2 .btns2').off('click');
+			}
+			show_azb();
+		})
+		$('.btns2_blue').bind('click',function(){
+			var autoNum = randomNum(1,1,16);
+			$('.ball_list_blue li').removeClass('gray');
+			$('.ball_list_blue li').eq(autoNum[0]-1).addClass('gray');
+			$('.select_ball_blue').html('<li>'+autoNum[0]+'</li>');
+			$('.select_bg2 .ball_control').eq(0).css('display','block');
+			if($('.select_bg2 li').length>=7){
+				$('.select_bg2 .btns2').removeClass('btn_disabled').on('click',confirmorder);
+			}
+			else{
+				$('.select_bg2 .btns2').off('click');
+			}
+			show_azb();
+		})
+		var nowValue = $('.ball_control_num').html();
+		$('.add_btn').bind('click',function(){
+			nowValue++;
+			$('.ball_control_num').html(nowValue)
+			show_azb();
+		})
+		$('.reduce_btn').bind('click',function(){
+			nowValue--;
+			if(nowValue<=0){
+				nowValue = 0
+			}
+			$('.ball_control_num').html(nowValue)
+			show_azb();
+		})
+
+		selectBall()
+		function selectBall(){
+			$('.select_bg2 .btns2').addClass('btn_disabled').off('click');
+			$('.ball_list_red li').off('click').on('click',function(){
+				if($(this).hasClass('gray')){
+					$(this).removeClass('gray');
+					for(var i=0; i<selectArr.length; i++){
+						if(selectArr[i]==$(this).html()){
+							selectArr.splice(i,1);
+							$('.select_ball_red li').eq(i).remove()
+						}
+					}
+				}
+				else{						
+					$(this).addClass('gray');
+					selectArr.push($(this).html());
+					$('.select_ball_red').append('<li>'+$(this).html()+'</li>')
+				}
+				if($('.select_bg2 li').length>=7){
+					$('.select_bg2 .btns2').removeClass('btn_disabled').on('click',confirmorder);;
+				}
+				else{
+					$('.select_bg2 .btns2').off('click');
+				}
+				if(selectArr.length>=6){
+					$('.ball_list_red li').off('click');
+					$('.ball_list_red li.gray').on('click',function(){
+						for(var i=0; i<selectArr.length; i++){
+							if(selectArr[i]==$(this).html()){
+								selectArr.splice(i,1);
+								$('.select_ball_red li').eq(i).remove();
+								if($('.select_bg2 li').length>=7){
+									$('.select_bg2 .btns2').removeClass('btn_disabled').on('click',confirmorder);
+								}
+								else{
+									$('.select_bg2 .btns2').off('click');
+								}
+							}
+						}
+						$(this).removeClass('gray');
+						
+						selectBall()
+					})
+				};
+				$('.select_bg2 .ball_control').eq(0).css('display','block');
+				show_azb();
+			})
+		}
+		$('.ball_list_blue li').on('click',function(){
+			$('.ball_list_blue li').removeClass('gray');
+			$(this).addClass('gray');
+			$('.select_ball_blue').html('<li>'+$(this).html()+'</li>');
+			$('.select_bg2 .ball_control').eq(0).css('display','block');
+			if($('.select_bg2 li').length>=7){
+				$('.select_bg2 .btns2').removeClass('btn_disabled').on('click',confirmorder);
+			}
+			else{
+				$('.select_bg2 .btns2').off('click');
+			}
+			show_azb();
+		})
+	})
+</script>
+
+</head>
+<body>
+	<div id="div1"></div>
+<div class="main" style="padding-bottom: 0;">
+	<div class="banner">
+		<img src="<!--{$out.new_static_url}-->/<!--{$out.prefix}-->/images/banner3.png"/>
+	</div>
+	<div class="tab_title">
+		<ul>
+			<li ><a href="/lottery/double_color_ball/buy.php?aid=<!--{$out.aid}-->&sid=<!--{$out.sid}-->">机选</a></li>
+			<li class="current"><a href="javascript:;">自选</a></li>
+		</ul>
+	</div>
+	<div class="select_bg1">
+		<div class="tab_cnt">
+			<ul class="ball_list ball_list_red">
+				<li>1</li><li>2</li><li>3</li><li>4</li><li>5</li><li>6</li><li>7</li>
+				<li>8</li><li>9</li><li>10</li><li>11</li><li>12</li><li>13</li><li>14</li>
+				<li>15</li><li>16</li><li>17</li><li>18</li><li>19</li><li>20</li><li>21</li>
+				<li>22</li><li>23</li><li>24</li><li>25</li><li>26</li><li>27</li><li>28</li>
+				<li>29</li><li>30</li><li>31</li><li>32</li><li>33</li>
+			</ul>
+		</div>
+		<a href="javascript:;" class="btns2 btns2_red">随机红球</a>
+		<ul class="ball_list ball_list_blue">
+			<li>1</li><li>2</li><li>3</li><li>4</li><li>5</li><li>6</li><li>7</li>
+			<li>8</li><li>9</li><li>10</li><li>11</li><li>12</li><li>13</li><li>14</li>
+			<li>15</li><li>16</li>
+		</ul>
+		<a href="javascript:;" class="btns2 btns2_blue">随机蓝球</a>
+	</div>
+	<div class="select_bg2">
+		<div class="ball_info">
+			<ul style="float: left;" class="select_ball_red">
+				
+			</ul>
+			<ul style="float: left;" class="select_ball_blue">
+				
+			</ul>
+			<div class="ball_control" style="display: none;">
+				<span class="reduce_btn"></span>
+				<em class="btns ball_control_num">1</em>
+				<span class="add_btn"></span>
+			</div>
+			<div class="clear"></div>
+			<p>合计：<span id="show_azb">0安智币</span></p>
+		</div>
+		<a href="javascript:;" class="btns2 btns_submit">确认投注</a>
+	</div>
+</div>
+<!--{include file="../tpl/lottery/double_color_ball/tips.html"}-->
+</body>
+</html>

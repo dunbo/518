@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="/Public/css/style.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+</head>
+<body>
+<div class="main" >
+<div class="content">
+<center>
+<table width="80%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+    <td colspan="5" align="center"><h2>历史活动期列表</h2></td>
+  </tr>
+  <tr>
+	<td width="10%" align="center">编号</td>
+	<td width="10%" align="center">当前活动期</td>
+	<td width="20%" align="center">历史活动期</td>
+	<td width="20%" align="center">历史活动期图片</td>
+	<td width="20%" align="center">位置排序</td>
+  </tr>
+  <?php if(isset($activate_history)):?>
+  <volist name="activate_history" id="vo">
+  <tr>
+	<td width="10%" align="center">{$vo.id}</td>
+	<td width="10%" align="center">{$vo.activate_id}</td>
+	<td width="20%" align="center">{$vo.history_id}</td>
+	<td width="20%" align="center">
+	    <img src="<?php echo IMGATT_HOST;?>{$vo.pic_url}" width="100" height="100" alt="图标" />
+	</td>
+	<td width="20%" align="center">
+	    <select name="rank" rel="{$vo.id}" class="rank_select">
+		<?php
+			for($i = 1;$i <= $count; $i++){
+				echo "<option value=\"".$i."\"";
+				if($vo['rank'] == $i) echo " selected=\"selected\" ";
+				echo ">".$i."</option>";
+			}
+		?>
+		</select>
+	</td>
+  </tr>
+  </volist>
+  <?php else:?>
+  <tr>
+    <td align="center" colspan="5">暂无记录</td>
+  </tr>
+  <?php endif; ?>
+</table>
+{$page}
+</center>
+</div>
+</div>
+<script>
+	$('.rank_select').change(function(){
+		var url   = "__URL__/activate_update_rank/id/"+$(this).attr('rel')+"/rank/" + $(this).val()+"/p/{$p}/lr/{$lr}/activate_id/{$activate_id}";
+		$.ajax({
+			type: "GET",
+			url : url,
+			dataType:"json",
+			success: function(json){
+				if(json.p == 0)  json.p  = 1;
+				if(json.lr < 10) json.lr = 10;
+				var jumpUrl = "__URL__/view_activate_history/activate_id/{$activate_id}/p/"+json.p+"/lr/"+json.lr;
+				//window.location.reload();
+				window.location.href = jumpUrl;
+			}
+		});
+	});
+</script>
+</body>
+</html>
+

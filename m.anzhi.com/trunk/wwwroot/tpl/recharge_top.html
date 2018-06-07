@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>土豪充值登排行，小资也可抽大奖</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/recharge_top/css/recharge_top_common.css?v2"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/TouchSlide.1.1.js"></script>
+</head>
+<script>
+    var flags={canMove:true};
+    function showOpenBox(obj){
+        var bg_h=$(window).height()+$(document).scrollTop(),
+                top_h= $(obj).height()/ 2-$(document).scrollTop();
+        $(obj).css("margin-top",-top_h+"px").show();
+        $("#body-bg").css("height",bg_h+"px").show();
+        flags.canMove=false;
+    }
+    function cloBox(obj){
+        $(obj).hide();
+        $("#body-bg").hide();
+        flags.canMove=true;
+    }
+    $(function(){
+        $("body").bind('touchmove', function (e) {
+            if(!flags.canMove){
+                e.preventDefault();
+            }
+        });
+    })
+    $(function(){
+            var is_save = $('#is_save').val();
+            if(is_save==2){
+                $("#notice").html('为了能保证您收到奖品，请尽快填写您的个人信息！');
+                showOpenBox('#tip-box2');
+            }
+    })
+        var proid_arr = getArgs();
+	var skinvc = proid_arr.skinvc;
+        function getArgs() {
+            var args = {};
+            var query = location.search.substring(1);
+            var pairs = query.split("&");
+            for(var i = 0; i < pairs.length; i++) {
+                    var pos = pairs[i].indexOf('=');
+                    if (pos == -1) continue;
+                    var argname = pairs[i].substring(0,pos);
+                    var value = pairs[i].substring(pos+1);
+                    value = decodeURIComponent(value);
+                    args[argname] = value;
+            }
+            return args;
+        }
+var sid = '<!--{$out.sid}-->',img_url = '<!--{$out.img_url}-->';
+var aid = 216,p=0,soft_lists_go = [],soft_lists_anzhuang = [],flags={canMove:true};
+function lottery(){
+    location.href="/lottery/recharge_top_lottery.php?sid="+sid;
+}
+
+function my_soft() {
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	var soft_lists = soft_list.DATA;
+
+	for(j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		//var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		//if(soft_status_gos != -2){//未安装
+			//soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+			soft_lists_go.push(soft_lists[j]);
+		//}
+		if(soft_status_gos == 0 ||soft_status_gos == 1){//已安装
+			soft_lists_anzhuang.push(soft_lists[j]);
+		}
+	}        
+
+/*	
+	for(j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var  soft_status_gos = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(json_datas_gos == 5 && soft_status_gos == -2){//下载完成  未安装
+			soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+		}
+	}
+
+	for(j=0;j<soft_lists.length;j++){
+		var  soft_status_go = window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var json_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if((soft_status_go == -2 && json_datas_gos== -1) || json_datas_gos == 1 || json_datas_gos == 3 || json_datas_gos == 4){
+			//soft_lists_go.push(soft_lists[j]);
+			soft_lists_go.splice(soft_lists_go.length,0,soft_lists[j]);
+		}
+	}        
+        */
+	
+	get_soft();
+        my_login_soft();
+}
+function my_login_soft(){
+        var pagemax= Math.floor(soft_lists_anzhuang.length/4);
+	var data = soft_lists_anzhuang.slice(0,1);
+	if(data.length == 0){
+		p = 0;
+		data = soft_lists_anzhuang.slice(p*4,4*(p+1));
+	}
+
+	var str = '';
+	for(i = 0; i < data.length; i++) {
+		if(data[i][2].length > 4){
+			var softname = data[i][2].substring(0,3)+'...';
+		}else{
+			var softname = data[i][2];
+		}
+		str += '<p class="soft-icon"><a href="javascript:;" onclick="openApp(\''+data[i][7]+'\','+parseInt(data[i][0])+')"><img src="'+data[i][1]+'"/></a></p><p class="soft-name"><a href="javascript:;">'+softname+'</a></p>';
+	}
+	$('#my_soft').html(str);
+}
+
+function get_soft(){
+        var pagemax= Math.floor(soft_lists_go.length/4);
+        if(soft_lists_go.length%4==0){
+            pagemax = pagemax-1;
+        }
+	var data = soft_lists_go.slice(p*4,4*(p+1));
+	if(data.length == 0){
+		p = 0;
+		data = soft_lists_go.slice(p*4,4*(p+1));
+	}
+	var str = '';
+	for(i = 0; i < data.length; i++) {
+		if(data[i][2].length > 4){
+			var softname = data[i][2].substring(0,3)+'...';
+		}else{
+			var softname = data[i][2];
+		}
+		//var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+		var  json_datas = window.AnzhiActivitys.isInstalledApp(data[i][7],parseInt(data[i][13]));                
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);
+                if(soft_status == 0||soft_status == 1){
+		        str += '<li><p class="soft-icon"><a href="javascript:;" onclick="openApp(\''+data[i][7]+'\','+parseInt(data[i][0])+')"><img src="'+data[i][1]+'"/></a></p><p class="soft-name"><a href="javascript:;">'+softname+'</a></p></li>';
+                }else {
+		        str += '<li><p class="soft-icon"><a href="javascript:;" onclick="go_softinfo_down('+parseInt(data[i][0])+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+')"><img src="'+data[i][1]+'"/></a></p><p class="soft-name"><a href="javascript:;">'+softname+'</a></p></li>';
+                
+                }
+	}
+	$('#my_softs').html(str);
+
+	if(p==pagemax){
+		p=0;
+	}else{
+		p=p+1;
+	}
+}
+
+$(document).ready(function () {
+	my_soft();
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+});
+
+function change_soft(){
+	$('#my_softs').html('');
+	get_soft();
+}
+
+
+function go_softinfo_down(softid,my_package,softname,versioncode,size){
+				        $.ajax({
+                                                url: '/lottery/recharge_top_downlog.php',  //supwater  点击详情 点击下载
+						data:"&sid="+sid+"&aid="+aid+"&package="+my_package, 
+						type:"post",
+						success:function(data) {
+                    window.AnzhiActivitys.downloadForActivity(parseInt(aid),softid,my_package,softname,versioncode,size,1);
+						},
+					});
+}
+
+
+function installApp(pkgname,softid){
+	$.ajax({
+		url: '/lottery/vacation_third_install.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+		type: 'post',
+		success: function(data){
+			window.AnzhiActivitys.installAppForActivity(softid);
+		}
+	});
+}
+function openApp(pkg,softid){
+
+	the_soft = [softid];
+	$.ajax({
+		url: '/lottery/vacation_gift_open.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkg+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+		}
+	});
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		$('#'+softid+'').html("下载中");
+	}else if(newState == 2){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 3){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 4){
+		$('#'+softid+'').html("重试");
+	}else if(newState == 5){
+		$('#'+softid+'').html("安装");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				$('#'+softid+'').bind('click',function(){
+					installApp(parseInt(softid),soft_lists_go[i][7]);
+				});
+			}
+		}
+	}else if(newState == 6){
+		$('#'+softid+'').html("打开");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				$('#'+softid+'').bind('click',function(){
+					openApp(soft_lists_go[i][7],softid);
+				});
+			}
+		}
+	}else if(newState == 8){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 9){
+		$('#'+softid+'').html("检查中");
+	}
+}
+
+function showOpenBox(obj){
+	var bg_h=$("#body-bg").height()+$(document).scrollTop(),
+	top_h= $(obj).height()/ 2-$(document).scrollTop();
+	$(obj).css("margin-top",-top_h+"px").show();
+	$("#body-bg").css("height",bg_h+"px").show();
+	flags.canMove=false;
+}
+
+function cloBox(obj){
+	$(obj).hide();
+	$("#body-bg").hide();
+	flags.canMove=true;
+}
+
+</script>
+<body>
+<section>
+    <div class="tip-box" id="tip-box2" style="display: none;">
+        <div class="prompt4">提示</div>
+        <div class="tip-con">
+            <p><span id="notice"></span></p>
+        </div>
+        <div class="btn_back mtop">
+            <a href="#" onclick="cloBox('#tip-box2')">返回</a>
+        </div>
+    </div>   
+    <div class="banner"><img src="<!--{$out.static_url}-->/recharge_top/images/banner.jpg"/></div>
+    <div class="banner_bg">
+        <div class="rule">
+            <p>活动时间：2015年5月1日 0时-5月5日 24时</p>
+            <p>活动说明：</p>
+            <p>1.活动时间内，充值排名前10的用户，将会在 “土豪充值榜”上进行展示，该榜单2小时刷新 一次，活动结束时，最终榜单前10的用户，将会获得不同实物的大奖；</p>
+            <p>2.活动时间内，凡充值的用户，累积每满100元 均获得一次抽取幸运大奖的机会，抽奖次数单日 上限10次；每日0点重置该限制，活动结束时，抽奖次数置零；不能拼榜单，咱就拼人品吧！</p>
+        </div>
+    </div>
+    <div class="main">
+        <input type="hidden" id="is_save" value="<!--{$out.is_save}-->">
+        <div class="notice clear">
+            <div class="notice-icon"></div>
+            <div class="notice-list">
+                <marquee scrollamount="6" scrolldelay="90" direction="left">
+                    <!--{if $out.user_top.0.username != ''}--><span>恭喜用户<!--{$out.user_top.0.username}-->，累计充值<!--{$out.user_top.0.money}-->,厮杀至榜首；</span><!--{/if}-->
+                    <!--{if $out.user_top.1.username != ''}--><span>恭喜用户<!--{$out.user_top.1.username}-->，累计充值<!--{$out.user_top.1.money}-->,高居排行榜第二；</span><!--{/if}-->
+                    <!--{if $out.user_top.2.username != ''}--><span>恭喜用户<!--{$out.user_top.2.username}-->，累计充值<!--{$out.user_top.2.money}-->,暂居第三；</span><!--{/if}-->
+                    <!--{if $out.user_top.3.username != ''}--><span>恭喜用户<!--{$out.user_top.3.username}-->，累计充值<!--{$out.user_top.3.money}-->,登至排行榜第四；</span><!--{/if}-->
+                    <!--{if $out.user_top.4.username != ''}--><span>恭喜用户<!--{$out.user_top.4.username}-->，累计充值<!--{$out.user_top.4.money}-->,杀进排行榜前五；</span><!--{/if}-->
+                    <!--{if $out.user_top.5.username != ''}--><span>恭喜用户<!--{$out.user_top.5.username}-->，累计充值<!--{$out.user_top.5.money}-->,冲入排行榜第六；</span><!--{/if}-->
+                    <!--{if $out.user_top.6.username != ''}--><span>恭喜用户<!--{$out.user_top.6.username}-->，累计充值<!--{$out.user_top.6.money}-->,拼杀至排行榜第七；</span><!--{/if}-->
+                    <!--{if $out.user_top.7.username != ''}--><span>恭喜用户<!--{$out.user_top.7.username}-->，累计充值<!--{$out.user_top.7.money}-->,奋战入排行榜第八；</span><!--{/if}-->
+                    <!--{if $out.user_top.8.username != ''}--><span>恭喜用户<!--{$out.user_top.8.username}-->，累计充值<!--{$out.user_top.8.money}-->,冲入排行榜第九；</span><!--{/if}-->
+                    <!--{if $out.user_top.9.username != ''}--><span>恭喜用户<!--{$out.user_top.9.username}-->，累计充值<!--{$out.user_top.9.money}-->,挤入排行榜第十；</span><!--{/if}-->
+                </marquee>
+            </div>
+        </div>
+        <div class="mod_hd"><img src="<!--{$out.static_url}-->/recharge_top/images/mod_hd.png"/></div>
+        <div class="mod_bd">
+            <div class="ranking_hd"><img src="<!--{$out.static_url}-->/recharge_top/images/ranking_hd.png"/></div>
+            <table class="ranking" cellspacing="0" cellpadding="0">
+                <tr>
+                    <th>排名</th>
+                    <th>昵称</th>
+                    <th>充值金额</th>
+                    <th>推荐游戏</th>
+                </tr>
+                <tr class="first">
+                    <td><span class="num">1</span></td>
+                    <td><span class=""><!--{$out.user_top.0.username}--></span></td>
+                    <td><!--{$out.user_top.0.money}--></td>
+                    <td rowspan="10">
+                        <ul class="soft" id="my_softs"></ul>
+                        <ul>
+                            <li>
+                                <a class="refresh">刷新</a>
+                                <a href="javacript:;" onclick="change_soft();"  class="btn_change">换一换</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr class="second">
+                    <td><span class="num">2</span></td>
+                    <td><span class=""><!--{$out.user_top.1.username}--></span></td>
+                    <td><!--{$out.user_top.1.money}--></td>
+                </tr>
+                <tr class="third">
+                    <td><span class="num">3</span></td>
+                    <td><span class=""><!--{$out.user_top.2.username}--></span></td>
+                    <td><!--{$out.user_top.2.money}--></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><span class=""><!--{$out.user_top.3.username}--></span></td>
+                    <td><!--{$out.user_top.3.money}--></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td><span class=""><!--{$out.user_top.4.username}--></span></td>
+                    <td><!--{$out.user_top.4.money}--></td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td><span class=""><!--{$out.user_top.5.username}--></span></td>
+                    <td><!--{$out.user_top.5.money}--></td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td><span class=""><!--{$out.user_top.6.username}--></span></td>
+                    <td><!--{$out.user_top.6.money}--></td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td><span class=""><!--{$out.user_top.7.username}--></span></td>
+                    <td><!--{$out.user_top.7.money}--></td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td><span class=""><!--{$out.user_top.8.username}--></span></td>
+                    <td><!--{$out.user_top.8.money}--></td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td><span class=""><!--{$out.user_top.9.username}--></span></td>
+                    <td><!--{$out.user_top.9.money}--></td>
+                </tr>
+            </table>
+        </div>
+        <div class="mod_ft"><img src="<!--{$out.static_url}-->/recharge_top/images/mod_ft.png"/></div>
+                    <!--{if $out['is_login'] == 2}-->
+        <div class="prompt">
+            <p><span><a href="http://i.anzhi.com/mweb/account/login?serviceId=014&serviceVersion=5410&serviceType=0&redirecturi=http://promotion.anzhi.com/lottery/recharge_top.php?sid=<!--{$out.sid}-->">请登录</a>【登录可查看个人目前充值信息】</span></p>
+            <p>榜单、充值和充值新增抽奖次数均2小时刷新一次</p>
+            <p>本次刷新时间：<!--{$out.now_time}--> 下次刷新时间：<!--{$out.next_time}--></p>
+        </div>
+            	    <!--{/if}-->
+            <!--{if $out['is_login'] == 1}-->
+<div class="logined">
+            <ul>
+                <li>用户名：<!--{$out.username}-->（我）</li>
+                 <!--{if $out.user_info.money != null}-->
+                <li>已充值：<!--{$out.user_info.money}-->元</li>
+                <!--{/if}-->
+                 <!--{if $out.user_info.money == null}-->
+                <li>已充值：0元</li>
+                <!--{/if}-->
+                <li>榜单、充值和充值新增抽奖次数均2小时刷新一次</li>
+                <li>本次刷新时间：<!--{$out.now_time}--> 下次刷新时间：<!--{$out.next_time}--></li>
+            </ul>
+            <div class="user_info"><a href="/lottery/recharge_top_lottery_userinfo.php?uid=<!--{$out.uid}-->">个人信息</a> </div>
+            <div class="soft_icon" id="my_soft"></div>
+</div>
+            	    <!--{/if}-->
+        
+        <div class="f_prize_hd">
+            <h4>土豪充值榜前10奖品</h4>
+                    <!--{if $out['is_login'] == 1}-->
+            <a href="javacript:;" onclick="lottery();">我要抽奖</a>
+            	    <!--{/if}-->
+                    <!--{if $out['is_login'] == 2}-->
+            <a href="http://i.anzhi.com/mweb/account/login?serviceId=014&serviceVersion=5410&serviceType=0&redirecturi=http://promotion.anzhi.com/lottery/recharge_top.php?tiaozhuan=1&sid=<!--{$out.sid}-->">我要抽奖</a>
+            	    <!--{/if}-->
+        </div>
+<div id="slideBox" class="slideBox">
+            <div class="bd">
+                <ul>
+                    <li>
+                        <a href="#"><img src="<!--{$out.static_url}-->/recharge_top/images/rank_04.jpg" /></a>
+                    </li>
+                    <li>
+                        <a href="#"><img src="<!--{$out.static_url}-->/recharge_top/images/rank_03.jpg"/></a>
+                    </li>
+                    <li>
+                        <a href="#"><img src="<!--{$out.static_url}-->/recharge_top/images/rank_02.jpg"/></a>
+                    </li>
+                    <li>
+                        <a class="pic" href="#"><img src="<!--{$out.static_url}-->/recharge_top/images/rank_01.jpg"/></a>
+                    </li>
+                </ul>
+            </div>
+</div>
+        <div class="sycee"><img src="<!--{$out.static_url}-->/recharge_top/images/sycee.png"/></div>
+    </div>
+</section>
+</body>
+<script type="text/javascript">
+    $(function(){
+        TouchSlide({
+            slideCell:"#slideBox",
+            mainCell:".bd ul",
+            effect:"leftLoop",
+            autoPlay:true //自动播放
+        });
+    })
+</script>
+</html>

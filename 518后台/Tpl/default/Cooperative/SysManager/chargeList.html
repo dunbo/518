@@ -1,0 +1,87 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link type="text/css" href="/Public/css/co_managers.css" rel="stylesheet" />	
+<link type="text/css" href="/Public/css/co_common.css" rel="stylesheet" />
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="/Public/js/co_public.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+	<div class="content">
+		<div class="nav_page">安智合作运营平台>账号负责人列表</div>
+		<div class="search_box">
+			<div class="title_item" style="padding-left:20px">
+				<h2>账号负责人列表：</h2>
+			</div>
+			<form method="get" action='/index.php/Cooperative/SysManager/chargeList/' id='search' name='search'>
+				<table cellpadding="0" cellspacing="0" class="search_table">
+					<tbody>
+						<tr>
+							<td width="15%"><input id='charge' name='charge' type="text" class="search_item_text" style="width:180px" value='<if condition="$charge_name">{$charge_name}<else />请输入负责人名称</if>' onfocus="if(this.value=='请输入负责人名称'){this.value=''}" onblur="if(value==''){value='请输入负责人名称'}"/></td>
+							<td width="85%"><span onclick='onsubmits("search");' class="search_btn">搜  索</span></td>
+						</tr>
+						<tr>
+							<td colspan="2"><a href='/index.php/Cooperative/SysManager/addCharge/' class="thickbox search_btn search_btn2" style="border-bottom:1px solid #bdbdbd">添加负责人</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</form>
+		</div>
+		<div class="tablelist_box">
+			<table cellpadding="0" cellspacing="0" class="table_list">
+				<thead>
+					<tr>
+						<th width="8%">序号</th>
+						<th width="12%">负责人名称</th>
+						<th width="18%">负责账号数</th>
+						<th width="18%">创建时间</th>
+						<th width="44%">操作</th>
+					</tr>
+				</thead>
+				<tbody>
+				<volist name='charge' id='list'>
+					<tr>
+						<td>{$list.num}</td>
+						<td>{$list.charge_name}</td>
+						<td><?php if($list['charge_number']){ ?>{$list.charge_number}<?php }else{ ?>0<?php } ?></td>
+						<td><?php echo date('Y-m-d',strtotime($list['create_time'])).'<br />'.date('H:i:s',strtotime($list['create_time'])); ?></td>
+						<td class="table_btna"><a href='/index.php/Cooperative/SysManager/editCharge/id/{$list.id}/' class="thickbox table_btna2">编辑名称</a><a href="/index.php/Cooperative/SysManager/moveCharge/id/{$list.id}/charge/{$charge_name}/" class="table_btna2">账号转移</a><if condition="$list['charge_number']"><else /><a href='javascript:;'  onclick="delcharge({$list.id})">删除</a></if></td>
+					</tr>
+				</volist>
+				</tbody>
+			</table>
+			<div class="pagebars">
+				<table cellpadding="0" cellspacing="0" width="100%">
+					<td class="pagebars_right right">
+					  {$page}
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="clear"></div>
+<script type="text/javascript">
+function onsubmits(name) {
+	if($("#charge").val()=="请输入负责人名称"){
+		$("#charge").attr("value","");
+	}
+	$(document).ready(function(){
+		$("#"+name).submit();
+	});
+} 
+
+function delcharge(id) {
+	var r=confirm("删除该负责人！");
+	if (r==true){
+		$.ajax({
+		    type: "POST",
+		    url: "/index.php/Cooperative/SysManager/delCharge/",
+		    data: "id="+id,
+		    dataType: 'JSON',
+		    success: function(json){
+	    		if(json==0){
+					alert('删除失败！');
+				}
+				window.location.reload();
+		   }
+		});
+	}
+}
+</script> 

@@ -1,0 +1,637 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+</head>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<!--[if lt IE9]> 
+<script src="http://apps.bdimg.com/libs/html5shiv/3.7/html5shiv.min.js"></script>
+<![endif]-->
+<script>
+$(document).ready(function () {
+	var ap_id = $('#ap_id').val();
+	//console.log($('#ap_type').html());
+	var obj = document.getElementById("ap_type");
+	sel_type(obj);
+	show_hide('is_repeat','pop_tr');
+	show_hide('is_score','rule_tr');
+	show_hide('get_lottery_type','interests_tr');
+});
+
+//页面类型
+function sel_type(obj){
+	var ap_type = obj.value;
+	//alert(ap_type);
+	if(ap_type == 3){
+		$("#tab_end").show();
+		$("#tab_hide").hide();
+		show_hide('not_winning_tips','end_tr');
+	}else{
+		$("#tab_end").hide();
+		$("#tab_hide").show();
+	}
+}
+
+function show_hide(inputname,classname){
+	var fal = 0;
+	$("[name='"+inputname+"']").each(function(){
+		if($(this).is(':checked')) {
+			fal = $(this).val();
+		}
+	});	
+	if(fal == 1){
+		$('.'+classname).css('display','none');
+	}else{
+		$('.'+classname).css('display','');
+	}
+}
+
+//颜色
+$(function(){
+	$('.color').colorPicker();
+});
+//图片验证	
+function test(file_name)
+{
+	var result =/\.[^\.]+/.exec(file_name);
+	return result;
+}	
+function onUploadImgChange(sender,img,obj){  
+	if(!$("#"+img).val()){
+		return false;
+	}
+    if( $("#"+img).val() && !sender.value.match( /.jpg|.gif|.png|.bmp|.jpeg/i ) )
+	{        
+        alert('图片格式无效！');   
+		remove_file(img);	
+        return false;       
+    }   
+	var ap_id = $('#ap_id').val();//图片名称后缀必须为小写，大些报错
+	var b=test(sender.value);
+	if( $("#"+img).val() &&  b!=".jpg"&&b!=".gif"&&b!=".png"&&b!=".bmp"&&b!=".jpeg")
+	{
+		alert('后缀只支持小写格式！');
+		if(!ap_id)
+		{
+			remove_file(img);	
+		}
+		else
+		{
+			var file = $("#"+img);
+			file.after(file.clone().val(""));
+			file.remove();
+		}
+		return false;  
+	}
+	var pic_size = getPhotoSize(sender);
+	if(!pic_size){
+	    alert('图片大小请控制在200KB以内');
+		remove_file(img);	
+        return false;  
+	}
+	var imgSrc = check_img(sender);
+    var img_url = imgSrc;
+    var newimg = new Image();
+		newimg.src = img_url;
+    // 加载完成执行
+    newimg.onload = function () {
+		// 打印
+		var w = newimg.width;
+		var h = newimg.height;
+		if((img == 'ap_imgurl' || img == 'bg_img' || img == 'button_pic' || img == 'draw_font_color' || img == 'rule_pic' || img == 'third_text_color' || img == 'lose_no_img') && w != 640){
+			alert('宽必须640');  
+			remove_file(img);			
+			return false;    			
+		}
+		if((img =='prize_pic_up1' || img =='prize_pic_up2' || img =='prize_pic_up3' || img =='prize_pic_up4' || img =='prize_pic_up5' || img =='prize_pic_up6' || img =='uppage') && w != 200){
+			alert('宽必须200');  
+			remove_file(img);			
+			return false;    		
+		}
+		if(img == 'share_weixin_pic'  && (w != 70 || h != 70)){
+			alert('分享微信图请上传70*70的图片');  
+			remove_file(img);			
+			return false;   		
+		}			
+		var objPreview = document.getElementById(obj); 
+		$('#'+img+'_del').remove();
+		str = '<button id="'+img+'_del" type="button" onclick="del_img(\''+img+'\');" >&nbsp;&nbsp;删&nbsp;&nbsp;除&nbsp;&nbsp;</button>';
+		$('#'+obj).closest('img').after(str);		
+		var imgs=document.getElementById(img);
+		if( sender.files &&  sender.files[0] ){ 
+			objPreview.style.display = 'block';        
+			objPreview.style.width = 'auto';        
+			objPreview.style.height = 'auto';
+			objPreview.src = window.URL.createObjectURL(imgs.files[0]);
+		}       
+	}	
+} 	
+function del_img(img){
+	if(confirm('是否确认删除？')) {
+		remove_file(img);
+	}
+}
+function remove_file(file){
+	$('#'+file+'_div').removeAttr('src').css('display','none');
+	$('#'+file+'_del').remove();	
+	var file = $("#"+file);
+	file.after(file.clone().val(""));
+	file.remove();	
+	return false;   	
+}
+function check_img(obj){
+   var imgSrc = '';
+    if (obj.files && obj.files[0]) {
+        if (getOs() == 'Chrome') {
+            imgSrc = window.webkitURL.createObjectURL(obj.files[0]);
+        } else {
+            imgSrc = window.URL.createObjectURL(obj.files[0]);
+        }
+    } else {
+        //IE下，使用滤镜
+        obj.select();
+        //解决IE9下document.selection拒绝访问的错误
+        if (navigator.appName == "Microsoft Internet Explorer" && navigator.appVersion.match(/9./i) == "9.") {
+            obj.blur();
+        }
+        var imgSrc = document.selection.createRange().text;
+        document.selection.empty();
+    }
+	return imgSrc;
+}
+function getOs() 
+{ 
+   var OsObject = ""; 
+   if(isIE = navigator.userAgent.indexOf("MSIE")!=-1) { 
+        return "MSIE"; 
+   }
+   if(isFirefox=navigator.userAgent.indexOf("Firefox")!=-1){ 
+        return "Firefox"; 
+   }
+   if(isChrome=navigator.userAgent.indexOf("Chrome")!=-1){ 
+        return "Chrome"; 
+   }
+   if(isSafari=navigator.userAgent.indexOf("Safari")!=-1) { 
+        return "Safari"; 
+   }
+   if(isOpera=navigator.userAgent.indexOf("Opera")!=-1){ 
+        return "Opera"; 
+   } 
+} 
+function checkinput(){
+	var ap_name = $.trim($('#ap_name').val());
+	if (!ap_name){
+		alert('活动名称不可为空');
+		return false;
+	}
+	var ap_id = $('#ap_id').val();
+	var ap_type = $('#ap_type').val();
+	if(!ap_id){
+		if (!$('#ap_imgurl').val()){
+			alert('请上传活动头图');
+			return false;
+		}		
+		if (ap_type==2){
+			if (!$('#ap_imgurl').val()){
+				alert('请上传活动头图');
+				return false;
+			}			
+			var share_switch =0;
+			$("[name='share_switch']").each(function(){
+				if($(this).is(':checked')) {
+					share_switch = $(this).val();
+				}
+			});	
+			if(share_switch == 1){
+				if (!$('#share_weixin_pic').val()){
+					alert('请上传分享微信图');
+					return false;
+				}
+				if (!$('#share_other_pic').val()){
+					alert('请上传其他分享图');
+					return false;
+				}			
+			}	
+		}else if($_POST['ap_type'] == 3){
+			if (!$('#share_weixin_pic').val()){
+				alert('请上传页尾中奖背景图');
+				return false;
+			}		
+		}			
+	}else{
+		var share_switch =0;
+		$("[name='share_switch']").each(function(){
+			if($(this).is(':checked')) {
+				share_switch = $(this).val();
+			}
+		});	
+		if(share_switch == 1){
+			var share_weixin_pic = "<?php echo $list['share_weixin_pic']; ?>";
+			if (!$('#share_weixin_pic').val() && !share_weixin_pic){
+				alert('请上传分享微信图');
+				return false;
+			}		
+			var share_other_pic = "<?php echo $list['share_other_pic']; ?>";
+			if (!$('#share_other_pic').val() && !share_other_pic){
+				alert('请上传其他分享图');
+				return false;
+			}			
+		}		
+	}
+}
+
+
+//编辑器
+/*
+	KindEditor.ready(function(K) {
+		window.editor = K.create('#ap_rule',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'forecolor'
+			]
+		});
+		window.editor = K.create('#no_marquee',{
+			allowImageRemote : false,
+			allowImageUpload : true,
+			items : [
+				'forecolor'
+			]
+		});
+	});
+	KindEditor.options.cssData = 'body { font-size: 14px; }';
+*/	
+//判断照片大小
+function getPhotoSize(obj){
+  var fileSize = 0;
+  var isIE = /msie/i.test(navigator.userAgent) && !window.opera;      
+  if (isIE && !obj.files) {     
+     var filePath = obj.value;      
+     var fileSystem = new ActiveXObject("Scripting.FileSystemObject");  
+     var file = fileSystem.GetFile (filePath);        
+     fileSize = file.Size;     
+  }else { 
+     fileSize = obj.files[0].size;   
+  } 
+  fileSize=Math.round(fileSize/1024*100)/100; //单位为KB
+  if(fileSize>200){
+    return false;
+  }else{
+	return true;
+  }
+}
+</script>
+<body>
+<form action="__URL__/<?php if($_GET['ap_id']){ echo 'vip_discount_edit'; }else{ echo 'vip_discount_add'; } ?>" method="post" onsubmit="return checkinput();" enctype="multipart/form-data">
+<input type='hidden' name='ap_id' id='ap_id' value="{$list['ap_id']}"/>
+<input type='hidden' name='prize_pic' id='prize_pic' value='{$list["prize_pic"]}' />
+<div style="margin:20px;">
+<a href="/index.php/Sendnum/CoActivity/vip_discount" class="search_btn">返回</a>&nbsp;&nbsp;
+<h2><span class="my_activate">添加活动页面</span></h2>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr>
+		<td width="110" >活动名称</td>
+		<td  colspan='2'>
+		<input type="text" id="ap_name" name="ap_name" value="{$list['ap_name']}" /></td>
+	</tr>
+	<tr>
+		<td>页面类型</td>
+		<td colspan='2'>
+			<select name="ap_type" id="ap_type" onchange='sel_type(this);' >
+				<option value="2" <?php if($list['ap_type'] == 2) echo 'selected'; ?> >活动页面</option>
+				<option value="3" <?php if($list['ap_type'] == 3) echo 'selected'; ?>>结束页面</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>活动头图</td>
+		<td width="105" >
+		<input type="file" name="ap_imgurl" id="ap_imgurl" onchange="onUploadImgChange(this,'ap_imgurl','ap_imgurl_div');" />
+		<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+        </td>
+		<td><img id="ap_imgurl_div" <?php if($list['ap_imgurl']){ ?>src="{$IMGATT_HOST}{$list['ap_imgurl']}" <?php } ?>/></td>
+	</tr>
+	<tr>
+		<td>整体背景图</td>
+		<td>
+			<input type="file" name="bg_img" id="bg_img" onchange="onUploadImgChange(this,'bg_img','bg_img_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td>
+			<img id="bg_img_div" <?php if($list['bg_img']){ ?>src="{$IMGATT_HOST}{$list['bg_img']}" <?php } ?>/>
+		</td>
+	</tr>	
+</table>	
+<table id="tab_hide" border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">	
+	<tr>
+		<td>会员卡折扣图片</td>
+		<td>
+            <input type="file" name="button_pic" id="button_pic" onchange="onUploadImgChange(this,'button_pic','button_pic_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="button_pic_div" <?php if($list['button_pic']){ ?> src="{$IMGATT_HOST}{$list['button_pic']}" <?php } ?>/>
+		</td>
+	</tr>	
+	<tr>
+		<td>成为会员按钮图片：</td>
+		<td>
+            <input type="file" name="button_color" id="button_color" onchange="onUploadImgChange(this,'button_color','button_color_div');" />
+            <p class="tips">建议尺寸：363*74。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="button_color_div" <?php if($list['button_color']){ ?> src="{$IMGATT_HOST}{$list['button_color']}" <?php } ?>/></td>
+	</tr>
+	<tr>
+		<td>立即开通按钮图片:</td>
+		<td>
+            <input type="file" name="button_comment" id="button_comment" onchange="onUploadImgChange(this,'button_comment','button_comment_div');" />
+            <p class="tips">建议尺寸：363*74。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="button_comment_div" <?php if($list['button_comment']){ ?> src="{$IMGATT_HOST}{$list['button_comment']}" <?php } ?>/></td>
+	</tr>	
+	<tr>
+		<td>会员福利图片:</td>
+		<td>
+            <input type="file" name="draw_font_color" id="draw_font_color" onchange="onUploadImgChange(this,'draw_font_color','draw_font_color_div');" />
+            <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="draw_font_color_div" <?php if($list['draw_font_color']){ ?> src="{$IMGATT_HOST}{$list['draw_font_color']}" <?php } ?>/></td>
+	</tr>	
+	<tr>
+		<td style="background-color: lightgrey" colspan="3">
+			<h3>推荐软件模块</h3>
+		</td>
+	</tr>	
+	<tr>
+		<td>推荐软件版块图片：</td>
+		<td>
+            <input type="file" name="soft_bg" id="soft_bg" onchange="onUploadImgChange(this,'soft_bg','soft_bg_div');" />
+            <p class="tips">建议尺寸：275*74。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="soft_bg_div" <?php if($list['soft_bg']){ ?> src="{$IMGATT_HOST}{$list['soft_bg']}" <?php } ?>/></td>
+	</tr>		
+	<tr>
+		<td>换一换按键图片:</td>
+		<td>
+            <input type="file" name="describe" id="describe" onchange="onUploadImgChange(this,'describe','describe_div');" />
+            <p class="tips">建议尺寸：93*43。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="describe_div" <?php if($list['describe']){ ?> src="{$IMGATT_HOST}{$list['describe']}" <?php } ?>/></td>
+	</tr>	
+	<tr>
+		<td width="110" >下载中按键背景图：</td>
+		<td>
+            <input type="file" name="download_comment" id="download_comment" onchange="onUploadImgChange(this,'download_comment','download_comment_div');" />
+            <p class="tips">建议尺寸：124*58。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="download_comment_div" <?php if($list['download_comment']){ ?> src="{$IMGATT_HOST}{$list['download_comment']}" <?php } ?>/></td>
+	</tr>	
+	<tr>
+		<td width="110" >下载按键背景图：</td>
+		<td>
+            <input type="file" name="ap_download_link" id="ap_download_link" onchange="onUploadImgChange(this,'ap_download_link','ap_download_link_div');" />
+            <p class="tips">建议尺寸：124*58。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="ap_download_link_div" <?php if($list['ap_download_link']){ ?> src="{$IMGATT_HOST}{$list['ap_download_link']}" <?php } ?>/></td>
+	</tr>		
+	<tr>
+		<td width="110" >更新按键背景图：</td>
+		<td>
+            <input type="file" name="update_button_color" id="update_button_color" onchange="onUploadImgChange(this,'update_button_color','update_button_color_div');" />
+            <p class="tips">建议尺寸：124*58。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="update_button_color_div" <?php if($list['update_button_color']){ ?> src="{$IMGATT_HOST}{$list['update_button_color']}" <?php } ?>/></td>
+	</tr>	
+	<tr>
+		<td width="110" >安装按键背景图：</td>
+		<td>
+            <input type="file" name="my_prize_button_color" id="my_prize_button_color" onchange="onUploadImgChange(this,'my_prize_button_color','my_prize_button_color_div');" />
+            <p class="tips">建议尺寸：124*58。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="my_prize_button_color_div" <?php if($list['my_prize_button_color']){ ?> src="{$IMGATT_HOST}{$list['my_prize_button_color']}" <?php } ?>/></td>
+	</tr>	
+	<tr>
+		<td width="110" >打开按键背景图：</td>
+		<td>
+            <input type="file" name="my_prize_text_color" id="my_prize_text_color" onchange="onUploadImgChange(this,'my_prize_text_color','my_prize_text_color_div');" />
+            <p class="tips">建议尺寸：124*58。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="my_prize_text_color_div" <?php if($list['my_prize_text_color']){ ?> src="{$IMGATT_HOST}{$list['my_prize_text_color']}" <?php } ?>/></td>
+	</tr>	
+
+	<tr>
+		<td >推荐软件名称颜色</td>
+		<td colspan='2'>
+			<div class="label_txt"></div>
+            <div class="color_box">
+			<input type="text" class='color' name="sudoku_color" id="sudoku_color" value="<?php echo $list['sudoku_color'] ? $list['sudoku_color'] : '#ffffff'?>" /></div>		
+		</td>
+	</tr>	
+	<tr>
+		<td style="background-color: lightgrey" colspan="3">
+			<h3>活动规则介绍模块</h3>
+		</td>
+	</tr>	
+	<tr>
+		<td>整体配置为图片</td>
+		<td colspan='2'>
+            <input type="radio" name="is_score" value="1"  <?php if(!$list['is_score'] ||$list['is_score'] == 1) echo "checked"; ?>  onclick="show_hide('is_score','rule_tr');" /> 是&nbsp;
+			<input type="radio" name="is_score" value="2"  <?php if($list['is_score'] == 2) echo "checked"; ?> onclick="show_hide('is_score','rule_tr');"  /> 否
+		</td>		
+	</tr>
+	<tr>
+		<td>活动规则背景图:</td>
+		<td>
+            <input type="file" name="rule_pic" id="rule_pic" onchange="onUploadImgChange(this,'rule_pic','rule_pic_div');" />
+             <p class="tips">宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="rule_pic_div" <?php if($list['rule_pic']){ ?> src="{$IMGATT_HOST}{$list['rule_pic']}" <?php } ?>/>
+		</td>
+	</tr>	
+	<tr class="rule_tr" >
+		<td width="110">活动规则文字颜色</td>
+		<td colspan='2'>
+			<div class="label_txt"></div>
+            <div class="color_box">
+			<input type="text" class='color' name="desc_color" id="desc_color" value="<?php echo $list['desc_color'] ? $list['desc_color'] : '#ffffff'?>" /></div>		
+		</td>					
+	</tr>
+	<tr class="rule_tr">
+		<td >活动规则文本</td>
+		<td colspan='2'>
+		<textarea id='ap_rule' name='ap_rule' rows="3" cols="20" style="margin: 0px; width: 400px; height: 100px;" ><?php if($list['ap_rule']){ echo $list['ap_rule']; } ?></textarea>		
+		</td>
+	</tr>	
+	<tr>
+		<td style="background-color: lightgrey" colspan="3">
+			<h3>分享模块</h3>
+		</td>
+	</tr>	
+	<tr>
+		<td>分享按钮图:</td>
+		<td>
+            <input type="file" name="third_text_color" id="third_text_color" onchange="onUploadImgChange(this,'third_text_color','third_text_color_div');" />
+            <p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td>
+			<img id="third_text_color_div" <?php if($list['third_text_color']){ ?> src="{$IMGATT_HOST}{$list['third_text_color']}" <?php } ?>/>
+		</td>
+	</tr>
+	<tr>
+		<td>分享微信图:</td>
+		<td>
+            <input type="file" name="share_weixin_pic" id="share_weixin_pic" onchange="onUploadImgChange(this,'share_weixin_pic','share_weixin_pic_div');" />
+            <p class="tips">尺寸：70*70。大小尽量控制在200KB以内</p>
+		</td>
+		<td>
+			<img id="share_weixin_pic_div" <?php if($list['share_weixin_pic']){ ?> src="{$IMGATT_HOST}{$list['share_weixin_pic']}" <?php } ?>/>
+		</td>
+	</tr>
+	<tr>
+		<td>其他分享图:</td>
+		<td>
+            <input type="file" name="share_other_pic" id="share_other_pic" onchange="onUploadImgChange(this,'share_other_pic','share_other_pic_div');" />
+            <p class="tips">尺寸：111*111。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="share_other_pic_div" <?php if($list['share_other_pic']){ ?> src="{$IMGATT_HOST}{$list['share_other_pic']}" <?php } ?>/></td>
+	</tr>
+	<tr>
+		<td>分享文案</td>
+		<td colspan='2'>
+		<textarea id='share_text' name='share_text' rows="3" cols="20" style="margin: 0px; width: 400px; height: 100px;" ><?php if($list['share_text']){ echo $list['share_text']; } ?></textarea>		
+		</td>
+	</tr>	
+	<tr>
+		<td style="background-color: lightgrey" colspan="3">
+			<h3>开通流程弹窗</h3>
+		</td>
+	</tr>		
+	<tr>
+		<td>整体配置为图片:</td>
+		<td colspan='2'>
+            <input type="radio" name="is_repeat" value="1"  <?php if(!$list['is_repeat'] || $list['is_repeat'] == 1) echo "checked"; ?>  onclick="show_hide('is_repeat','pop_tr');" /> 是&nbsp;
+			<input type="radio" name="is_repeat" value="0" <?php if(isset($list['is_repeat']) && $list['is_repeat'] == 0) echo "checked"; ?> onclick="show_hide('is_repeat','pop_tr');"  /> 否
+		</td>
+	</tr>	
+	<tr>
+		<td>弹窗背景图片:</td>
+		<td>
+            <input type="file" name="lottery_pic" id="lottery_pic" onchange="onUploadImgChange(this,'lottery_pic','lottery_pic_div');" />
+            <p class="tips">建议尺寸：326*387。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="lottery_pic_div" <?php if($list['lottery_pic']){ ?> src="{$IMGATT_HOST}{$list['lottery_pic']}" <?php } ?>/></td>
+	</tr>	
+	<tr>
+		<td>弹窗按钮图片:</td>
+		<td>
+            <input type="file" name="click_lottery_pic" id="click_lottery_pic" onchange="onUploadImgChange(this,'click_lottery_pic','click_lottery_pic_div');" />
+            <p class="tips">建议尺寸：338*76。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="click_lottery_pic_div" <?php if($list['click_lottery_pic']){ ?> src="{$IMGATT_HOST}{$list['click_lottery_pic']}" <?php } ?>/></td>
+	</tr>	
+	<tr class="pop_tr">
+		<td>开通流程文本颜色</td>
+		<td colspan='2'>
+			<div class="label_txt"></div>
+            <div class="color_box">
+			<input type="text" class='color' name="mean_text_color" id="mean_text_color" value="<?php echo $list['mean_text_color'] ? $list['mean_text_color'] : '#ffffff'?>" /></div>		
+		</td>
+	</tr>	
+	<tr class="pop_tr">
+		<td>开通流程规则文本</td>
+		<td colspan='2'>
+		<textarea id='no_marquee' name='no_marquee' rows="3" cols="20" style="margin: 0px; width: 400px; height: 100px;" ><?php if($list['no_marquee']){ echo $list['no_marquee']; } ?></textarea>		
+		</td>
+	</tr>
+	<tr>
+		<td style="background-color: lightgrey" colspan="3">
+			<h3>会员权益页</h3>
+		</td>
+	</tr>
+	<tr>
+		<td>整体配置为图片:</td>
+		<td colspan='2'>
+            <input type="radio" name="get_lottery_type" value="1"  <?php if(!$list['get_lottery_type'] || $list['get_lottery_type'] == 1) echo "checked"; ?>  onclick="show_hide('get_lottery_type','interests_tr');" /> 是&nbsp;
+			<input type="radio" name="get_lottery_type" value="0" <?php if(isset($list['get_lottery_type']) && $list['get_lottery_type'] == 0) echo "checked"; ?> onclick="show_hide('get_lottery_type','interests_tr');"  /> 否
+		</td>
+	</tr>		
+	<tr>
+		<td>背景图片:</td>
+		<td>
+            <input type="file" name="lose_no_img" id="lose_no_img" onchange="onUploadImgChange(this,'lose_no_img','lose_no_img_div');" />
+			<p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p>
+		</td>
+		<td><img id="lose_no_img_div" <?php if($list['lose_no_img']){ ?> src="{$IMGATT_HOST}{$list['lose_no_img']}" <?php } ?>/></td>
+	</tr>	
+	<tr class="interests_tr" >
+		<td>赠送说明图片:</td>
+		<td>
+            <input type="file" name="lose_yes_img" id="lose_yes_img" onchange="onUploadImgChange(this,'lose_yes_img','lose_yes_img_div');" />
+            <p class="tips">建议尺寸：590*322。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="lose_yes_img_div" <?php if($list['lose_yes_img']){ ?> src="{$IMGATT_HOST}{$list['lose_yes_img']}" <?php } ?>/></td>
+	</tr>	
+	<tr class="interests_tr">
+		<td>赠送说明文本颜色</td>
+		<td colspan='2'>
+			<div class="label_txt"></div>
+            <div class="color_box">
+			<input type="text"  class="color" name="rule_color" id="rule_color" value="<?php if($list['rule_color']){ echo $list['rule_color']; } ?>" /></div>		
+		</td>
+	</tr>	
+	<tr class="interests_tr">
+		<td>赠送说明文本</td>
+		<td colspan='2'>
+		<textarea id='lost_no_desc' name='lost_no_desc' rows="3" cols="20" style="margin: 0px; width: 400px; height: 100px;" ><?php if($list['lost_no_desc']){ echo $list['lost_no_desc']; } ?></textarea>		
+		</td>
+	</tr>	
+</table>	
+<table id="tab_end" border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+	<tr>
+		<td>整体配置为图片:</td>
+		<td colspan='2'>
+            <input type="radio" name="not_winning_tips" value="1"  <?php if(!$list['not_winning_tips'] || $list['not_winning_tips'] == 1) echo "checked"; ?>  onclick="show_hide('not_winning_tips','end_tr');" /> 是&nbsp;
+			<input type="radio" name="not_winning_tips" value="0" <?php if(isset($list['not_winning_tips']) && $list['not_winning_tips'] == 0) echo "checked"; ?> onclick="show_hide('not_winning_tips','end_tr');"  /> 否
+		</td>
+	</tr>	
+	<tr class="end_tr">
+		<td>活动结束小图片:</td>
+		<td>
+            <input type="file" name="no_prize_pic" id="no_prize_pic" onchange="onUploadImgChange(this,'no_prize_pic','no_prize_pic_div');" />
+            <p class="tips">建议尺寸：256*121。大小尽量控制在200KB以内。</p>
+		</td>
+		<td><img id="no_prize_pic_div" <?php if($list['no_prize_pic']){ ?> src="{$IMGATT_HOST}{$list['no_prize_pic']}" <?php } ?>/></td>
+	</tr>
+	<tr class="end_tr">
+		<td>活动结束文本颜色</td>
+		<td colspan='2'>
+			<div class="label_txt"></div>
+            <div class="color_box">
+			<input type="text"  class="color" name="uppage_color" id="uppage_color" value="<?php if($list['uppage_color']){ echo $list['uppage_color']; } ?>" /></div>		
+		</td>
+	</tr>	
+	<tr class="end_tr">
+		<td>活动结束文本</td>
+		<td colspan='2'>
+		<textarea id='change_button' name='change_button' rows="3" cols="20" style="margin: 0px; width: 400px; height: 100px;" ><?php if($list['change_button']){ echo $list['change_button']; } ?></textarea>		
+		</td>
+	</tr>	
+</table>	
+</div>
+<div style="margin-top:20px;margin-left:100px;">
+	<table>
+		<tr>
+			<td><input type="submit" class="search_btn" value="确定" /></td>
+			<td><a href="javascript:;" onclick="javascript:history.go(-1);" class="search_btn" >取消</a></td>
+		</tr>
+	</table>
+</div>
+</form>
+</body>
+</html>

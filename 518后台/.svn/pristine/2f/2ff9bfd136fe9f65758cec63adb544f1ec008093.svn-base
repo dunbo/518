@@ -1,0 +1,188 @@
+<include file="../../Public/header"  />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+
+<style>
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+   
+<body>
+<table cellpadding="0" cellspacing="0" class="table_list">
+	<tbody>
+		<tr height="35">
+			<td align="center" <?php echo $passed == 0 ? 'style="background:#FFCC66"' :''; ?>>
+				<a href="__URL__/index/passed/0">
+					<font style="color:#000; font-weight:bold">待审核</font>
+				</a>
+			</td>
+			<td align="center" <?php echo $passed == 1 ? 'style="background:#FFCC66"' :''; ?>>
+				<a href="__URL__/index/passed/1">
+					<font style="color:#000; font-weight:bold">已通过</font>
+				</a>
+			</td>
+			<td align="center" <?php echo $passed == 2 ? 'style="background:#FFCC66"' :''; ?>>
+				<a href="__URL__/index/passed/2">
+					<font style="color:#000; font-weight:bold">未通过</font>
+				</a>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<table cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th onclick="selectAlls(1);">全选</th>
+			<th onclick="selectAlls(2);">反选</th>
+			<th >
+			<form action="__URL__/index" method="GET" name="showproductlist">
+				<input type="hidden" name="passed" value="{$passed}"/>
+				<select style="width:150px;" name='information_subclass' id="information_subclass"  onchange="javascript:showproductlist.submit();">
+					<option width="150px"  value="">全部</option>
+					<volist name="information_subclass_config" id="vo" key="k">
+					<option value="{$k}"  <if condition="($k eq $information_subclass)"> selected = "selected" </if> >{$vo}</option>
+					</volist>
+				</select>
+			</form>		
+			</th>
+			<?php if($passed == 0){ ?>
+			<th colspan='3'>&nbsp;</th>
+			<th onclick="batch_pass()" >批量通过</th>
+			<th onclick="batch_refuse()" >批量驳回</th>
+			<?php }else if($passed == 1 || $passed == 2){ ?>
+			<th colspan='4'>&nbsp;</th>
+			<th onclick="batch_withdraw()" >批量撤回</th>
+			<?php } ?>			
+		</tr>
+		<tr><td colspan='7'>&nbsp;</td></tr>			
+		<tr>			
+			<th width="5%">选择</th>
+			<th width="5%">id</th>
+			<th width="12%">资讯标题</th>
+			<th width="15%">资讯图片</th>
+			<th width="12%">是否包含敏感词</th>
+			<th width="12%">来源</th>
+			<th width="12%">入库时间</th>
+			<th width="5%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		<volist name="list" id="vo">
+		<tr>
+			<td><input type="checkbox" name="id[]" value="{$vo.id}" /></td>
+			<td>{$vo.id}</td>
+			<td>{$vo.news_name}</td>
+			<td>
+				<img src='<?php echo CAIJI_ATTACHMENT_HOST.$vo['news_pic'];?>' width="200" height="100"/> 
+			</td>
+			<td><?php echo $vo['sensitive_status'] == 1 ? '包含' : '不包含'; ?></td>
+			<td>{$vo.website_name}</td>
+			<td><?php echo date("Y-m-d H:i:s",$vo['create_tm']); ?></td>
+			<td >
+				<?php if($passed == 0){ ?>
+				<button onClick="pass({$vo.id});" class="search_btn"  >通过</button>
+				<button onClick="refuse({$vo.id});" class="search_btn" >驳回</button>
+				<?php }else if($passed == 1 || $passed == 2){ ?>
+				<button onClick="withdraw({$vo.id});" class="search_btn" >撤回</button>
+				<?php } ?>
+				<button onClick="update({$vo.id});" class="search_btn" >编辑</button>				
+			</td>
+		</tr>	
+		</volist>	
+	</tbody>
+</table>
+<div style="width:92%; text-align:right">{$page}</div>
+</body>
+</html>
+<script type="text/javascript">
+function pass(id){
+	if(confirm('是否确认通过？')) {
+		window.location.href="__URL__/pass/id/"+id;
+	}else{
+		return false;
+	}
+}
+function update(id){
+	var urls ="__URL__/update?id="+id+"&width=1000&height=600";
+	window.location.href=urls;
+	//tb_show('编辑模块',urls,"thickbox");
+}
+function refuse(id){
+	if(confirm('是否确认驳回？')) {
+		window.location.href="__URL__/refuse/id/"+id;
+	}else{
+		return false;
+	}
+}
+function withdraw(id){
+	if(confirm('是否确认撤回？')) {
+		window.location.href="__URL__/withdraw/id/"+id;
+	}else{
+		return false;
+	}
+}
+//全选
+function selectAlls(status) {
+	if(status == 1){
+		$("[name='id[]']").each(function(){
+			$(this).attr('checked',true);
+		});
+	}else{
+		$("[name='id[]']").each(function(){
+			$(this).attr('checked',false);
+		});
+	}	
+}
+//判断选中
+function Selected_check(){
+	var id_arr = new Array();
+	var i = 0;
+	$("[name='id[]']").each(function(){
+		if($(this).is(':checked')) {
+			id_arr[i] = $(this).val();
+			i++;
+		}
+	});
+	var id_str = id_arr.join(',');
+	if(id_str=='') {
+		alert('请选择要操作的对象！');
+		return false;
+	}
+	return id_str;
+}
+function batch_pass(){
+	id_str = Selected_check();
+	if(id_str){
+		if(confirm('是否确认批量通过？')) {
+			window.location.href="__URL__/batch_pass/ids/"+id_str;
+		}else{
+			return false;
+		}		
+	}
+}
+function batch_refuse(){
+	id_str = Selected_check();
+	if(id_str){
+		if(confirm('是否确认批量驳回？')) {
+			window.location.href="__URL__/batch_refuse/ids/"+id_str;
+		}else{
+			return false;
+		}		
+	}
+}	
+function batch_withdraw(){
+	id_str = Selected_check();
+	if(id_str){
+		if(confirm('是否确认批量撤回？')) {
+			window.location.href="__URL__/batch_withdraw/ids/"+id_str;
+		}else{
+			return false;
+		}		
+	}
+}	
+</script>	

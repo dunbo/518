@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>有爱圣诞节亮了</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/christmas2015/css/common3.css?v1"/>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/jQueryRotate-2.3.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/activity/christmas2015/js/zp.js"></script>
+<script type="text/javascript">
+	// 通用
+	var sid = '<!--{$out.sid}-->';
+	var aid = <!--{$out.aid}-->;
+	var unwritten = <!--{$out.unwritten}-->;
+	var lottery_num = <!--{$out.lottery_num}-->;
+	var award_count = <!--{$out.award_count}-->;
+	var rotate_flag = 0;//抽奖点击按钮是否可点击
+	var submit_info_clickable = true;
+	
+	var gift_package;//礼包奖包名
+	// 软件列表中固定的包
+	var stable_soft_lists=['com.husor.beibei', 'com.husor.mizhe', 'com.KingOfTank.kkk.anzhi', 'com.crisisfire.android.anzhi'];
+	
+	var again_text = ['没中奖不要紧！看成败人生豪迈，大不了从头再来。','少年姿势不对，再试一次~','默念三遍我一定会中，再试下~','少年你离奖品就差一步，再试试嘛~','说好的奖品呢，连辣条都不给我啊喂！','继续攒人品，下次一定RP大爆发！','少年别灰心，安智君相信下次你就能中~','天灵灵，地灵灵，下次中奖一定灵~','奖品是个磨人的小妖精，看我再试一次定会抓住你~'];
+	
+	var flags={canMove:true};
+	function showOpenBox(obj){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+                    top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$(obj).css("margin-top",-top_h+"px").show();
+		$("#body-bg").css("height",bg_h+"px").show();
+		flags.canMove=false;
+		window.onresize = function(){
+			var bg_h=$(window).height() + $(document).scrollTop(),
+                 top_h= $(obj).height()/ 2 - $(document).scrollTop();
+			$('#body-bg').css("height",bg_h+"px");
+			$(obj).css("margin-top",-top_h+"px");	
+		}
+	}
+	function showOpenBox2(obj){
+		var bg_h=$(window).height(),
+				top_h= $(obj).height()/ 2;
+		$(obj).css("margin-top",-top_h+"px").show();
+		$("#body-bg").css("height",bg_h+"px").show();
+		flags.canMove=false;
+		window.onresize = function(){
+			var bg_h=$(window).height();
+			$("#body-bg").css("height",bg_h+"px");
+		}
+	}
+	function cloBox(obj){
+		$(obj).hide();
+		$("#body-bg").hide();
+		flags.canMove=true;
+	}
+	$(function(){
+		$("body").bind('touchmove', function (e) {
+			if(!flags.canMove){
+				e.preventDefault();
+			}
+		});
+		if (unwritten) {
+			// 打开填写信息窗
+			$("#award_level_name").html('<!--{$out.award_level_name}-->');
+			$("#award_name").html('<!--{$out.award_name}-->');
+			showOpenBox2("#tip-box3");
+		}
+		if (lottery_num > 0) {
+			// 抽奖按钮可点击
+			$(".rotate-pointer").removeClass('pointer-disabled');
+			$(".rotate-pointer").bind('click', lottery_click);
+			$(".rotate-pointer").bind('dblclick', lottery_click);
+		}
+	});
+	
+	function lottery_click() {
+        if (rotate_flag == 1)
+            return;
+        rotate_flag = 1;
+        $.ajax({
+            url: '/lottery/christmas2015_get_award.php',
+            data: 'sid='+sid,
+            type: 'get',
+            dataType: "json",
+            success: function(data){
+                var status = data.status;
+                if (status == 200) {
+                    var info = data.info;
+                    var award_level = info.award_level;
+                    var left_num = info.left_num;
+                    // 更新页面的剩余次数
+					$("#lottery_num").html(left_num);
+                    var a = runzp(award_level);
+                    $(".rotate-pointer").rotate({
+                        duration:3000,
+                        angle: 0,
+                        animateTo:1800+a.angle,
+                        easing: $.easing.easeOutSine,
+                        callback: function(){
+							rotate_flag = 0;//可以点击了
+							if (left_num <= 0) {
+								// 中奖按钮置灰，unbind点击事件
+								$(".rotate-pointer").unbind('click');
+								$(".rotate-pointer").unbind('dblclick');
+								$(".rotate-pointer").addClass('pointer-disabled');
+							}
+							if (award_level > award_count) {
+								// 没有中奖
+								if (left_num > 0) {
+									// random出一个句子
+									var random = randomnum(0, again_text.length-1);
+									$("#again_text").html(again_text[random]);
+                                    showOpenBox("#tip-box1");// 剩余次数大于0
+								} else {
+									showOpenBox("#tip-box2");// 剩余次数为0
+								}
+							} else {
+								setTimeout(function (){go_info(info)},3000);
+							}
+                        }
+                    });
+                } else {
+                    alert("您当前没有抽奖机会哟！下载游戏可以获得额外的抽奖机会哟！");
+                    rotate_flag = 0;//可以点击了
+                }
+            },
+			error:function(){
+				alert('服务器出了点小问题，请稍等～～');
+			}
+        });
+    }
+	
+	function go_info(info) {
+		var award_level = info.award_level;
+		var award_type = info.award_type;
+		if (award_type == 2) {
+			// 礼包
+			$("#award_level_name2").html(info.award_level_name);
+			$("#award_name2").html(info.award_name);
+			$("#gift_card_pwd").html(info.gift_card_pwd);
+			$("#gift_path").html(info.gift_path);
+			gift_package = info.package;
+			var own_softs = soft_lists;
+			for(var i=0;i<own_softs.length;i++){
+				if(gift_package == own_softs[i][7]){
+					var  soft_status_go = window.AnzhiActivitys.isInstalledApp(own_softs[i][7],parseInt(own_softs[i][13]));
+					var soft_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(own_softs[i][0]));
+					$('#gift_softname').html(own_softs[i][2]);
+					$('#gift_icon').attr('src', own_softs[i][1]);
+					if((soft_status_go == -2 && soft_datas_gos== -1) || soft_datas_gos == 1 || soft_datas_gos == 3){
+						var apk_size = own_softs[i][9];
+						$('#go_convert').html("下载软件("+apk_size+")");
+					}else if(soft_datas_gos == 5 && soft_status_go == -2){
+						$('#go_convert').html("去兑换");
+					}else if(soft_status_go != -2){
+						$('#go_convert').html("去兑换");
+					}
+					break;
+				}
+			}
+			showOpenBox("#tip-box5");
+		} else {
+			// 实物
+			$("#award_level_name").html(info.award_level_name);
+			$("#award_name").html(info.award_name);
+			$("#name").val("");
+			$("#telephone").val("");
+			showOpenBox("#tip-box3");
+		}
+	}
+	
+	function download_package(){
+		var own_softs = soft_lists;
+		for(var i=0;i<own_softs.length;i++){
+			if(gift_package == own_softs[i][7]){
+				var  soft_status_go = window.AnzhiActivitys.isInstalledApp(own_softs[i][7],parseInt(own_softs[i][13]));
+				var soft_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(own_softs[i][0]));
+				if((soft_status_go == -2 && soft_datas_gos== -1) || soft_datas_gos == 1 || soft_datas_gos == 3){
+					window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(own_softs[i][0]),own_softs[i][7],own_softs[i][2],parseInt(own_softs[i][13]),own_softs[i][27],1);
+				}else if(soft_datas_gos == 5 && soft_status_go == -2){
+					installApp(parseInt(own_softs[i][0]));
+				}else if(soft_status_go != -2){
+					openApp(own_softs[i][7],parseInt(own_softs[i][0]));
+				}
+			}
+		}
+		cloBox('#tip-box5');
+	}
+	
+	// 提交信息
+	function submit_info() {
+		if (!submit_info_clickable) {
+			return;
+		}
+		submit_info_clickable = false;
+		$("#prompt").text('');
+		var name = $.trim($("#name").val());
+		var telephone = $.trim($("#telephone").val());
+		if (name == '') {
+			submit_info_clickable = true;
+			$("#prompt").text('姓名不能为空');
+			return;
+		}
+		if (telephone == '') {
+			submit_info_clickable = true;
+			$("#prompt").text('电话不能为空');
+			return;
+		}
+		$.ajax({
+			url:"/lottery/christmas2015_get_info.php?sid="+sid,
+			data:{name:name, telephone:telephone},
+			type:"post",
+			success:function(data){
+				if (data == -1) {
+					submit_info_clickable = true;
+					$("#prompt").text('请插入sim卡！');
+				} else if (data == 500) {
+					submit_info_clickable = true;
+					$("#prompt").text('姓名不能为空！');
+				} else if (data == 501) {
+					submit_info_clickable = true;
+					$("#prompt").text('电话不能为空！');
+				} else if (data == 502) {
+					submit_info_clickable = true;
+					$("#prompt").text('姓名太长！');
+				} else if (data == 503) {
+					submit_info_clickable = true;
+					$("#prompt").text('电话号码格式不对！');
+				} else if (data == 200) {
+					$("#prompt").text('提交成功！');
+					setTimeout(function(){
+						submit_info_clickable = true;
+						cloBox('#tip-box3');
+						location.href="/lottery/christmas2015_lottery.php?sid="+sid+"&#gameTable";
+					}, 3000);
+				} else {
+					submit_info_clickable = true;
+					$("#prompt").text('出错啦！');
+				}
+			}
+		});
+	}
+</script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/activity/christmas2015/js/lottery_softs2.js"></script>
+</head>
+<body>
+<section>
+	<div id="body-bg" style="display: none;"></div>
+    <div class="tip-box tip-box1" id="tip-box1"  style="display: none;">
+			<div class="tip_hd">
+				<img src="<!--{$out.new_static_url}-->/activity/christmas2015/images/person5.png"/>
+				<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box1')">关闭</a></div>
+			</div>
+			<div class="tip-mid">
+				<div class="tip-con">
+					<p id="again_text"></p>
+				</div>
+			</div>
+			<a href="javascript:;" class="btns" onclick="cloBox('#tip-box1');lottery_click();">再来一次</a>
+    </div>
+	<div class="tip-box tip-box1" id="tip-box2"  style="display: none;">
+        <div class="tip_hd">
+            <img src="<!--{$out.new_static_url}-->/activity/christmas2015/images/person6.png"/>
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box2')">关闭</a></div>
+        </div>
+        <div class="tip-mid">
+            <div class="tip-con">
+                <p>我真的还想再抽500次~</p>
+            </div>
+			<a href="#my_softs" class="btns" onclick="cloBox('#tip-box2')">去下载</a>
+        </div>
+    </div>
+	<div class="tip-box pbot" id="tip-box3" style="display: none;">
+		<p class="prize-title cnt"><span class="spec">少年恭喜获得<br/><span id="award_level_name"></span>  <span id="award_name"></span></p>
+		<form class="form1">
+			<div class="form_title"></div>
+			<div class="prompt1">快填写个人信息领奖吧~</div>
+			<div class="form-item clear">
+				<label for="name">姓名：</label>
+				<div class="textbox"><input type="text" id="name"/> </div>
+			</div>
+			<div class="form-item clear">
+				<label for="telephone">手机：</label>
+				<div class="textbox"><input type="text" id="telephone"/> </div>
+			</div>
+			<div class="prompt2 prompt3" id="prompt"></div>
+		</form>
+		<a class="btns btns_tip" href="javascript:;" onclick="submit_info();">提交</a>
+	</div>
+	<div class="tip-box tip-box3" id="tip-box5"  style="display: none;">
+		<div class="prize_ok">
+			<div class="prize_okl">
+				<img id="gift_icon" src="javascript:;"/>
+				<span><span id="gift_softname"></span></span>
+			</div>
+			<div class="prize_okr">
+				<p>少年恭喜获得  <span id="award_level_name2"></span><br/><span id="award_name2"></span></p>
+				<p class="wordwrap">礼包码：<span id="gift_card_pwd"></span></p>
+				<p class="wordwrap">兑奖路径：<span id="gift_path"></span></p>
+			</div>
+		</div>
+		<div class="btns2 btns3">
+			<a class="btns" href="javascript:;" onclick="cloBox('#tip-box5')">关闭</a>
+			<a class="btns" style="width:112px" href="javascript:;" onclick="download_package()" id="go_convert"></a>
+		</div>
+	</div>
+</section>
+<section>
+    <div class="banner"><img src="<!--{$out.new_static_url}-->/activity/christmas2015/images/banner.png"/></div>
+    <div class="main2">
+		<div class="awards">
+			<div class="slide_up">
+				<div>
+					<!--{if $out.people_award_list}-->
+					<!--{foreach from=$out.people_award_list item=i}-->
+					<dd><!--{$i.telephone}-->获得<!--{$i.award_name}--></dd>
+					<!--{/foreach}-->
+					<!--{else}-->
+					<dd>少年，要加油才能拿大奖喔！</dd>
+					<!--{/if}-->
+				</div>
+			</div>
+		</div>
+		<div class="lottery_info">
+			<p>我还有<label id="lottery_num"><!--{$out.lottery_num}--></label>次抽奖机会</p>
+			<a href="/lottery/christmas2015_lottery_award.php?sid=<!--{$out.sid}-->">我的奖品</a>
+			<div class="clear"></div>
+		</div>
+		<div class="person1">
+			<p>暖光四溢圣诞节，该和你爱的人一起分享。带着安智君送你的礼物过有爱圣诞节！</p>
+		</div>
+		<div class="lotter_wrap">
+			<div class="lottery">
+				<div class="rotate">
+					<div class="rotate-con">
+						<img src="<!--{$out.new_static_url}-->/activity/christmas2015/images/lottery.png" width="100%"/>
+						<div class="rotate-pointer pointer-disabled"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="soft">
+			<ul class="soft-list clear" id="my_softs">
+			</ul>
+			<div class="soft_p">
+				<p>下载APP增加抽奖机会吧~</p>
+			</div>
+			<a href="javascript:;" class="btns_app" onclick="get_soft()">换一换</a>
+		</div>
+		<div class="lottery_bom">
+			<div class="lottery_info2">
+				<p><a href="http://weibo.com/u/1962757973">没中奖？不要紧！关注@安智市场 新浪微博继续参与活动，更多大奖正在送出哦。</a></p>
+			</div>
+			<a href="/lottery/christmas2015_index.php?sid=<!--{$out.sid}-->" class="return_btn">返回首页</a>
+			<div class="bom_btn">
+				<a href="/lottery/christmas2015_lottery_rules.php?sid=<!--{$out.sid}-->">【活动规则】</a>
+			</div>
+		</div>
+		<div class="banner_bom"><img src="<!--{$out.new_static_url}-->/activity/christmas2015/images/banner_bom.png"/></div>
+    </div>
+</section>
+<section>
+	<div class="footer clear">
+		<p>活动最终解释权归安智所有</p>
+	</div>
+</section>
+<script type="text/javascript">
+function sliderUp(obj){
+	obj.each(function(){
+		var _this=$(this)[0],
+				oDiv1=$(this).find("div:first")[0],
+				oDiv2=$(this).find("div:last")[0];
+
+		if(oDiv2.offsetTop-_this.scrollTop<=0)
+			_this.scrollTop-=oDiv1.offsetHeight;
+		else{
+			_this.scrollTop++;
+		}
+	})
+}
+$(function(){
+	var speed=40;
+	var oSlider=$(".slide_up");
+	oSlider.each(function(){
+		var $oDiv1=$(this).find("div:first");
+		var len = $oDiv1.children().length;
+		if (len > 4) {
+			$oDiv1.after("<div>"+$oDiv1.html()+"</div>");
+		}
+	})
+	var run=setInterval(function(){
+		sliderUp(oSlider);
+	},speed);
+})
+</script>
+</body>
+</html>

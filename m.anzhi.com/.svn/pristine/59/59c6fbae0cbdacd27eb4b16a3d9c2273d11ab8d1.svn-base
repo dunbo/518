@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>重逢老友记 回归拿大奖</title>
+<script type="text/javascript" src="<!--{$out.static_url}-->/friends/js/jquery-1.8.0.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/friends/css/common.css?v1"/>
+<script type="text/javascript">
+var aid=<!--{$out.aid}-->,sid = '<!--{$out.sid}-->',my_num='<!--{$out.my_num}-->',status='<!--{$out.status}-->';
+function my_notice(){
+	var notice_no = new Array();
+	notice_no = [['没中奖不要紧！看成败人生豪迈，大不了从头再来。'],['少年你离奖品就差一步，再试试嘛~'],['说好的奖品呢，连辣条都不给我啊喂！'],['继续攒人品，下次一定RP大爆发！'],['少年别灰心，安智君相信下次你就能中~'],['天灵灵，地灵灵，下次中奖一定灵~'],['奖品是个磨人的小妖精，看我再试一次定会抓住你~'],['姿势不对，再抽一次~']];
+	var i = Math.floor(1+Math.random()*7);
+	var the_notice = notice_no[i];
+	$("#awarning_text").html(''+the_notice+'');
+}
+
+$(document).ready(function(){
+	if(status == 2){
+		showOpenBox('#tip-box');
+	}
+});
+
+function get_award(obj){
+	if(!my_num || my_num == 0){
+		return false;
+	}
+	if(obj == 100){
+		cloBox('#have-tip-box');
+	}
+	if(!obj || obj == 100){
+		obj = 4 - my_num;
+	}
+
+	$('#lottery_'+obj+'').siblings('p').find('i').addClass('move');
+	$('#lottery_'+obj+'').siblings('p').find('em').addClass('light');
+	setTimeout(function(){
+		var self = this;
+		$.ajax({
+			url:'/lottery/friends_get_award.php',
+			data:'sid='+sid+'&aid='+aid+'&obj='+obj,
+			type: 'get',
+			success: function(data){
+				var data = eval(''+data+'');
+				$('#my_num').html(data[1]);
+				my_num = data[1];
+				if(data[0] == 0){
+					if(my_num == 0){
+						showOpenBox('#no-tip-box');
+					}else{
+						my_notice();
+						showOpenBox('#have-tip-box');
+					}
+				}else{
+					$('#my_prize').html(data[2]);
+					showOpenBox('#tip-box');
+				}
+				setTimeout(function(){
+					$('#lottery_'+obj+'').addClass('disabled');
+					$('#lottery_'+obj+'').attr('onclick',false);
+				},500);
+			}
+		});
+	},1000);
+}
+
+var flags={canMove:true};
+function showOpenBox(obj){
+	var bg_h=$("#body-bg").height()+$(document).scrollTop(),
+	top_h= $(obj).height()/ 2-$(document).scrollTop();
+	$(obj).css("margin-top",-top_h+"px").show();
+	$("#body-bg").css("height",bg_h+"px").show();
+	flags.canMove=false;
+}
+function cloBox(obj){
+	$(obj).hide();
+	$("#body-bg").hide();
+	flags.canMove=true;
+}
+$(function(){
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+})
+
+window.onresize = function(){
+	var obj = '#tip-box';
+	var bg_h=$("#body-bg").height()+$(document).scrollTop(),
+	top_h= $(obj).height()/ 2-$(document).scrollTop();
+	$(obj).css("margin-top",-top_h+"px");
+	$("#body-bg").css("height",bg_h+"px");
+}
+function get_info(){
+	var telephone = $('#telephone').val();
+	var name = $('#name').val();
+	if(!telephone || telephone == '手机号'){
+		$('#my_error').css('display','block');
+		$('#my_error').html('请输入手机号');
+		return false;
+	}else{
+		$('#my_error').css('display','none');
+	}
+	if(!name){
+		$('#my_error').css('display','block');
+		$('#my_error').html("请输入姓名");
+		return false;
+	}else{
+		$('#my_error').css('display','none');
+	}
+	if(name.length > 10){
+		$('#my_error').css('display','block');
+		$('#my_error').html("请输入10个字以内的收货人姓名");
+		return false;
+	}else{
+		$('#my_error').css('display','none');
+	}
+	$.ajax({
+		url: '/lottery/friends_get_info.php',
+		data: 'telephone='+telephone+'&name='+name+'&sid='+sid+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			if(data){
+				data = eval(''+data+'');
+				if(data == 500){
+					$('#my_error').css('display','block');
+					$('#my_error').html('请输入正确的手机号');
+				}else if(data == 200){
+					$('#my_error').css('display','block');
+					$('#my_error').html('提交成功');
+					setTimeout(function(){
+						$('#my_error').css('display','none');
+						$('#telephone').val('');
+						$('#name').val('');
+						cloBox('#tip-box');
+					},1000);
+				}
+			}
+		}
+	});
+}
+</script>
+</head>
+<body>
+<section>
+    <div class="banner"><img src="<!--{$out.static_url}-->/friends/images/banner.jpg"/></div>
+    <div class="main">
+		<!--{if $out.imsi_status == 2}-->
+		<div class="mod mbom">
+			<div class="prize_no sim_no">
+				<p>少年请先插入SIM卡，重启安智市场参加此活动</p>
+			</div>
+			<div class="mod_bg"></div>
+		</div>
+		<!--{elseif $out.imsi_status == 1}-->
+		<div class="title">
+			<a href="/lottery/friends_rule.php?sid=<!--{$out.sid}-->" class="title_rule">活动规则</a>
+			<a class="fr title_prize" href="/lottery/friends_prize.php?sid=<!--{$out.sid}-->">我的奖品</a>
+			<div class="clear"></div>
+		</div>
+		<div class="mod">
+			<p>少年你离开安智市场已经超过30天了。<br/>听说你一直忙着打怪升级，直到现在才荣耀回归。<br/>安智君想对你说：你若归来，安智永在！</p>
+			<div class="mod_bg"></div>
+		</div>
+		<div class="line"></div>
+		<div class="lottery_title"><img src="<!--{$out.static_url}-->/friends/images/lotter_title.png"/></div>
+		<div class="lottery">
+			<ul>
+				<li>
+					<p>
+						<span></span>
+						<i <!--{if $out.lottery_1}-->style="display:none;"<!--{/if}-->></i>
+						<em <!--{if $out.lottery_1}-->style="display:none;"<!--{/if}-->></em>
+					</p>
+					<a href="javascript:;" id="lottery_1" <!--{if !$out.lottery_1}-->onclick="get_award(1);"<!--{/if}--> <!--{if $out.lottery_1}-->class="disabled"<!--{/if}-->></a>
+				</li>
+				<li>
+					<p>
+						<span></span>
+						<i <!--{if $out.lottery_2}-->style="display:none;"<!--{/if}-->></i>
+						<em <!--{if $out.lottery_2}-->style="display:none;"<!--{/if}-->></em>
+					</p>
+					<a href="javascript:;" id="lottery_2" <!--{if !$out.lottery_2}-->onclick="get_award(2);"<!--{/if}--> <!--{if $out.lottery_2}-->class="disabled"<!--{/if}-->></a>
+				</li>
+				<li>
+					<p>
+						<span></span>
+						<i <!--{if $out.lottery_3}-->style="display:none;"<!--{/if}-->></i>
+						<em <!--{if $out.lottery_3}-->style="display:none;"<!--{/if}-->></em>
+					</p>
+					<a href="javascript:;" id="lottery_3" <!--{if !$out.lottery_3}-->onclick="get_award(3);"<!--{/if}--> <!--{if $out.lottery_3}-->class="disabled"<!--{/if}-->></a>
+				</li>
+				<div class="clear"></div>
+			</ul>
+		</div>
+		<div class="line"></div>
+		<div class="lottery_tip">
+			<p>少年你还有<span id="my_num"><!--{$out.my_num}--></span>次开宝箱机会</p>
+		</div>
+		<div class="mod">
+			<img class="lottery_list2" src="<!--{$out.static_url}-->/friends/images/lotter_list2.png"/>
+			<div class="lottery_list1"></div>
+		</div>
+		<!--{/if}-->
+    </div>
+</section>
+<!--弹窗-->
+<section>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box" style="display: none;">
+        <div class="tip_hd">
+            <div class="prize_title mod">
+				<p>老盆友恭喜你获得<br/><span id="my_prize"><!--{$out.my_award}--></span></p>
+			</div>
+        </div>
+        <div class="tip-con">
+            <p>快输入手机号领奖吧！</p>
+			<form>
+				<input type="text" class="inputtext" id="telephone" placeholder="手机号"/>
+				<input type="text" class="inputtext" id="name" placeholder="姓名"/>
+				<span style="color:red;margin:15px auto 0;width:85%;display:block;" id="my_error"></span>
+				<div class="title">
+					<a href="javascript:;" onclick="get_info();">提交</a>
+				</div>
+			</form>	
+        </div>
+    </div>
+	<div class="tip-box" id="have-tip-box"  style="display: none;">
+        <div class="tip_hd">
+            <img src="<!--{$out.static_url}-->/friends/images/tips_02.png"/>
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#have-tip-box');">关闭</a></div>
+        </div>
+		<div class="tip-con2">
+			<p id="awarning_text">我真的还想再抽500遍</p>
+		</div>
+		<div class="title">
+			<a href="javascript:;" onclick="get_award(100);">再来一次</a>
+			<div class="clear"></div>
+		</div>
+    </div>
+	<div class="tip-box" id="no-tip-box"  style="display: none;">
+        <div class="tip_hd">
+            <img src="<!--{$out.static_url}-->/friends/images/tips_02.png"/>
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#no-tip-box')">关闭</a></div>
+        </div>
+		<div class="tip-con2">
+			<p>少年，奖虽未中，荣耀永存！</p>
+		</div>
+		<div class="title">
+			<a href="javascript:;" onclick="cloBox('#no-tip-box');">关闭</a>
+			<div class="clear"></div>
+		</div>
+    </div>
+</section>
+</body>
+</html>

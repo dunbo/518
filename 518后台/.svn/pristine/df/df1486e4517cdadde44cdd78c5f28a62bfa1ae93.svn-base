@@ -1,0 +1,120 @@
+<include file="../../Public/header" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+<div class="main" >
+    <div class="content">
+        <div class="search_box" style="margin-top:10px;height:auto;width:100%">
+            <form method="get" action="">
+                <input type='hidden' name='cateid' id='cateid' value="{$init_cateid}"/>
+                <table cellspacing="0" cellpadding="0" width="99%" class="search_table">
+                    <tbody>
+                    <tr>
+                        <td >用户名
+                            <input type="text" style="width:140px" value="{$name}" name="sname" id="sname" class="search_item_text">
+                        </td>
+                        <td >公司名
+                            <input type="text" style="width:130px" name="scompany" id="scompany" value="{$company}" class="search_item_text">
+                        </td>                      
+                        <td>
+                            <input type="submit" onclick="" value="搜索" style="float:left; height:30px;" class="search_btn">
+                        </td>
+
+                    </tr>                   
+                    </tbody></table>
+                <input type="hidden" value="5580cb87fc83ace494fd9e28f5eecfa7" name="__hash__"></form>
+        </div>
+        <div style="float:left;margin-top:10px;margin-left:5px">
+            <a href='__URL__/saveUser?width=400' style="float:left;" title="创建用户" class="thickbox search_btn">创建用户</a>
+        </div>
+        <div style="margin-top:50px;width:100%;">
+            <table class="table_list" >
+                <thead>
+                <th>用户名</th><th>公司名</th><th>密码</th><th>创建时间</th><th>操作</th>
+                </thead>
+                <?php
+				foreach($user as $k=>$v){
+                ?>
+                <tr>
+                    <td><?php echo $v['name'];?></td>
+                    <td><?php echo $v['company'];?></td>
+                    <td><?php echo $v['password'];?></td>
+                    <td><?php echo date("Y-m-d H:i:s",$v['create_tm']);?></td>
+                    <td><a href='__URL__/saveUser/id/<?php echo $v['id'];?>?width=400' class='thickbox'>编辑</a></td>     
+                </tr>
+                <?php
+				}
+			?>
+            </table>
+        </div>
+        <div>
+            {$page}
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    var choose_id;
+    function get_choose_id(){
+        var i = 0;
+        $('input[name^=id_]').each(function(){
+            if($(this).attr('checked') == 'checked'){
+                choose_id = $(this).val();
+                i++;
+            }
+        });
+        if(i==0){
+            alert('请选择一个任务');
+            return false;
+        }
+        if(i>1){
+            alert('最多选择一个任务');
+            return false;
+        }
+        return true;
+    }
+    function edit_task(){
+        if(get_choose_id()){
+            $("#input_edit").attr('href',"__URL__/save_task?p={$p}&lr={$lr}&width=400&id="+choose_id);
+            $("#input_edit").click();
+
+        }
+        return true;
+    }
+
+    function my_reset() {
+        var text_arr = ['s_softname','s_contract_code','contact_config_id','s_task_id','s_package','s_custom_name','begintime','endtime','task_status'];
+        for(var i=0;i<text_arr.length;i++){
+            $("#"+text_arr[i]).val('');
+        }
+    }
+
+    function import_out(){
+        var choose_id_str = search_str ='';
+        $('input[name^=id_]').each(function(i){
+            if($(this).attr('checked') == 'checked'){
+                choose_id_str += $(this).val()+',';
+            }
+        });
+        search_str = '{$param}';
+        if(choose_id_str!=''){
+            search_str += "&id_str="+choose_id_str;
+        }else{
+            alert('请选择要导出的合同');
+            return false;
+        }
+
+        window.location.href = '__URL__/task_list?import_out=1&'+search_str;
+    }
+    function checkAll(obj)
+    {
+        var flag = $(obj).attr('checked') == 'checked';
+        $('input[name^=id_]').attr('checked', flag);
+    }
+</script>
+<include file="../../Public/category" />

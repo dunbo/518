@@ -1,0 +1,580 @@
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src='/Public/js/cn_area.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?2"></script>
+<!--文本编辑器用到的-->
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<style>
+.ke-container.ke-container-default{width:550px!important;}
+</style>
+<script>
+ KindEditor.ready(function(K) {
+        window.editor = K.create('#editor_content',{
+            allowImageRemote : false,
+            allowImageUpload : true,
+            items : [
+                'bold','italic','underline','fontsize','forecolor','|','justifyleft','justifycenter','justifyright'
+            ]
+        });
+    });
+    KindEditor.options.cssData = 'body { font-size: 16px; }';
+	
+
+jQuery(function(){
+		//V6.5 加载桌面红包
+		var desk_red_val=$("#desk_red_div").html();
+		if(desk_red_val=="")
+		{
+			$.ajax({
+				url:'/index.php/Public/showDeskRed?table=sj_custom_push',
+				type: 'POST',
+				dataType:'html',
+				success: function(data)
+				{
+					$("#desk_red_div").html(data);
+					$("#desk_red_div #think_page_trace").remove();
+					$("#desk_red_div #think_run_time").remove();
+					//tb_init('#choose_div_id a.thickbox');//pass where to apply thickbox
+					//imgLoader = new Image();// preload image
+					//imgLoader.src = tb_pathToImage;
+				}
+			});
+		}
+		
+        // 生成推荐链接并赋值给a元素，第三个参数不配置，使用默认分配的名称
+        href = generate_content_type_href('content_type_div','','','custom_push');
+        $("#content_type_a").attr("href", href);
+		var div_val=$("#choose_div_id").html();
+		if(div_val=="")
+		{
+			$.ajax({
+				url:'/index.php/Public/showContions',
+				type: 'POST',
+				dataType:'html',
+				success: function(data)
+				{
+					$("#choose_div_id").html(data);
+					$("#choose_div_id #push_area").css("display","");
+					$("#choose_div_id #paichu_area").css("display","");
+					$("#choose_div_id #push_abi").css("display","");
+					$("#choose_div_id #abi_div_ver").css("display","none");
+					$("#choose_div_id #abi_div_big").css("display","");
+					$("#choose_div_id #think_page_trace").remove();
+					$("#choose_div_id #think_run_time").remove();
+					tb_init('#choose_div_id a.thickbox');//pass where to apply thickbox
+					imgLoader = new Image();// preload image
+					imgLoader.src = tb_pathToImage;
+				}
+			});
+		}
+		//加载的时候 根据推送方式是否显示 推送内容和描述详情
+		var push_type = $("#push_type").val();
+		select_choose_show(push_type);
+    });
+    
+    function checkLen(obj, maxChars, hint_id) {
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+        $("#" + hint_id).html(obj.value.length + "/" + maxChars);
+    };
+    
+
+    function checkPost() {
+        var soft_package = $("#add_content_form #monitor_soft_package").val();
+		var replace_packages = $("#add_content_form #replace_soft_packages").val();
+        if (!soft_package&&!replace_packages) {
+            alert("监控包名不能为空！");
+            return false;
+        }
+        var soft_name = $("#add_content_form #monitor_soft_name").val();
+        if (!soft_name) {
+            alert("监控包名不能为空！");
+            return false;
+        }
+        var push_type = $("#push_type").val();
+		if(push_type==1||push_type==3||push_type==4||push_type==5)
+		{
+			if(push_type==3)
+			{
+				// 判断KindEditor内容是否为空
+				window.editor.sync();//同步一下
+				var push_text = $.trim(window.editor.text());
+			}
+			else
+			{
+				var push_text = $("#add_content_form #push_text").val();
+			}
+			if(!push_text)
+			{
+				alert("描述详情不能为空");
+				return false;
+			}
+			//弹窗展示时间
+			var show_time = $("#add_content_form #pop_show_time").val();
+			if(show_time)
+			{
+				var reg = /^\+?[1-9][0-9]*$/;  
+				if(reg.test(show_time) == false)
+				{  
+					alert("弹窗展示时间必须为正整数!"); 
+					return false;
+				}  
+			}
+			else
+			{
+				alert("弹窗展示时间不能为空");
+				return false;
+			}
+		}
+		if(push_type==2)
+		{
+			var my_soft_package = $("#add_content_form #my_soft_package").val();
+			var my_soft_name = $("#add_content_form #my_soft_name").val();
+			if(!my_soft_package)
+			{
+				alert("对应我司软件包名不能为空");
+				return false;
+			}
+			if(!my_soft_name)
+			{
+				alert("对应我司软件名称不能为空");
+				return false;
+			}
+		}
+		if(push_type==3||push_type==5)
+		{
+			var title_content = $("#add_content_form #title_content").val();
+			if(!title_content)
+			{
+				alert("标题内容不能为空");
+				return false;
+			}
+		}
+        var start_time = $("#add_content_form #fromdate").val();
+        if (!start_time) {
+            alert("开始时间不能为空！");
+            return false;
+        }
+        var end_time = $("#add_content_form #todate").val();
+        if (!end_time) {
+            alert("结束时间不能为空！");
+            return false;
+        }
+        if (start_time > end_time) {
+            alert("开始时间不能大于结束时间！");
+            return false;
+        }
+        var pkg = $("#package").val();
+  		var enable=true;
+	  	if(pkg){
+	  		$.ajax({
+				url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+				type: 'get',
+				async:false,
+				success: function(data){
+					if(data){
+						if(!confirm(data)){
+							enable=false;
+						}
+					}
+				}
+			});
+			if(!enable){
+				return false;
+			}
+	  	}
+		return check_area();
+		return checkRcontent("#add_content_form");
+    }
+	
+function checkit(){
+    var choise = confirm("你确定你的操作吗？");
+    if(!choise){
+    return false;
+    }else{
+     return true;
+    }
+}
+	//监控任意包 V6.2选择安智市场手机助手的时候用
+	function package_check()
+	{
+		var soft_package = $('#my_soft_package').val();
+		$.ajax({
+			url: '/index.php/Public/package_check/soft_package/'+soft_package,
+			type: 'get',
+			dataType: 'json',
+			success: function(data){
+				if(data == 1){
+					alert("该软件包名不存在！");
+				}else{
+					$('#my_soft_name').val(data);
+				}
+			}
+		});
+
+	}
+	//这个函数  在content_type.html中提交所选的内容后加载
+	function show_tr()
+	{
+		var type = $('#content_type').val();
+		if(type ==1)
+		{
+			$('#soft_show_positon').css("display","");
+			$('#soft_show_icon').css("display","");
+		}
+		else
+		{
+			$('#soft_show_positon').css("display","none");
+			$('#soft_show_icon').css("display","none");
+		}
+	}
+	//判断概率
+	function check_odds(obj)
+	{
+		var val = $(obj).val();
+		if(val !== "")
+		{
+			if(val>100 || val <1)
+			{
+				alert("请填写1到100的整数");
+				$(obj).attr("value",'');
+				return false;
+			}
+			var r=/^[0-9]*[1-9][0-9]*$/;
+			if(r.test(val) == false)
+			{
+				alert("请填写1到100的整数");
+				$(obj).attr("value",'');
+				return false;
+			}
+		}
+	}
+	function add_daily_time()
+	{
+		var html = '<div style="display:inline-block;">';
+		html += '<input name="daily_fromtime[]" value="" type="text"> 至 <input name="daily_totime[]" value="" type="text">';
+		html += '<input type="button" value="删除" onclick="del_daily_time(this)" class="act_btn"/>';
+		html += '</div>';
+		$('#daily_time').append(html);
+	}
+	
+	function del_daily_time(obj)
+	{
+		$(obj).parent().remove();
+	}
+	function select_choose_show(val)
+	{
+		if(val==1)
+		{
+			$("#recommend_content_tr").css('display','');
+			$("#recommend_text_tr").css('display','');
+			$("#push_node_tr").css('display','');
+			$("#pop_show_time_tr").css('display','');
+			$("#my_soft_package_tr").css('display','none');
+			$("#my_soft_name_tr").css('display','none');
+			//V6.4新增加
+			$("#title_content_tr").css('display','none');
+			$("#pub_pic_tr").css('display','none');
+			//$("#des_detail_tr").css('display','none'); 公用一个
+			$("#btn_name_tr").css('display','none');
+			$("#closed_tr").css('display','none');
+			$("#recommend_text_tr").css("display",'');
+			$("#recommend_text_tr_pop1").css("display",'none');
+			$("#red_div").css("display",'none');
+		}
+		else if(val==2)
+		{
+			$("#recommend_content_tr").css('display','none');
+			$("#recommend_text_tr").css('display','none');
+			$("#push_node_tr").css('display','none');
+			$("#pop_show_time_tr").css('display','none');
+			$("#my_soft_package_tr").css('display','');
+			$("#my_soft_name_tr").css('display','');
+			//V6.4新增加
+			$("#title_content_tr").css('display','none');
+			$("#pub_pic_tr").css('display','none');
+			//$("#des_detail_tr").css('display','none');
+			$("#btn_name_tr").css('display','none');
+			$("#closed_tr").css('display','none');
+			$("#recommend_text_tr").css("display",'');
+			$("#recommend_text_tr_pop1").css("display",'none');
+			$("#red_div").css("display",'none');
+		}
+		else if(val==3)//V6.4增加多种样式
+		{
+			$("#recommend_content_tr").css('display','');
+			$("#recommend_text_tr").css('display','');
+			$("#push_node_tr").css('display','');
+			$("#pop_show_time_tr").css('display','');
+			$("#my_soft_package_tr").css('display','none');
+			$("#my_soft_name_tr").css('display','none');
+			//V6.4新增加
+			$("#title_content_tr").css('display','');
+			$("#pub_pic_tr").css('display','none');
+			//$("#des_detail_tr").css('display','');
+			$("#btn_name_tr").css('display','');
+			$("#closed_tr").css('display','');
+			$("#recommend_text_tr").css("display",'none');
+			$("#recommend_text_tr_pop1").css("display",'');
+			$("#red_div").css("display",'none');
+		}
+		else if(val==4)
+		{
+			$("#recommend_content_tr").css('display','');
+			$("#recommend_text_tr").css('display','');
+			$("#push_node_tr").css('display','');
+			$("#pop_show_time_tr").css('display','');
+			$("#my_soft_package_tr").css('display','none');
+			$("#my_soft_name_tr").css('display','none');
+			//V6.4新增加
+			$("#title_content_tr").css('display','none');
+			$("#pub_pic_tr").css('display','');
+			//$("#des_detail_tr").css('display','');
+			$("#btn_name_tr").css('display','');
+			$("#closed_tr").css('display','');
+			$("#recommend_text_tr").css("display",'');
+			$("#recommend_text_tr_pop1").css("display",'none');
+			$("#red_div").css("display",'none');
+		}
+		else if(val==5)
+		{
+			$("#recommend_content_tr").css('display','');
+			$("#recommend_text_tr").css('display','');
+			$("#push_node_tr").css('display','');
+			$("#pop_show_time_tr").css('display','');
+			$("#my_soft_package_tr").css('display','none');
+			$("#my_soft_name_tr").css('display','none');
+			//V6.4新增加
+			$("#title_content_tr").css('display','');
+			$("#pub_pic_tr").css('display','');
+			//$("#des_detail_tr").css('display','');
+			$("#btn_name_tr").css('display','');
+			$("#closed_tr").css('display','');
+			$("#recommend_text_tr").css("display",'');
+			$("#recommend_text_tr_pop1").css("display",'none');
+			$("#red_div").css("display",'none');
+		}
+		else if(val==6)
+		{
+			//$("#recommend_content_tr").css('display','none');
+			$("#recommend_text_tr").css('display','');
+			$("#push_node_tr").css('display','');
+			$("#pop_show_time_tr").css('display','none');
+			$("#my_soft_package_tr").css('display','none');
+			$("#my_soft_name_tr").css('display','none');
+			//V6.4新增加
+			$("#title_content_tr").css('display','none');
+			$("#pub_pic_tr").css('display','none');
+			//$("#des_detail_tr").css('display','none'); 公用一个
+			$("#btn_name_tr").css('display','none');
+			$("#closed_tr").css('display','none');
+			$("#recommend_text_tr").css("display",'none');
+			$("#recommend_text_tr_pop1").css("display",'none');
+			$("#red_div").css("display",'');
+		}
+	}
+</script>
+<body>
+<br />
+<div style="margin-top:10px;margin-left:20px;">
+<h3>添加监控软件</h3>
+<BR />
+<form id="add_content_form" action ="__URL__/custom_push_addto"  method="post" onsubmit="return checkPost()" enctype="multipart/form-data">
+<span>定制推送内容</span>
+<table width="700" height="30" border="1" style="margin:10px 0px;">
+<tr>
+	<td><font style="color:red;">*</font>监控软件包名:</td>
+	<td>
+		<div style="margin-bottom:20px;">
+			添加包名：<br/>
+			<textarea name="monitor_soft_package" id="monitor_soft_package"></textarea><font style="color:red;font-size:12px;">（可以添加一个或多个包名，添加多个包名时用','逗号分割）</font>
+		</div>
+		<div  style="margin-bottom:20px;">
+			添加并替换包名：<br/>
+			<textarea name="replace_soft_packages" id="replace_soft_packages"></textarea><font style="color:red;font-size:12px;">（以xxx结尾的包名可以被替换为以.appchina和.yyh结尾,添加多个包名时用','逗号分割）</font><Br/>替换后缀：<input type="checkbox" name="replace_suffix[]" value=".appchina"/>.appchina<input type="checkbox" name="replace_suffix[]"value=".yyh" />.yyh
+		</div>
+	</td>
+</tr>
+<tr>
+	<td><font style="color:red;">*</font>监控软件名称:</td>
+	<td><input name="monitor_soft_name" type="text" id="monitor_soft_name" value=""/></td>
+</tr>
+<tr>
+	<td><font style="color:red;">*</font>推送方式:</td>
+	<td>
+		<select name="push_type" id="push_type" onchange="select_choose_show(this.value)">
+			<option value="1">定制推送</option>
+			<option value="2">安智游戏助手</option>
+			<option value="3">弹窗样式1</option>
+			<option value="4">弹窗样式2</option>
+			<option value="5">弹窗样式3</option>
+			<option value="6">桌面红包</option>
+		</select>
+	</td>
+</tr>
+<tr class="sub_tr" id="recommend_content_tr">
+	<td><font color="red">*</font>推荐内容</td>
+	<td>
+		<!--下面a里的href的url会在ready函数里自动生成-->
+		<a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+		<!--下面的content_type_div是选择推荐内容后append的地方-->
+		<div id="content_type_div"/>
+	</td>
+	<td/>
+</tr>
+<tr class="sub_tr" id="title_content_tr" style="display:none;">
+	<td><font style="color:red;">*</font>标题内容:</td>
+	<td><input type="text" name="title_content" id="title_content" value="" /></td>
+</tr>
+<tr class="sub_tr" id="pub_pic_tr" style="display:none; width:150px;">
+	<td><font style="color:red;">*</font>宣传图片:</td>
+	<td><input type="file" name="pub_pic" id="pub_pic" value="" /><span style="font-size:12px; color:red;">jpg,png,{$pub_pic_width}*{$pub_pic_height}</span></td>
+</tr>
+<!--<tr class="sub_tr" id="des_detail_tr" style="display:none;">
+	<td><font style="color:red;">*</font>描述详情:</td>
+	<td><textarea type="text" id="des_detail"  name="des_detail" value=""></textarea></td>
+</tr><!-->
+<!--V6.4推荐文本 改为描述详情  字数也不再限制 去掉onblur="show_count_limit()"-->
+<tr class="sub_tr" id="recommend_text_tr">
+	<td><font style="color:red;">*</font>描述详情:</td>
+	<td><textarea type="text" id="push_text" name="push_text" value=""></textarea><span style="font-size:12px; color:red;">（推送方式选择定制推送，推荐内容为软件时最多50个字,其他18个字。选择其他方式不限制字数）</span></td>
+</tr>
+<tr class="sub_tr" id="recommend_text_tr_pop1" style="display:none;">
+	<td><font style="color:red;">*</font>描述详情:</td>
+	<td><textarea style="width:550px;height:300px;" name="editor_content" id="editor_content"></textarea></td>
+</tr>
+
+<tr class="sub_tr" id="btn_name_tr" style="display:none;">
+	<td>按钮名称:</td>
+	<td><input type="text" name="btn_name" id="btn_name" value="" /></td>
+</tr>
+
+<tr class="sub_tr" id="my_soft_package_tr" style="display:none;">
+	<td><font style="color:red;">*</font>对应我司软件包名:</td>
+	<td><input type="text" name="my_soft_package" id="my_soft_package" value="" onBlur="package_check()" /></td>
+</tr>
+<tr class="sub_tr" id="my_soft_name_tr" style="display:none;">
+	<td><font style="color:red;">*</font>对应我司软件名称:</td>
+	<td><input name="my_soft_name" type="text" id="my_soft_name" value="" readonly /></td>
+</tr>
+</table>
+<div id="red_div" style="display:none;">
+	<div id="desk_red_div"></div>
+	<div>
+		<table width="600" height="30" border="1">
+			<tr>
+				<td>覆盖人数：</td>
+				<td><input type="text" name="red_cover_num" onblur="if(value==''){value='全部'}" onFocus="if(this.value=='全部'){this.value=''}" value="全部" /><span>为空将默认所有用户</span></td>
+			</tr>
+			<tr>
+				<td>合作形式</td>
+				<td>
+					<SELECT name='co_type_desk'>
+						<?php foreach($typelist as $key => $val): ?>
+							<option value='<?php echo $key?>'<?php if ($val[1]) print ' selected';?>><?php echo $val[0]?></option>
+						<?php endforeach; ?>				
+					</SELECT>
+				</td>
+			</tr>
+		</table>
+	</div><br />
+</div>
+
+<span>定制推送设置</span>
+<table width="700" height="30" border="1" style="margin:10px 0px;">
+<tr class="sub_tr" id="closed_tr" style="display:none;">
+	<td><font style="color:red;">*</font>关闭控制:</td>
+	<td><input type="radio" name="closed_type"  value="1" checked="checked"/>不再展示&nbsp&nbsp&nbsp&nbsp<input type="radio" name="closed_type"  value="2" />下次启动展示</td>
+</tr>
+<tr id="push_node_tr">
+	<td>推送节点:</td>
+	<td>
+		<select name="push_node" id="push_node">
+			<option value="1">启动</option>
+			<option value="2">安装成功</option>
+			<option value="3">退出</option>
+			<option value="4">卸载成功</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td>推送频率:</td>
+	<td>
+		<select name="push_frequency" id="push_frequency">
+			<option value="1">推送一次</option>
+			<option value="2">推送二次</option>
+			<option value="3">推送三次</option>
+			<option value="0">不限</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td>概率:</td>
+	<td>
+		<input name="chance" onblur="return check_odds(this)" type="text" id="chance" value=""/>
+	</td>
+</tr>
+<tr>
+	<td>每日推送时间段</td>
+	<td align="left" width="200">
+		<div id="daily_time" name="daily_time" style="display:inline-block;">
+			<input id="daily_fromtime" name="daily_fromtime[]" value="" type="text"> 至 <input id="daily_totime" name="daily_totime[]" value="" type="text">
+			<input type="button" value="添加" onclick="add_daily_time()" class="act_btn" id="act_btn"/>
+		</div>
+	</td>
+</tr>
+<tr>
+	<td><font color="red">*</font>开始时间 </td>
+	<td align="left" width="200">
+		<input id="fromdate" name="fromdate" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})">
+		</td>
+</tr>
+<tr>
+	<td><font color="red">*</font>结束时间</td>
+	<td align="left" width="200">
+		<input id="todate" name="todate" value="" type="text" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})">
+	</td>
+</tr>
+<tr id="pop_show_time_tr">
+	<td><font color="red">*</font>弹框展示时间</td>
+	<td align="left" width="200">
+		<input name="pop_show_time" id="pop_show_time" value="" type="text"><span>秒</span>
+	</td>
+</tr>
+<tr id="soft_show_positon" style="display:none;">
+	<td><font style="color:red;">*</font>展示位置:</td>
+	<td>
+		<select name="show_positon">
+			<option value="1">顶部</option>
+			<option value="2">居中</option>
+		</select>
+	</td>
+</tr>
+<tr id="soft_show_icon" style="display:none;">
+	<td>展示ICON</td>
+	<td><input type="file" name="show_icon" style="width:150px;"/>
+		<span style="font-size:12px; color:red;">jpg,png,{$icon_width}*{$icon_height}不上传则默认显示软件自身ICON</span>
+	</td>
+</tr>
+<tr class="sub_tr" >
+		<td>精准投放</td>
+		<td>
+			<div id="choose_div_id"></div>
+		</td>
+	</tr>
+ 
+<tr>
+	<td colspan="2" align="center">
+		<input type="submit" name="submit" value="提交">
+		<input type="button" value='取消' onclick="location.href='/index.php/Webmarket/CustomPush/custom_push_list'"/>
+	</td>
+</tr>
+</table>
+</form>
+</div>
+<include file="../Public/footer" />

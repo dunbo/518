@@ -1,0 +1,79 @@
+<script>
+	function check_all(){
+		var target = $('#target').val();
+		var top = $('#top').val();
+		var below = $('#below').val();
+		var r   = "^[0-9]*[0-9][0-9]*$";
+		var re   = new RegExp(r); 
+		if(target == 1){
+			if(top.substring(top.indexOf("."),top.length).length>3 || isNaN(top)){
+				$("#top").css("border","#ff0000 1px solid");
+				the_false_top = 1;
+			}else{
+				$("#top").css("border","");
+				the_false_top = 0;
+			}
+			
+			if(below.substring(below.indexOf("."),below.length).length>3 || isNaN(below)){
+				$("#below").css("border","#ff0000 1px solid");
+				the_false_below = 1;
+			}else{
+				$("#below").css("border","");
+				the_false_below = 0;
+			}
+		}else{
+			if((top != '' && (top.length > 8 || top < 0 || isNaN(top) || !(/(^[1-9]\d*$)/.test(top)))) || (top == '' && below == '')){
+				$("#top").css("border","#ff0000 1px solid");
+				the_false_top = 1;
+			}else{
+				$("#top").css("border","");
+				the_false_top = 0;
+			}
+			if((below != '' && (below.length > 8 || below < 0 || isNaN(below) || !(/(^[1-9]\d*$)/.test(below)))) || (below == '' && top == '')){
+				$("#below").css("border","#ff0000 1px solid");
+				the_false_below = 1;
+			}else{
+				$("#below").css("border","");
+				the_false_below = 0;
+			}
+		}
+		
+		if(the_false_top == 1 || the_false_below == 1){
+			return false;
+		}else{
+			return true;
+		}
+	}
+</script>
+<form action="__URL__/update_warning_do" method="post">
+<div class="newbox" id="edit_alerm_newbox">
+	<h6>编辑：</h6>
+	<div class="newbox_cnt">
+		<table cellpadding="0" cellspacing="0" class="table_list">
+			<thead>
+				<tr>
+					<th width="20%">收入类型</th>
+					<th width="20%">指标</th>
+					<th width="20%">单位</th>
+					<th width="20%">上限</th>
+					<th width="20%">下限</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><input type="hidden" name="id" value="{$result[0]['id']}" /><?php if($result[0]['income_type'] == 1){ ?>安智市场激活<?php }elseif($result[0]['income_type'] == 2){ ?>广告分成收入<?php }elseif($result[0]['income_type'] == 3){ ?>游戏分成收入<?php } ?></td>
+					<td><?php if($result[0]['target'] == 1){ ?>日环比<?php }elseif($result[0]['target'] == 2){ ?>原收入<?php }elseif($result[0]['target'] == 3){ ?>新收入<?php } ?><input type="hidden" name="target" id="target" value="{$result[0]['target']}" /></td>
+					<td><?php if($result[0]['target'] == 1){ ?>百分比<?php }elseif($result[0]['target'] == 2){ ?>元<?php }elseif($result[0]['target'] == 3){ ?>元<?php } ?></td>
+					<td><input type="text" name="top" id="top" value="<?php if($result[0]['top'] != ''){ ?>{$result[0]['top']}<?php }else{ ?><?php } ?>" /></td>
+					<td><input type="text"  name="below" id="below" value="<?php if($result[0]['below'] != ''){ ?>{$result[0]['below']}<?php }else{ ?><?php } ?>" /></td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="open_close_btn">
+			<input type="submit" value="确认" onclick="return check_all();" />
+			<a href="javascript:;" onclick="tb_remove();">取消</a>
+			<div class="clear"></div>
+		</div>
+	</div>
+</div>
+</form>

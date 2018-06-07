@@ -1,0 +1,53 @@
+
+<script>
+
+//导出数据
+function export_data(url){
+	//进度条显示开始
+	popup('await');
+	$.ajax({
+		'url': url,
+		'type': 'get',
+		'dataType': 'json',
+		'success': function(res){
+			if (res.type == 'pager') {
+				//console.log(res.type);
+				//console.log(res.url);
+				//进行下一页请求
+				return export_data(res.url);
+			}else if (res.type == 'file') {
+				//完成以后关闭进度条显示
+				popclose('await');
+				//进行文件下载
+				location.href = res.url;
+			}
+		}
+	});
+}
+function popup(id) {
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	if($(document).scrollTop()<=0){
+		$("#"+id).css("top","20px");
+	}
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+}
+function popclose(id) {
+	$("#"+id).css({display:"none"});
+	$("#bgdiv").css({display:"none"});
+}
+
+</script>
+<!--等待-->
+<div id="await" style="padding:10px; display:none;z-index:10011;">
+<table border="0" cellpadding="0" cellspacing="0" style="width:100%;height:100%;">
+<tr><td><img src="/Public/images/loading.gif" width="32" height="32" border="0" style="vertical-align:middle;text-align:center;" /></td></tr>
+</table>
+</div>
+
+<!--灰色区域-->
+
+<div id="bgdiv" style="position:absolute;display:none; left:0px; top:0px; width:100%; height:100%; filter:alpha(opacity=40);opacity:0.4; background-color:#000000; z-index:1000;"></div>

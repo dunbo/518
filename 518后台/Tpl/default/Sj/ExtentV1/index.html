@@ -1,0 +1,310 @@
+<?php if (empty($parent_id)): ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>区间管理</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css?version1" />
+<?php if (!$isAjax) : ?>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox1.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style type="text/css">
+	.tab td {
+		cursor: pointer;
+		text-align:center;
+		width: 70px;
+		height: 38px;
+	}
+
+	td.active {
+		background-color: #DFDFDF;
+	}
+</style>
+<script>
+function showSoft(obj)
+{
+	var extent_id = $(obj).attr('ref');
+
+	var tr1 = $(obj).parents('.tr1');
+	$(".subtr").hide();
+	if(tr1.hasClass("sty1")){
+		tr1.removeClass("sty1");
+	}else{
+		$('#extent_tr_' + extent_id).show();
+		$(".sty1").removeClass("sty1");
+		tr1.addClass("sty1");
+	}
+
+	$('#extent_item_' + extent_id).load('/index.php/Sj/ExtentV1/list_soft/extent_id/' + extent_id + '/op_id/extent_item_' + extent_id, function(){
+		tb_init('#extent_item_' + extent_id + ' .thickbox');
+	});
+}
+
+function showExtent(extent_id, ex_type)
+{
+	var className = $('#div_' + extent_id).attr('class');
+
+	if (ex_type == 2)
+		exurl = '/index.php/Sj/ExtentV1/index/parent_id/' + extent_id + '/op_id/extent_item_' + extent_id;
+	else if (ex_type == 3)
+		exurl = '/index.php/Sj/ExtentV1/index/parent_union_id/' + extent_id + '/op_id/extent_item_' + extent_id;
+	if (className == 'off') {
+		$.get(exurl, function(data){
+			$('#div_' + extent_id).removeClass('off');
+			$('#div_' + extent_id).addClass('on');
+			$('#extent_' + extent_id).after(data);
+			tb_init('tr[rel=extent_sub_' + extent_id + '] .thickbox');
+		});
+	} else {
+		$('#div_' + extent_id).removeClass('on');
+		$('#div_' + extent_id).addClass('off');
+		$('tr[rel=extent_sub_' + extent_id + ']').remove();
+	}
+}
+
+function extent_batch_rank(){
+	var ranks = '';
+	var ids = '';
+	$('select[name=rank]').each(function(){
+		ranks = ranks + $(this).val()+',';
+		ids   = ids + $(this).attr('rel')+',';
+	});
+	window.location.href = '__URL__/batch_rank/id/'+ids+'/rank/'+ranks+'/pid/<?php echo $pid?>';
+}
+
+function changePid(obj)
+{
+	window.location.href = '/index.php/Sj/ExtentV1/index?pid=' + $(obj).val();
+}
+
+function totag(tagid)
+{
+	var tagurl = [
+		'/index.php/Sj/ExtentV1/index?pid=' + $("#pid").val(),
+		'/index.php/Sj/ExtentV1/union?pid=' + $("#pid").val(),
+	];
+	//alert(tagid);
+	window.location.href = tagurl[tagid];
+	//alert(tagid);
+}
+
+function showAreaName(id, name)
+{
+	if (name == ',,' || name == '' ) {
+		return false;
+	}
+	var arr = name.split(';');
+	var html = '';
+	$(arr).each(function(){
+		var t = this.split(' ');
+		if (typeof(t[0]) != 'undefined') {
+			var p = t[0].split(':');
+			var n = area_list[p[0]];
+			var m = n['name'].split("\t");
+			html += m[0] + ',';
+
+			if (typeof(t[1]) != 'undefined') {
+				var ps = t[1].split(':');
+				var n = area_list[p[0]]['sub'][ps[0]];
+				var m = n.split("\t");
+				html += m[0];
+			}
+			html += '<br>';
+			$('#_div_' + id).html(html);
+		}
+	});
+}
+</script>
+<?php endif; ?>
+</head>
+<body>
+<div class="main_r">
+	<h3 class="current_h3">分区列表</h3>
+
+	<div class="currentNav2">
+		<div class="currentNav2_l">
+			请选择要操作的产品:
+			<select name="pid" id="pid" onchange="changePid(this)">
+				<?php foreach($product_list as $k => $v): ?>
+				<option value="<?php echo $k; ?>"<?php if ($v[1] == true):?> selected="true"<?php endif; ?> ><?php echo $v[0] ?></option>
+				<?php endforeach; ?>
+			</select>
+		</div>
+	</div>
+	<div class="currentNav2" style="height:40px;">
+		<div class="currentNav2_l tab">
+			<table border=1 cellspacing=0 cellpadding=0 style="border: 1px solid black;border-collapse:collapse;">
+				<tr>
+					<td class="active">普通分区</td>
+					<td onclick="totag(1);">联合分区</td>
+				</tr>
+			</table>
+		</div>
+
+		<div class="currentNav2_r">
+			<a href="/index.php/Sj/ExtentV1/add_extent?pid=<?php echo $pid?>&modal=true" class="thickbox recBtn_bg" >添加新分区</a>
+			<a href="/index.php/Sj/ExtentV1/list_candidate_soft" class="recBtn_bg">备选库管理</a>
+            <a href="/index.php/Sj/ExtentV1/index_multiSoftwareExtent" class="recBtn_bg">首页底部多软件位管理</a>
+			<!--<a href="/index.php/Sj/ExtentV1/list_area_soft" class="recBtn_bg">区域投放列表</a>-->
+		</div>
+	</div>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="softlist_tab">
+		<thead>
+			<tr>
+				<td width="1%"></td>
+				<td width="7%">分区ID</td>
+				<td width="12%">区间名</td>
+				<td width="12%">联合区间名</td>
+				<td width="7%">类型</td>
+				<td width="7%">区间位置数</td>
+				<td width="7%">区间软件数</td>
+				<td width="5%">运营商</td>
+				<td width="5%">渠道</td>
+				<td width="5%">投放区域</td>
+				<td width="5%">排序</td>
+				<td width="40%" class="thead_position">操作</div>
+				</td>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach($list as $val): ?>
+			<tr id="extent_<?php echo $val['extent_id'] ?>" <?php if ($val['extent_size'] < $val['soft_counts']) echo 'bgcolor="red"';?>>
+				<td><?php if ($val['type'] != 1): ?><div class="off" id="div_<?php echo $val['extent_id'] ?>"><a href="javascript:" onclick="showExtent(<?php echo $val['extent_id'] . ',' . $val['type'] ?>)"></a></div><?php endif; ?></td>
+				<td><?php echo $val['extent_id'] ?></td>
+				<td><?php if (!empty($val['extent_name'])) echo $val['extent_name']; else echo '&nbsp;';?></td>
+				<td><?php if (!empty($val['union_name'])) echo $val['union_name']; else echo '&nbsp;';?></td>
+				<td>
+					<?php
+						switch($val['type'])
+						{
+							case 1:
+								echo '普通分区';
+								break;
+							case 2:
+								echo '活动分区';
+								break;
+						}
+					?>
+				</td>
+				<td><?php echo $val['extent_size'] ?></td>
+				<td><?php echo $val['soft_counts'] ?></td>
+				<td><?php echo $val['mname'] ?></td>
+				<td><?php echo $val['chname'] ?></td>
+				<td>
+				<div id="_div_{$val['extent_id']}"><?php if($val['push_area']) { ?> {$val.push_area} <?php } else { ?>-<?php } ?></div>
+				<script>showAreaName({$val['extent_id']}, "{$val.push_area}");</script>
+				</td>
+				<td>
+					<select name="rank" rel="<?php echo $val['extent_id'] ?>" class="extent_rank">
+					<?php
+					for($i = 1; $i <= $count; $i++){
+						echo '<option value="' . $i . '"';
+						if($val['rank'] == $i) echo ' selected="selected" ';
+						echo '>' . $i . '</option>';
+					}
+					?>
+					</select>
+				</td>
+				<td style="color: #808080;">
+				<?php if (empty($val['parent_union_id'])): ?>
+				<?php if ($val['type'] != 2): ?>
+				<a href="/index.php/Sj/ExtentV1/add_soft/extent_id/<?php echo $val['extent_id'] ?>/show_form/<?php echo $val['show_form'] ?>/modal=true" class="thickbox">添加软件</a>　｜　<a href="/index.php/Sj/ExtentV1/list_soft/extent_id/<?php echo $val['extent_id'] ?>/show_form/<?php echo $val['show_form'] ?>/">查看软件</a>　｜　
+				<?php elseif ($val['type'] == 2):?>
+				<a class="thickbox" href="/index.php/Sj/ExtentV1/add_extent?parent_id=<?php echo $val['extent_id'] ?>&pid=<?php echo $pid ?>&modal=true">添加分区</a>　｜　
+		        <a href="#" onclick="showExtent(<?php echo $val['extent_id'] ?>)">查看分区</a>　｜　
+				<?php endif; ?>
+				<a class="thickbox" href="/index.php/Sj/ExtentV1/edit_extent?extent_id=<?php echo $val['extent_id'] ?>&modal=true" >编辑</a>　｜　<a href="/index.php/Sj/ExtentV1/del_extent/extent_id/<?php echo $val['extent_id'] ?>" onclick="javascript:return checkit()">删除</a></td>
+				<?php else: ?>
+					添加软件　｜　查看软件　｜　<a class="thickbox" href="/index.php/Sj/ExtentV1/edit_extent?extent_id=<?php echo $val['extent_id'] ?>&show_form=<?php echo $val['show_form'] ?>&modal=true" >编辑</a>　｜　删除
+				<?php endif; ?>
+			</tr>
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+	<center>{$page}</center>
+</div>
+<script>
+$('.extent_rank').change(function(){
+	var url = "__URL__/edit_rank/extent_id/"+$(this).attr('rel')+"/rank/"+$(this).val()+"/p/{$p}/lr/{$lr}/pid/<?php echo $pid?>";
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+			var url     = eval("("+response+")");
+			var jumpUrl = "__URL__/index/pid/<?php echo $pid?>/p/"+url.p+"/lr/"+url.lr;
+			//window.location.reload();
+			window.location.href = jumpUrl;
+		}
+	});
+});
+
+$(".extent_rank_parent").change(function(){
+	var url = "__URL__/edit_rank/extent_id/"+$(this).attr('rel')+"/parent_id/"+$(this).attr('rel1')+"/rank/"+$(this).val()+"/p/{$p}/lr/{$lr}/pid/<?php echo $pid?>";
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+			var url     = eval("("+response+")");
+			var jumpUrl = "__URL__/index/pid/<?php echo $pid?>/p/"+url.p+"/lr/"+url.lr;
+			//window.location.reload();
+			window.location.href = jumpUrl;
+		}
+	});
+});
+</script>
+<?php elseif (!empty($parent_id)):?>
+	<?php $i=0; $span = count($list); ?>
+	<?php foreach($list as $val): ?>
+	<tr rel="extent_sub_<?php echo $val['parent_id']; ?>" <?php if ($val['extent_size'] < $val['soft_counts']) echo 'bgcolor="red"';?>>
+		<?php if ($i == 0):?>
+			<td rowspan="<?php echo $span; ?>"></td>
+		<?php endif;$i++; ?>
+		<td width="7%"><?php echo $val['extent_id'] ?></td>
+		<td><?php if (!empty($val['extent_name'])) echo $val['extent_name']; else echo '&nbsp;';?></td>
+		<td><?php if (!empty($val['union_name'])) echo $val['union_name']; else echo '&nbsp;';?></td>
+		<td>
+			<?php
+				switch($val['type'])
+				{
+					case 1:
+						echo '普通分区';
+						break;
+					case 2:
+						echo '活动分区';
+						break;
+				}
+			?>
+		</td>
+		<td width="7%"><?php echo $val['extent_size'] ?></td>
+		<td width="7%"><?php echo $val['soft_counts'] ?></td>
+		<td width="5%"><?php echo $val['mname'] ?></td>
+		<td width="5%"><?php echo $val['chname'] ?></td>
+		<!--<td width="5%"><?php echo str_replace(';', '<br>', $val['location']); ?></td>-->
+		<td width="5%">
+			<select name="rank" rel="<?php echo $val['extent_id'] ?>" rel1="<?php echo $val['parent_id'] ?>" class="extent_rank_parent">
+			<?php
+			for($i = 1;$i <= $count; $i++){
+				echo "<option value=\"".$i."\"";
+				if($val['rank'] == $i) echo " selected=\"selected\" ";
+				echo ">".$i."</option>";
+			}
+			?>
+			</select>
+
+		</td>
+		<td width="5%">
+		<?php if ($val['type'] != 2): ?>
+		<a href="/index.php/Sj/ExtentV1/add_soft/extent_id/<?php echo $val['extent_id'] ?>/show_form/<?php echo $val['show_form'] ?>/modal=true" class="thickbox">添加软件</a>　｜　<a href="/index.php/Sj/ExtentV1/list_soft/extent_id/<?php echo $val['extent_id'] ?>/show_form/<?php echo $val['show_form'] ?>/">查看软件</a>　｜　
+		<?php elseif ($val['type'] == 2):?>
+		<a href="/index.php/Sj/ExtentV1/add_extent/parent_id/<?php echo $val['extent_id'] ?>/pid/<?php echo $pid?>">添加分区|</a>
+		<a href="#" onclick="showExtent(this)" ref='<?php echo $val['extent_id'] ?>'>查看分区 |</a>
+		<?php endif; ?>
+		<a class="thickbox" href="/index.php/Sj/ExtentV1/edit_extent/extent_id/<?php echo $val['extent_id'] ?>/parent_id/<?php echo $val['parent_id'] ?>">编辑</a>　｜　<a href="/index.php/Sj/ExtentV1/del_extent/extent_id/<?php echo $val['extent_id'] ?>/parent_id/<?php echo $val['parent_id'] ?>" onclick="javascript:return checkit()">删除</a></td>
+	</tr>
+	<?php endforeach; ?>
+<?php endif; ?>
+

@@ -1,0 +1,145 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<body>
+<script>
+	var i = 0;
+	var j = 0;
+	function add_entrance(id,new_id){
+		if(i == 0){
+			i = id;
+		}
+		if(j == 0){
+			j = new_id;
+		}
+		$("#entrance_"+i+"").after('<div style="border:1px solid #999;width:280px;height:70px;margin-top:10px;" id="entrance_'+j+'"><table style="margin-top:8px;"><tr><td>快捷入口名称：<input type="text" name="entrance_name[]" /><input type="hidden" name="entrance_id[]" value="'+j+'" /></td></tr><tr><td>快捷入口地址：<input type="text" name="entrance_link[]" /></td><td><input type="button" value="删除" onclick="del_entrance('+j+');"  /></td></tr></table></div>');
+		i = j;
+		j = i + 1;
+	}
+	
+	function del_entrance(id){
+		$("#entrance_"+id+"").html('');
+		$("#entrance_"+id+"").css('display','none');
+	}
+	
+	function del_entrance_true(id){
+		$("#entrance_"+id+"").html('');
+		$("#entrance_"+id+"").css('display','none');
+		$.ajax({
+			url: '__URL__/del_entrance_true',
+			data: 'id='+id,
+			type: 'get',
+			success: function(data){
+				if(data == 2){
+					alert("编辑失败");
+				}
+			}
+		});
+	}
+	
+	
+	function check(){
+		var machine_name = $('#machine_name').val();
+		if(machine_name.length > 10 || machine_name.length < 1){
+			alert("请填写1-10字以内的机型名称");
+			return false;
+		}
+		var machine_link = $('#machine_link').val();
+		if(machine_link.length > 255 || machine_link.length < 1){
+			alert("请填写1-255字以内的机型地址");
+			return false;
+		}
+		var describe = $('#describe').val();
+		if(describe.length > 10 || describe.length < 1){
+			alert("请填写1-10字以内的机型描述");
+			return false;
+		}
+		var describe2 = $('#describe2').val();
+		if(describe2.length > 10 || describe2.length < 1){
+			alert("请填写1-10字以内的机型描述");
+			return false;
+		}
+		if(rank < 1){
+			alert("排序值错误");
+			return false;
+		}
+		var title_str = document.getElementsByName("entrance_name[]");
+		var link_str = document.getElementsByName("entrance_link[]");
+		for(i=0;i<title_str.length;i++){
+			if((title_str[i].value && !link_str[i].value) || (!title_str[i].value && link_str[i].value)){
+				alert("快捷入口名称与地址是配套的，如果已填写其中一项，则另一项也必须填写");
+				return false;
+			}
+		}
+	}
+</script>
+<div style="margin-top:20px;margin-left:50px;">
+<h3>编辑机型</h3>
+<br />
+<form action="__URL__/edit_machine_do" method="post" enctype="multipart/form-data">
+<table>
+	<tr>
+		<td>品牌名称：</td>
+		<td>{$brand_result.brand_name}</select>
+		<input type="hidden" name="id" value="{$result.id}" />
+		<input type="hidden" name="machine_names" value="{$machine_name}" />
+		<input type="hidden" name="extend_id" value="{$extend_id}" />
+		<input type="hidden" name="lr" value="{$lr}" />
+		<input type="hidden" name="p" value="{$p}" />
+		</td>
+	</tr>
+	<tr>
+		<td>机型名称：</td>
+		<td><input type="text" name="machine_name" id="machine_name" value="{$result.machine_name}" /></td>
+	</tr>
+	<tr>
+		<td>排序：</td>
+		<td><input type="text" name="rank" id="rank" value="{$result.rank}" /></td>
+	</tr>
+	<tr>
+		<td>图片：</td>
+		<td><input type="file" name="machine_pic" />&nbsp;&nbsp;<span style="color:red;">72*110</span>&nbsp;&nbsp;<img src="<?php echo IMGATT_HOST;?>{$result.machine_pic}" style="width:165px;height:100px;"/></td>
+	</tr>
+	<tr>
+		<td>机型地址：</td>
+		<td><input type="text" name="machine_link" id="machine_link" value="{$result.machine_link}" /></td>
+	</tr>
+	<tr>
+		<td>机型描述：</td>
+		<td><input type="text" name="describe" id="describe" value="{$result.describe}" /></td>
+	</tr>
+	<tr>
+		<td>机型描述2：</td>
+		<td><input type="text" name="describe2" id="describe2" value="{$result.describe2}" /></td>
+	</tr>
+</table>
+<?php if($entrance_result){ ?>
+<?php foreach($entrance_result as $key => $val){ ?>
+<div style="border:1px solid #999;width:280px;height:70px;margin-top:10px;" id="entrance_{$val.id}">
+	<table style="margin-top:8px;">
+		<tr>
+			<td>关联文章名称：<input type="text" name="entrance_name[]" value="{$val.entrance_name}" /><input type="hidden" name="entrance_id[]" value="{$val.id}" /></td>
+		</tr>
+		<tr>
+			<td>关联文章地址：<input type="text" name="entrance_link[]" value="{$val.entrance_link}" /></td>
+			<td><input type="button" value="删除" onclick="del_entrance_true({$val.id});"  /></td>
+		</tr>
+	</table>
+</div>
+<?php } ?>
+<?php }else{ ?>
+<div id="entrance_0" style="display:none;">
+</div>
+<?php } ?>
+<div style="margin-top:10px;">
+	<input type="button" class="search_btn" value="增加关联文章" onclick="add_entrance(<?php if($entrance_result[$entrance_count]['id']){ echo $entrance_result[$entrance_count]['id'];}else{ echo 0;}  ?>,{$all_entrance});" />
+</div>
+<table style="margin-top:30px;">
+	<tr>
+		<td><input type="submit" value="确定" class="search_btn" onclick="return check();" /></td>
+		<td><a href="javascript:history.go(-1);" class="search_btn">取消</a></td>
+	</tr>
+</table>
+</form>
+</div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+	<table cellspacing="0" cellpadding="0" border=0 class="tb" >
+		<tbody>
+			<tr>
+				<td>共选择软件:</td>
+				<td><?php echo $num; ?>个</td>
+			</tr>
+			<tr>
+				<td>结束时间:</td>
+				<td>
+					<input type="text" id="save_end_tm" name="save_end_tm" value="{$save_end_tm}" size="30" class='Wdate' onfocus='WdatePicker({minDate:"%y-%M-#{%d}",el:"save_end_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})'/>
+					<input type="hidden" id="ids" name="ids" value="{$ids}">
+					<input type="hidden" id="srh_key" name="srh_key" value="{$srh_key}">
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<button onclick="save_end_tm();" >确定</button>
+				</td>
+				<td>
+					<button onclick="tb_remove();" >取消</button>
+				</td>	
+			</tr>
+		</tbody>
+	</table>
+<script>
+	function save_end_tm(){
+		var end_tm = $('#save_end_tm').val();
+		if(!end_tm){
+			alert("请选择结束时间");
+			return false;
+		}
+		var ids = $('#ids').val();
+		var srh_key = $('#srh_key').val();
+		$.ajax({
+			url: '__URL__/save_endtm',
+			data: 'ids='+ids+'&end_tm='+end_tm+'&srh_key='+srh_key,
+			type:'POST',
+			secureuri:false,
+			dataType:'json',
+			success: function(data){
+				if(data.code == 1){
+					tb_remove();
+					alert(data.msg);
+					location.reload();//加载页面	
+				}else{
+					alert(data.msg);
+					if(data.success_num > 0){
+						tb_remove();
+						location.reload();//加载页面	
+					}
+					return false;
+				}
+			}
+		});	
+	}
+</script>

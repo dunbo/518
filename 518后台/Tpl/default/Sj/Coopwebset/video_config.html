@@ -1,0 +1,138 @@
+<include file="../../Public/new_header" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<!--<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />-->
+<!--<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>-->
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+
+<div class="main" >
+    <div class="content">
+        <div class="search_box" style="margin-top:10px;height: 37px">
+
+                <table cellspacing="0" cellpadding="0" width="99%" class="search_table">
+                    <tbody>
+                    <tr>
+                        <form method="post" action="__URL__/edit_video_con_rank" name="fml">
+                        <td width="25%">视频内容排序
+                            <input type="text" style="width:140px" value="{$video_rank}" name="video_rank" id="video_rank" class="search_item_text">
+                        </td>
+                        <td>
+                            <input type="button" value="编辑" class="search_btn" onclick="return chk_order()">
+                        </td>
+                        </form>
+                        <form method="post" action="__URL__/pub_edit_video_con_rank" name="fml1">
+                        <td width="25%">视频内容优先级
+                            <input type="text" style="width:140px" value="{$c_video_rank}" name="c_video_rank" id="c_video_rank" class="search_item_text">
+                        </td>
+                        <td>
+                            <input type="button" value="编辑" class="search_btn" onclick="return chk_c_order()">
+                        </td>
+                        </form>
+                    </tr>
+
+                    </tbody></table>
+                <input type="hidden" value="5580cb87fc83ace494fd9e28f5eecfa7" name="__hash__"></form>
+        </div>
+
+        <div style="margin-top:10px;width:auto;overflow:visible;">
+            <table class="table_list" >
+                <th>合作站点</th><th>展示字段管理</th><th>推荐弹窗文案</th><th width="6%">优先级</th><th>展现次数</th><th width="8%">精确投放</th><th width="18%">渠道包</th><th width="6%">状态</th><th width="10%">操作</th>
+                <?php
+				foreach($list as $k=>$v){
+                ?>
+                <tr>
+                    <td><?php echo $v['website_name'];?></td>
+                    <td><?php echo $v['show_column'];?></td>
+                    <td>
+                        <?php echo $v['coop_doc'];?>
+                    </td>
+                    <td><a href="__URL__/edit_coop_doc?id={$v['id']}&p={$p}&lr={$lr}&width=350&height=400&type=rank"  class="thickbox"><?php echo $v['rank'];?></a></td>
+                    <td><a href="__URL__/edit_coop_doc?id={$v['id']}&p={$p}&lr={$lr}&width=350&height=400&type=show_count"  class="thickbox"><?php echo $v['show_count'];?></a></td>
+                    <td>
+                        <a class="thickbox" href="__URL__/show_video_delivery?id={$v.id}&width=400">查看</a>
+                    </td>
+                    <td>
+                        <?php
+							if($chl_soft_arr[$v['package']]['version_code']){
+								echo "软件名称：<a href='".IMGATT_HOST . $chl_soft_arr[$v['package']]['url']."' >".$chl_soft_arr[$v['package']]['softname']."</a>";
+                        echo "<br/>包名：".$chl_soft_arr[$v['package']]['package'];
+                        echo "<br/>版本名：".$chl_soft_arr[$v['package']]['version'];
+                        }else{
+                        echo "软件名称：<a href='".IMGATT_HOST . $soft_arr[$v['package']]['url']."' >".$soft_arr[$v['package']]['softname']."</a>";
+                        echo "<br/>包名：".$soft_arr[$v['package']]['package'];
+
+                        echo "<br/>版本名：<font style='color:red'>通用包</font>";
+                        }
+                        if($chl_soft_arr[$v['package']]['version_code'] && $chl_soft_arr[$v['package']]['version_code'] < $soft_arr[$v['package']]['version_code']){
+                        echo "<font style='color:red'>(需更新)</font>";
+                        }
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                            if($v['status']==1){echo '启用';}else{echo '停用';}
+                        ?>
+                    </td>
+                    <td>
+                        <a href="__URL__/edit_show_column?id={$v['id']}&p={$p}&lr={$lr}&width=500" class="thickbox">编辑展示字段</a><br>
+                        <a href="__URL__/edit_delivery?id={$v['id']}&p={$p}&lr={$lr}&width=500"  class="thickbox">编辑投放条件</a><br>
+                        <a href="__URL__/edit_coop_doc?id={$v['id']}&p={$p}&lr={$lr}&width=350&height=400&from=extend"  class="thickbox">编辑弹窗文案</a><br>
+                        <if condition="$v.status eq 1">
+                            <a href="javascript:void(0)" onclick="change_sta('{$v.id}',0)">停用</a>
+                        <else />
+                            <a href="javascript:void(0)" onclick="change_sta('{$v.id}',1)">启用</a>
+                        </if><br/>
+                        <?php
+							if($chl_soft_arr[$v['package']]['version_code'] && $chl_soft_arr[$v['package']]['version_code'] < $soft_arr[$v['package']]['version_code']){
+								echo '<a title ="更新渠道包" class="thickbox" href="/index.php/Cooperate/Contentcooperation/save_chl_pkg?package='.$v['package'].'&softid='.$soft_arr[$v['package']]['softid'].'" class="blue">更新渠道包</a>';
+                        }else if(!$chl_soft_arr[$v['package']]['version_code']){
+                        echo '<a title ="添加渠道包" class="thickbox" href="/index.php/Cooperate/Contentcooperation/save_chl_pkg?package='.$v['package'].'&softid='.$soft_arr[$v['package']]['softid'].'" class="blue">添加渠道包</a>';
+                        }
+                        ?>
+
+                    </td>
+                </tr>
+                <?php
+				}
+			?>
+            </table>
+        </div>
+        <div>
+            {$page}
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function chk_order(){
+        var video_rank = $("#video_rank").val();
+        if(video_rank<2||video_rank>20){
+            alert("视频内容排序必须为2-20以内");
+            return false;
+        }else{
+            window.fml.submit();
+        }
+    }
+    function chk_c_order(){
+        var c_video_rank = $("#c_video_rank").val();
+        if(c_video_rank<2||c_video_rank>20){
+            alert("视频内容优先级必须为2-20以内");
+            return false;
+        }else{
+            window.fml1.submit();
+        }
+    }
+    function change_sta(id,status){
+        var str = '';
+        if(status == 1){
+            str = '确认启用吗';
+        }else{
+            str = '确认停用吗';
+        }
+        if(confirm(str)){
+            window.location.href = '__URL__/edit_video_status?status='+status+'&id='+id;
+        }
+       // javascript:if(confirm('确认停用吗'){window.location.href='__URL__/edit_video_status?status=0&id={$v['id']}&p={$p}&lr={$lr}'})
+    }
+</script>

@@ -1,0 +1,276 @@
+<!--{include file="header.html"}-->
+
+<div class="content">
+	<div class="title">
+		<h2><a href="/index.php">安智市场</a></h2>
+		<span class="space">&gt;</span>
+		<h3>用户注册</h3>
+	</div>
+	<div class="border_three">
+		<div class="register_box">
+			<div class="register_box_l">
+				<form action="register.php?act=submit" method="post" id='register_form'>
+					<div class="register_list">
+						<label for="">用户名</label>
+						<input type="text" class="inputtext" name='' value="" id="user_name" />
+						<span><img id='user_name_right' style="display:none" src="images/icon_01.png" alt="" /></span>
+					</div>
+					<div id='user_name_error' class="form_check" style="display:none">3到15个字符，不区分大小写</div>
+					<div class="register_list">
+						<label for="">密码</label>
+						<input type="password" class="inputtext" name='' id="user_password" />
+						<span><img id='user_password_right' style='display:none' src="images/icon_01.png" alt="" /></span>
+					</div>
+					<div id='user_password_error' class="form_check" style="display:none">6到16个字符，区分大小写</div>
+					<div class="register_list">
+						<label for="">确认密码</label>
+						<input type="password" class="inputtext" name=''  value="" id="re_user_password" />
+						<span><img id='re_user_password_right' style='display:none' src="images/icon_01.png" alt="" /></span>
+					</div>
+					<div id='re_user_password_error' class="form_check" style="display:none">密码不一致</div>
+					<div class="register_list">
+						<label for="">E-mail</label>
+						<input type="text" class="inputtext" name=''  value="" id="email" />
+						<span><img id='email_right' style='display:none' src="images/icon_01.png" alt="" /></span>
+					</div>
+					<div id='email_error' class="form_check">请输入常用邮箱，chen@example.com</div>
+					<div class="register_list">
+						<label for="">验证码</label>
+						<input type="text" class="inputtext" value="" name='checkcode' id="com5" />
+					</div>
+					<div id='checkcode_error' class="form_check" style="display:none">请输入下面的字符，不区分大小写</div>
+					<div class="verification">
+						<img src="/checkcode/check_seccode.php" id='checkcode' />
+						<span onclick='$("#checkcode")[0].src="/checkcode/check_seccode.php?rand="+Math.random()'>换一张</span>
+						<div class="clear"></div>
+					</div>
+					<input type='hidden' name='referer' value=''>
+					<div class="agree">
+						<input type="checkbox" checked="checked" id='agreement' />
+						<label for="">我已阅读并同意<a href="tpl/user_agreement.html" target="_blank">《用户协议》</a></label>
+					</div>
+					<div class="register_btn">
+						<span class="register1" onclick="if(check_submit()){$('#register_form').submit();}">注　册</span>
+						<p>已有账号？<a href="login.php">登录</a></p>
+					</div>
+				</form>
+			</div>
+			<div class="register_box_r">
+				<ul>
+					<li>
+						<h6>海量精品软件免费下载</h6>
+						<p>搜罗最新最流行的精品应用游戏<br/>轻松一键免费下载</p>
+					</li>
+					<li>
+						<h6>满足不同用户的个性化需求</h6>
+						<p>精心打造多种特色功能<br/>满足不同用户的个性化需求</p>
+					</li>
+					<li>
+						<h6>多种客户端　全方位的下载渠道</h6>
+						<p>多种客户端组成的全方位的下载渠道<br/>力求给用户带来全方位的下载体验</p>
+					</li>
+				</ul>
+			</div>
+			<div class="clear"></div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+<!--
+var  error_msg = '';
+<!--{if $out.error == $smarty.const.REG_USER_ERROR}-->
+error_msg = '用户名错误';
+<!--{elseif $out.error == $smarty.const.REG_PASSWORD_ERROR}-->
+error_msg = '密码错误';
+<!--{elseif $out.error == $smarty.const.REG_EMAIL_ERROR}-->
+error_msg = '邮箱错误';
+<!--{elseif $out.error == $smarty.const.REG_USER_REPEAT}-->
+error_msg = '该用户名已被注册';
+<!--{elseif $out.error == $smarty.const.REG_EMAIL_REPEAT}-->
+error_msg = '该邮箱已被注册';
+<!--{elseif $out.error == $smarty.const.REG_VER_CODE_ERROR}-->
+error_msg = '验证码错误';
+<!--{elseif $out.error == $smarty.const.REG_SYSTEM_CODE_ERROR}-->
+error_msg = '系统错误';
+<!--{elseif $out.error}-->
+error_msg = '您的注册账户无效，建议您去安智论坛注册用户！';
+<!--{/if}-->
+<!--{if $out.is_msg == 1}-->
+error_msg = '<!--{$out.message}-->';
+<!--{/if}-->
+if (error_msg) {
+    alert(error_msg);
+}
+var check_field = new Array();
+check_field['user_name'] = new Function("v",  "return (jQuery.trim(v.val()).length >= 3 && jQuery.trim(v.val()).length <= 16) ");
+check_field['user_password'] = new Function("v", "return ( jQuery.trim(v.val()).length >= 6 && jQuery.trim(v.val()).length <= 16 )");
+check_field['re_user_password'] = new Function("v", "return ( jQuery.trim(v.val()) == jQuery.trim( $('input[name=\"user_password\"]').val() ) ) ");
+check_field['email'] = new Function("v", "var reg = /^[a-zA-Z0-9_-]+([a-zA-Z0-9_-]|\.)+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{1,}){1,2})$/;  return reg.test(v.val());");
+check_field['checkcode'] = new Function("v", "return jQuery.trim(v.val()) != ''");
+var user_exists = false;
+function check_submit()
+{
+	if(user_exists){
+		return false;
+    }
+    for (i in check_field) {
+        obj = $("input[name='"+ i  +"']");
+        $("#"+ i +"_error").hide();
+        obj[0].className = 'inputtext';
+        if ( !check_field[i](obj) ) {
+            obj[0].className = 'inputtext checkinput';
+            $("#"+ i +"_error").show();
+            obj[0].focus();
+            return false;
+        } else {
+        	 obj[0].className = 'inputtext checkinput';
+             $("#"+ i +"_right").show();
+             obj[0].focus();
+        }
+    }
+    
+    if ( !$("#agreement")[0].checked ) {
+        alert('请先阅读协议');
+        return false;
+    }
+    return true;
+}
+
+function check_user(username){
+    var r = '';
+	$.ajax({  
+          type : "post",  
+          url : "check_user.php",  
+          data : 'user_name='+username,  
+          async : false,  
+          success : function(data){  
+            r = data;
+          }  
+    });
+    return r
+}
+
+$(document).ready(function() {  
+    for (i in check_field) {
+        obj = $("input[name='"+ i  +"']");
+        obj.keydown(function(event) {  
+            if (event.keyCode == 13) {  
+                if (check_submit()) {
+                    $('#register_form').submit();
+                }
+            }  
+        })
+    }
+});
+var lastusername = '', lastpassword = '', lastemail = '', lastinvitecode = '', stmp = new Array();
+
+function errormessage(id, msg) {
+	if(document.getElementById(id)) {
+		if(msg == 'succeed'){
+			if(document.getElementById(id + '_right')) {
+					document.getElementById(id + '_error').style.display = "none";
+					document.getElementById(id + '_right').style.display = "block";
+			}
+		}else{
+			if(document.getElementById(id + '_error')) {
+				document.getElementById(id + "_error").innerHTML = msg;
+				document.getElementById(id + '_error').style.display = "block";
+				document.getElementById(id + '_right').style.display = "none";	
+			}			
+		}
+	}
+}
+
+function addFormEvent(formid){
+	var si = 0;
+	var formNode = document.getElementById(formid).getElementsByTagName('input');
+	for(i = 0;i < formNode.length;i++) {
+		if(formNode[i].name == '') {
+			formNode[i].name = formNode[i].id;
+			stmp[si] = i;
+			si++;
+		}
+	}
+	if(!si) {
+		return;
+	}
+	formNode[stmp[0]].onblur = function () {
+		if(checkusername(formNode[stmp[0]].id)){
+			errormessage(formNode[stmp[0]].id,'succeed');
+		}
+	};
+	formNode[stmp[1]].onblur = function () {
+		if(formNode[stmp[1]].value == '') {
+			errormessage(formNode[stmp[1]].id, '请填写密码');
+		}else{
+			errormessage(formNode[stmp[1]].id, 'succeed');
+		}
+	};
+	formNode[stmp[2]].onblur = function () {
+		if(formNode[stmp[2]].value == '') {
+			errormessage(formNode[stmp[2]].id, '请再次输入密码');
+		}
+		checkpassword(formNode[stmp[1]].id, formNode[stmp[2]].id);
+	};
+	formNode[stmp[3]].onblur = function () {
+		if(formNode[stmp[3]].value == '') {
+			errormessage(formNode[stmp[3]].id, '请输入邮箱地址');
+		}
+
+		if(checkemail(formNode[stmp[3]].value)){
+			errormessage(formNode[stmp[3]].id, 'succeed');
+		}else{
+			errormessage(formNode[stmp[3]].id, '邮箱不合法！！');
+		}
+		
+	};
+	stmp['email'] = formNode[stmp[3]].id;
+}
+
+function trim(str) {
+	return str.replace(/^\s*(.*?)[\s\n]*$/g, '$1');
+}
+
+function checkusername(id) {
+	var username = trim(document.getElementById(id).value);
+	if(username.match(/<|"%/ig)) {
+		errormessage(id, '用户名包含敏感字符');
+		return false;
+	}
+	var unlen = username.replace(/[^\x00-\xff]/g, "**").length;
+	if(unlen < 3 || unlen > 15) {
+		errormessage(id, unlen < 3 ? '用户名小于 3 个字符' : '用户名超过 15 个字符');
+		return false;
+	}
+	
+	if(check_user(username)){
+		$("#user_name_right").hide();
+		$("#user_name_error").html('用户名已经存在！！');
+		$("#user_name_error").show();
+		return false;
+	} else {
+	   $("#user_name_error").hide();
+	}
+	return true;
+}
+
+function checkpassword(id1, id2) {
+	if(!document.getElementById(id1).value && !document.getElementById(id2).value) {
+		errormessage(id2, '请输入密码及确认密码！！');
+	}
+	if(document.getElementById(id1).value != document.getElementById(id2).value) {
+		errormessage(id2, '两次输入的密码不一致');
+	} else {
+		errormessage(id2, 'succeed');
+	}
+}
+
+function checkemail(val) {
+		var reg = /^[a-zA-Z0-9_-]+([a-zA-Z0-9_-]|\.)+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{1,}){1,2})$/;var flag = reg.test(val);	
+		return flag;
+}
+
+addFormEvent('register_form');
+//-->
+</script>
+<!--{include file="footer.html"}-->

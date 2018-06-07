@@ -1,0 +1,336 @@
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src='__PUBLIC__/js/thickbox-compressed.js'></script>
+<link media="screen" type="text/css" href="__PUBLIC__/css/thickbox.css" rel="stylesheet"> 
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<div class="main" >
+    <div class="content" >
+        <div style="float:left">
+            <a href='javascript:void(0)' style="float:left;" title="添加推送" class="search_btn" onclick="add_ad()">添加推送</a>
+        </div>
+		<div style="float:right">
+            <a href='__URL__/sdk_push/status/3' style="float:left;<?php if($status==3){echo 'color:red';}?>"  class="search_btn" >过期</a>
+        </div>
+		<div style="float:right;margin-right:5px">
+            <a href='__URL__/sdk_push/status/2' style="float:left;<?php if(!$status||$status==2){echo 'color:red';}?>"  class="search_btn" >当前</a>
+        </div>
+		<div style="float:right;margin-right:5px">
+            <a href='__URL__/sdk_push/status/1' style="float:left;<?php if($status==1){echo 'color:red';}?>"  class="search_btn" >未开始</a>
+        </div>
+        <div style="clear:both"></div>
+        <div>
+            <table class="table_list" style="table-layout:fixed;width:100%">
+                <tbody>
+                    <tr bgcolor="#ccc"><td>序号</td><td>标题</td><td>数据类型</td><td>渠道</td><td>平台</td><td width="7%">添加时间</td><td width="7%">开始时间</td><td width="7%">结束时间</td><td>操作</td></tr>
+                </tbody>
+               <volist name="result" id="vo">
+                   <tr>
+                       <td>{$vo.id}</td><td>{$vo.title}</td><td>{$vo.content_type_name}</td><td>{$vo.channel_name}</td><td>{$vo.pid}</td><td>{$vo.create_at|date="Y-m-d H:i:s",###}</td>
+					    <td>{$vo.start_at}</td>
+					   <td>{$vo.end_at}</td>
+                       <td>
+                           <input type='hidden' id='content_type_{$vo.id}' value='{$vo.content_type}'>
+                           <input type='hidden' id='title_{$vo.id}' value='{$vo.title}'>
+                           <input type='hidden' id='description_{$vo.id}' value='{$vo.description}'>
+                           <input type='hidden' id='channel_id_{$vo.id}' value='{$vo.channel_id}'>
+						   <input type='hidden' id='channel_name_{$vo.id}' value='{$vo.channel_name}'>
+                           <input type='hidden' id='pid_{$vo.id}' value='{$vo.pid}'>
+                           <input type='hidden' id='start_at_{$vo.id}' value='{$vo.start_at}'>
+                           <input type='hidden' id='end_at_{$vo.id}' value='{$vo.end_at}'>
+                           <input type='hidden' id='url_{$vo.id}' value='{$vo.url}'>
+                           <input type='hidden' id='open_mode_{$vo.id}' value='{$vo.open_mode}'>
+                           <input type='hidden' id='package_{$vo.id}' value='{$vo.package}'>
+                           <input type='hidden' id='download_flag_{$vo.id}' value='{$vo.download_flag}'>
+						   <input type='hidden' id='app_type_{$vo.id}' value='{$vo.app_type}'>
+                           <a href="javascript:void(0)" onclick="edit({$vo.id})">[编辑]</a> | <a href="javascript:void(0)" onclick="del({$vo.id})">[删除]</a>
+                       </td>
+                   </tr>
+               </volist>
+            </table>
+        </div>
+    </div>
+</div>
+<div style="float:left;width:100%" >
+   {$page} 
+</div>
+<div style='clear:both'></div>
+<div style="display:none;width:330px;text-align: center;height:auto;padding-top:10px;padding-right:10px" id="ad_div" >
+    <form method="post" action="__URL__/add_ad" name="fml" enctype="multipart/form-data">    
+    <div  id="ad_div1" style="display:block;overflow: auto" class="ad_div_c">
+        <table  width="100%">
+            <tr>
+                <td width="26%" align="right">广告数据类型:</td>
+                <td align='left'>
+                    <select class="search_item_text" id="content_type" name="content_type" style="width: 100px" onchange="change_content($(this).val())">
+                        <?php
+                        foreach($content_type as $key=>$val){
+                        ?>
+                        <option value="<?php echo $key;?>" <?php if($_GET['content_type']==$key){echo 'selected="selected"';}else if($key==1){echo 'selected="selected"';}?>><?php echo $val;?></option>
+                        <?php
+                        }
+                    ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td  align="right">标题:</td><td align='left'><input type='text' id='title' name='title' class="search_item_text" style="width:100px"></td>
+            </tr>
+            <tr>
+                <td  align="right">描述:</td><td align='left'><textarea name="description" id="description" class="search_item_text" style="width:150px;height:100px"></textarea></td>
+            </tr>         
+            <tr>
+                <td align="right">图片:</td><td align='left'><input type="file" name="img" id="img" class="search_item_text" style="width:150px"></td>
+            </tr>           
+            <tr>
+                <td align="right">渠道:</td>
+				<td align='left'>
+                    <a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel&platform=1" onclick="set_style()" class="thickbox">选择指定渠道</a><br>
+                    <div id="channel_div">
+
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">平台:</td><td align='left'><input type="text" class="search_item_text" style="width:100px" name="pid" id="pid"></td>
+            </tr>
+            <tr>
+                <td align="right">开始时间:</td><td align='left'><input type="text" style="width:150px" id="start_at" name="start_at" class="search_item_text Wdate" onclick='WdatePicker({startDate:"%y-%M-%d %H:%m:%s",dateFmt:"yyyy-MM-dd HH:mm:ss"})'></td>
+            </tr>
+            <tr>
+                <td align="right">结束时间:</td><td align='left'><input type="text" style="width:150px" id="end_at" name="end_at" class="search_item_text Wdate" onclick='WdatePicker({startDate:"%y-%M-%d %H:%m:%s",dateFmt:"yyyy-MM-dd HH:mm:ss"})'></td>
+            </tr>
+            <tr class ='type type1'>
+                <td align="right">链接地址:</td><td align='left'><input type='text' class="search_item_text" style="width:100px" id='url' name="url" value=''></td>
+            </tr>
+            <tr class ='type type1'>
+                <td align="right">链接打开方式:</td><td align='left'><input type="radio" name="open_mode" value="1">内置浏览器<input type="radio" name="open_mode" value="2">外置浏览器</td>
+            </tr>
+            <tr class ='type type2' id="pack_td" style="display:none">
+                <td align="right">包名:</td><td align='left'>
+                    <div style="float:left"><input type="text" class="search_item_text" style="width:100px" id="package" name="package"></div> 
+                </td>
+            </tr>
+            <tr class ='type type2' style="display:none">
+                <td align="right">下载方式:</td>
+                <td align='left'>
+                    <?php 
+                    foreach($download_flag as $k=>$v){
+                    ?>
+                    <input type="radio" name="download_flag" value="<?php echo $k;?>"><?php echo $v;?><br>
+                    <?php
+                    }?>
+                </td>
+            </tr>
+			<tr>
+                <td align="right">投放区域:</td><td align='left'>
+                    <input type="radio" name="app_type" value="0">通用
+					<input type="radio" name="app_type" value="1">定制
+					<input type="radio" name="app_type" value="2">不限制
+                </td>
+            </tr>
+			<tr class ='type type2' style="display:none">
+                <td  align="right">下载完成:</td><td align='left'>
+                    <input type="radio" name="show_intall_pic" value="1">弹出下载软件安装界面<br>
+					<input type="radio" name="show_intall_pic" value="2">不弹下载软件安装界面
+                </td>
+            </tr>
+        </table>
+        <div>
+            <input type="hidden" id="c_ad_type" name="c_ad_type">
+            <div style="float:left;margin-left:45px;margin-top:10px;margin-bottom: 10px"><input type="submit" onclick="return sub()" class="search_btn" value="确定"></div>
+            <div style="float:left;margin-left:20px;margin-top:10px;margin-bottom: 10px"><input type="button" onclick="$.zxxbox.hide();" class="search_btn " value="取消"></div>
+        </div>
+    </div>
+    <input type='hidden' id='push' name='push' value='1'>
+    <input type="hidden" id="edit" name="edit">
+    <input type="hidden" id="id" name="id">
+    </form>
+</div>
+
+<script type="text/javascript">
+    function add_ad(){
+		clear_data();
+		$('#content_type').val(1);
+		change_content(1);
+        $('#edit').val(0);
+		$('#channel_div').html('');
+        $("#ad_div").zxxbox();
+    }
+    
+    function sub(){
+        var edit = $('#edit').val();
+        if($('#content_type').val()==''){
+            alert('广告数据类型不能为空');
+            return false;
+        }
+        if($('#title').val()==''){
+            alert('标题不能为空');
+            return false;
+        }
+        if(edit!=1){
+			/*
+            if($('#img').val()==''){
+                alert('请上传图片');
+                return false;
+            }
+			*/
+			if($('#img').val()!=''){
+				if (!/\.(jpg)$/.test($('#img').val().toLowerCase())){
+					alert('图片格式错误');
+					return false;
+				}    
+			}             
+        }
+        
+        if($('#pid').val()==''){
+            alert("请输入平台");
+            return false;
+        }
+        if($('#start_at').val()==''){
+            alert("请输入开始时间");
+            return false;
+        }
+        if($('#end_at').val()==''){
+            alert("请输入结束时间");
+            return false;
+        }
+        
+        if($('#content_type').val()==1){
+            if($('#url').val()==''){
+                alert("请输入链接地址");
+                return false;
+            }
+            if(!$("input[name='open_mode']:checked").val()){
+                alert('请选择链接打开方式');
+                return false;
+            }
+        }else{
+            if($('#package').val()==''){
+                alert("请输入包名");
+                return false;
+            }
+            if(!$("input[name='download_flag']:checked").val()){
+                alert('请选择下载方式');
+                return false;
+            }
+			if(!$("input[name='show_intall_pic']:checked").val()){
+                alert('请选择下载完成是否弹出安装界面');
+                return false;
+            }
+        }
+
+        
+    }
+
+    function change_content(id){
+        $('.type').css('display','none');
+        $('.type'+id).css('display','');
+        
+    }
+
+    
+    function del(id){
+        if(confirm('确认删除吗？')){
+            window.location.href = '__URL__/del_push?id='+id;
+        }
+    }
+    
+	function clear_data(){
+		var arr = ['title','description','channel_id','pid','start_at','end_at','url','package'];
+		for(var i=0;i<arr.length;i++){
+			$('#'+arr[i]).val('');
+		}
+		$("input[name='open_mode']").attr("checked",false);
+		$("input[name='download_flag']").attr("checked",false);
+	}
+    function edit(id){
+        $("#ad_div").zxxbox();
+		$('#channel_div').html('');
+		$('#edit').val(1);
+		var content_type = $('#content_type_'+id).val();
+		change_content(content_type);
+        $("#content_type").val(content_type);
+        $("#title").val($('#title_'+id).val());
+        $("#description").val($('#description_'+id).val());
+		var channel_name = $('#channel_name_'+id).val();
+		var channel_id = $('#channel_id_'+id).val();
+        if(channel_name&&channel_name !=''){
+            var channel_name_arr = channel_name.split(',');
+            var channel_id_arr = channel_id.split(',');
+            for(var c=0;c<channel_name_arr.length;c++){
+                var str = '<label class="l_cid_'+channel_id_arr[c]+'"><input type="checkbox" alt="'+channel_name_arr[c]+'" onclick="selectChannel(this,onclikChannel,\'checkbox\')" value="'+channel_id_arr[c]+'" name="cid[]" checked="checked">'+channel_name_arr[c]+'</label>';
+                $('#channel_div').append(str);
+            }
+        }
+        $("#pid").val($('#pid_'+id).val());
+        $("#start_at").val($('#start_at_'+id).val());
+        $("#end_at").val($('#end_at_'+id).val());
+		$("#id").val(id);
+		var app_type = $('#app_type_'+id).val();
+		$("input[name='app_type'][value="+app_type+"]").attr("checked","true");
+		if(content_type == 1){
+			$("#url").val($('#url_'+id).val());
+			var open_mode = $('#open_mode_'+id).val();
+			$("input[name='open_mode'][value="+open_mode+"]").attr("checked","true");
+		}else{
+			$("#package").val($('#package_'+id).val());
+			var download_flag = $('#download_flag_'+id).val();
+			$("input[name='download_flag'][value="+download_flag+"]").attr("checked","true");
+		}	
+    }
+	
+	function selectChannel(obj,fselected,type)
+    {
+            if (obj.checked == true) {
+                    var item = $('<label class="l_cid_' + $(obj).val() + '">' + $('.l_cid_' + $(obj).val()).html() + '</label>');
+                    item.find('input').attr('checked', true);
+                    $('#channel_selected').append(item);
+                    //alert(fselected);
+                    if(type=="radio"){
+                            tb_remove();
+                    }
+                    fselected();
+            } else {
+                    $('.l_cid_' + $(obj).val() + ' input:checked').attr('checked', false);
+                    $('#channel_selected .l_cid_' + obj.value).remove();
+                    onclikChannel_c(obj.value);
+            }
+    }
+     function check_arr()
+    {
+        $('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+        $('#channel_div input:checked').each(function(){
+                $('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+        });
+    }
+    function onclikChannel()
+    {
+            $('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+    }
+    function onclikChannel_c(cid)
+    {
+            $('#channel_div .l_cid_' + cid).remove();
+    }
+    function set_style(){
+        document.getElementById('wrapOut').style.zIndex = 1;
+        document.getElementById('zxxBlank').style.zIndex = 1;
+    }
+    function submitChannel()
+    {
+        var cids = '';
+        $('#channel_div').html('');
+        $("#TB_ajaxContent #channel_selected input:checked").each(function(){
+                var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+                item.find('input').attr('checked', 'true');
+                $('#channel_div').append(item);
+        })
+        $.cookie('cids', '', {path: '/'});
+        tb_remove();
+    }
+</script>

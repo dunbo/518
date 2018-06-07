@@ -1,0 +1,197 @@
+<include header="../Public/header"/>
+
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+
+<script>
+function check_del()
+{
+	if(confirm("你确认删除该条数据吗？"))
+	{
+		return ture;
+	}
+	return false;
+}
+
+$(document).ready(function () {
+	var from = '{$from}';
+	if(from == 'fixed_resource_channel'){
+		$('.all').hide();
+	}else{
+		$('.all').show();
+	}
+});
+</script>
+<style>
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+<body>
+	<if condition="$from neq 'fixed_resource_channel'">
+	 <div class="currentNav">
+        <div class="currentNav_l">
+        <!--导航栏-->
+        <a href="__URL__/index">全部</a>><a href="__URL__/index?general_page_type=1">普通</a>><a href="__URL__/reslibrary">资源库</a>><label>{$extent_name}</label>
+        </div>
+        <!--end-->
+    </div>
+	</if>
+
+<if condition="$resource_type neq 28 && $from != 'fixed_resource_channel'">
+<div class="search_box">
+	<form action="__URL__/list_soft" method="get">
+		<input type="hidden" value="{$extent_id}" name="extent_id"/>
+		<input type="hidden" value="{$resource_type}" name="resource_type"/>
+		<input type="hidden" value="{$cont}" name="cont"/>
+        <span>
+            标题：
+            <input type="text" name="srch_title" value="{$srch_title}">
+            <?php if($resource_type==24 || $resource_type==26 || $resource_type==29): ?>
+            软件包名：
+            <input type="text" name="srch_pkg" value="{$srch_pkg}">
+            <?php endif; ?>
+            <if condition="$resource_type == 2">
+			    <tr class="sub_tr">
+			        <td style="width: 15%">软件类型</td>
+			        <td><select id="s_soft_type" name="s_soft_type">
+			        	<option value="0">全部</option>
+			        	<option value="1" <?php if($s_soft_type == 1) echo "selected"; ?> >应用</option>
+			        	<option value="2" <?php if($s_soft_type == 2) echo "selected"; ?> >游戏</option>
+			        </select></td>
+			        <td></td>
+			    </tr>
+			</if>
+			<?php if($resource_type==2 || $resource_type==24 || $resource_type==26 || $resource_type==29): ?>
+			&nbsp;&nbsp;&nbsp;&nbsp;内容性质：{$content_xz}&nbsp;&nbsp;&nbsp;&nbsp;
+			内容质量：{$content_zl}
+			&nbsp;&nbsp;&nbsp;&nbsp;内容栏目：
+			<select name="s_content_column" id="s_content_column">
+				<option value="0" selected>全部</option>
+				<volist name='column_list' id='columnlist'>
+				<option value="{$columnlist.cont_id}" <?php if($s_content_column == $columnlist['cont_id']) echo "selected"; ?> >{$columnlist.name}</option>
+			    </volist>
+			</select>
+			<br>内容来源：{$con_source}&nbsp;&nbsp;&nbsp;&nbsp;
+			标签状态：
+			<select name="s_status_tag" id="s_status_tag">
+				<option value="" selected>全部</option>
+				<option value="0" <?php if($s_status_tag === '0') echo "selected"; ?> >否</option>
+				<option value="1" <?php if($s_status_tag == 1) echo "selected"; ?> >是</option>
+			</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			用户倾向：{$user_tend}&nbsp;&nbsp;&nbsp;&nbsp;
+			<?php endif; ?>
+			
+            <input type="submit" value="搜索">
+        </span>
+    </form>
+</div>
+</if>
+
+	<div style="margin:10px;width:100px;">
+		<if condition="$from neq 'fixed_resource_channel'">
+		 <a class="search_btn thickbox" href="__URL__/add_soft?width=700&height=500&extent_id={$extent_id}&resource_type={$resource_type}&cont={$cont}">添加</a>
+		<else/>
+			<a class="search_btn" href="javascript:window.history.go(-1)">返回</a>
+		</if>
+	</div>
+	<table class="table_list" border="0" cellpadding="0" cellspacing="0">
+		<thead>
+			<tr>
+					<th width="5%" class="all">ID</th>
+					<th width="7%" ><if condition="$from neq 'fixed_resource_channel'">资源</if>类型</th>
+					<if condition="$resource_type eq 28 || $from eq 'fixed_resource_channel'">
+					<th width="10%" class="all">一句话短评</th>
+					<th width="10%">标题</th>
+					</if>
+					<th width="6%" class="all">素材来源</th>
+					<th width="17%">图片</th>
+					<th width="7%" class="all">视频</th>
+					<if condition="($resource_type neq 2 and $resource_type neq 28)|| $from eq 'fixed_resource_channel'" >
+					<th width="8%">软件包名</th>
+					<th width="8%">软件名称</th>
+					</if>
+					<th width="10%" class="all">推荐内容</th>
+					<th width="9%" class="all">更新时间</th>
+<?php if(in_array($resource_type,array(2,24,26,29))){ ?>
+<th>内容属性</th>
+<?php } ?>
+					<th width="7%">操作</th>
+			</tr>
+		</thead>
+	   <tbody>
+			<volist name="list" id="list">
+					<tr>
+						<td class="all">{$list.id}</td>
+						<td>
+							<if condition='$list.resource_type eq 24' >单软件(列表单图)
+								<elseif condition='$list.resource_type eq 26' />单软件(3图)
+								<elseif condition='$list.resource_type eq 29' />单软件(视频)
+								<elseif condition='$list.resource_type eq 2' />单排
+								<elseif condition='$list.resource_type eq 28' />场景卡片
+							</if>
+						</td>
+						<if condition="$resource_type eq 28 || $from eq 'fixed_resource_channel'" >
+							<td class="all">{$list.description}</td>
+							<td>{$list.title}</td>
+						</if>
+						<td class="all"><if condition='$list.is_dev eq 1'>是<else/>否</if></td>
+						<td>
+							<if condition='($list.is_dev eq 0) AND ($list.resource_type eq 24)'>
+								<img height="50" width="100" src="{$domain_url}{$list.image_url|default='&nbsp;'}"/>
+								<elseif condition='($list.is_dev eq 0) AND ($list.resource_type eq 26)' />
+								<img height="50" width="50" src="{$domain_url}{$list.image_url|default='&nbsp;'}"/>
+								<img height="50" width="50" src="{$domain_url}{$list.high_image_url|default='&nbsp;'}"/>
+								<img height="50" width="50" src="{$domain_url}{$list.low_image_url|default='&nbsp;'}"/>
+								<elseif condition='$list.resource_type eq 29' />
+								<img height="50" width="100" src="{$domain_url}{$list.video_pic|default='&nbsp;'}"/>
+								<elseif condition='$list.resource_type eq 2' />
+								<img height="50" width="50" src="{$domain_url}{$list.image_url|default='&nbsp;'}"/>
+								<img height="50" width="50" src="{$domain_url}{$list.high_image_url|default='&nbsp;'}"/>
+								<img height="50" width="50" src="{$domain_url}{$list.low_image_url|default='&nbsp;'}"/>
+								<img height="50" width="50" src="{$domain_url}{$list.gif_image_url|default='&nbsp;'}"/>
+								<img height="50" width="50" src="{$domain_url}{$list.gif_image_url_62|default='&nbsp;'}"/>
+								<else/>-</if>
+						</td>
+						<td class="all"><if condition='$list.resource_type eq 29'><a class="thickbox blue" href="__URL__/edit_soft/show_video/1/width/540/height/420/id/{$list.id}">预览视频</a><else/>无</if></td>
+						<if condition="$resource_type neq 2 and $resource_type neq 28" >
+							<td><if condition="$list.package_643 neq ''">{$list.package_643}<else />{$list.package}</if></td>
+							<td><if condition="$list.package_name neq ''">{$list.package_name}<else />{$softname}</if></td>
+						</if>
+						<td class="all">
+							{$list.mark_name}：{$list.lead_content}
+						</td>
+						<td class="all">{$list.update_at|date="Y-m-d H:i:s",###}</td>
+<?php if(in_array($resource_type,array(2,24,26,29))){ ?>
+<td>{$list.content_select}</td>
+<?php } ?>
+						<td class="blue">
+							<a class="thickbox blue" href="__URL__/edit_soft/id/{$list.id}">编辑</a>
+							<if condition='$list.resource_type eq 28&&$from neq "fixed_resource_channel"'>
+								<a class="blue" href="__URL__/del_soft/id/{$list.id}" onClick="return check_del();">删除</a>
+							</if>
+						</td>
+					</tr>
+
+
+		  </volist>
+		 </tbody>
+	</table>
+	<div class="navgition">
+	{$page|default='&nbsp;'}
+	</div>
+</body>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />
+</html>

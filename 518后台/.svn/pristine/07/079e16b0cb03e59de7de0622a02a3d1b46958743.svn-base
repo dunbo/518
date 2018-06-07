@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+</head>     
+<body>
+<table style='float:left;' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+		<form method="get" action="__URL__/soft_filter_list" name="index" id="index">
+			<td>
+				&nbsp;&nbsp;软件包名：<input type="text" class="search_item_text" style="width:100px" name="search_package" id="search_package" value="{$search_package}"/>	
+			</td>
+			<td>	
+				<input type="button" value="搜索" onclick="$('#index').submit();" class="search_btn"/>	
+			</td
+		</form>
+			<td >
+				<input type="button" title="添加" class="search_btn thickbox" value="添加" alt="__URL__/soft_filter_add?height=500&width=1000" >	
+			</td>
+			<td colspan='7'>
+
+			</td>	
+		</tr>
+		<tr><td colspan='10'>&nbsp;	</td></tr>
+		<tr>
+			<th width="17%">包名</th>
+			<th width="10%">软件名</th>
+			<th width="65%">&nbsp;</th>
+			<th width=8%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='list' id='vo'>
+	<?php $i=0;?>
+		<tr>
+			<td align='center' >{$vo.package|default=''}</td>
+			<td align='center' >{$vo.softname|default=''}</td>
+			<td align='center' >
+				<table style='float:left;' cellpadding="0" cellspacing="0" class="table_list">
+					<tr style="font-weight:bold; background:#ececec">
+						<td width="15%">屏蔽模块</td>
+						<td width="25%">指定区域类型</td>
+						<td width="25%">屏蔽区域</td>
+						<td width="25%">起止时间</td>
+					</tr>
+
+					<foreach name="module[$vo['package']]" item="v" key="k" >
+					
+					<if condition="$i lt 3">
+						<tr>
+							<td><?php echo $module_conf[$k]; ?></td>
+							<td>
+								<?php 
+									if($v['filter_area'] == 1){
+										echo '屏蔽指定区域';
+									}else if($v['filter_area'] == 2){
+										//echo '只在指定区域其他都屏蔽';
+										echo '只在指定区域展示'."<br/>".$v['area'];
+									}else{
+										echo  '';
+									}
+								?>
+							</td>
+							<td>
+								<?php 
+									if($v['filter_area'] == 1){
+										echo $v['area'];
+									}else if($v['filter_area'] == 2){
+										echo '其他都屏蔽';
+									}else{
+										echo  '全部';
+									}
+								?>
+							</td>
+							<td>
+							<?php echo date("Y-m-d H:i:s",$v['start_tm'])."~<br/>".date("Y-m-d H:i:s",$v['end_tm']); ?>
+							</td>
+						</tr>
+					<else /> 
+						<tr style="display:none;" id="filter">
+							<td><?php echo $module_conf[$k]; ?></td>
+							<td>
+								<?php 
+									if($v['filter_area'] == 1){
+										echo '屏蔽指定区域';
+									}else if($v['filter_area'] == 2){
+										//echo '只在指定区域其他都屏蔽';
+										echo '只在指定区域展示'."<br/>".$v['area'];
+									}else{
+										echo  '';
+									}
+								?>
+							</td>
+							<td>
+								<?php 
+									if($v['filter_area'] == 1){
+										echo $v['area'];
+									}else if($v['filter_area'] == 2){
+										echo '其他都屏蔽';
+									}else{
+										echo  '全部';
+									}
+								?>
+							</td>
+							<td>
+							<?php echo date("Y-m-d H:i:s",$v['start_tm'])."~<br/>".date("Y-m-d H:i:s",$v['end_tm']); ?>
+							</td>
+						</tr>
+					</if>
+						<?php $i++;?>
+					</foreach>
+					<if condition="$i egt 3">
+					<tr>
+						<td align="right" colspan='5'>
+							<input type="button" value="展开" onclick="show_list(this,1)" />
+						</td>
+					</tr>
+					</if>
+				</table>
+			</td>
+			<td align='center' >				
+				<a href="#" onclick="edit('{$vo.package}')" >编辑</a>
+				&nbsp;|&nbsp;
+				<a href="#" onclick="del('{$vo.package}')" >删除</a>
+			</td>
+
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='10'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+</html>
+<script>
+function edit(pkg){
+	if(pkg){
+		tb_show('编辑','__URL__/soft_filter_edit?pkg='+pkg+'&height=500&width=1000',false);
+	}
+}
+function del(pkg){
+	if(confirm('是否确认删除？')){
+		window.location.href="__URL__/soft_filter_del?pkg="+pkg;
+	}
+}
+function show_list(obj,ident){
+	if(ident==1){
+		$(obj).parent().parent().siblings("#filter").show();
+		$(obj).attr('onclick','show_list(this,2)');
+		$(obj).val('收起');
+	}else{
+		$(obj).parent().parent().siblings("#filter").hide();
+		$(obj).attr('onclick','show_list(this,1)');
+		$(obj).val('展开');
+	}
+	
+}
+</script>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>购会员享八折</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/css_2/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+<script type="text/javascript">
+    (function (doc, win) {
+    	var docEl = doc.documentElement,
+        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+        recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            docEl.style.fontSize = clientWidth / 16 + 'px';
+        };
+	    // Abort if browser does not support addEventListener
+	    if (!doc.addEventListener) return;
+	    win.addEventListener(resizeEvt, recalc, false);
+	    doc.addEventListener('DOMContentLoaded', recalc, false);
+	   //以640像素设计图为准 ，1rem代表40像素
+	})(document, window);
+</script>
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images_2/banner.png" />
+</div>
+<div class='main'>
+	<div class="menber_card"   onclick="go_vip();">
+		<ul>
+			<li>
+				<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images_2/menber_card01.png" />
+			</li>
+			<li>
+				<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images_2/menber_card02.png" />
+			</li>
+			<li>
+				<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images_2/menber_card03.png" />
+			</li>
+			<li>
+				<img src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images_2/menber_card04.png" />
+			</li>
+			<div class="clear"></div>
+		</ul>
+		<a href="javascript:;" class="btns" ><!--{if $out.is_sdk == 1}-->立即开通<!--{else}-->成为会员<!--{/if}--></a>
+	</div>
+	<div class="wrap menber_good_wrap"  onclick="go_vip_detail();">
+		<div class="title">成为会员的N个理由</div>
+		<img class="menber_good" src="<!--{$out.new_static_url}-->/activity/<!--{$out.prefix}-->/images_2/menber_good.png" />
+	</div>
+	<div class="wrap"  style="background:#6246d0;">
+		<div class="title">热门游戏</div>
+		<a href="javascript:;" class="change_btn"  onclick="change_soft();">换一换</a>
+		<ul class="soft_list clear"  id='soft-list'>
+			<div class="clear"></div>
+		</ul>
+	</div>
+	<div class="wrap rule_wrap">
+		<div class="title">活动规则</div>
+		<p>1、活动期间开通会员8折优惠（包含续费）<br/>2、活动期间用户可多次参与优惠<br/>3、返利礼券所有网游均可使用，除（梦幻西游大话西游、海岛奇兵、部落冲突、皇室战争）不可使用<br/>4、返利的礼券即时到账，有效期为7天<br/>5、此优惠可进行月会员、季会员、半年会员、年会员任意会员开通<br/>6、开通会员后可在个人中心-会员页面进行查看权益<br/>7、开通会员与VIP不冲突，同时获得奖励<br/>8、会员每月可领取3张首充礼券，同时有丰富的会员活动等着你<br/>9、活动结束后将恢复原价</p>
+	</div>
+<!--{if $out.is_sdk == 0}-->
+	<a href="javascript:;" class="btns" style="margin-bottom: 1.2rem;" onclick="go_share();" >分享</a>
+<!--{/if}-->
+</div>	
+</body>
+</html>
+   <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box1"  style="display: none;">
+		<div class="wrap rule_wrap">
+			<div class="title">开通流程</div>
+			<span class="close" onclick="cloBox('#tip-box1')"></span>
+			<p>1、打开已有游戏或下载游戏<br/>2、通过游戏内活动页立即开通<br/>3、如未找到活动页操作如下</p>
+			<ul>
+				<li>①进入个人中心点击“会员”</li>
+				<li>②进入“会员”页面</li>
+				<li>③点击“开通”进入付款页面</li>
+				<li>④选择开通类型及付款方式 </li>
+				<li>⑤点击付款并付款成功</li>
+				<li>⑥成功开通会员，享受会员权益</li>
+			</ul>
+			<a href="javascript:;" class="btns" onclick="cloBox('#tip-box1')">确定</a>
+		</div>
+    </div>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->',p=0,soft_lists_go = [],flags={canMove:true};
+var version_code = '<!--{$out.version_code}-->';
+var prefix = "<!--{$out.prefix}-->";
+var type = "<!--{$out.type}-->";
+var limit = 8;
+var open_pkg_arr = [];
+function my_soft() {
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	var soft_lists = soft_list.DATA;
+	var open_list = [];
+	var install_list = [];
+	var down_list = [];
+	for(j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var json_data =  window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(json_data == 0 || json_data == 1 ){
+			open_list.push(soft_lists[j]);
+			open_pkg_arr.push(soft_lists[j][7]);
+		}
+		if(json_data == -2 && soft_status_gos == 5){
+			install_list.push(soft_lists[j]);
+		}
+		if((json_data == -2 && soft_status_gos != 5 ) || json_data == -1){
+			down_list.push(soft_lists[j]);
+		}
+	}    
+	if(j<=4){
+		//软件小于等于4个不显示换一换按钮
+		$(".soft_title").css('display','none');
+	}		
+  	for(var ii in open_list) {
+		soft_lists_go.push(open_list[ii]);
+	}  
+  	for(var ii in install_list) {
+		soft_lists_go.push(install_list[ii]);
+	}
+  	for(var ii in down_list) {
+		soft_lists_go.push(down_list[ii]);
+	}
+	get_soft();
+}
+
+
+function get_soft(){
+	var pagemax= Math.floor(soft_lists_go.length/limit);
+	if(soft_lists_go.length%limit==0){
+		pagemax = pagemax-1;
+	}
+	var data = soft_lists_go.slice(p*limit,limit*(p+1));
+	if(data.length == 0){
+		p = 0;
+		data = soft_lists_go.slice(p*limit,limit*(p+1));
+	}
+
+	var str = '';
+	for(i = 0; i < data.length; i++) {
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);		
+		if(data[i][data[i].length-1] != ''){
+			var size = data[i][data[i].length-1];
+		}else{
+			var size = data[i][27];
+		}			
+		if(data[i][2].length > 4){
+			var softname = data[i][2].substring(0,3)+'...';
+		}else{
+			var softname = data[i][2];
+		}		
+		str += get_soft_li(soft_status,parseInt(data[i][0]),data[i][7],softname,parseInt(data[i][13]),size,data[i][1]);
+
+	}
+	$('#soft-list').html(str);
+	if(p==pagemax){
+		p=0;
+	}else{
+		p=p+1;
+	}
+}
+
+function get_soft_li(soft_status,softid,my_package,softname,versioncode,size,src){
+	if(soft_status == 1){
+		var soft_li = '<li id="li_'+softid+'" ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name">'+softname+'</p><p class="btn"><a href="javascript:;" class="soft_btn" >下载中</a></p></li>';
+	}else if(soft_status == 2 || soft_status == 3 || soft_status == 8){
+		var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="soft_btn" >继续</a></p></li>';
+	}else if(soft_status == 4){
+		var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="soft_btn"  >下载</a></p></li>';
+	}else if(soft_status == 5){
+		var soft_li = '<li onclick="installApp('+softid+',\''+my_package+'\')" ><p class="soft_icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft_name">'+softname+'</p><p class="btn"><a href="javascript:;" class="soft_btn" >安装</a></p></li>';
+	}else if(soft_status == 6){
+		var soft_li = '<li onclick="openApp(\''+my_package+'\','+softid+')" ><p class="soft_icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft_name">'+softname+'</p><p class="btn" ><a href="javascript:;" class="soft_btn"  >打开</a></p></li>';
+	}else if(soft_status == 9){
+		var soft_li = '<li onclick="installApp('+softid+',\''+my_package+'\')" ><p class="soft_icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft_name">'+softname+'</p><p class="btn" ><a href="javascript:;" class="soft_btn"  >校验中</a></p></li>';
+	}else if(soft_status == 10){
+		var soft_li = '<li><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="soft_btn" >已下载</a></p></li>';
+	}else if(soft_status == -1){
+		var soft_other_status = window.AnzhiActivitys.isInstalledApp(my_package,parseInt(versioncode));
+		if(soft_other_status == -2){
+			var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="soft_btn"  >下载</a></p></li>';
+		}else if(soft_other_status == -1){
+			var soft_li = '<li id="li_'+softid+'" onclick="go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')" ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name">'+softname+'</p><p class="btn" ><a id="'+softid+'" href="javascript:;" class="soft_btn"  >更新</a></p></li>';
+		}else if(soft_other_status == 0){
+			var soft_li = '<li onclick="openApp(\''+my_package+'\','+softid+')" ><p class="soft_icon"><a href="javascript:;" ><img src="'+src+'"/></a></p><p class="soft_name">'+softname+'</p><p class="btn" ><a href="javascript:;" class="soft_btn"  >打开</a></p></li>';
+		}else if(soft_other_status == 1){
+			var soft_li = '<li ><p class="soft_icon"><a href="javascript:;"><img src="'+src+'"/></a></p><p class="soft_name">'+softname+'</p><p class="btn"><a id="'+softid+'" href="javascript:;" class="soft_btn" >已下载</a></p></li>';
+		}
+	}
+	return soft_li;
+}
+$(document).ready(function () {
+	setTimeout(function(){
+			my_soft();
+	}, 500);
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+});
+
+function change_soft(){
+	$('#soft-list').html('');
+	get_soft();
+}
+
+
+function openApp(pkg,softid){
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	the_soft = [softid];
+	$.ajax({
+		url: '/lottery/vacation_gift_open.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkg+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+		}
+	});
+}
+
+
+function go_softinfo_down(softid,my_package,softname,versioncode,size){
+	$('#li_'+softid+'').removeAttr("onclick");
+	$('#'+softid+'').html("下载中").removeAttr("onclick");
+	$.ajax({
+		url: '/lottery/year_feedback_download.php',  //supwater  点击详情 点击下载
+		data:"softid="+softid+"&sid="+sid+"&aid="+aid+"&pkgname="+my_package, 
+		type:"post",
+		success:function(data) {
+			window.AnzhiActivitys.downloadForActivity(parseInt(aid),softid,my_package,softname,versioncode,size,0);
+		},
+	});
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		$('#'+softid+'').html("下载中");
+	}else if(newState == 2 || newState == 3 || newState == 8){
+		$('#'+softid+'').html("继续");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				if(soft_lists_go[i][2].length > 4){
+					var softname = soft_lists_go[i][2].substring(0,3)+'...';
+				}else{
+					var softname = soft_lists_go[i][2];
+				}				
+				$('#li_'+softid+'').attr('onclick',"go_softinfo_down("+parseInt(softid)+",'"+soft_lists_go[i][7]+"','"+softname+"','"+soft_lists_go[i][13]+"','"+soft_lists_go[i][soft_lists_go[i].length-1]+"')");
+			}
+		}				
+	}else if(newState == 4){
+		$('#'+softid+'').html("重试");			
+	}else if(newState == 5){		
+		$('#'+softid+'').html("安装");
+		$('#li_'+softid+'').removeAttr("onclick");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				$('#li_'+softid+'').attr('onclick',"installApp("+parseInt(softid)+",'"+soft_lists_go[i][7]+"')");
+			}
+		}
+	}else if(newState == 6){
+		$('#'+softid).html("打开");
+		$('#li_'+softid+'').removeAttr("onclick");
+		for(var i=0;i < soft_lists_go.length;i++){		
+			if(soft_lists_go[i][0] == softid){
+				$('#li_'+softid).attr('onclick',"openApp('"+soft_lists_go[i][7]+"',"+parseInt(softid)+")");
+                break;
+			}
+		}
+	}else if(newState == 9){
+		$('#'+softid+'').html("检查中");			
+	}
+}
+
+function installApp(softid,pkgname){
+	$.ajax({
+		url: '/lottery/vacation_third_install.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+		type: 'post',
+		success: function(data){
+			window.AnzhiActivitys.installAppForActivity(softid);
+		}
+	});
+}
+
+
+//分享
+function go_share(){
+	$.ajax({
+		url: '/lottery/my_name_MT3_new/share.php',
+		data: 'sid='+sid+'&aid='+aid,
+		type: 'get',
+		async:false,
+		success:function(data){
+		}
+	});
+	var share_text="活动期间开通及续费会员 享八折优惠，《会员专属》活动已经开启~好礼不容错过！";	
+	var share_url='<!--{$out.activity_host}-->/lottery/'+prefix+'/index.php?type=2&is_share=1&aid='+aid;	
+	var share_json = '{"TEXT":"'+share_text+'","URL":"<!--{$out.activity_host}-->/static/activity/'+prefix+'/images/share_icon.png","ACTIONURL":"'+share_url+'","URLWEIXIN":"<!--{$out.activity_host}-->/static/activity/'+prefix+'/images/share_icon.png"}';
+
+	window.AnzhiActivitys.getShareDialog(share_json);
+}
+
+
+<!--{if $out['is_share'] == 1}-->
+document.write(unescape("%3Cscript src='/js/anzhi-fd-min1.js?v"+Math.round(Math.random()*100)+"' type='text/javascript'%3E%3C/script%3E"));
+var js_param = {type:'action', id:aid, callback:invite_callback};
+var php_param = {type:'action', aid:aid};
+$(document).ready(function () {
+	Azfd.share_download(js_param, php_param);
+});	
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6200){
+			js_param = {type:'action', id:aid, callback:null};
+			Azfd.lock = false;
+			share_download(js_param, php_param);			
+		}else {
+			setTimeout(function(){
+				var php_url = 'fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;			
+			},1000);		
+		} 
+	}else{
+		setTimeout(function(){
+			var php_url = 'fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;			
+		},1000);		
+	}
+}
+function is_null(){}
+<!--{/if}-->	
+function go_vip_detail(){
+	var url = "index.php?aid="+aid+"&click=2&sid="+sid+"&type="+type;
+	window.location.href=url;	
+}
+
+var is_sdk = '<!--{$out.is_sdk}-->';
+function go_vip(){
+	$.ajax({
+		url: 'index.php',
+		data: 'sid='+sid+'&aid='+aid+'&click=1',
+		type: 'get',
+		async:false,
+		success:function(data){
+			if(is_sdk == 1){
+				var json = '{"pageName":"PAY_MEMBER"}';
+				window.AnzhiActivitys.sdkComMed(json,1);
+			}else{
+				showOpenBox('#tip-box1');
+			}
+		}
+	});
+}
+
+var flags={canMove:true};
+function showOpenBox(obj){
+	 var bg_h=$(window).height() + $(document).scrollTop(),
+			top_h= $(obj).height()/ 2 - $(document).scrollTop();
+	$(obj).css("margin-top",-top_h+"px").show();
+	$("#body-bg").css("height",bg_h+"px").show();
+	flags.canMove=false;
+	window.onresize = function(){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+			top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$('#body-bg').css("height",bg_h+"px");
+		$(obj).css("margin-top",-top_h+"px");
+		
+	}
+}
+function cloBox(obj){
+	$(obj).hide();
+	$("#body-bg").hide();
+	flags.canMove=true;
+}
+$(function(){
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+})
+</script>

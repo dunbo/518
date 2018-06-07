@@ -1,0 +1,164 @@
+<!--------------------------编辑特殊敏感词开始----------------------------------------->
+
+<form action="__URL__/edit_special" method="post" enctype="multipart/form-data">
+<table width="100%"  border="0" cellpadding="0" cellspacing="0" >
+<tr>
+<td colspan='3'>编辑特殊敏感词：</td>
+<input type='hidden' name='edit_id' id='edit_id' value="{$id}"/>
+</tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td colspan='3'><textarea style="height: 64px;  width: 345px;" readonly name="edit_word" id='edit_word' >{$edit_list['word']}</textarea></td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td colspan='3'> <b>适用范围：（必填）</b></td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td colspan='3' align='left' >
+<input type="checkbox" id = "edit_spcial_1" name="edit_spcial[]" value="1"  <if condition="isset($scope[1])">checked='true'</if> />软件名称
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" id = "edit_spcial_2" name="edit_spcial[]" value="2" <if condition="isset($scope[2])">checked='true'</if> />软件简介
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" id = "edit_spcial_3" name="edit_spcial[]" value="3" <if condition="isset($scope[3])">checked='true'</if> />关键词
+</td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr>
+<td colspan='3'>
+<input type="checkbox" name="softfrom_edit" value="1" onclick="soft_from_edit();" <if condition="$edit_list['softfrom'] neq ''">checked='true'</if> />
+<b>软件提交路径适用范围（选填）:</b>
+</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+ <tr id="softfrom_edit" style=<if condition="$edit_list['softfrom'] eq ''">"display:none;"</if>><td colspan='3' align='left'>
+<input type="checkbox" name="edit_softfrom[]" value="1" <if condition="isset($softfrom_list[1])">checked='true'</if>  />新软件提交
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" name="edit_softfrom[]" value="2" <if condition="isset($softfrom_list[2])">checked='true'</if> />修改软件提交
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" name="edit_softfrom[]" value="3" <if condition="isset($softfrom_list[3])">checked='true'</if> />升级提交
+</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+<tr>
+<td colspan='3'>
+<input type="checkbox" name="softobj" value="1" onclick="soft_obj()" <if condition="$edit_list['soft_scope'] neq ''">checked='true'</if>/>
+<b>软件类型范围（选填）</b>
+</td>
+</tr>
+<tr><td>
+<div id="category" style=<if condition="$edit_list['soft_scope'] neq ''">"display:back;width: 385px;"<else/>"display:none;width: 385px;"</if>>
+<table   border="0" cellpadding="0" cellspacing="0" >
+	<volist name='cname' id='vo' key='k'>
+	<tr><td colspan='5'><input type="checkbox" onclick="$('input[rel={$vo.category_id}]').attr('checked', $(this).attr('checked') == 'checked');edit_refreshCatid();"/><strong>{$vo.name}</strong></td></tr>
+	<tr>
+	<td colspan='5'>----------------------------------------------------------------------</td></tr>
+	<tr>
+	<volist name="vo['sub']" id = 'v' key='m'> 
+	<td><input rel="{$vo.category_id}" onclick='edit_catid()' type="checkbox" name="editcatid[]" value="{$v.category_id}" <if condition="isset($cateid[$v['category_id']])">checked='true'</if>/>&nbsp;&nbsp;&nbsp;{$v.name}</td>
+	<if condition="$m % 5 eq 0 "></tr></if>
+	</volist>
+	</volist>
+</table>
+</div>	
+</td></tr>
+	<input type='hidden' name='cateid_edit' id='cateid_edit' value="{$edit_list['soft_scope']}"/>
+<tr><td>&nbsp;</td></tr>
+<tr>
+<td colspan='3'>
+<input type="checkbox" name="editwhite" value="1" onclick="edit_white()" <if condition="$edit_list['white_obj'] != 2 || $edit_list['devid_str'] != ''">checked='true'</if> />
+<b>白名单开放范围（选填）</b>
+</td>
+</tr>	
+<tr><td>&nbsp;</td></tr>
+<tr id="editwhite_div" style=<if condition="$edit_list['white_obj'] != 2 || $edit_list['devid_str'] != ''">"display:back;"<else/>"display:none;"</if>>
+<td colspan='3' align='left'>
+<input type="checkbox" id="edit_type2" name="edit_type[]" value="2"  <if condition="$edit_list['white_obj'] == 0 || $edit_list['white_obj'] == 1">checked='true'</if>/>开发者类型
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" id="edit_type1" name="edit_type[]" value="1"  <if condition="$edit_list['devid_str'] != ''">checked='true'</if> />开发者ID&nbsp;&nbsp;
+</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+<tr >
+<td colspan='3' align='left'>
+	<div id="edit_obj_type"  <if condition="$edit_list['white_obj'] == 0 || $edit_list['white_obj'] == 1">style="display:back;" <else/>style="display:none;"</if>>
+	<input type="radio" id="type0" name="type_edit" value="0" <if condition="$edit_list['white_obj'] == 0">checked='true'</if> />公司
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<input type="radio" id="type1" name="type_edit" value="1" <if condition="$edit_list['white_obj'] == 1">checked='true'</if> />个人
+	</div><br/>
+	<div id="edit_dev_man"  <if condition="$edit_list['devid_str'] != ''">style="display:back;" <else/>style="display:none;"</if> >
+	选择接收人：<input size='25' type="text" name="devid_edit" id="devid_edit" value="{$edit_list['devid_str']}" onchange="if(!/^[0-9,]*$/.test(this.value)){alert('只能输入数字加逗号'); this.value='';}" />
+	</div><br/>
+</td>
+</tr>
+<tr><td>备注：<textarea style="width:300px"  name="info">{$edit_list['info']}</textarea></td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr align='center'>
+	<td><input name="" type="submit" value="确定" />
+	<input name="" type="button" onclick="self.tb_remove()"" value="取消" /></td>
+</tr>	
+</table>	
+</form>
+
+<script>
+$('#edit_type2').click(function(){
+	$('#edit_type2').each(function(){
+		if($(this).is(':checked')) {
+			$('#edit_obj_type').show();
+		}else{
+			$('#edit_obj_type').hide();
+			$("#type0").attr('checked', false);
+			$("#type1").attr('checked', false);
+		}
+	});
+});
+$('#edit_type1').click(function(){
+	$('#edit_type1').each(function(){
+		if($(this).is(':checked')) {
+			$('#edit_dev_man').show();
+		}else{
+			$('#edit_dev_man').hide();
+			$("#devid_edit").val('');
+		}
+	});
+});
+function edit_catid(){
+	edit_refreshCatid();
+}
+function edit_refreshCatid()
+{
+	var ids = '';
+	$("input[name='editcatid[]']").each(function(){
+		if (this.checked) {
+			ids+= $(this).val() + ',';
+		}
+		$('#cateid_edit').val(ids);
+	});
+}
+function soft_obj(){
+	$("[name='softobj']").each(function(){
+		if($(this).is(':checked')) {
+			$('#category').show();
+		}else{
+			$('#category').hide();
+		}
+	});
+}
+function edit_white(){
+	$("[name='editwhite']").each(function(){
+		if($(this).is(':checked')) {
+			$('#editwhite_div').show();
+		}else{
+			$('#editwhite_div').hide();
+			$('#edit_dev_man').hide();
+			$('#edit_obj_type').hide();
+			$("#edit_type1").attr('checked', false);
+			$("#edit_type2").attr('checked', false);
+		}
+	});
+}
+function soft_from_edit(){
+	$("[name='softfrom_edit']").each(function(){
+		if($(this).is(':checked')) {
+			$('#softfrom_edit').show();
+		}else{
+			$('#softfrom_edit').hide();
+		}
+	});
+}
+</script>

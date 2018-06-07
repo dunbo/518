@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery-1.9.1.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+</head>     
+<body>
+<div class="search_box margin_top">
+	<table width="99%" cellspacing="0" cellpadding="0" class="search_table">
+		<tbody>
+<form method='get' action="__URL__/release_list" >
+			<tr>
+				<td width="18%">文章标题：<input type="text" class="search_item_text" value="{$title}" id="title" name="title"></td>
+				<td width="35%" width="300" colspan='3' >起止时间：<span><input type="text" name="begintime" id="begintime" value="{$begintime}" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>~
+				<span><input id="endtime" name="endtime" style="cursor: hand; width: 150px;" value="{$endtime}" size="15" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span></td>
+				<td width="44%"><input type="submit" class="search_btn" value="搜索"></td>
+			</tr>
+</form>
+			<tr><td colspan='5' align='right'><button  onclick="window.location.href='__URL__/help_content_edit'">添加文章</button></td></tr>
+		 </tbody>
+	</table>
+</div>
+<div>{$total}条记录</div>
+<table cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="7%">一级排序</th>
+			<th width="15%">一级目录</th>
+			<th width="7%">二级排序</th>
+			<th width="15%">二级目录</th>
+			<th width="20%">文章标题</th>
+			<th width="10%">添加时间</th>
+			<th width="10%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<?php foreach($list as $k => $v): ?>
+		<?php if($title || ($begintime && $endtime )){ ?>
+			<tr>
+				<td ><?php echo $lists[$v['pid']]['one_pos'] ? $lists[$v['pid']]['one_pos'] : $v['one_pos']; ?></td>
+				<td ><?php echo $lists[$v['pid']]['directory'] ? $lists[$v['pid']]['directory'] : $v['directory']; ?></td>
+				<td ><?php echo $v['pid'] ? $v['two_pos'] : ''; ?></td>
+				<td ><?php echo $v['pid'] ? $v['directory'] : ''; ?></td>
+				<td >
+				<?php if($_SERVER['SERVER_ADDR']=='192.168.0.99' || $_SERVER['SERVER_ADDR']=='127.0.0.1'|| $_SERVER['SERVER_ADDR']=='10.0.3.15') { ?>
+					<a target='_blank' href='http://9.newdev.anzhi.com/help_detail.php?id=<?php echo $v['id']; ?>'>
+					<?php echo $v['title']; ?>
+					</a>
+				<?php }else{ ?>	
+					<a target='_blank' href='http://dev.anzhi.com/help_detail.php?id=<?php echo $v['id']; ?>'>
+					<?php echo $v['title']; ?>
+					</a>				
+				<?php } ?>	
+				</td>
+				<td align='center'>
+				<div style='width:70px;'>
+				<?php echo $v['add_tm'] ? date("Y-m-d H:i:s",$v['add_tm']) :''; ?></div></td>
+				<td width="10%">
+					<a href='__URL__/help_content_edit/editor_id/<?php echo $v['id']; ?>'>编辑</a>
+					<a href="javascript:void(0);"  onclick="del_check('__URL__/help_content_del/id/<?php echo $v['id']; ?>/pid/<?php echo $v['pid']; ?>');" >删除</a>
+				</td>
+			</tr>
+		<?php }else{ ?>
+			<tr>
+				<td ><?php echo $v['one_pos']; ?></td>
+				<td ><?php echo $v['directory']; ?></td>
+				
+				<td colspan='5'>
+				<table cellpadding="0" cellspacing="0" class="table_list">
+			<?php if($v['two_dir']){ ?>	
+				<?php foreach($v['two_dir'] as $val){ ?>
+				<tr>
+					<td  width="5%"><?php echo $val['two_pos']; ?></td>
+					<td width="17%"><?php echo $val['directory']; ?></td>
+					<td width="22%">
+					<?php if($_SERVER['SERVER_ADDR']=='192.168.0.99' || $_SERVER['SERVER_ADDR']=='127.0.0.1'|| $_SERVER['SERVER_ADDR']=='10.0.3.15') { ?>	
+						<a target='_blank' href='http://9.newdev.anzhi.com/help_detail.php?id=<?php echo $val['id']; ?>'>
+						<?php echo $val['title']; ?>
+						</a>	
+					<?php }else{ ?>
+						<a target='_blank' href='http://dev.anzhi.com/help_detail.php?id=<?php echo $val['id']; ?>'>
+						<?php echo $val['title']; ?>
+						</a>	
+					<?php } ?>		
+					</td>
+					<td width="10%" >
+					<div style='width:70px;align:center;'>
+					<?php echo $val['add_tm'] ? date("Y-m-d H:i:s",$val['add_tm']) : ''; ?>
+					</div>
+					</td>
+					<td width="10%">
+					<a href='__URL__/help_content_edit/editor_id/<?php echo $val['id']; ?>'>编辑</a>
+					<a href="javascript:void(0);"  onclick="del_check('__URL__/help_content_del/id/<?php echo $val['id']; ?>/pid/<?php echo $val['pid']; ?>');" >删除</a>
+					</td>
+				</tr>
+				<?php } ?>
+			<?php }else{ ?>	
+				<tr>
+					<td width="6%">&nbsp;</td>
+					<td width="17%">&nbsp;</td>
+					<td width="22%">
+					<?php if($_SERVER['SERVER_ADDR']=='192.168.0.99' || $_SERVER['SERVER_ADDR']=='127.0.0.1'|| $_SERVER['SERVER_ADDR']=='10.0.3.15') { ?>	
+						<a target='_blank' href='http://9.newdev.anzhi.com/help_detail.php?id=<?php echo $v['id']; ?>'>
+						<?php echo $v['title']; ?>
+						</a>					
+					<?php }else{ ?>
+						<a target='_blank' href='http://dev.anzhi.com/help_detail.php?id=<?php echo $v['id']; ?>'>
+						<?php echo $v['title']; ?>
+						</a>	
+					<?php } ?>	
+					</td>
+					<td width="10%" >
+					<div style='width:70px;align:center;'>
+					<?php echo $v['add_tm'] ? date("Y-m-d H:i:s",$v['add_tm']) : ''; ?>
+					</div>
+					</td>
+					<td width="10%">
+					<a href='__URL__/help_content_edit/editor_id/<?php echo $v['id']; ?>'>编辑</a>
+					<a href="javascript:void(0);"  onclick="del_check('__URL__/help_content_del/id/<?php echo $v['id']; ?>');" >删除</a>
+					</td>
+				</tr>
+			<?php } ?>
+				</table>
+				</td>
+			</tr>
+		<?php } ?>
+	<?php endforeach;?>
+	</tbody>
+</table>
+<div  align='left'>{$page}</div>
+</body>
+</html>
+<script>
+function del_check(url){
+	if(confirm('是否确认删除？')){
+		window.location.href = url
+	}
+}
+
+//一级排序
+$('.extent_rank').change(function(){
+	var url = '__URL__/pub_help_sequence/id/'+$(this).attr('rel')+'/one_pos/'+$(this).val();
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+			var url     = eval("("+response+")");
+			var jumpUrl = '__URL__/release_list/p/<?php echo is_numeric($_GET['p']) ? $_GET['p'] : '1'; ?>/lr/<?php echo is_numeric($_GET['lr']) ? $_GET['lr'] : '10'; ?>';
+			window.location.href = jumpUrl;
+			if(window.ActiveXObject) window.event.returnValue = false;
+		}
+	});
+});
+//二级排序
+$('.extent_rank2').change(function(){
+	var url = '__URL__/pub_help_sequence/id/'+$(this).attr('rel')+'/two_pos/'+$(this).val()+'/pid/'+$(this).attr('pid');
+	$.ajax({
+		type: "GET",
+		url : url,
+		success: function(response){
+			var url     = eval("("+response+")");
+			var jumpUrl = '__URL__/release_list/p/<?php echo is_numeric($_GET['p']) ? $_GET['p'] : '1'; ?>/lr/<?php echo is_numeric($_GET['lr']) ? $_GET['lr'] : '10'; ?>';
+			window.location.href = jumpUrl;
+			if(window.ActiveXObject) window.event.returnValue = false;
+		}
+	});
+});
+</script>

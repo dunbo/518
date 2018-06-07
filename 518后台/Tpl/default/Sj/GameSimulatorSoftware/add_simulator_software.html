@@ -1,0 +1,272 @@
+<include file="../Public/header"/>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+
+<script>
+    function checkLen(obj) {
+        var maxChars = 70;//最多字符数
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+    };
+    // 检查字符串是否使用英文、数字、下划线或拼音
+    function isLetter(str) {
+        if (str.length!=0) {
+            reg=/^[a-zA-Z1-9 _]+$/;
+            if(!reg.test(str)){
+                return false;
+            }
+        }
+        return true;
+    }
+    function add_simulator_software() {
+        if ($.trim($("#type").val()) <= 0 || $.trim($("#type").val()) >=6) {
+            $("#s1").html('<font color="red">请选择软件类型<font>');
+            return;
+        } else {
+            $("#s1").html('');
+        }
+        if ($.trim($("#software_name").val()) == "") {
+            $("#s2").html('<font color="red">请填写软件名称<font>');
+            return;
+        } else {
+            $("#s2").html('');
+        }
+        // ROM文件相关判断
+        var rom_path = $.trim($("#rom_upload_file").val());
+        var rom_path_length = rom_path.length;
+        if (rom_path == "") {
+            $("#s3").html('<font color="red">请选择上传软件<font>');
+            return;
+        } else {
+            $("#s3").html('');
+        }
+        // 判断rom文件类型
+        if (rom_path.substring(rom_path_length-4, rom_path_length) != ".zip") {
+            $("#s3").html('<font color="red">请选择上传zip类型<font>');
+            return;
+        } else {
+            $("#s3").html('');
+        }
+        // 判断文件名称是否为英文
+        rom_name = rom_path.substring(rom_path.lastIndexOf("\\")+1, rom_path_length-4);
+        if (!isLetter(rom_name)) {
+            $("#s3").html('<font color="red">rom的命名必须使用英文、数字、下划线或拼音<font>');
+            return;
+        } else {
+            $("#s3").html('');
+        }
+        // icon相关判断
+        var icon_path = $.trim($("#icon_upload_file").val());
+        var icon_path_length = icon_path.length;
+        if (icon_path == "") {
+            $("#s4").html('<font color="red">请选择上传icon<font>');
+            return;
+        } else {
+            $("#s4").html('');
+        }
+        // 判断icon文件类型
+        var icon_type = icon_path.substring(icon_path_length-4, icon_path_length);
+        if (icon_type != ".png" && icon_type != ".jpg") {
+            $("#s4").html('<font color="red">请选择上传png、jpg类型<font>');
+            return;
+        } else {
+            $("#s4").html('');
+        }
+        icon_name = icon_path.substring(icon_path.lastIndexOf("\\")+1, icon_path_length);
+        // 星级判断
+        if ($.trim($("#star").val()) < 0 || $.trim($("#star").val()) > 10) {
+            $("#s5").html('<font color="red">请选择星级<font>');
+            return;
+        } else {
+            $("#s5").html('');
+        }
+        
+        if (trim($("#note").val()).length>70) {
+            $("#s6").html('<font color="red">简介内容限制在70字以内<font>');
+            return;
+        } else {
+            $("#s6").html('');
+        }
+        /* 需求变更，软件名称可重复
+        // 最后检测软件名称是否已存在，如果存在则提示
+        var software_name_exists = check_software_name(false);
+        if (!software_name_exists) {
+            return;
+        }
+        */
+        /* 改用时间戳+文件名来命名，所以不用检查是否存在的情况了
+        // 最后检测rom是否已存在，如果存在则提示
+        var rom_exists = check_if_rom_exists(false, rom_name+".zip");
+        if (!rom_exists) {
+            return;
+        }
+        // 最后检测icon是否已存在，如果存在则提示
+        var icon_exists = check_if_icon_exists(false, icon_name);
+        if (!icon_exists) {
+            return;
+        }
+        */
+        $('#add_simulator_software').submit();
+    };
+    
+    /*
+    // 检查软件名称是否可用，传入参数b_async如果为true，表示设置ajax请求为异步，false为同步
+    function check_software_name(b_async) {
+        var software_name = trim($("#software_name").val());
+        var ret = true;
+        if (software_name != "") {
+            var param = {
+                software_name : software_name
+            };
+            $.ajax({
+                url:'__URL__/check_software_name',
+                type:'POST',
+                async:b_async,
+                data:param,
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    if(data.status != 0) {
+                        $("#s2").html('<font color="red">软件名称已存在<font>');
+                        ret = false;
+                    } else {
+                        $("#s2").html('');
+                        ret = true;
+                    }
+                }
+            });
+        }
+        return ret;
+    }
+    
+    // 检查rom包是否已存在，传入参数b_async如果为true，表示设置ajax请求为异步，false为同步
+    function check_if_rom_exists(b_async, rom_name) {
+        var ret = true;
+        if (rom_upload_file != "") {
+            var param = {
+                rom_upload_file : rom_name
+            };
+            $.ajax({
+                url:'__URL__/check_if_rom_exists',
+                type:'POST',
+                async:b_async,
+                data:param,
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    if(data.status != 0) {
+                        $("#s3").html('<font color="red">rom已存在<font>');
+                        ret = false;
+                    } else {
+                        $("#s3").html('');
+                        ret = true;
+                    }
+                }
+            });
+        }
+        return ret;
+    }
+    
+    // 检查rom包是否已存在，传入参数b_async如果为true，表示设置ajax请求为异步，false为同步
+    function check_if_icon_exists(b_async, icon_name) {
+        var ret = true;
+        if (icon_upload_file != "") {
+            var param = {
+                icon_upload_file : icon_name
+            };
+            $.ajax({
+                url:'__URL__/check_if_icon_exists',
+                type:'POST',
+                async:b_async,
+                data:param,
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    if(data.status != 0) {
+                        $("#s4").html('<font color="red">icon已存在<font>');
+                        ret = false;
+                    } else {
+                        $("#s4").html('');
+                        ret = true;
+                    }
+                }
+            });
+        }
+        return ret;
+    }
+    */
+</script>
+
+
+<body>
+<h2>模拟器软件添加</h2>
+<form method="post" action="__URL__/add_simulator_software" id="add_simulator_software" enctype="multipart/form-data">
+    <input type="hidden" id="from" name="from" value="{$from}"/>
+    <div class="form_list">
+        <label><font color="red">*</font>软件类型</label>
+        <select id="type" name="type">
+            <option value="0" selected="selected">请选择</option>
+            <option value="1">{$all_status[0]['name']}</option>
+            <option value="2">{$all_status[1]['name']}</option>
+            <option value="3">{$all_status[2]['name']}</option>
+            <option value="4">{$all_status[3]['name']}</option>
+            <option value="5">{$all_status[4]['name']}</option>
+        </select>
+        <span id="s1" class="prompt_infor"></span>
+    </div>
+    <div class="clear"></div>
+    <div class="form_list">
+        <label><font color="red">*</font>软件名称：</label>
+        <input type="text" id="software_name" name="software_name" class="input_text"/>
+        <span id="s2" class="prompt_infor"></span>
+    </div>
+    <div class="clear"></div>
+    <div class="form_list">
+        <label><font color="red">*</font>添加ROM：</label>
+        <input id="rom_upload_file" type="file" name="rom_upload_file" class="input_text"/>
+        <span id="s3" class="prompt_infor"></span>
+    </div>
+    <div class="clear"></div>
+    <div class="form_list">
+        <label><font color="red">*</font>添加ICON：</label>
+        <input id="icon_upload_file" type="file" name="icon_upload_file" class="input_text"/>
+        <span id="s4" class="prompt_infor"></span>
+    </div>
+    <div class="clear"></div>
+    <div class="form_list">
+        <label><font color="red">*</font>星级：</label>
+        <select id="star" name="star">
+            <option value="-1" selected="selected">请选择</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+        </select>
+        <span id="s5" class="prompt_infor"></span>
+    </div>
+    <div class="clear"></div>
+    <div class="form_list">
+        <label>简介：</label>
+        <textarea id="note" type="text" name="note" onKeyUp="checkLen(this)" class="input_text"></textarea>
+        <span style="padding-left:155px">简介内容限制在70字以内</span>
+        <span id="s6" class="prompt_infor"></span>
+    </div>
+    <div class="clear"></div>
+    <div class="form_btns_box">
+		<a href="#" onClick="add_simulator_software()">提交</a>
+		<a href="__URL__/ren_tian_tang">取消</a>
+	</div>
+    <div class="clear"></div>
+</form>
+
+</body>

@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<style>.qh{float:left;width:98px;height:28px;line-height:28px;text-align:center;cursor:pointer;font-size:14px;font-family:微软雅黑;text-decoration:none;color:#444;padding:0;border-width:1px;border-style:solid;border-color:#bdbdbd;display:block}</style>
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js?1'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+</head>
+<body>
+		<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+			<thead>
+			<tr>
+				<td style="font-size: 16px;font-weight: 700;">
+					<div style="margin-top:10px;margin-bottom:10px">查看配置详情</div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div style="margin-top:10px;margin-bottom:10px">每日签到配置</div>
+				</td>
+			</tr>
+			</thead>
+		</table>
+       <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+	        <thead >
+	          <tr align="center" >
+				<th width="10%">月份</th>
+				<th width="10%">日期</th>
+				<th width="10%">每日签到图片</th>
+				<th width="10%">奖励类型</th>
+				<th width="10%">红包奖励类型</th>
+				<th width="15%">红包详情</th>
+				<th width="15%">红包关联软件</th>
+				<th width="10%">抽奖详情</th>
+				<!-- <th width="10%">软件库</th> -->
+	          </tr>
+	        </thead>
+            <tbody>
+				<?php foreach($days as $val) :?>
+					<tr>
+					<td height="20" align="center">{$year_month}</td>
+					<td height="20" align="center">{$val['day']}</td>
+					<td height="20" align="center">
+						<if condition="$val.type eq 1 || $val.type eq 2">
+							<img src="<?php echo IMGATT_HOST; ?>{$val.pic_path}" width="74px;" height="54px;">
+						</if>
+					</td>
+					<td height="20" align="center">
+						<if condition="$val.type eq 1">
+							红包
+						<elseif condition="$val.type eq 2" />
+							抽奖
+						<else />
+							无
+						</if>
+					</td>
+					<td height="20" align="center">
+						<if condition="$val.type eq 1 && $val.condition eq 1">
+							红包
+						<elseif condition="$val.type eq 1 && $val.condition eq 2" />
+							红包任务
+						<else />
+							无
+						</if>
+					</td>
+					
+					<td height="20" align="center">
+						<if condition="$val.type eq 1">
+							红包id：{$val['redid']}<br/>
+							总额：{$red_list[$val['redid']]['totalmon']}数量：{$red_list[$val['redid']]['totalnum']}<br/>
+							金额随机范围：{$red_list[$val['redid']]['minrand']}~{$red_list[$val['redid']]['maxrand']}
+						<else />
+							————
+						</if>
+					</td>
+					<td height="20" align="center">
+						<if condition="$val.type eq 1 && $val.condition eq 2">
+							包名：{$val['package']}<br/>
+							软件名：{$val['softname']}
+						<else />
+							————
+						</if>
+					</td>
+					
+					<td height="20" align="center">
+						<if condition="$val.type eq 2">
+							<a title="奖品配置详情" href="/index.php/Sj/SignAward/sign_award_detail/aid/{$val.id}/atp/0/" style="color:blue" class="thickbox">查看</a>
+						<else />
+							————
+						</if>
+					</td>
+				<?php endforeach;?>
+           </tbody>
+         </table>
+         
+       <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+			<thead>
+			<tr>
+				<td style="font-size: 16px;font-weight: 700;">
+					<div style="margin-top:10px;margin-bottom:10px">连续签到配置</div>
+				</td>
+			</tr>
+			</thead>
+		</table>
+       <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+	        <thead >
+				<tr>
+					<th width="10%">ID</th>
+					<th width="10%">连续签到天数</th>
+					<th width="10%">参与抽奖人数系数</th>
+					<th width="15%">状态</th>
+					<th width="10%">抽奖详情</th>
+				</tr>
+	        </thead>
+            <tbody>
+				<?php foreach($list as $key => $val){ ?>
+				<tr>
+					<td>{$val.id}</td>
+					<td>{$val.count}</td>
+					<td>
+						基数：{$val.base_num} &nbsp;&nbsp;&nbsp;随机数：{$val.random_start}-{$val.random_end}
+					</td>
+					<td>
+						<if condition="$val.status eq 1">
+						启动
+						<else/>
+						停止
+						</if>
+					</td>
+					<td>
+						<a style="color:blue" title="奖品配置详情" class="thickbox" href="/index.php/Sj/SignAward/sign_award_detail/aid/{$val.id}/atp/1" >查看</a>
+					</td>
+				</tr>
+				<?php } ?>
+           </tbody>
+         </table>
+         
+         
+         <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+			<thead>
+			<tr>
+				<td style="font-size: 16px;font-weight: 700;">
+					<div style="margin-top:10px;margin-bottom:10px">补签卡配置</div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div style="margin-top:10px;margin-bottom:10px">金币购买补签卡</div>
+				</td>
+			</tr>
+			</thead>
+		</table>
+
+       <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+	        <thead >
+				<tr>
+					<th width="10%">金币价格</th>
+					<th width="10%">每月购买次数</th>
+					<th width="10%">状态</th>
+				</tr>
+	        </thead>
+            <tbody>
+				<?php foreach($list_price as $key => $val){ ?>
+				<tr>
+					<td>{$val.price}</td>
+					<td>{$val.buy_num}</td>
+					<td>
+						<if condition="$val.status eq 1">
+						启动
+						<else/>
+						停止
+						</if>
+					</td>
+				</tr>
+				<?php } ?>
+           </tbody>
+         </table>
+         
+         <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+			<thead>
+			<tr>
+				<td>
+					<div style="margin-top:10px;margin-bottom:10px">做任务领补签卡</div>
+				</td>
+			</tr>
+			</thead>
+		</table>
+
+       <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+	        <thead >
+				<tr>
+					<th width="10%">每月任务次数</th>
+					<th width="10%">软件库</th>
+					<th width="10%">状态</th>
+				</tr>
+	        </thead>
+            <tbody>
+				<?php foreach($list_task as $key => $val){ ?>
+				<tr>
+					<td>{$val.task_num}</td>
+					<td><a title="软件库配置详情" class="thickbox"  href="/index.php/Sj/SignTaskSoft/task_soft_detail?aid={$val.mid}&atp=1" style="color:blue">查看</a></td>
+					<td>
+						<if condition="$val.status eq 1">
+						启动
+						<else/>
+						停止
+						</if>
+					</td>
+				</tr>
+				<?php } ?>
+           </tbody>
+         </table>
+ </body>
+</html>

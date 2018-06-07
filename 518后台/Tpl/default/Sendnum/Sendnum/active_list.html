@@ -1,0 +1,102 @@
+<include file="../Public/header" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/css/tablelist.css" />
+<script>
+function checkit()
+{
+    if(confirm("确定要这么执行该操作吗？"))
+    {
+        return ture;
+    }
+    return false;
+}
+</script>
+<center>
+	<form action="__URL__/active_list" method="GET">
+	<table>
+		<tr><td>活动名:</td><td><input type="text" name="active_name" value="{$active_name}" /></td><td>活动状态:</td>
+		<td>
+			<select name="search_type">
+			<?php foreach($active_type_list as $info){ ?>
+			<option value="<?php echo $info[0];?>" <?php if($info[0] == $search_type) echo "selected=selected"?>><?php echo $info[1]; ?></option>
+			<?php } ?>
+			</select>
+		</td>
+		<td><input type="submit" name="search" value="搜索"></td>
+		</tr>
+	</table>
+	</form>
+	<table width="90%" border="0" cellpadding="0" cellspacing="0" class="table_list">
+		<tr>
+		<th><a href="__URL__/active_list/order/id/type/{$order}">活动id</a></th>
+		<th>活动名称</th>
+		<th><a href="__URL__/active_list/order/start_tm/type/{$order}">活动开始时间</a></th>
+		<th>活动结束时间</th>
+		<th>创建人</th>
+		<th>已发数量</th>
+		<th>余量</th>
+		<th>上传总量</th>
+		<th>活动链接</th>
+		<th>活动状态</th>
+		<th>操作</th>
+		</tr>
+		<script type="text/javascript" src='/Public/js/zeroclipboard/ZeroClipboard.js'></script>
+		<?php foreach($list as $info){ ?>
+		<tr>
+			<td><?php echo $info['id'];?></td>
+			<td><?php echo $info['active_name'];?></td>
+			<td><?php echo date("Y-m-d H:i:s",$info['start_tm']);?></td>
+			<td><?php echo date("Y-m-d H:i:s",$info['end_tm']);?></td>
+			<td><?php echo $info['creater'];?></td>
+			<td><?php echo $info['used_cnt'];?></td>
+			<td><?php echo $info['num_cnt'] - $info['used_cnt'];?></td>
+			<td><?php echo $info['num_cnt'];?></td>
+			<td id="copy<?php echo $info['id'];?>"><a  href="#">复制</a></td>
+
+			<td>
+			<?php
+			 if ($info['start_tm'] < time() and $info['end_tm'] > time() and $info['status'] == 0){
+				 echo "暂停";
+			 }elseif($info['start_tm'] < time() and $info['end_tm'] > time() and $info['status'] == 1 and $info['num_cnt'] - $info['used_cnt'] > 0){
+				 echo  "正常";
+			 }elseif($info['start_tm'] > time()){
+				 echo "未开始";
+			 }elseif($info['end_tm'] < time() || $info['num_cnt'] - $info['used_cnt'] == 0){
+				 echo "已结束";
+			 }
+			?>
+
+			</td>
+			<td>
+				<?php
+			//"暂停";
+			if ($info['start_tm'] < time() and $info['end_tm'] > time() and $info['status'] == 0){ ?>
+				<a href="__URL__/active_contrl/id/{$info.id}/type/1" onclick="javascript:return checkit()" >恢复</a>|<a href="__URL__/active_modify/id/{$info.id}{$url_suffix}">活动编辑</a>|<a href="__URL__/active_csv_dl/activeid/{$info.id}">下载</a>
+			 <?php } elseif($info['start_tm'] < time() and $info['end_tm'] > time() and $info['status'] == 1 and $info['num_cnt'] - $info['used_cnt'] > 0){
+				//"正常"; ?>
+				<a href="__URL__/active_contrl/id/{$info.id}/type/0" onclick="javascript:return checkit()">停用</a> | <a href="__URL__/active_modify{$url_suffix}/id/{$info.id}/view/1">查看</a>
+			<?php }elseif($info['start_tm'] > time() ){
+				 //"未开始";
+				 if($info['status'] == 1){ ?>
+					<a href="__URL__/active_contrl/id/{$info.id}/type/0" onclick="javascript:return checkit()">停用</a> | <a href="__URL__/active_csv_dl/activeid/{$info.id}">下载</a> | | <a href="__URL__/active_modify{$url_suffix}/id/{$info.id}/view/1">查看</a>
+				 <?php }else{ ?>
+					<a href="__URL__/active_contrl/id/{$info.id}/type/1" onclick="javascript:return checkit()" >恢复</a>|<a href="__URL__/active_modify/id/{$info.id}{$url_suffix}">活动编辑</a>|<a href="__URL__/active_csv_dl/activeid/{$info.id}">下载</a>
+				 <?php } ?>
+
+			 <?php }elseif($info['end_tm'] < time() || $info['num_cnt'] - $info['used_cnt'] ==  0){
+
+				//"已结束";
+?>
+				<a href="__URL__/active_csv_dl/activeid/{$info.id}">下载</a> |  <a href="__URL__/active_modify{$url_suffix}/id/{$info.id}/view/1">查看</a>
+			 <?php } ?>
+			</td>
+		</tr>
+		<script>
+			var dom = 'copy' + <?php echo $info['id'];?>;
+			var content = "<?php echo 'forum.php?mod=game&a='.$info['id'];?>";
+			ZC(dom).cut(content);
+		</script>
+		<?php } ?>
+	</table>
+
+	{$page}
+</center>

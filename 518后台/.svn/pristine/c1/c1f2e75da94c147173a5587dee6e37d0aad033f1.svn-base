@@ -1,0 +1,575 @@
+<style type="text/css">
+<!--
+.tb{ border-top:1px solid #666666;border-left:1px solid #666666;}
+.tb th,.tb td{border-right:1px solid #666666; border-bottom:1px solid #666666;}
+.tb_add tr{line-height:33px;}
+-->
+</style>
+<include file="../Public/header" /><body>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" type="text/css" media="all" href="/Public/css/tablelist.css" />
+<script type="text/javascript">
+var options, a;
+jQuery(function(){
+	options = {
+		serviceUrl:'/index.php/Sj/Channels/channels_setup',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+	};
+  a = $('#clientname').autocomplete(options);
+});
+</script>
+<script type="text/javascript">
+var option, b;
+jQuery(function(){
+	option = {
+		serviceUrl:'/index.php/Sj/Channels/category_channels',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+	};
+  b = $('#chname').autocomplete(option);
+});
+</script>
+
+<script>
+	
+function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		$.cookie('cids', '', {path: '/'});
+		tb_remove();
+	}
+
+	function onclikChannel()
+	{	
+		$('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+	}
+	function onclikChannel_c(cid)
+	{	
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	function check_arr()
+	{
+		$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+function get_params(){
+	var cid=document.getElementById("zh_cid_str").value;
+	var url='__URL__/category_channels';
+	if(cid){
+		url=url + "/cid/"+cid; 
+	}
+	var category_id=document.getElementById("category_array").value;
+	if(category_id){
+		url=url + "/category_id/"+category_id; 
+	}
+
+	document.form1.action=url;
+	return true;
+}
+
+</script>
+<form id="upload" method='get' action="__URL__/category_channels" >
+<table width="700" height="89"  border="0" cellpadding="0" cellspacing="0"  style="width:99%; margin:0 auto">
+  <tr>
+    <td colspan="8">分类：
+	<?php if($category_id ==''): ?>
+	所有分类
+	<?php else: ?>
+	<?php foreach($category_list as $key => $value): ?>
+		<?php if($category_id == $key):?>
+			<?php echo $value['name']?>
+		<?php endif; ?>
+	<?php endforeach;?>
+	<?php endif; ?>
+	</td>
+  </tr>
+  <tr>
+	    <td >渠道分类：
+	    <select name="category_id" >
+    		<option value="">--所有分类--</option>
+    		<?php foreach ($category_list as $key => $value): ?>
+   			 <option value="<?php echo $key?>" <?php if($category_id != '' && $category_id == $key):?>selected <?php endif; ?> ><?php echo $value['name']?></option>
+ 			 <?php endforeach; ?>
+		</select>
+		</td>
+		<td>
+			渠道名称：
+			<input type="text" name='chname' id = 'chname' value='{$chname_value}'>	
+		</td>
+		
+		<td>
+			客户名称：
+			<input type="text" name='clientname' id='clientname' value='{$clientname_value}'>
+		</td>
+		<br>
+</tr>
+	<tr>
+		<td>
+		所属部门：
+		<select name="department" >
+    		<option value="">--所有部门--</option>
+    		<?php foreach ($depart_value as $key => $value): ?>
+   			 <option value="<?php echo $value['name']?>"<?php if($department != '' && $department == $key):?>selected <?php endif; ?> ><?php echo $value['name']?></option>
+ 			 <?php endforeach; ?>
+		</select>
+		</td>
+		<td>
+		所属小组：
+		<select name="team" >
+    		<option value="">--所有小组--</option>
+    		<?php foreach ($team_value as $key => $value): ?>
+   			  <option value="<?php echo $value['name']?>"<?php if($team != '' && $team == $key):?>selected <?php endif; ?> ><?php echo $value['name']?></option>
+ 			 <?php endforeach; ?>
+		</select>
+		</td>
+		<td>
+		负责人：
+		<select name="fuzeren" >
+    		<option value="">--所有负责人--</option>
+			<?php foreach ($fuze_value as $key => $value): ?>
+   			  <option value="<?php echo $value['name']?>"<?php if($fuzeren != '' && $fuzeren == $key):?>selected <?php endif; ?> ><?php echo $value['name']?></option>
+ 			 <?php endforeach; ?>
+		</select>
+		</td>
+		<td>性质
+	<select name="co_group">
+	<option value="-1" <?php if($hezuo_value=='')  echo "selected"; else echo ''; ?> >全部</option>
+	<?php foreach($co_group_arr as $k => $v){ ?>
+		<option value="{$k}" <?php if($hezuo_value==$k)  echo "selected";?> >{$v}</option>
+	<?php } ?>
+	</select>
+	&nbsp;&nbsp;&nbsp;
+			<input type="hidden" value="{$zh_cid_str}" name="zh_cid_str" id="zh_cid_str">
+			<input type="hidden" value="{$category_id}" name="category_array" id="category_array">
+			<input type="submit" name="button" id="button" value="搜索" />
+	</td>
+	</tr>
+  </tr>
+
+</table>
+
+</form>
+<div style="width:99%; margin:15px auto 0">
+	<input type="button" id="delete" value="批量转移渠道"   onclick="popup('_add_div')" class="search_btn"/> 
+</div>
+
+<!-- <input type="button" id="delete" value="批量加入分类"   onclick="show()" class="thickbox"/>-->
+
+<table cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr height="40"> 
+			  <th> <input type="checkbox" onClick="SelectAll(this)" value="全选"/></td>
+			  <th>分类ID</th>
+			  <th>渠道分类</th>
+			  <th>渠道ID</th>
+			  <th>渠道名称</th>
+			  <th>客户名称</th>
+			  <th>负责人</th>
+			  <th>所属小组</th>
+			  <th>所属部门</th>
+			  <th>合作分类</th>
+			  <th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name="list" id="vo">
+		<tr height="0">
+		<td align="center"><input type="checkbox" name="id[]" value="{$vo.cid}" /></td>
+		<td align="center">{$vo.category_id}</td>
+
+		<php> if($vo['name']!=''){ </php>
+		<td align="center">{$vo.name}</td>
+		<php>}else{</php>
+		<td align="center">未分类</td>
+		<php>}</php>
+		
+		<td align="center">{$vo.cid}</td>
+        <td align="center">{$vo.chname|default='&nbsp;'|default='&nbsp;'}</td>
+		<php> if($vo['clientname']!=''){ </php>
+		<td align="center">{$vo.clientname}</td>
+		<php>}else{</php>
+		<td align="center">---</td>
+		<php>}</php>
+		<php> if($vo['fuzeren']!=''){ </php>
+		<td align="center">{$vo.fuzeren}</td>
+		<php>}else{</php>
+		<td align="center">---</td>
+		<php>}</php>
+        <php> if($vo['team']!=''){ </php>
+		<td align="center">{$vo.team}</td>
+		<php>}else{</php>
+		<td align="center">---</td>
+		<php>}</php>
+        <php> if($vo['department']!=''){ </php>
+		<td align="center">{$vo.department}</td>
+		<php>}else{</php>
+		<td align="center">---</td>
+		<php>}</php>
+		
+        <php> if($vo['co_group']==0){</php>
+        	<td align="center"><?php echo"未选择"; ?></td>
+           <php>}else{</php>
+		<td align="center"> <?php 
+              if($vo['co_group']==1)  echo "厂商";
+              if($vo['co_group']==2)  echo "捆绑";
+              if($vo['co_group']==3)  echo "门店";
+              if($vo['co_group']==4)  echo "平板";
+              if($vo['co_group']==5)  echo "刷机";
+              if($vo['co_group']==6)  echo "网盟";
+              if($vo['co_group']==7)  echo "线上合作";
+                            ?>
+        </td>
+			<php>}</php>
+		
+        <td align="center"><a href="__URL__/channel_jump?cid={$vo.cid}&category_id={$vo.category_id}&co_group={$vo.co_group}&chname=<?php echo urlencode($vo['chname']);?>&clientname=<?php echo urlencode($vo['clientname']);?>&fuzeren=<?php echo urlencode($vo['fuzeren']);?>&team=<?php echo urlencode($vo['team']);?>&department=<?php echo urlencode($vo['department']);?>" class='thickbox'>转移</a></td>
+		</tr>
+	</volist>
+	</tbody>
+</table>
+<br/>
+		{$page}
+<br/>
+<!--批量操作-->
+<div id="_add_div" style="position:absolute;top:150px;left:350px;display:none;background:#EEEEEE;width:550px;height:auto;border:1px solid #000;font-size:14px;">
+	<!--<form name="form_add" method="post" action="__URL__/channels_to_category" id="_form_add"  style="width:100%;height:100%;">-->
+	<table border="0" cellspacing="0" cellpadding="0" style="width:550px; height:100%;" class="tb_add">
+		
+		<tr>
+			<td class="td1" align="right" width="200">已获取的渠道数量：</td>
+			<td><span name = 'sid' id ='sid'></span></td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">转移方式： </td>
+			<td><input type="radio"  id='22' name="1" value='qudao' onclick='dian(2)' checked="checked"/>渠道分类<input type="radio" name="1" id='11' value='fuze'  onclick='dian(1)'/>负责人<input type="radio" name="1" id='33' value='fenlei'  onclick='dian(3)'/>合作分类</td>
+		</tr>
+		<tr id= 'qdfl' style="display:" class="td1">
+			<td align="right">渠道分类：</td>
+			<td><select name="category_id" id='ss' onblur='jccg()'>
+		    		<option value="">--所有分类--</option>
+		    		<?php foreach ($category_list as $key => $value): ?>
+		   			 <option value="<?php echo $key?>"><?php echo $value['name']?></option>
+		 			 <?php endforeach; ?>
+				</select>
+				<span id='flts'></span>
+			</td>
+		</tr>
+		<tr id ='fzr' style="display:none" class="td1">
+			<td class="td1" align="right">所属部门：</td>
+			<td>
+				<select name="department" id ='department' onblur='jcbm()'>
+					<option value="" >--所有部门--</option>
+					<?php foreach ($depart_value as $key => $value): ?>
+					 <option value="<?php echo $value['name']?>" onchange='jcbm()'><?php echo $value['name']?></option>
+					 <?php endforeach; ?>
+				</select>
+			<span id='bmts'></span>
+			</td>
+		</tr>
+		<tr id="fzr_01" style="display:none">
+			<td align="right">所属小组：</td>
+			<td>
+				<select name="team" id='team' onblur='jcxz()'>
+					<option value="">--所有小组--</option>
+					<?php foreach ($team_value as $key => $value): ?>
+					 <option value="<?php echo $value['name']?>"><?php echo $value['name']?></option>
+					 <?php endforeach; ?>
+				</select>
+				<span id='xzts'></span>
+			</td>
+		</tr>
+		<tr id="fzr_02" style="display:none">
+			<td align="right">负责人：</td>
+			<td>
+				<select name="fuzeren" id='fuzeren' onblur='jcfzr()'>
+					<option value="">--所有负责人--</option>
+					<?php foreach ($fuze_value as $key => $value): ?>
+					 <option value="<?php echo $value['name']?>"><?php echo $value['name']?></option>
+	
+					 <?php endforeach; ?>
+				</select>
+				<span id='fzrts'></span>
+			</td>
+		</tr>
+	<tr id="hzfl" style=" display:none;" class="td1">
+	<td align="right">合作分类：</td>
+	<td>
+	<select name="co_group" id="hezuo">
+	<option value="0" <?php if($hezuo_value==0)  echo "selected"; else echo ''; ?> >未选择</option>
+	<option value="1" <?php if($hezuo_value==1)  echo "selected"; else echo ''; ?> >厂商</option>
+	<option value="2" <?php if($hezuo_value==2)  echo "selected"; else echo ''; ?>>捆绑</option>
+	<option value="3" <?php if($hezuo_value==3)  echo "selected"; else echo ''; ?>>门店</option>
+	<option value="4" <?php if($hezuo_value==4)  echo "selected"; else echo ''; ?>>平板</option>
+	<option value="5" <?php if($hezuo_value==5)  echo "selected"; else echo ''; ?>>刷机</option>
+	<option value="6" <?php if($hezuo_value==6)  echo "selected"; else echo ''; ?>>网盟</option>
+	<option value="7" <?php if($hezuo_value==7)  echo "selected"; else echo ''; ?> >线上合作</option>
+	</select>
+					<span id='hzfl_01'></span>
+	</td>
+</tr>
+
+		<tr id="cut_add_input">
+			<td colspan="2" style="text-align:center;"><input style="margin:15px;" type="button" onClick="show_chuan();"  value="确定"></input><input name="sub_type" type="hidden" value="add" />
+			<input style="margin:15px;" type="button" onClick="popclose('_add_div')" value="取消">
+			</td>
+		</tr>
+	</table>
+	<!-- <input type="hidden" name="__hash__" value="4a674d3b2b9cb54d6467a3ced6861674" /> -->
+	<input type="hidden" name="cid" value="" />
+
+	<!--</form>-->
+</div>
+
+</body>
+<script type="text/javascript">
+function popup(id,user_id) {
+	
+	var str=document.getElementsByName("id[]");
+	var objarray=str.length;
+	var chestr="";
+	var checked_counts = 0; 
+	for (i=0;i<objarray;i++)
+	{
+	  if(str[i].checked == true)
+	  {
+	   chestr+=str[i].value+",";
+	   checked_counts++;
+	  }
+
+	}
+	if(chestr=='')
+	{
+
+		alert('请选择要操作的对象');
+		return false;
+	}else{
+	document.getElementById("sid").innerHTML= checked_counts;
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+	}
+}
+function popclose(id) {
+	$("#"+id).css({display:"none"});
+	$("#bgdiv").css({display:"none"});
+}
+
+
+function show_chuan()
+{
+
+	var zt = document.getElementsByName("1");
+	var category_id =$('#ss').val();
+	var co_group=$('#hezuo').val();
+	var value="";
+	for(var i=0;i<zt.length;i++){
+		if(zt[i].checked) 
+		 value = zt[i].value;
+		
+	}
+
+	if(value=='qudao')
+		{
+			if(category_id=='')
+			{	
+				document.getElementById('flts').innerHTML="请选择";
+     			document.getElementById("flts").style.color="#FF0000";
+     			return false;
+				
+			}else{
+			var str=document.getElementsByName("id[]");
+			var objarray=str.length;
+			var chestr=""; 
+			for (i=0;i<objarray;i++)
+			{
+			  if(str[i].checked == true)
+			  {
+			   chestr+=str[i].value+",";
+			  }
+			}
+			$.ajax({
+				type:"post",
+				url:"__URL__/channels_to_category",
+				data:"sid="+chestr+"&category_id="+category_id,
+				success:function(a){
+					if(a==1)
+					{
+						alert('成功');
+						window.location="/index.php/Sj/Channels/category_channels/";
+					}
+				}
+			});
+		}
+
+		}
+		else if(value=='fuze')
+		{
+			var department = $('#department').val();	
+			var team =$('#team').val();
+			var fuzeren =$('#fuzeren').val();
+			var str=document.getElementsByName("id[]");
+			var objarray=str.length;
+			var chestr=""; 
+			var g = 'zz';
+
+				if(department=='')
+				{
+					document.getElementById('bmts').innerHTML="请选择一个部门";
+     				document.getElementById("bmts").style.color="#FF0000";
+				
+					return false;
+				}else if(team==''){
+					document.getElementById('xzts').innerHTML="请选择一个小组";
+     				document.getElementById("xzts").style.color="#FF0000";
+				
+					return false;
+				}else if(fuzeren=='')
+				{
+					document.getElementById('fzrts').innerHTML="请选择一个负责人";
+     				document.getElementById("fzrts").style.color="#FF0000";
+					
+					return false;
+				}else{
+
+				for (i=0;i<objarray;i++)
+				{
+				  if(str[i].checked == true)
+				  {
+				   chestr+=str[i].value+",";
+				  }
+				}
+					$.ajax({
+					type:"post",
+					url:"__URL__/channels_to_category",
+					data:"sid="+chestr+"&category_id="+g+"&department="+department+"&team="+team+"&fuzeren="+fuzeren,
+					success:function(a){
+						if(a==1)
+						{
+							alert('成功');
+							window.location="/index.php/Sj/Channels/category_channels/";
+						}
+					
+					}
+				});
+			}
+	}
+	else if(value=='fenlei')
+		{
+		    var str=document.getElementsByName("id[]");
+			var objarray=str.length;
+			var chestr=""; 
+			var k="tt";
+			if(co_group==='')
+			{	
+				document.getElementById('hzfl_01').innerHTML="请选择";
+     			document.getElementById("hzfl_01").style.color="#FF0000";
+     			return false;
+				
+			}else{
+			var str=document.getElementsByName("id[]");
+			var objarray=str.length;
+			var chestr=""; 
+			for (i=0;i<objarray;i++)
+			{
+			  if(str[i].checked == true)
+			  {
+			   chestr+=str[i].value+",";
+			  }
+			}
+			$.ajax({
+				type:"post",
+				url:"__URL__/channels_to_category",
+				data:"sid="+chestr+"&category_id="+k+"&co_group="+co_group,
+				success:function(a){
+					if(a==1)
+					{
+						alert('成功');
+						window.location="/index.php/Sj/Channels/category_channels/";
+					}
+				}
+			});
+		}
+
+		}
+}
+
+function dian(type)
+{
+	var type;
+	if(type==1)
+	{
+		document.getElementById("fzr").style.display = "";
+		document.getElementById("fzr_01").style.display = "";
+		document.getElementById("fzr_02").style.display = "";
+		document.getElementById("qdfl").style.display = "none";
+	    document.getElementById("hzfl").style.display = "none";
+	}
+	else if(type==2)
+	{
+		document.getElementById("fzr").style.display = "none";
+		document.getElementById("fzr_01").style.display = "none";
+		document.getElementById("fzr_02").style.display = "none";
+		document.getElementById("qdfl").style.display = "";
+		document.getElementById("hzfl").style.display = "none";
+	}
+	else if(type==3)
+	{
+		document.getElementById("fzr").style.display = "none";
+		document.getElementById("fzr_01").style.display = "none";
+		document.getElementById("fzr_02").style.display = "none";
+		document.getElementById("qdfl").style.display = "none";
+		document.getElementById("hzfl").style.display = "";
+	}
+	
+}
+
+function jccg()
+{
+	document.getElementById('flts').innerHTML="";
+}
+
+function jcbm()
+{
+	document.getElementById('bmts').innerHTML="";
+}
+function jcxz(){
+	document.getElementById('xzts').innerHTML="";
+}
+function jcfzr()
+{
+	document.getElementById('fzrts').innerHTML="";
+}
+/*function ss(){
+	var category_id = $('#cat_id').val();
+	var department = $('#depart').val();
+	var team = $('#tm').val();
+	var fuzeren = $('#fn').val();
+		if(category_id==""){
+			alert("请选择一项");
+			return false;
+		}else
+		{
+			return true;
+		}
+
+	}*/
+</script>

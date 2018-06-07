@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>『Goapk|安智网』管理平台</title>
+<style type="text/css">
+	body, td, th {
+		font-size: 12px;
+	}
+</style>
+<link rel="stylesheet" type="text/css" media="all" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript" src="/Public/js/json2.js"></script>
+<script type="text/javascript">
+	
+	function deleteOne(pid)
+	{
+		if (!confirm("确定要删除该项么？"))
+			return false;
+		window.location="__URL__/DeletePiracy/id/%5b%22" + pid + "%22%5d";
+	}
+	
+	function selectAll()
+	{
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox" && checkall[i].disabled == false)
+				checkall[i].checked = true;
+		}
+	}
+	
+	function selectRev()
+	{
+		checkall = document.getElementsByTagName("input");
+		for (i = 0; i < checkall.length; i++)
+		{
+			if (checkall[i].type == "checkbox"  && checkall[i].disabled == false)
+				checkall[i].checked = !checkall[i].checked;
+		}
+	}
+	
+	
+	function form_chk() {
+		if($('#add_softname').val()=='') {
+			alert("请填写软件名称！");
+			return false;
+		}
+		$('#_form_add').submit();
+	}
+	
+	function form_chk_edit() {
+		if($('#edit_softname').val()=='') {
+			alert("请填写软件名称！");
+			return false;
+		}
+		return true;
+	}
+	
+	function popup(id) {
+		$("#bgdiv").css("display","block");
+		$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+	
+		$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+		$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+		$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+	}
+	
+	function popclose(id) {
+		$("#"+id).css({display:"none"});
+		$("#bgdiv").css({display:"none"});
+	}
+	
+	function edit(rowid) {
+		$('#edit_softname').val($('#softname_'+rowid).html());
+		//$('#edit_softname').html($('#softname_'+rowid).html());
+		$('#edit_id').val(rowid);
+		popup('_edit_div');
+	}
+	
+	function check_all(){
+		var client_ob = $('input[id^=client_]');
+		var my_client = '';
+		for(i=0;i<client_ob.length;i++){
+			if(client_ob[i].checked == true){
+				my_client += client_ob[i].value+',';
+			}
+		}
+		if(!my_client){
+			alert("请选择要转移的客户");
+			return false;
+		}
+		var charge_id = $('#fuzeren').val();
+		if(charge_id == 0 || charge_id == ''){
+			alert("请选择要转入的负责人");
+			return false;
+		}
+
+	}
+</script>
+</head>
+
+<body>
+<div style="width:99%; margin-top:4px">
+	<form action="{:U('AdCustomer_p/sel_customer_name')}" method="post">
+		
+			<tr>
+				<td>转出负责人：</td>
+				<td>{$name}</td>
+				<td><input type="hidden" name="name" value="{$name}"></td>
+			</tr>
+			<br/>
+			<br/>
+			<tr>
+				<td width="10%">客户名称：</td>
+				<td><input type="text" name="customer_name" value="{$customer_name}"></td>
+				<td><input type="hidden" name="chid" value='{$chid}'></td>
+				<td><input type="submit" value="搜索"></td>
+			</tr>
+		
+	</form>
+
+<form action="__URL__/transfers" method="post">
+	<table width="99%" class="table_list" cellpadding="0" cellspacing="0" style="margin-top:10px">
+		<thead>
+			<tr align="center">
+				<th width="5%" height="26" bgcolor="#E3E2FE">选择</th>
+				<th width="10%" bgcolor="#E3E2FE">帐号ID</th>
+				<th width="%" bgcolor="#E3E2FE">客户名称</th>
+				<th width="%" bgcolor="#E3E2FE">登录名</th>
+				<th width="%" bgcolor="#E3E2FE">创建时间</th>
+				<th width="%" bgcolor="#E3E2FE">帐号状态</th>
+			</tr>
+		</thead>
+		<tbody>
+			<volist name="list" id="transferList">
+				<tr>
+					<td align="center"><input type="checkbox" value="{$transferList.id}" id="client_{$transferList.id}" name="check[]"></td>
+					<td align="center"> {$transferList.id}</td>
+					<td align="center" id="softname_{$piracyList.id}">{$transferList.client_name}</td>
+					<td align="center" id="softname_{$piracyList.id}">{$transferList.login_name}</td>
+					<td align="center"> {$transferList.create_tm|date='Y-m-d H:i:s',###|default='&nbsp;'} </td>
+					<td align="center" id="softname_{$piracyList.id}"> 
+					<php> if($transferList['status'] == 1){ </php>
+							正常   
+                    <php>}else if($transferList['status'] == 2){</php>
+							暂停
+                    <php>}</php></td>
+				</tr>
+			</volist>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="10" style="padding-top:10px">
+					<input type="button" value="全选" onclick="selectAll();">
+					<input type="button" value="反选" onclick="selectRev();">
+				</td>
+			</tr>
+		</tfoot>
+		
+	</table>
+	
+
+<br/>
+转入负责人:<select name="fuzeren" id="fuzeren">
+				<option value="0">选择负责人</option>
+			<volist name="headlist" id="val">
+				<option value = "{$val.id}">{$val.charge_name}</option>
+			</volist>
+		   </select>
+<br/>
+<br/>
+<input type="submit" value="确定" onclick="return check_all();">&emsp;
+<input type="button"  onclick="location.href='/index.php/Channel_cooperation/AdCustomer_p/index'" value="取消">
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</form>
+<p>注：<br/>1.&nbsp&nbsp请先确认转入负责人具有要转移的渠道权限，如没有请联系技术人员开通。</p>
+
+</div>
+
+
+</body>
+</html>

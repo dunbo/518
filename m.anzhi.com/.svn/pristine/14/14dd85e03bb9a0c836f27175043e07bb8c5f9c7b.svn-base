@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <meta content="telephone=no" name="format-detection">
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+	<title>过年保卫战！</title>
+    <link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/defendwar/css/special.css"/>
+</head>
+<div style="height:0; overflow:hidden;">
+	<img src="<!--{$out.new_static_url}-->/activity/defendwar/res/share.jpg">
+</div>
+<body>
+<audio id="Music" src="<!--{$out.new_static_url}-->/activity/defendwar/res/audio/audio_bg.mp3" preload="auto" loop="true"></audio>
+<!--{foreach from=$out.all_soft_arr key=k item=x}-->
+<div id="page<!--{$k+1}-->" class="page" style="display:block;">
+    <div class="header"><img src="<!--{$out.new_static_url}-->/activity/defendwar/res/special/special_hd.png"/></div>
+    <div class="wrap">
+        <div class="banner"><img src="<!--{$out.new_static_url}-->/activity/defendwar/res/special/txt_<!--{$k+1}-->.png"/></div>
+        <ul class="soft clear">
+			<!--{foreach from=$x item=i}-->
+            <li>
+                <div class="soft_list clear">
+                    <div class="soft_icon"><img src="<!--{imgurltrans}--><!--{$i.iconurl}--><!--{/imgurltrans}-->"/></div>
+                    <div class="soft_info">
+                        <p><!--{$i.softname}--></p>
+                        <p><a class="download" href="<!--{$i.down_url}-->" content='<!--{$i.softid}-->' onclick="download_click(<!--{$i.softid}-->, '<!--{$i.package}-->');">下载</a></p>
+                    </div>
+                </div>
+                <div class="desc"><!--{$i.desc}--></div>
+            </li>
+			<!--{/foreach}-->
+        </ul>
+    </div>
+</div>
+<!--{/foreach}-->
+
+<div id="page4" class="page" style="display: none;">
+    <div class="end_text"><img src="<!--{$out.new_static_url}-->/activity/defendwar/res/special/end_text.png"/></div>
+    <div class="woman">
+        <div class="woman_bd"><img src="<!--{$out.new_static_url}-->/activity/defendwar/res/woman_bd.png"/></div>
+        <div class="woman_hd"><img src="<!--{$out.new_static_url}-->/activity/defendwar/res/woman_hd.png"/></div>
+    </div>
+    <div class="btns clear">
+        <a href="javascript:;" id="again" class="again cnt"><img src="<!--{$out.new_static_url}-->/activity/defendwar/res/special/again.png"/></a>
+        <a href="javascript:;" class="share" id="share_btn" style="display:none;"><img src="<!--{$out.new_static_url}-->/activity/defendwar/res/special/share.png"/></a>
+    </div>
+    <div class="logo"><img src="<!--{$out.new_static_url}-->/activity/defendwar/res/logo.png"/></div>
+    <div class="share_mark">
+        <img src="<!--{$out.new_static_url}-->/activity/defendwar/res/special/share_tip.png"/>
+    </div>
+</div>
+<div class="next_page">
+    <img src="<!--{$out.new_static_url}-->/activity/defendwar/res/special/next.png"/>
+</div>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript"  src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script type="text/javascript">
+var debug_mode = false;
+var wx_share_config = <!--{$out.wx_share_config}-->;
+var share_title = '<!--{$out.share_title}-->';
+var share_desc = '<!--{$out.share_desc}-->';
+var share_url = '<!--{$out.share_url}-->';
+var share_img = '<!--{$out.new_static_url}-->/activity/defendwar/res/share.jpg';
+</script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/activity/defendwar/js/weixin_share.js?v4"></script>
+<script type="text/javascript">
+	// 微信
+	$(function(){
+		/*
+		document.addEventListener("WeixinJSBridgeReady",
+		function() {
+			// 将所有下载地址换成跳转页面
+			$('.download').each(function(){
+				var softid = $(this).attr('content');
+				$(this).attr('href', 'jump.php?softid='+softid);
+			});
+			window.isWeixin = !0
+		});
+		*/
+		if (/MicroMessenger/i.test(navigator.userAgent)) {
+			// 微信
+			$('.download').each(function(){
+				var softid = $(this).attr('content');
+				$(this).attr('href', 'jump.php?softid='+softid);
+			});
+			$('#again').removeClass('cnt');
+			$('#share_btn').show();
+			window.isWeixin = !0
+		}
+	});
+	
+	function download_click(softid, pkg) {
+		$.ajax({
+			url:"download_click.php?softid="+softid+"&package="+pkg,
+			success:function(){
+			}
+		});
+		
+	}
+
+    //获取地址栏参数
+    function GetQueryString(name)
+    {
+        var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if(r!=null)return  unescape(r[2]); return null;
+    }
+    var audio=GetQueryString("audio");
+    $(document).ready(function(){
+        if(audio !=null)
+        {
+            if(audio==1){
+                var $Music=$("#Music").get(0);
+                $Music.play();
+                $('body').on('touchstart',function(){
+                    $Music.play();
+                })
+            }
+        }
+        //下一页
+        var nextpage=function(){
+            var cIndex= 0;
+            $(".next_page").on("click",function(){
+                $(".page:eq("+cIndex+")").hide();
+                $(".page:eq("+(cIndex+1)+")").show();
+                cIndex++;
+                if(cIndex>=$(".page").length-1){
+                    $(this).remove();
+                }
+            })
+        }
+        //分享
+        var share = function(){
+            $('#share_btn').on('click',function(){
+                $('.share_mark').show();
+            })
+            $('.share_mark').on('click',function(){
+                $(this).hide();
+            })
+        }
+        //再来一遍
+        var again = function(){
+            $('#again').on('click',function(){
+               window.location.href="play.php";
+            })
+        }
+        nextpage();
+        share();
+        again();
+    })
+</script>
+</body>
+</html>

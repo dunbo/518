@@ -1,0 +1,58 @@
+<include file="../Public/header"/>
+
+<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css?v1" type="text/css" media="screen" />
+
+<script type="text/javascript">
+    function upload() {
+        var import_file = $.trim($("#upload_file").val());
+        if (import_file.length == 0) {
+            alert("请上传文件！");
+            return;
+        }
+        $.ajaxFileUpload({
+            url:'__URL__/batch_add_new_server',
+            //type:'POST',
+            files:[$('#upload_file')],
+            secureuri:false,
+            dataType:'json',
+            success:function(data){
+				//console.log(data);
+                if(data.code == '0'){
+					//alert(data.error);
+					$('#error_show_div').html("<font color='red' >"+data.error+"</font>");
+					return false;
+				}else{
+					alert('添加成功');
+					location.href = "/index.php/Sj/Onlinegame/audit_new_server/status/1";
+					return false;
+				}
+            },
+			error: function (data, status, e)//服务器响应失败处理函数
+			{
+				alert(e);
+				return false;
+			}
+        });
+    }
+    
+</script>
+
+<body>
+    <div style="width:97%; margin:10px auto;">
+		<h2>批量添加新服</h2>
+		<p>您可以通过“CSV文件导入”的方式，批量投放广告</p>
+		<p>(1) 请下载示例CSV文件　(2) 填写信息　(3) 上传CSV并验证</p>
+		<div class="csv_download"><a href="/Public/csv_template/new_server.csv">下载示例csv</a><div>
+		<div style="margin:10px 0 15px;">
+		<input type="file" id="upload_file" name="upload_file" />
+		</div>
+	</div>
+    <!-- error_show_div用来展示文件的错误信息 -->
+    <div id="error_show_div">
+    </div>
+    <input type="button" value="完成" onClick="upload()" class="search_btn" style="float:left; margin-right:15px; display:inline; height:30px;"/>
+    <a href="/index.php/Sj/Onlinegame/audit_new_server/status/1" class="search_btn" style="float:left;">返回</a>
+	<div class="clear"></div>
+</body>

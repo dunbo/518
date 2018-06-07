@@ -1,0 +1,173 @@
+<script language="JavaScript">
+	function checkform(obj){
+		if(document.getElementById(obj.id).value =="")
+		{
+			alert("不能为空！");
+		}
+	}
+	
+	function validate_required(field,alerttxt)
+	{
+	with (field)
+	  {
+	  if (value==null||value=="")
+		{alert(alerttxt);return false}
+	  else {return true}
+	  }
+	}
+
+	function validate_form(thisform)
+	{
+	with (thisform)
+	  {
+		if (validate_required(alone_update,"独立更新选项必填!")==false)
+		{alone_update.focus();return false}
+		if (validate_required(only_auth,"软件授权过滤选项必填!")==false)
+		{only_auth.focus();return false}
+	  }
+	}
+</script>
+<form method='post' action="__URL__/channels_batch" enctype="multipart/form-data" onSubmit="return validate_form(this)">
+
+<?php if($enabled == true):?>
+<input type="submit" value="确定提交下列渠道" name="submit_to_db"/>
+</br>
+<td>渠道&nbsp;&nbsp;-&nbsp;&nbsp;运营商选择&nbsp;：&nbsp;
+	<select id="oid" name="oid"  onchange="checkchannel(this,'mid','did')" >
+		<option value="0" selected>--忽略--</option>
+		<volist name="list1" id="vo">
+		<option value="{$vo.oid}" >{$vo.mname}</option>
+		</volist>
+	</select>
+</td>
+</br>
+<tr>
+<td >独&nbsp;立&nbsp;更&nbsp;新&nbsp;选&nbsp;项 &nbsp;&nbsp;&nbsp;：&nbsp;			<select name="alone_update">
+			<option value="0" <?php echo $vo[0]['alone_update'] == 0 ? selected : '';?>>不更新
+			<option value="1" <?php echo $vo[0]['alone_update'] == 1 ? selected : '';?>>更新
+		</select> &nbsp;&nbsp;是否为独立更新</td>
+</tr></br>
+<tr>
+<td >软件显示选项 &nbsp;：&nbsp;<select name="only_auth">
+			<option value="0" <?php echo $vo[0]['only_auth'] == 0 ? selected : '';?>>显示未授权软件
+			<option value="1" <?php echo $vo[0]['only_auth'] == 1 ? selected : '';?>>不显示未授权软件
+		</select>&nbsp;&nbsp;&nbsp;&nbsp;是否显示</td>
+</tr></br>
+<tr>
+<td >软件更新选项 &nbsp;：&nbsp;<select name="soft_update">
+			<option value="1">更新
+			<option value="0">不更新
+		</select>&nbsp;&nbsp;&nbsp;&nbsp;是否限制</td>
+</tr></br>
+<tr>
+<td >软件搜索时是否过滤 &nbsp;：&nbsp;<select name="is_filter">
+			<option value="0">不过滤
+			<option value="1">过滤
+		</select>&nbsp;&nbsp;&nbsp;&nbsp;软件搜索时是否过滤</td>
+</tr></br>
+<tr>
+<td >渠道类型选择&nbsp;：&nbsp;
+<select id="category_id" name="category_id" >
+    <?php foreach ($category_list as $key => $value): ?>
+    <option value="<?php echo $key?>"><?php echo $value['name']?></option>
+	<?php endforeach; ?>
+</select>
+</td>
+</tr></br>
+<tr>
+<td >渠道用途选择&nbsp;：&nbsp;
+<select id=activation_type name="activation_type" >
+    <option value="5" selected>普通非山寨</option>
+	<option value="9">普通山寨</option>
+</select>
+</td>
+</tr></br>
+<tr>
+<td >渠道device_id选择&nbsp;：&nbsp;
+<select id=purpose name="purpose" >
+    <option value="1">imei</option>
+	<option value="2">imsi</option>
+	<option value="3">wifi_mac</option>
+</select>
+</td>
+</tr></br>
+<tr>
+<td >轮播图接口(GET_RECOMMEND_NEW)轮播图显示方式: &nbsp;&nbsp;
+<select name="channel_ad" >
+	<option value="3">显示通用+渠道</option>
+    <option value="1">只显示通用</option>
+	<option value="2">只显示本渠道内容</option>
+</select>
+</tr></br>
+<tr>
+<td >平台类型
+<select name="platform" >
+	<?php foreach($product_list as $key => $val):?>
+	<option value="<?php echo $key?>" ><?php echo $val[0]?></option>
+	<?php endforeach;?>
+	</select>
+</tr></br>
+<tr>
+	<td>渠道推送开关
+	<select name="switch">
+	<option value="1" selected>开</option>
+	<option value="0">关</option>
+	</select>
+	</td>
+</tr></br>
+<tr>
+<td >备注 &nbsp;：&nbsp;<textarea name="note" cols="50" rows="5" ></textarea>
+</tr></br>
+<tr>
+<td >开关输入框 &nbsp;：&nbsp;<textarea name="inputtext" cols="50" rows="5" >{$vo.inputtext}</textarea>
+</tr>
+<?php else:?>
+数据存在重复，请修改后重新上传
+<?php endif;?>
+
+
+</form>
+<table>
+<?php foreach($csv as $item): ?>
+<tr>
+<td <?php if($item['status'] > 0):?>style="color:red"<?php endif;?>>
+<?php echo $item['chl']?>  <?php echo $item['chname']?>
+
+<?php if($item['status'] & 1 ):?>渠道号重复 &nbsp;&nbsp;<?php endif;?>
+<?php if($item['status'] & 2 ):?>渠道名重复 &nbsp;&nbsp;<?php endif;?>
+<?php if($item['status'] & 4 ):?>渠道号数据库已经存在 &nbsp;&nbsp;<?php endif;?>
+<?php if($item['status'] & 8 ):?>渠道名数据库已经存在 &nbsp;&nbsp;<?php endif;?>
+<?php if($item['status'] & 16 ):?>查看用户名数据库已经存在 &nbsp;&nbsp;<?php endif;?>
+
+</td>
+</tr>
+<?php endforeach; ?>
+</table>
+<script>
+function checkchannel(o,nid,did) {
+
+
+    if (o.value!=1) {
+
+        document.getElementById(nid).removeAttribute('disabled');
+
+    }else {
+       document.getElementById(nid).disabled='false';
+       document.getElementById(did).disabled='false';
+
+    }
+    
+}
+
+cottage_control();
+$('#activation_type').bind('change',function(event){cottage_control();});
+function cottage_control() {
+	var	val = $('#activation_type option:selected').text();
+	$("#purpose").empty();
+	if(val == '普通山寨' || val == '严格山寨') {
+		$("#purpose").prepend('<option value="2">imsi</option><option value="3">wifi_mac</option><option value="4">sn</option>');
+	} else {
+		$("#purpose").prepend('<option value="1">imei</option><option value="2">imsi</option><option value="3">wifi_mac</option>');
+	}
+}
+</script>

@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<style>
+td{padding:5px;}
+.red{color:red;}
+.box_input tr td{text-align:left !important;font-size:14px;}
+.box_input tr td input{ height:31px; width:190px; float:left;}
+.green{color:green;}
+.myradio{display:inline;height:auto !important;width:auto;}
+.justfy{width:124px;}
+</style>
+</head>
+<body>
+<h5 style="padding-left:20px;"><a href="__URL__/content_config">返回</a></h5>
+<?php if($_GET['action'] == 'list'): ?>
+
+<table class="table_list" style="table-layout:fixed;width:50%">
+	<tbody>
+		<tr bgcolor="#ccc">
+		<td>日期</td><td>图文-浏览量</td><td>图文-下载量</td><td>视频-播放量</td><td>视频-下载量</td></tr>
+	</tbody>
+   <volist name="data" id="vo">
+	   <tr>
+		   <td>{$vo.create_at|date="Y-m-d",###}</td>
+		   <td>{$vo.c_visit_congfig}%</td>
+		   <td>{$vo.c_down_congfig}%</td>
+		   <td>{$vo.v_visti_congfig}%</td>
+		   <td>{$vo.v_down_congfig}%</td>
+	   </tr>
+   </volist>
+</table>
+
+<?php elseif($_GET['action'] == 'edit_show') : ?>
+<form action="__URL__/content_config" id="download_config_manager" method="post" class="uform">
+<input type="hidden"  name="action" class="" value="edit">
+	<table class="yahei box_input" style='width:700px;!important;'>
+		<tr>
+			<td class="justfy">图文</td>
+		</tr>
+		<tr>
+			<td class="justfy" style="padding-left:59px;!important;">阅读量：</td>
+			<td ><input type="text"  name="c_visit_congfig" class="" id="c_visit_congfig" value="{$data.c_visit_congfig}">%</td>			
+		</tr>
+		<tr>
+			<td class="justfy" style="padding-left:59px;!important;">下载量：</td>
+			<td ><input type="text"  name="c_down_congfig" class="" id="c_down_congfig" value="{$data.c_down_congfig}">%</td>			
+		</tr>
+		<tr>
+			<td class="justfy">视频</td>
+		</tr>
+		<tr>
+			<td class="justfy" style="padding-left:59px;!important;">播放量：</td>
+			<td ><input type="text"  name="v_visti_congfig" class="" id="v_visti_congfig" value="{$data.v_visti_congfig}">%</td>			
+		</tr>
+		<tr>
+			<td class="justfy" style="padding-left:59px;!important;">下载量：</td>
+			<td ><input type="text"  name="v_down_congfig" class="" id="v_down_congfig" value="{$data.v_down_congfig}">%</td>			
+		</tr>		
+	</table>
+	<br><br>
+	<div style="margin:10px auto;padding:0px 90px;">
+	<button class=" btn btn-sm btn-success yahei"  style="padding-left:30px;padding-right:30px;margin-left:40px;" type="button" onclick="checkBeforeSubmit()">确定</button>
+	</div>
+</form>
+<div>
+可配置0-100的任意整数，配置后立刻生效；配置扣量系数，配置扣除后给用户显示数量的百分比。；例如：阅读量配置数为60%，则100阅读量，用户端显示为60
+</div>
+
+<?php endif; ?>
+<script>
+
+function checkBeforeSubmit()
+{
+	var arr_str = ['c_visit_congfig','c_down_congfig','v_visti_congfig','v_down_congfig'];
+	$mark  = true;
+	for(var i=0;i<4;i++){
+		var num = $('#'+arr_str[i]).val();
+		if(num.length == 0 || num == ""){
+			$mark = false;
+			break;
+		}
+		if(parseInt(num)!=num){
+			$mark = false;
+			break;
+		}
+		if(Number(num)<=0 || Number(num) > 100){
+			$mark = false;
+			break;
+		}		
+	}
+	if(!$mark){
+		alert('所有项必须是0~100正整数！');
+		return false;
+	}
+	$('#download_config_manager').submit();
+}
+
+
+</script>
+
+<!-- 主页面结束 -->
+</body>
+</html>

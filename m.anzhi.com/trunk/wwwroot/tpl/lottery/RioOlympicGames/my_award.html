@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>脑力大冒险-里约奥运会</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/RioOlympicGames/css/common.css?v1"/>
+</head>
+<body>
+<div class="main_wrap">
+    <div class="banner"><img src="<!--{$out.new_static_url}-->/activity/RioOlympicGames/images/banner.png"/></div>
+	<!--{if $out.my_award_list}-->
+	<div class="main">
+		<!--{foreach from=$out.my_award_list item=i key=k}-->
+		<div class="prize_list">
+			<div class="prize_list_inner">
+				<!--{if !$out.is_overdue}-->
+				<a href="javascript:;" class="prize_btns" onclick="edit_info(<!--{$i.award_id}-->)">编辑</a>
+				<!--{/if}-->
+				<p class="prize-title"><span><!--{$i.award_level_name}--> <!--{$i.award_name}--></span></p>
+				<ul class="prize-text">
+					<li><span>姓名：</span><font id="name_<!--{$i.award_id}-->"><!--{$i.name}--></font></li>
+					<li><span>手机：</span><font id="telephone_<!--{$i.award_id}-->"><!--{$i.telephone}--></font></li>
+					<li><span>地址：</span><font id="address_<!--{$i.award_id}-->"><!--{$i.address}--></font></li>
+				</ul>
+			</div>
+			<div class="prize_top"></div>
+		</div>
+		<!--{/foreach}-->
+	</div>
+	<!--{else}-->
+	<div class="main">
+		<div class="tips_p">
+			<div class="tips_img">
+				<img src="<!--{$out.new_static_url}-->/activity/RioOlympicGames/images/tip_hd_04.png">
+			</div>
+			<p>你还没有奖品哦~<br/><br/></p>
+		</div>
+		<div class="line1"></div>
+		<a href="/lottery/RioOlympicGames/rules.php?sid=<!--{$out.sid}-->" class="rule_btn">活动规则</a>
+	</div>
+	<div class="footer">
+		<p>*本次活动最终解释权归安智所有</p>
+	</div>
+	<!--{/if}-->
+</div>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+	<div class="tip-box pbot" id="tip-box4"  style="display: none;">
+		<form class="form1">
+			<div class="form_title"></div>
+			<div class="prompt1">快填写个人信息领奖吧~</div>
+			<div class="form-item clear">
+				<label for="name">姓名：</label>
+				<div class="textbox"><input type="text" id="name"/></div>
+			</div>
+			<div class="form-item clear">
+				<label for="telephone">手机：</label>
+				<div class="textbox"><input type="text" id="telephone" value=""/> </div>
+			</div>
+			<div class="form-item clear">
+				<label for="address">地址：</label>
+				<div class="textbox"><input type="text" id="address" value=""/> </div>
+			</div>
+			<input type="text" id="award_id" style="display:none"/>
+			<div id="prompt" class="prompt1 prompt3"></div>
+		</form>
+		 <div class="tip_hd">
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box4')">关闭</a></div>
+        </div>
+		<a class="btns btns_tip" href="javascript:;" onclick="submit_info()">提交</a>
+	</div>
+</section>
+</body>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = <!--{$out.aid}-->;
+var soft_lists = [];
+var submit_info_clickable = false;
+
+	var flags={canMove:true};
+	function showOpenBox(obj){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+                    top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$(obj).css("margin-top",-top_h+"px").show();
+		$("#body-bg").css("height",bg_h+"px").show();
+		flags.canMove=false;
+		window.onresize = function(){
+			var bg_h=$(window).height() + $(document).scrollTop(),
+                 top_h= $(obj).height()/ 2 - $(document).scrollTop();
+			$('#body-bg').css("height",bg_h+"px");
+			$(obj).css("margin-top",-top_h+"px");	
+		}
+	}
+	function cloBox(obj){
+		$(obj).hide();
+		$("#body-bg").hide();
+		flags.canMove=true;
+	}
+
+	function edit_info(award_id) {
+		var name = $("#name_"+award_id).text();
+		var telephone = $("#telephone_"+award_id).text();
+		var address = $("#address_"+award_id).text();
+		$("#name").val(name);
+		$("#telephone").val(telephone);
+		$("#address").val(address);
+		$("#award_id").val(award_id);
+		$("#prompt").text('');//清错误提示
+		submit_info_clickable = true;
+		
+		showOpenBox("#tip-box4");
+	}
+	
+	function submit_info() {
+		if (!submit_info_clickable) {
+			return;
+		}
+		submit_info_clickable = false;
+		var name = $.trim($("#name").val());
+		var telephone = $.trim($("#telephone").val());
+		var award_id = $.trim($("#award_id").val());
+		var address = $.trim($("#address").val());
+		if (name == '') {
+			submit_info_clickable = true;
+			$("#prompt").text('姓名不能为空');
+			return;
+		}
+		if (telephone == '') {
+			submit_info_clickable = true;
+			$("#prompt").text('手机号码不能为空');
+			return;
+		}
+		if (address == '') {
+			submit_info_clickable = true;
+			$("#prompt").text('地址不能为空');
+			return;
+		}
+		var archor = "prize_"+award_id;
+		var r = Math.random();
+		$.ajax({
+			url:"/lottery/RioOlympicGames/edit_info.php?aid="+aid+"&sid="+sid,
+			data:{name:name, telephone:telephone, award_id:award_id,address:address,},
+			type:"post",
+			success:function(data){
+				if (data == -1) {
+					submit_info_clickable = true;
+					$("#prompt").text('请插入sim卡！');
+				} else if (data == 500) {
+					submit_info_clickable = true;
+					$("#prompt").text('姓名不能为空！');
+				} else if (data == 501) {
+					submit_info_clickable = true;
+					$("#prompt").text('手机号码不能为空！');
+				} else if (data == 502) {
+					submit_info_clickable = true;
+					$("#prompt").text('姓名太长！');
+				} else if (data == 503) {
+					submit_info_clickable = true;
+					$("#prompt").text('手机号码格式不对！');
+				} else if (data == 504) {
+					submit_info_clickable = true;
+					$("#prompt").text('地址不能为空！');
+				} else if (data == 200) {
+					$("#prompt").text('编辑成功！');
+					setTimeout(function(){
+						submit_info_clickable = true;
+						cloBox('#tip-box4');
+						location.href="/lottery/RioOlympicGames/my_award.php?aid="+aid+"&sid="+sid+ "&r=" + r + "&#"+archor;
+					}, 3000);
+				} else {
+					submit_info_clickable = true;
+					$("#prompt").text('出错啦！');
+				}
+			}
+		});
+	}
+</script>
+</html>

@@ -1,0 +1,106 @@
+<include file="./common_header" />
+	<script>
+		var refusesoftid;
+		$(function() {
+
+			$("#formRefusesubmit").click(function() {
+				var reason = $("#otherReason").val();
+				if (!(reason)) {
+					alert("驳回原因不能为空!");	
+				} else {
+					var url = "__URL__/verifyRefuse/softid/" + refusesoftid + "/reason/" + reason;
+					location.href = url;
+				}
+			});
+
+			$("[act='verifyrefuse']").click(function() {
+				if ($(this).attr('sign') == 'single') {
+					refusesoftid = $(this).parent().attr('softid');
+					openWin();
+				} else if ($(this).attr('sign') == 'multiple') {
+					if (!(refusesoftid = checkbox())) {
+						alert('请选择要操作的对象');
+					} else {
+						openWin();
+					}
+				}
+			});
+
+			$("[act='verifypass']").click(function() {
+				if ($(this).attr('sign') == 'single') {
+					var softid = $(this).parent().attr("softid");
+					if (confirm("是否通过审核？")) {
+						var url = "__URL__/verifyPass/softid/" + softid;
+						location.href = url;
+					}
+				} else if ($(this).attr('sign') == 'multiple') {
+					if (!checkbox()) {
+						alert('请选择要操作的对象');
+					} else {
+						if (confirm("是否通过审核？")) {
+							$('#actType').val("pass");
+							$('#verifyAction').submit();
+						}
+					}
+				}
+			});
+		});
+	</script>
+	<form id="formRefuse">
+	<div id="openbox">
+		<div><b>驳回原因:</b></div>
+		<div>其他原因:</div>
+		<div>
+			<textarea style="width:300px;height:60px;" id="otherReason" name="otherReason"></textarea>
+		</div>
+		<div><input type="button" id="formRefusesubmit"  value="确定" />
+		&nbsp;<input onclick="closefn();"type="button" value="取消" /></div>
+		<div id="close">关闭</div>
+	</div>
+	</form>
+	<form id="verifyAction" action="__URL__/verifyAction" method="POST">
+	<input type="hidden" id="actType" value="" name="actType" />
+	<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+		<thead>
+			<tr>
+				<th width="4%"><input type="checkbox" class="checkAll" ajaxSign="ajaxClear" /></th>
+				<th width="8%">软件id</th>
+				<th width="22%">软件信息</th>
+				<th width="16%">开发者</th>
+				<th width="10%"><a val="{$Val}" id="downloadOrder" href="javascript:void();">下载量</a></th>
+				<th width="10%">软件状态</th>
+				<th width="10%"><a val="{$Val}" id="datelineOrder" href="javascript:void();">添加时间</a></th>
+				<th width="10%">来源详情</th>
+				<th width="10%">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach($unverifyData as $info):?>
+		<tr line="<?php echo $info['softid'];?>" align="center" height="30px">
+			<td><input ajaxSign="ajaxClear" btn="<?php echo $info['softid'];?>" name="app[]" value="<?php echo $info['softid'];?>" type="checkbox" /></td>
+			<td class="iconimg">
+				<a href="__URL__/unverifyList/searchMainStr/{$info.softid}/searchMainType/3">
+					<?php echo $info['softid_reset'];?></a></td>
+			<td class="left"><?php echo $info['softinfo_reset'];?></td>
+			<td class="left"><?php echo $info['developer_reset'];?></td>
+			<td><?php echo $info['download_reset'];?></td>
+			<td><?php echo $info['hide_reset'];?></td>
+			<td><?php echo str_replace(' ', '<br/>', $info['dateline_reset']);?></td>
+			<td><?php echo $info['offidesc_reset'];?></td>
+			<td softid="<?php echo $info['softid'];?>">
+				<input btn="<?php echo $info['softid'];?>" sign="single" act="verifypass" value="通过" type="button" class="verify" />
+				<br />
+				<br />
+				<input btn="<?php echo $info['softid'];?>" sign="single" act="verifyrefuse" value="驳回" type="button" class="verify"  />
+			</td>
+		</tr>
+		<?php endforeach; ?>
+		</tbody>
+	</table>
+	<div style="margin-top:10px; margin-bottom:10px; text-align:left; padding-left:20px;">
+		<input class="checkAll" type="checkbox" ajaxSign="ajaxClear" />
+		<input act="verifypass" sign="multiple" value="通过" type="button" style="margin:0 8px 0 4px" />
+		<input act="verifyrefuse" sign="multiple" value="驳回" type="button" />
+	</div>
+	</form>
+<include file="./common_footer" />

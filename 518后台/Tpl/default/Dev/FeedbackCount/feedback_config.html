@@ -1,0 +1,65 @@
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<div class="main" >
+    <div class="content" >
+        <div style="float:left">
+            <a href='__URL__/operate_feedback?width=300&amp;height=240' style="float:left;" title="设置渠道/类型" class="thickbox search_btn">添加渠道/类型</a>
+        </div>
+        <div style="clear:both"></div>
+        <div>
+            <table class="table_list" style="table-layout:fixed;width:100%">
+                <tbody>
+                <tr bgcolor="#ccc"><td>渠道排序</td><td>反馈渠道</td><td>类型排序</td><td>问题类型</td><td>添加时间</td><td>操作</td></tr>
+                </tbody>
+                <?php
+                    foreach($res as $k=>$v){
+                        if(count($v['son'])>1){ ?>
+                            <?php
+                                foreach($v['son'] as $key=>$val){
+                                   if($key==0){ ?>
+                                   <tr><td rowspan='<?php echo count($v["son"]);?>'><?php echo $v['parent']['rank'];?></td><td rowspan='<?php echo count($v["son"]);?>'><?php echo $v['parent']['c_name'];?></td><td><?php echo $val['rank'];?></td><td><?php echo $val['c_name'];?></td><td><?php echo date('Y-m-d H:i:s',$val['add_tm']);?></td>
+                                       <td>
+                                           <a class="thickbox" href='__URL__/operate_feedback?parent_id=<?php echo $v['parent']['id'];?>&is_open=<?php if(isset($val['is_open'])){echo '1';}?>&id=<?php echo $val["id"];?>&edit=1&width=300&amp;height=240'>编辑</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                           <a href="javascript:void(0)" onclick="if(confirm('确认执行该操作？')){window.location.href='__URL__/del_feedback?is_open=<?php if(isset($val['is_open'])){echo '1';}?>&id=<?php echo $val['id'];?>'}">删除</a>
+                                       </td>
+                                   </tr>
+                                   <?php }else{ ?>
+                                   <tr>
+                                       <td><?php echo $val['rank'];?></td><td><?php echo $val['c_name'];?></td><td><?php echo date('Y-m-d H:i:s',$val['add_tm']);?></td><td><a class="thickbox" href='__URL__/operate_feedback?parent_id=<?php echo $v['parent']['id'];?>&is_open=<?php if(isset($val['is_open'])){echo '1';}?>&id=<?php echo $val["id"];?>&edit=1&width=300&amp;height=240'>编辑</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" onclick="if(confirm('确认执行该操作？')){window.location.href='__URL__/del_feedback?is_open=<?php if(isset($val['is_open'])){echo '1';}?>&id=<?php echo $val['id'];?>'}">删除</a></td>
+                                   </tr>
+                                   <?php }
+                                }
+                            ?>
+                        <?php }else{
+                            ?>
+                            <tr><td><?php echo $v['parent']['rank'];?></td><td><?php echo $v['parent']['c_name'];?></td>
+                                <?php if(count($v['son'])>=1){ ?>
+                                <td><?php echo $v['son'][0]['rank'];?></td><td><?php echo $v['son'][0]['c_name'];?></td>
+                               <?php }else{ ?>
+                               <td colspan='2'></td>
+                               <?php } ?>
+                                
+                                <td>
+                                    <?php
+                                        if(isset($v['son'])){
+                                            echo date('Y-m-d H:i:s',$v['son'][0]['add_tm']);
+                                        }else{
+                                            echo date('Y-m-d H:i:s',$v['parent']['add_tm']);
+                                        }
+                                    ?>
+                                </td>
+                                <td><a class="thickbox" href='__URL__/operate_feedback?parent_id=<?php if(isset($v['son'])){echo $v['son'][0]['parent_id'];}?>&is_open=<?php if(isset($v['son'][0]['is_open'])){echo '1';}?>&id=<?php if(isset($v["son"])){echo $v["son"][0]["id"];}else{echo $v["parent"]["id"];}?>&edit=1&width=300&amp;height=240'>编辑</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" onclick="if(confirm('确认执行该操作？')){window.location.href='__URL__/del_feedback?is_open=<?php if(isset($v['son'][0]['is_open'])){echo '1';}?>&id=<?php if(isset($v['son'])){echo $v['son'][0]['id'];}else{echo $v['parent']['id'];}?>'}">删除</a></td></tr>
+                            <?php
+                        }
+                    }
+                ?>
+            </table>
+        </div>
+    </div>
+</div>

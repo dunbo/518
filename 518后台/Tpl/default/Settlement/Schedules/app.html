@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+<form name="app_schedule" method="post" action="/index.php/Settlement/Schedules/app/">
+<table>
+	<tr>
+		<td width="100">导出日期：</td>
+		<td><input type="text" name="start" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"   id="input_start" value="<?php echo date('Y-m-d',$start);?>"/>～<input type="text" name="end" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"   id="input_end" value="<?php echo date('Y-m-d', $end);?>"/></td>
+	</tr>
+	<tr>
+		<td>软件包名：</td>
+		<td><input type="text" id="input_app_package" name="package"/><span id="span_app_package"></span></td>
+	</tr>
+	<tr>
+		<td>排期状态：</td>
+		<td><label><input type="checkbox" name="release" value="1" checked/>正式排期</label> <label><input type="checkbox" name="preview" value="1" checked/>预排期</label></td>
+	</tr>
+	<tr>
+		<td>所属商务：</td>
+		<td>
+			<ul>
+			<volist name="bds" id="bd">
+			<li><font color="#{$bd.color}" size="8">■</font> <label><input type="radio" name="bd" value="{$bd.bid}"/>{$bd.bname}</label></li>
+			</volist>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<td>刊例范围：</td>
+		<td><select name="rate">
+			<volist name="rate_list" id="row">
+			<option value="{$row.id}">{$row.rate_card_name}</option>
+			</volist>
+		</select></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<button type="submit">导出</button> 
+			<button type="button" id="button_cancel">取消</button>
+		</td>
+	</tr>
+</table>
+</form>
+
+<script>
+$(function(){
+	
+	// 查询软件是否存在
+	$('#input_app_package').blur(function(){
+		if($(this).val()=='')
+			return;
+		
+		$.getJSON('/index.php/Settlement/ContractApp/ajax_exist_app/package/'+$(this).val(), function(json){
+			if(json.result_no < 0){
+				$('#span_app_package').html('没有找到软件！');
+			}else{
+				$('#span_app_package').html(json.result_data.softname);
+			}
+		});
+	});
+
+	$('#button_cancel').click(function(){
+		tb_remove();
+	});
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+<include file="../../Public/header" />
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/My97DatePicker/WdatePicker.js"></script>
+<link rel="stylesheet" href="__PUBLIC__/css/bootstrap.min.css">
+<script type="text/javascript" src="__PUBLIC__/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/Public/js/chartjs/highcharts.js"></script>
+
+
+
+<script type="text/javascript">	
+var chart;
+$(document).ready(function() {
+	chart = new Highcharts.Chart({
+		chart: {
+			renderTo: 'container',
+			defaultSeriesType: 'line'
+		},
+		title: {
+			text: '精选软件PV'
+		},
+		subtitle: {
+			text: ''
+		},
+		xAxis: {
+			categories: <?php echo $stat_date;?> },
+		yAxis: {
+			title: {
+				text: 'PV'
+			}
+			
+		},
+		tooltip: {
+			enabled: true,
+			formatter: function() {
+				return '<b>'+ this.series.name +'</b><br/>'+
+					this.x +': '+ this.y +'';
+			}
+		},
+		plotOptions: {
+			line: {
+				dataLabels: {
+					enabled: true
+				},
+				enableMouseTracking: true
+			}
+		},
+		series: [{"name":"浏览器访问","data":<?php echo $browser_pv;?>},{"name":"客户端访问","data":<?php echo $market_pv;?>}]});
+	
+	
+});
+	
+</script>
+
+
+<style>
+.navgition{text-align:right;padding-right:30px;padding-bottom:20px;}
+.navgition form{display:inline;}
+.table thead tr th{ text-align:center;}
+</style>
+<body>
+<h3>{$perfect.softname} - {$perfect.subject}</h3>
+<form action="" method="get">
+<table class="yahei" style="margin:10px;">
+	<tr>
+		<td>开始日期：</td>
+		<td><input type="text" name="from_date"  class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"   id="from_date" value="{$from_date}" style="height:30px;"/></td>
+		<td style="padding-left:10px;">结束日期：</td>
+		<td><input type="text" name="to_date"  class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d', dateFmt:'yyyy-MM-dd'})"   id="to_date" value="{$to_date}" style="height:30px;"/></td>
+		<td><button style="margin:0px 10px;" class="btn btn-sm btn-success yahei">搜索</button><button id="button_clear" class="btn btn-default btn-sm yahei">清空</button></td>
+	</tr>
+</table>
+</form>
+<div id="container"></div>
+<table class="table table-striped table-bordered table-hover center middle yahei">
+  <thead>
+	<tr>
+		<th width="25%">日期</th>
+		<th width="25%">通过浏览器访问PV</th>
+		<th width="25%">通过客户端访问PV</th>
+		<th width="25%">合计</th>
+	</tr>
+   </thead>
+	<volist name="result" id="row">
+	<tr>
+		<td>{$row.stat_date}</td>
+		<td>{$row.browser_pv}</td>
+		<td>{$row.market_pv}</td>
+		<td><?php echo $row['browser_pv']+$row['market_pv'];?></td>
+	</tr>
+	</volist>
+	<tr>
+		<td>合计</td>
+		<td>{$browser_pv_total}</td>
+		<td>{$market_pv_total}</td>
+		<td><?php echo $browser_pv_total+$market_pv_total;?></td>
+	</tr>
+</table>
+<div class="yahei navgition">{$page|default='&nbsp;'}</div>
+</body>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+<include file="../../Public/footer" />

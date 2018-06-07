@@ -1,0 +1,110 @@
+<style type="text/css">
+    .me_div{float:left}
+    .search_item_text{margin-top: 0px}
+    .div_t{width:85px;text-align:right}
+</style>
+<form name="fml" action="__URL__/save_content" method="post" enctype="multipart/form-data">
+<div>
+    <div style="margin-top: 10px">
+        <div class="me_div div_t">资讯标题：</div>
+        <div class="me_div"><input type="text" name="title" id="title" class="search_item_text" style="width:150px;" value="{$content.title}" disabled></div>
+        <div style="clear:both"></div>
+    </div>
+    <div style="margin-top: 10px">
+        <div class="me_div div_t">展示标题：</div>
+        <div class="me_div"><input type="text" name="az_titile" id="az_titile" class="search_item_text" style="width:150px;" value="<?php if($content['az_titile']){echo $content['az_titile'];}else{echo $content['title'];}?>">
+            <input type="hidden" id="az_title_pre" value="{$content.az_titile}">
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <div style="margin-top: 10px">
+        <div class="me_div div_t">展示图片：</div>
+        <div class="me_div">
+            <span style="float:left">
+                <input type="hidden" id="az_images_p" value="<?php if($content['az_images']){echo $content['az_images'];}else{echo $content['images_small'];}?>">
+                <input type="text" id="az_images_pre" value="<?php if($content['az_images']){echo $content['az_images'];}else{echo $content['images_small'];}?>" class="inputtext" style="width:150px;height: 28px" readonly>
+            </span>
+            <span style="float:left">
+                <input type="button" value="浏   览" style="height: 28px;margin-left: 10px">
+            </span>
+            <span style="float:left">
+                <input type="file" style="position: absolute;opacity: 0;filter: alpha(opacity=0);overflow: hidden;margin-left:-52px;width:52px;height: 30px;" id="az_images" name="az_images" onchange="$('#az_images_pre').val($(this).val());">
+            </span>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <div style="margin-top: 10px">
+        <div class="me_div div_t">&nbsp;</div>
+        <div class="me_div">
+            jpg,jpeg,png格式，最大宽高为700像素<br>
+            <div style="float:left">
+                <img id= 'az_img' src="<?php if($content['az_images']){echo IMGATT_HOST.$content['az_images'];}else{echo $content['images_small'];}?>" width="205" height="100">
+            </div>
+            <?php if($content['az_images']){ ?>
+            <div style="float:left;margin-left: 10px;margin-top: 85px">
+                <input type="hidden" name="az_images_del" id="az_images_del" value="0">
+                <a href="javascript:" onclick="$('#az_images_del').val(1);$('#az_img').attr('src','');$('#az_images_pre').val('');">删除</a>
+            </div>
+            <?php } ?>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <div style="margin-top: 10px">
+        <div class="me_div div_t">网页地址：</div>
+        <div class="me_div"><?php echo $content['url'];?>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+    <div style="margin-top: 10px">
+        <div style="float:left;margin-left: 30px">
+            <input type="submit" value="确定" class="search_btn" onclick="return chk()">
+        </div>
+        <div style="float:left;margin-left: 10px">
+            <input type="button" value="取消" class="search_btn" onclick="tb_remove();">
+        </div>
+        <div style="clear:both"></div>
+    </div>
+</div>
+    <input type="hidden" value="{$id}" name="id" id="id">
+</form>
+<script type="text/javascript">
+    function chk(){
+        var az_title = $("#az_titile").val();
+        var az_title_pre = $("#az_title_pre").val();
+        var az_img = $("#az_images_pre").val();
+        var az_img_pre = $("#az_images_p").val();
+        if(az_title==az_title_pre&&az_img==az_img_pre){
+            alert('未修改任何信息');
+            return false;
+        }
+        var len = GetCharLength(az_title);
+        if(len > 100){
+            alert('标题不可超过50个汉字');
+            return false;
+        }
+        <?php if($content['az_images']){ ?>
+        if($('#az_images_pre').val()){
+            if(!/\.(jpg|jpeg|png)$/.test($('#az_images_pre').val().toLowerCase())) {
+                alert('展示图片仅支持.png或.jpg格式的文件，请重新上传！');
+                return false;
+            }
+        }
+        <?php } ?>
+        return true;
+    }
+
+    function GetCharLength(str) {
+        var iLength = 0;  //记录字符的字节数
+        for (var i = 0; i < str.length; i++)  //遍历字符串中的每个字符
+        {
+            if (str.charCodeAt(i) > 255)   //如果当前字符的编码大于255
+            {
+                iLength += 2;    //所占字节数加2
+            }
+            else {
+                iLength += 1;   //否则所占字节数加1
+            }
+        }
+        return iLength;   //返回字符所占字节数
+    }
+</script>

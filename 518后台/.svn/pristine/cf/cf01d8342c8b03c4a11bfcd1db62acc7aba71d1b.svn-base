@@ -1,0 +1,96 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+	function change_config(obj){
+		if(confirm("是否确定修改？"))
+		{
+			$.ajax({
+				url:'/index.php/Sj/Downloadrecommend/edit_config/config/'+obj,
+				type:'get',
+				dataType:'json',
+				success:function(data){
+					if(data == 2){
+						alert("编辑失败！");
+					}
+					else
+					{
+						alert("编辑成功！");
+					}
+				}
+			});
+			return true;
+		}
+		else
+		{
+			window.location.href="/index.php/Sj/Downloadrecommend/recommend_list";
+			return false;
+		}
+	}
+	
+	function checkit(){
+		if(confirm("删除后不可恢复，并且直接影响线上数据，是否确认删除"))
+		{
+			return true;
+		}
+		return false;
+	}
+
+</script>
+<body>
+	<div style="margin:20px;">
+	推荐范围：<input type="radio" name="config" value="1" <?php if($config_result[0]['configcontent'] == 1){ ?>checked<?php } ?> onclick="change_config(1);" />搜索结果列表&nbsp;&nbsp;<input type="radio" name="config" <?php if($config_result[0]['configcontent'] == 2){ ?>checked<?php } ?> value="2" onclick="change_config(2);" />通用下载列表&nbsp;&nbsp;<input type="radio" name="config" value="0" <?php if($config_result[0]['configcontent'] == 0){ ?>checked<?php } ?> onclick="change_config(0);" />关闭
+	<a href="__URL__/add_recommend_show/p/{$p}/lr/{$lr}<?php if($soft_name){ ?>/soft_name/{$soft_name}<?php } ?><?php if($package){ ?>/package/{$package}<?php } ?><?php if($operating_id){ ?>/operating_id/{$operating_id}<?php } ?>" class="search_btn" style="float:right;margin-right:200px;margin-bottom:20px;">添加软件</a>
+	<div class="clear"></div>
+	</div>
+	<div>
+	<form action="__URL__/recommend_list" method="get">
+	<table>
+	<tr>
+		<td>软件名称：</td>
+		<td><input type="text" name="soft_name" value="{$soft_name}" />&nbsp;&nbsp;</td>
+		<td>软件包名：</td>
+		<td><input type="text" name="package" value="{$package}" />&nbsp;&nbsp;</td>
+		<td>运营商：</td>
+		<td>
+		<select name="operating_id">
+		<option value="0">请选择...</option>
+		<?php foreach($operating_result as $key => $val){ ?>
+		<option value="{$val.oid}" <?php if($val['oid'] == $operating_id){ ?>selected<?php } ?>>{$val.mname}</option>
+		<?php } ?>
+		</select>&nbsp;&nbsp;
+		</td>
+		<td><input type="submit" value="搜索" class="search_btn" /></td>
+	</tr>
+	</table>
+	</form>
+	</div>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="table_list" >
+		<thead>
+		<tr>
+			<th width="20%">软件名称</th>
+			<th width="20%">软件包名</th>
+			<th width="10%">运营商</th>
+			<th width="20%">渠道</th>
+			<th width="5%">推荐软件数</th>
+			<th width="18%">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr>
+		<td>{$val.soft_name}</td>
+		<td>{$val.package}</td>
+		<td><?php if($val['operating_name']){ ?>{$val.operating_name}<?php }else{ ?>不限制<?php } ?></td>
+		<td><?php if($val['chname']){ ?>{$val.chname}<?php } else{ ?>不限制<?php } ?></td>
+		<td><?php if($val['soft_count']){ ?>{$val.soft_count}<?php }else{ ?>0<?php } ?></td>
+		<td><a href="__URL__/add_soft_show/recommend_id/{$val.id}/" class="thickbox blue">添加推荐</a>&nbsp;&nbsp;<a href="__URL__/soft_list/recommend_id/{$val.id}" class="blue">查看推荐</a>&nbsp;&nbsp;<a href="__URL__/edit_recommend_show/id/{$val.id}/p/{$p}/lr/{$lr}<?php if($soft_name){ ?>/soft_name/{$soft_name}<?php } ?><?php if($package){ ?>/package/{$package}<?php } ?><?php if($operating_id){ ?>/operating_id/{$operating_id}<?php } ?>" class="blue">编辑</a>&nbsp;&nbsp;<a href="__URL__/del_recommend/id/{$val.id}/p/{$p}/lr/{$lr}<?php if($soft_name){ ?>/soft_name/{$soft_name}<?php } ?><?php if($package){ ?>/package/{$package}<?php } ?><?php if($operating_id){ ?>/operating_id/{$operating_id}<?php } ?>" class="blue" onclick="return checkit();">删除</a></td>
+	</tr>
+	<?php } ?>
+	</table>
+</body>
+{$page}
+</html>

@@ -1,0 +1,437 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<script type="text/javascript" src='/Public/js/cooperation_public.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/cooperation_common.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link rel="stylesheet" type="text/css" media="all" href="/Public/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script>
+	function select_all(){
+		if($('#my_select').attr('checked') == 'checked'){
+			$("input[id^=channel_]").attr('checked','checked');
+		}else if($('#my_select').attr('checked') != 'checked'){
+			$("input[id^=channel_]").attr('checked',false);
+		}
+	}
+	
+	function no_select(cid){
+		if($('#channel_'+cid+'').attr('checked') != 'checked'){
+			$('#my_select').attr('checked',false);
+		}
+	}
+
+	function location_go(my_go,cid,status){
+		if(!my_go){
+			my_go = '__URL__/channel_list';
+		}
+		my_go = my_go+get_url_parm();
+
+		if(cid){
+			my_go = my_go+'/cid/'+cid;
+		}
+		if(status){
+			my_go = my_go+'/status/'+status;
+		}
+		location.href=my_go;
+	}
+	document.onkeydown=function(event){
+            var e = event || window.event || arguments.callee.caller.arguments[0];       
+             if(e && e.keyCode==13){ // enter 键
+                 location_go();
+            }
+        };
+	function price_change(){
+		location_go('__URL__/channel_list');
+	}
+	function qualit_change(){
+		location_go('__URL__/channel_list');
+	}
+	function status_change(){
+		location_go('__URL__/channel_list');
+	}
+	
+	function change_channel(cid,status){
+		if(status==2)
+		{
+			var str = "是否执行此操作！执行此操作之后，渠道系数将变为0！";
+		}
+		else
+		{
+			var str = "是否执行此操作！";
+		}
+		if(confirm(str))
+		{
+			location_go('__URL__/change_channel',cid,status);
+		}
+		return false;
+	}
+	
+	function select_client(cid){
+		var my_go = get_url_parm();
+		if(cid){
+			my_go = my_go+'/cid/'+cid;
+		}
+		if(status){
+			my_go = my_go+'/status/'+status;
+		}
+		
+		location.href='__URL__/select_client_show'+my_go;
+	}
+	
+	function change_qualits(){
+		var cid_str=document.getElementsByName("cid[]");
+		var my_cid = '';
+		for(i=0;i<cid_str.length;i++){
+			if(cid_str[i].checked == true){
+				my_cid += cid_str[i].value+',';
+			}
+		}
+		var my_go = get_url_parm();
+		if(my_cid){
+			tb_show('',"__URL__/edit_qualit_show/cid/"+my_cid+my_go+"?mm",false);
+		}else{
+			alert("请选择渠道");
+		}
+	}
+	
+	function checkit(){
+		if(confirm("是否执行此操作！"))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	function edit_price_show(cid){	
+		var my_go = get_url_parm();
+		if(cid){
+			my_go = my_go+'/cid/'+cid;
+		}
+		if(status){
+			my_go = my_go+'/status/'+status;
+		}
+		tb_show('','__URL__/edit_price_show'+my_go+"?mm",false);
+		
+	}
+	function get_url_parm(){
+		var my_price = $('#my_price').val();
+		var my_qualit = $('#my_qualit').val();
+		var my_status = $('#my_status').val();
+		var chname = $('#chname').val();
+		var my_attribute = $('#my_attribute').val();
+		var category_id = $('#category_id').val();
+		var client_name = $('#client_name').val();
+		var charge_id = $('#charge_id').val();
+		var p = $('#my_p').val();
+		var lr = $('#my_lr').val();
+		var billing = $('#billing').val();
+		var co_group = $('#co_group').val();		
+		var my_go = '';
+		if(my_price){
+			my_go = my_go+'/my_price/'+my_price;
+		}
+		if(my_qualit){
+			my_go = my_go+'/my_qualit/'+my_qualit;
+		}
+		if(my_status){
+			my_go = my_go+'/my_status/'+my_status;
+		}
+		if(chname){
+			my_go = my_go+'/chname/'+chname;
+		}
+		if(my_attribute){
+			my_go = my_go+'/my_attribute/'+my_attribute;
+		}
+		if(category_id !=''){
+			my_go = my_go+'/category_id/'+category_id;
+		}
+		if(client_name){
+			my_go = my_go+'/client_name/'+client_name;
+		}
+		if(charge_id　!= ''){
+			my_go = my_go+'/charge_id/'+charge_id;
+		}
+		if(billing){
+			my_go = my_go+'/billing/'+billing;
+		}
+		if(co_group!= ''){
+			my_go = my_go+'/co_group/'+co_group;
+		}
+		if(p){
+			if(status == 10){
+				my_go = my_go+'/the_p/'+p;
+			}else{
+				my_go = my_go+'/p/'+p;
+			}
+		}
+		if(lr){
+			my_go = my_go+'/lr/'+lr;
+		}
+		return my_go;
+	}
+	
+	
+	function change_price(){
+		var cid_str=document.getElementsByName("cid[]");
+		var my_cid = '';
+		for(i=0;i<cid_str.length;i++){
+			if(cid_str[i].checked == true){
+				my_cid += cid_str[i].value+',';
+			}
+		}
+		var my_go = get_url_parm();
+		if(my_cid){
+			tb_show('',"__URL__/change_price_show/cid/"+my_cid+my_go+"?mm",false);
+		}else{
+			alert("请选择渠道");
+		}
+	
+	}
+	
+	function change_attribute(my_cid){
+		var cid_str=document.getElementsByName("cid[]");
+		if(!my_cid){
+			var my_cids = '';
+			for(i=0;i<cid_str.length;i++){
+				if(cid_str[i].checked == true){
+					my_cids += cid_str[i].value+',';
+				}
+			}
+			my_cid = my_cids.substring(0,my_cids.length-1);
+		}
+		var my_go = get_url_parm();		
+		if(my_cid){
+			tb_show('',"__URL__/edit_attribute_show/cid/"+my_cid+my_go+"?mm",false);
+		}else{
+			alert("请选择渠道");
+		}
+	
+		
+	}
+</script>
+<div>
+	<div style="margin:20px 20px 0 20px;">
+	<form action="__URL__/channel_list" method="get">	
+		<table class="search_table" cellpadding="0" cellspacing="0">
+			<tr>
+				<td width="20%">渠道名称：<input type="text" name="chname" value="{$chname}" id="chname" /></td>
+				<td width="20%">客户名称：<input type="text" name="client_name" value="{$client_name}" id="client_name" /><input type="hidden" id="my_p" name="my_p" value="{$p}" /><input type="hidden" id="my_lr" name="my_lr" value="{$lr}" /></td>
+				<td width="15%">负责人：<select name="charge_id" id="charge_id"><option value="0">请选择...</option><?php foreach($charge_result as $key => $val){ ?><option value="{$val.id}" <?php if($charge_id == $val['id']){ ?>selected<?php } ?>>{$val.charge_name}</option><?php } ?></select></td>
+				<td width="15%">渠道属性：
+					<select name="my_attribute" id="my_attribute">
+						<option value="0" >全部</option>
+						<option value="1" <?php if($attribute == 1){ echo "selected"; } ?>>线上</option>
+						<option value="2" <?php if($attribute == 2){ echo "selected"; }?>>线下</option>
+						<option value="3" <?php if($attribute == 3){ echo "selected"; } ?>>论坛</option>
+					</select>
+				</td>
+				<td  width="20%" ><button type='button' onclick="open_category();"  >渠道类型</button></td>
+				<td width="20%" rowspan='2'>
+					<input type="submit" value="搜索" class="search_btn"  />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					渠道分类：
+					<select id='co_group' name="co_group">
+					<option value="" <?php if($co_group == '')  echo "selected";?> >全部</option>
+					<?php foreach($co_group_arr as $k => $v){ ?>
+						<option value="{$k}" <?php if(isset($co_group) && $co_group==$k)  echo "selected";?> >{$v}</option>
+					<?php } ?>
+					</select>
+				</td>
+				<td>
+					结算方式：
+					<select id="billing" name="billing">
+					<option value="" <?php if($billing == '')  echo "selected";?> >全部</option>
+					<option value="1" <?php if($billing==1)  echo "selected";?> >激活</option>
+					<option value="2" <?php if($billing==2)  echo "selected";?> >预装</option>
+					</select>
+				</td>
+				<td>
+					结算类型：
+					<select id="settle_attr" name="settle_attr">
+					<option value="" <?php  if($settle_attr=='') echo "selected";?> >全部</option>
+					<option value="1" <?php if($settle_attr==1)  echo "selected";?> >付费</option>
+					<option value="2" <?php if($settle_attr==2)  echo "selected";?> >换量</option>
+					<option value="3" <?php if($settle_attr==3)  echo "selected";?> >其他</option>
+					</select>
+				</td>
+				<td colspan="3">
+					创建时间：
+					<input id="start_tm" name="start_tm" style="cursor: hand; width: 100px;" size="15" type="text" value="{$start_tm}" /><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})' style="margin: 1px; cursor: hand;" width="16px" align="absmiddle" height="15px" />
+					&nbsp;至&nbsp;
+					<input id="end_tm" name="end_tm" style="cursor: hand; width: 100px;" size="15" type="text"  value="{$end_tm}" /><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_tm",dateFmt:"yyyy-MM-dd HH:mm:ss"})' style="margin: 1px; cursor: hand;" width="16px" align="absmiddle" height="15px" />
+				</td>
+			</tr>
+			
+		</table>
+		<input type='hidden' name='category_id' id='category_id' value="{$category_id}"/>
+	</form>	
+	</div>
+	<div style="margin-left:20px;">
+	<table>
+		<tr>
+		<td><input type="button" class="search_btn" value="批量修改单价" onclick="change_price();" /></td>
+		<td>&nbsp;&nbsp;</td>
+		<td><input type="button" class="search_btn" value="批量修改质量" onclick="change_qualits();" /></td>
+		<td>&nbsp;&nbsp;</td>
+		<td><input type="button" class="search_btn" style="width:128px;" value="批量修改渠道属性" onclick="change_attribute();" /></td>	
+		<td>&nbsp;&nbsp;</td>
+		<td><input type="button" class="search_btn" style="width:128px;" value="批量修改结算方式" onclick="batch_save_billing();" /></td>
+		<td><input type="button" class="search_btn" style="width:128px;" value="批量修改结算类型" onclick="batch_save_settle_attr();" /></td>
+		</tr>
+	</table>
+	</div>
+	<div>
+		<form action="__URL__/add_channel" method="post" enctype="multipart/form-data">
+		<table  border="1" cellpadding="0" cellspacing="0" class="table_list" >
+			<thead>
+				<tr>
+					<th width="4%"><input type="hidden" name="id" value="{$id}"><input type="checkbox" onclick="select_all();" id="my_select" /></th>
+					<th width="6%">渠道ID</th>
+					<th width="10%">渠道名称</th>
+					<th width="5%">渠道属性</th>
+					<th width="8%">渠道类型</th>
+					<th width="8%">渠道分类</th>
+					<th width="5%">结算方式</th>
+					<th width="5%">结算类型</th>
+					<th width="8%">客户名称</th>
+					<th width="6%">负责人</th>
+					<th width="8%">创建时间</th>
+					<th width="5%">
+					<select style="width:60px" onchange="price_change();" id="my_price">
+					<option value="0">单价</option>
+					<option value="yes" <?php if($price == 'yes'){ ?>selected<?php } ?>>固定单价</option>
+				<?php foreach($price_result as $key => $val){ ?>
+					<option value="{$val.id}" <?php if($price == $val['id']){ ?>selected<?php } ?>>{$val.name}</option>
+				<?php } ?>
+					<option value="no" <?php if($price == 'no'){ ?>selected<?php } ?>>未编辑</option>
+					</select>
+					</th>
+					<th width="7%"><select onchange="qualit_change();" id="my_qualit"><option value="0">质量</option><option value="1" <?php if($qualit == 1){ ?>selected<?php } ?>>优质</option><option value="2" <?php if($qualit == 2){ ?>selected<?php } ?>>普通</option><option value="3" <?php if($qualit == 3){ ?>selected<?php } ?>>较差</option><option value="4" <?php if($qualit == 4){ ?>selected<?php } ?>>未编辑</option></select></th>		
+					<th width="7%"><select onchange="status_change();" id="my_status"><option value="0">渠道状态</option><option value="1" <?php if($co_status == 1){ ?>selected<?php } ?>>正常</option><option value="2" <?php if($co_status == 2){ ?>selected<?php } ?>>暂停</option><option value="3" <?php if($co_status == 3){ ?>selected<?php } ?>>未关联</option></select></th>
+					<th width="20%">操作</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach($channel_result as $key => $val){ ?>
+			<tr>
+				<td><?php if($val['co_status'] != 3){ ?><input type="checkbox" value="{$val.cid}" name="cid[]" id="channel_{$val.cid}" onclick="no_select({$val.cid});" /><?php } ?></td>
+				<td>{$val.cid}</td>
+				<td>{$val.chname}</td>
+				<td><?php if($val['attribute'] == 1){echo '线上';}elseif($val['attribute'] == 2){echo '线下';}elseif($val['attribute'] == 3){echo '论坛';}?></td>
+				<td>{$val.category_name|default='未分类'}</td>
+				<td><?php echo $co_group_arr[$val['co_group']]; ?></td>
+				<td><?php echo $val['billing'] == 1 ? '激活' : '预装'; ?></td>
+				<td><?php if($val['settle_attr'] == 1){echo '付费';}elseif($val['settle_attr'] == 2){echo '换量';}elseif($val['settle_attr'] == 3){echo '其他';} else echo "";?></td>
+				<td><?php if($val['client_id']){ ?><a href="__URL__/channel_list/client_id/{$val.client_id}">{$val.client_name}<?php }else{ ?>{$val.client_name}<?php } ?></td>
+				<td>{$val.charge_name}</td>
+				<td><div style="margin:0 auto"><?php if($val['submit_tm']){ echo date('Y-m-d H:i:s',$val['submit_tm']); } ?></div></td>
+				<?php if($val['price_type'] == 1){ ?>
+				<td><div class="check_prev"><div class="check_prev_shortbox"><span style="color:blue;">{$val.price_name}</span></div>
+				<?php if($val['price_type'] == 1){ ?>
+				<div style="display:none;" class="check_prev_newbox">
+				<table border="1" cellspacing="0" cellpadding="0">
+					<tr>
+						<td>方案名称</td>
+						<td>日均激活量</td>
+						<td>单价(元)</td>
+					</tr>
+					<tr>
+						<td rowspan="<?php echo count($val['the_price']); ?>">{$val.price_name}</td>
+						<td><?php echo $val['the_price'][0]['star_activations']; ?>-<?php if($val['the_price'][0]['end_activations']){ echo $val['the_price'][0]['end_activations'];} ?></td>
+						<td><?php echo $val['the_price'][0]['price']; ?></td>
+					</tr>
+					<?php foreach(array_slice($val['the_price'],1) as $k => $v){ ?>
+					<tr>
+						<td>{$v.star_activations}-<?php if($v['end_activations']){ ?>{$v.end_activations}<?php } ?></td>
+						<td>{$v.price}</td>
+					</tr>
+					<?php } ?>
+				</table>
+				</div>
+				<?php } ?>
+				</div>
+				</td>
+				<?php }elseif($val['price_type'] == 2){ ?>
+				<td>{$val.price}</td><?php }else{ ?><td>-</td><?php } ?>
+				<td><?php if($val['qualit'] == 1){ ?>优质<?php }elseif($val['qualit'] == 2){ ?>普通<?php }elseif($val['qualit'] == 3){ ?>较差<?php }else{ ?>-<?php } ?></td>
+				<td><?php if($val['co_status'] == 1){ ?>正常<?php }elseif($val['co_status'] == 2){ ?>暂停<?php }else{ ?>-<?php } ?></td>
+				<td>
+				<?php if($val['co_status'] != 3){ ?>
+					<a href="javascript:;" onclick="edit_price_show({$val.cid});" class="blue">编辑单价</a>
+					<br/>
+					<a href="__URL__/edit_qualit_show/from/1/cid/{$val.cid}<?php if($price){ ?>/my_price/{$price}<?php } ?><?php if($qualit){ ?>/my_qualit/{$qualit}<?php } ?><?php if($co_status){ ?>/my_status/{$co_status}<?php } ?><?php if($chname){ ?>/chname/{$chname}<?php } ?><?php if($client_name){ ?>/client_name/{$client_name}<?php } ?><?php if($charge_id){ ?>/charge_id/{$charge_id}<?php } ?><?php if($p){ ?>/p/{$p}<?php } ?><?php if($lr){ ?>/lr/{$lr}<?php } ?><?php if($attribute){ ?>/my_attribute/{$attribute}<?php } ?><?php if($co_group!=''){ ?>/co_group/{$co_group}<?php } ?><?php if($billing!=''){ ?>/billing/{$billing}<?php } ?>?mm" class="thickbox blue" >编辑质量</a>
+					<br/>
+					<a href="javascript:;" onclick="change_attribute({$val.cid});" class="blue">编辑属性</a><br/>
+					<a href="javascript:;" onclick="save_billing({$val.cid});" class="blue">编辑结算方式</a><br/>
+					<?php if($val['co_status'] == 1){ ?>
+					<a href="javascript:;" onclick="change_channel({$val.cid},2);" class="blue">停用</a><?php } ?>
+					<?php if($val['co_status'] == 2){ ?>
+					<a href="javascript:;" onclick="change_channel({$val.cid},1);" class="blue">恢复</a><?php } ?>
+				<?php }else{ ?>
+					<a href="javascript:;" onclick="select_client({$val.cid});" class="blue">关联客户</a>
+				<?php } ?>
+				</td>
+			</tr>
+			<?php } ?>
+			</tbody>
+		</table>
+		</form>
+		{$page}
+	</div>
+</div>
+
+<script type="text/javascript">
+function open_category(){
+	var category_id = $('#category_id').val();
+	var urls ="/index.php/Sj/Channels/pub_get_channelCategory?width=400&height=400&category_id="+category_id;
+	tb_show('渠道类型',urls,false);
+}
+//编辑结算方式
+function save_billing(id){
+	var my_go = get_url_parm();
+	if(id){
+		tb_show('结算方式',"__URL__/save_billing/cid/"+id+my_go+"?mm",false);
+	}
+}
+//批量编辑结算方式
+function batch_save_billing(){
+	var cid_str=document.getElementsByName("cid[]");
+	var my_cid = '';
+	for(i=0;i<cid_str.length;i++){
+		if(cid_str[i].checked == true){
+			my_cid += cid_str[i].value+',';
+		}
+	}
+	if(my_cid){
+		save_billing(my_cid);
+	}else{
+		alert("请选择渠道");
+	}
+}
+//编辑结算类型
+function save_settle_attr(id){
+	var my_go = get_url_parm();
+	if(id){
+		tb_show('结算类型',"__URL__/save_settle_attr/cid/"+id+my_go+"?mm",false);
+	}
+}
+//批量编辑结算类型
+function batch_save_settle_attr(){
+	var cid_str=document.getElementsByName("cid[]");
+	var my_cid = '';
+	for(i=0;i<cid_str.length;i++){
+		if(cid_str[i].checked == true){
+			my_cid += cid_str[i].value+',';
+		}
+	}
+	if(my_cid){
+		save_settle_attr(my_cid);
+	}else{
+		alert("请选择渠道");
+	}
+}
+</script>

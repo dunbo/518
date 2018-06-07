@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>安智购省钱 福利进校园</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/store/css/common.css?v1"/>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/store/css/swiper.css?v1"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">
+var sid='<!--{$out.sid}-->';
+var wait='<!--{$out.send_time}-->';
+        $(function () {
+                if(wait<60){
+                    time($("#use"));
+                }
+        });
+
+function save(shopid,store_name){
+                    cloBox('#tip-box1');
+                    time($("#use"));
+        var city='<!--{$out.city}-->';
+        var school='<!--{$out.school}-->';
+        var mobile='<!--{$out.mobile}-->';
+	$.ajax({
+		url: '/lottery/store/buy_myprize.php?sid='+sid,
+		data: 'school='+school+'&city='+city+'&shopid='+shopid+'&store_name='+store_name+'&mobile='+mobile,
+                type: 'post',
+                dataType:'json',
+                success:function(data){
+                    if(data==2){
+                        $(".coupon_infor_s").html('您的设备或者手机号已经被绑定或者优惠券已使用');
+                    }else if(data==3){
+                        //alert('您今日发送短信已达到5次，请明日再来');
+                        $(".coupon_infor_s").html('您今日发送短信已达到5次，请明日再来');
+                    }else if(data==5){
+                        $(".coupon_infor_s").html('页面已失效，请退出活动重新进');
+                        //alert('页面已失效，请退出活动重新进入');
+                    }else{
+                        $(".coupon_infor_s").html('已选门店：'+data.store_name+'  &nbsp;代金券兑换码已发送至您的手机，请注意查收');
+                    }
+                }
+	});
+}
+
+//var wait=50;
+function time(o) {
+        if (wait == 0) {
+            o.attr("onclick","showOpenBox('#tip-box1')");
+            o.html('立即使用');
+            wait = 60;
+        } else {
+            o.removeAttr("onclick");
+            o.html("重新发送(" + wait + ")");
+            wait--;
+            setTimeout(function() {
+                time(o)
+            },
+            1000)
+        }
+    }
+
+</script>
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.imgurl}--><!--{$out.config_info['buy_img']}-->"/>
+	<a href="#rules_wrap">活动规则</a>
+</div>
+<div class="main">
+	<div class="wrap" id="coupon_wrap">
+		<div class="item_title">
+			<i>1</i>
+			<span>我的手机号码 </span>
+			<em><!--{$out.mobile}--></em>
+			<!--<em><input type="text"/></em>-->
+                        <!--<a href="/lottery/store/buy_index.php?sid=<!--{$out.sid}-->&mobile=<!--{$out.mobile}-->">修改</a>-->
+		</div>
+		<div class="item_cnt" id="phone_submit">
+			
+		</div>
+		<div class="item_title" style="margin-top:-15px">
+			<i>2</i>
+			<span>选择学校　<!--{$out.school}--></span>
+		</div>
+		<div class="item_cnt" id="school_sel">
+			<ul>
+
+			</ul>
+		</div>
+		<div class="item_title item_current" style="margin-top:-15px;">
+			<i>3</i>
+			<span>获得代金券</span>
+		</div>
+		<div class="item_cnt" style="border:none">
+                        <!--{if $out['status']== 1}-->
+			<div class="coupon_infor coupon_used">
+                        <!--{/if}-->
+                        <!--{if $out['status']== 2}-->
+			<div class="coupon_infor">
+                        <!--{/if}-->
+				<div class="coupon_size">
+					<p><span>￥</span>5</p>
+				</div>
+				<div class="coupon_time">
+					有效期至：2015.12.31
+					<!--{if $out['status']== 2}--><a id="use" href="javascript:;" onclick="showOpenBox('#tip-box1')">立即使用</a><!--{/if}-->
+                                        <!--{if $out['status']== 1}--><a href="javascript:;">代金券已使用</a><!--{/if}-->
+				</div>
+
+				<!--{if $out['status']== 2}-->
+				<!--{if $out['store_name']== ''}-->
+                                <p class="coupon_infor_s">代金券兑换码将发送至您的手机</p>
+                                <!--{/if}-->
+				<!--{if $out['store_name']!= ''}-->
+                                <p class="coupon_infor_s">已选门店：<!--{$out.store_name}--> &nbsp;代金券兑换码已发送至您的手机，请注意查收</p>
+                                <!--{/if}-->
+
+                                <!--{/if}-->
+			</div>
+                        <!--{if $out['status']== 2}-->
+			<div class="store_list clear">
+				<span>试用门店：</span><p><!--{$out.shop_str}--></p>
+			</div>
+			<div class="coupon_rules">
+				<p>代金券说明：<br/>1、可在学校任一家活动店铺内使用，到店消费时再点击“立即使用”按钮；<br/>2、全场通用，不兑现，不找零；<br/>3、每天仅限20名；<br/>4、请在有效期2015年12月31日前使用，过期作废。</p>
+			</div>
+                        <!--{/if}-->
+		</div>
+		<div class="cloud_01"></div>
+	</div>
+	<div class="wrap" id="code_wrap">
+		<p>呼唤小伙伴扫描二维码领取代金券啦！</p>
+		<img class="code_img" src="<!--{$out.static_url}-->/store/images/code.jpg"/>
+		<p>扫描二维码下载安智市场</p>
+		<img class="tree_img" src="<!--{$out.static_url}-->/store/images/tree.png"/>
+		<div class="cloud_02"></div>
+	</div>
+	<div class="wrap" id="rules_wrap">
+		<h3>活动规则</h3>
+                <div class="rules">
+                    <!--{$out.config_info['explain']}-->
+                </div>
+	</div>
+</div>
+<section>
+	<div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box1">
+		<div class="tip_hd">
+			<h4>请选择店面</h4>
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box1')">关闭</a></div>
+		</div>
+		<div class="swiper-container">
+			<div class="swiper-wrapper">
+				<div class="swiper-slide">
+					<div class="tip-mid">
+						<ul class="share_tips">
+                                                    <!--{foreach from=$out.shoplist item=vo}-->
+							<li>
+								<a href="javascript:;" class="selected" onclick='save("<!--{$vo.id}-->","<!--{$vo.store_name}-->")'><!--{$vo.store_name}--></a>
+							</li>
+                                                    <!--{/foreach}-->
+							<div class="clear"></div>
+						</ul>
+					</div>
+				</div>
+				<div class="swiper-slide"></div>
+			</div>
+		</div>
+    </div>
+</section>
+<script type="text/javascript"  src="<!--{$out.static_url}-->/store/js/swiper.js"></script>
+<script type="text/javascript">
+	var mySwiper = new Swiper('.swiper-container',{
+		direction: 'vertical',
+		slidesPerView: 'auto',
+		mousewheelControl: true,
+		freeMode: true
+	})
+</script>
+<script type="text/javascript">
+	var flags={canMove:true};
+    function showOpenBox(obj){
+        var bg_h=$("#body-bg").height()+$(document).scrollTop(),
+               top_h= $(obj).height()/ 2-$(document).scrollTop();
+        $(obj).css("margin-top",-top_h+"px");
+		$(obj).css('opacity','1');
+		$(obj).css('z-index','1000000');
+		$(obj).css('transform','translate3d(0,0,0)');
+		$(obj).css('-webkit-transform','translate3d(0,0,0)');
+        $("#body-bg").css("height",bg_h+"px").show();
+            flags.canMove=false;
+        }
+        function cloBox(obj){
+            $(obj).css('opacity','0');
+			$(obj).css('z-index','-1');
+			$(obj).css('transform','translate3d(0,200%,0)');
+			$(obj).css('-webkit-transform','translate3d(0,200%,0)');
+            $("#body-bg").hide();
+            flags.canMove=true;
+        }
+        $(function(){
+            $("body").bind('touchmove', function (e) {
+                if(!flags.canMove){
+                    e.preventDefault();
+                }
+            });
+        })
+		
+</script>
+</body>
+</html>

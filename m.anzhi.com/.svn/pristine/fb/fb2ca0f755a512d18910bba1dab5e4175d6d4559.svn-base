@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>补签卡</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/<!--{$out.prefix}-->/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v4"></script>
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+</head>
+<body>
+<!--{if $out.card_config.0.buy_num gt 0}-->	
+<div class="piece sign_add_01">
+	<h3 class="titles">金币购买(<span id='jbnum' ><!--{$out.user_card_config.jb_num}--></span>/<!--{$out.card_config.0.buy_num}-->)</h3>
+	<p>使用<!--{$out.card_config.0.price}-->金币购买一张补签卡，每月可购买<!--{$out.card_config.0.buy_num}-->张</p>
+	<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/banner_01.png" />
+	<!--{if $out.user_card_config.jb_num >= $out.card_config.0.buy_num}-->
+		<div class="btns"><a href="javascript:;" class="disabled">已购买</a></div>
+	<!--{else}-->
+		<div class="btns">
+			<a href="javascript:;" onclick='jb_consum()' id='sub_jb_buy' >立即购买</a>
+		</div>
+	<!--{/if}-->	
+</div>
+<!--{/if}-->	
+
+<!--{if $out.card_config.1.task_num gt 0}-->
+<div class="piece sign_add_02">
+	<h3 class="titles">补签卡任务(<span id='tasknum' ><!--{$out.user_card_config.task_num}--></span>/<!--{$out.card_config.1.task_num}-->)</h3>
+	<p>下载并打开如下软件，即可领取补签卡一张，每天限领一次，每月限领<!--{$out.card_config.1.task_num}-->次</p>
+	<!--{if $out.user_card_config.task_num >=  $out.card_config.1.task_num }-->
+		<div class="sign_prompt">
+			<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/sign_prompt_02.png" />
+			<p>补签卡任务已全部完成</p>
+		</div>
+	<!--{else}-->
+		<div class="sign_prompt" style="display: none;" >
+			<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/sign_prompt_01.png" />
+			<p>抱歉，已经没有任务软件啦</p>
+		</div>
+	<!--{/if}-->	
+	<ul class="soft_list clear" style="display: none;" id="soft-list">
+		<li>
+			<p class="soft-icon"><a href="javascript:;"><img id='gm_pic' src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/app_01.png"/></a></p>
+			<p class="soft-name"><a href="javascript:;" id='gm_name' ></a></p>
+			<p class="soft-info">下载并打开<span class="blue" id='g_name'></span>， 即可领取补签卡</p>
+			<p><a href="javascript:;" class="download app_btn">安装</a></p>
+		</li>
+	</ul>	
+	<!--{if $out.task_status eq 1 && $out.is_card_task eq 0}-->
+		<div class="btns">
+			<a href="javascript:;" onclick='pick_up_card()' id='sub_pick' >领取补签卡</a>
+		</div>
+	<!--{else if $out.task_status eq 2}-->
+		<div class="btns"><a href="javascript:;" class="disabled">已领取</a></div>
+	<!--{else}-->
+		<div class="btns"><a href="javascript:;" class="disabled">领取补签卡</a></div>
+	<!--{/if}-->	
+</div>
+<!--{/if}-->
+</body>
+    <div id="body-bg" style="display: none;"></div>
+    <div class="tip-box" id="tip-box1"  style="display: none;">
+		<div class="tip-title">
+			<h6>温馨提示</h6>
+			<span onclick="cloBox('#tip-box1')"></span>
+		</div>
+        <div class="tip-con">
+			<p id='tip_info' >使用<!--{$out.card_config.0.price}-->金币购买1张补签卡？</p>
+		</div>
+		<div class="btns2">
+			<a href="javascript:;" onclick="cloBox('#tip-box1')" class="cancel">取消</a>
+			<a href="javascript:;" id="sub_jb_consum" onclick="jb_consum_do();">确认</a>
+		</div>
+    </div>
+</html>
+<script>
+var json_soft_status = <!--{$out.json_soft_status}-->;
+var sid='<!--{$out.sid}-->';
+var prefix = "<!--{$out.prefix}-->";
+var stop = "<!--{$out.stop}-->";
+var price = "<!--{$out.card_config.0.price}-->";
+var buy_num = "<!--{$out.card_config.0.buy_num}-->";
+var mid ="<!--{$out.mid}-->";
+var activity_host ="<!--{$out.activity_host}-->";
+function onLoginComplete(sid,tip){
+	var is_register = 0;
+	if(tip == "注册成功"){
+		var is_register = 1;
+	}
+	sid_str = sid.replace("PHPSESSID=", "");
+	location.href="/"+prefix+"/lottery.php?sid="+sid_str;
+}
+//使用说明
+<!--{if $out['is_login'] == 1}-->
+	//修改右侧actionBar,紧支持文本
+	var rightaction_url = activity_host+"/"+prefix+"/signature_card.php?sid="+sid+"&is_rule=1";
+	var rightaction_json = '{"text":"使用说明","url":"'+rightaction_url+'"}';
+	window.AnzhiActivitys.updateRightActionBar(rightaction_json);
+<!--{/if}-->
+
+//金币购买
+function jb_consum(){
+	<!--{if $out['is_login'] == 2}-->
+		login('<!--{$out.login_url}-->','<!--{$out.version_code}-->');
+		return false;
+	<!--{/if}-->
+	
+	$('#tip_info').html("使用<!--{$out.card_config.0.price}-->金币购买1张补签卡？").parent().attr('class','tip-con');
+	$('.btns2').css('display','block');
+	$('.tip-title').html('<h6>温馨提示</h6><span onclick="cloBox(\'#tip-box1\')"></span>');
+	pop_tips('','','1',1);			
+	setTimeout(function(){	
+		var bg_h=$(window).height() + $(document).scrollTop(),
+			top_h= $("#tip-box1").height()/ 2 - $(document).scrollTop();
+		$('#body-bg').css("height",bg_h+"px");	
+		$("#tip-box1").css("margin-top",-top_h+"px");	
+	},500);		
+}
+
+function jb_consum_do(){
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	$('#tip_info').html("购买中~~").parent().attr('class','tip-con3');
+	$('.tip-title').html('<h6>温馨提示</h6>');
+	$('.btns2').css('display','none');
+	$('#sub_jb_consum').removeAttr("onclick");
+	$('#sub_jb_buy').removeAttr("onclick");
+	$.ajax({
+		url: "/"+prefix+"/signature_card.php",
+		data:"is_consum=1&sid="+sid+"&price="+price,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if(data.code == 1){
+				jb_consum_do_res(data.water_id);						
+			}else if(data.code == 2){
+				location.href="/"+prefix+"/index.php";
+			}else{
+				setTimeout(function(){		
+					cloBox('#tip-box1');
+					$('#sub_jb_consum').attr('onclick','jb_consum_do()');
+					$('#sub_jb_buy').attr('onclick','jb_consum()');
+				},2000);		
+				window.AnzhiActivitys.showToastForJs(data.msg);
+				return false;
+			}
+		},
+	});	
+}
+//轮循结果
+function jb_consum_do_res(water_id){
+	setTimeout(function(){	
+		$.ajax({
+			url: "/"+prefix+"/signature_card.php",
+			data:"is_consum_res=1&sid="+sid+"&price="+price+"&water_id="+water_id,
+			type:"post",
+			dataType: 'json',
+			success:function(ret) {
+				$('#sub_jb_consum').attr('onclick','jb_consum_do()');
+				if(ret.code == 1){
+					var jbnum = parseInt($('#jbnum').text())+1;
+					$('#jbnum').html(jbnum);
+					if(jbnum >= buy_num){
+						$('#sub_jb_buy').attr('class','disabled').html('已购买');
+					}else{
+						$('#sub_jb_buy').attr('onclick','jb_consum()');
+					}				
+					window.AnzhiActivitys.showToastForJs("购买成功 补签卡+1");				
+					//扣除的金币数量
+					window.AnzhiActivitys.setWealthPointNum(-price);			
+				}else{
+					window.AnzhiActivitys.showToastForJs(ret.msg);
+				}
+			},
+		});	
+		setTimeout(function(){
+			cloBox('#tip-box1');
+		},1500);		
+	},1000);		
+}
+//领取补签卡
+function pick_up_card(){
+	if(window.AnzhiActivitys.isNetworkDisabled()){
+		window.AnzhiActivitys.showToastForJs("网络大塞车，请检查一下手机网络吧");
+		return false;
+	}
+	$.ajax({
+		url: "/"+prefix+"/signature_card.php",
+		data:"is_task=1&sid="+sid+"&price="+price,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if(data.code == 1){
+				$('#sub_pick').removeAttr("onclick").attr('class','disabled').html('已领取');
+				var tasknum = parseInt($('#tasknum').text())+1;
+				$('#tasknum').html(tasknum);
+				window.AnzhiActivitys.showToastForJs("领取成功 补签卡+1");
+				/*
+				setTimeout(function(){
+					location.reload();//加载页面
+				}, 2000);
+				*/
+			}else if(data.code == 2){
+				location.href="/"+prefix+"/index.php";
+			}else{
+				location.reload();//加载页面
+				return false;
+			}
+		},
+	});	
+}
+//=======
+$(document).ready(function () {
+	setTimeout(function(){
+		my_soft();	
+	}, 500);
+});
+var soft_lists_go = [];
+var limit = 1,p=0;
+var proid_arr = getArgs();
+var skinvc = proid_arr.skinvc;
+function getArgs() {
+	var args = {};
+	var query = location.search.substring(1);
+	var pairs = query.split("&");
+	for(var i = 0; i < pairs.length; i++) {
+			var pos = pairs[i].indexOf('=');
+			if (pos == -1) continue;
+			var argname = pairs[i].substring(0,pos);
+			var value = pairs[i].substring(pos+1);
+			value = decodeURIComponent(value);
+			args[argname] = value;
+	}
+	return args;
+}
+
+function my_soft() {
+	<!--{if $out.user_card_config.task_num >=  $out.card_config.1.task_num }-->
+		//补签卡任务已全部完成
+		//$('#soft-list').css('display','none');
+		//$('.sign_prompt').css('display','block');
+		//return false;
+	<!--{/if}-->	
+	var json_data = window.AnzhiActivitys.getAllSignAppList(parseInt(mid));		
+	if(!json_data || json_data == 'null'){
+		//已无任务软件
+		$('#soft-list').css('display','none');
+		$('.sign_prompt').css('display','block');
+		return false;
+	}
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	var soft_lists = soft_list.DATA;
+	var open_list = [];
+	var install_list = [];
+	var down_list = [];
+	for(j=0;j<soft_lists.length;j++){
+		var pkg = soft_lists[j][7];
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(pkg);		
+		if(json_soft_status != null && typeof(json_soft_status[pkg]) != 'undefined'){
+			var is_down = json_soft_status[pkg]['is_down'] ? json_soft_status[pkg]['is_down'] : 0;
+			var is_open = json_soft_status[pkg]['is_open'] ? json_soft_status[pkg]['is_open'] : 0;
+			if(is_down == 1 && is_open == 1){
+				//过滤已完成的软件
+				continue;
+			}else if(is_down == 1 && is_open != 1){
+				//任务未完成软件
+				down_list.push(soft_lists[j]);
+				break;
+			}
+		}
+		var json_data =  window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));	
+		if((json_data == -2 && soft_status_gos != 5 ) || json_data == -1){
+			down_list.push(soft_lists[j]);
+			break;
+		}
+		
+	}
+  	for(var ii in down_list) {
+		soft_lists_go.push(down_list[ii]);
+	}
+	var soft_length = soft_lists_go.length;
+	if(soft_length == 0){
+		//已无任务软件
+		$('#soft-list').css('display','none');
+		$('.sign_prompt').css('display','block');
+	}else{
+		$('#soft-list').css('display','block');
+		get_soft();
+	}
+}
+
+
+function get_soft(){
+	var pagemax= Math.floor(soft_lists_go.length/limit);
+	if(soft_lists_go.length%limit==0){
+		pagemax = pagemax-1;
+	}
+	var data = soft_lists_go.slice(p*limit,limit*(p+1));
+	if(data.length == 0){
+		p = 0;
+		data = soft_lists_go.slice(p*limit,limit*(p+1));
+	}
+	for(i = 0; i < data.length; i++) {
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);		
+		if(data[i][data[i].length-1] != ''){
+			var size = data[i][data[i].length-1];
+		}else{
+			var size = data[i][27];
+		}			
+		$(".soft-info1").html(data[i][9]+' '+data[i][11]+'次下载');
+		$(".soft-info2").html(data[i][23].substring(0,13)+'...');		
+		var softname = data[i][2];
+		get_soft_one(soft_status,parseInt(data[i][0]),data[i][7],softname,parseInt(data[i][13]),size,data[i][1]);
+		return false;
+	}
+	if(p==pagemax){
+		p=0;
+	}else{
+		p=p+1;
+	}
+}
+
+function get_soft_one(soft_status,softid,my_package,softname,versioncode,size,src){
+	$("#gm_pic").attr('src',src);
+	$("#gm_name").html(softname);
+	$("#g_name").html(softname);
+	if(soft_status == 1){
+		$(".app_btn").html("下载中");
+	}else if(soft_status == 2 || soft_status == 3 || soft_status == 8){
+		$(".app_btn").attr("class",'download app_btn install').attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')').html("继续");
+	}else if(soft_status == 4){
+		$(".app_btn").attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')').html("下载");
+	}else if(soft_status == 5){
+		$(".app_btn").attr("class",'download app_btn install').attr("class",'download app_btn install').attr("onclick",'installApp('+softid+',\''+my_package+'\')').html("安装");	
+	}else if(soft_status == 6){
+		$(".app_btn").attr("class",'download app_btn').attr("onclick",'openApp(\''+my_package+'\','+softid+')').html("打开");		
+	}else if(soft_status == 9){
+		$(".app_btn").attr("onclick",'installApp('+softid+',\''+my_package+'\')').html("校验中");
+	}else if(soft_status == 10){
+		$(".app_btn").attr("onclick","").html("已下载");	
+	}else if(soft_status == -1){
+		var soft_other_status = window.AnzhiActivitys.isInstalledApp(my_package,parseInt(versioncode));
+		if(soft_other_status == -2){
+			$(".app_btn").attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')').html("下载");		
+		}else if(soft_other_status == -1){
+			$(".app_btn").attr("onclick",'go_softinfo_down('+softid+',\''+my_package+'\',\''+softname+'\','+versioncode+','+size+')').html("更新");			
+		}else if(soft_other_status == 0){
+			$(".app_btn").attr("class",'download app_btn').attr("onclick",'openApp(\''+my_package+'\','+softid+')').html("打开");	
+		}else if(soft_other_status == 1){
+			$(".app_btn").attr("onclick","").html("已下载");
+		}
+	}	
+}
+
+function openApp(pkg,softid){
+	the_soft = [softid];
+	$.ajax({
+		url: "/"+prefix+"/signature_card.php",
+		data: 'openapp=1&from=1&softid='+softid+'&sid='+sid+'&package='+pkg,
+		type: 'post',
+		success: function(data){
+			window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+			<!--{if $out.is_card_task eq 0}-->
+			setTimeout(function(){
+				location.reload();//加载页面		
+			},2000);	
+			<!--{/if}-->			
+		}
+	});
+}
+
+
+function go_softinfo_down(softid,my_package,softname,versioncode,size){
+	$(".app_btn").html("下载中").removeAttr("onclick");
+	$.ajax({
+		url: "/"+prefix+"/signature_card.php", //supwater  点击详情 点击下载
+		data:"downapp=1&from=1&softid="+softid+"&sid="+sid+"&package="+my_package, 
+		type:"post",
+		success:function(data) {
+			window.AnzhiActivitys.downloadForActivity(parseInt(mid),softid,my_package,softname,versioncode,size,0);
+		},
+	});
+}
+function installApp(softid,pkgname){
+	$.ajax({
+		url: "/"+prefix+"/signature_card.php",
+		data: 'installApp=1&from=1&softid='+softid+'&sid='+sid+'&package='+pkgname,
+		type: 'post',
+		success: function(data){
+			window.AnzhiActivitys.installAppForActivity(softid);
+		}
+	});
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		$(".app_btn").html("下载中");
+	}else if(newState == 2 || newState == 3 || newState == 8){
+		$(".app_btn").html("继续");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				$(".app_btn").attr('onclick',"go_softinfo_down("+parseInt(softid)+",'"+soft_lists_go[i][7]+"','"+soft_lists_go[i][2]+"','"+soft_lists_go[i][13]+"','"+soft_lists_go[i][soft_lists_go[i].length-1]+"')");
+			}
+		}		
+	}else if(newState == 4){
+		$(".app_btn").html("重试");		
+	}else if(newState == 5){		
+		$(".app_btn").html("安装");
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				$(".app_btn").attr('onclick',"installApp("+parseInt(softid)+",'"+soft_lists_go[i][7]+"')");
+			}
+		}		
+	}else if(newState == 6){
+		$(".app_btn").html("打开");
+		for(var i=0;i < soft_lists_go.length;i++){		
+			if(soft_lists_go[i][0] == softid){
+				$(".app_btn").attr('onclick',"openApp('"+soft_lists_go[i][7]+"',"+parseInt(softid)+")");
+                break;
+			}
+		}		
+	}else if(newState == 9){
+		$(".app_btn").html("检查中");			
+	}
+}
+
+
+</script>

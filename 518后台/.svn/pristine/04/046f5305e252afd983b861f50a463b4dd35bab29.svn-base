@@ -1,0 +1,121 @@
+<div>
+		<table style="width:99%; margin:10px auto; font-size:12px; line-height:20px; border-collapse:collapse; color:#252525;" cellpadding="1" cellspacing="1" border="1">
+			<thead>
+				<tr>
+					<th width="5%">序号</th>
+					<th width="6%">月份</th>
+					<th width="6%">客户名称</th>
+					<th width="6%">渠道名称</th>
+					<th width="5%">激活量</th>
+					<th width="5%">激活量合计</th>
+					<th width="5%">日均激活量</th>
+					<th width="5%">单价</th>
+					<th width="6%">结算金额</th>
+					<th width="6%">补差</th>
+					<th width="5%">税率</th>
+					<th width="6%">应付金额</th>
+					<th width="6%">已付金额</th>
+					<th width="5%">差额补齐</th>
+					<th width="5%">未付金额</th>
+					<th width="6%">发票金额</th>
+					<th width="7%">操作时间</th>
+					<th width="5%">状态</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach($result as $key => $val){ ?>
+			<tr>
+				<td rowspan="<?php echo count($val['cid_result']); ?>">{$val.num}</td>
+				<td rowspan="<?php echo count($val['cid_result']); ?>"><?php echo date('Ym',strtotime($val['month'].'01')); ?></td>
+
+				<td style="align:left;" rowspan="<?php echo count($val['cid_result']); ?>">
+				
+
+
+				{$val.client_name}
+				</td>
+
+				<td style="text-align:left;">
+
+				<?php echo $val['cid_result'][0]['chname']; ?>
+				</td>
+				<td><?php echo $val['cid_result'][0]['activation']; ?></td>
+				<?php if($val['cid_result'][0]['settle_entity'] == 2){ ?><td rowspan="<?php echo count($val['cid_result']); ?>"><?php echo $val['cid_result'][0]['activation_sum']; ?></td><?php } else { ?><td>-</td><?php } ?>
+				<?php if($val['cid_result'][0]['settle_entity'] == 2){ ?><td rowspan="<?php echo count($val['cid_result']); ?>"><?php echo $val['cid_result'][0]['average_sum']; ?></td><?php } else { ?><td><?php echo $val['cid_result'][0]['average']; ?></td><?php } ?>
+				<td <?php if($val['cid_result'][0]['settle_entity'] == 2){ ?>rowspan="<?php echo count($val['cid_result']); ?>"<?php } ?>><?php echo $val['cid_result'][0]['price']; ?></td>
+				<td <?php if($val['cid_result'][0]['settle_entity'] == 2){ ?>rowspan="<?php echo count($val['cid_result']); ?>"<?php } ?>><?php if($min_pay > $val['cid_result'][0]['settle_amount']){ ?><span style="color:red;"><?php }else{ ?><span><?php } ?><?php echo $val['cid_result'][0]['settle_amount']; ?></span></td>
+				<td <?php if($val['cid_result'][0]['settle_entity'] == 2){ ?>rowspan="<?php echo count($val['cid_result']); ?>"<?php } ?>><?php echo $val['cid_result'][0]['salvation']; ?></td>
+
+				<td rowspan="<?php echo count($val['cid_result']); ?>"><?php echo $val['cid_result'][0]['taxt']; ?>%</td>
+				<td rowspan="<?php echo count($val['cid_result']); ?>"><?php echo $val['all_amount_pay']; ?></td>
+
+				<td rowspan="<?php echo count($val['cid_result']); ?>" ><?php if($val['cid_result'][0]['status'] == 0 || $val['cid_result'][0]['status'] == 3){ ?>0<?php }else{ ?><?php echo $val['all_amount_paid']; ?><?php } ?></td>
+
+				<td rowspan="<?php echo count($val['cid_result']); ?>" ><?php echo $val['my_salvation']; ?></td>
+
+				<td rowspan="<?php echo count($val['cid_result']); ?>"><?php if($val['cid_result'][0]['status'] == 0 || $val['cid_result'][0]['status'] == 3){ ?><?php echo $val['all_amount_pay']; ?><?php }else{ ?><?php echo $val['no_paid']; ?><?php } ?></td>
+				<?php $settle_group_new  = array_count_values($settle_group[$val['cid_result'][0]['month'].$val['cid_result'][0]['client_id'].$val['cid_result'][0]['status']]);
+				?>
+				<td <?php if($val['cid_result'][0]['settle_entity'] == 2){ ?>rowspan="<?php echo count($val['cid_result']); ?>"<?php }else{ ?> rowspan="<?php echo $settle_group_new[$val['cid_result'][0]['settle_group']];  ?>"<?php } ?>>
+				<?php echo $val['cid_result'][0]['bill_amount']; ?>	
+				</td>
+
+				<td rowspan="<?php echo count($val['cid_result']); ?>"><div style="width:70px"><?php echo date('Y-m-d',$val['cid_result'][0]['update_tm']); ?><br /><?php echo date('H:i:s',$val['max_update_tm']); ?></div></td>
+				
+				<td rowspan="<?php echo count($val['cid_result']); ?>"><?php if($val['cid_result'][0]['status'] == 0){ ?>已冻结<?php }elseif($val['cid_result'][0]['status'] == 2){ ?>已付款<?php }elseif($val['cid_result'][0]['status'] == 3){ ?>未付款<?php } ?></td>
+			</tr>
+			<?php $i = 0; foreach(array_slice($val['cid_result'],1) as $k => $v){ ?>
+				<tr>
+				<td style="text-align:left;">
+
+				{$v.chname}
+				</td>
+				<td>{$v.activation}</td>
+				<?php if($v['settle_entity'] == 1){ ?>
+				<td>-</td>
+				<td>{$v.average}</td>
+				<td>{$v.price}</td>
+				<td>{$v.settle_amount}</td>
+				<td>{$v.salvation}</td>
+				<?php 
+				$settle_group_new  = array_count_values($settle_group[$v['month'].$v['client_id'].$v['status']]);				
+					if($i==0){ 
+						if($v['settle_group'] != $val['cid_result'][0]['settle_group']){
+				?>
+				<td rowspan="<?php echo $settle_group_new[$v['settle_group']]; ?>"  >
+				{$v.bill_amount}</td>
+						<?php } ?>
+				<?php }elseif($settle_group_last != $v['settle_group'] ){ ?>
+				<td rowspan="<?php echo $settle_group_new[$v['settle_group']]; ?>"  >{$v.bill_amount}</td>
+				<?php }else{ ?>
+				
+				<?php } ?>
+
+				<?php } ?>
+				</tr>
+				<?php $settle_group_last = $v['settle_group']; $i++; } ?>
+			<?php } ?>
+				<tr>
+					<td>总计</td>
+					<td>-</td>
+					<td></td>
+					<td>-</td>
+					<td>{$the_activation}</td>
+					<td></td>
+					<td></td>
+					<td>-</td>
+					<td>{$the_settle_amount}</td>
+					<td>{$the_salvation}</td>
+					<td></td>
+					<td>{$the_amount_pay}</td>
+					<td>{$the_amount_paid}</td>
+					<td>{$the_my_salvation}</td>
+					<td>{$the_no_paid}</td>
+					<td>{$the_bill_amount}</td>
+					<td></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+

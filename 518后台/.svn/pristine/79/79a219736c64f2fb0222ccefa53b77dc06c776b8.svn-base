@@ -1,0 +1,136 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css?1" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<style>
+    .future_class {
+        background-color:#CCCCCC
+    }
+</style>
+
+<body style="position:relative;">
+
+	<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+<!-- 		<tr>
+			<td>主频道名称</td>
+			<td>
+				<input type="text" id='configcontent' name='configcontent'  style='height:25px' value="{$configcontent}"/>
+			</td>
+			<td><input type='button' value='编辑' style='width:50px' onclick="change_name()"  /></td>
+			<td>显示在安智市场第四个频道位置（最多2个汉字）</td>
+		</tr>	 -->
+		<tr>
+			<td>选择站点</td>
+			<td>
+				<select id="site_id" name="site_id"  onchange="channel_list();">
+					<?php foreach($coop_site as $k => $v){ ?>
+					<option value="<?php echo $v['id']; ?>" <?php if($site_id == $v['id']) echo 'selected="selected"'; ?> >
+						<?php echo $v['anzhi_name']; ?>
+					</option>
+					<?php } ?>
+				</select>
+			</td>
+			<td><a href="javascript:;" onclick="add_channel();" >创建频道</a></td>
+		</tr>		
+	</table>
+    <br><br>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="4%">频道ID</th>
+                    <th width="5%">频道排序</th>
+                    <th width="8%">频道名称</th>
+                    <if condition="$site_id_type eq 0 or $site_id_type eq 3 or $site_id_type eq 4">
+					<th width="8%">推荐内容</th>
+					<else/>
+					<th width="8%">关联卡片</th>
+					</if>
+                    <th width="5%">频道状态</th>
+                    <th width="7%">精确投放</th>
+                    <th width="6%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+                    <td>{$list.id}</td>
+                    <td>{$list.rank}</td>
+                    <td>{$list.channel_name}</td>
+                    <td>
+                    <if condition="$site_id_type eq 0 or $site_id_type eq 3 or $site_id_type eq 4 or $site_id_type eq 5">
+                    	<if condition="$list.type eq 3">
+							内容类型：{$list.type_name}
+						<else/>
+							内容合作：<a href="__URL__/card_list?channle_id={$list.id}&site_id={$site_id}">
+						<?php echo $count_arr[$list['id']];?>
+						</a>
+						</if>
+					<else/>
+						内容合作：<a href="__URL__/card_list?channle_id={$list.id}&site_id={$site_id}">
+						<?php echo $count_arr[$list['id']];?>
+						</a>
+					</if>
+					</td>
+                    <if condition="$list.status eq 1 ">
+                    <td>启用</td>
+                    <else/>
+                    <td>停用</td>
+                    </if>
+					<td><a class="thickbox" href="__URL__/pub_delivery_conditions?id={$list.id}">查看</a></td>
+                    <td>
+						<if condition="$list.status eq 1 ">
+						<a href="__URL__/switch_channel?id={$list.id}&status=0&type={$list.type}&channel_name={$list.channel_name}" class="blue" onClick="return confirm('确定要停用吗？');">停用</a>
+						<else/>
+						<a href="__URL__/switch_channel?id={$list.id}&status=1&type={$list.type}" class="blue" onClick="return confirm('确定要启用吗？');">启用</a>
+						</if>|
+						<a title ="编辑频道" class="thickbox" href="__URL__/save_channel?id={$list.id}&site_id={$list.site_id}" class="blue">编辑</a>|
+						<a href="__URL__/del_channel?id={$list.id}" class="blue"  onClick="return confirm('确定要删除吗？');">删除</a>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>
+<script type="text/javascript">
+function change_name(){
+	var configcontent=$("#configcontent").val();
+	if(configcontent == "{$configcontent}"){
+		alert("未做任何修改");
+		return false;
+	}
+	$.ajax({    
+		url:'/index.php/Cooperate/Contentcooperation/save_meun_name/configcontent/'+configcontent,
+		type: 'get',
+		dataType: 'json',		
+		async:false,
+		success: function(res){   
+			if(res.code == 1){
+				alert(res.msg);
+			}else{
+				alert(res.msg);
+			}
+		}
+	});
+}
+function add_channel(){
+	var site_id = $("#site_id").val();
+	if(!site_id){
+		alert("请选择站点！");
+		return false;
+	}
+	var urls ="__URL__/add_channel?site_id="+site_id;
+	var timenow = new Date().getTime();
+	suffix = timenow;
+	window_list.push(timenow);	
+	tb_show('添加频道',urls,"thickbox");
+}
+function channel_list(){
+	var site_id = $("#site_id").val();
+	window.location.href="__URL__/channel_list?site_id="+site_id;
+}
+</script>

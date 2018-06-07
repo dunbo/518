@@ -1,0 +1,322 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+{//时间插件结束}
+
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<table  width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+<tr height="35">
+	<td align="center" style=<?php if($passed ==1 || $passed ==4){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/explicit_list/passed/1"><font style="color:#000; font-weight:bold">审核中</font></a>
+	</td>
+	<td align="center" style=<?php if($passed ==2){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/explicit_list/passed/2"><font style="color:#000; font-weight:bold">发布中</font></a>
+	</td>
+	<td align="center" style=<?php if($passed ==3){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/explicit_list/passed/3"><font style="color:#000; font-weight:bold">驳回列表</font></a>
+	</td>
+	<!-- <td align="center" style=<?php if($passed ==4){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/explicit_list/passed/4"><font style="color:#000; font-weight:bold">已过期</font></a>
+	</td> -->
+</tr>
+</table>
+
+<table style='margin-top:30px;float:left;' width="100%" cellspacing="0" cellpadding="0" class="search_table">
+	<tbody>
+	<form method='get' action="__URL__/explicit_list/passed/{$passed}" >
+		<tr>
+			<td width="10%">软件ID:<input type="text" size='9'  value="{$softid}" id="s_softid" name="s_softid"></td>
+			<td width="20%">软件包名：<input type="text"  value="{$package}" id="s_package" name="s_package"></td>
+			<td width="20%">展示样式：
+				<select name="s_show_style" id="s_show_style">
+					<option value="">全部</option>
+					<option value="1" <if condition="$show_style eq 1">selected</if>>单图</option>
+					<option value="2" <if condition="$show_style eq 2">selected</if>>三图</option>
+				</select>
+			</td>
+			<td width="20%">模板类型：
+				<select name="s_template_select" id="s_template_select">
+					<option value="">全部</option>
+					<option value="1" <if condition="$template_select eq 1">selected</if>>安智样式</option>
+					<option value="2" <if condition="$template_select eq 2">selected</if>>APP自带样式</option>
+					<option value="3" <if condition="$template_select eq 3">selected</if>>富媒体样式</option>
+				</select>
+			</td>
+			<td align='right' width="10%" rowspan='2'><input type="submit" class="search_btn" value="搜索"></td>
+		</tr>
+		<tr>
+			<td width="20%">内容类型：
+				<select name="s_content_type" id="s_content_type">
+					<option value="">全部</option>
+					<option value="1" <if condition="$content_type eq 1">selected</if>>应用评测</option>
+					<option value="2" <if condition="$content_type eq 2">selected</if>>应用中内容</option>
+					<option value="3" <if condition="$content_type eq 3">selected</if>>活动发布</option>
+				</select>
+			</td>
+			<td colspan='2'>提交时间：
+			<span><input type="text" name="begintime" id="begintime" value="{$begintime}" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>	~
+			<span><input id="endtime" name="endtime" style="cursor: hand; width: 150px;"
+			 value="{$endtime}" size="15" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>
+			</td>
+			<td colspan='2'>来源：
+				<select name="s_content_from" id="s_content_from">
+					<option value="">全部</option>
+					<option value="1" <if condition="$content_from eq 1">selected</if>>518后台</option>
+					<option value="2" <if condition="$content_from eq 2">selected</if>>内容合作平台</option>
+				</select>
+			</td>
+		</tr>
+		<?php if($passed == 2 || $passed == 1 || $passed == 3){ ?>	
+		<tr>
+			<td >内容性质:{$content_xz}</td>
+			<td >内容质量:{$content_zl}</td>
+			<td >内容栏目:
+				<select name="s_content_column" id="s_content_column">
+					<option value="0" selected>全部</option>
+					<volist name='column_list' id='columnlist'>
+					<option value="{$columnlist.cont_id}" <?php if($s_content_column == $columnlist['cont_id']) echo "selected"; ?> >{$columnlist.name}</option>
+				    </volist>
+				</select>
+			</td>
+			<td colspan = '2'>内容来源:{$con_source}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				标签状态：<select name="s_status_tag" id="s_status_tag">
+				<option value="">全部</option>
+				<option value="0" <?php if($s_status_tag === '0') echo "selected"; ?> >否</option>
+				<option value="1" <?php if($s_status_tag == 1) echo "selected"; ?> >是</option>
+			  </select>
+			</td>
+		</tr>
+		<tr>
+			<td>用户倾向:{$user_tend}</td>
+		</tr>
+		<?php } ?>			
+	</form>
+	 </tbody>
+</table>
+
+
+<table style='float:left;' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<td>
+			<if condition="$draft neq 1">
+			<?php if($passed == 1){ ?>
+				<input type="button" title="批量驳回" class="search_btn" value="批量驳回" onclick="batch_reject(3)" >
+			<?php }else if($passed == 2){ ?>	
+				<input type="button" title="批量驳回" class="search_btn" value="批量驳回" onclick="batch_reject(3)" >
+			<?php }else if($passed == 3){ ?>	
+				<input type="button" title="批量撤销" class="search_btn" value="批量撤销" onclick="batch_reject(1)" >
+			<?php } ?>				
+			</td>
+			</if>
+			<td>
+			<?php if($passed == 1||$passed == 4){ ?>
+				<a href="/index.php/Sj/ContentExplicit/explicit_edit/add/1" class="search_btn">添加内容外显</a>
+			<?php } ?>
+			</td>
+			<td>
+			<?php if($passed == 1 ||$passed == 4){ ?>
+				<a href="/index.php/Sj/ContentExplicit/explicit_list/passed/4/draft/1" style="<if condition="$draft eq 1 or $passed == 4">background:#6aaff9</if>" class="search_btn">草稿箱</a>
+			<?php } ?>
+			</td>	
+			<td colspan='10'>&nbsp;</td>
+		</tr>
+		<tr>
+			<th width="3%" bgcolor="#e3e2fe"><input type="checkbox" id="id_all[]" name="id_all[]" onclick="selectAlls();">序号</th>
+			<th width="19%">软件信息</th>
+			<th width="19%">开发者</th>
+			<th width="7%">详情页标题</th>
+			<th width="7%">展示样式</th>
+			<th width="7%">模板类型</th>
+			<th width="7%">内容类型</th>
+			<!-- <th width="7%">下载引导信息</th> -->
+			<!-- <th width="7%">开始时间</th>
+			<th width="7%">结束时间</th> -->
+			<?php if($passed == 4){ ?>
+			<th width="5%">保存时间</th>
+			<?php }else if($passed == 3){ ?>
+			<th width="5%">驳回时间</th>
+			<?php }else{ ?>
+			<th width="5%">提交时间</th>
+			<?php } ?>
+			<?php if($passed == 2 || $passed == 1 || $passed == 3){ ?>
+			<th width="15%">内容属性</th>
+			<?php } ?>
+			<th width="5%">操作</th>
+			
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='list' id='softlist'>
+		<tr>
+			<td align='left'>
+				<input type="checkbox" name="id[]" value="{$softlist.id}" /><br/>
+				{$softlist.id|default=''}<br/><br/>
+			</td>
+		
+			<td>
+				<table style="border:0;" class="noborder">
+					<tr>
+						<td>
+							<?php 
+								echo $soft_list[$softlist['package']]['softid'];
+							?>
+						</td>
+						<td rowspan="2">
+							<if condition="$soft_list[$softlist['package']]['softid']">
+								<a target='_blank'  href='http://www.anzhi.com/soft_<?php echo $soft_list[$softlist['package']]['softid'];?>.html'><b><?php echo $soft_list[$softlist['package']]['softname']; ?></b></a><br/>
+							<else/>
+								<b><?php echo $soft_list[$softlist['package']]['softname']; ?></b><br/>
+							</if>
+							{$softlist.package}<br/>
+							<?php 
+								echo $category_list[trim($soft_list[$softlist['package']]['category_id'],',')];
+							?><br>
+							下载量：<?php echo $soft_list[$softlist['package']]['total_downloaded']; ?>
+						</td>
+					</tr>
+					<tr>
+						<td><img src='<?php echo IMGATT_HOST;?><?php echo $icon_list[$soft_list[$softlist['package']]['id']]['iconurl'];?>' width="48" height="48"/></td>
+					</tr>
+					<tr colspan="2">
+						
+					</tr>
+				</table>			
+			</td>
+			<td style="text-align:left;">
+				<?php 
+					echo $dev_list[$softlist['dev_id']]['reg_ip']."<br>";
+					echo $dev_list[$softlist['dev_id']]['dev_name']."<br>";
+					echo $dev_list[$softlist['dev_id']]['dev_id']."<br>";
+					if($dev_list[$softlist['dev_id']]['type']==0){
+						echo "公司"."<br>";
+					}else if($dev_list[$softlist['dev_id']]['type']==1){
+						echo "个人"."<br>";
+					}else if($dev_list[$softlist['dev_id']]['type']==2){
+						echo "团队"."<br>";
+					}
+					echo $dev_list[$softlist['dev_id']]['email']."<br>";
+				?>
+			</td>
+
+			<td>{$softlist.title}</td>
+			
+			
+
+			<td><if condition="$softlist.show_style eq 1">单图<elseif condition="$softlist.show_style eq 2" />三图</if></td>
+			<td><if condition="$softlist.template_select eq 1">安智样式<elseif condition="$softlist.template_select eq 2" />APP自带样式<elseif condition="$softlist.template_select eq 3" />富媒体样式</if></td>
+
+			<td><if condition="$softlist.content_type eq 1">应用评测<elseif condition="$softlist.content_type eq 2" />应用中内容<elseif condition="$softlist.content_type eq 3" />活动发布</if></td>
+
+			<!-- <td align='center' >
+				<div style="width:70px;">
+					{$softlist.bottom_download_pink}
+				</div>
+			</td> -->	
+			<!-- <td align='center' >
+				<div style="width:70px;">
+					{$softlist.start_tm}
+				</div>
+			</td>
+			<td align='center' >
+				<div style="width:70px;">
+					{$softlist.end_tm}
+				</div>
+			</td> -->
+			<td align='center' >
+				<div style="width:70px;">
+					{$softlist.update_tm}
+				</div>
+			</td>
+			<?php if($passed == 2 || $passed == 1 || $passed == 3){ ?>
+			<td> {$softlist.content_select}</td>
+			<?php } ?>
+			<td align='center' >
+				<?php if($passed == 1){ ?>
+					<a href="__URL__/explicit_edit?id={$softlist.id}&passed={$passed}" class="blue">审核</a><br/>
+					<a href="javascript:void(0);" class="blue" onclick="reject({$softlist.id},3)">驳回</a><br/>
+
+				<?php }else if($passed == 2){ ?>	
+					<a href="javascript:void(0);" class="blue" onclick="reject({$softlist.id},3)">驳回</a><br/>
+					<a href="__URL__/explicit_edit?id={$softlist.id}&passed={$passed}" class="blue">修改</a><br/>
+				<?php }else if($passed == 3){ ?>	
+					<a href="javascript:void(0);" class="blue" onclick="javacsript:if(confirm('确认将该条数据移至审核中列表吗？')){window.location.href='__URL__/explicit_handle?id=<?php echo $softlist['id'];?>&passed=1'}">撤销</a><br/>
+				<?php }else if($passed == 4){ ?>	
+					<!-- <a href="javascript:void(0);" class="blue"
+					onclick="javacsript:if(confirm('删除后不可恢复，是否确认删除？')){window.location.href='__URL__/explicit_handle?id=<?php echo $softlist['id'];?>&passed=4'}">删除</a><br/> -->
+					<a href="__URL__/explicit_edit?id={$softlist.id}&passed=4&draft={$draft}" class="blue">编辑</a><br/>
+					<a href="__URL__/draft_delete?id={$softlist.id}&passed=4&draft={$draft}" class="blue" onclick="return confirm('删除后不可恢复，是否确认删除？')">删除</a><br/>
+				<?php } ?>
+				<if condition="$passed neq 4">
+					<a href="__URL__/preview_content_explicit?id={$softlist.id}" class="blue" target="_black">预览</a><br/>				
+				</if>
+			</td>
+
+			
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='12'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+</html>
+<script>
+function reject(){
+	id=arguments[0]?arguments[0]:0;
+	passed=arguments[1]?arguments[1]:0;
+	if(passed==3){
+		tb_show('取消','__URL__/explicit_handle?passed='+passed+'&id='+id+'&bs=1&height=300&width=400',false);
+	}else{
+		window.location.href='__URL__/explicit_handle?id='+id+'&passed='+passed+'&1/1';
+	}
+}
+function get_ids(){
+	var chks=$("input[name='id[]']:checked");
+	var ids=new Array();
+    $(chks).each(function(){
+       ids.push(this.value);        
+    });
+    return ids;
+}
+function batch_reject(passed){
+
+	ids=get_ids();
+    if(ids.length==0){
+		alert('请选择要操作的对象!');
+		return;
+	}
+	var str='';
+	if(passed==1){
+		str='确认将该条数据移至审核中列表吗？';
+	}else if(passed==4){
+		str="删除后不可恢复，是否确认删除？";
+	}else{
+		str="你确认操作吗？";
+	}
+	if(!confirm(str))
+	{
+		return true;
+	}
+	
+	reject(ids,passed);
+    
+}
+</script>

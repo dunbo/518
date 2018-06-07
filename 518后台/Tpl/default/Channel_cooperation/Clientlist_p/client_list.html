@@ -1,0 +1,132 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script>
+	function select_all(){
+		if($('#my_select').attr('checked') == 'checked'){
+			$("input[id^=client_]").attr('checked','checked');
+		}else if($('#my_select').attr('checked') != 'checked'){
+			$("input[id^=client_]").attr('checked',false);
+		}
+	}
+
+	function no_select(cid){
+		if($('#client_'+cid+'').attr('checked') != 'checked'){
+			$('#my_select').attr('checked',false);
+		}
+	}
+
+
+
+	function change_zt(){
+		var cid_str=document.getElementsByName("cid[]");
+		var my_cid = '';
+		for(i=0;i<cid_str.length;i++){
+			if(cid_str[i].checked == true){
+				my_cid += cid_str[i].value+',';
+			}
+		}
+		if(my_cid){
+			tb_show('修改结算主体',"__URL__/change_zhuti_show/cid/"+my_cid+'?ss');
+		}else{
+			alert("请选择客户");
+		}
+	}
+
+	function checkit(my_value){
+		var my_alert = '';
+		if(my_value == 1){
+			my_alert = '确定要恢复此账号吗？';
+		}else if(my_value == 2){
+			my_alert = '停用账号，账号将无法在前台登录，但不影响渠道数据,是否执行此操作！';
+		}else if(my_value == 0){
+			my_alert = '确定要删除此账号吗？';
+		}
+		if(confirm(my_alert))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	document.onkeydown=function(event){
+            var e = event || window.event || arguments.callee.caller.arguments[0];       
+             if(e && e.keyCode==13){ // enter 键
+                 my_submit.submit();
+        }
+    };
+</script>
+<div>
+	<div>
+		<form action="__URL__/client_list" name="my_submit" method="get">
+			<table cellpadding="0" cellspacing="0" class="search_table margin_top">
+				<tr>
+					<td width="9%">
+						<select name="search_type">
+							<option value="1" <?php if($search_type == 1){ ?>selected<?php } ?> >客户名称</option>
+							<option value="2" <?php if($search_type == 2){ ?>selected<?php } ?>>登录名</option>
+						</select>
+					</td>
+					<td width="15%">
+						<input type="text" name="search_need" value="{$search_need}" />
+					</td>
+					<td width='18%'>负责人：<select name="charge_id">
+							<option value="0">请选择...</option>
+							<?php foreach($charge_result as $key => $val){ ?>
+							<option value="{$val.id}" <?php if($charge_id == $val['id']){ ?>selected<?php } ?>>{$val.charge_name}</option>
+							<?php } ?>
+						</select></td>
+					<td width="58%"><input type="submit" value="搜索" class="search_btn" /></td>
+				</tr>
+			</table>
+		</form>
+	</div>
+	
+
+	<table>
+		<tr>
+		<td><a href="__URL__/add_client_show" class="search_btn">添加新客户</a></td>
+		<td>&nbsp;&nbsp;</td>
+		<td><a href="#" class="search_btn" onclick="change_zt();">结算主体</a></td>
+		</tr>
+	</table>
+
+	<div>
+		<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+			<thead>
+				<tr>
+                                    	<th width="3%"><input type="hidden" name="id" value="{$id}"><input type="checkbox" onclick="select_all();" id="my_select" /></th>
+					<th width="5%">账号ID</th>
+					<th width="8%">客户名称</th>
+					<th width="10%">登录名</th>
+					<th width="7%">负责人</th>
+					<th width="7%">结算主体</th>
+					<th width="10%">税率</th>
+					<th width="16%">创建时间</th>
+					<th width="6%">渠道数量</th>
+					<th width="7%">账号状态</th>
+					<th width="21%">操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach($result as $key => $val){ ?>
+				<tr>
+				        <td><input type="checkbox" value="{$val.id}" name="cid[]" id="client_{$val.id}" onclick="no_select({$val.id});" /></td>
+					<td>{$val.id}</td>
+					<td><a href="__URL__/client_detail/id/{$val.id}">{$val.client_name}</a></td>
+					<td>{$val.login_name}</td>
+					<td>{$val.charge_name}</td>
+					<td><?php if($val['settle_entity']==1){ echo '按渠道';} ?><?php if($val['settle_entity']==2){ echo '按客户';} ?></td>
+					<td>{$val.account_attr_name}</td>
+					<td><div><?php if($val['create_tm']){ echo date('Y-m-d H:i:s',$val['create_tm']);} ?></div></td>
+					<td><?php if($val['channel_num']){ ?><a href="__URL__/channel_list/client_id/{$val.id}">{$val.channel_num}<?php }else{ ?>{$val.channel_num}<?php } ?></td>
+					<td><?php if($val['status'] == 1){ ?>正常<?php }else{ ?>暂停<?php } ?></td>
+					<td><a href="__URL__/edit_client_show/id/{$val.id}" class="blue">编辑</a>&nbsp;&nbsp;<a href="__URL__/add_channel_show/id/{$val.id}" class="blue">添加渠道</a>&nbsp;&nbsp;<a href="__URL__/add_power_show/id/{$val.id}" class="thickbox blue">权限</a>&nbsp;&nbsp;<?php if($val['status'] == 1){ ?><a href="__URL__/change_status/status/2/id/{$val.id}" onclick="return checkit(2);"  class="blue">停用</a><?php }else{ ?><a href="__URL__/change_status/status/1/id/{$val.id}" onclick="return checkit(1);"  class="blue">恢复</a><?php } ?><?php if(!$val['channel_num']){ ?>&nbsp;&nbsp;<a href="__URL__/change_status/status/0/id/{$val.id}" onclick="return checkit(0);"  class="blue">删除</a><?php } ?></td>
+				</tr>
+				<?php } ?>
+			</tbody>
+		</table>
+	</div>
+	{$page}
+</div>

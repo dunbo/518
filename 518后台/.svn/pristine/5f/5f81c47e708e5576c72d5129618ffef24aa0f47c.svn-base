@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+{//时间插件结束}
+
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<table  width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+<tr height="35">
+	<td align="center" style=<?php if($tab ==1): ?>"background:#FFCC66"; <?php endif; ?> >
+		<a href="__URL__/settle_audit/tab/1"><font style="color:#000; font-weight:bold">待审核</font></a>
+	</td>
+	<td align="center" style=<?php if($tab ==2): ?>"background:#FFCC66"; <?php endif; ?> >
+		<a href="__URL__/settle_passed/tab/2"><font style="color:#000; font-weight:bold">财务结算</font></a>
+	</td>
+</tr>
+</table>
+
+<table style='margin-top:10px;float:left;width:50%' cellspacing="0" cellpadding="0" class="search_table">
+	<tbody>
+	<form method='get' action="" >
+		<tr>
+			<td>选择月份：
+				<span><input type="text" name="begintime" id="begintime" value="{$begintime}" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" /></span>	~
+			<span><input id="endtime" name="endtime" style="cursor: hand; width: 150px;"
+						 value="{$endtime}" size="15" type="text" class="Wdate" onClick="WdatePicker({startDate: '%y-%M', dateFmt: 'yyyy-MM'})" /></span>
+			</td>
+			<td>状态：
+				<select name="status" id="status">
+					<option value="">全部</option>
+					<option value="3" <if condition="$status eq 3">selected</if>>待审核</option>
+					<option value="2" <if condition="$status eq 2">selected</if>>内容待评价</option>
+					<option value="1" <if condition="$status eq 1">selected</if>>系数待确定</option>
+				</select>
+			</td>
+			<td align='right'><input type="submit" class="search_btn" value="确定"></td>
+		</tr>
+	</form>
+	 </tbody>
+</table>
+<div style="clear: both"></div>
+
+<table style='float:left;width:100%' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th>月份</th>
+			<th>用户名</th>
+			<th>内容数量</th>
+			<th>结算金额</th>
+			<th>补差</th>
+			<th>应付金额</th>
+			<th>状态</th>
+			<th>结算详情</th>
+			<th>备注</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='list' id='vo'>
+		<tr>
+			<td>{$vo.month}</td>
+			<td>{$vo.user_name}</td>
+			<td>{$vo.content_num}</td>
+			<td><if condition="$vo.status neq 3">--<else />{$vo.settle_num}</if></td>
+			<td>
+				<if condition="$vo.status neq 3">
+					--
+					<else />
+					<a href="__URL__/compensation?id={$vo.id}" class="thickbox">{$vo.compensate_num}</a>
+				</if>
+			</td>
+			<td><if condition="$vo.status neq 3">--<else />{$vo.payable_num}</if></td>
+			<td>
+				<if condition="$vo.status eq 1">
+					<a href="__URL__/settle_param/tab/1">系数待确定</a>
+				<elseif condition="$vo.status eq 2" />
+					<a href="__URL__/content_settle?username={$vo.user_name}&month={$vo.month}">内容待评价</a>
+				<else />
+					待审核
+				</if>
+			</td>
+			<td>
+				<if condition="$vo.status neq 3">--<else />
+					<a href="__URL__/settle_moreinfo?user_id={$vo.user_id}&month={$vo.month}&url=<?php echo base64_encode($_SERVER['REQUEST_URI']);?>">查看</a>
+				</if>
+			</td>
+			<td style="text-align:left">{$vo.info}</td>
+			<td>
+				<if condition="$vo.status neq 3">
+					通过 | 备注
+				<else />
+					<a href="javascript:pass('{$vo.id}')">通过</a> | <a href="__URL__/compensation?id={$vo.id}&type=1" class="thickbox">备注</a>
+				</if>
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='12'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+</html>
+<script>
+	function pass(id){
+		if(confirm("确认通过审核？")){
+			$.ajax({
+				url: '__URL__/compensation',
+				type: 'post',
+				data: {id:id,type:2},
+				dataType: 'json',
+				success: function(ret) {
+					if(ret.code == 200){
+						alert('通过成功');
+						window.location.reload();
+					}else{
+						alert('通过失败');
+					}
+				}
+			});
+		}
+	}
+</script>

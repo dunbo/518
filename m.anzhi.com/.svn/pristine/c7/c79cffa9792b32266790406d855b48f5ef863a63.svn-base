@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title></title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/red_ffl/share/css/common.css?v1"/>
+<script type="text/javascript"  src="http://img4.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/activity_public3.js?v4"></script>
+<script type="text/javascript" src="/js/clipboard_js/dist/clipboard.min.js"></script>
+</head>
+<body style="background: none;">
+<div class="share_info1">
+	<p class="share_info1_txt1">接受<!--{$out.azinviteusername}-->的邀请</p>	
+	<p class="share_info1_txt2">体验安智市场，最高得100元<br/>现金红包</p>	
+
+</div>
+<div class="main">
+	<div class="share_info2">
+		<p>hi~恭喜获得一个现金红包</p>
+		<div class="share_info2_inner">
+			<img src="<!--{$out.static_url}-->/red_ffl/share/images/bg2.png" />
+			<p class="margintop10">邀请码：<!--{$out.azinvitecode}--></p>
+			<p class="btn" onclick="copytext('<!--{$out.azinvitecode}-->');">复制邀请码</p>
+			<div class="share_tips"  style="display: none;">邀请码复制成功</div>
+			<a href="javascript:;" onclick='share_download();' >去市场 拆红包</a>
+		</div>
+		<p class="share_info2_p2">打开市场填写邀请码即得红包</p>					
+	</div>
+	<div class="share_info3">
+		<p>去市场 做任务 抢红包</p>
+		<ul>
+			<li>
+				<img src="<!--{$out.static_url}-->/red_ffl/share/images/process_01.png" />
+				<span>安装安智市场</span>
+			</li>
+			<li class="process_arrow"></li>
+			<li>
+				<img src="<!--{$out.static_url}-->/red_ffl/share/images/process_02.png" />
+				<span>下载软件</span>
+			</li>
+			<li class="process_arrow"></li>
+			<li>
+				<img src="<!--{$out.static_url}-->/red_ffl/share/images/process_03.png" />
+				<span>得现金红包</span>
+			</li>
+			<div class="clear"></div>
+		</ul>
+	</div>
+</div>
+<!--{if $out['task_status'] eq 0}-->
+<div class="footer">
+	<p>体验市场，得红包活动已结束<br/><span>做任务，得红包正在火热进行...</span></p>
+	<a href="javascript:;" onclick='share_download();'>安装市场</a>
+</div>
+<!--{/if}-->
+<div class="share_02_wrap"  style="display: none;">
+    <div class="body-bg" id="body-bg2" ></div>
+    <div class="share_02">
+		<img src="<!--{$out.static_url}-->/red_ffl/share/images/share_02.png"/>
+		<p>抱歉~暂不支持ios系统</p>
+	</div>
+</div>
+<div id="body-bg" ></div>
+<div class="tip-box" id="tip-box1"  style="display: none;">
+	<div class="tip-title">
+		<h6>温馨提示</h6>
+		<span onclick="cloBox('#tip-box1')"></span>
+	</div>
+	<div class="tip-con">
+		<p>安装“安智市场客户端”才能领取哦~</p>
+	</div>
+	<p><a id="share_down" class="btns_close" href="javascript:;" >去下载</a></p>
+</div>
+<div class="share_01_wrap"  style="display: none;">
+    <div class="body-bg" id="body-bg1"></div>
+    <div class="share_01"><img src="<!--{$out.static_url}-->/red_ffl/share/images/share_01.png"/></div>
+</div>
+</body>
+</html>
+
+<script type="text/javascript">
+var uid = '<!--{$out.uid}-->';
+var rewardtype = '<!--{$out.rewardtype}-->';
+var versioncode = '<!--{$out.versioncode}-->';
+var is_weixin = "<!--{$out.is_weixin}-->";
+if(is_weixin){
+	var disable_auto = true;
+}else{
+	var disable_auto = false;
+}
+//分享地址为活动页 用的方法
+//$.getScript("/js/anzhi-fd-min.js");
+document.write(unescape("%3Cscript src='/js/anzhi-fd-min1.js?v"+Math.round(Math.random()*100)+"' type='text/javascript'%3E%3C/script%3E"));
+var php_param = {type:'invite',uid:uid, chl_cid:'4fb52a893294',rewardtype:rewardtype,versionCode:versioncode,disable_auto:disable_auto}; 
+var js_param = {type:'invite',rewardtype:rewardtype,versionCode:versioncode,callback:invite_callback}; 
+function share_download(){
+	<!--{if $out.is_ios == 1 }-->
+	$('.share_02_wrap').show();
+	return false;
+	<!--{/if}-->
+	if(is_weixin){
+		$('.share_01_wrap').show();
+		return false;		
+	}		
+	$(".btn").click();
+	Azfd.error=get_share_url;	
+	Azfd.share_download(js_param, php_param);
+}
+var lock = false;
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6500){
+			//已安装市场进入红包任务页面
+			var id = 191; //红包任务页面	 453测试id
+			js_param = {type:'launch', id:id,callback:null}; 
+			Azfd.lock = false;
+			//share_download(js_param, php_param);			
+		}else {
+			setTimeout(function(){
+				var php_url = '/fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;			
+			},1000);		
+		} 
+	}else{
+		setTimeout(function(){
+			var php_url = '/fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;			
+		},1000);		
+	}
+}
+function copytext(txt){
+	//alert(txt)
+	var clipboard = new Clipboard('.btn', {
+		text: function() {
+			return txt;
+		}
+	});
+	$(".share_tips").show();
+	setTimeout(function(){
+		$('.share_tips').hide()
+	},3000);		
+	/*
+	clipboard.on('success', function(e) {
+		console.log(e);
+	});
+	clipboard.on('error', function(e) {
+		alert("复制失败");
+		console.log(e);
+	});
+	*/
+}
+$('#body-bg1').click(function(){
+	$('.share_01_wrap').hide()
+})
+$('#body-bg2').click(function(){
+	$('.share_02_wrap').hide()
+})
+
+function get_share_url(url){
+	$('#share_down').attr('href',url);
+	pop_tips('','','1',1);	
+	return false;
+}
+</script>

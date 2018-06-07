@@ -1,0 +1,84 @@
+<include file="../../Public/header" />
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<link type="text/css" href="/Public/css/co_common.css" rel="stylesheet" />
+<link type="text/css" href="/Public/css/account.css" rel="stylesheet" />
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="/Public/js/co_public.js"></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript">
+function showOrHide(obj){
+	$(obj).parent().parent().find('.config_list_tips').toggle();
+}
+
+	function checkit(){
+	   if(confirm("您确定执行此操作吗？")){
+		  return true;
+	   }else{
+		  return false;
+	   }
+	}
+
+</script>
+	<div class="content">
+		<div class="nav_page">安智合作运营平台>渠道列表</div>
+		<div class="search_box">
+		  <form name='search' action='/index.php/Cooperative/CoAccount/channelList/' method="get">
+				<table cellpadding="0" cellspacing="0" class="search_table">
+					<tbody>
+						<tr>
+							<td width="18%">负责人:<select name='charge'>
+								<option value='0'>请选择</option>
+								<volist id='charges' name='charge'>
+								<option value='{$charges.id}' <?php if ($charge_person == $charges['id']) echo selected;?>>{$charges.charge_name}</option>
+								</volist></select></td>
+							<td width="18%">账号名称：<input name='user' type="text" class="search_item_text" value='{$user_name}' /></td>
+							<td width="18%">渠道名称：<input name='channel' type="text" class="search_item_text" value='{$chname}' /></td>
+							<td width="46%"><span onclick='javascript:document.search.submit();' class="search_btn">搜  索</span></td>
+						</tr>
+						<tr>
+							<td colspan="4"><a class="search_btn search_btn2" style="border-bottom:1px solid #bdbdbd" href="/index.php/Cooperative/CoAccount/addChannel/uid/<?php if($uid && !$suid){ ?>{$uid}<?php  }elseif(!$uid && $suid){ ?>{$suid}<?php } ?>">添加渠道</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</form>
+		</div>
+		<div class="tablelist_box">
+			<table cellpadding="0" cellspacing="0" class="table_list">
+				<thead>
+					<tr>
+						<th width="6%">渠道ID</th>
+						<th width="19%">渠道名称</th>
+						<th width="10%">渠道类型</th>
+						<th width="10%">账号名称</th>
+						<th width="8%">负责人</th>
+						<th width="11%">添加时间</th>
+						<th width="9%">渠道状态</th>
+						<th width="9%">日志</th>
+						<th width="18%">操作</th>
+					</tr>
+				</thead>
+				<tbody>
+				<volist id='list' name='channel'>
+					<tr>
+						<td>{$list.cid}</td>
+						<td><a href='/index.php/Cooperative/CoAccount/showChannel/id/{$list.id}?width=900' class="thickbox blue">{$list.chname}</a></td>
+						<td><?php if($list['ch_category']){ ?>{$list.ch_category}<?php }else{ ?>未分类<?php } ?></td>
+						<td><a href="__URL__/channelList/user/{$list.user}" class="blue">{$list.user}</a></td>
+						<td><a href="__URL__/channelList/charge/{$list.chargeid}" class="blue">{$list.charge}</td>
+						<td><?php echo date('Y-m-d',strtotime($list['create_time'])).'<br />'.date('H:i:s',strtotime($list['create_time'])); ?></td>
+						<td>{$list.stat}</td>
+						<td><a href="/index.php/Cooperative/SysManager/logList/chname/{$list.chname}/start_tm/{$month_ago}/end_tm/{$today}" class="blue">查看</a></td>
+						<td class="table_btna"><?php if($list['status'] == 0 || $list['status'] == 1){ ?><a href='/index.php/Cooperative/CoAccount/editChannel/id/{$list.id}<?php if($charge_person){ ?>/charge/{$charge_person}<?php } ?><?php if($user_name){ ?>/user/{$user_name}<?php } ?><?php if($chname){ ?>/chname/{$chname}<?php } ?>?width=900' class="thickbox">编辑</a><?php } ?><?php if($list['status'] == 0){ ?><a href='__URL__/delChannel/id/{$list.id}/uid/{$list.uid}' onclick="return checkit();">删除</a><?php } ?><?php if($list['status'] == 1){ ?><a href='__URL__/stopChannel/id/{$list.id}/status/3/uid/{$list.uid}<?php if($charge_person){ ?>/charge/{$charge_person}<?php } ?><?php if($user_name){ ?>/user/{$user_name}<?php } ?><?php if($chname){ ?>/chname/{$chname}<?php } ?>' onclick="return checkit();">停用</a><?php } ?><?php if($list['status'] == 3){ ?><a href='__URL__/stopChannel/id/{$list.id}/status/1/uid/{$list.uid}<?php if($charge_person){ ?>/charge/{$charge_person}<?php } ?><?php if($user_name){ ?>/user/{$user_name}<?php } ?><?php if($chname){ ?>/chname/{$chname}<?php } ?>' onclick="return checkit();">恢复</a><?php } ?></td>
+					</tr>
+				</volist>
+				</tbody>
+			</table>
+			<div class="pagebars">
+				<table cellpadding="0" cellspacing="0" width="100%">
+					<td class="pagebars_right right">
+					  {$page}
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="clear"></div>

@@ -1,0 +1,146 @@
+<script>
+function editFilter(obj)
+{
+  $('#source_value').val(obj.source_value);
+  $('#source_type').val(obj.source_type);
+  $('#limit_time').val(obj.limit_time);
+  if (obj.limit_time == 1) {
+    $('#begintime').val(timetodate(obj.begintime));
+    $('#endtime').val(timetodate(obj.endtime));
+  } else {
+    $('#begintime').val('');
+    $('#endtime').val('');
+  }
+  $('#id').val(obj.id);
+  $('#add_td').hide();
+  $('#edit_td').show();
+}
+
+function backToAddMode()
+{
+  $('#edit_td').hide();
+  $('#add_td').show();
+  $('#addFilterForm')[0].reset();
+  $('#id').val(0);
+}
+function  timetodate(tim){
+  var d = new Date(parseInt(tim)*1000);
+  return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+} 
+
+function checkForm()
+{
+  if ($('#source_type_pop').val() == '') {
+    alert('请选择屏蔽类型');
+    return false;
+  }
+  if ($('#source_value').val() == '') {
+    alert('请填写需要过滤的值');
+    return false;
+  }
+
+  if ($('input[name^=rid]:checked').length==0 && ($('#reason').val()=='请输入屏蔽原因：' || $('#reason').val()=='')) {
+    alert('请填写屏蔽原因');
+    return false;
+  } else if ($('#reason').val()=='请输入屏蔽原因：') {
+    $('#reason').val('');
+  }
+  if ($('#begintime_pop').val() == '') {
+    alert('请填写开始时间');
+    return false;
+  }
+  if ($('#endtime_pop').val() == '') {
+    alert('请填写结束时间');
+    return false;
+  }
+  
+  if (Date.parse($('#begintime_pop').val()) > Date.parse($('#endtime_pop').val()) ) {
+    alert('开始时间不能大于结束时间');
+    return false;
+  }
+
+  return true;
+}
+function getBlockValue(obj) {
+  var type = $(obj).val();
+  var tag = '';
+  switch (type) {
+    case '1': 
+      tag = 'ipmsg';
+    break;
+    case '2': 
+      tag = 'imei';
+    break;
+
+    case '3': 
+      tag = 'user';
+    break;
+  }
+  var tag_id = '#' + tag + '_' + <?php echo $_GET['id']; ?>;
+  $('#source_value').val($(tag_id).html());
+}
+
+function checkReason(obj)
+{
+  if(obj.value == '请输入屏蔽原因：') {
+    obj.value = '';
+  }
+}
+
+</script>
+
+<form id="editFilterForm" name="editFilterForm" method="post" action="__URL__/editBadFilter" onsubmit="return checkForm();">
+<input type="hidden" id="id" value="<?php echo $filter['id']?>" name="id"/>
+<input type="hidden" id="limit_time" value="1" name="limit_time"/>
+<table cellpadding="0" cellspacing="0" border="0" class="tb" width="100%">
+<tr>
+  <td>
+<!--     <select name="source_type" id="source_type" onchange="getBlockValue(this)">
+    <option value="">请选择</option>
+    <option value="1" <?php $filter['source_type']==1 && print('selected')?>>IP</option>
+    <option value="2" <?php $filter['source_type']==2 && print('selected')?>>IMEI</option>
+    <option value="3" <?php $filter['source_type']==3 && print('selected')?>>用户名</option>
+    </select> -->
+	<if condition="$filter['source_type'] ==1">
+	<input type='hidden' name='source_type' value='1' >
+	IP:
+	<elseif condition="$filter['source_type'] ==2"/>
+	<input type='hidden' name='source_type' value='2' >
+	IMEI:
+	<else/>
+	<input type='hidden' name='source_type' value='3' >
+	用户名:
+	</if>
+  </td>
+   <td><input type='hidden' name='source_value' value='<?php echo $filter['source_value']?>' >
+   <?php echo $filter['source_value']?></td>
+</tr>
+<tr>
+<td width="125">起始时间:</td>
+<td width="150">
+<input type="text" name="begintime_pop" id="begintime" value="<?php echo date('Y-m-d', $filter['begintime']) ?>" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
+</td>
+</tr>
+<tr>
+<td width="125">结束时间：</td>
+<td width="150">
+<input type="text" name="endtime_pop" id="endtime" value="<?php echo date('Y-m-d', $filter['endtime']) ?>" style="cursor: hand; width: 150px;" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd'})" />
+</td>
+</tr>
+<tr>
+  <td style="font-weight:bold" >屏蔽原因</td>
+  <td>
+<?php foreach($reasons as $val): ?>
+<input type="checkbox" name="rid[]" value="<?php echo $val['id']?>" <?php if (in_array($val['id'], $rid)) echo 'checked=true'?> /> <?php echo $val['content']?><br/>
+<?php endforeach;?>
+</td>
+</tr>
+<tr>
+  <td style="font-weight:bold" >其他原因</td>
+  <td ><textarea name="reason" id="reason" onclick="checkReason(this)"><?php echo $filter['reason']?></textarea></td>
+</tr>
+<tr id="add_td" align="center">
+<td colspan="2"><input type="submit" id="addbtn" value="确定" name="addbtn"/>&nbsp;&nbsp;<input type="reset" value="重置"/></td>
+</tr>
+</table>
+</form>

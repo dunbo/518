@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>排期申请</title>
+</head>
+
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script>
+$(function(){
+document.onkeydown = function(e){
+    var ev = document.all ? window.event : e;
+    if(ev.keyCode==13) {
+        search();
+     }
+}
+});       
+    function trim(str){ //删除左右两端的空格 
+        return str.replace(/(^\s*)|(\s*$)/g, ""); 
+    };
+    function search() {
+        var begintime = trim($("#begintime").val());
+        var endtime = trim($("#endtime").val());
+        var start_time_begin = trim($("#start_time_begin").val());
+        var start_time_end = trim($("#start_time_end").val());
+        if (begintime!="" && endtime!="" && begintime > endtime) {
+            alert('申请时间的结束时间不能小于开始时间');
+        } if (start_time_begin != "" && start_time_end != "" && start_time_begin > start_time_end) {
+            alert('开始时间的结束时间不能小于开始时间');
+        } else {
+            $("#search").submit();
+        }
+    };
+    function del(schedule_id) {
+        if (confirm('删除不可恢复！确定要删除此条记录?')) {
+            var url = "__URL__/delete/schedule_ids/" + schedule_id;
+			location.href = url;
+        }
+    };
+    
+    function get_checkbox_ids() {
+        var checkboxs = $("[type]='checkbox'");
+        var idArr = new Array();
+        checkboxs.each(function(){
+            if ($(this).attr("checked") == "checked") {
+                idArr.push($(this).val());
+            }
+        });
+        if (idArr.length > 0) {
+            return idArr.join(',');
+        }
+        return false; 
+    }
+    
+    function batch_delete() {
+        var ids = get_checkbox_ids();
+        if (!ids) {
+            alert("请选择要删除的记录！");
+            return;
+        }
+        if (confirm('删除不可恢复！确定要删除所有选中记录?')) {
+            var url = "__URL__/delete/schedule_ids/" + ids;
+            location.href = url;
+        }
+    }
+    
+    function unauthorized_tb_remove(obj) {
+        var reg = /^\{/;
+        //console.log(reg.test($(obj).html()));
+        if (reg.test($(obj).html())) {
+            $("#TB_overlay").click(tb_remove);
+        }
+    };
+</script>
+
+<body>
+<form action="/index.php/Sendnum/Schedule/schedule_list" method="post" id="search">
+<div class="search_box margin_top">
+    <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+        <tr>
+            <td width="16%">产品名称：<input type="text" name="product_name" id="product_name" value="{$product_name}" class="search_item_text"></td>
+            <td width="15%">负责人：<input type="text" name="person_in_charge" id="person_in_charge" value="{$person_in_charge}" class="search_item_text"></td>
+            <td width="38%">申请时间：
+                <input id="begintime" name="begintime" value="{$begintime}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:150px">
+                到
+                <input id="endtime" name="endtime" value="{$endtime}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:150px">
+            </td>
+            <td width="15%">　　类别：
+                <select name="category">
+                    <option value="-1" selected="selected">全部</option>
+                    <option value="1" <?php if(isset($category) && $category == 1) echo "selected=\"selected\"";?>>网游</option>
+                    <option value="2" <?php if(isset($category) && $category == 2) echo "selected=\"selected\"";?>>单机</option>
+                </select>
+            </td>
+            <td width="16%" colspan="2"><input type="button" onclick="search()" value="搜索" class="search_btn" style="float:left; height:30px;"><a href="schedule_list?{$sqlparam}down=1" style="float:left; margin-left:10px; display:inline" class="search_btn">导出</a></td>
+        </tr>
+        <tr>
+            <td>活动名称：<input type="text" name="activity_name" id="activity_name" value="{$activity_name}" class="search_item_text"></td>
+            <td>　包名：<input type="text" name="package_name" id="package_name" value="{$package_name}" class="search_item_text"></td>
+            <td width="32%">开始时间：
+                <input id="start_time_begin" name="start_time_begin" value="{$start_time_begin}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:150px">
+                到
+                <input id="start_time_end" name="start_time_end" value="{$start_time_end}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:150px">
+            </td>
+            <td>申请类型：
+                <select name="type">
+                    <option value="-1" <if condition="($type eq -1)"> selected="selected" </if>>全部</option>
+                    <option value="1" <if condition="($type eq 1)"> selected="selected" </if>>常规</option>
+                    <option value="2" <if condition="($type eq 2)"> selected="selected" </if>>活动</option>
+                </select>
+            </td>
+            <td><a href="__URL__/import?width=450&height=100&modal=true&post_load=unauthorized_tb_remove" class="thickbox search_btn" style="float:left; margin-right:10px; display:inline">批量导入申请</a></td>
+            <td><a href="__URL__/modify/opt/1" class="search_btn" style="float:left">添加申请</a></td>
+        </tr>
+        <tr>
+            <td><input type="button" onclick="batch_delete()" value="批量删除" class="search_btn" style="float:left; height:30px;"></td>
+        </tr>
+    </table>
+</div>
+</form>
+<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+    <thead>
+        <tr align="center">
+            <th width="2%"></th>
+            <th width="4%" height="26">申请时间</th>
+            <th width="3%">申请类型</th>
+            <th width="4%">负责人</th>
+            <th width="4%">产品名称</th>
+            <th width="4%">包名</th>
+            <th width="3%">包大小</th>
+            <th width="2%">评测级别</th>
+            <th width="4%">游戏类型</th>
+            <th width="4%">申请资源位</th>
+            <th width="4%">类别</th>
+            <th width="4%">高低配</th>
+            <th width="4%">活动名称</th>
+            <th width="4%">开始时间</th>
+            <th width="4%">结束时间</th>
+            <th width="4%">活动天数</th>
+            <th width="4%">活动内容</th>
+            <th width="4%">上周非活动日均流水</th>
+            <th width="4%">上周日均注册数</th>
+            <th width="4%">预计注册数</th>
+            <th width="4%">预计活动流水</th>
+            <th width="3%">备注</th>
+            <th width="6%">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        <volist name="list" id="list">
+            <tr>
+                <td><input type="checkbox" value="{$list.id}"/></td>
+                <td height="20" align="center"><div style="width:70px">{$list.application_time|date="Y-m-d H:i:s",###}</div></td>
+                <td height="20" align="center"><if condition="($list.type eq 1)">常规</if><if condition="($list.type eq 2)">活动</if></td>
+                <td height="20" align="center">{$list.person_in_charge}</td>
+                <td height="20" align="center">{$list.product_name}</td>
+                <td height="20" align="center">{$list.package_name}</td>
+                <td height="20" align="center">{$list.package_size}</td>
+                <td height="20" align="center">{$list.reviewlevel}</td>
+                <td height="20" align="center">{$list.game_type}</td>
+                <td height="20" align="center">{$list.application_resource_position}</td>
+                <td height="20" align="center">
+                    <?php if ($list['category'] == 1) echo "网游"; else if ($list['category'] == 2) echo "单机";?>
+                </td>
+                <td height="20" align="center">
+                    <switch name="list.high_low_config">                        
+                        <case value="1"><a href="__URL__/show_high_low_config_info?width=300&height=200&id={$list.id}" class="thickbox blue">高配</a></case>
+                        <case value="2"><a href="__URL__/show_high_low_config_info?width=300&height=200&id={$list.id}" class="thickbox blue">低配</a></case>
+                        <default />无
+                    </switch>
+                </td>
+                <td height="20" align="center">{$list.activity_name}</td>
+                <td height="20" align="center"><div style="width:70px">{$list.start_time|date="Y-m-d H:i:s",###}</div></td>
+                <td height="20" align="center"><div style="width:70px">{$list.end_time|date="Y-m-d H:i:s",###}</div></td>
+                <td height="20" align="center">{$list.activity_days}</td>
+                <td height="20" align="center">
+                    <a href="__URL__/show_full_content?content=1&width=300&height=200&id={$list.id}" class="thickbox blue" id="activity_content">{$list.activity_content}</a>
+                </td>
+                <td height="20" align="center">{$list.avg_income_lweek_inactive}</td>
+                <td height="20" align="center">{$list.avg_regist_number_lweek}</td>
+                <td height="20" align="center">{$list.expected_regist_number}</td>
+                <td height="20" align="center">{$list.expected_income}</td>
+                <td height="20" align="center">
+                    <a href="__URL__/show_full_content?content=2&width=300&height=200&id={$list.id}" class="thickbox blue" id="activity_content">
+                    {$list.remark}
+                </td>
+                <td height="20" align="center"><a href="__URL__/modify/opt/2/id/{$list.id}" class="blue">编辑</a><br/><a href="#{$list.id}" onclick="del({$list.id})" class="blue">删除</a><br/><a href="__URL__/modify/opt/3/id/{$list.id}" class="blue">复制添加</a></td>
+            </tr>
+        </volist>
+    </tbody>
+</table>
+
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+
+
+</body>

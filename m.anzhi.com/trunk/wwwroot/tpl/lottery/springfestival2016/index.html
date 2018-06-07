@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>抓住爱带回家</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.new_static_url}-->/activity/springfestival2016/css/common.css?v1"/>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">
+var sid = '<!--{$out.sid}-->';
+var aid = <!--{$out.aid}-->;
+var ever_shared = <!--{$out.ever_shared}-->;
+var lottery_num = <!--{$out.lottery_num}-->;
+var award_count = <!--{$out.award_count}-->;
+var rotate_flag = 0;//抽奖点击按钮是否可点击
+var submit_info_clickable = true;
+var again_text = ['没中奖不要紧！看成败人生豪迈，大不了从头再来。','少年姿势不对，再试一次~','默念三遍我一定会中，再试下~','少年你离奖品就差一步，再试试嘛~','说好的奖品呢，连辣条都不给我啊喂！','继续攒人品，下次一定RP大爆发！','少年别灰心，安智君相信下次你就能中~','天灵灵，地灵灵，下次中奖一定灵~','奖品是个磨人的小妖精，看我再试一次定会抓住你~'];
+// 软件
+var stable_soft_lists=<!--{$out.stable_soft_lists}-->;
+var gift_package;//礼包奖包名
+
+var flags={canMove:true};
+function showOpenBox(obj){
+		var bg_h=$(window).height() + $(document).scrollTop(),
+                    top_h= $(obj).height()/ 2 - $(document).scrollTop();
+		$(obj).css("margin-top",-top_h+"px").show();
+		$("#body-bg").css("height",bg_h+"px").show();
+		flags.canMove=false;
+		window.onresize = function(){
+			var bg_h=$(window).height() + $(document).scrollTop(),
+                 top_h= $(obj).height()/ 2 - $(document).scrollTop();
+			$('#body-bg').css("height",bg_h+"px");
+			$(obj).css("margin-top",-top_h+"px");	
+		}
+	}
+	function showOpenBox2(obj){
+		var bg_h=$(window).height(),
+				top_h= $(obj).height()/ 2;
+		$(obj).css("margin-top",-top_h+"px").show();
+		$("#body-bg").css("height",bg_h+"px").show();
+		flags.canMove=false;
+		window.onresize = function(){
+			var bg_h=$(window).height();
+			$("#body-bg").css("height",bg_h+"px");
+		}
+	}
+function cloBox(obj){
+	$(obj).hide();
+	$("#body-bg").hide();
+	flags.canMove=true;
+}
+
+function randomnum(smin, smax) {// 获取2个值之间的随机数
+	var Range = smax - smin;
+	var Rand = Math.random();
+	return (smin + Math.round(Rand * Range));
+}
+
+$(function(){
+	$("body").bind('touchmove', function (e) {
+		if(!flags.canMove){
+			e.preventDefault();
+		}
+	});
+	var unwritten = <!--{$out.unwritten}-->;
+	if (unwritten) {
+		$("#award_level_name").html('<!--{$out.award_level_name}-->');
+		$("#award_name").html('<!--{$out.award_name}-->');
+		showOpenBox("#tip-box3");
+	}
+	
+	if (!ever_shared) {
+		$("#go_lottery").bind('click', function(){
+			showOpenBox('#tip-box6');
+		});
+	} else if (lottery_num > 0) {
+		if ($("#go_lottery").hasClass("disabled")) {
+			$("#go_lottery").removeClass("disabled");
+			$("#go_lottery").bind('click', function() {
+				lottery();
+			});
+		}
+	}
+});
+
+function lottery() {
+	if (rotate_flag == 1) {
+		return;
+	}
+	rotate_flag = 1;
+	$.ajax({
+		url:'/lottery/springfestival2016/get_award_api.php?sid='+sid,
+		dataType:'json',
+		success:function(data) {
+			var status = data.status;
+			var award_level = data.info.award_level;
+			var left_num = data.info.left_num;
+			$("#lottery_num").html(left_num);
+			if (left_num <= 0) {
+				$("#go_lottery").addClass("disabled");
+				$("#go_lottery").unbind('click');
+			}
+			var reg = /^\d$/
+			if (status != 200 || !reg.test(award_level)) {
+				alert('出错啦');
+				rotate_flag = 0;
+				return;
+			}
+			$('.lottery_ac_m').css('height','20%');
+			setTimeout(function(){
+				$('.lottery_ac_b img').attr('src','<!--{$out.new_static_url}-->/activity/springfestival2016/images/lottery_05.png');
+				$('.lottery_ac_m').css('height','32%');
+				setTimeout(function(){
+					$('.lottery_ac_m').css('height','40%');
+					setTimeout(function(){
+						$('.lottery_ac_b img').attr('src','<!--{$out.new_static_url}-->/activity/springfestival2016/images/lottery_06.png');	
+					},300);
+					setTimeout(function(){
+						$('.lottery_ac_m').css('height','6%');
+						setTimeout(function(){
+							$('.lottery_ac_b img').attr('src','<!--{$out.new_static_url}-->/activity/springfestival2016/images/lottery_04.png');
+							if (award_level <= 0) {
+								if (left_num > 0) {
+									var random = randomnum(0, again_text.length-1);
+									$("#again_text").html(again_text[random]);
+									showOpenBox('#tip-box1');
+								} else {
+									showOpenBox('#tip-box2');
+								}
+							} else {
+								var award_level_name = data.info.award_level_name;
+								var award_type = data.info.award_type;
+								if (award_type == 2) {
+									// 礼包
+									go_gift(data.info);
+								} else {
+									// 实物
+									go_substantial(data.info);
+								}
+							}
+							rotate_flag = 0;
+						},1300);
+					},300)
+				},500);
+			},1000);
+		},
+		error:function() {
+			alert('出错啦');
+			rotate_flag = 0;
+		}
+	});
+}
+
+function go_gift(info) {
+	$("#award_level_name2").html(info.award_level_name);
+	$("#award_name2").html(info.award_name);
+	$("#gift_path").html(info.gift_path);
+	gift_package = info.package;
+	var own_softs = soft_lists;
+	for(var i=0;i<own_softs.length;i++){
+		if(gift_package == own_softs[i][7]){
+			var  soft_status_go = window.AnzhiActivitys.isInstalledApp(own_softs[i][7],parseInt(own_softs[i][13]));
+			var soft_datas_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(own_softs[i][0]));
+			$('#gift_softname').html(own_softs[i][2]);
+			$('#gift_icon').attr('src', own_softs[i][1]);
+			if((soft_status_go == -2 && soft_datas_gos== -1) || soft_datas_gos == 1 || soft_datas_gos == 3){
+				var apk_size = own_softs[i][9];
+				$('#go_convert').html("下载软件("+apk_size+")");
+			}else if(soft_datas_gos == 5 && soft_status_go == -2){
+				$('#go_convert').html("去兑换");
+			}else if(soft_status_go != -2){
+				$('#go_convert').html("去兑换");
+			}
+			break;
+		}
+	}
+	showOpenBox('#tip-box5');
+}
+
+function go_substantial(info) {
+	$("#award_level_name").html(info.award_level_name);
+	$("#award_name").html(info.award_name);
+	$("#name").val("");
+	$("#telephone").val("");
+	showOpenBox("#tip-box3");
+}
+
+// 提交信息
+function submit_info() {
+	if (!submit_info_clickable) {
+		return;
+	}
+	submit_info_clickable = false;
+	$("#prompt").text('');
+	var name = $.trim($("#name").val());
+	var telephone = $.trim($("#telephone").val());
+	if (name == '') {
+		submit_info_clickable = true;
+		$("#prompt").text('姓名不能为空');
+		return;
+	}
+	if (telephone == '') {
+		submit_info_clickable = true;
+		$("#prompt").text('手机号码不能为空');
+		return;
+	}
+	var pattern = /^1[34578][0-9]{9}$/
+	if (!pattern.test(telephone)) {
+		submit_info_clickable = true;
+		$("#prompt").text('手机号码格式不对！');
+		return;
+	}
+	$.ajax({
+		url:"/lottery/springfestival2016/get_info.php?sid="+sid,
+		data:{name:name, telephone:telephone},
+		type:"post",
+		success:function(data){
+			if (data == -1) {
+				submit_info_clickable = true;
+				$("#prompt").text('请插入sim卡！');
+			} else if (data == 500) {
+				submit_info_clickable = true;
+				$("#prompt").text('姓名不能为空！');
+			} else if (data == 501) {
+				submit_info_clickable = true;
+				$("#prompt").text('手机号码不能为空！');
+			} else if (data == 502) {
+				submit_info_clickable = true;
+				$("#prompt").text('姓名太长！');
+			} else if (data == 503) {
+				submit_info_clickable = true;
+				$("#prompt").text('手机号码格式不对！');
+			} else if (data == 200) {
+				$("#prompt").text('提交成功！');
+				setTimeout(function(){
+					submit_info_clickable = true;
+					$("#prompt").text('');
+					cloBox('#tip-box3');
+					location.href="/lottery/springfestival2016/index.php?sid="+sid+"&#gameTable";
+				}, 3000);
+			} else {
+				submit_info_clickable = true;
+				$("#prompt").text('出错啦！');
+			}
+		}
+	});
+}
+
+function go_share() {
+	var share_text = '你抓我，抓到我，我就和你……我就和你一起把新年壕礼拿回家，快来安智市场抓娃娃机试试运气吧！';
+	var share_actionurl = '<!--{$out.promotion_share_url}-->';
+	var share_url = '<!--{$out.share_big_pic}-->';
+	var share_urlweixin = '<!--{$out.share_small_pic}-->';
+	var share_json = '{"TEXT":"' + share_text + '", "URL":"' + share_url + '","ACTIONURL":"' + share_actionurl + '","URLWEIXIN":"' + share_urlweixin + '"}';
+	window.AnzhiActivitys.getShareDialog(share_json);
+	setTimeout('share()',5000);
+}
+
+function share() {
+	$.ajax({
+		url:'/lottery/springfestival2016/share_api.php?sid='+sid,
+		dataType:'json',
+		success:function(data) {
+			var lottery_num = data.lottery_num;
+			if (!ever_shared && data.ever_shared) {
+				$("#go_lottery").unbind('click');
+				ever_shared = data.ever_shared;
+			}
+			$("#lottery_num").html(lottery_num);
+			if (ever_shared && lottery_num > 0) {
+				if ($("#go_lottery").hasClass("disabled")) {
+					$("#go_lottery").removeClass("disabled");
+					$("#go_lottery").bind('click', function() {
+						lottery();
+					});
+				}
+			}
+		}
+	});
+}
+
+</script>
+<script type="text/javascript"  src="<!--{$out.new_static_url}-->/activity/springfestival2016/js/lottery_softs.js"></script>
+</head>
+<body>
+<section>
+    <div class="banner"><img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/banner.png"/></div>
+    <div class="main">
+		<div class="notice clear">
+			<div class="notice-icon"></div>
+			<div class="notice-list">
+				<marquee direction="left" scrolldelay="90" scrollamount="2">
+					<!--{if $out.people_award_list}-->
+						<!--{foreach from=$out.people_award_list item=i}-->
+						<span><!--{$i.telephone}-->获得<!--{$i.award_name}--><em><!--{$i.date}--></em></span>
+						<!--{/foreach}-->
+					<!--{else}-->
+						<span>少年，要加油才能拿大奖喔！</span>
+					<!--{/if}-->
+				</marquee>
+			</div>
+		</div>
+		<div class="share_wrap">
+			<div class="share_txt">
+				<p>每天分享活动，可以增加抽奖机会哦~</p>
+			</div>
+			<a class="share_btn" href="javascript:;" onclick="go_share()">分享活动激活抽奖</a>
+		</div>
+		<div class="lottery_info clear">
+			<a class="fl" href="/lottery/springfestival2016/my_award.php?sid=<!--{$out.sid}-->">我的奖品</a>          
+			<p class="fr">我还有<span id="lottery_num"><!--{$out.lottery_num}--></span>次抽奖机会</p>
+		</div>
+		<div class="lottery_wrap" id="gameTable">
+			<div class="lottery_top">
+				<div class="lottery_top_inner">
+					<img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/lottery.png"/>
+					<img class="lottery_01" src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/lottery_01.png"/>
+					<div class="lottery_ac">
+						<div class="lottery_ac_t"><img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/lottery_02.png"/></div>
+						<div class="lottery_ac_m"><img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/lottery_03.png"/></div>
+						<div class="lottery_ac_b"><img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/lottery_04.png"/></div>
+					</div>
+				</div>
+			</div>
+			<div class="lottery_btn clear">
+				<a class="disabled" href="javascript:;" id="go_lottery"></a>
+			</div>
+		</div>
+		<div class="wrap">
+			<ul class="soft_list wrap_inner clear" id="my_softs">
+			</ul>
+			<div class="spark spark_01"><img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/spark_01.png"/></div>
+			<div class="spark spark_02"><img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/spark_02.png"/></div>
+			<div class="spark spark_03"><img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/spark_03.png"/></div>
+			<div class="spark spark_04"><img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/spark_04.png"/></div>
+		</div>
+		<a class="btns" href="javascript:;" onclick="get_soft()">换一换</a>
+		<div class="wrap">
+			<div class="wrap_inner weinxin_a">
+				<a href="http://weibo.com/u/1962757973">没抽到奖不要紧，去@安智市场继续参加活动吧，奖品多的宝宝开心坏了。</a>
+			</div>
+		</div>
+		<a href="/lottery/springfestival2016/rules.php?sid=<!--{$out.sid}-->" class="rule_btn">活动规则</a>
+		<div class="spark spark_05"><img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/spark_05.png"/></div>
+		<div class="spark spark_06"><img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/spark_06.png"/></div>
+    </div>
+</section>
+<section>
+	<div class="footer clear">
+		<p>*本次活动最终解释权归安智所有</p>
+	</div>
+</section>
+<section>
+    <div id="body-bg" style="display: none;"></div>
+	<div class="tip-box" id="tip-box1"  style="display: none;">
+		<div class="tip-mid">
+			<div class="tip-con">
+				<p id="again_text"></p>
+			</div>
+		</div>
+		<div class="tip_hd">
+			<img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/tip_hd_04.png"/>
+			<div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box1')">关闭</a></div>
+		</div>
+		<a href="javascript:;" class="btns" onclick="cloBox('#tip-box1');lottery();">再来一次</a>
+    </div>
+	<div class="tip-box" id="tip-box2"  style="display: none;">
+		<div class="tip-mid">
+            <div class="tip-con">
+                <p>我真的还想再抽500次~</p>
+            </div>
+        </div>
+        <div class="tip_hd">
+            <img src="<!--{$out.new_static_url}-->/activity/springfestival2016/images/tip_hd_05.png"/>
+            <div class="clo"><a href="javascript:;" onclick="cloBox('#tip-box2')">关闭</a></div>
+        </div>
+		<a href="#my_softs" class="btns" onclick="cloBox('#tip-box2')">去下载</a>
+    </div>
+	<div class="tip-box pbot" id="tip-box3"  style="display: none;">
+		<p class="prize-title cnt">少年恭喜获得<span class="spec" id="award_level_name"></span><br/><span id="award_name"></span></p>
+		<form class="form1">
+			<div class="form_title"></div>
+			<div class="prompt1">快填写个人信息领奖吧~</div>
+			<div class="form-item clear">
+				<label for="name">姓名：</label>
+				<div class="textbox"><input type="text" id="name"/> </div>
+			</div>
+			<div class="form-item clear">
+				<label for="telephone">手机：</label>
+				<div class="textbox"><input type="text" id="telephone"/> </div>
+			</div>
+			<div class="prompt1 prompt3" id="prompt"></div>
+		</form>
+		<a class="btns btns_tip" href="javascript:;" onclick="submit_info();">提交</a>
+	</div>
+	<div class="tip-box" id="tip-box5"  style="display: none;">
+		<p class="prize-title cnt">少年恭喜获得<span class="spec" id="award_level_name2"></span><br/><span id="award_name2"></span></p>
+		<div class="prize_ok">
+			<div class="prize_okl">
+				<img id="gift_icon" src="javascript:;"/>
+				<span id="gift_softname"></span>
+			</div>
+			<div class="prize_okr">
+				<p class="wordwrap">兑换路径：<span id="gift_path"></span></p>
+			</div>
+		</div>
+		<div class="btns2 btns3">
+			<a class="btns" href="javascript:;" onclick="cloBox('#tip-box5')">关闭</a>
+			<a class="btns" style="width:112px" href="javascript:;" id="go_convert" onclick="download_package()"></a>
+		</div>
+	</div>
+    <div class="tip-box" id="tip-box6"  style="display: none;">
+        <div class="tip-mid">
+            <div class="tip-con">
+                <p>少年先分享活动，<br/>才能启动抓娃娃机哦~</p>
+            </div>
+			<a class="btns" href="javascript:;" onclick="cloBox('#tip-box6')">关闭</a>
+        </div>
+    </div>
+</section>
+</body>
+</html>

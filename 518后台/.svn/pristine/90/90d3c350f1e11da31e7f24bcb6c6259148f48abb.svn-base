@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <script type="text/javascript" src="../internal.js"></script>
+    <script type="text/javascript" src="../../third-party/jquery-1.10.2.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../third-party/webuploader/webuploader.css">
+    <style>
+        ul,li {list-style: none}
+        .se_op {margin-top:20px;margin-left:20px;}
+        .se_su {text-align:center;margin-top:40px;}
+    </style>
+</head>
+<body>
+<div>
+    <ul style="margin:5px;">
+        <p>插入应用内览</p>
+    	<li class="se_op">软件包名 : <input type="text" id="package" name="package" value="" onblur="get_softname()"/></li>
+    	<li class="se_op">内容标题 : <span id="content_title_block"><select id="content_title" name="content">
+    				<option value="0">未选择</option>
+    			</select></span></li>
+        <li class="se_su"><input type="button" onclick="sub_select()" value="确定">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" onclick="reset()" value="取消"></li>
+    </ul>
+</div>
+
+<script>
+    var package_id = new Array();
+    var host_img = '';
+    var host_url = '';
+    function get_softname(){
+        var package = $("#package").val();
+        var data = "query="+package;
+        $.ajax({
+            type: "GET",
+            url: '/index.php/ContentType/pub_showUsed_content_explain',
+            data: data,
+            dataType:'Json',
+            cache: false,
+            success: function(data){
+                //console.log(data.data)
+                if(data.code == 0) {
+                    $(this).val('')
+                    var html = "<select id='content_title' name='content_title' ><option value='0'>未选择</option></select>"
+                    $('#content_title_block').empty().append(html);
+                    alert('该软件未有符合条件的应用预览的内容')
+                }else {
+                    host_img = data.img_host;
+                    host_url = data.url_host;
+                    var html = '<select name="content_title" id="content_title">';
+                    $.each(data.data, function(k,v){
+                        html += '<option value="'+v.id+'">'+v.title+'</option>'
+                        package_id[v.id] = v;
+                    })
+                    html += '</select>';
+                    $('#content_title_block').empty().append(html)
+                }
+            }
+        });
+        
+    }
+    
+    //确定
+    function sub_select(){
+        var value = $("#content_title").find("option:selected").val();
+        if(value == '' || value == 0){
+            alert('请选择内容标题');
+            return false;
+        }else{
+            //获取编辑器文本框内容
+            var me = UE.getEditor('ueditor');
+            me.focus();
+            var con_y = me.getContent();
+            //拼接内容标题放入文本框
+            var content_select = package_id[value];
+            var id = content_select.id;
+            var title = content_select.title;
+            var pic = JSON.parse(content_select.explicit_pic);
+            var show_style = content_select.show_style;
+            var con = '';
+            if(con_y.substring(con_y.length-17) != '<hr/><p><br/></p>') con += '<hr/>';
+            if(show_style == 1){//单图
+                con += '<ul class="more_content_ul"><li>';
+                // con += '<ul class="more_content_ul"><li><a href="javascript:;" onclick="go_launch('+id+','+content_select.dev_id+','+content_select.softname+','+content_select.package+')">';
+                con += '<p class="more_content_ul_img"><a href="'+host_url+'/softnews_'+id+'.html"><img src="'+host_img+pic.pic0+'"></a></p>';
+                con += '<p class="more_content_ul_txt"><a style="text-decoration:none;color:#626262;" href="'+host_url+'/softnews_'+id+'.html">'+title+'</a></p></li></ul><hr/>';
+            } 
+            if(show_style == 2){//三图
+                con += '<ul class="more_content_ul"><li>';
+                con += '<p class="more_content_ul3_txt"><a style="text-decoration:none;color:#626262;" href="'+host_url+'/softnews_'+id+'.html">'+title+'</a></p>';
+                con += '<p class="more_content_ul3_img"><a href="'+host_url+'/softnews_'+id+'.html">';
+                if(pic.pic1 != ' ' || pic.pic1 != undefined) con += '<img src="'+host_img+pic.pic1+'">';
+                if(pic.pic2 != ' ' || pic.pic2 != undefined) con += '<img src="'+host_img+pic.pic2+'">';
+                if(pic.pic3 != ' ' || pic.pic3 != undefined) con += '<img src="'+host_img+pic.pic3+'">';
+                con += '</a></p></li></ul><span style="display:block;clear:both;"></span><hr/>';
+            } 
+			me.execCommand('inserthtml',con);  
+            // me.setContent(con);
+        }
+        dialog.close(true);
+    }
+
+    //取消
+    function reset(){
+        dialog.close(false);
+    }
+</script>
+</body>
+</html>

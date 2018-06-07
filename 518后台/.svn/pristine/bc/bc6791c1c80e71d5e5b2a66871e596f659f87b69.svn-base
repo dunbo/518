@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<table style='margin-top:10px;float:left;' width="100%" cellspacing="0" cellpadding="0" class="search_table">
+	<tbody>
+	<form method='get' action="__URL__/ebook_manager_list" >
+		<tr>
+			<td>
+			 标签名称：
+				<select style="width:140px" name="bk_class_a">
+				<volist name='category' id='cat'>
+					<option value="" <?php if($bk_class_a==0){echo 'selected';}?>>全部</option>
+					<option value="{$cat.bk_class_a}" <?php if($cat['bk_class_a']==$bk_class_a){echo 'selected';}?>>{$cat.bk_class_a_name}</option>
+				</volist>
+				</select>
+			</td>
+			<td>
+			  VIP状态：
+				<select style="width:140px" name="book_vip_type">
+					<option value="0" <?php if($book_vip_type==0){echo 'selected';}?>>全部</option>
+					<option value="1" <?php if($book_vip_type==1){echo 'selected';}?>>免费</option>
+					<option value="2" <?php if($book_vip_type==2){echo 'selected';}?>>全书vip</option>
+					<option value="3" <?php if($book_vip_type==3){echo 'selected';}?>>章节vip</option>
+				</select>
+			</td>
+			<td colspan="2">时间：<span><input type="text" name="begintime" id="begintime" value="{$begintime}" style="cursor: hand; width: 150px;" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>~
+				<span><input id="endtime" name="endtime" style="cursor: hand; width: 150px;"
+							 value="{$endtime}" size="15" type="text" class="Wdate search_item_text" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></span>
+			</td>
+			
+		</tr>
+		<tr>
+			<td>书籍id：<input type="text" value="{$bk_id}" id="bk_id" name="bk_id" class="search_item_text" style="width:140px" ></td>
+			<td>书籍名称：<input type="text" value="{$bk_name}" id="bk_name" name="bk_name" class="search_item_text" style="width:140px" ></td>
+
+			<td>
+				<input type="submit" class="search_btn" value="搜索"></td>
+		</tr>
+	</form>
+	</tbody>
+</table>
+<div style="clear: both"></div>
+<table  width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top" style="margin-left:500px;width:600px;"> 
+<tr height="35">
+	<td align="center" style=<?php if($status ==1){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/ebook_manager_list/status/1"><font style="color:#000; font-weight:bold">全部&nbsp;&nbsp;</font></a>
+	</td>
+	<td align="center" style=<?php if($status ==1){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/ebook_manager_list/status/1"><font style="color:#000; font-weight:bold">进行中</font></a>
+	</td>
+	<td align="center" style=<?php if($status ==0){ echo "background:#FFCC66"; } ?> >
+		<a href="__URL__/ebook_manager_list/status/0"><font style="color:#000; font-weight:bold">已过期</font></a>
+	</td>
+</tr>
+</table>
+<div style="clear: both"></div>
+<input type="button" class="search_btn" value="添加内容" onclick="get_ids(1)" style="width:100px;">
+<table style='float:left;' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="5%" bgcolor="#e3e2fe">选择</th>
+			<th width="9%"><a href="__URL__/ebook_manager_list/order/bk_id/sta/<?php echo ($sta==1)?2:1;?>">书籍ID<?php echo ($sta==1 && $order=='bk_id')?'↓↑':'↑↓';?></a></th>
+			<th width="10%">书籍名称</th>
+			<th width="10%">书籍名称(安智)</th>
+			<th width="5%">书籍分类</th>
+			<th width="5%">作者</th>
+			<th width="5%">章节数量</th>
+			<th width="5%">字数</th>
+			<th width="5%">vip状态</th>
+			<th width="5%">书籍状态</th>
+			<th width="9%"><a href="__URL__/ebook_manager_list/order/bk_visit_week/sta/<?php echo ($sta==1)?2:1;?>">周点击量<?php echo ($sta==1 && $order=='bk_visit_week')?'↓↑':'↑↓';?></a></th>
+			<th width="9%"><a href="__URL__/ebook_manager_list/order/bk_com_week/sta/<?php echo ($sta==1)?2:1;?>">周推荐数<?php echo ($sta==1 && $order=='bk_com_week')?'↓↑':'↑↓';?></a></th>
+			<th width="12%">更新时间</th>
+			<th width="12%">抓取时间</th>
+			<th width="10%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='res' id='bklist'>
+		<tr>
+			<td align='left' id='{$bklist.id}'>
+				<input type="checkbox" name="chk_list" value="{$bklist.id}" />
+			</td>
+			<td align='left'>
+				{$bklist.bk_id}
+			</td>
+			<td align='left'>
+				{$bklist.bk_name}
+			</td>
+			<td align='left'>
+				{$bklist.anzhi_bk_name}
+			</td>
+			<td align='left'>
+				{$bklist.bk_class_a_name}
+			</td>
+			<td align='left'>
+				{$bklist.bk_author}
+			</td>
+			<td align='left'>
+				<a href="__URL__/chapter_list/bk_id/{$bklist.bk_id}" style="color:blue;">{$bklist.ch_total}</a>
+			</td>
+			<td align='left'>
+				<?php echo number_format($bklist['bk_size']/10000,1);?>w
+			</td>
+			<td align='left'>
+				<if condition="$bklist.book_vip_type eq 1">免费<elseif condition="$bklist.book_vip_type eq 2"/>全书vip<elseif condition="$bklist.book_vip_type eq 3"/>章节vip</if>
+			</td>
+			<td align='left'>
+				<if condition="$bklist.bk_fullflag eq 0">连载<elseif condition="$bklist.bk_fullflag eq 1"/>完本<elseif condition="$bklist.bk_fullflag eq 2"/>封笔</if>
+			</td>
+			<td align='left'>
+				{$bklist.bk_visit_week}
+			</td>
+			<td align='left'>
+				{$bklist.bk_com_week}
+			</td>
+			<td align='left'>
+				{$bklist.bk_last_ch_update2}
+			</td>
+			<td align='left'>
+			<if condition="$bklist.bk_cre_date">{$bklist.bk_cre_date2}</if>
+				{$bklist.bk_cre_date}
+			</td>
+			<!-- <td><img src="{$messlist.news_pic|default='&nbsp;'}" width="48" height="48"/></td> -->
+			
+			<td align='center' id='hide_{$messlist.id}'>
+			<a href="__URL__/set_vip?id={$bklist.id}"  class="thickbox" style="text-decoration:none;">编辑</a><br/>		
+			<?php if($bklist['status'] == 1){ ?>				
+				<a href="javascript:void(0);" onclick="news_release('{$bklist.id}',0)" class="blue" style="text-decoration:none;">撤销</a>
+			<?php }else if($messlist['status'] == 0){ ?>
+				<a href="javascript:void(0);" class="blue"  onclick="news_release('{$bklist.id}',1)" style="text-decoration:none;">通过</a>
+			<?php } ?>				
+			</td>
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='15'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+</html>
+<a id='set_vip' class="thickbox" href=""></a>
+<script>
+function change_status(id,passed){
+	if(!confirm("你确认操作吗？"))
+	{
+		return true;
+	}
+	if(id){
+		// tb_show('取消','/index.php/Sj/Onlinegame/del_new_server?type=1&id='+id+'&height=300&width=400',false);
+		$.ajax({    
+                url:'/index.php/Sj/Messmanager/change_status/id/'+id+'/passed/'+passed,
+                type: 'get',
+                async:false,
+                success: function(data)
+                {   
+                    if(data==1){
+                    $('#'+id).parent().css('background','#ccc');
+                    $('#hide_'+id).html('');
+                    	alert('操作成功');
+                    }else{
+                    	alert('操作失败');
+                    }
+                }
+            });
+	}
+}
+function news_release(id,passed){
+	if(!confirm("你确认操作吗？"))
+	{
+		return true;
+	}
+	if(id){
+		$.ajax({    
+                url:'/index.php/Cooperate/Ebookmanager/news_release/id/'+id+'/passed/'+passed,
+                type: 'get',
+                async:false,
+                success: function(data)
+                {   
+                    if(data==1){
+                    $('#'+id).parent().css('background','#ccc');
+                    $('#hide_'+id).html('');
+                    	alert('操作成功');
+                    }else{
+                    	alert('操作失败');
+                    	// alert(data);
+                    }
+                }
+            });
+	}
+}
+function get_ids(passed){
+	if(!confirm("你确认操作吗？"))
+	{
+		return true;
+	}
+	var chks=$("input[name='chk_list']:checked");
+	var ids=new Array()
+	var i=0;
+    $(chks).each(function(){
+       ids[i]=this.value;
+       i++;                      
+    });
+    if(i==0){
+		alert('请选择要批量操作的电子书');
+		return;
+	}
+    $.ajax({    
+        url:'/index.php/Cooperate/Ebookmanager/news_release/ids/'+ids+'/passed/'+passed+'/biaoshi/1',
+        type: 'get',
+        async:false,
+        success: function(data)
+        {   
+            if(data==1){
+            	$(chks).each(function(){
+						$('#'+this.value).parent().css('background','#ccc');
+						$('#hide_'+this.value).html('');
+						                    
+				});
+            	alert('操作成功');
+            }else{
+            	alert('操作失败');
+            }
+        }
+    }); 
+}
+function ag_select(){
+	var chks=$("input[name='chk_list']");
+    $(chks).each(function(){
+       	if($(this).attr('checked')!='checked'){
+       		$(this).attr('checked','checked');
+       	}else{
+       		$(this).attr('checked',false);
+       	}
+    });
+}
+function set_up_vip(){
+	if(!confirm("你确认操作吗？"))
+	{
+		return true;
+	}
+	var chks=$("input[name='chk_list']:checked");
+	var ids=new Array()
+	var i=0;
+    $(chks).each(function(){
+       ids[i]=this.value;
+       i++;                      
+    });
+    if(i==0){
+		alert('请选择要批量操作的电子书');
+		return;
+	}
+	$('#set_vip').attr('href','__URL__/batch_set_vip/width/300/bk_ids/'+ids+'/bs/1');
+	$('#set_vip').click();	
+}
+// //排序
+// $('.extent_rank').change(function(){
+// 	var url = '__URL__/new_server_sequence/id/'+$(this).attr('rel')+'/pos/'+$(this).val()+'/old_pos/'+$(this).attr('old_pos');
+// 	$.ajax({
+// 		type: "GET",
+// 		url : url,
+// 		success: function(response){
+// 			var url     = eval("("+response+")");
+// 			var jumpUrl = '__URL__/audit_new_server/status/1/p/<?php echo is_numeric($_GET['p']) ? $_GET['p'] : '1'; ?>/lr/<?php echo is_numeric($_GET['lr']) ? $_GET['lr'] : '10'; ?>';
+// 			window.location.href = jumpUrl;
+// 			if(window.ActiveXObject) window.event.returnValue = false;
+// 		}
+// 	});
+// });
+</script>

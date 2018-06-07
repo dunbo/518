@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>权限配置</title>
+
+	<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+	<script type="text/javascript" src='/Public/js/jquery.js'></script>
+    <script type="text/javascript" src='/Public/js/thickbox.js'></script>
+    <link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+	<script>
+        function checkbox() {
+            var admin = $("[name='admin_id[]']");
+            var idArr = new Array();
+            admin.each(function() {
+                if ($(this).attr("checked") == 'checked') {
+                    idArr.push($(this).val());	
+                }	
+            });
+            if (idArr.length > 0) {
+                return idArr.join(',');
+            }
+            return false; 
+        }
+
+        $(function() {
+            $(".checkAll").click(function() {
+                if ($(this).attr('checked') == 'checked') {
+                    $("[type='checkbox']").attr("checked", true);	
+                } else {
+                    $("[type='checkbox']").attr("checked", false);	
+                }
+                $("[type='checkbox'][disabled='disabled']").attr('checked', false);
+            });
+            
+            $("[act='delete']").click(function() {
+                if (!checkbox()) {
+                    alert('请选择要操作的对象');
+                } else {
+                    if (confirm("确定删除已选管理员？")) {
+                        $('#delete').submit();
+                    }
+                }
+            });
+        });
+        
+        function unauthorized_tb_remove(obj) {
+            var reg = /^\{/;
+            //console.log(reg.test($(obj).html()));
+            if (reg.test($(obj).html())) {
+                $("#TB_overlay").click(tb_remove);
+            }
+        }
+
+	</script>
+</head>
+
+<body>
+<div class="page_nav">权限配置</div>
+	<form id="delete" action="__URL__/delete" method="POST">
+	<div style="width:99%; margin:15px auto 0">
+		<a href="__URL__/add?width=600&height=300&modal=true&post_load=unauthorized_tb_remove" class="thickbox search_btn" style="float:left; margin-right:10px; display:inline">添加人员</a>
+		<input btn="delete" act="delete" value="删除人员" type="button" class="verify search_btn" style="height:30px;" />
+        
+    </div>
+	<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+		<thead>
+			<tr>
+				<th width="8%"><input type="checkbox" class="checkAll" ajaxSign="ajaxClear" /></th>
+				<th width="16%">管理人员</th>
+				<th width="38%">上线产品页面</th>
+				<th width="38%">排期申请页面</th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach($list as $info):?>
+		<tr line="<?php echo $info['id'];?>" align="center" height="30px">
+			<td><input ajaxSign="ajaxClear" btn="<?php echo $info['id'];?>" name="admin_id[]" value="<?php echo $info['id'];?>" type="checkbox" /></td>
+			<td class="left"><?php echo $info['admin_user_name'];?></td>
+			<td><?php if($info['auth_online'] == 1) echo "可查看该页面中所有负责人的数据"; else echo "仅可查看自己的数据";?></td>
+			<td><?php if($info['auth_schedule'] == 1) echo "可查看该页面中所有负责人的数据"; else echo "仅可查看自己的数据";?></td>
+		</tr>
+		<?php endforeach; ?>
+		</tbody>
+	</table>
+	</form>
+	<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>

@@ -1,0 +1,141 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/Public/js/zhiyoo/common.js"></script>
+<style>
+.search_c{margin:10px;border:1px solid #000; padding:10px;height:30px;line-height:30px;}
+.Search{float:left; margin-left:20px;}
+.Search input {height:20px;line-height:20px;width:180px;}
+.Search select{width:150px;}
+.Search #tj {width:80px;height:28px;cursor:pointer;line-height:20px;margin-top:3px;}
+.Search span{font-size:14px;}
+.noData{color:red;font-size:14px;}
+.Search_tj input{float:right;width:98px;height:28px;cursor:pointer;line-height:20px;margin-top:2px;margin-right:20px;}
+.Search_tj a{float:right;width:98px;height:28px;cursor:pointer;margin-top:2px;margin-right:20px;}
+.clear{ clear:both; float:none;}
+.apply_c{font-size:16px;}
+h2{margin:10px;}
+</style>
+
+<body>
+<h2 style="float:left;">当前位置：产品管理</h2>
+<div style="float:right; margin:10px;">
+	<a href="__URL__/product_act/"  class="search_btn" style="display:inline-block;width:135px;">产品活动配置</a>
+	<a href="__URL__/productPer/"  class="search_btn" style="display:inline-block;width:135px;">产品分期管理</a>
+</div>
+<div style="clear:both;"></div>
+
+<div class="search_c">
+<form method='post' action="__URL__/productList" >
+	<div class="Search">
+		<span>产品名称：</span><input type="text" name="subject" id="subjectid" value="{$subject}" />
+	</div>
+	<div class="Search">
+		<span>产品分类：</span>
+		<select name="p_class" id="p_class">
+			
+			 <option value="">全部</option>
+			<volist name="threadtype" id="val">
+				<option value="{$val.id}">{$val.name}</option>
+			</volist>
+		</select>
+	</div>
+	<div class="Search">
+		<span>状态：</span>
+		<select name="p_status" id="p_status">
+			 <option value="">全部</option>
+			 <option value="1">待上线</option>
+			 <option value="2">即将上线</option>
+			 <option value="3">申请中</option>
+			 <option value="4">体验中</option>
+			 <option value="5">已结束</option>
+		</select>
+	</div>
+	<div class="Search_tj">
+		<input type="submit" id="tj" value="搜  索" class="search_btn" />
+	</div>
+</form>
+</div>
+<form method="post" action="__URL__/editRank/">
+<div class="Search_tj">
+ <if condition="$edit_rank">
+    <input value="保存优先级" type="submit"  class="search_btn" style="display:inline-block;">
+    <a href="__URL__/productList/"  class="search_btn" style="display:inline-block;">取消编辑</a>
+    <else />
+    <a href="__URL__/productList/edit_rank/1/"  class="search_btn" style="display:inline-block;">编辑优先级</a>
+</if>
+</div>
+<div class="clear"></div>
+<div style="font-size: 20px;color: red;">
+**注 当排序值设置为大于9998时，优先级不显示，该产品按默认的排序规则排序</div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+	<tr>
+    
+		<th width="70">优先级</th>
+		<th width="70">TID</th>
+		<th width="60">FID</th>
+		<th>产品名称</th>
+		<th width="55">产品数量</th>
+		<th width="70">阈值系数</th>
+		<th>产品分类</th>
+		<th width="120">发布/申请 时间</th>
+		<th width="120">体验/结束 时间</th>
+		<th width="55">申请人数</th>
+		<th width="55">众测报告</th>
+		<th width="60">状态</th>
+	</tr>
+	</thead>
+	<if condition="$threadlist neq ''">
+	<volist name="threadlist" id="val">
+	<tr class="tr">
+		<td><if condition="$edit_rank eq 1"><input style="width:40px;" type="text" name="rank[{$val.tid}]" value="{$val.displayorder}"><else />{$val.displayorder}</if></td>
+		<td>{$val.tid}</td>
+		<td>{$val.fid}</td>
+		<td><a <if condition="$val.status eq '待上线'">href="http://bbs.zhiyoo.com/thread-{$val.tid}-1-1.html" <else />href="http://pingce.zhiyoo.com/pdetail.php?tid={$val.tid}" </if> target="_blank">{$val.subject}</a></td>
+		<td>{$val.p_count}</td>
+		<td>
+			<if condition="$val.count gt 18">
+			<a href="/index.php/Zhiyoo/Product/applyModulus/tid/{$val.tid}" class="thickbox">系数:{$val.modulus}</a><br />
+			总:{$val.showtotal}
+			</if>
+		</td>
+		<td>{$val.typename}</td>
+		<td>{$val.release_time}<br />{$val.application_time}</td>
+		<td>{$val.experience_time}<br />{$val.end_time}</td>
+		<td>
+			<if condition="$val.status eq '申请中'">
+			<a href="__URL__/applyList/tid/{$val.tid}/pnum/{$val.p_count}/applyAdd/1/" class="apply_c">{$val.count}</a>
+			<elseif condition="$val.count neq 0" />
+			<a href="__URL__/applyList/tid/{$val.tid}/pnum/{$val.p_count}/" class="apply_c">{$val.count}</a>
+			<else />0</if>
+		</td>
+		<td>
+			<a href="__URL__/testContent/tid/{$val.tid}" class="apply_c">{$val.test_count}</a>
+		</td>
+		<td>{$val.status}</td>
+		
+	</tr>
+	</volist>
+	<else />
+	<tr>
+		<td colspan="11" class="noData">暂无数据！</td>
+	</tr>
+	</if>
+</table>
+</form>
+<div class="navgition">
+	{$pageList|default='&nbsp;'}
+</div>
+<script type="text/javascript">
+$(function(){
+	 $("#p_class").find("option[value='{$p_class}']").attr("selected",true);
+	 $("#p_status").find("option[value='{$p_status}']").attr("selected",true);
+});
+</script>
+</body>
+</html>

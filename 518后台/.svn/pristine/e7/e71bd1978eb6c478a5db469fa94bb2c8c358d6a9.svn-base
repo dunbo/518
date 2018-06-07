@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>『Goapk|安智网』管理平台</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src='/Public/js/soft.js'></script>
+{//时间插件结束}
+	<script type="text/javascript">
+		var id_arr = new Array();
+		function choose_id(){
+
+			var i = 0;
+			$('input[name^=video_]').each(function(){
+				if($(this).is(':checked')&&$(this).attr('name')!='id_all') {
+					id_arr[i] = $(this).val();
+					i++;
+				}
+			});
+
+			if(id_arr.length == 0) {
+				alert('请选择要操作的对象！');
+				return false;
+			}else{
+				return id_arr;
+			}
+		}
+		function change_status_more(type){
+			if(choose_id()){
+				var check_status = type;
+				if(check_status==1){
+					var href = "__URL__/change_status/check_status/"+check_status+"/id/"+id_arr+"/cont/1";
+					tb_show('',href,'thickbox');
+				}else{
+					window.location.href = "__URL__/change_status/check_status/"+check_status+"/id/"+id_arr;
+				}
+				
+			}
+
+		}
+		function selectAll()
+		{
+			$("input[name^=video_]").each(function(){
+				if(this.checked != true){
+					this.checked = true;
+				}
+			})
+		}
+
+		function selectRev()
+		{
+			$("input[name^=video_]").each(function(){
+				this.checked = !$(this).attr("checked");
+			})
+		}
+	</script>
+</head>     
+<body>
+<style type="text/css">
+.margin_top tbody tr td{ border:1px solid #cccccc; border-radius:10px 10px 0 0;}
+.margin_top{ float:left;}
+</style>
+<h3 style="margin-left:20px;margin-top:20px;margin-bottom:-20px;">视频管理</h3>
+<table style='margin-top:30px;float:left;' width="100%" cellspacing="0" cellpadding="0" class="search_table">
+	<tbody>
+	<form method='get' action="__URL__/video_list" >
+		<tr>
+			
+			<td width="20%">软件包名：<input style="width:100px;" type="text"  value="{$package}" id="s_package" name="s_package"></td>
+			<td width="20%">软件名称：<input style="width:100px;" type="text"  value="{$softname}" id="s_softname" name="s_softname"></td>
+			<td width="20%">视频名称：<input style="width:100px;"type="text"  value="{$video_title}" id="s_video_title" name="s_video_title"></td>
+			<td width="20%">来源：
+				<select name="s_video_num" id="s_video_num">
+					<option value="">全部</option>
+					<option value="1" <if condition="$video_num eq 1">selected</if>>游戏联运</option>
+					<option value="2" <if condition="$video_num eq 2">selected</if>>开发者</option>
+					<option value="3" <if condition="$video_num eq 3">selected</if>>视频</option>
+					<option value="4" <if condition="$video_num eq 4">selected</if>>当乐网</option>
+					<option value="5" <if condition="$video_num eq 5">selected</if>>百家号</option>
+					<option value="6" <if condition="$video_num eq 6">selected</if>>超好玩</option>
+					<option value="7" <if condition="$video_num eq 7">selected</if>>内容合作平台</option>
+				</select>
+			</td>
+			<td width="15%">
+				<input type="hidden" name="check_status" value="{$check_status}">
+				<input type="submit" class="search_btn" value="搜索">
+			</td>
+			<td width="15%" align="right">
+				<a href="__URL__/video_edit/add/1/" class="search_btn">添加视频</a>
+			</td>
+		</tr>
+		<?php if($check_status == 1 || $check_status == 0 || $check_status == 2){ ?>	
+		<tr>
+			<td >内容性质:{$content_xz}</td>
+			<td >内容质量:{$content_zl}</td>
+			<td >内容栏目:
+				<select name="s_content_column" id="s_content_column">
+					<option value="0" selected>全部</option>
+					<volist name='column_list' id='columnlist'>
+					<option value="{$columnlist.cont_id}" <?php if($s_content_column == $columnlist['cont_id']) echo "selected"; ?> >{$columnlist.name}</option>
+				    </volist>
+				</select>  
+			</td>
+			<td >内容来源:{$con_source}</td>
+			<td>标签状态：<select name="s_status_tag" id="s_status_tag">
+							<option value="">全部</option>
+							<option value="0" <?php if($s_status_tag === '0') echo "selected"; ?> >否</option>
+							<option value="1" <?php if($s_status_tag == 1) echo "selected"; ?> >是</option>
+						  </select>
+			</td>
+		</tr>
+		<tr>
+			<td>用户倾向:{$user_tend}</td>
+		</tr>
+		<?php } ?>			
+	</form>
+	 </tbody>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="margin_top">
+	<if condition="$check_status == 0">
+		<span style="color:red;margin-left:20px">未通过审核的视频将无法配置至市场运营位中</span>
+	</if>
+	<tr height="35">
+		<td align="center" style=<?php if($check_status == 0){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/video_list/check_status/0"><font style="color:#000; font-weight:bold">待审核</font></a>
+		</td>
+		<td align="center" style=<?php if($check_status == 1){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/video_list/check_status/1"><font style="color:#000; font-weight:bold">已通过</font></a>
+		</td>
+		<td align="center" style=<?php if($check_status == 2){ echo "background:#FFCC66" ;}?>>
+		<a href="__URL__/video_list/check_status/2"><font style="color:#000; font-weight:bold">未通过</font></a>
+		</td>
+	</tr>
+</table>
+<div style="clear: both"></div>
+<div style="margin-top: 10px">
+	<a href="javascript:void(0);" onclick="selectAll()" class="search_btn" style="float: left">全选</a>&nbsp;
+	<a href="javascript:void(0);" onclick="selectRev()" class="search_btn" style="float: left">反选</a>
+	<?php if($check_status == 0){ ?>
+	<a href="javascript:void(0);" onclick="change_status_more(2)" class="search_btn" style="float: right;margin-right: 10px">批量驳回</a>
+	<a href="javascript:void(0);" onclick="change_status_more(1)" class="search_btn" style="float: right;margin-right: 10px">批量通过</a>
+	<?php }else{ ?>
+	<a href="javascript:void(0);" onclick="change_status_more(0)" class="search_btn" style="float: right;margin-right: 10px">批量撤销</a>
+	<?php } ?>
+</div>
+
+<table style='float:left;' cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th width="5%"></th>
+			<th width="5%">
+				<?php if(!$order){ ?>
+				<a href="__URL__/video_list/order/a?{$o_param}">视频id&uarr;&darr;</a>
+				<?php }else if($order == 'd'){ ?>
+				<a href="__URL__/video_list/order/a?{$o_param}">视频id&uarr;</a>
+				<?php }else{ ?>
+				<a href="__URL__/video_list/order/d?{$o_param}">视频id&darr;</a>
+				<?php } ?>
+			</th>
+			<th width="15%">视频名称</th>
+			<th width="15%">视频默认图</th>
+			<th width="15%">软件包名</th>
+			<th width="8%">软件名称</th>
+			<th width="8%">来源</th>
+			<th width="8%">创建时间</th>
+			<th width="10%">内容属性</th>
+			<th width="15%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+	<volist name='list' id='videolist'>
+		<tr>
+			<td><input type="checkbox" value="{$videolist.id}" id="video_{$videolist.id}" name="video_{$videolist.id}"></td>
+			<td align='left'>
+				{$videolist.id|default=''}
+			</td>
+			<td>{$videolist.video_title}</td>
+			<td><img src="{$attachment_host}{$videolist.video_pic}" width='120px' height="60px" /></td>
+			<td>{$videolist.package}</td>
+			<td>{$videolist.softname}</td>
+			<td>{$videolist.source}</td>
+			<td><?php if(!empty($videolist['add_tm'])){echo date("Y-m-d H:i:s",$videolist['add_tm']);}?></td>
+			<td> {$videolist.content_select}</td>
+			<td align='center' >				
+				<?php if($videolist['video_url']){ ?>
+					<a href="__URL__/video_edit?id={$videolist.id}&show_video=1&width=540&height=420" class="thickbox">预览视频</a> 
+				<?php } ?>
+				<?php if($check_status==0){ ?>
+				| <a href="__URL__/change_status/check_status/1/id/{$videolist.id}/cont/1" class="thickbox">通过</a> | <a href="__URL__/change_status/check_status/1/id/{$videolist.id}/sysc/1/cont/1" class="thickbox">通过并同步</a> | <a href="__URL__/change_status/check_status/2/id/{$videolist.id}">驳回</a>
+				<?php }else{ ?>
+				| <a href="__URL__/change_status/check_status/0/id/{$videolist.id}">撤销</a>
+				<?php } ?>
+				| <a href="__URL__/video_edit?id={$videolist.id}" class="blue">编辑</a>
+				<?php if($videolist['video_num'] == 3){ ?>
+					<!-- | <a href="__URL__/video_edit?id={$videolist.id}" class="blue">编辑</a> | -->
+					| <a href="javascript:void(0);" class="blue"
+					onclick="javacsript:if(confirm('删除后不可恢复，是否确认删除？')){window.location.href='__URL__/video_del?id=<?php echo $videolist['id'];?>'}">删除</a><br/>
+				<?php } ?>			
+			</td>
+
+			
+		</tr>
+	</volist>
+	</tbody>
+	<tr>
+		<td colspan='12'>
+			<div  align='left' >{$page}</div>
+		</td>
+	<tr>
+</table>
+</body>
+
+</html>

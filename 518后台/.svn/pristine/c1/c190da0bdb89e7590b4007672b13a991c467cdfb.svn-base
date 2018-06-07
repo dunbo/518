@@ -1,0 +1,170 @@
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+    <script type="text/javascript">
+        function showtype(valuenum){
+                    if(valuenum==1)
+                    {
+                            $('.addactive_1').css('display','');
+                            $('.addactive_2').css('display','none');
+                    }
+                    else{
+                            $('.addactive_1').css('display','none');
+                            $('.addactive_2').css('display','');
+                    }
+        }
+
+        function upload(){
+            var rastatus = $('input:radio:checked').val();
+            
+            if($("#hdname1").val().length>20)
+            {
+                alert('活动名称太长了');
+                return;
+            }
+
+            if($("#hdname1").val().length==0)
+            {
+                alert('活动名称不能为空');
+                return;
+            }
+
+            if(rastatus==1)
+            {
+                if($("#uploadFile0").val().length==0)
+                {
+                    alert('请上传BI提供的规则文件');
+                    return;
+                }
+
+                if($("#uploadFile1").val().length==0)
+                {
+                    alert('请上传CP提供的投资信息文件');
+                    return;
+                }
+            }else
+            {
+                if($("#uploadFile2").val().length==0)
+                {
+                    alert('请上传活动参与者文件');
+                    return;
+                }
+            }
+
+            if($("#endtime").val().length==0)
+            {
+                alert('抽奖截止时间不能为空');
+                return;
+            }
+
+            var d2 = $("#endtime").val();
+            var d2 = new Date(d2.replace(/-/g, "/"));
+            var myDate = new Date();
+            var y = myDate.getFullYear();
+            var m = myDate.getMonth()+1;
+            var d = myDate.getDate();
+            var thisday = y+'-'+m+'-'+d;
+            var thisday = new Date(thisday.replace(/-/g, "/")); 
+
+            if (Date.parse(d2) - Date.parse(thisday)  < 0) {
+                alert("截止时间不能小于当前时间");
+                return;
+            }            
+            
+
+            var param = {
+                hdname: $("#hdname1").val(),
+                beizhu : $("#beizhu").val(),
+                endtime : $("#endtime").val(),
+                rastatus: rastatus
+            };
+
+            //弹出加载中
+            var timenow = new Date().getTime();
+            suffix = timenow;
+            window_list.push(suffix);
+            var urls ="#TB_inline?height=100&width=200&inlineId=loading&modal=true";
+            tb_show('title',urls,"thickbox");
+
+            $.ajaxFileUpload({
+                url:'__URL__/save',
+                type:'POST',
+                data:param,
+                files:[$('#uploadFile0'),$('#uploadFile1'),$('#uploadFile2')],
+                secureuri:false,
+                dataType:'json',
+                success:function(data){
+                    if(data==1)
+                    {
+                        location.href ="/index.php/Sendnum/Market/index";
+                    }else if(data==2)
+                    {
+                        alert('服务器忙，上传失败，请稍候再试');
+                    }else if(data==3)
+                    {
+                        alert('服务器忙，添加失败，请稍候再试');
+                    }
+                }
+            });
+        };
+    </script>
+</head>
+<body>
+
+<div style="width:45; margin-top:4px">
+	 <form id="form1" name="form1" method="post" action="__URL__/add/">
+  <table width="99%" height="63" border="0" align="center" cellpadding="4" cellspacing="1"  bgcolor="#333333" id="table1">
+    <tr>
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">活动名称:</td>
+         <td align="left" bgcolor="#FFFFFF">
+           <input name="hdname1" type="text" id="hdname1" size="40" />        </td>
+    </tr>    
+        <tr>
+         <td width="22%" size="20" height="20" align="right" bgcolor="#FFFFFF"></td>
+         <td align="left" bgcolor="#FFFFFF">
+             <font color="red">*，活动名称限制在20个字符长度内</font>        </td>
+    </tr>
+	 <tr>
+         <td height="20" colspan="2" align="left" bgcolor="#ffffff">　
+           <input type="radio" name="addactive_type" id="addactive_type" value="1" onclick="showtype(1)" checked="checked" />
+            评论反馈抽奖
+           <input type="radio" name="addactive_type" id="addactive_type" value="2" onclick="showtype(2)"  />
+           客户端下载抽奖        </td>
+      </tr> 
+    <tr class="addactive_1">
+         <td width="22%" height="20" align="right" bgcolor="#FFFFFF">活动规则文件:</td>
+         <td align="left" bgcolor="#FFFFFF">
+           <input id="uploadFile0" type="file" name="upload[]" /><br/> <font color="red">*，由BI提供的规则文件</font>        </td>
+    </tr>
+    <tr class="addactive_1">
+        <td height="20" align="right" bgcolor="#FFFFFF">抽奖信息文件:</td>
+        <td bgcolor="#FFFFFF">
+           <input id="uploadFile1" type="file" name="upload[]" /><br/> <font color="red">*，由CP提供的投资信息文件</font>        </td>
+    </tr>  
+	 <tr class="addactive_2" style="display:none">
+        <td height="20" align="right" bgcolor="#FFFFFF">活动参与者文件:</td>
+        <td bgcolor="#FFFFFF">
+           <input id="uploadFile2" type="file" name="upload[]" /><br/> <font color="red">*，由产品提供的投资信息文件</font>        </td>
+    </tr>  
+    <tr>
+        <td height="20" align="right" bgcolor="#FFFFFF">抽奖截止时间:</td>
+        <td bgcolor="#FFFFFF"><input id="endtime" name="endtime"
+				style="cursor: hand; width: 100px;"
+				value="{$endtime}" size="15" type="text"><img
+				src="/Public/js/calendar.gif"
+                                onclick="return showCalendar('endtime', 'y-m-d');" style="border:1px solid #000;"/><font color="red"> *</font></td>
+   </tr>
+
+    <tr>
+        <td height="20" align="right" bgcolor="#FFFFFF">备注:</td>
+        <td align="left" bgcolor="#FFFFFF"> 
+            <textarea name="beizhu" id="beizhu" cols="30" rows="8"></textarea>        </td>
+    </tr>
+   <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="提交" onClick="upload()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onClick="tb_remove();"/></td>
+      </tr>
+</table>
+  
+  </form>
+</div>
+</body>
+</html>

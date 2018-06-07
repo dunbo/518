@@ -1,0 +1,299 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript">
+var checkedparentid = [];
+
+var checkedtag = new Array();
+
+function showchild(parentid){
+	var childobj = document.getElementById('tagparnetid_'+parentid);
+	if(gettagobj('tag_'+parentid).checked == true){
+		childobj.style.display = 'block';	
+	}else{
+		childobj.style.display = 'none';
+		var childs = childobj.getElementsByTagName('input');
+		var cnt = childs.length;
+		for(var i=0;i < cnt; i++){
+			if (childs[i].checked == true) childs[i].checked = false;
+		}	
+	}
+}
+
+function checkparentid(obj,childtagid){
+	var tid = tagsinfo[childtagid].parentid;
+	if(tid == 0) return false;
+	if(obj.checked == true){
+		checkedparentid[tid] = 1;
+	}else{
+		checkedparentid[tid] = 0;
+	}
+}
+
+function gettagobj(id){
+	return document.getElementById(id);	
+}
+
+function createtag(tag){
+	return document.createElement(tag);
+}
+
+function checkname(){　　 
+	var name = document.getElementsByName('colname')[0].value;
+	
+	<?php if(intval($_GET['specialtype']) === 1 ):?>
+	if(name == '请输入专题名称' ||name == ''){
+		alert('请输入专题名称');
+		return false;
+	}
+	<?php else: ?>
+	if(name == '请输入栏目名称' ||name == ''){
+		alert('请输入栏目名称');
+		return false;
+	}
+	<?php endif; ?>
+	return true;
+}
+
+</script>
+<style>
+.pl_left{margin-left:10px;}
+</style>
+<div>
+<form action="__URL__/add_column_sub/<?php if(intval($_GET['specialtype']) === 1 ) echo 'specialtype/1';?>" method="post" enctype="multipart/form-data" >
+<?php 
+if(!empty($stoprule)){
+	echo '<center>规则中包含停用标签<b>'.$stoprule.'</b>,请启用标签后再使用' ;
+	echo '<br/><br/>';
+	echo '<button onclick="tb_remove();return false;" class="search_btn">确定</button></center>';
+	die;
+ }
+ ?>
+<?php if($cid){ ?>
+<?php if(intval($_GET['specialtype']) === 1 ):?>
+<div class="cl_colname">
+<h3>编辑专题</h3><br/>
+<span >专题名称：</span>
+	<input type="hidden" name="cid" value="{$cid}">
+	<input type="text" name="colname" value="{$colunm[0].name}">
+</div>
+<div class="cl_filter">
+	<volist name="filterdata" id="val"  key="k">
+	<if condition="$k eq $colunm[0]['filter']">
+	<input type="radio" value="{$k}" name="filter" checked="checked" /> {$val} <br />
+	<else />
+	<input type="radio" value="{$k}" name="filter" /> {$val} <br />
+	</if>
+	</volist>
+</div>
+<div>
+	<span >备注：</span>
+	<input type="text" name="common" value="{$colunm[0].common}">
+</div>
+<div>
+	<span >平台：</span>
+	<volist name="platform" id="val"  key="k">
+		<span class="pl_left"></span>
+		<if condition="$val.platform eq $colunm[0]['platform']">
+		<input type="radio" name="platform" value="{$val.platform}" checked="checked" /> {$val.platformname} 
+		<else />
+		<input type="radio" name="platform" value="{$val.platform}" /> {$val.platformname}
+		</if>
+		<span class="pl_left"></span>
+	</volist>
+
+</div>
+<div>
+	<span >封面图：</span>
+	<if condition="$colunm[0]['cover_img'] neq ''">
+		<img id="viewImg" src="<?php echo IMGATT_HOST;?>{$colunm[0].cover_img}" height="100" />
+        <a href="javascript:;" onclick="return delimg({$cid});">删除</a>
+	 <else /> 无
+	 </if><br />
+	<input type="file" name="p_logo" id="coverimg" />
+</div>
+<?php else: ?>
+<div class="cl_colname">
+<h3>编辑栏目</h3><br />
+<span >栏目名称：</span>
+	<input type="hidden" name="cid" value="{$cid}">
+	<input type="text" name="colname" value="{$colunm[0].name}">
+</div>
+<div class="cl_filter">
+	<volist name="filterdata" id="val"  key="k">
+	<if condition="$k eq $colunm[0]['filter']">
+	<input type="radio" value="{$k}" name="filter" checked="checked" /> {$val} <br />
+	<else />
+	<input type="radio" value="{$k}" name="filter" /> {$val} <br />
+	</if>
+	</volist>
+</div>
+<div>
+	<span >备注：</span>
+	<input type="text" name="common" value="{$colunm[0].common}">
+</div>
+<div>
+	<span >平台：</span>
+	<volist name="platform" id="val"  key="k">
+		<span class="pl_left"></span>
+		<if condition="$val.platform eq $colunm[0]['platform']">
+		<input type="radio" name="platform" value="{$val.platform}" checked="checked" /> {$val.platformname} 
+		<else />
+		<input type="radio" name="platform" value="{$val.platform}" /> {$val.platformname}
+		</if>
+		<span class="pl_left"></span>
+	</volist>
+
+</div>
+<div>
+	<span >封面图：</span>
+	<if condition="$colunm[0]['cover_img'] neq ''">
+		<img id="viewImg" src="<?php echo IMGATT_HOST;?>{$colunm[0].cover_img}" height="100" />
+        <a href="javascript:;" onclick="return delimg({$cid});">删除</a>
+	 <else /> 无
+	 </if><br />
+	<input type="file" name="p_logo" id="coverimg" />
+</div>
+<?php endif; ?>
+<?php }else{ ?>
+<?php if(intval($_GET['specialtype']) === 1 ):?>
+<div class="cl_colname">
+<h3>添加新专题</h3><br/>
+<span >专题名称：</span>
+<input type="text" name="colname" value="请输入专题名称" onfocus="if(this.value=='请输入专题名称'){this.value=''}">
+</div>
+<div class="cl_filter">
+	<volist name="filterdata" id="val"  key="k">
+	<input type="radio" value="{$k}" name="filter" /> {$val} <br />
+	</volist>
+</div>
+<div>
+	<span >备注：</span>
+	<input type="text" name="common" value="{$colunm[0].common}">
+</div>
+<div>
+	<span >平台：</span>
+	<volist name="platform" id="val"  key="k">
+		<span class="pl_left"></span>
+		<input type="radio" name="platform" value="{$val.platform}" /> {$val.platformname} <span class="pl_left"></span>
+	</volist>
+
+</div>
+<div>
+	<span >封面图：</span>
+	<input type="file" name="p_logo" id="coverimg" />
+</div>
+<?php else: ?>
+<h3>添加新栏目</h3><br/>
+<div class="cl_colname">
+<span >栏目名称：</span>
+<input type="text" name="colname" value="请输入栏目名称" onfocus="if(this.value=='请输入栏目名称'){this.value=''}">
+</div>
+<div class="cl_filter">
+	<volist name="filterdata" id="val"  key="k">
+	<input type="radio" value="{$k}" name="filter" /> {$val} <br />
+	</volist>
+</div>
+<div>
+	<span >备注：</span>
+	<input type="text" name="common" value="{$colunm[0].common}">
+</div>
+<div>
+	<span >平台：</span>
+	<volist name="platform" id="val"  key="k">
+		<span class="pl_left"></span>
+		<input type="radio" name="platform" value="{$val.platform}" /> {$val.platformname} <span class="pl_left"></span>
+	</volist>
+
+</div>
+<div>
+	<span >封面图：</span>
+	<input type="file" name="p_logo" id="coverimg" />
+</div>
+<?php endif; ?>
+
+<?php } ?>	
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	
+<?php 
+	foreach($cat as $groupid=>$name){ ?>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+		<tr id="group_{$groupid}"><th>{$name}</th></tr>
+		<?php
+		$i =0;
+		foreach($taginfo[$groupid] as $tag){
+			if($tag['parentid'] != 0){
+				continue;	
+			}
+			$i++;
+			if($i%5==1) echo "<tr>";
+			$checked='';
+			if(in_array($tag['tagid'],$tags)) $checked='checked';
+			?>
+			<td width="100px">
+			<input type="checkbox" name="tags[]" id="tag_{$tag.tagid}" class="ck" onclick="showchild({$tag.tagid})" value="{$tag.tagid}" {$checked}/>
+			{$tag['tagname']}
+			</td>
+			<?php
+			if($i%5==0) echo "</tr>";
+		}
+		?>
+		</tr>
+	</table>
+	
+	
+		<?php 
+		//foreach($tagpinfo as $key => $tagslist){
+			foreach($taginfo[$groupid] as $tag){
+				if($tag['parentid'] != 0) continue;	
+				$tagslist = $tagpinfo[$tag['tagid']]; 
+				if(empty($tagslist)) continue;
+				$key = $tag['tagid'];
+				$j =0;
+				if(in_array($key,$tags)) $display='block'; else $display='none';
+				echo "<table id=\"tagparnetid_".$key."\" style=\"display:".$display."\"  class=\"table_list\">";
+				echo "<th>".$taglist[$key]['tagname']."</th>";
+				foreach($tagslist as $info){
+					$j++;
+					if($j%5==1) echo "<tr>";
+					$checked='';
+					if(in_array($info['tagid'],$tags)) $checked='checked';
+					?>
+					<td width="100px"><input type="checkbox" name="tags[]" id="tag_{$info['tagid']}" value="{$info['tagid']}" onclick="checkparentid(this,{$info['tagid']})" {$checked}/>{$info['tagname']}</td>
+					
+					<?php
+					
+					if($i%5==0) echo "</tr>";
+				}
+				echo "</table>";
+			
+		}
+	} 
+?>
+</table>
+<div id="gettags">
+
+</div>
+<div id="getid">
+	
+</div>
+
+<input type="hidden" name="searchtagid" id="searchtagid" value=""/>
+<input type="submit" name="submit" value="提交" onclick="return checkname()">
+<input type="submit" name="submit" value="取消" onclick="tb_remove();return false;">
+</form>	
+</div>
+
+<script type="text/javascript">
+function delimg(cid){
+    if(!confirm('确实要删除图片吗?')) return false;
+    $.getJSON("__URL__/delimg/cid/" + cid + '/',function(e){
+        if(e.su){
+            var viewImg = document.getElementById("viewImg");
+            viewImg.src='';
+            alert('删除成功');
+        }else{
+            alert('删除失败');
+        }
+    })
+    return false;
+}
+</script>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>回归安智100%有礼 派现金红包</title>
+<link type="text/css" rel="stylesheet" href="/css/flyback_common.css?v1"/>
+<script type="text/javascript"  src="/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="/js/anzhi.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+var share= '<!--{$out.share}-->'
+var sid = '<!--{$out.sid}-->';
+var aid = <!--{$out.aid}-->;
+var uid = '<!--{$out.uid}-->';
+var actsid = '<!--{$out.actsid}-->';
+var p=0,soft_lists = [],soft_lists_anzhuang = [],flags={canMove:true};
+var soft_lists_go = [],datas = [],my_package='',zp_status=false;
+$(document).ready(function () {
+	if(share == 1){
+		share_downloads();
+	}
+	
+	if(typeof(window.AnzhiActivitys) != "undefined"){
+		var lottery_num = parseInt('<!--{$out.lottery_num}-->');
+		var is_login = '<!--{$out['is_login']}-->';
+		if(lottery_num == 0&&is_login==1){
+			$('.lottery').css('display','none');
+			$('.soft-list').css('display','');
+			get_soft();
+		}
+		
+	}	
+	
+});
+function share_downloads() {
+	var js_param = {type:'launchact', id:aid, actsid:actsid};
+	//http://m.anzhi.com/fast.php?&type=action&aid=218&actsid=xxxxxxx
+	var php_param = {type:'action', aid:aid, actsid:actsid, disable_auto:1};
+	share_download(js_param,php_param);
+}
+
+
+function get_soft(){
+	var json_data = window.AnzhiActivitys.getAllAppList(parseInt(aid));
+	var cmd = 'var soft_list=' + json_data;
+	eval(cmd);
+	soft_lists = soft_list.DATA;
+	var open_list = [];
+	var install_list = [];
+	var down_list = [];
+	for(j=0;j<soft_lists.length;j++){
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(soft_lists[j][0]));
+		window.AnzhiActivitys.registerInstallObserver(soft_lists[j][7]);
+		var json_data =  window.AnzhiActivitys.isInstalledApp(soft_lists[j][7],parseInt(soft_lists[j][13]));
+		var soft_status_gos = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(soft_lists[j][0]));
+		if(json_data == 0 || json_data == 1 ){
+			open_list.push(soft_lists[j]);
+		}
+		if(json_data == -2 && soft_status_gos == 5){
+			install_list.push(soft_lists[j]);
+		}
+		if((json_data == -2 && soft_status_gos != 5 ) || json_data == -1){
+			down_list.push(soft_lists[j]);
+		}
+	}      
+  	for(var ii in open_list) {
+		soft_lists_go.push(open_list[ii]);
+	}  
+  	for(var ii in install_list) {
+		soft_lists_go.push(install_list[ii]);
+	}
+  	for(var ii in down_list) {
+		soft_lists_go.push(down_list[ii]);
+	}
+	my_soft();
+}
+
+function my_soft() {
+	var strss = '<div class="mod_hd clear"><a href="javascript:;" onclick="change_soft();" class="btn_change">换一换</a></div>';	
+	var data = soft_lists_go.slice(p*8,8*(p+1));
+	if(data.length == 0){
+		p = 0;
+		data = soft_lists_go.slice(p*8,8*(p+1));
+	}else{
+		p = p + 1;
+	}
+	
+	var strs = '';
+	
+	for(i = 0; i < data.length; i++) {
+		if(data[i][2].length > 4){
+			var softname = data[i][2].substring(0,3)+'...';
+		}else{
+			var softname = data[i][2];
+		}
+		window.AnzhiActivitys.registerDownloadObserver(parseInt(data[i][0]));
+		var json_datas = window.AnzhiActivitys.getDownloadStateForActivity(parseInt(data[i][0]));
+		var cmd = 'var soft_status=' + json_datas;
+		eval(cmd);
+		
+		if(soft_status == 1){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载中</a>';
+		}else if(soft_status == 2){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+		}else if(soft_status == 3){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+		}else if(soft_status == 4){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk(parseInt('+aid+'),'+data[i][0]+',"'+data[i][7]+'","'+data[i][2]+'",parseInt('+data[i][13]+'),"'+data[i][27]+'",0,0,'+data[i][27]+');" class="downlode">下载</a>';
+		}else if(soft_status == 5){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="installApp(parseInt('+data[i][0]+'),\''+data[i][7]+'\');" class="downlode">安装</a>';
+		}else if(soft_status == 6){
+			var my_soft = '<a id="'+data[i][0]+'" class="downlode" onclick="openApp(\''+data[i][7]+'\','+data[i][0]+');">打开</a>';
+		}else if(soft_status == 8){
+			var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">继续</a>';
+		}else if(soft_status == 9){
+			var my_soft = '<a value="校验中" id="'+data[i][0]+'" class="downlode">校验中</a>';
+		}else if(soft_status == 10){
+			var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+		}else if(soft_status == -1){
+			var soft_other_status = window.AnzhiActivitys.isInstalledApp(data[i][7],parseInt(data[i][13]));
+			if(soft_other_status == -2){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">下载</a>';
+			}else if(soft_other_status == -1){
+				var my_soft = '<a id="'+data[i][0]+'" onclick="download_apk('+aid+','+data[i][0]+',\''+data[i][7]+'\',\''+data[i][2]+'\','+data[i][13]+','+data[i][27]+',0,0,'+data[i][27]+');" class="downlode">更新</a>';
+			}else if(soft_other_status == 0){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode" onclick="openApp(\''+data[i][7]+'\','+data[i][0]+');">打开</a>';
+			}else if(soft_other_status == 1){
+				var my_soft = '<a id="'+data[i][0]+'" class="downlode">已下载</a>';
+			}
+		}		
+		strs += '<li><p class="soft-icon"><img src="'+data[i][1]+'"/></p><p class="soft-name"><a href="javascript:;">'+softname+'</a></p><p>'+my_soft+'</p></li>';
+	}
+	str = strss + strs;
+	$('.soft-list').html(str);
+}
+
+function change_soft(){
+	$('#my_softs').html('');
+	my_soft();
+}
+
+//下载软件
+function download_apk(activity_id,softid,pkgname,softname,versionCode,size,flag,noflux,firmware,status){
+	window.AnzhiActivitys.downloadForActivity(parseInt(aid),parseInt(softid),pkgname,softname,parseInt(versionCode),size,flag);
+	setTimeout(function(){download_go(softid,pkgname)},3000);		
+}
+
+function download_go(softid,pkgname){
+	$.ajax({
+		url: '/lottery/flyback/flyback_download.php',
+		data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+		type: 'get',
+		success: function(data){
+			if(data != 200){
+				$('#my_num').html(data);
+			}
+		}
+	});
+}
+
+function installApp(softid,pkgname){
+	if(!pkgname){
+		for(i=0;i < soft_lists_go.length;i++){
+			if(soft_lists_go[i][0] == softid){
+				pkgname = soft_lists_go[i][7];
+			}
+		}
+	}
+	window.AnzhiActivitys.installAppForActivity(softid);
+	//$.ajax({
+	//	url: '/lottery/coactivity_install.php',
+	//	data: 'softid='+softid+'&sid='+sid+'&package='+pkgname+'&aid='+aid,
+	//	type: 'get',
+	//	success: function(data){
+			
+	//	}
+	//});
+}
+
+//更新软件状态（正在下载）
+function onDownloadCreated(softid){
+	$('#'+softid+'').html("下载中");
+}
+
+function onDownloadStateChanged(softid,newState){
+	if(newState == 1){
+		$('#'+softid+'').html("下载中");
+	}else if(newState == 2){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 3){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 4){
+		$('#'+softid+'').html("重试");
+	}else if(newState == 5){
+		$('#'+softid+'').html("安装");
+		$('#'+softid+'').removeAttr("onclick");
+		$('#'+softid+'').bind('click',function(){
+			installApp(parseInt(softid));
+		});
+	}else if(newState == 6){
+		$('#'+softid+'').html("打开");
+		if(soft_lists_go[i][0] == softid){
+			$('#'+softid+'').bind('click',function(){
+				openApp(soft_lists_go[i][7],softid);
+			});
+		}
+	}else if(newState == 8){
+		$('#'+softid+'').html("继续");
+	}else if(newState == 9){
+		$('#'+softid+'').html("检查中");
+	}
+}
+
+function openApp(pkg,softid){
+	the_soft = [softid];
+	window.AnzhiActivitys.openAppForActivity(pkg,the_soft);
+	//$.ajax({
+	//	url: '/lottery/coactivity_open.php',
+	//	data: 'softid='+softid+'&sid='+sid+'&package='+pkg+'&aid='+aid,
+	//	type: 'get',
+	//	success: function(data){
+			
+	//	}
+	//});
+}
+</script>
+<section>
+    <div class="banner">
+        <img src="<!--{$out.static_url}-->/flyback/banner.jpg"/>
+        <img src="<!--{$out.static_url}-->/flyback/rule.jpg"/>
+    </div>
+    <div class="notice">
+        <div class="notice_icon"><img src="<!--{$out.static_url}-->/flyback/notice_icon.png"/></div>
+        <div class="notice_list">
+            <marquee scrollamount="2" scrolldelay="90" direction="left">
+				<!--{if $out.prize != ''}-->                
+                 <!--{foreach from=$out.prize item=v key=k}-->
+                    <span>恭喜用户<!--{$v.username}-->，回归后好运临门，获得<!--{$v.prizename}-->；</span>
+                 <!--{/foreach}-->
+				 <!--{else}-->
+				 <span>活动已开启，现在回归吧！100%领取回归大礼！</span>
+				 <!--{/if}-->
+            </marquee>
+        </div>
+    </div>
+    <div class="main">
+        <div class="mod">
+            <div class="login">
+				<!--{if $out['is_login'] != 1}-->
+				<ul>
+                    <li>回归一定要先登录哦！</li>
+                </ul>
+				<div class="btn_log"><a href="<!--{$out.login_url}-->">登录</a> </div>
+				<!--{else}-->
+                <ul>
+                    <li>已登录账号为：<!--{$out.username}--></li>
+                    <div class="btn_log" id="my_info"><a href="
+					<!--{if $out['is_login'] != 1}-->
+						<!--{$out.login_url}-->
+					<!--{else}-->
+						javascript:void(0);
+					<!--{/if}-->" class="btn_myprize" onclick="
+					<!--{if $out['is_login'] == 1}-->
+						<!--{if $out['lottery_num'] == -1}-->
+						showOpenBox('#tip-box3');
+						<!--{else}-->
+						myInfo();
+						<!--{/if}-->
+					<!--{/if}-->">个人信息</a> 
+					</div>
+                </ul>
+				<!--{/if}-->
+            </div>
+        </div>
+        <div class="soft">
+            <div class="mod_hd clear">
+				<span class="hd_l"></span><span class="hd_m">回归奖品专区</span>
+				<span class="hd_r"></span>
+				<a href="
+				<!--{if $out['is_login'] != 1}-->
+					<!--{$out.login_url}-->
+				<!--{else}-->
+					javascript:void(0);
+				<!--{/if}-->" class="btn_myprize" onclick="
+				<!--{if $out['is_login'] == 1}-->
+					<!--{if $out['lottery_num'] == -1}-->
+					showOpenBox('#tip-box3');
+					<!--{else}-->
+					myAward(0);
+					<!--{/if}-->
+				<!--{/if}-->
+				">我的奖品</a>
+			</div>
+            <div class="lottery">
+                <div class="lottery_inner">
+                    <table cellspacing="10" cellpadding="0" id="gameTable">
+                        <tbody>
+                        <tr>
+                            <td width="30%"><img src="<!--{$out.static_url}-->/flyback/prize/prize1.png"/></td>
+                            <td width="30%"><img src="<!--{$out.static_url}-->/flyback/prize/prize2.png"/></td>
+                            <td width="30%"><img src="<!--{$out.static_url}-->/flyback/prize/prize3.png"/></td>
+                        </tr>
+                        <tr>
+                            <td width="30%"><img src="<!--{$out.static_url}-->/flyback/prize/prize4.png"/></td>
+                            <td width="30%"></td>
+                            <td width="30%"><img src="<!--{$out.static_url}-->/flyback/prize/prize5.png"/></td>
+                        <tr>
+                            <td width="30%"><img src="<!--{$out.static_url}-->/flyback/prize/prize6.png"/></td>
+                            <td width="30%"><img src="<!--{$out.static_url}-->/flyback/prize/prize7.png"/></td>
+                            <td width="30%"><img src="<!--{$out.static_url}-->/flyback/prize/prize8.png"/></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <!--抽奖按钮-->
+                    <p><a id="gameBtn" href="javascript:;"></a></p>
+                </div>
+            </div>
+			<ul class="soft-list clear" style="display:none">
+                <div class="mod_hd clear"><a href="#" class="btn_change">换一换</a></div>
+                
+            </ul>
+        </div>
+        <div class="mod mtop">
+            <div class="rule">
+                <div class="mod_hd clear"><span class="hd_l"></span><span class="hd_m">活动规则</span><span class="hd_r"></span></div>
+                <dl>
+                    <dt>A.</dt>
+                    <dd>回归资格指：在2015年7月1日-2015年9月30日有过充值，且在2015年10月1日起未登录过的安智账号，才能参与此活动。</dd>
+                </dl>
+                <dl>
+                    <dt>B.</dt>
+                    <dd>领奖前提：用户必须用满足回归资格的安智账号，在活动页面登录。</dd>
+                </dl>
+                <dl>
+                    <dt>C.</dt>
+                    <dd>同一个安智账号，只能领取一次奖品。</dd>
+                </dl>
+                <dl>
+                    <dt>D.</dt>
+                    <dd>只要满足回归资格，100%领取回归大礼，礼品种类随机，所有人都有机会冲击现金大奖。</dd>
+                </dl>
+                <dl>
+                    <dt>E.</dt>
+                    <dd>登录后，请点击个人信息，填写收奖联系方式，以便领奖后给您发放实物奖品。</dd>
+                </dl>
+                <dl>
+                    <dt>F.</dt>
+                    <dd>所有实物奖品将在活动结束后的15个工作日内发出；安智币发放在活动结束后的第二个工作日内完成。</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>活动最终解释权归安智所有</p>
+    </div>
+	<div id="az_spirit"></div>
+    <div id="body-bg" style="display: none;"></div>
+	<!--{include 'flyback/tip_box.html'}-->
+</section>
+
+<script type="text/javascript">
+    function getCookie(name)
+    {
+        var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+        if(arr=document.cookie.match(reg)){
+            return arr[2];
+		}
+        else{
+			return null;
+		} 
+    }
+
+    function GetSide(m, n) {
+        //初始化数组
+        var arr = [];
+        for (var i = 0; i < m; i++) {
+            arr.push([]);
+            for (var j = 0; j < n; j++) {
+                arr[i][j] = i * n + j;
+            }
+        }
+        //获取数组最外圈
+        var resultArr = [];
+        var tempX = 0,tempY = 0,direction = "Along",count = 0;
+        while (tempX >= 0 && tempX < n && tempY >= 0 && tempY < m && count < m * n) {
+            count++;
+            resultArr.push([tempY, tempX]);
+            if (direction == "Along") {
+                if (tempX == n - 1)
+                    tempY++;
+                else
+                    tempX++;
+                if (tempX == n - 1 && tempY == m - 1)
+                    direction = "Inverse"
+            }
+            else {
+                if (tempX == 0)
+                    tempY--;
+                else
+                    tempX--;
+                if (tempX == 0 && tempY == 0)
+                    break;
+            }
+        }
+        return resultArr;
+    }
+
+    var stopNum = '';
+    $(document).ready(function () {
+		var draw_num = parseInt("<!--{$out.lottery_num}-->");
+		if(draw_num <= 0){
+			$("#gameBtn").parent().addClass('waitGame');
+			$("#gameBtn").css('display','none');
+			<!--{if $out['lottery_num'] == -1}-->
+			$(".waitGame").click(function () {
+				showOpenBox('#tip-box3');
+				return;
+			})
+			<!--{/if}-->
+		}
+        var index = 1,           //当前亮区位置
+                prevIndex = 0,          //前一位置
+                Speed = 300,           //初始速度
+                Time,            //定义对象
+                arr = GetSide(3, 3),         //初始化数组
+                EndIndex = 0,           //决定在哪一格变慢
+                cycle = 0,           //转动圈数
+                EndCycle = 0,           //计算圈数
+                flag = false,           //结束转动标志
+                quick = 0,          //加速
+                gameTable = document.getElementById("gameTable");
+
+		
+        $("#gameBtn").click(function () {
+            //var my_num = 5;
+            //var stopNum = my_num+1;//点击产生随机数，最后将停在次数上
+            //document.cookie="stopNum="+stopNum;
+			
+			draw();
+            $(this).hide(); //开始后隐藏开始按钮
+			$(this).parent().addClass("waitGame");
+        });
+
+
+        function Star(num) {
+            gameTable.rows[arr[index][0]].cells[arr[index][1]].style.border = "";
+            gameTable.rows[arr[index][0]].cells[arr[index][1]].style.backgroundImage = "url('<!--{$out.static_url}-->/flyback/cj_light.png')";
+            gameTable.rows[arr[index][0]].cells[arr[index][1]].style.backgroundSize="100% 100%";
+            //1px solid pink
+            //"pink";
+            if (index > 0) {
+                prevIndex = index - 1;
+            }
+            else {
+                prevIndex = arr.length - 1;
+            }
+            gameTable.rows[arr[prevIndex][0]].cells[arr[prevIndex][1]].style.border = "";
+            gameTable.rows[arr[prevIndex][0]].cells[arr[prevIndex][1]].style.background = "";
+            //1px solid #ffdd99
+            //#fff9ed
+            index++;
+            quick++;
+
+            if (index >= arr.length) {
+                index = 0;
+                cycle++;
+            }
+
+            //跑马灯变速
+            if (flag == false) {
+                //走五格开始加速
+                if (quick == 5) {
+                    clearInterval(Time);
+                    Speed = 50;
+                    Time = setInterval(Star, Speed);
+                }
+                //跑N圈减速
+                if (cycle == EndCycle + 3 && index == EndIndex) {
+                    clearInterval(Time);
+                    Speed = 300;
+                    flag = true;        //触发结束
+                    Time = setInterval(Star, Speed);
+                }
+            }
+			
+            var stopNums = getCookie('stopNum');
+            if (flag == true && (index == stopNums - 1||(index==0&&stopNums==9))) {
+                quick = 0;
+                clearInterval(Time);
+                //$("#gameContent p").removeClass("waitGame");
+                //$("#gameBtn").show(); //停止后显示开始按钮
+				if(stopNums == 6){
+					var softname = decodeURIComponent(getCookie('softname'));
+					var gift_num = getCookie('gift_number');
+					if(gift_num.length>0){
+						$('#tip-box7 .my_prize_list').html('<li>恭喜您获得'+softname+'礼包一份</li><li>礼包码：'+gift_num+'</li>');
+					}else{
+						$('#tip-box7 .my_prize_list').html('<li>抱歉，礼包已发放完毕</li>');
+					}
+					showOpenBox('#tip-box7');
+				}else{
+					var pid = getCookie('pid');
+					var pid_arr = new Array();
+					pid_arr[1] = '800元京东卡';
+					pid_arr[2] = '500元京东卡';
+					pid_arr[3] = '300京东卡';
+					pid_arr[4] = '100元充值卡';
+					pid_arr[5] = '100安智币';
+					pid_arr[6] = '50安智币';
+					pid_arr[7] = '30安智币';
+					if(pid!=5&&pid!=6&&pid!=7){
+						$('#tip-box .my_prize_list').html('<li>恭喜获得:'+pid_arr[pid]+'一张</li>');
+						getMyInfo(2,0);
+						showOpenBox('#tip-box');
+					}else{
+						$('#tip-box6 .my_prize_list').html('<li>恭喜您获得'+pid_arr[pid]+'</li>');
+						showOpenBox('#tip-box6');
+						
+					}
+					
+				}
+                
+            }
+
+        }
+		//转盘抽奖
+		var user_game = '';
+		function draw(){				
+			all_package ='';
+			$.ajax({                			
+				url: '/lottery/flyback/flyback_lottery.php',
+				data: 'type=draw&sid='+sid+'&aid='+aid+'&user_game='+all_package,
+				type: 'post',
+				dataType: "json",
+				success: function(data){
+					var award_level = '';
+					var id_arr = new Array();
+					id_arr[1] = 1;
+					id_arr[2] = 2;
+					id_arr[3] = 3;
+					id_arr[4] = 8;
+					id_arr[5] = 4;
+					id_arr[6] = 7;
+					id_arr[7] = 6;
+					id_arr[8] = 5;
+					//data.lottery_type=1
+					//data.pid = 4;
+					if(data !=100||data != 2001||data != 500){
+						cycle = 0;
+						flag = false;
+						EndIndex = Math.floor(Math.random() * 8);
+						EndCycle = 1;
+						Time = setInterval(Star, Speed);
+					}
+					
+					if(data==100){
+						$("#tip-box9 .tip_prompt").html('<p>网络忙，请稍候重试！</p>');
+						showOpenBox('#tip-box9');
+					}else if(data==2001){
+						$("#tip-box9 .tip_prompt").html('<p>您登陆状态已退出，请登录后再来尝试，谢谢！</p>');
+						showOpenBox('#tip-box9');
+					}else if(data==500){
+						showOpenBox('#tip-box3');
+					}else if(data.lottery_type==1){ //实体
+						stopNum = id_arr[data.pid]+1;
+						document.cookie="stopNum="+stopNum;
+						document.cookie="pid="+data.pid;
+					}else{ //礼包	
+						document.cookie="stopNum=6";
+						if(data.gift_number){
+							softname = data.softname;
+							gift_number = data.gift_number;
+						}else{
+							softname = "";
+							gift_number = "";
+						}
+						document.cookie="softname="+encodeURIComponent(softname);
+						document.cookie="gift_number="+gift_number;
+					} 
+				}
+			});                
+		}
+
+    })
+		
+	
+</script>
+</body>
+</html>

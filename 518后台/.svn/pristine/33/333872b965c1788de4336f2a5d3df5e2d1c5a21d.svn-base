@@ -1,0 +1,232 @@
+<script>
+    function submit_check() {
+        var ret = true;
+        // 存储金额的数组
+        var valueArr = new Array();
+        var numberArr = new Array();
+        
+        // 检查单张发票金额是否为空
+        var invoiceValue = $("input[name^='invoiceValue_']");
+        invoiceValue.each(function() {
+            var value = $.trim($(this).val());
+            valueArr.push(value);
+            if (value == '') {
+                alert("金额不能为空！");
+                $(this).focus();
+                ret = false;
+                return false;
+            }
+        });
+        if (!ret)
+            return false;
+        // 检查开票时间是否为空
+        var addTime = $("input[name^='addTime_']");
+        addTime.each(function() {
+            var value = $.trim($(this).val());
+            if (value == '') {
+                alert("开票时间不能为空！");
+                $(this).focus();
+                ret = false;
+                return false;
+            }
+        });
+        // 检查发票号是否为空
+        var invoiceNumber = $("textarea[name^='invoiceNumber_']");
+        invoiceNumber.each(function() {
+            var value = $.trim($(this).val());
+            numberArr.push(value);
+            if (value == '') {
+                alert("发票号不能为空！");
+                $(this).focus();
+                ret = false;
+                return false;
+            }
+        });
+        // 计算发票总额
+        var amount = get_invoice_amount(valueArr, numberArr);
+        // 检查发票加起来的金额是否大于剩余发票金额
+        var contract_id = $.trim($("#contract_id").val());
+        var month = $.trim($("#month").val());
+        var ret = check_invoice_amount(amount, contract_id, month);
+        return ret;
+    }
+    
+    // 增加发票块
+    function add_invoice_div() {
+        div_number++;
+        var html = generate_invoice_div();
+        $("#invoice_div").append(html);
+        // 如果div数量大于1，则每个div都有个删除按钮
+        if (div_number > 1) {
+            var span = $("span[name='buttons']");
+            span.each(function() {
+                var delButton = $(this).children("input[name='delButton']");
+                if (delButton.length <= 0) {
+                    var div_count = $(this).attr('count');
+                    var str = "<input type='button' name='delButton' value='删除' onclick='del_invoice_div(" + div_count + ")'/>";
+                    $(this).append(str);
+                } else {
+                    // do nothing
+                }
+            });
+        }
+    }
+    
+    // 删除发票块
+    function del_invoice_div(div_count) {
+        div_number--;
+        var str = "#invoice_div_" + div_count;
+        $(str).remove();
+        // 判断添加按钮存不存在，不存在则在最后一个div块里添加
+        if ($("#add_button").length > 0) {
+            // do nothing
+        } else {
+            var span = $("span[name='buttons']:last");
+            span.append('<input id="add_button" type="button" value="新增" onclick="add_invoice_div()"/>');
+        }
+        // 如果div数小于等于1，则删除唯一的删除按钮
+        if (div_number <= 1) {
+            $("input[name='delButton']").remove();
+        }
+    }
+    
+    // 将发票块里的金额统计出来
+    function get_invoice_amount(valueArr, numberArr) {
+        if (valueArr.length != numberArr.length)
+            return false;
+        var length = valueArr.length;
+        var amount = 0;
+        for (var i = 0; i < length; i++) {
+            var value = valueArr[i];
+            var actualLen = 0;
+            newnumberArr = numberArr[i].split("\n");// 奇葩，为什么在textarea里换行是\n，而post接收到的数据又是\r\n？
+            // 计算有效发票号的数量（即号码不为空的发票数）
+            for (var j = 0; j < newnumberArr.length; j++) {
+                if ($.trim(newnumberArr[j]) != '') {
+                    actualLen++;
+                }
+            }
+            amount += value * actualLen;
+        }
+        return amount;
+    }
+    
+    function check_invoice_amount(amount, contract_id, month) {
+        var param = {
+            input : amount,
+            contract_id : contract_id,
+            month : month,
+        };
+        var ret = true;
+        $.ajax({
+            url : "__URL__/check_invoice_input",
+            type : 'post',
+            async : false,
+            data : param,
+            secureuri : false,
+            dataType : 'json',
+            success : function (data) {
+                if (data.status != 0) {
+                    alert("发票总金额超出剩余发票数");
+                    ret = false;
+                }
+            }
+        });
+        return ret;
+    }
+    
+    // 全局变量，记录发票块数，初始值为1
+    var div_count = 1;
+    var div_number = 1;
+    // 生成发票块div的html
+    function generate_invoice_div() {
+        div_count++;
+        // romve掉以前的新增按钮
+        $("#add_button").remove();
+        var html = '';
+        html += '<div name="invoice_div_' + div_count + '" id="invoice_div_' + div_count + '">';
+        // 单张发票金额
+        html += '<div class="form_list_one"><label><font color="red">*</font>单张发票金额：</label>';
+        html += '<input type="text" class="input_text widen" name="invoiceValue_' + div_count + '" id="invoiceValue_' + div_count + '"/>';
+        html += '<span id="faceValueHint_' + div_count + '"></span>';
+        html += '</div><div class="clear"></div>';
+        // 开票日期
+        html += '<div class="form_list_one"><label><font color="red">*</font>开票日期：</label>';
+        html += '<input type="text" class="Wdate input_text widen" name="addTime_' + div_count + '" id="addTime_' + div_count + '" onClick="WdatePicker({dateFmt:' + "'yyyy-MM-dd HH:mm:ss'" + '})"/>';
+        html += '<span id="addTimeHint_' + div_count + '"></span>';
+        html += '</div><div class="clear"></div>';
+        // 发票号
+        html += '<div class="form_list_one"><label><font color="red">*</font>发票号：</label>';
+        html += '<textarea style="width:200px" name="invoiceNumber_'+ div_count + '" id="invoiceNumber_' + div_count + '"></textarea>';
+        html += '<span id="invoiceNumberHint_' + div_count + '"></span>';
+        html += '</div>';
+        // buttons
+        html += '<span name="buttons" count="' + div_count + '">';
+        html += '<input name="delButton" type="button" value="删除" onclick="del_invoice_div(' + div_count + ')"/>';
+        html += '<input id="add_button" type="button" value="新增" onclick="add_invoice_div()"/>';
+        html += '</span>';
+        html += '<div class="clear"></div>';
+        html += '</div>';
+        return html;
+    }
+    
+</script>
+
+<div>
+    <form action="__URL__/add_invoice" method="post">
+        <div name="invoice_div" id="invoice_div">
+            <div name="invoice_div_1" id="invoice_div_1">
+                <div class="form_list_one">
+                    <label>协议编号：</label>
+                    <label style="text-align:left;">{$record.framework_number}</label>
+                </div>
+                <div class="clear"></div>
+                <div class="form_list_one">
+                    <label>客户名称：</label>
+                    <label style="text-align:left;">{$record.client_name}</label>
+                </div>
+                <div class="clear"></div>
+                <div class="form_list_one">
+                    <label>票据类型：</label>
+                    <input type="radio" name="invoice_type" id="invoice_type" value="1" checked="checked"/>发票<span>&nbsp;&nbsp;&nbsp;&nbsp;</span><input type="radio" name="invoice_type" id="invoice_type" value="2"/>票据
+                </div>
+                <div class="clear"></div>
+                <div class="form_list_one">
+                    <label><font color="red">*</font>单张发票/票据金额：</label>
+                    <input type="text" class="input_text widen" name="invoiceValue_1" id="invoiceValue_1"/>
+                    <span id="faceValueHint_1"></span>
+                </div>
+                <div class="clear"></div>
+                <div class="form_list_one">
+                    <label><font color="red">*</font>开票日期：</label>
+                    <input type="text" class="Wdate input_text widen" name="addTime_1" id="addTime_1" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+                    <span id="addTimeHint"></span>
+                </div>
+                <div class="clear"></div>
+                <div class="form_list_one">
+                    <label><font color="red">*</font>发票/票据号：</label>
+                    <textarea style="width:200px" name="invoiceNumber_1" id="invoiceNumber_1"></textarea>
+                    <span id="invoiceNumberHint_1"></span>
+                </div>
+                <span name="buttons" count="1">
+                    <input id="add_button" type="button" value="新增" onclick="add_invoice_div()"/>
+                </span>
+                <div class="clear"></div>
+            </div>
+        </div>
+        <div>
+            <hr style="border-top:1px dashed #cccccc; height:1px">
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>备注：</label>
+            <textarea style="width:200px" name="remark" id="remark"></textarea>
+        </div>
+        <div class="clear"></div>
+        <input type="hidden" name="framework_id" id="framework_id" value="{$record.id}">
+        <div class="form_btns_box">
+            <input type="submit" value="确定" onclick="return submit_check();" style="margin-left:155px"/>
+            <input type="button" onclick="tb_remove()" value="取消"/>
+        </div>
+    </form>
+</div>

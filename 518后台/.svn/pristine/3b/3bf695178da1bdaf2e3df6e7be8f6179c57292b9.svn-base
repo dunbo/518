@@ -1,0 +1,254 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<!--使用灵活运营的推荐内容必需添加此js-->
+<script type="text/javascript" src="/Public/js/content_type.js?1"></script>
+<script type="text/javascript">
+var options, a;
+jQuery(function(){
+	options = { 
+		serviceUrl:'/index.php/Public/showSoft',
+		minChars:2,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+			$('#package_ext').val(data)
+			toggle_tr();
+		}
+	};
+  a = $('#search_key').autocomplete(options);
+});
+function checkPost()
+{
+	if($('#from_resource').attr('checked') == 'checked' && $('#resource_id option:selected').val()==0){
+        alert('资源库没有匹配数据');
+        return false;
+    }
+	if ($('#start_at').val() == '') {
+		alert('请填写开始时间');
+		return false;
+	}
+	if ($('#end_at').val() == '') {
+		alert('请填写结束时间');
+		return false;
+	}
+	
+	if (Date.parse($('#start_at').val()) > Date.parse($('#end_at').val()) ) {
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+	
+	var enable = true;
+	// $.ajax({
+ //       type: "GET",
+	//    url: "/index.php/Sj/ExtentV2/index/act/checkCandidate/",
+	//    data: "package="+$('#package').val(),
+	//    async:false,
+	//    success: function(d){
+	// 	     if (d == 1) {
+	// 			alert('包名已经存在');
+	// 			enable = false;
+	// 		}
+	//    }
+	// });
+	return enable;
+}
+
+$(function() {
+	href_1 = generate_content_type_href('content_type_div_one','1,2,3,4,5,6,7,9,10','','');
+	$("#content_type_a").attr("href", href_1);
+	href_2 = generate_content_type_href('content_type_div_two','1,2,3,4,5,6,7,9,10','','');
+	$("#content_type_b").attr("href", href_2);
+})
+
+
+function toggle_image() {
+	var is_dev = $("input[name='is_dev']:checked").val()
+	if( is_dev == 1) {
+		$("#dev_img").hide()
+		href_1 = generate_content_type_href('content_type_div_one','9','','');
+		$("#content_type_a").attr("href", href_1);
+	}else {
+		$("#dev_img").show()
+		href_1 = generate_content_type_href('content_type_div_one','1,2,3,4,5,6,7,9,10','','');
+		$("#content_type_a").attr("href", href_1);
+	}
+}
+function toggle_tr(){
+    if($('#from_resource').attr('checked') == 'checked'){
+        $("#dev_img").css('display','none'); //隐藏上传图片按钮
+        $("tr[id^=resource_tr_]").css('display','none');
+        $("#content_type_tr").css('display','');
+        var package_ext = $.trim($('#package_ext').val());
+        $.ajax({
+            url: '__APP__/Sj/FlexibleExtent/pub_get_package/resource_type/24/package_643/'+package_ext,
+            type: 'get',
+            dataType: 'json',
+            success: function(data){
+                if(data.code==1){
+                    var str = "";
+                    for(i=0;i<data.info.length;i++){
+                        if(data.info[i]['content_type']==1){
+                            str += "<option value='"+data.info[i]['id']+"'>软件</option>";
+                        }else if(data.info[i]['content_type']==2){
+                            str += "<option value='"+data.info[i]['id']+"'>活动</option>";
+                        }else if(data.info[i]['content_type']==3){
+                            str += "<option value='"+data.info[i]['id']+"'>专题</option>";
+                        }else if(data.info[i]['content_type']==4){
+                            str += "<option value='"+data.info[i]['id']+"'>页面</option>";
+                        }else if(data.info[i]['content_type']==5){
+                            str += "<option value='"+data.info[i]['id']+"'>网页</option>";
+                        }else if(data.info[i]['content_type']==6){
+                            str += "<option value='"+data.info[i]['id']+"'>礼包</option>";
+                        }else if(data.info[i]['content_type']==7){
+                            str += "<option value='"+data.info[i]['id']+"'>攻略</option>";
+                        }else if(data.info[i]['content_type']==9){
+                            str += "<option value='"+data.info[i]['id']+"'>应用内览</option>";
+                        }
+                    }
+                    $('#resource_id').html(str);
+                }else{
+                    $('#resource_id').html("<option value='0'>无可用内容类型</option>");
+                }
+            }
+        });
+    }else{
+    	$('#resource_id').html("<option value='0'>无可用内容类型</option>");
+        $("#content_type_tr").css('display','none');
+        $("tr[id^=resource_tr_]").css('display','');
+        if($('#is_dev').attr('checked') == 'checked'){
+            $("#dev_img").css('display','none');
+        }else{
+            $("#dev_img").css('display','');
+        }
+    }
+}
+function show_tag( a ){
+	if(a == 1) {
+		$(".tag_block").show();
+	}else {
+		$(".tag_block").hide();
+	}
+}
+</script>
+<style>
+.sub_tr {
+height: 35px;
+text-align: left;
+}
+</style>
+<FORM method="POST" action="/index.php/Sj/ExtentV2/add_candidate_soft" onsubmit="return checkPost()" enctype="multipart/form-data">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<tr class="sub_tr">
+		<td>软件包名</td>
+		<td><input type="text" name="search_key" id="search_key" onchange='toggle_tr()' /><input  id="package_ext" name='package_ext' type='hidden' /></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>优先级</td>
+		<td><input name='order' type='text'/></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>开始时间</td>
+		<td><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 154px;">
+		<input id="start_at" name="start_at"
+			style="border: 0px none black; width: 130px;" value=""
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 00:00:00",el:"start_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span></td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>结束时间</td>
+		<td><span
+			id="WebCalendar3"
+			style="border: 1px solid #7F9DB9; align: absmiddle; cursor: hand; display: inline-block; width: 154px; padding: 1px">
+		<input id="end_at" name="end_at"
+			style="cursor: hand; width: 130px; border: none 0px black;"
+			value="" size="15" type="text"><img
+			src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d 23:59:59",el:"end_at",dateFmt:"yyyy-MM-dd HH:mm:ss"})' 
+			style="margin: 1px; cursor: hand;" width="16px" align="absmiddle"
+			height="15px"></span></td>
+		<td></td>
+	</tr>	
+		<tr class="sub_tr" id='resource_tr_1'>
+		<td>内容标题</td>
+		<td>
+			<input type="text" name="content_title" value="" />
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>使用资源库素材</td>
+		<td>
+			<input name="resource_type" id="resource_type" type=hidden value="24" >
+			<input name="from_resource" id="from_resource" type="checkbox" value="1" onclick="toggle_tr();">单软件(列表单图)资源库
+		</td>
+		<td>勾选则根据包名获取内容类型</td>
+	</tr>
+	<tr class="sub_tr" id='content_type_tr' style='display:none' >
+        <td>内容类型</td>
+        <td><select id='resource_id' name='resource_id'>
+        	<option value='0'>无可用内容类型</option>
+        </select></td>
+        <td></td>
+    </tr>
+	<tr class="sub_tr" id='resource_tr_2'>
+		<td>素材来源</td>
+		<td>
+			<input name="is_dev" id="is_dev" type="checkbox" value="1" onclick="toggle_image();">开发者
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr" id="dev_img">
+		<td>图片</td>
+			<td><input name="img" type="file"></td>
+			<td>限制上传464*274的JPG/PNG/GIF图片
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr" id='resource_tr_3'>
+		<td style="width: 15%">推荐内容</td>
+		<td>
+			<a id="content_type_a" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+			<div id="content_type_div_one"></div>
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>是否展示标签</td>
+		<td>
+			<input name='is_tag' type='radio' checked="checked" value="1" onclick="show_tag(1)" />展示&nbsp;&nbsp;
+			<input name='is_tag' type='radio' value="0" onclick="show_tag(0)" />不展示
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr tag_block">
+		<td>标签标题</td>
+		<td>
+			<input type="text" name="tag_title" value="" />
+		</td>
+		<td></td>
+	</tr>
+	<tr class="sub_tr tag_block">
+		<td style="width: 15%">推荐内容</td>
+		<td>
+			<a id="content_type_b" href="javascript:void(0)" class="thickbox"><font color="blue">选择推荐内容</font></a>
+			<div id="content_type_div_two"></div>
+		</td>
+		<td></td>
+	</tr>
+	
+	<tr class="sub_tr">
+		<td colspan="2"> <input type='hidden' name="extent_id" value='<?php echo $extent_id?>'/><input type='submit' value="&nbsp;&nbsp;提交&nbsp;&nbsp;"/><input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;"></td>
+	</tr>
+</table>
+</FORM>	

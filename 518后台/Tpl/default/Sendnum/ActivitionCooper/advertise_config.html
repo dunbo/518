@@ -1,0 +1,176 @@
+<include file="../../Public/new_header" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/zoom/zoom.css" />
+<script type="text/javascript" src="/Public/zoom/zoom.js"></script> 
+<div class="main" >
+<div class="content">
+
+
+<div style="float:left;margin-bottom:10px;width:100%">
+	投放日期设置<span style="padding-left:20px;color:gray">说明：设置CP可投放广告的日期范围</span>
+</div>
+<div style="float:left;margin-bottom:10px;border:1px solid gray;width:100%">
+	当前设置
+	<span style="padding-left:20px;">
+		申请日之后&nbsp;<a href="javascript:void(0)" onclick="config_day(1,{$ad_day.start_day})">{$ad_day.start_day}</a>&nbsp;——&nbsp;<a href="javascript:void(0)" onclick="config_day(2,{$ad_day.end_day})">{$ad_day.end_day}</a>&nbsp;天以内，遇周五则延后一天
+	</span><br><br>
+	<span style="padding-left:72px;color:gray">
+		起始日需≥1，截止日需≤365，起始日需小于截止日
+	</span>
+</div>
+<div style="float:left;margin-bottom:10px;width:100%">
+	投放广告数设置
+	<span style="padding-left:20px;color:gray">
+		说明：设置某广告位可投放的换量广告数量及配置各位置的展现示意图
+	</span><br>
+	<span style="padding-left:108px;color:gray">
+		示意图格式限jpg和png，大小1M以内，尺寸建议480*320
+	</span>
+
+
+</div>
+<form action="__URL__/save_ad_info" method="post" name="fml" enctype="multipart/form-data"> 
+<input type="hidden" id="ad_id" name="ad_id">
+<div style="float:left;margin-top:5px;width:100%">
+	<table style="width:100%" border="0" cellpadding="0" cellspacing="0" class="table_list">
+	  <tr>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe" > <font style="color:#000; font-weight:bold">刊例名称</font></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">广告编号</font></td>
+		<td align='center' width="10%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">广告位名称</font></td>
+		<td align='center' width="6%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">换量广告数</font></td>
+		<td align='center' width="14%" height="30" bgcolor="#e3e2fe"><font style="color:#000; font-weight:bold">示意图</font></td>
+
+	  </tr>
+	  <volist name="ad_info" id ="vo">
+		<tr>
+			<td>{$vo.rate_card_name}</td>
+			<td>{$vo.advertising_code}</td>
+			<td>{$vo.advertising_name}</td>
+			<td><a href="javascript:void(0)" onclick="edit_num({$vo.cp_ad_num},{$vo.id})">{$vo.cp_ad_num}</a></td>
+			<td>
+			<if condition="$vo.cp_ad_demo eq ''">
+				<font id="upload_b_{$vo.id}" color="#174b73">上传</font><input type="file" style ="margin-left:-30px;height:24px; filter:alpha(opacity:0);opacity: 0;width:30px" name="ad_img_{$vo.id}" id="ad_img_{$vo.id}" size="28" onchange="upload_img({$vo.id})"/>
+			<else />
+				<a href="javascript:void(0)" zoomfile="<?php echo IMGATT_HOST;?>{$vo.cp_ad_demo}" file="<?php echo IMGATT_HOST;?>{$vo.cp_ad_demo}" onclick="_zoom(this,'<?php echo IMGATT_HOST;?>{$vo.cp_ad_demo}')">查看</a>							
+				&nbsp;
+				<font id="upload_b_{$vo.id}" color="#174b73">上传</font><input type="file" style ="margin-left:-30px;height:24px; filter:alpha(opacity:0);opacity: 0;width:30px" name="ad_img_{$vo.id}" id="ad_img_{$vo.id}" size="28" onchange="upload_img({$vo.id})"/>&nbsp;
+				<a href="javascript:void(0)" onclick="del_img({$vo.id})">删除</a>
+			</if>
+			</td>
+		</tr>
+	  </volist>
+	  
+	</table>
+</div>
+</div>
+<div style="clear:both"></div>
+<div>{$page}</div>
+
+</div>
+</div>
+
+<div style="display:none" id="upload_div">
+	<div style="padding:10px">		
+		确定上传吗
+	</div>
+	<div style="float:left;margin-top:10px"><input type="button" value="确定"  class="search_btn" onclick="window.fml.submit()"></div>
+	<div style="float:left;margin-left:20px;margin-top:10px"><input type="button" value="取消"  class="search_btn" onclick="$.zxxbox.hide();"></div>
+</div>
+<div style="display:none" id="config_day_div">
+	<div style="padding:10px">
+		<input type="text" id="day" class="search_item_text" style="width:262px"><br>
+		<input type="hidden" id="day_type">
+		<span style="color:red">起始日需≥1，截止日需≤365，起始日需小于截止日</span><br>
+		
+	</div>
+	<div>
+	<div style="float:left;;margin-left:37px;margin-top:10px"><input type="button" value="确定"  class="search_btn" onclick="save_day()"></div>
+	<div style="float:left;margin-left:20px;margin-top:10px"><input type="button" value="取消"  class="search_btn" onclick="$.zxxbox.hide();"></div>
+	</div>
+</div>
+
+<div style="display:none" id="config_ad_num">
+	<div style="padding:10px">
+		<input type="text" id="ad_num" class="search_item_text" style="width:262px"><br>
+		
+		<span style="color:red" id="num_error"></span><br>
+		
+	</div>
+	<div>
+	<div style="float:left;;margin-left:37px;margin-top:10px"><input type="button" value="确定"  class="search_btn" onclick="save_num()"></div>
+	<div style="float:left;margin-left:20px;margin-top:10px"><input type="button" value="取消"  class="search_btn" onclick="$.zxxbox.hide();"></div>
+	</div>
+</div>
+ <div id="append_parent"></div>
+<script type="text/javascript">
+	function upload_img(id){
+		$("#ad_id").val(id);
+		$("#upload_div").zxxbox();
+	}
+	
+	function config_day(type,now_day){
+		$("#day").val(now_day);
+		$("#day_type").val(type);
+		$("#config_day_div").zxxbox();
+	}
+	
+	function save_day(){
+		var day = $("#day").val();
+		var day_type = $("#day_type").val();
+		$.ajax({
+		   type: "POST",
+		   url: "__URL__/set_ad_day",
+		   data: "day="+day+"&day_type="+day_type,
+		   dataType:"json",
+		   success: function(data){
+			 alert(data.msg);
+			 if(data.code == 0){
+				window.location.href = "__URL__/advertise_config";
+			 }
+			 
+		   }
+		});
+	}
+	
+	function edit_num(num,id){
+		$("#ad_num").val(num);
+		$("#ad_id").val(id);
+		$("#num_error").html('');
+		$("#config_ad_num").zxxbox();
+	}
+	
+	function save_num(){
+		var num = $("#ad_num").val();
+		var ad_id = $("#ad_id").val();
+		if(num==''||!/^\d+$/.test(num))    
+		{    
+			$("#num_error").html('需为≥0的整数，请重新输入');
+			return false;
+		} 
+		$.ajax({
+		   type: "POST",
+		   url: "__URL__/save_ad_info",
+		   data: "ad_id="+ad_id+"&num="+num,
+		   dataType:"json",
+		   success: function(data){
+			 $("#num_error").html(data.msg);
+			 if(data.code == 0){
+				window.location.href = "__URL__/advertise_config";
+			 }
+			 
+		   }
+		});
+	}
+	
+	function del_img(id){
+		if(confirm("确认删除示意图吗")){
+			window.location.href = "__URL__/del_img/id/"+id;
+		}else{
+			return false;
+		}
+	}
+</script>

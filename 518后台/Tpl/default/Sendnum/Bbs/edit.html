@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style type="text/css">
+body,td,th {
+	font-size: 12px;
+}
+</style>
+	<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+        <script type="text/javascript">  
+        function save(){
+            if($("#bbshdname").val().length>20)
+            {
+                alert('活动名称太长了');
+                return;
+            }
+
+            if($("#bbshdname").val().length==0)
+            {
+                alert('活动名称不能为空');
+                return;
+            }
+
+            if($("#hdurl").val().length==0)
+            {
+                alert('活动URL不能为空');
+                return;
+            }
+
+	    var tomatch= /http:\/\/[A-Za-z0-9\.-]{3,}\.[A-Za-z]{3}/
+            if (!tomatch.test($("#hdurl").val())){
+                alert('活动URL格式错误');
+                return;
+            }
+
+            if($("#fengtime").val().length==0)
+            {
+                alert('活动封贴时间不能为空');
+                return;
+            }
+
+            if($("#closetime").val().length==0)
+            {
+                alert('活动关闭时间不能为空');
+                return;
+            }
+
+            var param = {
+                hh_id: $("#hh_id").val(),
+                bbshdname: $("#bbshdname").val(),
+                bbsbeizhu : $("#bbsbeizhu").val(),
+                fengtime : $("#fengtime").val(),
+                closetime : $("#closetime").val(),
+                hdurl: $("#hdurl").val()
+	    };
+            $.ajax({
+                url:'__URL__/edit',
+                type:'POST',
+                data:param,
+                dataType:'json',
+                success:function(data){
+                    if(data==2)
+                    {
+                        alert('URL地址只能是论坛活动地址');
+                    }else if(data ==1)
+                    {
+                        location.href ="/index.php/Sendnum/Bbs/index";
+                    }else if(data ==4)
+                    {
+                        alert('活动封贴时间不能大于活动关闭时间');
+                    }else if(data==5)
+                    {
+                        alert('该活动已禁用，不允许编辑');
+                        location.href ="/index.php/Sendnum/Bbs/index";
+                    }else if(data ==7)
+                    {
+                        alert('活动关闭时间不能小于当前时间');
+                    }else if(data ==6)
+                    {
+                        alert('活动封贴时间不能小于当前时间');
+                    }else if(data ==3)
+                    {
+                        alert('该地址已经添加过');
+                    }
+                }
+            });
+        };
+    </script>
+</head>
+ 
+<body>
+<div style="width:45; margin-top:4px">
+	 <form id="form1" name="form1" method="post" action="__URL__/add/">
+  <table width="99%" height="63" border="0" align="center" cellpadding="4" cellspacing="1"  bgcolor="#333333">
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">活动名称:</td>
+         <td align="left" bgcolor="#FFFFFF">
+             <input name="bbshdname" type="text" id="bbshdname" size="40" value="{$list.name}" />
+             <input name="hh_id" type="hidden" id="hh_id" size="40" value="{$id}" />
+        </td>
+    </tr>
+        <tr align="center">
+         <td width="20%" size="20" height="20" align="right" bgcolor="#FFFFFF"></td>
+         <td align="left" bgcolor="#FFFFFF">
+             <font color="red">*，字长不能大于20，不分中英文</font>
+        </td>
+    </tr>
+    <tr align="center">
+         <td width="12%" height="20" align="right" bgcolor="#FFFFFF">活动URL:</td>
+         <td align="left" bgcolor="#FFFFFF">
+           <input name="hdurl" type="text" id="hdurl" size="40" value="{$list.url}"/><font color="red">*</font>
+        </td>
+    </tr>
+    
+    <tr>
+        <td height="20" align="right" bgcolor="#FFFFFF">活动封贴时间:</td>
+        <td bgcolor="#FFFFFF"><input id="fengtime" name="fengtime" type="text" value="{$list.fengtime}" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"><font color="red">*</font></td>
+   </tr>
+   <tr>
+        <td height="20" align="right" bgcolor="#FFFFFF">活动关闭时间:</td>
+        <td bgcolor="#FFFFFF"><input id="closetime" name="closetime" type="text" value="{$list.closetime}" class="Wdate" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"><font color="red">*</font></td>
+
+   </tr>
+    <tr>
+        <td height="20" align="right" bgcolor="#FFFFFF">备注:</td>
+        <td align="left" bgcolor="#FFFFFF"> 
+            <textarea name="bbsbeizhu" id="bbsbeizhu" cols="30" rows="8">{$list.desc}</textarea>
+        </td>
+    </tr>
+   <tr>
+        <td height="20" colspan="2" align="center" bgcolor="#FFFFFF" ><input name="input" type="button" value="提交" onclick="save()"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="" type="reset" value="取消" onclick="tb_remove();"/></td>
+      </tr>
+</table>
+  
+  </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,331 @@
+
+<include file="../Public/header" /><body>
+<style type="text/css">
+.tb{ border-top:1px solid #DCDCDC;border-left:1px solid #DCDCDC;}
+.tb th,.tb td{border-right:1px solid #DCDCDC; padding:5px 10px; border-bottom:1px solid #DCDCDC;}
+.list a{border:1px solid #000;margin-right:20px;padding:5px;}
+.active {background:#cdd;font-weight:bold;}
+.verify {margin-right:10px; margin-left:10px; cursor:pointer;}
+#openbox{ text-align:left; width:400px; height:200px; padding:10px 8px; border:1px #0c0c0c solid; background:#FFFFFF; position:absolute; z-index:2; display:none;}
+#openbox #close{ position:absolute; top:8px; right:15px; cursor:pointer; font-size:14px;}
+#mark{ top:0; left:0; position:absolute; z-index:1; background:#000000; filter:alpha(opacity=50); opacity:0.5;}
+</style>
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link type="text/css" href="/Public/js/My97DatePicker/skin/WdatePicker.css" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script>
+window.onload = function(){
+	openWin = function(){
+		oDiv = document.getElementById('openbox');
+		if(oDiv){
+			oDiv.style.display = 'block';
+			oDiv.style.top = (viewHeight() - oDiv.offsetHeight)/2 + scrollY() + 'px';
+			oDiv.style.left = (viewWidth() - oDiv.offsetWidth)/2 + 'px';
+		}
+		oMark = document.createElement('div');
+		oMark.id = 'mark';
+		document.body.appendChild(oMark);
+		oMark.style.width = viewWidth() + 'px';
+		oMark.style.height = documentHeight() + 'px';
+		oMark.onclick = closefn;
+		closeLogin();
+		function closeLogin(){
+			var oClose = document.getElementById('close');
+			oClose.onclick = closefn; 		}
+		window.onresize = window.onscroll = function(){
+		oMark.style.width = viewWidth() + 'px';
+		oMark.style.height = documentHeight() + 'px';
+		oDiv = document.getElementById('openbox');
+			if(oDiv){
+				oDiv.style.top = (viewHeight() - oDiv.offsetHeight)/2 + scrollY() + 'px';
+				oDiv.style.left = (viewWidth() - oDiv.offsetWidth)/2 + 'px';
+			}
+		};
+	}
+	closefn = function(){
+		document.body.removeChild(oMark);
+		oDiv.style.display = 'none';
+	};
+
+	
+};
+function viewWidth(){
+	return document.documentElement.clientWidth;
+}
+function viewHeight(){
+	return document.documentElement.clientHeight;
+}
+function scrollY(){
+	return document.documentElement.scrollTop || document.body.scrollTop;
+}
+function documentHeight(){
+	return Math.max(document.documentElement.scrollHeight || document.body.scrollHeight,document.documentElement.clientHeight);
+}
+$(function() {
+	$("#cancel").click(function() {
+		var tab = "<?php echo $tab;?>";
+		if (tab) {
+			tab = '/tab/' + tab;	
+		}
+		location.href = "__URL__/<?php echo ACTION_NAME;?>" + tab;	
+	});
+
+	$(".checkAll").click(function() {
+		if ($(this).attr('checked') == 'checked') {
+			$("[type='checkbox']").attr("checked", true);	
+		} else {
+			$("[type='checkbox']").attr("checked", false);	
+		}
+		$("[type='checkbox'][disabled='disabled']").attr('checked', false);
+	});
+	$("#search").click(function() {
+		if ($("#edit_stm").val() != undefined) {
+			if (parseInt($("#edit_stm").val().replace(/-/g, '').replace(' ', '').replace(/:/g, ''))>parseInt($("#edit_etm").val().replace(/-/g, '').replace(' ', '').replace(/:/g, ''))) {
+				alert('开始时间不能大于结束时间!');	
+				return;
+			}	
+			if (($("#edit_stm").val() && !$("#edit_etm").val()) || (!$("#edit_stm").val() && $("#edit_etm").val()) ) {
+				alert('必须同时指定开始时间和结束时间!');	
+				return;
+			}	
+		} else {
+			if (parseInt($("#add_stm").val().replace(/-/g, '').replace(' ', '').replace(/:/g, ''))>parseInt($("#add_etm").val().replace(/-/g, '').replace(' ', '').replace(/:/g, ''))) {
+				alert('开始时间不能大于结束时间!');	
+				return;
+			}	
+			if (($("#add_stm").val() && !$("#add_etm").val()) || (!$("#add_stm").val() && $("#add_etm").val()) ) {
+				alert('必须同时指定开始时间和结束时间!');	
+				return;
+			}	
+		}
+		if (parseInt($("#downloadMin").val()) > parseInt($("#downloadMax").val())) {
+			alert('下载量起始值不能大于下载量结束值!');	
+			return;
+		}	
+		$("#searchform").submit();
+	});
+
+	$("#downloadOrder").click(function() {
+		$("#orderType").val("SS.total_downloaded");			
+		if ($(this).attr("val") == -1) {
+			$(this).attr("val", 1);  
+		} else {
+			$(this).attr("val", -1);  
+		}
+		$("#orderVal").val($(this).attr("val"));			
+		$("#searchform").submit();
+	});
+	$("#updatetmOrder").click(function() {
+		$("#orderType").val("SR.updatetm");			
+		if ($(this).attr("val") == -1) {
+			$(this).attr("val", 1);  
+		} else {
+			$(this).attr("val", -1);  
+		}
+		$("#orderVal").val($(this).attr("val"));			
+		$("#searchform").submit();
+	});
+	$("#datelineOrder").click(function() {
+		$("#orderType").val("SR.dateline");			
+		if ($(this).attr("val") == -1) {
+			$(this).attr("val", 1);  
+		} else {
+			$(this).attr("val", -1);  
+		}
+		$("#orderVal").val($(this).attr("val"));			
+		$("#searchform").submit();
+	});
+	$("#update_timeOrder").click(function() {
+		$("#orderType").val("SN.update_time");			
+		if ($(this).attr("val") == -1) {
+			$(this).attr("val", 1);  
+		} else {
+			$(this).attr("val", -1);  
+		}
+		$("#orderVal").val($(this).attr("val"));			
+		$("#searchform").submit();
+	});
+});
+function openw(){	
+	$("#open").zxxbox();
+}
+
+$(function() {
+	var	ids = '';
+	$("input[name='catid[]']").each(function(){
+		if (this.checked) {
+			ids+= $(this).val() + ',';
+		}
+		$('#cateid').val(ids);
+	});
+});
+
+function cid_selectAll(e) {	//全选类别
+	var chkobj =  document.getElementsByName("catid[]");
+	var len = chkobj.length;
+	var ids = '';
+	if($(e).attr('checked') == 'checked'){
+	   for(var i = 0; i < len; i++){
+			chkobj[i].checked = true;
+			ids+= chkobj[i].value+',';
+	   }
+	 $('#cateid').val(ids);
+	}
+	if($(e).attr('checked') != 'checked'){
+	   for(var a = 0; a <len; a++){
+		 chkobj[a].checked = false;
+	   }
+	   $('#cateid').val("");
+	}	
+}
+function refreshCatid() {
+	var	ids = '';
+	$("input[name='catid[]']").each(function(){
+		if (this.checked) {
+			ids+= $(this).val() + ',';
+		}
+		$('#cateid').val(ids);
+
+	});
+}
+function checkbox() {
+	var app = $("[name='app[]']");
+	var idArr = new Array();
+	app.each(function() {
+		if ($(this).attr("checked") == 'checked') {
+			idArr.push($(this).val());	
+		}	
+	});
+	if (idArr.length > 0) {
+		return idArr.join(',');
+	}
+	return false; 
+}
+
+function ajaxGet(url, softid) {
+	$.get(url, {}, function(data){
+		var softidArr = softid.split(',');
+		var len = softidArr.length;	
+		for(var i = 0; i < len; i++) {
+			$("[line='" + softidArr[i] + "']").css("background", "#eee");
+			$("[btn='" + softidArr[i] + "']").attr("disabled", true);	
+			$("[ajaxSign='ajaxClear'][type='checkbox']").attr("checked", false);	
+		}
+	});
+}
+</script>
+<br />
+<?php if (ACTION_NAME == 'verifyPassList'):?>
+<span style="display:block;line-height:30px;text-align:center;float:left;border:1px;width:49%;height:30px;background:#CDD;">系统扫描</span>
+<a href="/index.php/Dev/Authentication/Official_certification_list/referer/verifyPassList" style="display:block;line-height:30px;text-align:center;float:left;border:1px;width:49%;height:30px;background:#eee;">
+后台人工
+</a>
+<br />
+<?php endif;?>
+<center>
+	<br />
+	<form id="searchform" method="GET" >
+		<input type="hidden" name="orderType" id="orderType" value="{$orderType}" />
+		<input type="hidden" name="orderVal" id="orderVal" value="{$orderVal}" />
+		<input type="hidden" name="cateid" id="cateid" value="" />
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+			<tbody>
+				<tr>
+					<td>
+						<input name="searchMainStr" value="<?php echo $searchMainStr;?>" />
+						<select name="searchMainType">
+							<option <?php if($searchMainType == 1):?>selected<?php endif;?> value="1">软件名称</option>
+							<option <?php if($searchMainType == 2):?>selected<?php endif;?> value="2">软件包名</option>
+							<option <?php if($searchMainType == 3):?>selected<?php endif;?> value="3">软件ID</option>
+							<option <?php if($searchMainType == 4):?>selected<?php endif;?> value="4">
+								开发者名称
+							</option>
+							<option <?php if($searchMainType == 5):?>selected<?php endif;?> value="5">注册邮箱</option>
+						</select>	
+					</td>
+					<td>
+						<label>开发者:</label>
+						<select name="searchDevType">
+							<option value="">全部</option>
+							<option <?php if(isset($searchDevType) && $serachDevType == 0):?>
+							selected<?php endif;?> value="0">公司</option>	
+							<option <?php if($searchDevType == 1):?>selected<?php endif;?> value="1">个人</option>	
+						</select>
+					</td>
+					<td>
+						<label>来源详情:</label>
+						<select name="offiType">
+							<?php if ($_GET['tab']  != 'manual'): ?>
+							<option value="">全部</option>	
+							<option <?php if($offiType == 1):?>selected<?php endif;?> value="1">腾讯</option>	
+							<option <?php if($offiType == 2):?>selected<?php endif;?> value="2">安全管家</option>	
+							<option <?php if($offiType == 4):?>selected<?php endif;?> value="4">金山</option>	
+							<option <?php if($offiType == 8):?>selected<?php endif;?> value="8">360</option>	
+							<?php else: ?>
+							<option value="">后台人工</option>	
+							<?php endif;?>
+						</select>
+					</td>
+					<td>
+						<label>软件状态:</label>
+						<select name="hide">
+							<option value="">全部</option>
+							<option <?php if(isset($hide) && $hide == 0):?>selected<?php endif;?> value="0">
+							历史</option>
+							<option <?php if($hide == 1):?>selected<?php endif;?> value="1">上架</option>
+						</select>
+					</td>
+					<td rowspan="2">
+						<input id="search" type="button" value="搜索" />&nbsp;&nbsp;
+					</td>
+				</tr>
+				<tr>
+					<td>
+						&nbsp;&nbsp;&nbsp;&nbsp;
+						<?php if (ACTION_NAME == 'unverifyList'):?>
+						<label>按添加日期</label>
+						<?php showDatePicker('add_stm','add_etm', $add_stm,$add_etm);?>
+						<?php elseif (ACTION_NAME == 'verifyPassList'):?>
+						<label>按通过时间</label>	
+						<?php showDatePicker('edit_stm','edit_etm', $edit_stm,$edit_etm);?>
+						<?php elseif (ACTION_NAME == 'verifyRefuseList'):?>
+						<label>按驳回时间</label>	
+						<?php showDatePicker('edit_stm','edit_etm', $edit_stm,$edit_etm);?>
+						<?php endif;?>
+					</td>
+					<td>
+						<label>下载量:</label>	
+						<input style="width:60px;" id="downloadMin" name="downloadMin" value="{$downloadMin}"/>
+						<label>至</label>
+						<input style="width:60px;" id="downloadMax" name="downloadMax" value="{$downloadMax}"/>
+					</td>
+					<td colspan="2">
+						<input type="button" onClick="openw();" value="软件类型"/>
+					</td>
+					
+				</tr>
+			</tbody>
+		</table>
+		<div id="open"  style="padding:10px; display:none;">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+			<tr><td><font size='3' style="color:#000; font-weight:bold">软件类型</font></td><td><input type="checkbox" id="cid_all[]" name="cid_all[]" onClick="cid_selectAll(this);" sign="all">全选</td></tr><br/>
+			</table>		
+			<volist name='cname' id='vo' key='k'>
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+				<tr><td><input type="checkbox" onClick="$('input[rel={$vo.category_id}]').attr('checked', $(this).attr('checked') == 'checked');refreshCatid();"/><strong>{$vo.name}</strong></td></tr>
+				<tr>
+				<td colspan='3'>----------------------------------------------------------------------</td></tr>
+			<tr>
+				<volist name="vo['sub']" id = 'v' key='m'> 
+				<td><input rel="{$vo.category_id}" onclick='refreshCatid()' type="checkbox" name="catid[]" value="{$v.category_id}" <if condition="isset($cateid[$v['category_id']])">checked='true'</if>/>&nbsp;&nbsp;&nbsp;{$v.name}</td>
+				<if condition="$m % 3 eq 0 "></tr><tr></if>
+				</volist><br/>
+			</volist>
+			</table>
+		</div>
+	</form>
+	<div style="font-weight:bold; margin-top:10px; margin-bottom:10px; text-align:left;">
+		<?php echo $docs;?>条记录
+	</div>	

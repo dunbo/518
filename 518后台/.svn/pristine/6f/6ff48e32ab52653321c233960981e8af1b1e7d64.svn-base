@@ -1,0 +1,433 @@
+<?php if (empty($parent_id)): ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>频道运营区间管理</title>
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<?php if (!$isAjax) : ?>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox1.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/Manager.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script type="text/javascript" src="/Public/js/jquery.autocomplete-min.js"></script>
+<link href="/Public/css/autocomplete.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src='/Public/js/cn_area.js'></script>
+<script>
+function showSoft(obj)
+{
+	var extent_id = $(obj).attr('ref');
+	
+	var tr1 = $(obj).parents('.tr1');
+	$(".subtr").hide();
+	if(tr1.hasClass("sty1")){
+		tr1.removeClass("sty1"); 
+	}else{
+		$('#extent_tr_' + extent_id).show();
+		$(".sty1").removeClass("sty1");
+		tr1.addClass("sty1"); 
+	}
+	
+	$('#extent_item_' + extent_id).load('/index.php/Sj/CategoryExtent/list_soft/pid/<?php echo $pid?>/category_type/<?php echo $category_type?>/extent_id/' + extent_id + '/op_id/extent_item_' + extent_id, function(){
+		tb_init('#extent_item_' + extent_id + ' .thickbox');
+	});
+}
+
+function showExtent(extent_id)
+{
+	var className = $('#div_' + extent_id).attr('class');
+	if (className == 'off') {
+		$('#extent_item_' + extent_id).load('/index.php/Sj/CategoryExtent/index/pid/<?php echo $pid?>/category_type/<?php echo $category_type?>/parent_id/' + extent_id + '/op_id/extent_item_' + extent_id, function(){
+			$('#div_' + extent_id).removeClass('off');
+			$('#div_' + extent_id).addClass('on');
+			$('#extent_item_' + extent_id).show();
+			tb_init('#extent_item_' + extent_id + ' .thickbox');
+		});
+	} else {
+		$('#div_' + extent_id).removeClass('on');
+		$('#div_' + extent_id).addClass('off');
+		$('#extent_item_' + extent_id).hide();
+	}
+}
+
+function extent_batch_rank(){
+	var ranks = '';
+	var ids = '';
+	$('select[name=rank]').each(function(){
+		ranks = ranks + $(this).val()+',';
+		ids   = ids + $(this).attr('rel')+',';
+	});	
+	window.location.href = '__URL__/batch_rank/id/'+ids+'/rank/'+ranks; 	
+}
+
+function changePageType(obj) {
+    opt = $(obj).val();
+    showPageType(opt);
+}
+
+function showPageType(opt) {
+    if (opt == 0) {
+        document.getElementById("select_category").style.display="none";
+        document.getElementById("input_category").style.display="none";
+        document.getElementById("input_commontag_category").style.display="none";
+        document.getElementById("select_list").style.display="none";
+    } else if (opt == 1) {
+        document.getElementById("select_category").style.display="";
+        document.getElementById("input_category").style.display="none";
+        document.getElementById("input_commontag_category").style.display="none";
+        document.getElementById("select_list").style.display="none";
+    } else if (opt == 2) {
+        document.getElementById("select_category").style.display="none";
+        document.getElementById("input_category").style.display="";
+        document.getElementById("input_commontag_category").style.display="none";
+        document.getElementById("select_list").style.display="none";
+    } else if (opt == 3) {
+        document.getElementById("select_category").style.display="none";
+        document.getElementById("input_category").style.display="none";
+        document.getElementById("input_commontag_category").style.display="";
+        document.getElementById("select_list").style.display="none";
+    } else if (opt == 5) {
+        document.getElementById("select_list").style.display="";
+        document.getElementById("select_category").style.display="none";
+        document.getElementById("input_category").style.display="none";
+        document.getElementById("input_commontag_category").style.display="none";
+    }else if (opt == 4) {
+		document.getElementById("select_category").style.display="";
+		document.getElementById("input_category").style.display="none";
+		document.getElementById("input_commontag_category").style.display="none";
+		document.getElementById("select_list").style.display="none";
+	}
+    location.href = '/index.php/Sj/CategoryExtent/index/pid/<?php echo $pid?>/parent_id/<?php echo $parent_id?>/page_type/' + opt;
+}
+
+function changeCategoryType(obj) {
+    var page_type = $("#page_type").val();
+	var soft_type = $(obj).val();
+	
+
+	/*
+	if(soft_type == "fixed_user_also_download_package") {
+		$("#input_class_lable").hide();
+		$("#input_package_lable").show();
+	} else if(soft_type == "fixed_user_also_download_class"){
+		$("#input_package_lable").hide();
+		$("#input_class_lable").show();
+	} else {
+		$("#input_package_lable").hide();
+		$("#input_class_lable").hide();
+		location.href = '/index.php/Sj/CategoryExtent/index/pid/<?php echo $pid?>/parent_id/<?php echo $parent_id?>/page_type/' + page_type + '/category_type/' + soft_type;
+	}
+	*/
+	location.href = '/index.php/Sj/CategoryExtent/index/pid/<?php echo $pid?>/parent_id/<?php echo $parent_id?>/page_type/' + page_type + '/category_type/' + soft_type;
+
+}
+function changePid(obj) {
+  window.location.href = '/index.php/Sj/CategoryExtent/index?pid=' + $(obj).val();
+}
+
+jQuery(function() {
+  options = {
+		serviceUrl:'/index.php/ContentType/showTagPage',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+            var page_type = $("#page_type").val();
+            location.href = '/index.php/Sj/CategoryExtent/index/pid/<?php echo $pid?>/parent_id/<?php echo $parent_id?>/page_type/' + page_type + '/tag_name/' + value;
+		}
+	};
+  a = $('#tag_name').autocomplete(options);
+  
+  options = {
+		serviceUrl:'/index.php/ContentType/showCommonTagPage',
+		minChars:1,
+		width: '300px',
+		deferRequestBy: 0,
+		onSelect: function(value, data){
+            var page_type = $("#page_type").val();
+            location.href = '/index.php/Sj/CategoryExtent/index/pid/<?php echo $pid?>/parent_id/<?php echo $parent_id?>/page_type/' + page_type + '/commontag_name/' + value;
+		}
+	};
+  a = $('#commontag_name').autocomplete(options);
+  
+  var page_type = '<?php echo $page_type;?>';
+  //showPageType(page_type);
+  if (page_type == 0) {
+        document.getElementById("select_category").style.display="none";
+        document.getElementById("input_category").style.display="none";
+        document.getElementById("input_commontag_category").style.display="none";
+        document.getElementById("select_list").style.display="none";
+    } else if (page_type == 1) {
+        document.getElementById("select_category").style.display="";
+        document.getElementById("input_category").style.display="none";
+        document.getElementById("input_commontag_category").style.display="none";
+        document.getElementById("select_list").style.display="none";
+    } else if (page_type == 2) {
+        document.getElementById("select_category").style.display="none";
+        document.getElementById("input_category").style.display="";
+        document.getElementById("input_commontag_category").style.display="none";
+        document.getElementById("select_list").style.display="none";
+    } else if (page_type == 3) {
+        document.getElementById("select_category").style.display="none";
+        document.getElementById("input_category").style.display="none";
+        document.getElementById("input_commontag_category").style.display="";
+        document.getElementById("select_list").style.display="none";
+    }else if (page_type == 5) {
+        document.getElementById("select_list").style.display="";
+        document.getElementById("select_category").style.display="none";
+        document.getElementById("input_category").style.display="none";
+        document.getElementById("input_commontag_category").style.display="none";
+    }else if (page_type == 4) {
+		document.getElementById("select_category").style.display="";
+		document.getElementById("input_category").style.display="none";
+		document.getElementById("input_commontag_category").style.display="none";
+		document.getElementById("select_list").style.display="none";
+	}
+    
+    $('#tag_name').bind('keypress',function(event){
+        if(event.keyCode == "13") {
+            var page_type = $("#page_type").val();
+            var tag_name = $("#tag_name").val();
+            location.href = '/index.php/Sj/CategoryExtent/index/pid/<?php echo $pid?>/parent_id/<?php echo $parent_id?>/page_type/' + page_type + '/tag_name/' + tag_name;
+        }
+    });
+    $('#commontag_name').bind('keypress',function(event){
+        if(event.keyCode == "13") {
+            var page_type = $("#page_type").val();
+            var commontag_name = $("#commontag_name").val();
+            location.href = '/index.php/Sj/CategoryExtent/index/pid/<?php echo $pid?>/parent_id/<?php echo $parent_id?>/page_type/' + page_type + '/commontag_name/' + commontag_name;
+        }
+    });
+
+
+    //软件包和分类查询
+    $("#input_class,#input_package").change(function(){
+    	//alert(this.value);
+
+    	var page_type = $("#page_type").val();
+		
+		location.href = '/index.php/Sj/CategoryExtent/index/pid/<?php echo $pid?>/parent_id/<?php echo $parent_id?>/page_type/' + page_type + '/category_type/' + $("#soft_type_add").val()+"/expand/"+this.value;
+
+
+    });
+
+
+
+});
+
+</script>
+<?php endif; ?>
+</head>
+<body>
+<div class="main_r">
+	<h3 class="current_h3">频道运营分区列表</h3>
+
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="recPos">
+	<thead>
+	<tr>
+		<td>请选择要操作的产品:
+            <select name="pid" id="pid" onchange="changePid(this)">
+                <?php foreach($product_list as $k => $v): ?>
+                <option value="<?php echo $k;?>"<?php if ($v[1] == true):?> selected="true"<?php endif; ?> ><?php echo $v[0] ?></option>
+                <?php endforeach; ?>
+            </select>
+            请选择频道类型：
+            <select name="page_type" id="page_type" onchange="changePageType(this)">
+                <option value="0">全部</option>
+                <option value="1" <if condition="$page_type eq 1">selected</if>>普通</option>
+                <option value="2" <if condition="$page_type eq 2">selected</if>>标签</option>
+                <option value="3" <if condition="$page_type eq 3">selected</if>>常用标签</option>
+                <option value="5" <if condition="$page_type eq 5">selected</if>>榜单</option>
+				<option value="4" <if condition="$page_type eq 4">selected</if>>自定义列表</option>
+            </select>
+            <span id="select_category" style="display:none">
+	            请选择频道: 
+	            <select name="soft_type_add" id="soft_type_add" onchange="changeCategoryType(this)">
+	                <?php foreach($category_list as $key => $val):?>
+	                    <option value="<?php echo $key?>" <?php if($category_type == $key) echo "selected";?>><?php echo $val?></option>
+	                <?php endforeach;?>
+	            </select>
+            
+            	<span id="input_package_lable" style="display:<?= in_array($category_type,array('fixed_user_also_download_package','fixed_user_also_install_recommend_package')) ? '':'none'; ?>;">
+	            	请输入包名<input style="width: 130px" type="text" name="input_package" id="input_package" value="<?= $expand; ?>"/>
+				</span>
+				<span id="input_class_lable" style="display:<?= in_array($category_type,array('fixed_user_also_download_class','fixed_user_also_download_recommend_class','fixed_user_also_install_recommend_class')) ? '':'none'; ?>;">
+	            	请选择分类
+	            	<select id="input_class">
+		                <option>请选择..</option>
+		                <?php foreach($category_type_list as $k => $v):?>
+		                
+		                <option  <?= $k == $expand ? 'selected' : ''?> value="<?= $k ?>"><?= $v ?></option>
+		            	<?php endforeach; ?>
+	            	</select>
+				</span>
+
+
+            </span>
+            <span id="select_list" style="display:none">
+            请选择频道: 
+            <select name="soft_type_add" id="soft_type_add" onchange="changeCategoryType(this)">
+                <?php foreach($bd_list as $key => $val):?>
+                    <option value="<?php echo $key?>" <?php if($category_type == $key) echo "selected";?>><?php echo $val?></option>
+                <?php endforeach;?>
+            </select>
+            
+	            
+            </span>
+
+            <span id="input_category" style="display:none">
+            请输入频道：
+            <input type="text" name="tag_name" id="tag_name" value="{$tag_name}"/>
+            </span>
+            <span id="input_commontag_category" style="display:none">
+            请输入频道：
+            <input type="text" name="commontag_name" id="commontag_name" value="{$commontag_name}"/>
+            </span>
+        </td>
+		
+		<td>
+            <form action="/index.php/Sj/CategoryExtent/list_soft/pid/<?php echo $pid?>/parent_id/<?php echo $parent_id?>/category_type/<?php echo $category_type?>">软件包名：<input style="width: 130px" type="text" name="search_key" value="<?php echo $search_key?>"/><input type="submit" />
+            </form>
+        </td>
+		<td>
+            <?php if (!empty($category_type)): ?>
+            <a class="thickbox" href="/index.php/Sj/CategoryExtent/add_extent/pid/<?php echo $pid?>/parent_id/<?php echo $parent_id?>/category_type/<?php echo $category_type?>/expand/<?= urlencode($expand) ?>?1">添加新分区</a>
+            <?php endif;?>
+		</td>	
+	</tr>
+	
+	</thead>
+	</table>
+	<a href="?export=1" target="_blank" class="">
+		<button class="btn"  style="">导出页码和页面名称对应表</button>
+	</a>
+	<table cellspacing="0" cellpadding="0" border="0" align="center" class="table_list">
+		<?php 
+		$is_page_attr = (empty($category_type) || in_array($category_type,array('fixed_user_also_download_package','fixed_user_also_download_class','fixed_user_also_download_recommend_class','fixed_user_also_install_recommend_package','fixed_user_also_install_recommend_class'))) ? true : false; 
+		?>
+		<thead>
+			<tr>
+				<th width="1%"></th>
+				<th width="5%">分区ID</th>
+				<th width="5%">开始位置</th>
+				<th width="8%">区间名</th>
+				<th width="8%">列表展现形示</th>
+				<th width="8%">场景卡片名称</th>
+				<th width="4%">占位数</th>
+				<th width="7%">所占位置</th>
+				<th width="4%">区间软件数</th>
+				<?php if($category_type=="top_2_hot"){ ?>
+				<th width="4%">过滤已安装</th>
+				<?php } ?>
+				<th width="5%">运营商</th>
+				<th width="5%">渠道</th>
+                <th width="5%">投放区域</th>
+				<?php if ($is_page_attr): ?>
+				<th width="5%">所属页面</th>
+				<?php endif;?>
+				<th width="14%" class="thead_position">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach($list as $val): ?>
+			<tr>
+				<td><?php if ($val['type'] == 2): ?><div class="off" id="div_<?php echo $val['extent_id'] ?>"><a href="javascript:" onclick="showExtent(<?php echo $val['extent_id'] ?>)"></a></div><?php endif;?></td>
+				<td><?php echo $val['extent_id'] ?></td>
+				<td><?php echo $val['rank'];?></td>
+				<td><?php echo $val['extent_name'] ?></td>
+				<td><?php echo $val['list_display'] == 1 ? '场景卡片' : 'ICON+名称（原展现形式）' ?></td>
+				<td><?php echo $val['card_name'] ?></td>
+				<td><?php echo $val['extent_size'] ?></td>
+				<td><?php echo $val['rank'];?> ~ <?php echo $val['rank'] + $val['extent_size'] - 1 ?></td>
+				<td><?php echo $val['soft_counts'] ?></td>
+				<?php if($category_type=="top_2_hot") { ?>
+				<td><?php echo $val['filter'] ?></td>
+				<?php } ?>
+				<td><?php echo $val['mname'] ?></td>
+				<td><?php echo $val['chname'] ?></td>
+                                                                       <td>
+                                                                            <div id="_div_{$val['extent_id']}"><?php if($val['push_area']) { ?> {$val.push_area} <?php } else { ?>-<?php } ?></div>
+                                                                        </td>
+				<?php if ($is_page_attr): ?>
+				<td><a href='/index.php/Sj/CategoryExtent/index/pid/<?php echo $pid?>/parent_id/<?php echo $parent_id?>/category_type/<?php echo $val['category_type']?>/expand/<?= $val['category_type_expand']?>'><?php echo $val['category_name']?>
+					
+				<?php if(in_array($val['category_type'],array('fixed_user_also_download_package','fixed_user_also_install_recommend_package'))):?>
+					<br/><?= $val['category_type_expand'] ?>
+				<?php elseif(in_array($val['category_type'],array('fixed_user_also_download_class','fixed_user_also_download_recommend_class','fixed_user_also_install_recommend_class'))):?>
+					<br/><?= $category_type_list[$val['category_type_expand']]; ?>
+				<?php endif;?>
+				</a></td>
+				<?php endif;?>                                                                        
+				<td>
+				<?php if ($val['type'] == 1): ?>
+				<a href="/index.php/Sj/CategoryExtent/add_soft?extent_id=<?php echo $val['extent_id'] ?>&list_display=<?php echo $val['list_display'] ?>&modal=true" class="thickbox blue">添加软件</a> ｜ <a href="/index.php/Sj/CategoryExtent/list_soft/extent_id/<?php echo $val['extent_id']?>/list_display/<?php echo $val['list_display'] ?>/p/{$p}" class="blue">查看软件</a><br/>
+				<?php elseif ($val['type'] == 2):?>
+				<a href="/index.php/Sj/CategoryExtent/add_extent?parent_id=<?php echo $val['extent_id'] ?>&modal=true" class="thickbox blue">添加分区 |</a>
+		        <a href="#" onclick="showExtent(<?php echo $val['extent_id'] ?>)" class="blue">查看分区</a><br/>
+				<?php endif;?>
+				<a href="/index.php/Sj/CategoryExtent/edit_extent?extent_id=<?php echo $val['extent_id'] ?>&modal=true" class="thickbox blue">编辑</a> ｜ <a href="/index.php/Sj/CategoryExtent/del_extent/extent_id/<?php echo $val['extent_id'] ?>" onclick="javascript:return checkit()" class="blue">删除</a></td>
+			</tr>
+			<?php if ($val['type'] == 2):?>
+			<tr>
+				<td colspan="9" id="extent_item_<?php echo $val['extent_id'] ?>">
+				</td>
+			</tr>
+			<?php endif;?>
+			<?php endforeach;?>
+		</tbody>
+	</table>
+	<center>{$page}</center>
+</div>
+<?php else:?>
+	<table cellspacing="0" cellpadding="0" border="0" class="sub_tab">
+		<tbody>
+			<?php foreach($list as $val): ?>
+			<tr>
+				<td width="1%"><?php if ($val['type'] == 2): ?><div class="off" id="div_<?php echo $val['extent_id'] ?>"><a href="javascript:" onclick="showExtent(<?php echo $val['extent_id'] ?>)"></a></div><?php endif;?></td>
+				<td width="7%"><?php echo $val['extent_id'] ?></td>
+				<td width="12%"><?php echo $val['extent_name'] ?></td>
+				<td width="12%"><?php echo $val['type'] == 1 ? '普通分区' : '活动分区' ?></td>
+				<td width="7%"><?php echo $val['extent_size'] ?></td>
+				<td width="7%"><?php echo $val['soft_counts'] ?></td>
+				<td width="5%"><?php echo $val['mname'] ?></td>
+				<td width="5%"><?php echo $val['chname'] ?></td>
+            	<td>
+                    <div id="_div_{$val['extent_id']}"><?php if($val['push_area']) { ?> {$val.push_area} <?php } else { ?>-<?php } ?></div>
+                </td>
+				<td width="10%">
+					<iframe scrolling="no" frameborder="0" style="width:100px; height:100px; top:320px; left:60px; background-color:transparent; position:absolute; z-index:-1;"></iframe>
+					<select name="rank" rel="<?php echo $val['extent_id'] ?>" rel1="<?php echo $val['parent_id'] ?>" class="extent_rank_parent">
+					<?php
+					for($i = 1;$i <= $count; $i++){
+						echo "<option value=\"".$i."\"";
+						if($val['rank'] == $i) echo " selected=\"selected\" ";
+						echo ">".$i."</option>";
+					}
+					?>
+					</select>
+					
+				</td>
+                                                                      
+				<td width="40%">
+				<?php if ($val['type'] == 1): ?>
+				<a href="/index.php/Sj/CategoryExtent/add_soft?extent_id=<?php echo $val['extent_id'] ?>&list_display=<?php echo $val['list_display'] ?>&modal=true" class="thickbox">添加软件</a> ｜ <a href="/index.php/Sj/CategoryExtent/list_soft/extent_id/<?php echo $val['extent_id'] ?>/list_display/<?php echo $val['list_display'] ?>">查看软件</a> ｜ 
+				<?php elseif ($val['type'] == 2):?>
+				<a href="/index.php/Sj/CategoryExtent/add_extent?parent_id=<?php echo $val['extent_id'] ?>&modal=true" class="thickbox">添加分区</a> |
+		        <a href="#" onclick="showExtent(this)" ref='<?php echo $val['extent_id'] ?>'>查看分区</a> |
+				<?php endif;?>
+				<a href="/index.php/Sj/CategoryExtent/edit_extent/extent_id/<?php echo $val['extent_id'] ?>/parent_id/<?php echo $val['parent_id'] ?>?modal=true" class="thickbox">编辑</a> ｜ <a href="/index.php/Sj/CategoryExtent/del_extent/extent_id/<?php echo $val['extent_id'] ?>/parent_id/<?php echo $val['parent_id'] ?>" onclick="javascript:return checkit()">删除</a></td>
+			</tr>
+			<?php if ($val['type'] == 2):?>
+			<tr>
+				<td colspan="9" id="extent_item_<?php echo $val['extent_id'] ?>">
+				</td>
+			</tr>
+			<?php endif;?>
+			<?php endforeach;?>
+		</tbody>
+	</table>
+	<?php endif;?>

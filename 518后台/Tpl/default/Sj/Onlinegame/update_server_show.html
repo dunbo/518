@@ -1,0 +1,424 @@
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/school/js/jquery-1.6.2.min.js"></script>
+<link type="text/css" href="/Public/js/My97DatePicker/skin/WdatePicker.css" />
+<script type="text/javascript" src="/Public/js/ajaxfileupload_anzhi.js?{$rand}"></script>
+<div id="_add_div" style="width:600px;height:auto;font-size:15px;">
+	<form name="form_add" method="post" action="/index.php/Sj/Onlinegame/update_new_server" id="_form_add"  style="width:100%;height:100%;" enctype="multipart/form-data">
+	<table border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+	
+		<tr>
+			<td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">编辑新服：</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">应用包名：</td>	
+			<td align="left" style="padding-left:10px;">	
+				<input type="text" value="{$value.pack_name}"  disabled />
+				<input type="hidden" value="{$value.pack_name}" name="pack_name" />
+			</td>	
+		</tr>
+		<tr>
+			<td  align="right">服务器类型：</td><td align="left" style="padding-left:10px;" id="softname">
+			<input name="server_type" value="1" <if condition="$value.server_type eq 1">checked</if> type="radio" onclick="javascript:$('.neiche').css('display','none');$('.activation').css('display','none');$('#begin').attr('disabled',false);">新服
+			<input name="server_type" value="2" <if condition="$value.server_type eq 2">checked</if> type="radio" onclick="javascript:$('.neiche').css('display','');var out_count = $('#out_count').val();$('#begin').attr('disabled','disabled');$('#begin').val($('#begin').attr('alt')); if(out_count){ $('.activation').css('display','');}">内测服
+			</td>
+			</td>
+		</tr>
+		<tr style="<if condition="$value.server_type neq 2">display:none</if>" class="neiche">
+			<td class="td1" align="right">内测类型{$value.del_type}：</td>
+			<td align="left" style="padding-left:10px;" id="softname">
+			<input name="del_type" value="1"  <if condition="$value.del_type eq 1">checked</if> type="radio">删档内测
+			<input name="del_type" value="2" <if condition="$value.del_type eq 2">checked</if> type="radio" >不删档内测
+			</td>
+		</tr>
+		<tr style="<if condition="$value.server_type neq 2">display:none</if>" class="neiche">
+			<td class="td1" align="right">使用方法：</td>
+			<td align="left" style="padding-left:10px;">
+				<textarea name="use_method" id="use_method">{$value.method}</textarea>
+			</td>
+		</tr>
+		<tr style="<if condition="$value.server_type neq 2">display:none</if>" class="neiche">
+			<td class="td1" align="right">激活码总数：</td>
+			<td align="left" style="padding-left:10px;">
+				<input name="active_codes_count" id="active_codes_count" value="{$value.active_codes_count}" readonly />
+			</td>
+		</tr>
+		<tr style="<if condition="$value.server_type neq 2">display:none</if>" class="neiche">
+			<td class="td1" align="right">已发放的激活码总数：</td>
+			<td align="left" style="padding-left:10px;">
+				<input  id="grant_active_codes_count" name="grant_active_codes_count" value="{$value.grant_active_codes_count}" readonly />
+			</td>
+		</tr>
+		<tr style="<if condition="$value.server_type neq 2">display:none</if>" class="neiche">
+			<td class="td1" align="right">上传激活码：</td>
+			<td align="left" style="padding-left:10px;">
+				<input id="activation_code" type="file" style="left:145px;"  size="45" name="activation_code" class="input" onchange="change_onFileChange(this);">
+				<a href="#" onclick="return ajaxFileUpload();" style="color:blue;" id = "buttonUpload">上传</a><br/>
+			</td>
+		</tr>
+		<tr style="<if condition="$value.server_type neq 2">display:none</if>" class="neiche">
+			<td></td>
+			<td align="left" style="padding-left:10px; color:blue; display:inline-block;word-break:break-all;width:400px;">格式csv（文件名称可自定义；只读取第一列数据；每行一个号码;号码格式：1-25个字符，大小写英文、数字）,限9999以内;</td>
+		</tr>
+		<tr style="<if condition="$value.server_type neq 2">display:none</if>" class="neiche">
+			<td></td>
+			<td id='num_show_load' align="left" style="padding-left:10px; display:none;" >已上传<span id='show_num'>
+				<input id='out_count' type='text' name="out_count" value="" style="width:40px;"/>
+			</span>个</td>
+		</tr>
+		<tr>
+			<td  align="right">开始时间：</td>
+			<td align="left" style="padding-left:10px;" id="softname">
+				<input type="text" id="begin" name="begin" class="ui_timepicker" value="{:date('Y-m-d H:i:s',$value[begin])}" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"  <if condition="$value.server_type eq 2">disabled</if> alt="{:date('Y-m-d H:i:s',$value[begin])}"/>~
+				<input style='<if condition="$value.server_type neq 2">display:none</if>' class="neiche" type="text" id="end" name="end" class="ui_timepicker" <?php if($value['end']) { ?>value="{:date('Y-m-d H:i:s',$value[end])}"<?php } else { ?>value=""<?php } ?> onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',endDate:'%y-%M-%d 00:00:00',onpicking:function(dq){selectDatediff(dq.cal.getNewDateStr())}})" alt="{:date('Y-m-d H:i:s',$value[end])}"/>
+			</td>
+			</td>
+			</td>
+		</tr>
+		<tr style="<if condition="$value.active_codes_count eq 0 or $value.server_type neq 2">display:none</if>" class="activation">
+			<td  align="right">激活码发放时间：</td>
+			<td align="left" style="padding-left:10px;" id="softname">
+				<input type="text" name="active_codes_release_begin" id="active_codes_release_begin" class="ui_timepicker" <?php if($value['active_codes_release_begin']) { ?>value="{:date('Y-m-d H:i:s',$value[active_codes_release_begin])}"<?php } else { ?>value=""<?php } ?> onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" />~
+				<input type="text" name="active_codes_release_end" id="active_codes_release_end" class="ui_timepicker" <?php if($value['active_codes_release_end']) { ?>value="{:date('Y-m-d H:i:s',$value[active_codes_release_end])}"<?php } else { ?>value=""<?php } ?> onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',endDate:'%y-%M-%d 00:00:00'})" />
+			</td>
+		</tr>
+		<tr style="<if condition="$value.active_codes_count eq 0 or $value.server_type neq 2">display:none</if>" class="activation">
+			<td  align="right">激活码有效时间：</td>
+			<td align="left" style="padding-left:10px;" id="softname">
+				<input type="text" name="active_codes_effective_begin" id="active_codes_effective_begin" class="ui_timepicker" <?php if($value['active_codes_effective_begin']) { ?>value="{:date('Y-m-d H:i:s',$value[active_codes_effective_begin])}"<?php } else { ?>value=""<?php } ?> onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" />~
+				<input type="text" name="active_codes_effective_end" id="active_codes_effective_end" class="ui_timepicker" <?php if($value['active_codes_effective_end']) { ?>value="{:date('Y-m-d H:i:s',$value[active_codes_effective_end])}"<?php } else { ?>value=""<?php } ?> onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',endDate:'%y-%M-%d 00:00:00'})" />
+			</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">新服名称：</td><td align="left" style="padding-left:10px;" id="softname">
+			<input type="text" value="{$value.new_server_name}" name="new_server_name" id = "new_server_name" onBlur="gbname(this.form.new_server_name);"/></td>
+			</td>
+		</tr>
+
+
+		<tr>
+			<td class="td1" align="right">简介：</td>
+			<td>
+			<textarea id="update_content" name="comment" rows="4" cols="40"   onKeyDown="gbcount(this.form.update_content);" onKeyUp="gbcount(this.form.update_content);" >{$value.comment}</textarea>
+			</td>
+			</td>
+		</tr>
+		<tr>
+			<td class="td1" align="right">简介限制在50字之内</td>
+		</tr>
+		<tr id="cut_add_input">
+			<td colspan="2" style="text-align:center;">
+				<button style="margin:15px;" onclick="return check();" type="submit">确定</button>
+				<input name="sub_type" type="hidden" value="add" />
+				<button type="button" onclick='tb_remove();'>取消</button>
+				<input type='hidden' name='new_file' id="new_file" value="">
+				<input type='hidden' name='new_file_name' id='new_file_name' value="">
+			</td>
+		</tr>
+		<input type="hidden" name="id" value="{$value.id}" />
+	</table>
+	<input type="hidden" name="__hash__" value="4a674d3b2b9cb54d6467a3ced6861674" />
+	<input type="hidden" name="xin_str" id="hidden_name_01" /></form>
+</div>
+
+<div style="width:92%; padding-top:4px; text-align:right"></div>
+<script>
+
+	//简介验证
+	function gbcount(message)
+	{
+		var max;
+		max = 50;
+		if (message.value.length > max) {
+			message.value = message.value.substring(0,max);
+
+			alert("简介不能超过 50 个字!");
+		}
+		else {
+
+		}
+	}
+	
+	//新服名称验证
+	function gbname(message)
+	{	
+		var min;
+		var max;
+		min = 1;
+		max = 8;
+		//var messageLength = message.value.length;
+		var messageLength = message.value.replace(/\s+/gi,'').length;
+		document.getElementById('hidden_name_01').value = messageLength;
+		if (messageLength < min) {
+			message.value = message.value.substring(0,min);
+			alert("新服名称不能少于 1 个字!");
+			return false;
+		}
+		else if(messageLength > max){
+			message.value = message.value.substring(0,max);
+			alert("新服名称不能超过 8 个字!");
+			return false;
+		}
+	}
+	function check()
+	{
+		var begin = $('#begin').val();
+		var end = $('#end').val();
+		var old_end=$('#end').attr('alt');
+		var new_server_name = $('#new_server_name').val();
+		var server_type = $('[name="server_type"]:checked').val();
+		var use_method=$("#use_method").val();
+		var comment = $("#update_content").val();
+		
+		if(!begin){
+			alert("开始时间不能为空");
+			return false;
+		}
+		if(!new_server_name){
+			alert("服务器名称不能为空");
+			return false;
+		}
+		if(server_type==2)
+		{
+			var neice_type=$('[name="del_type"]:checked').val();
+			if(!neice_type)
+			{
+				alert("请选择内测类型");
+				return false;
+			}
+			if(use_method)
+			{
+				if(use_method.length>50||use_method<2)
+				{
+					alert("使用方法可输入2~50个字符");
+					return false;
+				}
+			}
+			else
+			{
+				alert("使用方法不能为空");
+				return false;
+			}
+			if(end)
+			{
+				if(begin>end)
+				{
+					alert("开始时间不能大于结束时间");
+					return false;
+				}
+				if(old_end>end)
+				{
+					alert("修改后的结束时间必须大于当前结束时间");
+					return false;
+				}
+			}
+			else
+			{
+				alert("结束时间不能为空");
+				return false;
+			}
+			var out_count = parseInt($("#active_codes_count").val());
+			if($("#out_count").val())
+			{
+				var out_count_new = parseInt($("#out_count").val());
+			}
+			else
+			{
+				var out_count_new = 0;
+			}
+			//var out_count_new = parseInt($("#out_count").val());
+			var new_count = out_count+out_count_new;
+			if(new_count)
+			{
+				var active_codes_release_begin = $('#active_codes_release_begin').val();
+				var active_codes_release_end = $('#active_codes_release_end').val();
+				var active_codes_effective_begin = $('#active_codes_effective_begin').val();
+				var active_codes_effective_end  = $('#active_codes_effective_end ').val();
+				if(!active_codes_release_begin)
+				{
+					alert("激活码发放开始时间不能为空");
+					return false;
+				}
+				if(!active_codes_release_end)
+				{
+					alert("激活码发放结束时间不能为空");
+					return false;
+				}
+				if(active_codes_release_begin>active_codes_release_end)
+				{
+					alert("激活码发放开始时间不能大于激活码发放结束时间");
+					return false;
+				}
+				if(!active_codes_effective_begin)
+				{
+					alert("激活码有效开始时间不能为空");
+					return false;
+				}
+				if(!active_codes_effective_end)
+				{
+					alert("激活码有效结束时间不能为空");
+					return false;
+				}
+				if(active_codes_effective_begin>active_codes_effective_end)
+				{
+					alert("激活码有效开始时间不能大于激活码有效结束时间");
+					return false;
+				}
+				//当前时间<=发放开始<=内测开始<=有效开始   发放结束<=内测结束<=有效结束
+				if(active_codes_release_begin>begin)
+				{
+					alert("激活码发放开始时间不能大于内测服开始时间");
+					return false;
+				}
+				if(active_codes_release_begin>active_codes_effective_begin)
+				{
+					alert("激活码发放开始时间不能大于激活码有效开始时间");
+					return false;
+				}
+				if(begin>active_codes_effective_begin)
+				{
+					alert("内测服开始时间不能大于激活码有效开始时间");
+					return false;
+				}
+				if(active_codes_release_end>end)
+				{
+					alert("激活码发放结束时间不能大于内测服结束时间");
+					return false;
+				}
+				if(active_codes_release_end>active_codes_effective_end)
+				{
+					alert("激活码发放结束时间不能大于激活码有效结束时间");
+					return false;
+				}
+				if(end>active_codes_effective_end)
+				{
+					alert("内测服结束时间不能大于激活码有效结束时间");
+					return false;
+				}
+			}
+			if(out_count!=0||out_count_new)
+			{
+				if(new_count>9999||new_count<1)
+				{
+					alert("激活码数量限1~9999以内");
+					return false;
+				}
+			}
+		}
+		//$('#activation_code').attr('disabled','disabled');
+	}
+ function checkLen(obj, maxChars, hint_id) 
+ {
+	if (obj.value.length > maxChars)
+		obj.value = obj.value.substring(0,maxChars);
+	//$("#" + hint_id).html(obj.value.length + "/" + maxChars);
+ }
+function change_onFileChange(obj)
+{
+	var index = $(obj).attr('name');
+	if(index == 'activation_code'){
+		if( !obj.value.match( /.csv/i ) ){
+			alert('上传格式出错');
+			var file = $("#activation_code");
+			file.after(file.clone().val(""));
+			file.remove();	
+			return false;
+		}
+	}
+	var active_id = $('input[name=id]').val();
+	var all_count = parseInt($('#active_codes_count').val());
+	var grant_num = parseInt($('#grant_active_codes_count').val());
+	var residue_num = all_count-grant_num;
+	var file = $("#activation_code");
+	$.ajaxFileUpload
+	(
+		{
+			url:'__URL__/new_server_reseed/active_id/'+active_id+'/residue_num/'+residue_num, //处理上传文件的服务端
+			secureuri:false,
+			fileElementId:'activation_code',
+			dataType: 'json',
+			success: function (data){
+				if(data.error){
+					alert(data.error);
+					file.after(file.clone().val(""));
+					file.remove();
+					$('#file_path').val('');
+					$('#out_count').html('');
+					return false;
+				}
+				//$('#file_path').val(data.file);
+				//$('#file_add').val(data.file_add);
+				//$('#out_count').html(data.num);
+				//$('#num').val(data.num);
+				//$('#all_num').val(data.all_num);
+				//$('#active_codes_count').html(data.all_num);
+		   }
+	   }
+	)
+	return false;
+}
+function ajaxFileUpload()
+{
+	var all_count = parseInt($('#active_codes_count').val());
+	$.ajaxFileUpload
+	(
+		{
+			url:'__URL__/file_num', //处理上传文件的服务端
+			secureuri:false,
+			fileElementId:'activation_code',
+			dataType: 'json',
+			success: function (data){
+				if(data.err==1 || data.err==2 || data.err==3 || data.err==4){
+					alert(data.error_con);
+					return false;
+				}else{
+					var count = all_count+parseInt(data.out_count);
+					if(count>9999||count<1){
+						$("#num_show_load").css('display','block');
+						$("#out_count").val(data.out_count);
+						$("#new_file").val(data.new_file);
+						$("#new_file_name").val(data.new_file_name);
+						alert("激活码数量限1~9999以内");
+						$(".activation").css('display','none');
+						return false;
+					}else{
+						$("#num_show_load").css('display','block');
+						$("#new_file").val(data.new_file);
+						$("#new_file_name").val(data.new_file_name);
+						$("#out_count").val(data.out_count);
+						$(".activation").css('display','');
+					}
+				}
+		   }
+	   }
+	)
+	return false;
+}
+function selectDatediff(obj)
+ {
+	var out_count = parseInt($("#active_codes_count").val());
+	if($("#out_count").val())
+	{
+		var out_count_new = parseInt($("#out_count").val());
+	}
+	else
+	{
+		var out_count_new = 0;
+	}
+	var new_count = out_count+out_count_new;
+	if(new_count)
+	{
+		var begin = $('#begin').val();
+		var active_codes_release_begin = $('#active_codes_release_begin').val();
+		var active_codes_release_end = $('#active_codes_release_end').val();
+		var active_codes_effective_begin = $('#active_codes_effective_begin').val();
+		var active_codes_effective_end  = $('#active_codes_effective_end ').val();
+		if(!active_codes_release_begin&&!active_codes_release_end&&!active_codes_effective_begin&&!active_codes_effective_end)
+		{
+			$('#active_codes_release_begin').val(begin);
+			$('#active_codes_release_end').val(obj);
+			$('#active_codes_effective_begin').val(begin);
+			$('#active_codes_effective_end ').val(obj);
+		}
+	}
+ }
+</script>

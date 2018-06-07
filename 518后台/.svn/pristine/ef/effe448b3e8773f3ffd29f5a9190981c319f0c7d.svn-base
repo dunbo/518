@@ -1,0 +1,90 @@
+<script>
+	var check_name = 1;
+	var check_contact = 1;
+	var check_num = 1;
+	var check_none = 1;
+	function check_client(){
+		var client_name = $('#client_names').val();
+		if(!client_name){
+			$('#my_error').html('客户名称不能为空');
+			check_none = 2;
+		}else{
+			$.ajax({
+				'url' : '__URL__/check_client_name/client_name/'+client_name+'/from/1',
+				'type' : 'get',
+				'dateType' : 'json',
+				success: function(data){
+					if(data == 1){
+						$('#my_error').html('客户名称不能重复');
+						check_name = 2;
+					}else{
+						$('#my_error').html('');
+						check_name = 1;
+					}
+				}
+			});
+		}
+	}
+	
+	function check_all(){
+		
+		if(!$('#client_names').val()){
+			$('#my_error').html('客户名称不能为空');
+			check_none = 2;
+		}else{
+			$('#my_error').html('');
+			check_none = 1;
+			check_client();
+		}
+		if(!$('#contact_name').val()){
+			$('#my_error_contact').html('联系人不能为空');
+			check_contact = 2;
+		}else{
+			$('#my_error_contact').html('');
+			check_contact = 1;
+		}
+		if(!$('#contact_num').val()){
+			$('#my_error_num').html('联系方式不能为空');
+			check_num = 2;
+		}else{
+			$('#my_error_num').html('');
+			check_num = 1;
+		}
+		
+		if(check_name == 2 || check_none == 2 || check_contact == 2 || check_num == 2){
+			return false;
+		}
+	}
+
+</script>
+<div>
+	<form action="__URL__/add_client_do" method="get">
+	<table>
+		<tr>
+			<td><input type="hidden" name="client_names" value="{$client_name}" />
+			<input type="hidden" name="start" value="{$start}" />
+			<input type="hidden" name="end" value="{$end}" />
+			<input type="hidden" name="p" value="{$p}" />
+			<input type="hidden" name="lr" value="{$lr}" />
+			
+			<span style="color:red;">*</span>客户名称：</td>
+			<td><input type="text" id="client_names" name="client_names" onblur="check_client();" /></td>
+			<td><span style="color:red;" id="my_error"></span></td>
+		</tr>
+		<tr>
+			<td><span style="color:red;">*</span>联系人：</td>
+			<td><input type="text" id="contact_name" name="contact_name" /></td>
+			<td><span style="color:red;" id="my_error_contact"></span></td>
+		</tr>
+		<tr>
+			<td><span style="color:red;">*</span>联系方式</td>
+			<td><input type="text" id="contact_num" name="contact_num" /></td>
+			<td><span style="color:red;" id="my_error_num"></span></td>
+		</tr>
+		<tr>
+			<td><input type="submit" value="保存" class="search_btn" onclick="return check_all();" /></td>
+			<td><input type="button" value="取消" class="search_btn" onclick="tb_remove();" /></td>
+		</tr>
+	</table>
+	</form>
+</div>

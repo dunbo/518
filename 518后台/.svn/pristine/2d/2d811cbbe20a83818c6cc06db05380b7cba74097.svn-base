@@ -1,0 +1,221 @@
+<include file="../Public/header" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/jquery.cookie.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/tablelist.css" />
+<style type="text/css">
+.title_item{height:33px; padding:15px 0 6px;}
+.title_item h2{float:left; height:32px; border-bottom:1px solid #c4c4c4; font-size:16px; font-weight:bold;}
+.tb_add td{padding-bottom:10px;}
+</style>
+<body>
+<div>
+<div style="width:98%; margin:10px auto 0">
+<div class="title_item">
+	<h2>通用时间设置:</h2>
+</div>
+<div>
+<span style="float:left;">激活后渠道更新提示间隔：</span><span id='day' style="display:block; float:left;">{$day}天</span><input id='day_show' style="display:none; float:left; margin:0 5px;" type='text' value='{$day}'></input><span style="display:none; float:left" id='d_a_y'>天</span>
+<div style="clear:both;"></div>
+    <div style="margin-top:7px;">
+	<input type='button' id='save' value='保存' style="display:none;" onClick="dian_save()">
+    <input type='button' id='bj' value='编辑' style="display:block;" onClick="dian_edit()"></div>
+</div>
+<div class="title_item">
+	<h2>自定义更新渠道列表：</h2><button style="float:right; margin-right:15px; display:inline; cursor:pointer;" onClick="popup('_add_div')" class="search_btn">添加</button>
+</div>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list" id="channel_table1" style="margin-top:5px">
+	<thead>
+		<tr> 
+			<th width="5%">ID</th>
+         	<th width="8%">渠道编号</th>
+          	<th width="19%">渠道名</th>
+			<th width="19%">渠道用途</th>
+          	<th width="19%">渠道提示更新间隔</th>
+          	<th width="20%">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+  
+  <volist name="list" id="vo">
+		<tr>
+			<td>{$vo.p_id}</td>
+			<td>{$vo.chl_cid}</td>
+			<td>{$vo.chname}</td>
+			<td>{$vo.activation_type_name}</td>
+			<td>{$vo.update_time}天</td>
+			<td><a class="blue"><span onclick='ceshi({$vo.id})' style='cursor:pointer'>编辑</span></a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href='javascript:if(confirm("您是否确认将该条信息删除?"))location="__URL__/channels_updatetime_del?id={$vo.id}"' class="blue">删除</a></td>
+		</tr>
+  </volist>
+  	</tbody>
+</table>
+</div>
+<!--添加-->
+<div id="_add_div" style="position:absolute;top:150px;left:350px;display:none;background:#ffffff;width:550px;height:auto; padding:15px; border:1px solid #000;font-size:14px;">
+  <form name="form_add" method="post" action="/index.php/Sj/Channels/channels_update_add" id="_form_add"  style="width:100%;height:100%;" onSubmit="return jc()">
+  <table cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+    <tr>
+      <td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">添加渠道更新时间：</td>
+    </tr>
+
+    <tr>
+     <td class="td1" align="right">选择渠道：</td>
+      <td align="left">
+        <a class="thickbox" href="/index.php/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel&sel=no"><span onclick='dia()'>选择指定渠道</span></a>
+        <br>
+        <div id="channel_div"> </div>
+      </td>
+    </tr>
+    <tr>
+     <td class="td1" align="right">更新时间：</td>
+      <td align="left">
+       <input type='text' name='update_time' id='update_time'>天
+      </td>
+    </tr>
+    <tr id="cut_add_input">
+      <td colspan="2" style="text-align:center;">
+      <input type="button" value="确定" onClick="form_add.submit();">　　
+      <input type="button" value="取消" onClick="popclose('_add_div')">
+    </tr>
+  </table>
+  </form>
+</div>
+
+<!--编辑-->
+<div id="edit_show" style="position:absolute;top:150px;left:350px;display:none;background:#ffffff;width:550px;height:auto; padding:15px; border:1px solid #000;font-size:14px;">
+  <form name="form_edit" method="post" action="/index.php/Sj/Channels/channels_update_edit_to" id="_form_edit"  style="width:100%;height:100%;" >
+  <span id='exp' style='display:none'>a</span>
+  <table cellspacing="0" cellpadding="0" style="width:100%;height:100%;" class="tb_add">
+    <tr>
+      <td class="td1" align="left" colspan="2" style="padding-left:11px;font-weight:bold;">编辑渠道更新时间：</td>
+    </tr>
+    <tr>
+     <td class="td1" align="right">更新时间：</td>
+      <td align="left">
+       <input id='show_update_time' type='text' name='update_time' value=''>天
+      </td>
+    </tr>
+    <tr id="cut_add_input">
+      <td colspan="2" style="text-align:center;">
+      <input type="button" value="确定" onClick="form_edit.submit();">　　
+      <input type="button" value="取消" onClick="popclose('edit_show')">
+      <input type='hidden' value='' name='id' id='get_id'>
+    </tr>
+  </table>
+  </form>
+</div>
+
+
+</body>
+
+<script>
+  function submitChannel()
+  {
+
+    var cids = '';
+    $("#_add_div").css({display:"block"});
+    $('#channel_div').html('');
+    $("#TB_ajaxContent #channel_selected input:checked").each(function(){
+     var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+       item.find('input').attr('checked', 'true');
+       $('#channel_div').append(item);
+       })
+       $.cookie('cids', '', {path: '/'});
+       tb_remove();
+   
+  }
+  //主层动态变化数据
+  function onclikChannel()
+    { 
+      $('#channel_div').html('');
+      $("#TB_ajaxContent #channel_selected input:checked").each(function(){
+        var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+        item.find('input').attr('checked', 'true');
+        $('#channel_div').append(item);
+      })
+      $.cookie('cids', '', {path: '/'});
+    }
+  //
+  function check_arr(){
+      $('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+    }
+  function dian_edit(){
+  $("#day").css("display","none");
+  $("#day_show").css("display","block");
+  $("#save").css("display","block");
+  $("#bj").css("display","none");
+  $('#d_a_y').css("display","block");
+  $('#day_show').val({$day});
+ }
+ function dian_save(){
+  $("#day").css("display","block");
+  $("#day_show").css("display","none");
+  $("#save").css("display","none");
+  $("#bj").css("display","block");
+  $('#d_a_y').css("display","none");
+  var val = $('#day_show').val();
+  var param =/^\d+$/;
+  if(!param.test(val)){
+      alert("更新时间仅支持大于等于0的数字，请重新输入");
+      return false;
+  }else{
+    $.ajax({
+           type: "POST",
+           url: "/index.php/Sj/Channels/channels_updatetime_del_glob",
+           data: "val="+val,
+           success: function(msg){
+            if(msg==1){
+              alert('保存成功');
+              window.location="/index.php/Sj/Channels/channels_update_time";
+              return true;
+            }else if(msg==0){
+              alert('编辑失败');
+              return false;
+            }else if(msg==3){
+              alert('更新时间仅支持大于等于0的数字，请重新输入');
+            }else
+            {}
+          }
+      }); 
+    }
+ }
+ function popup(id,user_id) {
+  $("#bgdiv").css("display","block");
+  $("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+  $("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+  $("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+  $("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+  $("#update_time").val("");
+}
+function popclose(id) {
+  $("#"+id).css({display:"none"});
+  $("#bgdiv").css({display:"none"});
+}
+function dia(){
+  $("#_add_div").css({display:"none"});
+}
+function dia_edit(){
+  $("#edit_show").css({display:"none"});
+}
+function ceshi(id)
+{
+  $("#bgdiv").css("display","block");
+  $("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+  $("#edit_show").css({display:"block",position:"absolute",zIndex:"10001"});
+  $("#edit_show").css("top",($(window).height()-$("#edit_show")[0].offsetHeight)/2+$(document).scrollTop()+"px");
+  $("#edit_show").css("left",($(window).width()-$("#edit_show")[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+  $.ajax({
+         type: "POST",
+         url: "/index.php/Sj/Channels/channels_update_edit",
+         data: "id="+id,
+         success: function(msg){
+          $('#get_id').val(id);
+          $('#show_update_time').val(msg);
+        }
+    }); 
+}
+</script>

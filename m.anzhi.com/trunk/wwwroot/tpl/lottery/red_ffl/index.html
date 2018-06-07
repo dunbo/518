@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>红包翻翻乐</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/<!--{$out.prefix}-->/css/common.css?v1"/>
+</head>
+<body>
+<!--{if $out.activity.imgurl }-->
+<div class="banner"><img style="height:248px;" src="<!--{$out.img_url}--><!--{$out.activity['imgurl']}-->"/></div>
+<!--{else}-->
+<div class="banner"><img style="height:248px;" src="<!--{$out.static_url}-->/red_ffl/images/banner.png"/></div>
+<!--{/if}-->
+<div class="main">
+	<div class="info_p">
+		<p id="game_desc">
+		<!--{if $out.is_login eq 1 }-->
+			<!--{if $out.games gt 1 }-->
+				您有<!--{$out.games}-->局的翻牌机会～快来试试手气吧
+			<!--{elseif  $out.games eq 1 }-->
+				可以玩1局~要加油哦~
+			<!--{else}-->
+				机会都用完了，下次再来吧~
+			<!--{/if}-->
+		<!--{else}-->	
+			您有<!--{$out.activity.red_init_num}-->局的翻牌机会～快来试试手气吧
+		<!--{/if}-->
+		</p>
+	</div>
+	
+	<div class="draw_wrap">
+		<div class="draw">
+			<div class="card_wrap">
+				<ul>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+					<li></li>
+				</ul>
+				<!--{if $out.is_login eq 2 || !$out.user_num["g_num"] }-->
+					<!--{for $i = 1; $i < 9; $i++}-->
+							<div class="card">
+								<div class="face"></div>
+								<div class="backface">
+									<!--{if $out.prize[$i] eq 6 }-->
+										<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/lottery1.png">
+									<!--{elseif $out.prize[$i] eq 7 }-->
+										<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/lottery_no.png">
+									<!--{else}-->
+										<img src="" />
+									<!--{/if}-->
+								</div>
+							</div>
+					<!--{/for}-->
+				<!--{else}-->
+					<!--{for $i = 1; $i < 9; $i++}-->
+						<!--{if $out.level_list[$i] eq 1 }-->
+								<div class="card fan" onclick="lottery_do(this,<!--{$i}-->)">
+								<div class="face" >
+								</div>
+								<div class="backface" >
+									<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/lottery1.png">
+								</div>
+								</div>
+						<!--{elseif $out.level_list[$i] eq 2 }-->
+								<div class="card fan" onclick="lottery_do(this,<!--{$i}-->)">
+								<div class="face" >
+								</div>
+								<div class="backface" >
+									<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/lottery_no.png">
+								</div>
+								</div>
+						<!--{else}-->
+								<div class="card" onclick="lottery_do(this,<!--{$i}-->)">
+								<div class="face" style="transform: rotateY(0deg);-webkit-transform: rotateY(0deg);">
+								</div>
+								<div class="backface" style="transform: rotateY(-180deg);-webkit-transform:rotateY(-180deg);">
+									<img src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/lottery1.png">
+								</div>
+								</div>
+						<!--{/if}-->
+					<!--{/for}-->
+				<!--{/if}-->
+			</div>
+			<!--{if $out.is_login eq 2 || !$out.user_num["g_num"] }-->
+				<div class="start"></div>
+			<!--{else}-->
+				<div class="start" style="display: none;"></div>
+			<!--{/if}-->
+				<div class="mask">洗牌中···</div>
+				<p class="start-tip">点击<br/>翻卡</p>
+				<p class="games" onclick="reset()">再来一局</p>
+				<p class="end_games" onclick="window.AnzhiActivitys.showToastForJs('机会都用完了')" >再来一局</p>
+		</div>
+		<!--{if $out.is_login eq 1 }-->
+			<div class="draw_txt"><p>您还有<span><em id="lottery_num"><!--{$out.lottery_num}--></em>次</span>翻牌机会</p></div>
+		<!--{else}-->
+			<div class="draw_txt"><p>您还有<span><em id="lottery_num">1</em>次</span>翻牌机会</p></div>
+		<!--{/if}-->
+	</div>
+	
+	<!--{if $out.is_login eq 1 && $out.award_list }-->
+	<div class="lottery_list">
+		<ul>
+			<!--{foreach from=$out.award_list item='val' key='k'}-->
+			<li><p>中奖红包未领取　<!--{$val.time|date_format:'%m-%d %H:%M'}--> <a href="javascript:open_red_do(<!--{$k}-->);">立刻领取</a></p></li>
+			<!--{/foreach}-->
+			<li class="list_spec"><p>请尽快领取，红包将在1小时后过期</p></li>
+		</ul>
+	</div>
+	<!--{/if}-->
+	<div id="soft_layout" style="display:none">
+		<div class="soft_wrap">
+			<div class="soft_title">
+				<p>下载并打开软件本局可再翻1张牌(<span id="lottery_add"><!--{$out.lottery_add}--></span>/1)</p>
+				<a  href="javascript:;" onclick="change_soft('<!--{$out.aid}-->','<!--{$out.sid}-->',6,2);" >换一批</a>
+				<div class="clear"></div>
+			</div>
+			<!-- 软件下载 -->
+			<ul class="soft-list clear" id="soft-list">
+			</ul>
+		</div>
+		<div class="soft_txt">
+			<p>下载并打开软件可增加抽奖机会，每局可以获得1次机会哦！</p>
+		</div>
+	</div>
+	<div class="rules">
+		<h3>规则说明：</h3>
+		<ul>
+			<li><!--{$out.activity.red_at_desc}--></li>
+		</ul>
+	</div>
+</div>
+<div class="tip-box2" id="tip-box1" style="display: none;">
+	<div class="tip-title">
+		<h6>温馨提示</h6>
+		<span onclick="cloBox('#tip-box1')"></span>
+	</div>
+	<div class="tip-con">
+		<p>安装“安智市场客户端”才能领取哦~</p>
+	</div>
+	<p><a href="http://m.anzhi.com"  class="btns_close">去下载</a></p>
+</div>
+<script type="text/javascript" src="<!--{$out.new_static_url}-->/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="<!--{$out.static_url}-->/<!--{$out.prefix}-->/js/soft_task_list.js?v1"></script>
+<!--{if $out['is_share'] == 1}-->
+<script type="text/javascript" src="/js/anzhi.js"></script>
+<!--{/if}-->
+<!--{if $out['is_test'] == 1}-->
+<script type="text/javascript" src="/js/debug.js"></script>
+<script type="text/javascript" src="/js/pc_soft_list.js"></script>
+<!--{/if}-->
+
+<script type="text/javascript">
+var is_anmate = 0; //是否处于动画中
+var init_games = parseInt('<!--{$out.init_games}-->');
+var games = parseInt('<!--{$out.games}-->');
+var g_num = parseInt('<!--{$out.g_num}-->');
+var lottery_num = parseInt('<!--{$out.lottery_num}-->');
+
+var red_package_num = parseInt('<!--{$out.red_package_num}-->');;//抽奖总数
+var draw_num = parseInt('<!--{$out.draw_num}-->');//当前局中奖数
+var no_draw_num = 0;//当前局未中奖数
+
+var red_conf_num = parseInt('<!--{$out.red_conf_num}-->');//后台配置的红包数
+
+var sid = '<!--{$out.sid}-->';
+var aid = '<!--{$out.aid}-->';
+var uid = '<!--{$out.uid}-->';
+var prefix = '<!--{$out.prefix}-->';
+var is_login = '<!--{$out.is_login}-->';
+var stop = '<!--{$out.stop}-->';
+var login_url = '<!--{$out.login_url}-->';
+var version_code = '<!--{$out.version_code}-->';
+var static_path = '<!--{$out.static_url}-->/<!--{$out.prefix}-->/';
+var is_version = '<!--{$out.is_version}-->';
+
+
+var lock = 0;
+
+$(function(){
+	$('.start').bind('click',function(){
+		if(parseInt(is_version) == 0) {
+			$(".tip-box2").css('display','block');
+			return false;
+		}
+		if(parseInt(is_login)==2) {
+			login(login_url,version_code);
+			return;
+		}
+		if( games <= 0 ) {
+			window.AnzhiActivitys.showToastForJs('机会都用完了');
+			return false;
+		}
+		if( lock ) {
+			return false;
+		}else {
+			lock = 1;
+		}
+		$.ajax({
+			url: '/lottery/<!--{$out.prefix}-->/soft_task.php',
+			data:'type='+4+'&sid='+sid+'&aid='+aid,
+			type:"post",
+			dataType: 'json',
+			success:function(data) {
+				if( data.code == 1 ) {
+					games = games -1;
+					var game_desc = get_games_desc(games);
+					$('#game_desc').text(game_desc);
+					g_num = g_num +1;
+					lottery_num = 1;
+					$('#lottery_num').text(lottery_num);
+					shuffle();
+				}else if( data.code == 3 ) {
+					lock = 0;
+				}else {
+					lock = 0;
+					window.AnzhiActivitys.showToastForJs(data.msg);
+				}
+			},			
+		});	
+	})
+	
+	//控制按钮
+ 	if( is_login == 1 ) {
+		if( init_games != games ) {
+			$('.start').hide();
+			if( $('.fan').length == 0 ){
+				$('.start-tip').show();
+			}else {
+				//判断局数按钮
+				if( games > 0 ) {
+					$('.games').show();
+				}else {
+					$('.end_games').show();
+				}
+			}
+		}else {
+			$('.start').show();
+		}
+	}
+});
+
+
+function get_games_desc(i) {
+	var txt = '';
+	if( i > 1 ) {
+		txt = "您有"+i+"局的翻牌机会~快来试试手气吧";
+	}else if( i == 1 ) {
+		txt = "可以玩1局~要加油哦~";
+	}else {
+		txt = "机会都用完了，下次再来吧~";
+	}
+	return txt;
+}
+
+var prize_img = new Array('<!--{$out.static_url}-->/<!--{$out.prefix}-->/images/lottery_no.png');
+
+//再来一局
+var lock_r = 0;
+function reset()
+{
+	if(parseInt(is_version) == 0) {
+		$(".tip-box2").css('display','block');
+		return false;
+	}
+	if(parseInt(is_login)==2) {
+		//未登录
+		login(login_url,version_code);
+		return;
+	}
+	//在来一局获取后台配置的局数
+	if( games <= 0 ) {
+		window.AnzhiActivitys.showToastForJs('机会都用完了')
+		return false;
+	}
+	if( lock_r ) {
+		return false;
+	}else {
+		lock_r = 1;
+	}
+	//ajax交互
+	$.ajax({
+		url: '/lottery/<!--{$out.prefix}-->/soft_task.php',
+		data:'type='+3+'&sid='+sid+'&aid='+aid+'&uid='+uid,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			//alert(data.msg);
+			if( data.code == 1 ) {
+				is_anmate = 1;
+				games = games - 1;
+				var game_desc = get_games_desc(games);
+				$('#game_desc').text(game_desc);
+				g_num = g_num + 1;
+				lottery_num = 1;
+				$('#lottery_num').text(lottery_num);
+				$('#lottery_add').text(0);
+				$('.games').hide();
+				//翻出剩余的牌随机显示并且总数不超过4个红包
+				var prize_arr = random_prize(draw_num, no_draw_num);
+				red_package_num = 0;
+				draw_num = 0;
+				no_draw_num = 0;
+				var i = 0
+				$('.card').each(function(){
+					//翻出剩余所有牌
+					if( !$(this).hasClass('fan') ) {
+						if( prize_arr[i] == 0 ) {
+							//未中奖替换src
+							$(this).children('.backface').children('img').attr('src', prize_img[prize_arr[i]]);
+						}
+						$(this).children('.face').css({
+								'transform': "rotateY(180deg)",
+								'-webkit-transform': "rotateY(180deg)",
+						})
+						$(this).children(".backface").css({
+								'transform': "rotateY(0deg)",
+								'-webkit-transform': "rotateY(0deg)",
+						})
+						i++;
+					}else {
+						$(this).removeClass('fan');
+					}
+				})
+				//歇2秒
+				setTimeout(function(){
+					shuffle();
+				},2000);
+				lock_r = 0;
+			}else if(data.code == 2) {
+				login(login_url, version_code);
+				lock_r = 0;
+			}else if(data.code == 3) {
+				lock_r = 0;
+			}else {
+				window.AnzhiActivitys.showToastForJs(data.msg)
+				lock_r = 0;
+			}
+		},
+	});	
+}
+
+
+//翻牌
+var lock_l = 0;
+var cur_position = 0;
+function lottery_do(obj,position)
+{
+	if(parseInt(is_version) == 0) {
+		$(".tip-box2").css('display','block');
+		return false;
+	}
+	if( is_anmate == 1 ) {
+		//动画中禁止抽奖请求
+		return false;
+	}
+	if(parseInt(is_login)==2) {
+		//未登录
+		login(login_url,version_code);
+		return;
+	}
+	if( $(obj).hasClass('fan') ) {
+		return false;
+	}
+	if( lottery_num <= 0 ) {
+		window.AnzhiActivitys.showToastForJs('您没有翻牌的机会');
+		return false;
+	}
+	if( lock_l ) {
+		return false;
+	}else {
+		lock_l = 1;
+	}
+	$.ajax({
+		url: '/lottery/<!--{$out.prefix}-->/lottery.php',
+		data:"position="+position+'&sid='+sid+'&aid='+aid+'&uid='+uid+'&g_num='+g_num,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if( data.code == 1 ) {
+				$('.start-tip').hide();
+				if( games <= 0 ) {
+					$('.end_games').show();
+				}else {
+					$('.games').show();
+				}
+				cur_position = position;
+				//如果是返回有red_id替换图标  未完成
+				//逻辑 未中奖替换图片当局红包计数不增加,反之  未完成
+				red_package_num++;
+				draw_num++;
+				$(obj).addClass('fan');//标示已翻的
+				$(obj).children('.face').css({
+						'transform': "rotateY(180deg)",
+						'-webkit-transformtransform': "rotateY(180deg)",
+						
+				})
+				$(obj).children(".backface").css({
+						'transform': "rotateY(0deg)",
+						'-webkit-transform': "rotateY(0deg)",
+				})
+				$('.draw').removeClass('light_ac');
+				lottery_num--;
+				$('#lottery_num').text(lottery_num);
+				//调客户端弹层
+				//alert(data.data)
+				open_red(data.data);
+				lock_l = 0;
+			}else if( data.code == -1 ) {
+				$('.start-tip').hide();
+				if( games <= 0 ) {
+					$('.end_games').show();
+				}else {
+					$('.games').show();
+				}
+				red_package_num++;
+				no_draw_num++;
+				$(obj).children('.backface').children('img').attr('src', prize_img[0]);
+				$(obj).addClass('fan');//标示已翻的
+				$(obj).children('.face').css({
+						'transform': "rotateY(180deg)",
+						'-webkit-transform': "rotateY(180deg)"
+				})
+				$(obj).children(".backface").css({
+						'transform': "rotateY(0deg)",
+						'-webkit-transform': "rotateY(0deg)",
+				})
+				$('.draw').removeClass('light_ac');
+				lottery_num--;
+				$('#lottery_num').text(lottery_num);
+				//调客户端弹层
+				open_red(data.data);
+				lock_l = 0;
+			}else if(data.code == 2) {
+				login(login_url, version_code);
+				lock_l = 0;
+			}else if(data.code == 3) {
+				lock_l = 0;
+			}else{
+				window.AnzhiActivitys.showToastForJs(data.msg)
+				lock_l = 0;
+			}
+		},
+		error : function (textStatus) {
+			lock_l = 0;
+			window.AnzhiActivitys.showToastForJs(textStatus);
+		},
+		complete : function(XMLHttpRequest,status){
+			if(status=='timeout'){
+				lock_l = 0;
+				window.AnzhiActivitys.showToastForJs('超时啦！');
+			}
+		}
+	});
+
+}
+
+//洗牌
+function shuffle()
+{
+	$(".face").css({
+			'transform': "rotateY(0deg)",
+			'-webkit-transform': "rotateY(0deg)"
+        })
+		$(".backface").css({
+			'transform': "rotateY(-180deg)",
+			'-webkit-transform': "rotateY(-180deg)"
+        })
+		$('.draw').addClass('light_ac');//边框闪动动画
+		$('.start').hide();
+		$('.mask').show();
+		setTimeout(function(){
+			$(".card").css({
+				'transform': "translate3d(6.35rem,6.55rem,0)",
+				'-webkit-transform': "translate3d(6.35rem,6.55rem,0)",
+			})
+			setTimeout(function(){
+					$('.mask').hide();
+					$('.start-tip').show();
+					$('.card_wrap').html('<ul><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ul>');
+					var i = 0;
+					var r = null;
+					var timer = null;
+					timer = setInterval(function(){
+						var url = static_path+'images/lottery1.png';
+						i++;
+						if(i<9){
+							is_anmate = 1;
+							r = '<div class="card" onclick="lottery_do(this,'+i+')" ><div class="face"></div><div class="backface"><img src="' + url + '">' + "</div></div>";
+							$(".card_wrap").append(r);
+							
+							$(".face").css({
+								'transform': "rotateY(0deg)",
+								'-webkit-transform': "rotateY(0deg)"
+							})
+							$(".backface").css({
+								'transform': "rotateY(-180deg)",
+								'-webkit-transform': "rotateY(-180deg)"
+							})
+						}else{
+							is_anmate = 0;
+							clearInterval(timer)
+						}
+					},400)
+				},1200)
+		},1200)
+}
+
+function random_prize() {
+	var arr = [];
+	var card_num = 8 - red_package_num;//剩余卡牌数
+	var cha_num = red_conf_num - draw_num;
+	var	red_num = 0;
+	if( cha_num <= 0 ) {
+		for( var m = 0; m < card_num; m++) {
+			arr.push(0);
+		}
+		return arr;
+	}else {
+		if( draw_num == 1) {
+			if( cha_num > 3 ) {
+				red_num = 3
+			}else {
+				red_num = cha_num
+			}
+		}else if( draw_num == 2 ) {
+			if( cha_num > 2 ) {
+				red_num = 2
+			}else {
+				red_num = cha_num
+			}
+		}else {
+			if( cha_num > 4 ) {
+				red_num = 4
+			}else {
+				red_num = cha_num
+			}
+		}
+		for(var j=0; j<red_num; j++){
+			arr.push(1);
+		}
+		
+		var no_red_num = card_num - red_num;
+		for( var m = 0; m < no_red_num; m++){
+			arr.push(0);
+		}
+		return mess(arr);
+	}
+}
+
+function mess(arr){
+	return arr.sort(function(){ return 0.5 - Math.random() })
+} 
+
+$(function(){
+	setTimeout(function(){
+		var go_from = 2;
+		my_soft(aid,sid,6,go_from,'<!--{$out.uid}-->','<!--{$out.package_task}-->','<!--{$out.package_task_done}-->');
+	}, 500);
+})
+
+function onLoginComplete(sid,tip)
+{
+	if(parseInt(is_version) == 0) {
+		$(".tip-box2").css('display','block');
+		return false;
+	}
+	sid_str = sid.replace("PHPSESSID=", "");
+	location.href="/lottery/"+prefix+"/index.php?sid="+sid_str+"&aid=<!--{$out.aid}-->";	
+}
+
+function login(login_url,version_code)
+{
+	if(parseInt(is_version) == 0) {
+		$(".tip-box2").css('display','block');
+		return false;
+	}
+	if(version_code >= 5700 ){
+		window.AnzhiActivitys.login();
+		javascript:window.history.forward(1); 
+	}else{
+		location.href=login_url;
+	}
+}
+
+function open_red(param){
+	window.AnzhiActivitys.openRedPack(param);
+}
+
+function open_red_do(inserId)
+{
+	if( !inserId ) {
+		window.AnzhiActivitys.showToastForJs('领取失败')
+	}
+	$.ajax({
+		url: '/lottery/<!--{$out.prefix}-->/soft_task.php',
+		data:'type='+5+'&sid='+sid+'&aid='+aid+'&inserId='+inserId,
+		type:"post",
+		dataType: 'json',
+		success:function(data) {
+			if( data.code == 1 ) {
+				open_red(data.data)
+			}else {
+				window.AnzhiActivitys.showToastForJs(data.msg);
+			}
+		},			
+	});	
+}
+
+function reportPacketResult(json){
+    var data = JSON.parse(json);
+    if(data.type==2){
+        if(data.result==2||data.error==-5){
+            //将未领取干掉
+            $.ajax({
+                    url: '/lottery/red_package/index.php',
+                    data:'sid='+sid+'&aid='+aid+'&orderid='+data.orderId,
+                    type: 'post',
+                    dataType: 'json',	
+                    success:function(res){
+                    	//软件过滤  置回翻卡状态
+                        $.ajax({
+                        		url: '/lottery/<!--{$out.prefix}-->/soft_task.php',
+                                data:'type='+6+"&position="+cur_position+'&sid='+sid+'&aid='+aid+'&uid='+uid+'&g_num='+g_num,
+                                type: 'post',
+                                dataType: 'json',	
+                                success:function(res){
+                                    location.reload();
+                                }
+                        });
+                    }
+            });
+        }else{
+            location.reload();
+        }
+    }
+}
+
+function cloBox(obj,is_reload){
+	$(obj).hide();
+	 $('#body-bg').hide();
+	if(is_reload == 1){
+		window.location.reload();//加载页面
+	}
+}
+
+
+<!--{if $out['is_share'] == 1}-->
+document.write(unescape("%3Cscript src='/js/anzhi-fd-min.js' type='text/javascript'%3E%3C/script%3E"));
+var actiontype = '<!--{$out.activity.activity_type}-->';
+var from = 8;
+var lock = false;
+function share_download(){
+	var js_param = {type:'action', id:aid,actiontype:actiontype, from:from,callback:invite_callback};
+	var php_param = {type:'action', aid:aid,actiontype:actiontype, from:from};
+	Azfd.share_download(js_param, php_param);
+}
+function invite_callback() {
+	if (typeof(arguments[0]) != 'undefined') {
+		var magic = arguments[0];
+		var version = parseInt(arguments[1]);
+		var firmware = arguments[2];
+		var flag = arguments[3];
+		if(version >= 6500){
+			js_param = {type:'action', id:aid, callback:null};
+			Azfd.lock = false;
+		}else {
+			setTimeout(function(){
+				var php_url = '/fast.php?';
+				for (var i in php_param) {
+					php_url += '&' + i + '=' + php_param[i];
+				}
+				window.location.href=php_url;
+			},1000);
+		}
+	}else{
+		setTimeout(function(){
+			var php_url = '/fast.php?';
+			for (var i in php_param) {
+				php_url += '&' + i + '=' + php_param[i];
+			}
+			window.location.href=php_url;
+		},1000);
+	}
+}
+ $(document).ready(function () {
+	setTimeout(function(){
+		share_download();
+	}, 100);
+}); 
+<!--{/if}-->
+</script>
+</body>
+</html>

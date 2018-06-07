@@ -1,0 +1,113 @@
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style>
+.sub_tr {height: 35px;text-align: left;}
+</style>
+<script>
+function onUploadImgChange(sender,img){
+	if(!$("#"+img).val()){
+		return false;
+	}
+    if( $("#"+img).val() && !sender.value.match( /.jpg|.png/i ) )
+	{        
+        alert('图片格式无效！');   
+		remove_file(img);
+        return false;       
+    }
+}
+function remove_file(file){
+	var file = $("#"+file);
+	file.after(file.clone().val(""));
+	file.remove();	
+	return false;   	
+}
+function change_sth(obj){
+	$(obj).remove();
+	$("#banner_img").remove();
+	$("#banner_v").val('');
+}
+</script>
+<FORM method="POST" action="__URL__/soft_edit?" enctype="multipart/form-data">
+<table class="sub_tab" align="center" cellspacing="0" cellpadding="0" border="0">
+	<input name='id' id='id' type='hidden' value="<?php echo $soft_info['id']?>"/>
+	<tr class="sub_tr">
+		<td>渠道名称：</td>
+		<td>
+			渠道名称：
+			<select name="channel_id" id="channel_id" style="width:80px">
+				<?php 
+						$str .= "<option value='0'>全部</option>";
+						foreach($channel_list as $v) {
+						if( $v['id'] == $soft_info['channel_id'] ) {
+							$checked = "selected";
+						}else {
+							$checked = "";
+						}
+						$str .= "<option ".$checked." value='".$v['id']."' >".$v['name']."</option>";
+						}
+						echo $str;
+					?>
+			</select>
+		</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>软件名称：</td>
+		<td><?php echo $soft_info['softname']?></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>软件包名：</td>
+		<input name='package' id='package' type='hidden' value="<?php echo $soft_info['package']?>"/>
+		<td><?php echo $soft_info['package']?></td>
+	</tr>
+
+	<tr class="sub_tr">
+		<td>行为ID：</td>
+		<td><input name='beid' id='beid' type='text' value="<?php echo $soft_info['beid']?>"/></td>
+	</tr>
+
+	<tr class="sub_tr">
+		<td>简介：</td>
+		<td><input name='introduce' type='text' value="<?php echo $soft_info['introduce']?>" />&nbsp;&nbsp;选填：最多13个字</td>
+	</tr>
+	<tr class="sub_tr">
+		<td>单价：</td>
+		<td><input name='price' id='price' type='text' value="<?php echo $soft_info['price']?>"/></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>投放日期：</td>
+		<td><span id="WebCalendar3"
+			style="border: 1px solid rgb(127, 157, 185); padding: 1px; display: inline-block; width: 154px;">
+		<input id="start_at" name="tf_date"
+			onclick="WdatePicker({minDate: '%y-%M-#{%d}'})"
+			style="border: 0px none black; width: 130px;" value="<?php echo $soft_info['tf_date']?>"
+			size="15" type="text"><img src="/Public/js/calendar.gif"
+			class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"start_at",dateFmt:"yyyy-MM-dd",minDate: "%y-%M-#{%d}"})' 
+			style="margin: 1px;" width="16px" align="absmiddle" height="15px">
+		</span></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>icon图标：</td>
+		<td>
+		<input type="hidden" name="icon_v" value="<?php echo $soft_info['iconurl_72']; ?>" />
+		<input type="file" name="iconurl_72" id="iconurl_72" onchange="onUploadImgChange(this,'iconurl_72');" />
+		<?php if ($soft_info['iconurl_72']) { ?><img src="<?php echo $IMGATT_HOST.$soft_info['iconurl_72']; ?>" /><?php } ?>
+		<p>支持jpg、png格式，尺寸72x72，大小不超过5k</p></td>
+	</tr>
+	<tr class="sub_tr">
+		<td>Banner图：</td>
+		<td>
+		<input type="hidden" name="banner_v" id="banner_v" value="<?php echo $soft_info['banner']; ?>" />
+		<input type="file" name="banner" id="banner" onchange="onUploadImgChange(this,'banner');" />
+		<?php if ($soft_info['banner']) { ?><img id="banner_img" src="<?php echo $IMGATT_HOST.$soft_info['banner']; ?>" />&nbsp;&nbsp;<a href="javascript:;" onclick="change_sth(this)">删除</a><?php } ?>
+		<p>支持jpg、png格式，尺寸660x180，大小不超过20k</p></td>
+	</tr>
+	<tr class="sub_tr">
+		<td colspan="2"> 
+			<input type='submit' value="&nbsp;&nbsp;提交&nbsp;&nbsp;"/>&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type="button" onclick="tb_remove()" value="&nbsp;&nbsp;取消&nbsp;&nbsp;">
+		</td>
+	</tr>
+</table>
+</FORM>	

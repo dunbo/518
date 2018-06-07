@@ -1,0 +1,388 @@
+{// 加载头部公共文件 }
+<include file="../../Public/new_header" />
+
+<link rel="stylesheet" type="text/css" media="all"
+  href="__PUBLIC__/js/calendar-win2k-cold-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="__PUBLIC__/js/calendar_bak.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-zh.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/calendar-setup.js"></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>
+<script>
+function postcheckit(str)
+{
+	$.zxxbox('<div style="width:600px; height:300px" ><form action="__URL__/feedback_reback/id/'+str+'" method="post"><span>回复</span><br /><textarea name="content" cols="" rows="" style="width:580px; height:250px" ></textarea><br /><input name="" type="submit" value="提交" /><input name="" type="reset" value="取消" /></form></div>', {
+		title: "安智网",
+		bg: false		 
+	});
+}
+function deleteSoftFeedback(id)
+{ 	
+	if(confirm('您确定要删除此条举报？')) {
+		var buid = '#tr'+id+' td button';
+		$(buid).attr({disabled:'disabled', name:'disabled'});
+		$.ajax({
+			url: '__URL__/deleteSoftFeedback/softid/' + id, 
+			data: '',
+			type: 'get',
+			dataType: 'json',
+			success: function(ret) {				
+				if(ret['code']==1) {	//成功
+					//变灰不可点击处理
+					for(var i in ret['msg']) {
+						var delid = '#tr'+ret['msg'][i];
+						var aid = '#tr'+ret['msg'][i]+' a';
+						var iid = '#tr'+ret['msg'][i]+' input';
+						var imgid = '#tr'+ret['msg'][i]+' img';
+						var bid = '#tr'+ret['msg'][i]+' td button';
+						var tid = '#tr'+ret['msg'][i]+'  td table';
+						$(delid+' td').removeAttr('bgcolor');
+						$(delid).css({color:'#bcbcbc',background:'#ececec'});
+						$(aid).css('color', '#bcbcbc');
+						$(aid).removeAttr('href');
+						$(aid).removeAttr('onclick');
+						$(iid).attr({disabled:'disabled', name:'disabled'});
+						$(iid).attr('checked', false);
+						$(imgid).removeAttr('onclick');
+						$(bid).removeAttr('onclick');
+						$(bid).attr({disabled:'disabled', name:'disabled'});
+						$(tid).css({color:'#bcbcbc',background:'#ececec'});
+					}   
+				}else{
+					alert('删除失败请重试');
+				}
+			}
+		});
+	}	
+}
+function batchDeleteSoftFeedback()
+{
+  if (confirm("是否批量删除软件举报信息？")) {
+    var input = new Array();
+    var has = false;
+    $('input[name^=id_]').each(function(){
+      if (this.name != 'id_all' && this.checked) {
+        input.push(this.value);
+        has = true;
+      }
+    });
+    if (has) {
+      location.href = '__URL__/deleteSoftFeedback/softids/'+ input.join(',');
+    } else {
+      alert('请选择需要删除的记录');
+    }
+  }
+}
+function checkAll(obj)
+{
+  var flag = $(obj).attr('checked') == 'checked';
+  $('input[name^=id_]').attr('checked', flag);
+}
+function checkPost()
+{
+	if ($('#softname').val().length >0 && $('#softname').val().length < 2) {
+		alert('软件名称长度必须大于2');
+		return false;
+	}
+	if ($('#content').val().length >0 && $('#content').val().length < 2) {
+		alert('举报内容长度必须大于2');
+		return false;
+	}
+	if ($('#dev_name').val().length >0 && $('#dev_name').val().length < 2) {
+		alert('开发者名称长度必须大于2');
+		return false;
+	}
+	return true;
+}
+
+</script>
+<style type="text/css">
+<!--
+.intb td {
+border-right:none;
+border-bottom: none;
+}
+.searchbar input {
+  width: 70px;
+
+}
+-->
+</style>
+<div class="main" >
+<div class="content">
+<center>
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+<tr height="35">
+  <td align="center" style="background:#FFCC66"><a href="__URL__/soft_feedback_list"><font style="color:#000; font-weight:bold">软件举报信息</font></a></td>
+  <td align="center" ><a href="__URL__/soft_feedback_unshow_list"><font style="color:#000; font-weight:bold">已删除列表</font></a></td>
+</tr>
+</table>
+<form action="__URL__/soft_feedback_statistics_list" method="GET" onsubmit="return checkPost();">
+<table border="0"  width="100%" cellpadding="0"  cellspacing="0" class="tb">
+  <tr height="30">
+    <td>软件id:</td> <td><input size='9' type="text" name="softid" value="{$softid}" ></td>
+    <td>软件名称:</td> <td><input size='9' type="text" name="softname" id="softname" value="{$softname}" /></td>
+    <td>软件包名:</td> <td><input size='9' type="text" name="package" value="{$package}" /></td>
+    <td>开发者名称:</td>  <td><input size='9' type="text" name="dev_name" id="dev_name" value="{$dev_name}" /></td>	
+    <td>邮箱:</td> <td><input size='9' type="text" name="email" value="{$email}" /></td>
+    <td>下载量:</td> <td><input size='9' type="text" name="startdownload" value="{$startdownload}" />~<input size='9' type="text" name="enddownload" value="{$enddownload}" /></td>
+   <td rowspan='2' align='center' ><input type="submit" value="搜索"/></td>	
+  </tr>
+  <tr height="30">
+	  <td>举报内容:</td><td><input size='9'  type="text" name="content" id="content" value="{$content}" /></td>
+	  <td>举报类型:</td>
+	  <td colspan="2" >
+	  <select name="feedbacktype" id="feedbacktype" style="width:100px;height:25px;font-size:12px;">
+	  <option value="0">全部</option>
+	  <?php foreach ($feedbacktype_list as $key => $value): ?>
+	  <option value="<?php echo $key?>" <?php if($feedbacktype==$key) { ?> selected="selected"<?php } ?>><?php echo $value?></option>
+	  <?php endforeach; ?>
+	  </select>
+	  </td>
+	<td>举报类型（新）:</td>
+	<td colspan="1" >
+	  <select name="question_type" id="question_type" style="width:55px;height:25px;font-size:12px;">
+	  <option value="">全部</option>
+	  <?php foreach ($report_question_type as $key => $value): ?>
+	  <option value="<?php echo $key?>" <?php if($question_type==$key) { ?> selected="selected"<?php } ?>><?php echo $value['question']?></option>
+	  <?php endforeach; ?>
+	  </select>
+	</td>	  
+	  <td>来源:</td>
+	  <td colspan="1" >
+	  <select name="jbori" id="jbori" style="width:100px;height:25px;font-size:12px;">
+	  <option value="0">全部</option>
+	  <?php foreach ($feedback_source as $key => $value): ?>
+	  <option value="<?php echo $key?>" <?php if($jbori==$key) { ?> selected="selected"<?php } ?>><?php echo $value?></option>
+	  <?php endforeach; ?>
+	  </select>
+	  </td>
+	  <td>开发者类型：</td>
+	  <td colspan="1">
+	  <select name="dev_type">
+	  <option value='' <?php if($dev_type=='') { ?> selected="selected"<?php } ?> >全部</option>
+	  <option value='1' <?php if($dev_type=='1') { ?> selected="selected"<?php } ?> >个人</option>
+	  <option value='0' <?php if($dev_type=='0') { ?> selected="selected"<?php } ?> >公司</option>
+	  </select>
+	  </td>
+	  <td><button  type='button' onClick="window.location.href='__URL__/soft_feedback_list/begintime/<?php echo date('Y-m-d 00:00:00',strtotime(date("Y-m-d",time()))-30*86400); ?>/endtime/<?php echo date('Y-m-d 23:59:59',strtotime(date("Y-m-d",time()))); ?>/'"/>原始数据</button></td>
+  </tr>
+</table>
+</form>
+<table width="100%" border="1" cellpadding="0" cellspacing="0">
+<tr align='left' bgcolor="" height='30'>
+  <td><?php echo $total;?>条</td>
+</tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="tb">
+  <tr>
+	<td align='center'  width="5%" height="30" bgcolor="#e3e2fe"><input type="checkbox"  onclick="checkAll(this)" name="id_all"/></td>
+    <td  align='center' width="15%" height="30" bgcolor="#e3e2fe"><b>软件信息</b></td>
+    <td  align='center' width="10%" height="30" bgcolor="#e3e2fe"><b>开发者</b></td>
+    <td align='center' width="10%" height="30" bgcolor="#e3e2fe"><a href="__URL__/soft_feedback_statistics_list?<?php echo $query?>"?><b>剩余量</b><?php echo $order=='d' ? '↓' : '↑' ?></td>
+    <td  align='center' width="20%" height="30" bgcolor="#e3e2fe"><b>举报统计</b></td>
+    <td  align='center' width="10%" height="30" bgcolor="#e3e2fe"><b>操作</b></td>
+  </tr>
+  <?php foreach ($feedbacklist as $val):?>
+  <tr id='tr<?php echo $val['softid']?>'>
+	<td align='left'>
+	<input type="checkbox" value="<?php echo $val['softid']?>" name="id_<?php echo $val['softid']?>"/> <br/>
+	<a href="/index.php/Dev/Message/soft_feedback_list/softid/<?php echo $val['softid']?>"><?php echo $val['softid']?></a><br/>
+	<a href="/index.php/Dev/Soft/softlist/package/<?php echo $val['package']?>"><img width="48" height="48" src="<?php echo IMGATT_HOST. $softinfo[$val['softid']]?>"></a>
+	</td>
+    <td>
+         <a href="http://www.anzhi.com/pkg/<?php echo $val['package']?>" target="_blank"><?php echo $val['softname']?></a><br/>
+		<?php echo $val['package']?><br/>
+		版本号:<?php echo $val['version_code']?>&nbsp;|&nbsp;版本名:<?php echo $val['version']?>
+    </td>
+    <td align='left'>
+
+
+    <?php if ($dev_info[$val['dev_id']]) : ?>
+      <a href='/index.php/Dev/User/userlists/dev_id/<?php echo $val['dev_id']?>'>  
+<?php echo $dev_info[$val['dev_id']]['dev_name']?></a>  <br>
+    <?php echo $dev_info[$val['dev_id']]['type']==0?'公司':'个人'?> <br>
+    
+<a href="/index.php/Dev/Message/soft_feedback_list?email=<?php echo $dev_info[$val['dev_id']]['email']?>"><?php echo $dev_info[$val['dev_id']]['email']?></a>
+    <br>
+  <?php elseif($val['dev_name']):?>
+    <?php echo $val['dev_name'];?>
+  <?php endif;?>&nbsp;
+    </td>
+    <td align='left'>
+<!--  总量<?php echo $val['total_downloaded']?> <br>
+-扣量<?php echo $val['total_downloaded_detain']?><br>
++增量<?php echo $val['total_downloaded_add']?><br> -->
+<!-- 剩余量 -->
+<?php echo number_format($val['total_downloaded'] + $val['total_downloaded_add'] -$val['total_downloaded_detain']);?>
+    </td>
+    <td align='left'>
+    <table class="intb">
+<?php foreach ($feedbacktype_info[$val['softid']] as $key => $value): ?>
+      <tr>
+<td><a href="/index.php/Dev/Message/show_soft_feedback/softid/<?php echo $val['softid']?>/feedbacktype/<?php echo $value[2]?>"><?php echo $value[0] ?></a></td>
+<td><?php echo $value[1];?>条</td>
+</tr>
+<?php endforeach; ?>
+    </table>
+
+    </td>
+    <td align='center'>
+<!--  <input onclick="undercarriage('<?php echo $val['softid']?>')" value="下架" type='button'/>	<br/><br/> -->
+<button  onClick="deleteSoftFeedback(<?php echo $val['softid']?>)"/>删除</button>
+    </td>
+  <?php endforeach;?>
+  </tr>
+<tr height='50px'>
+    <td colspan="17">
+    <input type="checkbox"  onclick="checkAll(this)" name="id_all"/> 
+	<input type="button" id="delete" value="批量删除"  onClick="batchDeleteSoftFeedback()"  />
+	<!-- <input type="button" onclick="undercarriage_arr()" value="批量下架"/> -->
+</td>
+  </tr> 
+</table>
+<div  align='left'>{$page}</div>
+</center>
+</div>
+</div>
+<!-- 主页面结束 -->
+{// 加载尾部公共文件 }
+ 
+
+<!--下架-->
+<div id="reject_div" style="position:absolute;top:0px;left:0px;width:500px;height:440px;border:1px solid #000;background:#fff;display:none;">
+<table border="0" cellpadding="0" cellspacing="0" style="width:100%;height:100%;">
+	<tr height="30">
+		<td style="padding-left:10px;"><span style="font-weight:bold;text-align:center;">下架原因：</span></td>
+	</tr>
+	<volist name='reason_list' id='reason_list'>
+	<tr height="30">
+		<td style="padding-left:10px;"><input type="checkbox" name="reject[]" value="{$reason_list.content}" />&nbsp;&nbsp;&nbsp;{$reason_list.content}</td>
+	</tr>
+	</volist>
+	<tr height="30">
+		<td style="padding-left:10px;">其他原因：</td>
+	</tr>
+	<tr height="30">
+		<td style="padding-left:10px;"><textarea onblur="if(value==''){value='请输入其他下架原因：'}" cols="75" rows="9" style="color:#999999;" id="reject_reason" onfocus="clearText(this);" name="reject_reason">请输入其他下架原因：</textarea></td>
+	</tr>
+	<tr>
+		<td style="text-align:left;padding-left:130px;"><button type="button" onclick="undercarriage_submit()" style="margin-right:10px;">确定</button><button type="button" onclick="popclose('reject_div')">取消</button></td>
+	</tr>
+</table>
+</div>
+<input type="hidden" name="tmp" id="tmp" />
+
+<div id="bgdiv" style="position:absolute;display:none; left:0px; top:0px; width:100%; height:100%; filter:alpha(opacity=40);opacity:0.4; background-color:#000000; z-index:1000;"></div>
+
+<script language="javascript">
+function clearText(obj)
+{
+  if(obj.value!="")
+  obj.value=""
+}
+//下架
+var last_id = null;
+function undercarriage(id) {
+	if (last_id != id) {
+		$("[name='reject[]']").each(function(){
+			$(this).attr('checked',false);
+		});
+		$("#reject_reason").val("请输入其他下架原因：");
+		$('#reject_reason').css({'color':'#000'});
+
+	}
+	popup('reject_div');
+	last_id = id;
+	$('#tmp').val(id);
+}
+//批量下架
+function undercarriage_arr() {
+	var id_arr = new Array();
+	var i = 0;
+	$('input[name^=id_]').each(function(){
+		
+		if(this.name !='id_all' && $(this).is(':checked')) {
+			id_arr[i] = $(this).val();
+			i++;
+		}
+	});
+	var id_str = id_arr.join(',');
+	if(id_str=='') {
+		alert('请选择要#e3e2fe的对象！');
+		return false;
+	}
+
+	undercarriage(id_str);
+}
+//下架提交
+function undercarriage_submit() {
+	var rt = '';
+	$('input:checkbox[name="reject[]"]:checked').each(function(){
+		rt += $(this).val()+"<br />";
+	});
+	if($('#reject_reason').val()!='请输入其他下架原因：') {
+		rt += $('#reject_reason').val();
+	}
+	if(!rt) {
+		alert('请输入其他下架原因!');
+		return false;
+	}
+	$.ajax({
+		url: '/index.php/Dev/Soft/undercarriage/id/'+$('#tmp').val(),
+		data: 'msg='+rt,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				location.reload();//加载页面
+				return false;
+			} else if(ret['code']==1) {	//成功
+				popclose('reject_div');
+				//变灰不可点击处理
+				for(var i in ret['msg']) {
+					var delid = '#tr'+ret['msg'][i];
+					var aid = '#tr'+ret['msg'][i]+' a';
+					var iid = '#tr'+ret['msg'][i]+' input';
+					var imgid = '#tr'+ret['msg'][i]+' img';
+					var bid = '#tr'+ret['msg'][i]+' button';
+					$(delid+' td').removeAttr('bgcolor');
+					$(delid).css({color:'#bcbcbc',background:'#ececec'});
+					$(aid).css('color', '#bcbcbc');
+					$(aid).removeAttr('href');
+					$(aid).removeAttr('onclick');
+					$(iid).attr({disabled:'disabled', name:'disabled'});
+					$(iid).attr('checked', false);
+					$(imgid).removeAttr('onclick');
+					$(bid).removeAttr('onclick');
+					$(bid).attr({disabled:'disabled', name:'disabled'});
+				}
+			}
+		}
+	});
+}	
+</script>
+
+<script language="javascript">
+function popup(id) {
+	var ids=['reg','login','bgdiv'];
+	for(var i in ids) {
+		popclose(ids[i]);
+	}
+
+	$("#bgdiv").css("display","block");
+	$("#bgdiv").css({width:$(document).width()+"px",height:$(document).height()+"px"});
+
+	$("#"+id).css({display:"block",position:"absolute",zIndex:"10001"});
+	$("#"+id).css("top",($(window).height()-$("#"+id)[0].offsetHeight)/2+$(document).scrollTop()+"px");
+	$("#"+id).css("left",($(window).width()-$("#"+id)[0].offsetWidth)/2+$(document).scrollLeft()+"px");
+}
+function popclose(id) {
+	$("#"+id).css({display:"none"});
+	$("#bgdiv").css({display:"none"});
+}
+</script>
+ 

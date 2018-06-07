@@ -1,0 +1,388 @@
+<!--<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>-->
+{//时间插件开始}
+<!--<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>-->
+{//时间插件结束}
+<!--<script type="text/javascript" src="__PUBLIC__/school/js/jquery.zxxbox.3.0.js"></script>-->
+
+<link rel="stylesheet" href="/Public/css/jquery.autocomplete.css" type="text/css" media="screen" />
+<script type="text/javascript" src="/Public/js/jquery.autocomplete.js"></script>
+
+<div class="main" >
+<div class="content">
+    <form name="task_fml" action="__URL__/save_task"  method="post">
+    <div style="float:left;margin-left: 80px">
+        <div style="float:left;width:60px">软件包名：</div>
+        <input type="text" style="width:140px" name="package" id="package" value="{$task_info.package}" class="search_item_text" onblur="get_soft()" <?php if($task_info&&$task_info['start_tm']<time()){echo 'disabled';}?>>
+        <input type="hidden" name="id" id="id" value="{$task_info.id}">
+        <input type="hidden" name="softname" id="softname" value="{$task_info.softname}">
+        <input type="hidden" name="category_id" id="category_id" value="{$task_info.category_id}">
+        <input type="hidden" name="category_name" id="category_name" value="{$task_info.category_name}">
+        <div id="package_info"></div><div id="package_error" style="margin-left: 60px;color:red"></div>
+    </div>
+    <div style="float:left;margin-top: 10px;margin-left: 80px">
+        <div style="float:left;width:60px">所属客户：</div>
+        <select onchange='change_custom()' name="custom" id="custom" class="search_item_text" <?php if($task_info&&$task_info['start_tm']<time()){echo 'disabled';}?>>
+            <?php if($task_info['custom_name']){echo '<option value="'.$task_info['custom_id'].'_'.$task_info['contract_id'].'">'.$task_info['custom_name'].'</option>';}?>
+        </select>
+        <input type="hidden" name="s_custom" id="s_custom" value="<?php echo $task_info['custom_id'].'_'.$task_info['contract_id'];?>">
+        <div id="custom_error" style="margin-left: 60px;color:red"></div>
+        <div id="contract_info" style="color:gray"></div>
+    </div>
+    <div style="float:left;margin-top: 10px;margin-left: 80px">
+        <div style="float:left;width:60px">开始时间：</div>
+        <input type="text" style="width:140px" name="start_tm" id="start_tm" value="<?php if($task_info['start_tm']){echo date($tm_formate,$task_info['start_tm']);}?>" class="search_item_text Wdate"  onclick="WdatePicker({$start_formate})" onblur="check_time('start_tm')" readonly <?php if($task_info&&$task_info['start_tm']<=time()){echo 'disabled';}?>>
+        <div id="start_tm_error" style="margin-left: 60px;color:red"></div>
+    </div>
+    <div style="float:left;margin-top: 10px;margin-left: 80px">
+        <div style="float:left;width:60px">结束时间：</div>
+            <input type="text" style="width:140px" name="end_tm" id="end_tm" value="<?php if($task_info['end_tm']){echo date($tm_formate,$task_info['end_tm']);}?>" class="search_item_text Wdate" onclick="WdatePicker({$end_formate})" onblur="check_time('end_tm')" readonly <?php if($task_info&&$task_info['end_tm']<strtotime(date('Ymd'))){echo 'disabled';}?>>
+        <div id="end_tm_error" style="margin-left: 60px;color:red"></div>
+    </div>
+    <div style="float:left;margin-top: 10px;margin-left: 80px">
+        <div style="float:left;width:60px;text-align:right">单价：</div>
+        <input type="text" style="width:140px" name="price" id="price" value="<?php echo $task_info['price'];?>" class="search_item_text " <?php if($task_info&&$task_info['start_tm']<time()){echo 'disabled';}?> readonly>
+        <div id="price_error" style="margin-left: 60px;color:red"></div>
+    </div>
+    <!--<div style="float:left;margin-top: 10px;margin-left: 80px">-->
+        <!--期望日下载：<input type="text" style="width:140px" name="hope_download" id="hope_download" value="<?php echo $task_info['hope_download'];?>" class="search_item_text" <?php if($task_info&&$task_info['start_tm']<time()){echo 'disabled';}?>>-->
+        <!--<div id="hope_download_error" style="margin-left: 60px;color:red"></div>-->
+    <!--</div>-->
+        <div style="float:left;margin-top: 10px;margin-left: 80px">
+            <div style="float:left;width:60px;text-align:right">合同余额：</div>
+            <input type="text" style="width:140px" name="all_budgets" id="all_budgets" value="<?php echo $task_info['all_budgets'];?>" class="search_item_text" disabled>
+            <div id="all_budgets_error" style="margin-left: 60px;color:red"></div>
+        </div>
+        <div style="float:left;margin-top: 10px;margin-left: 52px">
+            <div style="float:left;width:86px">剩余充值金额：</div>
+            <input type="text" style="width:140px" name="recharge_budgets" id="recharge_budgets" value="<?php echo $task_info['recharge_budgets'];?>" class="search_item_text" disabled>
+            <div id="recharge_budgets_error" style="margin-left: 60px;color:red"></div>
+        </div>
+        <div style="float:left;margin-top: 10px;margin-left: 52px">
+            <div style="float:left;width:86px">剩余配送金额：</div>
+            <input type="text" style="width:140px" name="delivery_budgets" id="delivery_budgets" value="<?php echo $task_info['delivery_budgets'];?>" class="search_item_text" disabled>
+            <div id="delivery_budgets_error" style="margin-left: 60px;color:red"></div>
+            <input type="hidden" id="o_all_budgets">
+            <input type="hidden" id="o_recharge_budgets">
+            <input type="hidden" id="o_delivery_budgets">
+        </div>
+        <div style="float:left;margin-top: 10px;margin-left: 80px">
+            <div style="float:left;width:60px;text-align:right">备注：</div>
+            <textarea name="remark" id="remark" <?php if($task_info&&$task_info['start_tm']<time()){echo 'disabled';}?>><?php echo $task_info['remark'];?></textarea>
+            <div id="remark_error" style="margin-left: 60px;color:red"></div>
+        </div>
+    <div style="float:left;margin-top:10px;" id="confirm_game">
+        <div style="float:left;margin-left:70px"><input type="submit" value="确定" class="search_btn" onclick="return check_task()"></div>
+        <div style="float:left;margin-left:20px"><input type="button" value="取消" class="search_btn " onclick="javascript:tb_remove();"></div>
+    </div>
+
+</form>
+</div>
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        var client = [{$all_clients}];
+        $("#custom_name").autocomplete(client,{
+            minChars: 0,//自动完成激活之前填入的最小字符
+            max:12,//列表条目数
+            width: 400,//提示的宽度
+            scrollHeight: 300,//提示的高度
+            matchContains: true,//是否只要包含文本框里的就可以
+        });
+    })
+
+
+    function get_soft(){
+        var package = $("#package").val();
+        $("#custom").find("option").remove();
+        if(package!=''){
+            $.ajax({
+                type: "POST",
+                url: "__URL__/get_soft_info",
+                data: "package="+package+"&type=1",
+                dataType:"json",
+                success:function(data){
+
+                    if(data.code==0){
+                        alert(data.msg);
+                        $("#package_info").html('');
+                        $("#softname").val('');
+                        $('#category_id').val('');
+                        $('#category_name').val('');
+                    }else{
+                        var str = '软件名称：'+data.softname+'<br>软件分类：'+data.category_name;
+                        $("#package_info").html(str);
+                        $("#softname").val(data.softname);
+                        $('#category_id').val(data.category_id);
+                        $('#category_name').val(data.category_name);
+                        $("#package_error").html("");
+                        $("#custom").append('<option value="">--请选择--</option>')
+                        for(var i = 0;i<data.custom.length;i++){
+                            if(data.custom[i].status==0){
+                                var append_str = "<option value='"+data.custom[i].custom_id+"_"+data.custom[i].id+"' rel='"+data.custom[i].all_budgets+"' recharge='"+data.custom[i].recharge+"' delivery='"+data.custom[i].delivery+"' start_tm = '"+data.custom[i].start_tm+"' end_tm = '"+data.custom[i].end_tm+"' nature = '"+data.custom[i].nature+"' disabled>"+data.custom[i].custom_name+"("+data.custom[i].contract_code+"<未录入预存不可选择>)"+"</option>";
+                            }else{
+                                var append_str = "<option value='"+data.custom[i].custom_id+"_"+data.custom[i].id+"' rel='"+data.custom[i].all_budgets+"' recharge='"+data.custom[i].recharge+"' delivery='"+data.custom[i].delivery+"' start_tm = '"+data.custom[i].start_tm+"' end_tm = '"+data.custom[i].end_tm+"' nature = '"+data.custom[i].nature+"'>"+data.custom[i].custom_name+"("+data.custom[i].contract_code+")"+"</option>";
+                            }
+                            $("#custom").append(append_str);
+                        }
+                    }
+                }
+            });
+        }else{
+            $("#package_error").html('包名不能为空');
+            $("#package_info").html('');
+            $("#softname").val('');
+            $('#category_id').val('');
+            $('#category_name').val('');
+        }
+    }
+
+
+    function change_custom(){
+        var cus = $("#custom option:selected");
+        $("#all_budgets").val(cus.attr('rel'));
+        $("#recharge_budgets").val(cus.attr('recharge'));
+        $("#delivery_budgets").val(cus.attr('delivery'));
+        $("#o_all_budgets").val(cus.attr('rel'));
+        $("#o_recharge_budgets").val(cus.attr('recharge'));
+        $("#o_delivery_budgets").val(cus.attr('delivery'));
+        var str = '合同开始时间：'+cus.attr('start_tm')+'<br>合同结束时间：'+cus.attr('end_tm')+'<br>自然量：'+cus.attr('nature');
+        $("#contract_info").html(str);
+        $("#s_custom").val(cus.val());
+    }
+
+    function check_task(){
+        var package = $("#package").val();
+        var softname = $("#softname").val();
+        var custom = $("#custom_name").val();
+        var start_tm = $("#start_tm").val();
+        var end_tm = $("#end_tm").val();
+        var hope_download = $("#hope_download").val();
+        var all_budgets = $("#all_budgets").val();
+        if(softname == ''){
+            $("#package_error").html("包名不能为空或未找到此软件");
+            return false;
+        }else{
+            $("#package_error").html("");
+        }
+        if(custom==''){
+            $("#custom_error").html('客户名称不能为空');
+            return false;
+        }else{
+            if($("#custom_error").html()!="未找到该客户，可以手动创建"){
+                $("#custom_error").html('');
+            }
+        }
+        if(start_tm==''){
+            $("#start_tm_error").html('时间不能为空');
+            return false;
+        }else{
+            $("#start_tm_error").html('');
+        }
+        if(end_tm==''){
+            $("#end_tm_error").html('时间不能为空');
+            return false;
+        }else{
+            $("#end_tm_error").html('');
+        }
+        if(start_tm>end_tm){
+            alert("开始时间不能大于结束时间")
+            return false;
+        }
+        if(!check_contract(start_tm,end_tm)){
+            return false;
+        };
+        get_price();
+        if(!check_price()){
+            return false;
+        };
+//        if(hope_download !=''){
+//            if(isNaN(hope_download||hope_download<0)){
+//                $("#hope_download_error").html('期望日下载量为大于等于0的数字');
+//                return false;
+//            }
+//        }
+//        if(!check_recharge()){
+//            return false;
+//        }
+//        if(!check_delivery()){
+//            return false;
+//        }
+//        if(!check_budget()){
+//            return false;
+//        }
+//
+//        if(all_budgets==''){
+//            $("#all_budgets_error").html('总预算不能为空');
+//            return false;
+//        }
+//
+//        if(all_budgets !=''){
+//            if(isNaN(all_budgets)||all_budgets<0){
+//
+//                $("#all_budgets_error").html('总预算为大于等于0的数字');
+//                return false;
+//            }
+//        }
+        window.task_fml.submit();
+    }
+
+    $("#custom_name").blur(function(){
+        check_custom();
+    });
+
+    $("#price").blur(function(){
+        check_price();
+    });
+
+    $("#recharge_budgets").blur(function(){
+        if(check_recharge()){
+            check_budget();
+        }
+    });
+
+    $("#delivery_budgets").blur(function () {
+        if(check_delivery()){
+            check_budget();
+        }
+    });
+    function check_budget(){
+        var recharge = $("#recharge_budgets").val()?$("#recharge_budgets").val():0;
+        var delivery = $("#delivery_budgets").val()?$("#delivery_budgets").val():0;
+        var all_budgets = $("#all_budgets").val();
+        var bo = true;
+        if(!recharge&&!delivery){
+            $("#delivery_budgets_error").html('充值金额和配送金额都为空');
+            bo = false;
+        }else{
+            var new_budgets = parseFloat(recharge)+parseFloat(delivery);
+            $("#all_budgets").val(parseFloat(new_budgets).toFixed(2));
+            $("#delivery_budgets_error").html('');
+        }
+
+        return bo;
+    }
+    function check_delivery(){
+        var delivery = $("#delivery_budgets").val();
+        var o_delivery = $("#o_delivery_budgets").val();
+        var bo = true;
+        if(isNaN(delivery)||delivery<0){
+            $("#delivery_budgets_error").html('配送金额为大于等于0的数字');
+            bo = false;
+        }else if(parseFloat(delivery)>parseFloat(o_delivery)){
+            $("#delivery_budgets_error").html('配送金额不应大于剩余配送金额('+o_delivery+')');
+            bo = false;
+        }else if(delivery.indexOf(".")>=0&&(delivery.length-delivery.indexOf(".")-1)>2){
+            $("#delivery_budgets_error").html('配送金额最大支持保留到小数点后两位');
+            bo = false;
+        }else{
+            $("#delivery_budgets_error").html('');
+        }
+        return bo;
+    }
+
+    function check_recharge(){
+        var recharge = $("#recharge_budgets").val();
+        var o_recharge = $("#o_recharge_budgets").val();
+        var bo = true;
+        if(isNaN(recharge)||recharge<0){
+            $("#recharge_budgets_error").html('充值金额为大于等于0的数字');
+            bo = false;
+        }else if(parseFloat(recharge)>parseFloat(o_recharge)){
+            $("#recharge_budgets_error").html('充值金额不应大于剩余充值金额('+o_recharge+')');
+            bo = false;
+        }else if(recharge.indexOf(".")>=0&&(recharge.length-recharge.indexOf(".")-1)>2){
+            $("#recharge_budgets_error").html('充值金额最大支持保留到小数点后两位');
+            bo = false;
+        }else{
+            $("#recharge_budgets_error").html('');
+        }
+        return bo;
+    }
+    function check_price(){
+        var price = $("#price").val();
+        var bo;
+        if(!price){
+            $("#price_error").html('单价不能为空');
+            bo =  false;
+        }else if(isNaN(price)||price<0){
+            $("#price_error").html('单价为大于等于0的数字');
+            bo =  false;
+        }else{
+            $("#price_error").html('');
+            bo = true;
+        }
+        return bo;
+    }
+    function check_time(id){
+        if($("#"+id).val()==''){
+            $("#"+id+'_error').html('时间不能为空');
+        }else{
+            $("#"+id+'_error').html('');
+            if(id=="start_tm"){
+                get_price();
+            }
+        }
+    }
+
+    function get_price(){
+        var tm = $("#start_tm").val();
+        var custom = $("#custom").val();
+        $.ajax({
+            type: "POST",
+            url: "__URL__/pub_get_price",
+            data: "tm="+tm+"&custom="+custom,
+            dataType:"json",
+            success:function(data){
+                if(data.code==0){
+                    $("#start_tm_error").html('此时间未配置有效的产品单价，请配置');
+                }else{
+                    $("#price").val(data.price);
+                }
+            }
+        });
+    }
+
+    function check_custom(){
+        var custom = $("#custom_name").val();
+        $.ajax({
+            type: "POST",
+            url: "__URL__/check_custom",
+            data: "custom="+custom,
+            dataType:"json",
+            success:function(data){
+                if(data.code==0){
+                    $("#custom_error").html('客户名称不能为空');
+                }else if(data.code==2){
+                    $("#custom_error").html('未找到该客户，可以手动创建');
+                }else{
+                    $("#custom_error").html('');
+                }
+            }
+        });
+    }
+
+    function check_contract(start_tm,end_tm){
+        var contract_id = $("#custom").val();
+        var id = $("#id").val();
+        var bo;
+        $.ajax({
+            type: "POST",
+            url: "__URL__/check_task",
+            data: "custom="+contract_id+'&start_tm='+start_tm+'&end_tm='+end_tm+'&id='+id,
+            dataType:"json",
+            async: false,
+            success:function(data){
+                if(data.code==0){
+                    alert(data.msg);
+                    bo =  false;
+                   // return false;
+                }else{
+                    bo = true;
+                }
+            }
+        });
+        return bo;
+    }
+</script>
+

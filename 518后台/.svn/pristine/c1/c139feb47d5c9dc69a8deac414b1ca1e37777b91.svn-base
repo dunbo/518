@@ -1,0 +1,1282 @@
+<include header="../Public/header"/>
+
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+
+<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload.js"></script>
+<script type="text/javascript" src="/Public/js/ajaxfileupload/ajaxfileupload_anzhi_new.js"></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+
+<style type="text/css">
+    .widen {width:500px}
+</style>
+
+
+
+<body>
+    <center>
+      <h2>推送：</h2></center>
+    <form method="post" action="__URL__/push_edit_submit" id="push_edit_submit" enctype="multipart/form-data">
+      <input type="hidden" name="id" value="{$_GET['id']}" />
+   	  <div class="form_list_one">
+        <label>推送方式：</label> 
+        <input type="radio" name="push_mode" id="push_mode" value="0"  <if condition="$result['is_repeat'] eq 0">checked</if>>
+一次推送
+          <input type="radio" name="push_mode" id="push_mode2" value="1" <if condition="$result['is_repeat'] eq 1">checked</if>>
+不点击继续推送
+<label for="push_mode"></label>
+   	  </div>
+      <div class="form_list_one">
+        <label>开始时间：</label>
+        <input id="startdate" class="Wdate" type="text" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value="<?php echo date('Y-m-d H:i:s',$result['start_time']);?>" name="startdate">&nbsp;&nbsp;&nbsp;结束时间
+        <input type="text" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" class="Wdate" value="<?php echo date('Y-m-d H:i:s',$result['end_time']);?>" name="enddate" id="enddate">
+     </div>
+     <div class="form_list_one">
+       <label>每日推送时间段：</label>
+       <input id="push_time_start" class="Wdate" type="text" onClick="WdatePicker({dateFmt:'HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" value="<?php echo date('H:i:s',$result['item_show_time_start']);?>" name="push_time_start">   至
+       <input type="text" onClick="WdatePicker({dateFmt:'HH:mm:ss',startDate:'%y-%M-%d 23:59:59'})" class="Wdate" value="<?php echo date('H:i:s',$result['item_show_time_end']);?>" name="push_time_end" id="push_time_end">
+     </div>
+     <div class="form_list_one">
+        <label>游戏范围：</label>
+        <label for="game_ext"></label>
+        <select name="game_ext" id="game_ext">
+          <option value="0" <if condition="$result['select_package_type'] eq 0">selected</if>>请选择游戏范围</option>
+          <option value="1" <if condition="$result['select_package_type'] eq 1">selected</if>>手动上传</option>
+          <option value="2" <if condition="$result['select_package_type'] eq 2">selected</if>>全部游戏</option>
+          <option value="3" <if condition="$result['select_package_type'] eq 3">selected</if>>网络游戏</option>
+          <option value="4" <if condition="$result['select_package_type'] eq 4">selected</if>>棋牌游戏</option>
+          <option value="5" <if condition="$result['select_package_type'] eq 5">selected</if>>单机游戏</option>
+        </select>
+     </div>
+     <span id="mryc">
+     <div class="form_list_one" id="sdsc">
+     	<label>手动上传：</label>
+        &nbsp;&nbsp; 
+        <input type="file" name="the_package" id="the_package" />  点击
+        <input type="button" onClick="get_select();" value="上传">游戏包名
+    </div>
+     <div class="form_list_one" id="pbyx">
+          <label>屏蔽游戏：</label>
+          <input name="ignore_package_add" type="text" class="input_text" id="ignore_package_add"/>
+          &nbsp;&nbsp;&nbsp;            
+          <input type="button" onClick="add_ignore();" value="添加">
+&nbsp;&nbsp;&nbsp; 
+<input id="the_ignore_package" type="file" name="the_ignore_package">&nbsp;&nbsp;点击<input type="button" onClick="get_ignore();" value="上传">屏蔽游戏包名
+	 </div>
+     <div class="clear"></div>
+        <div class="form_list_one" id="ypbyx">
+          <label>已屏蔽游戏：</label>
+          <span id="ignore_text">
+          		<?php
+                	//echo "<pre>";print_r($ignore_arrs);
+                	$ignore_package_list = explode(',',$result['ignore_package_list']);
+                	foreach($ignore_package_list as $k=>$v){
+                    	if($v){
+                        	echo $ignore_arrs[$k][1].'
+                    <a onclick="del_ignore(\''.$v.'\');" href="javascript:;">
+                    <img src="/Public/images/delete_icon.png">
+                    </a>';
+                        }
+                    }
+                	
+                ?>
+          </span><input type="hidden" name="all_ignore" id="all_ignore" value="{$result['ignore_package_list']}" />
+          <span id="ypbyxz">
+          		
+          </span>
+     </div>
+     <div class="clear"></div>
+     <div class="form_list_one">
+          <label>已选择游戏：</label>
+          <span id="select_text">
+          <?php
+          	//echo "<pre>";print_r($result['select_package_list']);
+          	if($result['select_package_list'] != '' ){
+                $select_package_list = explode(',',$result['select_package_list']);
+                if($select_package_list != ''){
+                    foreach($select_package_list as $k=>$v){
+        				$select_text .= $package_arrs[$k][1].'<a href="javascript:;" onclick="del_select(\''.$v.'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+                    }
+                }
+            }
+            echo $select_text;
+          ?>
+          
+          </span><input type="hidden" name="all_select" id="all_select" value="{$result['select_package_list']}" />
+          <span id="selected_game" name="selected_game">
+          <?php
+          	$type = $result['select_package_type'];
+          	if($type == 2){
+            	echo "全部游戏";
+            }else if($type == 3){
+            	echo "网络游戏";
+            }else if($type == 4){
+            	echo "棋牌游戏";
+            }else if($type == 5){
+            	echo "单机游戏";
+            }
+          ?>
+          </span>
+     </div>
+     </span>
+     <div class="form_list_one">
+        <label>用户名：</label>
+        <select id="select_user_type" name="select_user_type">
+          <option value="0" <if condition="$result['select_user_type'] eq 0">selected</if>>请选择用户名</option>
+          <option value="1" <if condition="$result['select_user_type'] eq 1">selected</if>>手动上传</option>
+          <option value="2" <if condition="$result['select_user_type'] eq 2">selected</if>>老用户</option>
+          <option value="3" <if condition="$result['select_user_type'] eq 3">selected</if>>VIP用户</option>
+          <option value="4" <if condition="$result['select_user_type'] eq 4">selected</if>>金牌会员</option>
+          <option value="6" <if condition="$result['select_user_type'] eq 6">selected</if>>银牌会员</option>
+          
+        </select>&nbsp;&nbsp;&nbsp;<span id='show_remind' <if condition="$result['select_user_type'] neq 1">style='display:none;'</if>>上传的用户名必须是UID</span>
+      </div>
+      <div class="form_list_one" id="old_user" style=" margin-left:260px;">
+      	  <?php 
+                if($result['select_user_type'] == 2){
+          			$select_user_old[] = explode(',',$result['select_user_type_ext']);	
+                }
+          ?>
+          <input type="checkbox" name="old_user[]" value="2" <?php if(in_array(2,$select_user_old[0]))echo checked ;?>>
+          <label for="user_vip[]"></label>2日未登陆用户
+          <input type="checkbox" name="old_user[]" value="7" <?php if(in_array(7,$select_user_old[0]))echo checked ;?>>
+          <label for="old_user8"></label>
+          1周未登陆用户
+          <input type="checkbox" name="old_user[]" value="14" <?php if(in_array(14,$select_user_old[0]))echo checked ;?>>
+          <label for="old_user8"></label>
+          2周未登陆用户
+          <input type="checkbox" name="old_user[]" value="21" <?php if(in_array(21,$select_user_old[0]))echo checked ;?>>
+          <label for="old_user8"></label>
+          3周未登陆用户
+          <input type="checkbox" name="old_user[]" value="30" <?php if(in_array(30,$select_user_old[0]))echo checked ;?>>
+          <label for="old_user8"></label>
+          1个月未登陆用户
+	 </div>
+     <?php 
+     		if($result['select_user_type'] == 3){
+        		$select_user_vip = explode(',',$result['select_user_type_ext']);	
+            }
+     ?>
+     <div class="form_list_one" id="user_vip" style=" margin-left:260px;">
+        <div style="float: left;width: 310px;margin-left: 65px">
+          <input type="checkbox" name="user_vip[]" value="1" <?= in_array(1,$select_user_vip) ? 'checked':''?> />VIP1
+          <input type="checkbox" name="user_vip[]" value="2" <?= in_array(2,$select_user_vip) ? 'checked':''?> />VIP2
+          <input type="checkbox" name="user_vip[]" value="3" <?= in_array(3,$select_user_vip) ? 'checked':''?> />VIP3
+          <input type="checkbox" name="user_vip[]" value="4" <?= in_array(4,$select_user_vip) ? 'checked':''?> />VIP4
+          <input type="checkbox" name="user_vip[]" value="5" <?= in_array(5,$select_user_vip) ? 'checked':''?> />VIP5
+        </div>
+        <div style="float: left;">
+          <select name="user_vip[]" style="width: 100px">
+            <option value="a" <?= in_array('a',$select_user_vip) ? 'selected':''?> >全部VIP</option>
+            <option value="b" <?= in_array('b',$select_user_vip) ? 'selected':''?> >普通VIP</option>
+            <option value="c" <?= in_array('c',$select_user_vip) ? 'selected':''?> >召回VIP</option>
+            <option value="d" <?= in_array('d',$select_user_vip) ? 'selected':''?> >渠道VIP</option>
+          </select>
+        </div>
+      </div>
+     <span id="sdsc_user">
+     <div class="form_list_one" id="sd_user">
+   	   <label>手动上传[用户名]：</label>
+      &nbsp;&nbsp; 
+        <input type="file" name="user_path" id="user_path" />  点击
+<input type="button" onClick="upload_user();" value="上传">
+用户名
+    </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+        	<label>已选择用户：</label>
+        	<span id="user_text">
+            <?php
+          	$type = $result['select_user_type'];
+          	if($type == 1){
+            	echo "手动上传";
+            }else if($type == 2){
+            	echo "老用户";
+            }else if($type == 3){
+            	echo "VIP用户";
+            }
+          ?>
+          </span><input type="hidden" id="user_save" name="user_save" value="{$result['select_user_file_path']}">
+        </div>
+     </span>
+        <div class="clear"></div>
+        <div class="form_list_one">
+     <label>手机分辨率：</label>
+        <select onChange="select_user();" id="select_phone_dpi" name="select_phone_dpi">
+          	<option value="0" <if condition="$result['select_phone_dpi'] eq 0">selected</if>>请选择分辨率</option>
+          	<option value="1" <if condition="$result['select_phone_dpi'] eq 1">selected</if>>中分辨率</option>
+            <option value="2" <if condition="$result['select_phone_dpi'] eq 2">selected</if>>高分辨率</option>
+        </select>
+   	  &nbsp;&nbsp;&nbsp;</div>
+        <div class="form_list_one">
+            <label>push类型：</label>
+            <label for="push_type"></label>
+            <select name="push_type" id="push_type">
+              <option value="1" <if condition="$result['push_type'] eq 1">selected</if>>网页</option>
+              <option value="2" <if condition="$result['push_type'] eq 2">selected</if>>礼包</option>
+              <option value="3" <if condition="$result['push_type'] eq 3">selected</if>>活动</option>
+              <option value="4" <if condition="$result['push_type'] eq 4">selected</if>>公告</option>
+			  <option value="6" <if condition="$result['push_type'] eq 6">selected</if>>H5游戏</option>
+        <option value="7" <if condition="$result['push_type'] eq 7">selected</if>>游戏</option>
+            </select>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one">
+            <label>push展现形式：</label>
+            <label for="push_show_type"></label>
+            <select name="push_show_type" id="push_show_type">
+              <option value="1" <if condition="$result['push_style'] eq 1">selected</if>>传统push</option>
+              <option value="2" <if condition="$result['push_style'] eq 2">selected</if>>图片push</option>
+              <!--<option value="3" <if condition="$result['push_style'] eq 3">selected</if>>多行图片push</option>-->
+            </select>
+        </div>
+        <div class="clear"></div>
+      <div class="form_list_one" id="push_title_div">
+            <label>push标题：</label>
+            <input type="text" class="input_text" name="push_title" id="push_title" value="{$result['title']}"/>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one" id="push_intro_div">
+            <label>push简介：</label>
+            <input type="text" class="input_text" name="push_intro" id="push_intro" value="{$result['intro']}"/>
+        </div>
+        <div class="clear"></div>
+
+        <div id='push_type_7'>
+          <div class="form_list_one" id="package_div">
+              <label>游戏包名：</label>
+              <input type="text" class="input_text" name="package_new" id="package_new" onblur="get_softname();" value="{$result['package']}"/>
+          </div>
+          <div class="clear"></div>
+          <div class="form_list_one" id="download_way_div">
+              <label>下载方式：</label>
+              <input type="radio" name="download_way" id="download_way" value='1'  onclick="javascript:$('#uninstall_setting_div').show();$('#uninstall_setting_str').html('未安装：');" <?php echo $result['download_way']==1 ? "checked" : ''; ?>/>安智市场
+              <input type="radio" name="download_way" id="download_way" value='2'  onclick="javascript:$('#uninstall_setting_div').hide();$('#uninstall_setting_str').html('SDK下载方式：');" <?php echo $result['download_way']==2 ? "checked" : ''; ?>/>SDK(安智)
+          </div>
+          <div class="clear"></div>
+          <div class="form_list_one" id="sdk_uninstall_setting_div">
+              <label id="uninstall_setting_str">SDK下载方式：</label>
+              <input type="radio" name="uninstall_setting" id="uninstall_setting" value='1'  <?php echo $result['uninstall_setting']==1 ? "checked" : ''; ?>/>进软件详情不下载 
+              <input type="radio" name="uninstall_setting" id="uninstall_setting" value='2' <?php echo $result['uninstall_setting']==2 ? "checked" : ''; ?> />进软件详情自动下载 
+          </div>
+          <div class="clear"></div>
+          <div class="form_list_one" id="uninstall_setting_div">
+              <label>已安装：</label>
+              <input id="install_setting" type="radio" value="3" name="install_setting" <?php echo $result['install_setting']==3 ? "checked" : ''; ?>>启动软件<br>  
+              <label>&nbsp;</label><input id="install_setting" type="radio" value="4" name="install_setting" <?php echo $result['install_setting']==4 ? "checked" : ''; ?>>启动软件至某个页面
+              <input id="start_to_page" type="text" name="start_to_page" value="{$result['start_to_page']}""><br>
+              <label>&nbsp;</label><input id="install_setting" type="radio" value="1" name="install_setting" <?php echo $result['install_setting']==1 ? "checked" : ''; ?>>进软件详情不下载<input id="install_setting" type="radio" value="2" name="install_setting" <?php echo $result['uninstall_setting']==2 ? "checked" : ''; ?>>进软件详情自动下载 
+          </div>
+          <div class="clear"></div>
+        </div>
+
+      	<span id="push_img_low">
+        <div class="form_list_one">
+          <label>单行低分图片：</label>
+            <input type="file" name="push_img_low_1" onChange="onFileChange_ad_picture(this,480,88,'push_img_low_1',1);"  id="push_img_low_1" />
+            <input type="hidden" name="push_img_low_1_hide" id="push_img_low_1_hide" value="{$result['single_item_icon_low']}"/>
+        请上传480*88的JPG|PNG|GIF图片</div>
+            <div class="clear"></div>
+        <div class="form_list_one">
+          <label>单行高分图片：</label>
+          <input type="file" name="push_img_low_2"   onchange="onFileChange_ad_picture(this,720,132,'push_img_low_2',2);" id="push_img_low_2" />
+          <input type="hidden" name="push_img_low_2_hide" id="push_img_low_2_hide" value="{$result['single_item_icon_high']}"/>
+          请上传720*132的JPG|PNG|GIF图片</div>
+        </span>
+        <span id="push_img_high">
+        <div class="form_list_one">
+          <label>多行低分图片：</label>
+            <input type="file" name="push_img_high_1" id="push_img_high_1" onChange="onFileChange_ad_picture(this,480,250,'push_img_high_1',1);" />
+            <input type="hidden" name="push_img_high_1_hide" id="push_img_high_1_hide" value="{$result['multi_item_icon_low']}"/>
+          请上传480*250的JPG|PNG|GIF图片</div>
+            <div class="clear"></div>
+        <div class="form_list_one">
+          <label>多行高分图片：</label>
+          <input type="file" name="push_img_high_2" id="push_img_high_2" onChange="onFileChange_ad_picture(this,720,375,'push_img_high_2',2);" />
+            <input type="hidden" name="push_img_high_2_hide" id="push_img_high_2_hide" value="{$result['multi_item_icon_high']}"/>
+          请上传720*375的JPG|PNG|GIF图片</div>
+        </span>
+        <div class="clear"></div>
+       <span id="html_hide">
+	   <div class="form_list_one">
+        <label>网页标题：</label>
+          <input type="text" class="input_text" name="html_title" id="html_title" value="{$result['item_title']}"/>
+        </div>
+        <div class="clear"></div>
+      <div class="form_list_one" id="html_link_div">
+        <label>网页链接地址：</label>
+        <input type="text" class="input_text" name="html_link" id="html_link" value="{$result['item_url']}"/>
+        </div>
+		<div class="clear"></div>
+		<div class="form_list_one" id="display_method_div">
+			<label>横屏信息：</label>
+			<input type="radio" name="display_method" id="display_method" value='1' <?php echo $result['display_method']==1 ? "checked" : ''; ?> />横屏
+			<input type="radio" name="display_method" id="display_method" value='0' <?php echo $result['display_method']==0 ? "checked" : ''; ?> />竖屏
+        </div>
+        <div class="clear"></div>
+        <div class="form_list_one" id="push_browser_div">
+          <label>推送方式：</label> 
+            <input type="radio" name="push_browser" id="push_browser1" value="1"  <if condition="$result['item_open'] eq 1">checked</if>>
+            内置浏览器
+            <input name="push_browser" type="radio" id="push_browser2" value="2"  <if condition="$result['item_open'] eq 2">checked</if>>
+    外置浏览器
+    <label for="push_mode"></label>
+        </div>
+       </span>
+        <div class="form_list_one" id="buy_id_div">
+          <label id="lb_id">礼包ID：</label>
+          <input type="text" class="input_text" name="buy_id" id="buy_id" value="{$result['item_objid']}"/>
+      </div>
+        <div class="clear"></div>
+      <div class="form_list_one" id="editor_content_div">
+          <label>公告内容：</label>
+          <textarea style="width:690px;height:300px;" name="editor_content" id="editor_content">{$result['item_content']}</textarea>
+      </div>
+	  <div class="clear"></div>
+		
+    <div class="form_list_one">
+      <label>渠道范围：</label>
+      <input type='radio' name='cps_only' value='0' <?= $result['cps_only'] == 0 ? 'checked' : '' ?>  />所有渠道(含官方，CPS)
+      <input type='radio' name='cps_only' value='1' <?= $result['cps_only'] == 1 ? 'checked' : '' ?>  />安智官方
+      <input type='radio' name='cps_only' value='2' <?= $result['cps_only'] == 2 ? 'checked' : '' ?>  />安智合作渠道(CPS)
+
+    </div>
+
+    <div class="form_list_one">
+			<label>SDK版本：</label>
+			<input id="ver_big" type='radio' name='game_sdk_version_rule' value='>=' <?php if($result['game_sdk_version_rule']==">=") echo  "checked='checked'";?>>大于等于
+			<input id="ver_big_input" type='text' name='game_sdk_version1' value="<?php if($result['game_sdk_version_rule']==">=") echo $result['game_sdk_version_code'];?>"/><Br/>
+			
+			<input id="ver_small" type='radio' name='game_sdk_version_rule'  style="margin-left:155px;" value='<='  <?php if($result['game_sdk_version_rule']=="<=") echo  "checked='checked'";?>>小于等于
+			<input id="ver_small_input" type='text' name='game_sdk_version2' value="<?php if($result['game_sdk_version_rule']=="<=") echo $result['game_sdk_version_code'];?>"/><Br/>
+			 
+			<input id="ver_eq" type='radio' name='game_sdk_version_rule'  style="margin-left:155px;" value='=='   <?php if($result['game_sdk_version_rule']=="=="||$result['game_sdk_version_rule']=="") echo  "checked='checked'";?>>等于
+			<a style="color:blue;" href="__APP__/Public/showVersion?append_id=selected_versions&from=sdk" class="thickbox">请选择SDK版本</a>
+			<div id="selected_versions" style="margin-left:155px;">
+			   <input name="force_update_version" id="force_update_version" type="hidden" value="<?php if($result['game_sdk_version_rule']=="==") echo $result['game_sdk_version_code'];?>"/><label><?php if($result['game_sdk_version_rule']=="==") echo $result['game_sdk_version_code'];?></label>
+			</div>
+      <br/><p style="color:red;margin-left: 70px" >配置会员属性内容/活动时，请选择SDK4.3及以上版本</p>
+		</div>
+		<div class="clear"></div>
+      <div class="form_btns_box_one">
+            <input type="hidden" name="from" id="from" value="{$function_name}"/>
+            <input type="hidden" name="url_param" id="url_param" value="{$url_param}"/>
+            <!-- KindEditor内容需用input提交，不能用a的提交，否则提交后KindEditor的textarea内容不变，很诡异-->
+            <input type="submit" value="确定" onClick="return push_edit_submit();" style="margin-left:155px" class="form_input_submit" />
+            <a href="__URL__/{$function_name}">取消</a>
+			<div class="clear"></div>
+        </div>
+    </form>
+
+
+<script type="text/javascript">
+    KindEditor.ready(function(K) {
+        window.editor = K.create('#editor_content',{
+            allowImageRemote : false,
+            allowImageUpload : true,
+            items : [
+                'bold','italic','underline','fontsize','forecolor','|','image','anchor','link','unlink','justifyleft','justifycenter','justifyright'
+            ]
+        });
+    });
+    KindEditor.options.cssData = 'body { font-size: 16px; }';
+    $(document).ready(function(){
+		  
+       if(getRadioBoxValue('download_way')==2){
+          $('#uninstall_setting_div').hide();
+          $('#uninstall_setting_str').html('SDK下载方式：');
+       }else{
+          $('#uninstall_setting_div').show();
+          $('#uninstall_setting_str').html('未安装：');
+       }
+			var tmp_type = $("#select_user_type option:selected").val();
+      //手动上传用户名
+			if(tmp_type != 2){
+				$("#old_user").hide();//默认老用户隐藏
+			}
+			if(tmp_type != 3){
+				$("#user_vip").hide();//默认VIP用户隐藏
+			}
+			if(tmp_type == 0 || tmp_type == 4){
+				$("#user_vip").hide()
+				$("#sdsc_user").hide();
+			}else if(tmp_type != 1){
+				$("#sd_user").hide();
+				$("#show_remind").hide();
+				$("#sdsc_user").show();
+			}
+			$("#select_user_type").change(function(){
+				var val = $("#select_user_type option:selected").val();
+				if(val == 0 || val == 4){
+					$("#sdsc_user").hide();
+					$("#show_remind").hide();
+					$("#old_user").hide();
+					$("#user_vip").hide()
+					$("#user_text").html("")
+				}else if(val == 1){
+					$("#old_user").hide();
+					$("#user_vip").hide()
+					$("#sd_user").show();
+					$("#show_remind").show();
+					$("#sdsc_user").show();
+					$("#user_text").html("")
+				}else if(val == 2){
+					$("#user_text").html("老用户")
+					$("#user_vip").hide()
+					$("#old_user").show();
+					$("#sdsc_user").show();
+					$("#sd_user").hide();
+					$("#show_remind").hide();
+				}else if(val == 6){
+          $("#old_user").hide()
+          $("#user_text").html("银牌会员")
+          $("#sdsc_user").show();
+          $("#sd_user").hide();
+          $("#show_remind").hide();
+          $("#user_vip").hide();
+        }else{
+					$("#old_user").hide();
+					$("#user_text").html("金牌会员")
+					$("#sdsc_user").show();
+					$("#sd_user").hide();
+					$("#show_remind").hide();
+					$("#user_vip").show();
+				}
+			})
+			
+			if($("#game_ext option:selected").val() == 0){
+				$("#mryc").hide();
+			}else if($("#game_ext option:selected").val() == 1){
+				$("#mryc").show();
+				$("#ypbyx").hide();
+				$("#pbyx").hide();
+				$("#sdsc").show();
+				
+				$("#ignore_text").children().remove();
+				$("#ignore_text").html("");
+				$("#all_ignore").html("");
+			}else{
+				$("#mryc").show();
+				$("#sdsc").hide();//默认手动上传隐藏
+			}
+		  
+		$("#game_ext").change(function(){
+				var val = $("#game_ext option:selected").val();
+				var html = $("#game_ext option:selected").html();
+				
+				//当游戏范围切换时，数据清空
+				$("#ignore_text").html("");
+				$("#all_ignore").val("");
+				
+				 if($("#game_ext option:selected").val() == 0){
+					$("#mryc").hide();
+				  }else if(val == 1){
+					//alert("手动上传");
+					$("#ypbyx").hide();
+					$("#pbyx").hide();
+					$("#sdsc").show();
+					
+					$("#ignore_text").children().remove();
+					$("#ignore_text").html("");
+					$("#all_ignore").html("");
+					$("#mryc").show();
+				}else{
+					$("#ypbyx").show();
+					$("#pbyx").show();
+					$("#sdsc").hide();
+					
+					$("#select_text").children().remove();
+					$("#select_text").html("");
+					$('#all_select').val('');
+					$("#mryc").show();
+				}
+				if($("#game_ext option:selected").val() == 1){
+					$("#selected_game").html('');
+				}else{
+					$("#selected_game").html(html);
+				}
+		  });
+		  //push类型切换
+		  //1.1默认隐藏
+		  if($("#push_type option:selected").val() == 2){
+			 $("#editor_content_div").hide();
+			 //$("#html_hide").hide();
+			 $("#html_link_div").hide();
+			 $("#push_browser_div").hide();
+			 $("#buy_id_div").show();
+			 $("#push_browser").hide();
+			 $("#display_method_div").hide();
+			 $("#lb_id").html("礼包ID：");
+       $('#push_type_7').hide();
+		  }else if($("#push_type option:selected").val() == 3){
+			 $("#editor_content_div").hide();
+			 //$("#html_hide").hide();
+			 $("#html_link_div").hide();
+			 $("#push_browser_div").hide();
+			 $("#buy_id_div").show();
+			 $("#push_browser").hide();
+			 $("#display_method_div").hide();
+			 $("#lb_id").html("活动ID：");
+       $('#push_type_7').hide();
+		  }else if($("#push_type option:selected").val() == 4){
+			 $("#editor_content_div").show();
+			 $("#push_browser").show();
+			 $("#html_link_div").hide();
+			 $("#push_browser_div").hide();
+			 $("#buy_id_div").hide();
+			  $("#display_method_div").hide();
+			 $("#html_title_div").show();
+       $('#push_type_7').hide();
+		  }else if($("#push_type option:selected").val() == 6){
+			 $("#editor_content_div").hide();
+			 $("#html_hide").show();
+			 $("#buy_id_div").hide();
+			 $("#push_browser").hide();
+			 $("#html_link_div").show();
+			 $("#push_browser_div").hide();
+			 $("#display_method_div").show();
+			 $("#html_link_div label").text("游戏链接地址：");
+       $('#push_type_7').hide();
+		  }else if($("#push_type option:selected").val() == 7){
+       $("#editor_content_div").hide();
+       //$("#html_hide").show();
+         $("#buy_id_div").hide();
+       $("#push_browser").hide();
+       $("#html_link_div").hide();
+       $("#push_browser_div").hide();
+       $("#display_method_div").hide();
+       $("#html_title_div").hide();
+       $('#push_type_7').show();
+
+       
+      }else{
+			 $("#editor_content_div").hide();
+			 //$("#html_hide").show();
+		  	 $("#buy_id_div").hide();
+			 $("#push_browser").hide();
+			 $("#html_link_div").show();
+			 $("#push_browser_div").show();
+			 $("#display_method_div").hide();
+       $('#push_type_7').hide();
+		  }
+		  $("#push_type").change(function(){
+		  		var push_type_val = $("#push_type option:selected").val();
+				if(push_type_val == 2){
+					 $("#editor_content_div").hide();
+					 //$("#html_hide").hide();
+					 $("#html_link_div").hide();
+			 		 $("#push_browser_div").hide();
+					 $("#buy_id_div").show();
+					 $("#push_browser").hide();
+					 $("#display_method_div").hide();
+			 		 $("#lb_id").html("礼包ID：");
+           $('#push_type_7').hide();
+				  }else if(push_type_val == 3){
+				  	 $("#editor_content_div").hide();
+					 //$("#html_hide").hide();
+					 $("#html_link_div").hide();
+					 $("#push_browser_div").hide();
+					 $("#buy_id_div").show();
+					 $("#push_browser").hide();
+					 $("#display_method_div").hide();
+			 		 $("#lb_id").html("活动ID：");
+           $('#push_type_7').hide();
+				  }else if(push_type_val == 4){
+					 $("#editor_content_div").show();
+					 $("#push_browser").show();
+					 $("#html_link_div").hide();
+					 $("#push_browser_div").hide();
+					 $("#buy_id_div").hide();
+					 $("#display_method_div").hide();
+			 		 $("#html_title_div").show();
+           $('#push_type_7').hide();
+				  }else if(push_type_val == 6){
+					 $("#editor_content_div").hide();
+					 $("#html_hide").show();
+					 $("#buy_id_div").hide();
+					 $("#push_browser").hide();
+					 $("#html_link_div").show();
+					 $("#push_browser_div").hide();
+					 $("#display_method_div").show();
+					 $("#html_link_div label").text("游戏链接地址：");
+           $('#push_type_7').hide();
+				  }else if(push_type_val == 7){
+           $("#editor_content_div").hide();
+           $("#html_hide").show();
+           $("#buy_id_div").hide();
+           $("#push_browser").hide();
+           $("#html_link_div").hide();
+           $("#push_browser_div").hide();
+           $("#display_method_div").hide();
+           $("#html_title").parent().hide();
+           $('#push_type_7').show();
+          }else{
+					 $("#editor_content_div").hide();
+					 $("#html_hide").show();
+					 $("#buy_id_div").hide();
+					 $("#push_browser").hide();
+					 $("#html_link_div").show();
+					 $("#push_browser_div").show();
+					 $("#display_method_div").hide();
+           $('#push_type_7').hide();
+				  }
+				
+		  })
+		 $("#push_type").change();
+		  
+
+		  //push展现形式切换
+		   if($("#push_show_type option:selected").val() == 1){
+				//传统形式
+				$("#push_img_high").hide();
+				$("#push_img_low").hide();
+				$("#push_intro_div").show();
+				$("#push_img_div").hide();
+		   }else if($("#push_show_type option:selected").val() == 2){
+				//$("#push_img_high").hide();
+				$("#push_img_low").show();
+				$("#push_intro_div").show();
+				$("#push_img_div").hide();
+				$("#push_intro_div").hide();
+		   }
+		   $("#push_show_type").change(function(){
+		   		if($("#push_show_type option:selected").val() == 1){
+					//传统形式
+					$("#push_img_high").hide();
+					$("#push_img_low").hide();
+					$("#push_intro_div").show();
+					$("#push_img_div").hide();
+			   }else if($("#push_show_type option:selected").val() == 2){
+					$("#push_img_high").show();
+					$("#push_img_low").show();
+					$("#push_intro_div").show();
+					$("#push_img_div").hide();
+					$("#push_intro_div").hide();
+			   }
+		   }) 
+	})
+	//屏蔽游戏
+	function get_ignore(){
+		if($("#the_ignore_package").val().length==0) {
+			alert('请上传文件');
+			return;
+		}
+		$.ajaxFileUpload({
+			url:'/index.php/Sj/Push/get_ignore',
+			type:'POST',
+			files:[$('#the_ignore_package')],
+			secureuri:false,
+			dataType:'json',
+			success:function(data){
+				if(data == 2){
+					alert('上传文件格式错误');
+					return false;
+				}else if(data == 3){
+					alert('上传包名大于200个');
+					return false;
+				}else if(data[0] == 4){
+					alert('上传包名'+data[1]+'不存在');
+					return false;
+				}else{
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.ignore_package = package_strs;
+					$('#all_ignore').val(package_strs);
+					$('#ignore_text').html(need_str);
+				}
+			}
+		});
+	}
+	//删除屏蔽游戏
+	function del_ignore(obj){
+		var no_package = obj;
+		//var old_package = sessionStorage.ignore_package;
+		var old_package = $("#all_ignore").val();
+		$.ajax({
+			url:'/index.php/Sj/Push/del_select',
+			data: 'old_package='+old_package+'&no_package='+no_package,
+			type: 'get',
+			success: function(data){
+				if(data != 204){
+					var data = eval(''+data+'');
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.ignore_package = package_strs;
+					$('#all_ignore').val(package_strs);
+					$('#ignore_text').html(need_str);
+				}else{
+					sessionStorage.ignore_package = '';
+					$('#ignore_text').html('');
+					$('#all_ignore').val('');
+				}
+			}
+		});
+	}
+	//单独添加屏蔽游戏
+	function add_ignore(){
+		if($("#ignore_package_add").val().length==0) {
+			alert('请填写包名');
+			return;
+		}
+		var new_package = $("#ignore_package_add").val();
+		//var old_package = sessionStorage.ignore_package;
+		var old_package = $("#all_ignore").val();
+		$.ajax({
+			url:'/index.php/Sj/Push/add_ignore',
+			data: 'old_package='+old_package+'&new_package='+new_package,
+			type: 'get',
+			success: function(data){
+				var data = eval(''+data+'');
+				if(data[0] == 4){
+					alert("添加包名不存在");
+					return false;
+				}else if(data == 5){
+					alert("该包名已添加，请勿重复添加");
+					return false;
+				}else{
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_ignore(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.ignore_package = package_strs;
+					$('#all_ignore').val(package_strs);
+					$('#ignore_text').html(need_str);
+				}
+			}
+		});
+	}
+	//获取手动游戏
+	function get_select(){
+		if($("#the_package").val().length==0) {
+			alert('请上传文件');
+			return;
+		}
+		$.ajaxFileUpload({
+			url:'/index.php/Sj/Push/get_package',
+			type:'POST',
+			files:[$('#the_package')],
+			secureuri:false,
+			dataType:'json',
+			success:function(data){
+				if(data == 2){
+					alert('上传文件格式错误');
+					return false;
+				}else if(data == 3){
+					alert('上传包名大于200个');
+					return false;
+				}else if(data[0] == 4){
+					alert('上传包名'+data[1]+'不存在');
+					return false;
+				}else{
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.select_package = package_strs;
+					$('#all_select').val(package_strs);
+					$('#select_text').html(need_str);
+				}
+			}
+		});
+	}
+	//删除手动上传游戏
+	function del_select(obj){
+		var no_package = obj;
+		//var old_package = sessionStorage.select_package;
+		var old_package = $("#all_select").val();
+		$.ajax({
+			url:'/index.php/Sj/Push/del_select',
+			data: 'old_package='+old_package+'&no_package='+no_package,
+			type: 'get',
+			success: function(data){
+				if(data != 204){
+					var data = eval(''+data+'');
+					var need_str = '';
+					var package_str = '';
+					for(var i=0; i < data.length; i++){
+						if((i + 1)%9 == 0 && (i + 1) >= 9){
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+						}else{
+							need_str += data[i][1] + '<a href="javascript:;" onclick="del_select(\''+data[i][0]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+						}
+						package_str += data[i][0] + ',';
+					}
+					var package_strs = package_str.substring(0,package_str.length-1);
+					sessionStorage.select_package = package_strs;
+					$('#all_select').val(package_strs);
+					$('#select_text').html(need_str);
+				}else{
+					sessionStorage.select_package = '';
+					$('#select_text').html('');
+					$('#all_select').val('');
+				}
+			}
+		});
+	}
+	//手动上传用户名
+	function upload_user(){
+		if($('#user_path').val().length == 0){
+			alert("请上传用户名文件");
+			return false;
+		}
+		$.ajaxFileUpload({
+			url:'/index.php/Sj/Push/get_user',
+			type:'POST',
+			files:[$('#user_path')],
+			secureuri:false,
+			dataType:'json',
+			success:function(data){
+				if(data == 2){
+					alert('上传文件格式错误');
+					return false;
+				}else{
+					var str = '已上传<span style="color:red;">'+data[0]+'</span>个用户名';
+					$('#user_text').html(str);
+					$('#user_save').val(data[1]);
+					sessionStorage.user_count = data[0];
+				}
+			}
+		});
+	}
+	//删除手动上传用户名
+	function del_user(obj){
+		var no_package = obj;
+		var old_package = sessionStorage.select_package;
+		$.ajax({
+			url:'/index.php/Sj/Push/del_user',
+			data: 'old_package='+old_package+'&no_package='+no_package,
+			type: 'get',
+			success: function(data){
+				var data = eval(''+data+'');
+				var package_str = data.split(",");
+				var need_str = '';
+				for(var i=0; i < package_str.length; i++){
+					if((i + 1)%9 == 0 && (i + 1) >= 9){
+						need_str += package_str[i] + '<a href="javascript:;" onclick="del_user(\''+package_str[i]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;<br /><br />';
+					}else{
+						need_str += package_str[i] + '<a href="javascript:;" onclick="del_user(\''+package_str[i]+'\')"><img src="/Public/images/delete_icon.png" /></a>&nbsp;&nbsp;';
+					}
+				}
+				sessionStorage.select_package = data;
+				$('#user_save').val(data);
+				$('#user_text').html(need_str);
+			}
+		});
+	}
+	
+	
+	
+    function search_softname(async) {
+        var apply_pkg = $.trim($("#apply_pkg").val());
+        if (apply_pkg == '') {
+            $("#softname").val("");
+            return 0;
+        }
+        var param = {
+            package : apply_pkg
+        }
+        var ret = 0;
+        $.ajax({
+            url:'__URL__/search_softname',
+            type:'POST',
+            async:async,
+            data:param,
+            secureuri:false,
+            dataType:'json',
+            success:function(data) {
+                if (data.status == 1) {
+                    var info = data.info;
+                    $("#softname").val(info['softname']);
+                } else {
+                    $("#softname").val("");
+                }
+                ret = data.status;
+            }
+        });
+        return ret;
+    }
+    
+    function push_edit_submit() {
+        // 不为空的数据，key为id值，value为提示值
+        var nonempty = new Object();  
+        nonempty['startdate'] = '开始时间';
+		nonempty['enddate'] = '开始时间';
+        nonempty['push_time_start'] = '每日推送时间段';
+        nonempty['push_time_end'] = '每日推送时间段';
+        //nonempty['author'] = '作者';
+        //nonempty['news_content'] = '资讯简介';
+        //nonempty['editor_content'] = '资讯内容';
+        //nonempty['news_pic'] = '资讯默认图片';
+		
+		//版本号必填
+		var ver_type = $('input:radio[name="game_sdk_version_rule"]:checked').val();
+		if(ver_type==">=")
+		{
+			var ver1 = $("#ver_big_input").val();
+		}
+		else if(ver_type=="<=")
+		{
+			var ver1 = $("#ver_small_input").val();
+		}
+		else if(ver_type=="==")
+		{
+			var ver = $("#force_update_version").val();
+		}
+		/*if(!ver&&!ver1)
+		{
+			alert("SDK版本不能为空!");
+			return false;
+		}*/
+		if(ver1)
+		{
+			var sdk_ver_arr = {:json_encode($sdk_version_db)};
+			//alert(sdk_ver_arr);
+			//alert(typeof(sdk_ver_arr));
+			//var sdk_ver_arr = eval(sdk_ver_arr);
+			//var sdk_ver_arr=eval('(' +sdk_ver_arr+ ')');  
+			//alert(ver1);
+			//var arr[] = new Array();
+			var is_r = false;
+			for(var i=0;i<sdk_ver_arr.length;i++)
+			{
+				//arr.push(sdk_ver_arr[i]['version_code']); 
+				if(ver1==sdk_ver_arr[i]['version_code'])
+				{
+					is_r =true;
+				}
+			}
+			if(!is_r)
+			{
+				//alert("版本填写错误！");
+				//return false;
+			}
+		}
+		
+		//推送方式
+        if($("#push_mode").attr("checked")!= true && $("#push_mode2").attr("checked")!= true){
+			alert("没有选择推送方式");
+			return false;
+		}
+		//游戏范围 判断
+		if($("#game_ext option:selected").val() == 1 && $("#all_select").val() == ''){
+			alert("没有手动上传游戏");
+			return false;
+		}
+		//游戏范围
+		if($("#game_ext option:selected").val() == 1){
+			if($("#all_select").val() == '' || $("#select_text").html() == ''){
+				alert("请选择手动上传文件");
+				return false;
+			}
+		}
+		/*else if($("#game_ext option:selected").val() != 0 && $("#game_ext option:selected").val() != 2){
+			if($("#all_ignore").val() == '' || $("#ignore_text").html() == ''){
+				alert("请选择上传或添加屏蔽游戏");
+				return false;
+			}
+		}*/
+		//游戏范围 用户名 选择一个即可
+		if($("#game_ext option:selected").val() == 0 && $("#select_user_type option:selected").val() == 0){
+			alert("没有选择游戏范围 或者 没有上传用户名");
+			return false;
+		}
+		//如果选择老用户名 2
+		if($("#select_user_type option:selected").val() == 2){
+			if(mycheckbox("old_user") == false){
+				alert("请勾选老用户名");
+				return false;
+			}
+		}
+		//VIP用户
+		if($("#select_user_type option:selected").val() == 3){
+			if(mycheckbox('user_vip') == false){
+				alert("请勾选VIP户名组");
+				return false;
+			}
+		}
+		function mycheckbox(id) {
+			var falg = 0;
+			$("input[name='"+id+"[]']:checkbox").each(function () {
+				if ($(this).attr("checked")) {
+					falg =1;
+					return false;
+				}
+			})
+			if (falg > 0)
+				return true;
+			else
+				return false;
+		}
+		//push类型
+		if($("#push_type option:selected").val() == 1){
+			nonempty['html_title'] = '网页标题';
+			nonempty['html_link'] = '网页链接地址';
+			if($("#push_browser1").attr("checked")!= true && $("#push_browser2").attr("checked")!= true){
+				alert("没有选择打开方式");
+				return false;
+			}
+		}else if($("#push_type option:selected").val() == 4){
+			nonempty['html_title'] = '网页标题';
+       		// 判断KindEditor内容是否为空
+       		window.editor.sync();//同步一下
+			if ($.trim(window.editor.text()) == '') {
+				alert('公告内容不能为空！');
+				return false;
+			}
+		}else if($("#push_type option:selected").val() == 7){
+        if(!$('#package_new').val()){
+          alert('游戏包名不能为空！');
+          return false;
+        }
+        if(getRadioBoxValue('install_setting')==4 && !$('#start_to_page').val()){
+            alert('请填写启动页面！');
+            return false;
+        }
+        
+    }else if($("#push_type option:selected").val() == 6){
+       		nonempty['html_link'] = '游戏链接地址';
+		}else{
+			nonempty['buy_id'] = '礼包ID';
+		}
+		//push展现形式
+		if($("#push_show_type option:selected").val() == 1){
+			nonempty['push_title'] = 'push标题';
+			nonempty['push_intro'] = 'push简介';
+		}else if($("#push_show_type option:selected").val() == 2){
+			nonempty['push_title'] = 'push标题';
+			//判断手机分辨率
+			if($("#select_phone_dpi option:selected").val() == 0){
+				if($("#push_img_low_1_hide").val()==''){
+					alert("单行低分图片没有上传");
+					return false;
+				}else if( $("#push_img_low_2_hide").val()==''){
+					alert("单行高分图片没有上传");
+					return false;
+				}else if($("#push_img_high_1_hide").val()==''){
+					alert("多行低分图片没有上传");
+					return false;
+				}else if( $("#push_img_high_2_hide").val()==''){
+					alert("多行高分图片没有上传");
+					return false;
+				};
+			}else if($("#select_phone_dpi option:selected").val() == 1){
+				if($("#push_img_low_1_hide").val()==''){
+					alert("单行低分图片没有上传");
+					return false;
+				}else if($("#push_img_high_1_hide").val()==''){
+					alert("多行低分图片没有上传");
+					return false;
+				}
+			}else if($("#select_phone_dpi option:selected").val() == 2){
+				if( $("#push_img_low_2_hide").val()==''){
+					alert("单行高分图片没有上传");
+					return false;
+				}else if( $("#push_img_high_2_hide").val()==''){
+					alert("多行高分图片没有上传");
+					return false;
+				};
+			}
+		}
+		if($("#enddate").val() <= $("#startdate").val()){
+			alert("开始时间不能大于等于结束时间");
+			$("#enddate").focus();
+            return false;
+		}
+		if($("#push_time_end").val() <= $("#push_time_start").val()){
+			alert("每日推送时间段 开始时间不能大于等于结束时间");
+			$("#push_time_end").focus();
+            return false;
+		}
+		//活动ID不能为空
+		if($("#push_type option:selected").val() == 2){
+			if($("#buy_id").val()==''){
+				alert("礼包ID不能为空");
+				$("#buy_id").focus();
+				return false;
+			}
+		}else if($("#push_type option:selected").val() == 3){
+			if($("#buy_id").val()==''){
+				alert("活动ID不能为空");
+				$("#buy_id").focus();
+				return false;
+			}
+		}
+        for (key in nonempty) {
+            var str = "#" + key;
+            if ($.trim($(str).val()) == '') {
+                alert(nonempty[key]+'不能为空！');
+                $(str)[0].focus();
+                return false;
+            }
+        }
+        // 判断KindEditor内容是否为空
+        window.editor.sync();//同步一下
+        if ($.trim(window.editor.text()) == '') {
+            //alert('资讯内容不能为空！');
+            //return false;
+        }
+        var exists = search_softname(false);
+        if (!exists) {
+            //alert("游戏包名不存在！");
+            //$("#apply_pkg")[0].focus();
+            //return false
+        }
+        $("#push_edit_submit").submit();
+    }
+    function js_strto_time(str_time){
+		var new_str = str_time.replace(/:/g,'-');
+		new_str = new_str.replace(/ /g,'-');
+		var arr = new_str.split("-");
+		var datum = new Date(Date.UTC(arr[0],arr[1]-1,arr[2],arr[3]-8,arr[4],arr[5]));
+		return strtotime = datum.getTime()/1000;
+	}
+    function checkLen(obj) {
+        var maxChars = 40;//最多字符数
+        if (obj.value.length > maxChars)
+            obj.value = obj.value.substring(0,maxChars);
+    };
+	function onFileChange_ad_picture123(obj,width,height,name,num){
+		/*
+			width:图片宽
+			height：图片高
+			name：file上传的ID NAME 
+			num:php判断用 1 是单行低分图片 2是单行高分图片
+		*/
+		var index = $(obj).attr('name');
+		if( !obj.value.match(  /.jpg|.jpeg|.png|.gif/i) ){
+			data_err('上传格式出错',index);
+			return false;
+		}
+        var param = {
+			action : name,
+			width : width,
+			height : height
+        }
+		$.ajaxFileUpload({
+			url:'/index.php/Sj/Push/picture_do_two',
+			type:'POST',
+			files:[$('#'+name)],
+			data:param,
+			secureuri:false,
+			dataType:'json',
+			success:function(data){
+				if(data.code == 0){
+					alert(data.msg);
+				}else if(data.code == 1){
+					alert("上传成功");
+					$("#"+data.action+'_hide').val(data.file_path);
+				}
+			}
+		});
+		
+	}
+	function onFileChange_ad_picture(obj,width,height,name,num){
+		/*
+			width:图片宽
+			height：图片高
+			name：file上传的ID NAME 
+			num:php判断用 1 是单行低分图片 2是单行高分图片
+		*/
+		var index = $(obj).attr('name');
+		if( !obj.value.match(  /.jpg|.jpeg|.png|.gif/i) ){
+			data_err('上传格式出错',index);
+			return false;
+		}
+			$.ajaxFileUpload_new(
+		{
+			url:'/index.php/Sj/Push/picture_do/action/'+name+'/width/'+width+'/height/'+height, //你处理上传文件的服务端
+			secureuri:false,
+			fileElementId:name,
+			dataType: 'json',
+			success: function (data){
+				if(data.code == 0){
+					$(obj).attr('value',"");
+					alert(data.msg);
+				}else{
+					alert("上传成功");
+					$("#"+data.action+'_hide').val(data.file_path);
+				}
+			}
+		}
+		)
+	}
+	function data_err(err,file){
+		$("[name='"+file+"']").val('');
+		alert(err);
+		var file = $("#"+file);
+		file.after(file.clone().val(""));
+		file.remove();	
+		return false;
+	}
+  //软件包名验证
+  function get_softname(){
+    var package = $('#package_new').val();
+    $.ajax({
+      url: '/index.php/Sj/Onlinegame/get_softname/package/'+package,
+      type: 'get',
+      success: function(data){
+        if(data != 2){
+          var obj = eval('(' + data + ')');
+          
+          // $('#soft_name').val(obj.soft_name);
+          // $('#my_game').val(obj.category_name);
+        }else{
+          // $('#soft_name').val('');
+          $('#package_new').val('')
+          alert("该软件不存在");
+          return false;
+        }
+      }
+    });
+  }
+  function getRadioBoxValue(radioName) 
+  { 
+      var obj = document.getElementsByName(radioName);
+      for(i=0; i<obj.length;i++) {
+
+          if(obj[i].checked)    { 
+              return   obj[i].value; 
+          } 
+      }         
+       return "undefined";       
+  }
+</script>	
+</body>

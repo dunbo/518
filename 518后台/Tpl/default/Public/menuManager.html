@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel='stylesheet' type='text/css' href='__PUBLIC__/css/style.css'>
+<load href="__PUBLIC__/js/jquery.js" />
+<style>
+html{overflow-x : hidden;}
+</style>
+<script type="text/javascript">
+var action = 'move_node';
+
+function refreshCheck(obj)
+{
+	if ($(obj).attr('rel') == 'top') {
+		$(':checkbox[rel=sub]').attr('checked', false);
+		action = 'move_group';
+	} else if ($(obj).attr('rel') == 'sub') {
+		$(':checkbox[rel=top]').attr('checked', false);
+		action = 'move_node';
+	}
+}
+
+function showMenu(platform, type)
+{
+	$.ajax({
+		url:'/index.php/Public/getSubMenu?type=' + platform, 
+		dataType  : 'json', 
+		success : function(data) {
+			var view = {};
+			var html = '';
+			if (type == 'src') {
+				for (var i in data) {
+					view.group = data[i];
+					var title_html = '<tr class="row"  onclick=""><th class="tCenter space"><label><input type="checkbox" rel="top" onclick="refreshCheck(this)" name="src_group" value="<@group.group_id>"/><span id="group_<@group.group_id>"><@group.group_name></span></label>&nbsp;&nbsp;<a href="javascript:void(0)" onclick="editGroup(<@group.group_id>)">edit</a>&nbsp;&nbsp;<a href="javascript:void(0)" onclick="saveGroup(<@group.group_id>)">save</a></th></tr>';
+					title_html = fetch_tpl(title_html, view);
+					html += title_html;
+					for (var j in view.group.menu_item) {
+						view.menu_item = view.group.menu_item[j];
+						var sub_html = '<tr class="row " rel="sub_<@group.group_id>">';
+						sub_html += '<td><label>';
+						sub_html += '<input type="checkbox" rel="sub" name="src_node_map" onclick="refreshCheck(this)" value="<@menu_item.map_id>"/><span id="node_<@menu_item.node_id>"><@menu_item.postil></span></label>&nbsp;&nbsp;<a href="javascript:void(0)" onclick="editNode(<@menu_item.node_id>)">edit</a>&nbsp;&nbsp;<a href="javascript:void(0)" onclick="saveNode(<@menu_item.node_id>)">save</a></td>';
+						sub_html += '</tr>';
+						sub_html = fetch_tpl(sub_html, view);
+						html += sub_html;
+					}
+				}
+				$('#menu_' + type + ' table').html(html);
+			} else {
+				for (var i in data) {
+					view.group = data[i];
+					var title_html = '<tr class="row"><th class="tCenter space"><label><input type="radio" rel="top" name="des_group" value="<@group.group_id>"/><@group.group_name></label></th></tr>';
+					title_html = fetch_tpl(title_html, view);
+					html += title_html;
+				}
+				$('#menu_' + type + ' table').html(html);
+			}
+		}
+	});
+}
+
+function showPlatform(type)
+{
+	$.ajax({
+		url:'/index.php/Public/getPlatform', 
+		dataType  : 'json', 
+		success : function(data) {
+			var opt_html = '';
+			var view = {};
+			opt_tpl = '<option value="<@platform>"><@platform></option>';
+			var opt_html = '';
+			for(var i in data){
+				view.platform = data[i];
+				opt_html += fetch_tpl(opt_tpl, view);
+			}
+			if (type == 'src') {
+				var html = '<select name="'+type+'_platform_list" onchange="showMenu($(this).val(), \''+type+'\')"><option>---</option>'+opt_html+'</select>';
+			} else {
+				var html = '<select name="'+type+'_platform_list"><option>---</option>'+opt_html+'</select>';
+			}
+			$('#platform_' + type).html(html);
+			$('#menu_' + type + ' table').empty();
+		}
+	});
+}
+
+function showGroup()
+{
+	var type = 'des';
+	$.ajax({
+		url:'/index.php/Public/getGroup', 
+		dataType  : 'json', 
+		success : function(data) {
+			var opt_html = '';
+			var view = {};
+			opt_tpl = '<option value="<@group.group_id>"><@group.group_name></option>';
+			var opt_html = '';
+			for(var i in data){
+				view.group = data[i];
+				opt_html += fetch_tpl(opt_tpl, view);
+			}
+			var html = '<select name="'+type+'_group"><option>---</option>'+opt_html+'</select>';
+			$('#platform_' + type).html(html);
+			$('#menu_' + type + ' table').empty();
+		}
+	});
+}
+
+function fetch_tpl(str, obj)
+{
+	var _this = obj;
+	str = str.replace(/<@([a-z0-9\_]+)>/g, function (m, p1) {
+		return _this[p1];
+	})
+	str = str.replace(/<@([a-z0-9\_]+)\.([a-z0-9\_]+)>/g, function (m, p1, p2) {
+		return _this[p1][p2];
+	})
+	return str;
+}
+
+function save()
+{
+	var data = {};
+	if (action == 'move_group') {
+		var v = new Array();
+		$(':checkbox[name=src_group]:checked').each(function(){
+			v.push($(this).val());
+		});
+		data = {
+			action:action,
+			src_group:v,
+			des_platform:$('select[name=des_platform_list]').val()
+		}
+	} else if (action == 'move_node') {
+		var v = new Array();
+		$(':checkbox[name=src_node_map]:checked').each(function(){
+			v.push($(this).val());
+		});
+		data = {
+			action:action,
+			src_node:v,
+			des_group:$('select[name=des_group]').val()
+		}		
+	}
+	$.ajax({
+		url:'/index.php/Public/saveMenu', 
+		data  : data, 
+		type: 'POST',
+		success : function(data) {
+			
+		}
+	});
+}
+
+function editNode(node_id)
+{
+	var t = $('#node_' + node_id).html();
+	var html = '<input type="text" value="' + t + '" id="node_input_'+node_id+'"/>';
+	$('#node_' + node_id).html(html);
+}
+
+function saveNode(node_id)
+{
+	var data = {
+		action:'save_node',
+		node_id:node_id,
+		node_name:$('#node_input_' + node_id).val()
+	};
+	$.ajax({
+		url:'/index.php/Public/saveMenu', 
+		data  : data, 
+		type: 'POST',
+		success : function(data) {
+			$('#node_' + node_id).html($('#node_input_' + node_id).val());
+		}
+	});
+}
+
+function editGroup(group_id)
+{
+	var t = $('#group_' + group_id).html();
+	var html = '<input type="text" value="' + t + '" id="group_input_'+group_id+'"/>';
+	$('#group_' + group_id).html(html);
+}
+
+function saveGroup(group_id)
+{
+	var data = {
+		action:'save_group',
+		group_id:group_id,
+		group_name:$('#group_input_' + group_id).val()
+	};
+	$.ajax({
+		url:'/index.php/Public/saveMenu', 
+		data  : data, 
+		type: 'POST',
+		success : function(data) {
+			$('#group_' + group_id).html($('#group_input_' + group_id).val());
+		}
+	});
+}
+
+$(document).ready(function(){
+	showPlatform('src');
+});
+
+
+</script>
+</head>
+<body >
+<div id="menu_src" class="menu" style="width:100%">
+	<input value="复制到tab..." type="button" onclick="showPlatform('des')"/>
+	<input value="复制到组..." type="button" onclick="showGroup('des')"/>
+	<input value="保存..." type="button" onclick="save()"/>
+</div>
+
+<div id="menu_src" class="menu" style="width:45%">
+	<div id="platform_src"></div>
+	<table class="list shadow" cellpadding=0 cellspacing=0 ></table>
+</div>
+
+<div id="menu_des" class="menu" style="width:45%">
+	<div id="platform_des"></div>
+	<table class="list shadow" cellpadding=0 cellspacing=0 ></table>
+</div>
+
+</body>
+</html>

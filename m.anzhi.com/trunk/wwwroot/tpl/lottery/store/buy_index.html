@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta content="telephone=no" name="format-detection">
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<title>安智购省钱 福利进校园</title>
+<link type="text/css" rel="stylesheet" href="<!--{$out.static_url}-->/store/css/common.css?v1"/>
+<script type="text/javascript" src="http://img3.anzhi.com/static/public/js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript">
+var sid='<!--{$out.sid}-->';
+        function isMobel(value)  {  
+                //if((/^13\d{9}$/g.test(value))||(/^14\d{9}$/g.test(value))||(/^15\d{9}$/g.test(value))||(/^18\d{9}$/g.test(value))){
+                if(/^1[34578]\d{9}$/g.test(value)){
+                        return true;  
+                }else{
+                        return false;  
+                }
+        }
+
+function save(){
+        var mobile = $("#mobile").val();
+        if($("#mobile").val().trim().length==0){
+                $("#tel_mess").html("请输入手机号");
+                return;
+        }
+        if(!isMobel($("#mobile").val())){
+            $("#tel_mess").html("手机号格式不正确");
+            return;
+        }
+	$.ajax({
+		url: '/lottery/store/buy_index.php?sid='+sid,
+		data: 'mobile='+mobile,
+                type: 'post',
+                success:function(data){
+                    if(data==1){
+                        var mobile = $("#mobile").val();
+                        location.href="/lottery/store/buy_city.php?sid="+sid+'&mobile='+mobile+'#coupon_wrap';
+                    }else if(data==2){
+                            $("#tel_mess").html("您的手机号已参加过活动");
+                            return;
+                    }else if(data==3){
+                        var mobile = $("#mobile").val();
+                        location.href="/lottery/store/buy_myprize.php?sid="+sid+'&mobile='+mobile+'&fromindex=1#coupon_wrap';
+                    }else if(data==4){
+                            $("#tel_mess").html("您的设备已参加过活动");
+                            return;
+                    }else if(data==5){
+                            $("#tel_mess").html("页面已失效，请退出活动重新进入");
+                    }
+                }
+	});
+}
+
+</script>
+</head>
+<body>
+<div class="banner">
+	<img src="<!--{$out.imgurl}--><!--{$out.config_info['buy_img']}-->"/>
+	<a href="#rules_wrap">活动规则</a>
+</div>
+<div class="main">
+	<div class="wrap" id="coupon_wrap">
+            <!--{if $out['status']== 2}-->
+		<div class="item_title item_current">
+			<i>1</i>
+			<span>提交手机号码</span>
+		</div>
+		<div class="item_cnt" id="phone_submit">
+                    <input type="text" class="phone_input" id="mobile" value="<!--{$out.mobile}-->" placeholder="请输入手机号码（用于接收短信兑换码）"/>
+                    <!--<input type="text" class="phone_input" id="mobile" value="15901084927" placeholder="请输入手机号码（用于接收短信兑换码）"/>-->
+					<div class="error_form red"><span id="tel_mess"></span></div>
+			<a href="#" onclick="save()">提交</a>
+		</div>
+		<div class="item_title" style="margin-top:-15px">
+			<i>2</i>
+			<span>选择学校</span>
+		</div>
+		<div class="item_cnt"></div>
+		<div class="item_title" style="margin-top:-15px;">
+			<i>3</i>
+			<span>获得代金券</span>
+		</div>
+		<div class="item_cnt" style="border:none"></div>
+		<div class="cloud_01"></div>
+        <!--{/if}-->
+        <!--{if $out['status']== 1}-->
+            <div style="padding:5px 0 20px; text-align:center; line-height:24px">您的设备不支持本次活动，<br/>去发现频道看看其他活动吧~</div/>
+
+        <!--{/if}-->
+
+	</div>
+	<div class="wrap" id="code_wrap">
+		<p>呼唤小伙伴扫描二维码领取代金券啦！</p>
+		<img class="code_img" src="<!--{$out.static_url}-->/store/images/code.jpg"/>
+		<p>扫描二维码下载安智市场</p>
+		<img class="tree_img" src="<!--{$out.static_url}-->/store/images/tree.png"/>
+		<div class="cloud_02"></div>
+	</div>
+	<div class="wrap" id="rules_wrap">
+		<h3>活动规则</h3>
+                <div class="rules">
+                    <!--{$out.config_info['explain']}-->
+                </div>
+	</div>
+</div>
+</body>
+</html>

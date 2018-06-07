@@ -1,0 +1,337 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen"/>
+<link rel="stylesheet" href="/Public/css/tablelist.css?v2" type="text/css" media="screen"/>
+<script type="text/javascript" src='__PUBLIC__/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js?v1'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/jquery-1.4.2.min.js"></script>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>『Goapk|安智网』管理平台</title>
+    <script type="text/javascript">
+        if (typeof (window.parent) != 'undefined' && (menuFrame = window.parent.document.getElementById('menu-frame').contentWindow)) {
+            try {
+                menuFrame.selectMenu('__ACTION__');
+            } catch (e) {
+            }
+        }
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+            document.onkeydown = function (e) {
+                var ev = document.all ? window.event : e;
+                if (ev.keyCode == 13) {
+                    search();
+                }
+            }
+        });
+        function del(d_id) {
+            if (confirm("删除不可恢复！确定要删除此条记录?")) {
+                var param = {
+                    d_id: d_id
+                };
+                $.ajax({
+                    url: '__URL__/deletestandby',
+                    type: 'POST',
+                    data: param,
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data == 1) {
+                            location.reload();
+                        }
+                    }
+                });
+            }
+        }
+        ;
+
+        function search() {
+            var add_begintime = $("#add_begintime").val();
+            var add_endtime = $("#add_endtime").val();
+            if (add_begintime.length > 0 && add_endtime.length > 0 && add_endtime < add_begintime) {
+                alert('添加结束时间不能小于开始时间');
+            } else {
+                $("#search").submit();
+            }
+        }
+        ;
+
+        function unauthorized_tb_remove(obj) {
+            var reg = /^\{/;
+            //console.log(reg.test($(obj).html()));
+            if (reg.test($(obj).html())) {
+                $("#TB_overlay").click(tb_remove);
+            }
+        }
+
+        function stop(h_id, status_v) {
+            if (status_v == 1) {
+                mess = '启用';
+            } else if (status_v == 0) {
+                mess = '停用';
+            }
+            if (confirm("确定要" + mess + "该配置吗?")) {
+                var param = {
+                    h_id: h_id,
+                    status_v: status_v
+                };
+                $.ajax({
+                    url: '__URL__/update_status',
+                    type: 'POST',
+                    data: param,
+                    dataType: 'json',
+                    success: function (data) {
+                        alert('操作成功');
+                        location.reload();
+                    }
+                });
+            }
+            else return false;
+        }
+        ;
+        function selectAll() {
+            if ($("input[name='SelectAll']").attr("checked")) {
+                $(":checkbox").attr("checked", true);
+            } else {
+                $(":checkbox").attr("checked", false);
+            }
+        }
+
+        function selectAll1() {
+            if ($("input[name='SelectAll1']").attr("checked")) {
+                $(":checkbox").attr("checked", true);
+            } else {
+                $(":checkbox").attr("checked", false);
+            }
+        }
+
+        function allstop(type) {
+            var is_select = false;
+            $(":checkbox[checked]").each(function () {
+                if ($(this).val() != 'on') {
+                    is_select = true;
+                }
+            });
+
+            if (is_select) {
+                if (type == 0) {
+                    mess = '停用';
+                } else if (type == 1) {
+                    mess = '启用';
+                } else if (type == 2) {
+                    mess = '删除';
+                }
+                if (confirm("确定要" + mess + "这些软件吗?")) {
+                    var str = "";
+                    $(":checkbox[checked]").each(function () {
+                        if ($(this).val() != 'on') {
+                            str = str + $(this).val() + ',';
+                        }
+                    });
+                    var param = {
+                        type: type,
+                        str: str
+                    };
+                    $.ajax({
+                        url: '__URL__/all_update_status',
+                        type: 'POST',
+                        data: param,
+                        dataType: 'json',
+                        success: function (data) {
+                            location.reload();
+                        }
+                    });
+                }
+            } else {
+                alert("请选择要操作的对象");
+                return false;
+            }
+        }
+    </script>
+</head>
+<body>
+<form action="/index.php/Caiji/Collection/standbyfetch" method="get" id="search">
+    <div class="search_box">
+        <table cellpadding="0" cellspacing="0" class="tb2" style="margin-top:10px;">
+            <tr>
+                <td width="60" align="right">软件名称:</td>
+                <td width="170"><input type="text" name="softname" id="softname" value="{$get.softname}"></td>
+                <td width="60" align="right">审核流程:</td>
+                <td><select name="examine_type" style="width:102px;">
+                        <option value="-1"
+                        <if condition="($get.examine_type eq -1)"> selected="selected"</if>
+                        >全部</option>
+                        <option value="3"
+                        <if condition="($get.examine_type eq 3)"> selected="selected"</if>
+                        >免审</option>
+                        <option value="2"
+                        <if condition="($get.examine_type eq 2)"> selected="selected"</if>
+                        >快速审核</option>
+                        <option value="1"
+                        <if condition="($get.examine_type eq 1)"> selected="selected"</if>
+                        >普通审核</option>
+                    </select>
+                </td>
+                <td width="60" align="right">包名:</td>
+                <td><input type="text" name="package" id="package" value="{$get.package}"></td>
+                <td width="60" align="right">软件分类:</td>
+                <td>
+                    <select name="az_category">
+                        <option value="-1"
+                        <if condition="($get.az_category eq -1)"> selected="selected"</if>
+                        >全部</option>
+                        <option value="2"
+                        <if condition="($get.az_category eq 2)"> selected="selected"</if>
+                        >游戏</option>
+                        <option value="1"
+                        <if condition="($get.az_category eq 1)"> selected="selected"</if>
+                        >应用</option>
+                    </select>
+                </td>
+                <td rowspan="3"><input class="search_btn" style="float:left; height:30px;" type="button" value="搜索"
+                                       onclick="search()"></td>
+            </tr>
+            <tr>
+                <td width="60" align="right">添加时间:</td>
+                <td colspan="3" width="320">
+                    <input id="add_begintime" name="add_begintime" value="{$get.add_begintime}" type="text"
+                           class="Wdate"
+                           onClick="WdatePicker({startDate: '%y-%M-%d 00:00:00', dateFmt: 'yyyy-MM-dd HH:mm:ss'})"
+                           style="width:170px;"> - <input id="add_endtime" name="add_endtime"
+                                                                    value="{$get.add_endtime}" type="text" class="Wdate"
+                                                                    onClick="WdatePicker({startDate: '%y-%M-%d 23:59:59', dateFmt: 'yyyy-MM-dd HH:mm:ss'})"
+                                                                    style="width:170px;"></td>
+                <td width="60" align="right">状态:</td>
+                <td>
+                    <select name="status">
+                    <option value="-1"
+                    <if condition="($status eq -1)"> selected="selected"</if>
+                    >全部</option>
+                    <option value="1"
+                    <if condition="($status eq 1)"> selected="selected"</if>
+                    >已启用</option>
+                    <option value="0"
+                    <if condition="($status eq 0)"> selected="selected"</if>
+                    >已停用</option>
+                </select>
+                </td>
+                <td width="60" align="right">包名来源:</td>
+                <td><select name="package_from">
+                    <option value="-1"
+                    <if condition="($get.package_from eq -1)"> selected="selected"</if>
+                    >全部</option>
+                    <option value="1"
+                    <if condition="($get.package_from eq 1)"> selected="selected"</if>
+                    >市场扫描</option>
+                    <option value="2"
+                    <if condition="($get.package_from eq 2)"> selected="selected"</if>
+                    >人工添加</option>
+                </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="60" align="right">下载量:</td>
+                <td colspan="3"><input type="text" name="down_str" value="{$get.down_str}"> - <input
+                        type="text" name="down_end" value="{$get.down_end}">万
+                </td>
+                <td width="100" align="right">开发者类型:</td>
+                <td><select name="dev_type">
+                    <option value="-1"
+                    <if condition="($dev_type eq -1)"> selected="selected"</if>
+                    >全部</option>
+                    <option value="0"
+                    <if condition="($dev_type eq 0)"> selected="selected"</if>
+                    >公司</option>
+                    <option value="1"
+                    <if condition="($dev_type eq 1)"> selected="selected"</if>
+                    >个人</option>
+                    <option value="2"
+                    <if condition="($dev_type eq 2)"> selected="selected"</if>
+                    >团队</option>
+                    <option value="3"
+                    <if condition="($dev_type eq 3)"> selected="selected"</if>
+                    >无</option>
+                </select>
+                </td>                
+            </tr>
+        </table>
+    </div>
+</form>
+<div class="count_bar">&nbsp;&nbsp;&nbsp;{$count}条<a href="?down=1" class="search_btn"
+                                                           style="float:right; margin-right:37px;">导出</a><a
+        href="__URL__/add_more_standby?width=450&height=400&modal=true&id={$list.id}&type=2&TB_iframe=true"
+        class="thickbox blue search_btn" style="float:right; margin-right:37px;">添加</a></div>
+<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+    <thead>
+    <tr align="center">
+        <th width="1%"><input type="checkbox" name="SelectAll" onclick="selectAll();"></th>
+        <th width="7%" height="26">软件名称</th>
+        <th width="6%">包名</th>
+        <th width="2%">软件分类</th>
+        <th width="2%">开发者类型</th>
+        <th width="4%">安智下载量</th>
+        <th width="5%">审核流程</th>
+        <th width="2%">添加时间</th>
+        <th width="3%">状态</th>
+        <th width="4%">包名来源</th>
+        <th width="3%">操作人</th>
+        <th width="5%">备注</th>
+        <th width="8%">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <volist name="list" id="list">
+        <tr>
+            <td align='left'><input type="checkbox" name="suntao" value="{$list.id}"/></td>
+            <td height="20" align="center"> {$list.softname}</td>
+            <td height="20" align="center"> <a href="/index.php/Dev/Soft/global_search/type/1/package/{$list.package}"  target="_black" >{$list.package}</a></td>
+            <td height="20" align="center"> {$list.az_category}</td>
+            <td height="20" align="center"> 
+                <?php if(is_numeric($list['dev_type'])&&$list['dev_type']==0) echo '公司';?>
+                <?php if($list['dev_type']==1) echo '个人';?>
+                <?php if($list['dev_type']==2) echo '团队';?>
+                <?php if(is_null($list['dev_type'])) echo '无';?>
+            </td>
+            <td height="20" align="center"> {$list.az_downloaded}</td>
+            <td height="20" align="center">
+                <if condition="($list.examine_type eq 1)">普通审核</if>
+                <if condition="($list.examine_type eq 2)">快速审核</if>
+                <if condition="($list.examine_type eq 3)">免审</if>
+            </td>
+            <td height="20" align="center">
+                <div style="width:70px;">{$list.create_tm|date="Y-m-d H:i:s",###}</div>
+            </td>
+            <td height="20" align="center">
+                <if condition="($list.status eq 1)">已启用</if>
+                <if condition="($list.status eq 0)">已停用</if>
+            </td>
+            <td height="20" align="center">
+                <if condition="($list.package_from eq 1)">市场扫描</if>
+                <if condition="($list.package_from eq 2)">人工添加</if>
+            </td>
+            <td height="20" align="center"> {$list.os_username}</td>
+            <td height="20" align="center"> {$list.desc}</td>
+            <td height="20" align="center"><a
+                    href="__URL__/edit_standby?width=500&height=280&modal=true&id={$list.id}&type=1&TB_iframe=true"
+                    class="thickbox blue">修改</a> |
+                    <if condition="($list.status eq 1)"><a  href="__URL__/edit_standby?width=500&height=280&modal=true&id={$list.id}&type=1&act=stop&sid=0&TB_iframe=true"
+                    class="thickbox blue">停用</a></if>
+                	<if condition="($list.status eq 0)"><a  href="__URL__/edit_standby?width=500&height=280&modal=true&id={$list.id}&type=1&act=stop&sid=1&TB_iframe=true"
+                    class="thickbox blue">启用</a></if>
+                <!--<if condition="($list.status eq 1)"><a href="#" onclick="stop({$list.id},0)" class="blue">停用</a></if>
+                <if condition="($list.status eq 0)"><a href="#" onclick="stop({$list.id},1)" class="blue">启用</a></if>-->
+                | <a href="#{$list.id}" onclick="del({$list.id})" class="blue">删除</a></td>
+        </tr>
+    </volist>
+    </tbody>
+</table>
+<input type="checkbox" name="SelectAll1" onclick="selectAll1();"> <a href="#" onclick="allstop(2)" class="">批量删除</a>&nbsp;&nbsp;&nbsp;&nbsp;<a
+        href="#" onclick="allstop(1)" class="">批量启用</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" onclick="allstop(0)"
+                                                                                  class="">批量停用</a>
+
+<div style="width:92%; padding-top:4px; text-align:right">{$page}</div>
+</body>
+</html>

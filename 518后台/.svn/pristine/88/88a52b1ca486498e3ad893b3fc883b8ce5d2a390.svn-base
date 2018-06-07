@@ -1,0 +1,80 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<style>
+a {color:blue;}
+input.search_btn{height:31px;}
+</style>
+<body style="overflow-x: hidden; overflow-y: auto; ">
+
+<div style="float:right;margin: 5px;">
+<a href="__URL__/addtag?" class="thickbox search_btn">添加标签</a>
+</div>
+<volist name="list" id="val">
+<form method='post' action="__URL__/edit_rank" onsubmit="return clickConfirm('确定保存优先级更改吗？');">
+<input type="hidden" name="tagsname" value="{$val.name|default=''}" />
+<div class="tags_{$val.groupid}">
+<div >
+	标签分类：{$val.name|default=' '}（共{$val.count|default='0'}个）
+	<div style="float:right;margin: 5px;">
+		<a class="search_btn" style="display:inline-block;" href="__URL__/showDetail/groupid/{$val.groupid}/" id="priorityid_{$val.groupid}">查看详情</a>
+	</div>
+</div>
+
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th >标签ID</th>
+			<th >标签名称</th>
+			<th >使用状态</th>
+		</tr>
+	</thead>
+	<volist name="val.tags" id="tags">
+	<tr>
+		<td>{$tags.tagid}</td>
+		<td>{$tags.tagname}</td>
+		<td><if condition="$tags.status eq 1"> <a href="__URL__/edit?tagid={$tags.tagid}&status=0&action=status" onclick="return change();" title="点击切换状态为停用">使用</a>
+		<elseif condition="$tags.status eq 0"/><a href="__URL__/edit?tagid={$tags.tagid}&status=1&action=status" onclick="return change();" style="color:red" title="点击切换状态为使用">停用</a>
+		</if></td>
+	</tr>
+	</volist>
+</table>
+</div>
+</form>
+
+</volist>
+<script>
+function del()
+  {
+   if(confirm("你确定要删除该标签吗，删除后内容已有的该标签同时删除？"))
+    return true;
+   else return false
+  }
+  function change()
+  {
+   if(confirm("确定要更改状态吗？"))
+    return true;
+   else return false
+  }
+  
+  
+/* 论坛版块优先级 */
+function priority(tags_id){
+  	$('.tags_'+tags_id+' #P_id_'+tags_id+'>a').toggle();
+  	$('.tags_'+tags_id+' #P_id_'+tags_id+'>input').toggle();
+  	
+  	var prioritytext = '编辑优先级';
+  	if(!$('.tags_'+tags_id+' #P_id_'+tags_id+'>input').is(":hidden")){
+  		prioritytext = '取消优先级';
+  		$('.tags_'+tags_id+' #submid_'+tags_id).show();
+  		$('.tags_'+tags_id+' #submid_'+tags_id).attr('style','display:inline-block;');
+  	}else{
+  		$('.tags_'+tags_id+' #submid_'+tags_id).hide();
+  	}
+  	$('.tags_'+tags_id+' #priorityid_'+tags_id).text(prioritytext);
+}
+</script>
+</body>
+</html>

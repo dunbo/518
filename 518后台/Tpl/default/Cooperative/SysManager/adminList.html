@@ -1,0 +1,77 @@
+<script type="text/javascript">
+function checkall(obj,cName)
+{
+    var checkboxs = document.getElementsByName(cName);
+    for(var i=0;i<checkboxs.length;i++){checkboxs[i].checked = obj.checked;}
+}
+
+function search_all(){
+	var admin_name = $('#search').val();
+	if (admin_name == '请输入用户名') admin_name = '';
+	$.ajax({
+		url: '__URL__/adminList',
+		data: "admin_name="+admin_name,
+		type: 'post',
+		dataType: 'json',
+		success: function(data){
+			var my_input;
+			var my_status;
+			var my_str="";
+			for(i=0;i<data.length;i++){
+				if(data[i].join == 1){
+					var my_input = " ";
+				}else{
+					var my_input = "<input type='checkbox' name='aid[]' value='"+data[i].admin_user_id+"' />";
+				}
+				
+				if(data[i].join == 1){
+					var my_status = '已添加';
+				}else{
+					var my_status = '未添加';
+				}
+				my_str += "<tr><td>"+my_input+"</td><td>"+data[i].admin_user_name+"</td><td>"+data[i].last_logintime+"</td><td>"+my_status+"</td></tr>";
+			}
+			if (my_str)
+				$('#result_all').html(my_str);
+		}
+	});
+}
+
+</script>
+<div class="newbox" id="add_manager" style='display: block'>
+	<h6>添加用户：</h6>
+	<div class="newbox_cnt">
+		<form name='search' method="post" action="/index.php/Cooperative/SysManager/adminList/" class="add_manager_form" onkeydown= "if(event.keyCode==13)return   false;">
+			<div class="add_manager_list"><input name='search' value='请输入用户名' type="text" id="search" class="inputtext" onfocus="if(this.value=='请输入用户名'){this.value=''}" onblur="if(value==''){value='请输入用户名'}" /><span onclick='search_all();' class="search_btn">搜  索</span></div>
+		</form>
+		<form name='addAdmin' method='POST' action='/index.php/Cooperative/SysManager/addAdmin/' class="add_manager_form">
+			<div class="add_manager_list" id="add_manager_list2">
+				<table cellpadding="0" cellspacing="0" class="table_list">
+					<thead>
+						<tr>
+							<th><input type="checkbox" name="all" onclick="checkall(this,'aid[]')" /></th>
+							<th>用户名</th>
+							<th>最后登录时间</th>
+							<th>状态</th>
+						</tr>
+					</thead>
+					<tbody id="result_all">
+					<volist id='list' name='admin'>
+						<tr>
+							<td><if condition="$list.join eq 1">&nbsp;<else /><input type="checkbox" name='aid[]' value='{$list.admin_user_id}' /></if></td>
+							<td>{$list.admin_user_name}</td>
+							<td>{$list.last_logintime}</td>
+							<td><if condition="$list.join eq 1">已添加<else />未添加</if></td>
+						</tr>
+					</volist>
+					</tbody>
+				</table>
+			</div>
+		</form>
+		<div class="open_close_btn">
+			<a href="javascript:document.addAdmin.submit();">确认</a>
+			<a href="javascript:;" onclick="tb_remove();">取消</a>
+			<div class="clear"></div>
+		</div>
+	</div>
+</div>

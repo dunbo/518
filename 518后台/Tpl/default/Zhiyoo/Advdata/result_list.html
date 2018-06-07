@@ -1,0 +1,206 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<link type="text/css" rel="stylesheet" href="/Public/js/fancybox/jquery.fancybox-1.3.4.css" />
+<script type="text/javascript" src="/Public/js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+<script type="text/javascript">
+function delcheckit(ids){
+	var cer = '';
+	if(confirm("你确定要删除该数据吗？")){
+		cer = true;
+	}
+    var ids = String(ids);
+	if(cer == true){
+	$.ajax({
+			url: '/index.php/Zhiyoo/Advdata/del_list/ids/'+ids,
+			data: '',
+			type: 'get',
+			success: function(data){
+				if(data == 1){
+					var delids = ids.split(",");
+					cnt = delids.length;
+					for(i=0;i<cnt;i++){
+						$("#tr_"+delids[i]).css("color","gray");
+						$("#delstatus_"+delids[i]).html('<p style="text-decoration:underline;color:gray;">编辑</p>&nbsp;&nbsp;<p style="text-decoration:underline;color:gray;">删除</p>');
+						$("#substatus_"+delids[i]).html("<div style='color:gray;'>已删除</div><br/><a href='/index.php/Zhiyoo/Collectresult/reback_list/from/data/id/"+delids[i]+"' style='text-decoration:underline;color:blue;'>撤销删除</a>");
+
+						$("#edittag_"+delids[i]+" a" ).remove();
+						$("#edittag_"+delids[i]).append('<p style="text-decoration:underline;color:gray;">编辑</p>');
+					
+					}
+					alert("删除成功");
+				}else{
+					alert("删除失败");
+				}
+			}
+		});
+	}
+	
+}
+
+function selectAll(obj){
+	checkall = document.getElementsByTagName("input");
+if(obj.checked == true){
+	for (i = 0; i < checkall.length; i++)
+	{
+		if(checkall[i].id == 'all' ) continue;
+		if (checkall[i].type == "checkbox" && checkall[i].disabled == false)
+			checkall[i].checked = true;
+	}
+}else{
+	for (i = 0; i < checkall.length; i++)
+	{
+		if(checkall[i].id == 'all' ) continue;
+		if (checkall[i].type == "checkbox" && checkall[i].disabled == false)
+			checkall[i].checked = false;
+	}
+
+}
+}
+
+function passAll(method){
+	var count = 0;
+	var id = new Array();
+	checkall = document.getElementsByTagName("input");
+	for (i = 0; i < checkall.length; i++)
+	{
+		if(checkall[i].id == 'all' ) continue;
+		if (checkall[i].type == "checkbox" && checkall[i].checked == true)
+		{
+			id[count] = checkall[i].id;
+			count++;
+		}
+	}
+	var ids = id.join(',');
+	if(ids == '') {
+		alert('请选择需要操作的数据');
+		return false;
+	}
+	if(method == 'del') {
+		if(ok('删除后不可恢复，是否确认删除？'))
+		location.href = '/index.php/Zhiyoo/Advdata/del_list/posid/'+ids;
+	}
+}
+
+function ok(data)
+{
+   if(confirm(data))
+    return true;
+   else return false
+}
+$(document).ready(function() {
+		$("a.zshowbox").fancybox();
+});
+function checksearch(){
+	sval = document.getElementById('start_tm').value;
+	eval = document.getElementById('end_tm').value;
+	if(sval > eval){
+		alert('开始时间不能大于结束时间');
+		return false;
+	}
+	return true;
+}
+</script>
+<style>
+.table thead tr th{ text-align:center;}
+.navgition { padding-bottom:20px; padding-right:30px; text-align:right;}
+.navgition form {display:inline;}
+</style>
+<body>
+
+<div style="margin:20px 10px 20px 6px;">
+<form action="__URL__/result_list/{$srcurl}{$postimeurl}" method="get" class="table_list">
+<table>
+	<tr>
+		<td >
+		平台：
+			<select name="platform">
+				<option value='0'>全部</option>
+				<volist name="platform" id="list">
+				<option value='{$list.platform}' <?php if($list['platform'] == $_GET['platform']) echo 'selected'; ?>>{$list.platformname}</option>
+				</volist>
+			</select>
+		</td>
+		<td >
+		位置：
+			<select name="position">
+				<option value='0'>全部</option>
+				<volist name="position" id="list">
+				<option value='{$list.position}' <?php if($list['position'] == $_GET['position']) echo 'selected'; ?>>{$list.positionname}</option>
+				</volist>
+			</select>
+		</td>
+		<td>标题：<input type="text" name="title" value="{$_GET['title']}" /></td>
+		<td>素材ID：<input type="text" name="tid" value="{$_GET['tid']}" /></td>
+	</tr>
+	<tr>
+		<td colspan="3">添入时间：<input id="start_tm" name="start_tm" value="{$_GET['start_tm']}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px" />&nbsp;至&nbsp;<input id="end_tm" name="end_tm" value="{$_GET['end_tm']}" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px; height:28px"/></td>
+		<td><input type="submit" onclick="return checksearch()" value="搜索" class="search_btn" /></td>
+	</tr>
+</table>
+</form>
+</div>
+
+<div style="margin:20px 10px 20px 6px;"></div>
+<div style="margin:10px;">
+		<a href="__URL__/result_list{$filterurl}" class="search_btn" style="display:inline-block;<?php if($_GET['postime'] && $_GET['postime']!=='online') echo 'background:#fff;'?>">已上线</a>
+		<a href="__URL__/result_list/postime/waiton{$filterurl}" class="search_btn" style="display:inline-block;<?php if($_GET['postime']!=='waiton') echo 'background:#fff;'?>">待上线</a>
+		<a href="__URL__/result_list/postime/outline{$filterurl}" class="search_btn" style="display:inline-block;<?php if($_GET['postime']!=='outline') echo 'background:#fff;'?>">已过期</a>
+		<div style="float:right;">
+			<a href="__URL__/add?" class="thickbox search_btn" style="display:inline-block;width:135px;">添加广告素材</a>
+			<a href="javascript:;" onclick="passAll('del')" class="search_btn" style="display:inline-block;">批量删除</a>
+		</div>
+	  </div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th ><input type="checkbox" id="all" onclick="selectAll(this)"></th>	
+			<!--th style="width: 50px; "><a href="__URL__/result_list/type/id/order/<?php $order = isset($th['id']) ? $th['id'] : 'asc';echo $order.$filterurl.$cat?>">序号↑↓</a></th-->
+			<th style="width: 50px; "><a href="__URL__/result_list/type/ad.advdid/order/<?php $order = isset($th['ad.advdid']) ? $th['ad.advdid'] : 'asc';echo $order.$filterurl.$postimeurl?>">排期ID↑↓</a></th>
+			<th style="width: 50px; "><a href="__URL__/result_list/type/ad.advgid/order/<?php $order = isset($th['ad.advgid']) ? $th['ad.advgid'] : 'asc';echo $order.$filterurl.$postimeurl?>">素材ID↑↓</a></th>
+			<th style="width: 120px;"><a href="__URL__/result_list/type/ad.ext_title/order/<?php $order = isset($th['ad.ext_title']) ? $th['ad.ext_title'] : 'asc';echo $order.$filterurl.$postimeurl?>">宣传图片/标题↑↓</a></th>
+			<th >链接地址</th>
+			<th >标签</th>
+			<th style="width: 90px;"><a href="__URL__/result_list/type/ad.addtime/order/<?php  $order = isset($th['ad.addtime']) ? $th['ad.addtime'] : 'desc';echo $order.$filterurl.$postimeurl?>">添入时间↑↓</a></th>
+			<th ><a href="__URL__/result_list/type/ad.platform/order/<?php  $order = isset($th['ad.platform']) ? $th['ad.platform'] : 'desc';echo $order.$filterurl.$postimeurl?>">平台↑↓</a></th>
+			<th ><a href="__URL__/result_list/type/ad.position/order/<?php  $order = isset($th['ad.position']) ? $th['ad.position'] : 'desc';echo $order.$filterurl.$postimeurl?>">位置↑↓</a></th>
+			<th style="width: 90px;"><a href="__URL__/result_list/type/ad.starttime/order/<?php  $order = isset($th['ad.starttime']) ? $th['ad.starttime'] : 'asc';echo $order.$filterurl.$postimeurl?>">开始时间↑↓</a></th>
+			<th style="width: 90px;"><a href="__URL__/result_list/type/ad.endtime/order/<?php  $order = isset($th['ad.endtime']) ? $th['ad.endtime'] : 'asc';echo $order.$filterurl.$postimeurl?>">结束时间↑↓</a></th>
+			<th style="width: 80px;">操作</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr id="tr_{$val.advdid}">
+		<td><input type="checkbox" id="{$val.posid}"></td>
+		<!--td>{$val.advdid}</td-->
+		<td>{$val.advdid}</td>
+		<td>{$val.advgid}</td>
+		<td><?php if($val['img_path1']){ ?><div style="width: 100px; max-height: 80px; overflow: hidden;"><a href="{$val.img_path1}" class="zshowbox"><img width="180px" src="{$val.img_path1}"/></a></div><?php }elseif($val['img_path2']){ ?><div style="width: 100px; max-height: 80px; overflow: hidden;"><a href="{$val.img_path2}" class="zshowbox"><img width="180px" src="{$val.img_path2}"/></a></div><?php } ?><a href="{$val.url}" target="_blank">{$val.ext_title}</a></td>
+		<td><a href="{$val.url}" target="_blank">{$val.url}</a></td>
+		<td >分类标签：广告</td>
+		<td><?php echo date('Y/n/d',$val['addtime']).'<br>'.date('H:i:s',$val['addtime'])?></td>
+		<td>{$val['platformname']}</td>
+		<td>{$val['positionname']}</td>
+		<td><?php echo $val['starttime'] == 0 ? '' : date('Y/n/d',$val['starttime']).'<br>'.date('H:i:s',$val['starttime'])?><br><a href="__URL__/reonline/posid/{$val.posid}/" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a></td>
+		<td><?php echo $val['endtime'] == 0 ? '' :date('Y/n/d',$val['endtime']).'<br>'.date('H:i:s',$val['endtime'])?><br><a href="__URL__/reonline/posid/{$val.posid}/" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a></td>
+		<td id="delstatus_{$val.id}">
+		<p><a href="__URL__/edit/source/{$_GET['postime']|default='online'}/advdid/{$val.advdid}/" style="text-decoration:underline;color:blue;">编辑</a>|<br>
+		<a href="__URL__/del_list/posid/{$val.posid}" onclick="return ok('删除后不可恢复，是否确认删除？');" style="text-decoration:underline;color:blue;">删除</a>|<br>
+		<?php if($_GET['postime'] == 'waiton'): ?>
+			<p><a href="__URL__/copy/advdid/{$val.advdid}/" class="thickbox" style="text-decoration:underline;color:blue;">复制内容</a></p>
+		<?php elseif($_GET['postime'] == 'outline'): ?>
+			<a href="__URL__/reonline/posid/{$val.posid}/" class="thickbox" style="text-decoration:underline;color:blue;">重新上线</a></p>
+		<?php else: ?>
+			<a href="__URL__/over/posid/{$val.posid}" style="text-decoration:underline;color:blue;">结束</a></p>
+		<?php endif; ?>
+		</td>
+	</tr>
+	<?php } ?>
+</table>
+<div class="navgition">
+	{$page|default='&nbsp;'}
+</div>
+</body>
+</html>

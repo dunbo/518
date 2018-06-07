@@ -1,0 +1,382 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link type="text/css" href="/Public/css/tablelist.css" rel="stylesheet" />
+	<script type="text/javascript" src="/Public/js/ajaxfileupload/jquery.js"></script>
+    <script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript">
+        function trim(str){ //删除左右两端的空格 
+            return str.replace(/(^\s*)|(\s*$)/g, ""); 
+        }
+        
+        function modify(opt){
+            if (trim($("#application_time").val())=="") {
+                $("#s1").html('<em>*</em><font color="red">申请时间不能为空<font>');
+                return;
+            }else{
+                $("#s1").html('');
+            }
+            if (trim($("#person_in_charge").val())=="") {
+                $("#s2").html('<em>*</em><font color="red">负责人不能为空<font>');
+                return;
+            }else{
+                $("#s2").html('');
+            }
+            if (trim($("#product_name").val())=="") {
+                $("#s3").html('<em>*</em><font color="red">产品名称不能为空<font>');
+                return;
+            }else{
+                $("#s3").html('');
+            }
+            if (trim($("#package_name").val())=="") {
+                $("#s4").html('<em>*</em><font color="red">包名不能为空<font>');
+                return;
+            }else{
+                $("#s4").html('');
+            }
+            if (trim($("#package_size").val())=="") {
+                $("#s20").html('<em>*</em><font color="red">包大小不能为空<font>');
+                return;
+            }else{
+                $("#s20").html('');
+            }
+            if (trim($("#activity_name").val())=="") {
+                $("#s5").html('<em>*</em><font color="red">活动名称不能为空<font>');
+                return;
+            }else{
+                $("#s5").html('');
+            }
+            if (trim($("#category").val())=="") {
+                $("#s6").html('<em>*</em><font color="red">分类不能为空<font>');
+                return;
+            }else{
+                $("#s6").html('');
+            }
+            if (trim($("#start_time").val())=="") {
+                $("#s7").html('<em>*</em><font color="red">开始时间不能为空<font>');
+                return;
+            }else{
+                $("#s7").html('');
+            }
+            if (trim($("#end_time").val())=="") {
+                $("#s8").html('<em>*</em><font color="red">结束时间不能为空<font>');
+                return;
+            }else{
+                $("#s8").html('');
+            }
+            if (trim($("#activity_content").val())=="") {
+                $("#s9").html('<em>*</em><font color="red">活动内容不能为空<font>');
+                return;
+            }else{
+                $("#s9").html('');
+            }
+            if (trim($("#activity_days").val())=="") {
+                $("#s10").html('<em>*</em><font color="red">活动天数不能为空<font>');
+                return;
+            }else{
+                $("#s10").html('');
+            }
+            if (trim($("#avg_income_lweek_inactive").val())=="") {
+                $("#s11").html('<em>*</em><font color="red">上周非活动日均收入不能为空<font>');
+                return;
+            }else{
+                $("#s11").html('');
+            }
+            if (trim($("#avg_regist_number_lweek").val())=="") {
+                $("#s12").html('<em>*</em><font color="red">上周日均注册数不能为空<font>');
+                return;
+            }else{
+                $("#s12").html('');
+            }
+            if (trim($("#expected_regist_number").val())=="") {
+                $("#s13").html('<em>*</em><font color="red">预计注册数不能为空<font>');
+                return;
+            }else{
+                $("#s13").html('');
+            }
+            if (trim($("#expected_income").val())=="") {
+                $("#s14").html('<em>*</em><font color="red">预计活动收入不能为空<font>');
+                return;
+            }else{
+                $("#s14").html('');
+            }
+            if (trim($("#application_resource_position").val())=="") {
+                $("#s16").html('<em>*</em><font color="red">申请资源位不能为空<font>');
+                return;
+            }else{
+                $("#s16").html('');
+            }
+            // 检查开始时间是否不大于结束时间
+            if (trim($("#start_time").val()) >= trim($("#end_time").val())) {
+                alert('结束时间不能小于或等于开始时间');
+                return;
+            }
+            if ($('#select_game_type_other').attr('selected')==true) {
+                if (trim($('#input_game_type_other').val()) == "") {
+                    $("#s17").html('<em>*</em><font color="red">游戏类型不能为空<font>');
+                    return;
+                }
+                $("#s17").html('');
+                $('#select_game_type_other').val($('#input_game_type_other').val());
+            }
+            
+            if ($("#high_low_config").val() != 0) {
+                if (trim($('#config_softname').val()) == "" || trim($('#config_softname').val()) == "请输入软件名称") {
+                    $("#s18").html('<em>*</em><font color="red">软件名称不能为空<font>');
+                    return;
+                }
+                $("#s18").html('');
+                if (trim($('#config_package').val()) == ""  || trim($('#config_package').val()) == "请输入软件包名") {
+                    $("#s19").html('<em>*</em><font color="red">软件包名不能为空<font>');
+                    return;
+                }
+                $("#s19").html('');
+            }
+            // 最后检测负责人是否存在，如果存在则直接提交
+            var person_exists = check_person_in_charge(false);
+            if (!person_exists) {
+                return;
+            }
+            $('#modify').submit();
+        };
+        
+        function game_type_select(value) {
+            if ($('#select_game_type_other').attr('selected')==true) {
+                document.getElementById("input_game_type_other").style.display="";
+            } else {
+                document.getElementById("input_game_type_other").style.display="none";
+            }
+        }
+        
+        function high_low_config_select(value) {
+            if (value!=0) {
+                document.getElementById("div_config").style.display="";
+            } else {
+                document.getElementById("div_config").style.display="none";
+            }
+        }
+        
+        // 检查负责人是否存在，传入参数b_async如果为true，表示设置ajax请求为异步，false为同步
+        function check_person_in_charge(b_async) {
+            var person_in_charge = trim($("#person_in_charge").val());
+            var ret = true;
+            if (person_in_charge != "") {
+                var param = {
+                    person_in_charge : person_in_charge
+                };
+                
+                $.ajax({
+                    url:'__URL__/check_person_in_charge',
+                    type:'POST',
+                    async:b_async,
+                    data:param,
+                    secureuri:false,
+                    dataType:'json',
+                    success:function(data){
+                        if(data.status != 0) {
+                            $("#s2").html('<em>*</em><font color="red">负责人不存在<font>');
+                            ret = false;
+                        } else {
+                            $("#s2").html('');
+                            ret = true;
+                        }
+                    }
+                });
+            }
+            return ret;
+        }
+        
+        //判断游戏类型是否为其他，如果是，则显示游戏类型旁的input
+        function check_game_type() {
+            if ($('#select_game_type_other').attr('selected')==true) {
+                document.getElementById("input_game_type_other").style.display="";
+            }
+        }
+        function check_config_type() {
+            if ($("#high_low_config").val() != 0) {
+                document.getElementById("div_config").style.display="";
+            }
+        }
+        
+        //页面打开时加载的函数
+        window.onload = function() {
+            check_game_type();
+            check_config_type();
+        }
+    </script>
+</head>
+ 
+<body>
+<h2><if condition="$opt eq 1">添加申请排期：</if><if condition="$opt eq 2">编辑申请排期：</if><if condition="$opt eq 3">复制添加申请排期：</if></h2>
+<form method="post" action="__URL__/modify" id="modify">
+	<div class="form_list">
+        <label><font color="red">*</font>申请时间：</label>
+        <input id="application_time" name="application_time" type="text" class="Wdate" style="float:left"
+            onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+            <if condition="$opt neq 1">value="{$record.application_time|date="Y-m-d H:i:s",###}"</if>/>
+        <span id="s1" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>负责人：</label>
+        <input id="person_in_charge" type="text" name="person_in_charge" class="input_text" onblur="check_person_in_charge(true)" value="{$record.person_in_charge}"/>
+        <span id="s2" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>产品名称：</label>
+        <input id="product_name" type="text" name="product_name" class="input_text" value="{$record.product_name}"/>
+        <span id="s3" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>包名：</label>
+        <input id="package_name" type="text" name="package_name" class="input_text" value="{$record.package_name}"/>
+        <span id="s4" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>包大小：</label>
+        <input id="package_size" type="text" name="package_size" class="input_text" value="{$record.package_size}"/>
+        <span id="s20" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>评测级别：</label>
+        <select id="reviewlevel" name="reviewlevel">
+            <option value="A" <if condition="($record.reviewlevel eq 'A')"> selected="selected" </if>>A</option>
+            <option value="B" <if condition="($record.reviewlevel eq 'B')"> selected="selected" </if>>B</option>
+            <option value="C" <if condition="($record.reviewlevel eq 'C')"> selected="selected" </if>>C</option>
+            <option value="D" <if condition="($record.reviewlevel eq 'D')"> selected="selected" </if>>D</option>
+            <option value="S" <if condition="($record.reviewlevel eq 'S')"> selected="selected" </if>>S</option>
+        </select>
+        <span id="s21" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>活动名称：</label>
+        <input id="activity_name" type="text" name="activity_name" class="input_text" value="{$record.activity_name}"/>
+        <span id="s5" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>类别：</label>
+        <select name="category" id="category" value="{$record.category}">
+            <option value="1" <if condition="($record.category eq 1)"> selected="selected" </if>>网游</option>
+            <option value="2" <if condition="($record.category eq 2)"> selected="selected" </if>>单机</option>
+        </select>
+        <span id="s6" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>开始时间：</label>
+        <input id="start_time" name="start_time" type="text" class="Wdate" style="float:left"
+            onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00', dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+            <if condition="$opt neq 1">value="{$record.start_time|date="Y-m-d H:i:s",###}"</if>/>
+        <span id="s7" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>结束时间：</label>
+        <input id="end_time" name="end_time" type="text" class="Wdate" style="float:left"
+            onClick="WdatePicker({startDate:'%y-%M-%d 23:59:59', dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+            <if condition="$opt neq 1">value="{$record.end_time|date="Y-m-d H:i:s",###}"</if>/>
+        <span id="s8" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>活动内容：</label>
+        <textarea id="activity_content" type="text" name="activity_content" class="input_text">{$record.activity_content}</textarea>
+        <span id="s9" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>活动天数：</label>
+        <input id="activity_days" type="text" name="activity_days" class="input_text" value="{$record.activity_days}"/>
+        <span id="s10" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>上周非活动日均流水：</label>
+        <input id="avg_income_lweek_inactive" type="text" name="avg_income_lweek_inactive" class="input_text" value="{$record.avg_income_lweek_inactive}"/>
+        <span id="s11" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>上周日均注册数：</label>
+        <input id="avg_regist_number_lweek" type="text" name="avg_regist_number_lweek" class="input_text" value="{$record.avg_regist_number_lweek}"/>
+        <span id="s12" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>预计注册数：</label>
+        <input id="expected_regist_number" type="text" name="expected_regist_number" class="input_text" value="{$record.expected_regist_number}"/>
+        <span id="s13" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>预计活动流水：</label>
+        <input id="expected_income" type="text" name="expected_income" class="input_text" value="{$record.expected_income}"/>
+        <span id="s14" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>申请类型：</label>
+        <select name="type" id="type" value="{$record.type}">
+            <option value="1" <if condition="($record.type eq 1)"> selected="selected" </if>>常规</option>
+            <option value="2" <if condition="($record.type eq 2)"> selected="selected" </if>>活动</option>
+        </select>
+        <span id="s15" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>申请资源位：</label>
+        <input id="application_resource_position" type="text" name="application_resource_position" class="input_text" value="{$record.application_resource_position}"/>
+        <span id="s16" class="prompt_infor"></span>
+    </div>
+    <div class="form_list">
+        <label><font color="red">*</font>游戏类型：</label>
+        <select name="game_type" id="game_type" onchange="game_type_select(this.value);">
+            <?php foreach((array)$game_type_arr as $value):?>
+                <option value="<?php echo $value;?>" <?php if($record['game_type']==$value) echo 'selected="selected"';?>><?php echo $value;?></option>
+            <?php endforeach;?>
+                <option value="" id="select_game_type_other"
+                    <?php if(isset($record['game_type']) && !in_array($record['game_type'],(array)$game_type_arr)) echo "selected='selected'";?>
+                >其他</option>  
+        </select>
+        <input id="input_game_type_other" style="display:none;" id="input_game_type_other" class="input_text" value="<?php if(isset($record['game_type']) && !in_array($record['game_type'],(array)$game_type_arr)) echo $record['game_type'];?>"/>
+        <span id="s17" class="prompt_infor"></span>
+    </div>
+    <div class="clear"></div>
+    <div class="form_list">
+        <label>高低配置</label>
+        <select name="high_low_config" id="high_low_config" onchange="high_low_config_select(this.value);">
+            <option value="0" <if condition="($record.high_low_config eq 0)"> selected="selected" </if>>无</option>
+            <option value="1" <if condition="($record.high_low_config eq 1)"> selected="selected" </if>>高配</option>
+            <option value="2" <if condition="($record.high_low_config eq 2)"> selected="selected" </if>>低配</option>
+        </select>
+    </div>
+    <div name="div_config" id="div_config" style="display:none;">
+        <!--
+        <input name="config_softname" id="config_softname" class="input_text" onblur="if(this.value==''){this.value='请输入软件名称';}" onfocus="if(this.value=='请输入软件名称'){this.value='';}" value="<?php if($record['config_softname']!="") echo $record['config_softname']; else echo '请输入软件名称';?>"/>
+        <input name="config_package" id="config_package" class="input_text" onblur="if(this.value==''){this.value='请输入软件包名';}" onfocus="if(this.value=='请输入软件包名'){this.value='';}" value="<?php if($record['config_package']!="") echo $record['config_package']; else echo '请输入软件包名';?>"/>
+        <span id="s18" class="prompt_infor"></span>
+        -->
+        <div class="clear"></div>
+        <div class="form_list">
+            <label>高低配-软件名称</label>
+            <input id="config_softname" type="text" name="config_softname" class="input_text" value="{$record.config_softname}"/>
+            <span id="s18" class="prompt_infor"></span>
+        </div>
+        <div class="clear"></div>
+        <div class="form_list">
+            <label>高低配-软件包名</label>
+            <input id="config_package" type="text" name="config_package" class="input_text" value="{$record.config_package}"/>
+            <span id="s19" class="prompt_infor"></span>
+        </div>
+        <div class="clear"></div>
+    </div>
+    
+    <div class="clear"></div>
+    <div class="form_list">
+        <label>备注：</label>
+        <textarea id="remark" type="text" name="remark" class="input_text">{$record.remark}</textarea>
+    </div>
+    <div class="clear"></div>
+    
+    <input id="id" type="hidden" name="id" class="input_text" value="{$record.id}"/>
+    <input id="opt" type="hidden" name="opt" class="input_text" value="{$opt}"/>
+    
+    <div class="form_btns_box">
+		<a href="#" onclick="modify({$opt})">提交</a>
+		<a href="__URL__/schedule_list">取消</a>
+	</div>
+        
+</form>
+</body>
+</html>
+

@@ -1,0 +1,101 @@
+<include file="../Public/header" />
+<link type="text/css" rel="stylesheet" href="/Public/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/recommend.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script language="JavaScript">
+	function submitChannel()
+	{
+		var cids = '';
+		$('#channel_div').html('');
+		$("#TB_ajaxContent #channel_selected input:checked").each(function(){
+			var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+			item.find('input').attr('checked', 'true');
+			$('#channel_div').append(item);
+		})
+		tb_remove();
+	}
+
+	function onclikChannel()
+	{
+		$('#channel_div').html($('#TB_ajaxContent #channel_selected').html());
+	}
+
+	function onclikChannel_c(cid)
+	{
+		$('#channel_div .l_cid_' + cid).remove();
+	}
+	
+	function check_arr()
+	{
+		$('#TB_ajaxContent #channel_selected').html($('#channel_div').html());
+
+		$('#channel_div input:checked').each(function(){
+			$('#TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+		});
+	}
+	function checkPost(){
+		var enable_two = true;
+		var pkg = $("#package").val();
+		$.ajax({
+			url: '/index.php/Sj/ExtentV1/pub_check_soft_filter/package/'+pkg,
+			type: 'get',
+			async:false,
+			success: function(data){
+				if(data){
+					if(!confirm(data)){
+						enable_two = false;
+					}
+				}
+			}
+		});
+		return enable_two;
+	}
+</script>
+<body>
+<div style="margin:20px;">
+<h3>编辑软件</h3>
+<br />
+<form action="__URL__/edit_recommend_do" method="post" onsubmit="return checkPost()">
+<table>
+<tr>
+<td>软件包名：<input type="hidden" name="id" value="{$result[0]['id']}" /><input type="hidden" name="soft_names" value="{$soft_names}" />
+<input type="hidden" name="packages" value="{$packages}" />
+<input type="hidden" name="operating_ids" value="{$operating_ids}" />
+<input type="hidden" name="p" value="{$p}" />
+<input type="hidden" name="lr" value="{$lr}" />
+</td>
+<td><input type="text" name="package" value="{$result[0]['package']}" /></td>
+</tr>
+<tr>
+<td>运营商：</td>
+<td>
+<select name="operating_id">
+<option value="0" <?php if($result[0]['operating_id'] == 0){ ?>selected<?php } ?>>不限制</option>
+<?PHP foreach($operating_result as $key => $val){ ?>
+<option value="{$val.oid}" <?php if($result[0]['operating_id'] == $val['oid']){ ?>selected<?php } ?>>{$val.mname}</option>
+<?php } ?>
+</select>
+</td>
+</tr>
+<tr>
+<td>渠道：</td>
+<td><a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox blue">选择指定渠道</a><br />
+		<div id="channel_div">
+		<volist id="chl_list_vo" name="chl_list" >
+			&nbsp;<label class="l_cid_{$chl_list_vo.cid}"><input type="checkbox" name="cid[]" checked="checked" value="{$chl_list_vo.cid}"/>{$chl_list_vo.chname}</label>&nbsp;
+		</volist>
+		</div></td>
+</tr>
+</table>
+<table>
+<tr>
+<td><input type="submit" value="确定" class="search_btn" /></td>
+<td><input type="button" value="取消" class="search_btn" onclick="javascript:history.go(-1);" /></td>
+</tr>
+</table>
+</form>
+</div>
+</body>
+</html>

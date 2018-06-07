@@ -1,0 +1,109 @@
+<form method="post" name="fml" action="__URL__/edit_show_column">
+<div>
+    <table class="table_list" >
+        <tr>
+            <td>排序值</td> <td>字段</td> <td>是否展示</td>
+        </tr>
+        <tr>
+            <td width="40px">
+                1<!--<input type="text" style="width:30px" value='<if condition="$show_column.status_rank neq '0'">{$show_column.status_rank}</if>' name="status_rank" id="status_rank" class="search_item_text">-->
+            </td>
+            <td>状态</td>
+            <td>
+                <input type="radio" name="status_show" value="1" checked="checked" disabled>是
+                <input type="radio" name="status_show" value="0" disabled>否
+            </td>
+        </tr>
+        <tr>
+            <td>
+                2<!--<input type="text" style="width:30px" value='<if condition="$show_column.number_rank neq '0'">{$show_column.number_rank}</if>' name="number_rank" id="number_rank" class="search_item_text">-->
+            </td>
+            <td>集数</td>
+            <td>
+                <input type="radio" name="number_show" value="1" checked="checked" disabled>是
+                <input type="radio" name="number_show" value="0" disabled>否
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" style="width:30px;text-align: center;" value='<if condition="$show_column.year_rank neq '0'">{$show_column.year_rank}</if>'  name="year_rank" id="year_rank" class="search_item_text">
+            </td>
+            <td>年代</td>
+            <td>
+                <input type="radio" name="year_show" value="1" <if condition="$show_column.year_show eq 1">checked="checked"</if>>是
+                <input type="radio" name="year_show" value="0" <if condition="$show_column.year_show eq '0'">checked="checked"</if>>否
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" style="width:30px;text-align: center;" value='<if condition="$show_column.area_rank neq '0'">{$show_column.area_rank}</if>'  name="area_rank" id="area_rank" class="search_item_text">
+            </td>
+            <td>地区</td>
+            <td>
+                <input type="radio" name="area_show" value="1" <if condition="$show_column.area_show eq 1">checked="checked"</if>>是
+                <input type="radio" name="area_show" value="0" <if condition="$show_column.area_show eq '0'">checked="checked"</if>>否
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" style="width:30px;text-align: center;" value='<if condition="$show_column.type_rank neq '0'">{$show_column.type_rank}</if>'  name="type_rank" id="type_rank" class="search_item_text">
+            </td>
+            <td>类型</td>
+            <td>
+                <input type="radio" name="type_show" value="1" <if condition="$show_column.type_show eq 1">checked="checked"</if>>是
+                <input type="radio" name="type_show" value="0" <if condition="$show_column.type_show eq '0'">checked="checked"</if>>否
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" style="width:30px;text-align: center;" value='<if condition="$show_column.actor_rank neq '0'">{$show_column.actor_rank}</if>'  name="actor_rank" id="actor_rank" class="search_item_text">
+            </td>
+            <td>主演</td>
+            <td>
+                <input type="radio" name="actor_show" value="1" <if condition="$show_column.actor_show eq 1">checked="checked"</if>>是
+                <input type="radio" name="actor_show" value="0" <if condition="$show_column.actor_show eq '0'">checked="checked"</if>>否
+            </td>
+        </tr>
+    </table>
+</div>
+<input type="hidden" id="video_id" name="video_id" value="{$video_id}">
+<div style="float:left;margin-left: 150px">
+    <input type="button" value="取消" class="search_btn" onclick="tb_remove();">
+</div>
+<div style="float:left;margin-left: 10px">
+    <input type="button" value="确定" class="search_btn" onclick="my_sub()">
+</div>
+<div style="clear: both"></div>
+</form>
+<script type="text/javascript">
+    function my_sub(){
+        var column_arr = ['year_rank','area_rank','type_rank','actor_rank','video_id'];
+        var show_arr = ['year_show','area_show','type_show','actor_show'];
+        var str = '';
+        for(var i=0;i<column_arr.length;i++){
+            if($("input[name='"+column_arr[i]+"']").val()!=''&&$("input[name='"+column_arr[i]+"']").val()<=2&&column_arr[i]!='video_id'){
+                alert('排序值不能重复');
+                return false;
+            }
+            str += column_arr[i]+"="+$("input[name='"+column_arr[i]+"']").val()+"&";
+        }
+        for(var j=0;j<show_arr.length;j++){
+            str += show_arr[j]+"="+$("input[name='"+show_arr[j]+"']:checked").val()+"&";
+        }
+        $.ajax({
+           type: "POST",
+           url: "__URL__/edit_show_column",
+           data: str,
+           dataType: "json",
+           success: function(data){
+        	 alert(data.msg);
+        	 if(data.code==1){
+                 tb_remove();
+                 window.location.href="__URL__/video_config?p={$p}&lr={$lr}"
+        	 }
+           }
+        });
+    }
+</script>
+
+

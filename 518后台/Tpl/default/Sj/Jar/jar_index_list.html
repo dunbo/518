@@ -1,0 +1,169 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script>
+	$(function(){
+		document.onkeydown = function(e){
+			var ev = document.all ? window.event : e;
+			if(ev.keyCode==13) {
+				$('#jar_index_list').submit();
+			 }
+		}
+	});
+	$(document).ready(function(e) {
+        //判断搜索时间：
+		var endDate = $("#endDate").val();
+		var startDate = $("#startDate").val();
+		if(endDate != '' && startDate != ''){
+			if(js_strto_time(endDate) <= js_strto_time(startDate)){
+				alert("搜索条件：结束时间必须大于开始时间");
+			}
+			//js_strto_time
+		}
+    });
+	function select_all()
+	{
+		$("input[name='nid[]']").attr("checked",true);
+	}
+	function select_again()
+	{	
+		$("input[name='nid[]']").each(function () {  
+			$(this).attr("checked", !$(this).attr("checked"));  
+		});       
+	}
+	function release()
+	{
+		if(!confirm("确定要这么执行该操作吗？"))
+		{
+			return false;
+		}
+		var nid = $("input[name='nid[]']");
+		var id = "";
+		var is_select = false;
+		for ( i = 0 ; i < nid.length ; i++ ) 
+		{
+			if ( nid[i].checked == true ) 
+			{
+				id += "," + nid[i].value;
+				is_select = true;
+			}
+		}
+		if (is_select) 
+		{
+			window.location = "__URL__/news_release/id/"+id;
+		}
+		else
+		{
+			alert( "请至少选择一个条目，才能进行操作" );
+			return false;
+		}
+	}
+	function delete_go()
+	{
+		if(!confirm("确定要这么执行该操作吗？"))
+		{
+			return false;
+		}
+		var nid = document.getElementsByName("nid[]");
+		var id = "";
+		var is_select = false;
+		for ( i = 0 ; i < nid.length ; i++ ) 
+		{
+			if ( nid[i].checked == true ) 
+			{
+				id += "," + nid[i].value;
+				is_select = true;
+			}
+		}
+		if (is_select) 
+		{
+			window.location = "__URL__/sdk_update_del/id/"+id;
+		}
+		else
+		{
+			alert( "请至少选择一个条目，才能进行操作" );
+			return false;
+		}
+	}
+	function js_strto_time(str_time){
+		var new_str = str_time.replace(/:/g,'-');
+		new_str = new_str.replace(/ /g,'-');
+		var arr = new_str.split("-");
+		var datum = new Date(Date.UTC(arr[0],arr[1]-1,arr[2]));
+		return strtotime = datum.getTime()/1000;
+	}
+	function sdk_update_submit(){
+		$("#jar_index_list").submit();
+	}
+	
+</script>
+
+
+<body>
+    <div class="search_box" style="height:30px;">
+        <form method="get" action="__URL__/jar_index_list" name="jar_index_list" id="jar_index_list">
+            <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+                <tr>
+                    <td width="21%"><label>SDK类型：</label>
+                      <select name="search_sdk_type" id="search_sdk_type">
+                        <option value="" selected>全部</option>
+                        <?php
+                        	foreach($sdk_types as $k=>$v){
+                        ?>
+                        <option value="{$v['id']}" <?= $search_sdk_type == $v['id'] ? 'selected' : ''?> >{$v['name']} </option>
+                        <?php };?>
+                    </select></td>
+                    <td width="37%"><label>操作时间：</label>
+                    <input type="text" class="search_item_text" name="startDate" value="{$startDate}" id="startDate" placeholder="开始时间"/><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"startDate",dateFmt:"yyyy-MM-dd"})'  style="border:1px solid #000;vertical-align:middle;line-height:30px;"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="text"  class="search_item_text" name="endDate" value="{$endDate}" id="endDate"placeholder="结束时间"/><img src="/Public/js/calendar.gif" class='Wdate' onClick='WdatePicker({startDate:"%y-%M-%d",el:"endDate",dateFmt:"yyyy-MM-dd"})'  style="border:1px solid #000;vertical-align:middle;line-height:30px;"/>
+                    </td>
+                  <td width="10%"><input type="submit" onClick="return sdk_update_submit()" value="搜索" class="search_btn"/> </td>
+                    <td width="10%"><a href='/index.php/Sj/SdkUpdate/jar_add_show/name/JAR/' class="search_btn">添加JAR版本</a></td>
+                    <td width="11%">&nbsp;</td>
+                    <td width="11%"><a href='__URL__/jar_add_show?name=SDK' class="search_btn" style="display:none;">添加SDK版本</a></td>
+                </tr>
+			</table>
+        </form>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+					<!--<th width="8%">序号</th>-->
+                    <th width="25%">JAR版本号</th>
+                    <th>SDK类型</th>
+                    <th>版本名</th>
+
+                    <!--<th width="23%">操作时间</th>-->
+                    <th width="18%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="list">
+                <tr>
+					<!--<td>{$list.id}</td>-->
+                    <td>{$list.jar_version}</td>
+                    <!--<td>{$list.edit_time|date="Y-m-d H:i:s",###}</td>-->
+                    <td>{$list.sdk_type_name}</td>
+                    <td>{$list.jar_name}</td>
+
+                    <td><span>&nbsp;&nbsp;&nbsp;</span>
+                        <a href="__URL__/jar_edit_show?id={$list.id}&{$url_param}">编辑</a>
+                        <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                      <a href="__URL__/jar_update_del?id={$list.id}" onClick="return confirm('是否确认删除该条更新记录？');">删除</a>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <div>
+        <center>{$page}</center>
+    </div>
+</body>

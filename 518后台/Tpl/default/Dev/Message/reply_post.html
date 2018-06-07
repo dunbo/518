@@ -1,0 +1,196 @@
+<script type="text/javascript" src='/Public/js/default.js'></script>
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<div id="top"></div>
+<table width="80%" height="29" border="0" cellpadding="0" cellspacing="1" class="tb">
+<tr><td colspan="1"><strong>信息管理 ——软件评论回复</strong></td> <td align="right" ><a href="{$REFERER}" >返回</a></tr>
+</table>
+<style type="text/css">
+body,div,span,img,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,input,textarea,select,option,fieldset,legend,p,th,td{margin:0; padding:0;  font-weight:normal; font-family:"微软雅黑",Arial,sans-serif;}
+body{ font-size:14px; color:#202020;}
+fieldset,img {border: 0;}
+a{text-decoration:none; color:#202020;}
+a:hover{text-decoration:underline;}
+ul,li{list-style:none;}
+/*.feedback_replay_wrap{width:100%; padding-top:240px; position:relative;}
+.feedback_kf{width:410px;  padding-left:8px; border:1px solid #dcdcdc; background:#efefef; overflow:hidden; position:fixed; left:10px; top:30px; font-size:12px;_position:absolute; _top:expression(eval(document.documentElement.scrollTop + 10));}*/
+.feedback_kf{width:410px;  padding-left:8px; border:1px solid #dcdcdc; background:#efefef; overflow:hidden;font-size:12px;}
+.feedback_kf h3{height:24px; font-size:16px;}
+.feedback_kf textarea{width:400px; height:100px; border:1px solid #dcdcdc;}
+.feedback_user_cnt,.feedback_dev_cnt,.feedback_kf_cnt{ padding:10px 0; border-bottom:1px dashed #dcdcdc;}
+.feedback_img{display:none;}
+.feedback_kf_cnt h4{font-weight:bold;}
+.feedback_showimg{display:block; height:22px; line-height:22px; color:#055CC6;}
+
+.return_top{width:22px; height:90px; padding-top:10px; background:#f2f2f2; border:1px solid #d2d2d2; text-align:center; position:fixed; right:80px; bottom:40px; _position:absolute; _bottom:80px}
+.return_top a{color:#808080;}
+.return_top a:hover{ text-decoration:none;}
+</style>
+<div class="feedback_replay_wrap">
+	
+	<div class="feedback_kf">
+		<h3>安智客服</h3>
+	<form >	
+		<table border="0" cellpadding="0" cellspacing="0">	
+ 			<tr><td>最多字数：
+			<input disabled maxLength="4" name="total1" size="3" value="200" class="inputtext">
+			已用字数：
+			<input disabled maxLength="4" name="used1" size="3" value="0" class="inputtext">
+			剩余字数：
+			<input disabled maxLength="4" name="remain1" size="3" value="200" class="inputtext">
+			</td></tr>
+	<volist name='reason_list' id='reason_list'  key='i'>
+			<tr height="30">
+			<td style="padding-left:10px;">
+			<input type="checkbox" mark='0' name="reject[]" value="{$reason_list.content}" <notempty name="reason_list.content2"> onclick=tip_show("div_{$reason_list.id}")   </notempty> />{$i}&nbsp;&nbsp;&nbsp;
+			<span <notempty name="reason_list.content2"> onclick=tip_show("div_{$reason_list.id}") style="color:#58c5c7;cursor:pointer"  </notempty> > {$reason_list.content}</span></td>
+			</tr>
+		<notempty name="reason_list.content2">
+			<tr id = "div_{$reason_list.id}" style="display:none;padding-left:30px;" ><td>
+			<foreach  name='reason_list.content2' item='content2'>
+			<input type="checkbox" name="reject[]" mark='1' value="{$content2}">{$content2}
+			</foreach >
+			</td></tr>
+		</notempty>
+	</volist>	
+		<tr><td>
+			<textarea name="content" id='content' wrap=PHYSICAL  onKeyDown="gbcount1(this.form.content,this.form.total1,this.form.used1,this.form.remain1);" onKeyUp="gbcount1(this.form.content,this.form.total1,this.form.used1,this.form.remain1);"></textarea>
+		</td></tr>
+		<tr><td>&nbsp;</td></tr>
+	</form>
+		<tr><td>
+			<button type="button" onclick="undercarriage_submit()" style="margin-right:10px;">回复</button>
+		</td></tr>		
+	</table>	
+	</div>
+	<foreach  name='list' item='content'>
+	<div class="feedback_kf_cnt">
+		<p><h4>
+		<if condition="($content.user_type eq 1)">
+			安智（{$admin_info[$content['system_userid']]['admin_user_name']}）回复
+		<elseif condition="($content.user_type eq 2)"/>
+			开发者客服（{$dev_arr[$content['dev_id']]['user_name']}）回复
+		<else/>
+			软件评论回复
+		</if>:
+		</h4>{$content.dateline|date="Y-m-d H:i:s",###}</p>
+		<p>{$content.contents}</p>
+	</div>	
+	</foreach >
+
+	<div class="return_top">
+		<a href="#top">返回顶部</a>
+	</div>
+</div>
+<script language="javascript">
+function gbcount1(message,total,used,remain)
+{
+  var max1;
+  max1 = total.value;
+  if (message.value.length > max1) {
+  message.value = message.value.substring(0,max1);
+  used.value = max1;
+  remain.value = 0;
+ <!-- alert("留言不能超过 200 个字!");-->
+ alert("不能超过"+total.value+"个字!");
+  }
+  else {
+  used.value = message.value.length;
+  remain.value = max1 - used.value;
+  }
+}
+function showOrHide(index,obj)
+{
+	var status_img = $('#feedback_img'+index).css('display');
+	$('#feedback_img'+index).toggle(function(){
+		if(status_img == 'none')
+		{
+			obj.innerHTML = '收起附件';
+		}
+		else{
+			obj.innerHTML = '展开附件';
+		}
+	});
+}
+
+//回复提交
+function undercarriage_submit() {
+	var rt = '';
+	var mark_type = false;
+	var start_choose = true;
+	var last;
+	var error = 0;
+	$('input:checkbox[name="reject[]"]').each(function(){
+ 		if($(this).attr('mark') == 0){
+ 			if($(this).attr('checked') != 'checked')	last = 1;
+			else	last = 0;
+		}
+ 		if($(this).attr('checked') == 'checked'){
+		if(!mark_type){
+			if( $(this).attr('mark') == 1){
+				if(last == 1){
+					error = 1;					
+				}
+				rt = rt.substring(0,rt.length-1);
+				rt += '('+$.trim($(this).val());
+				mark_type = true;
+			}else{
+				if(start_choose){
+					rt +=  $(this).val();
+					start_choose = false;
+				}else{
+					rt += '\n' + $(this).val();					
+				}				
+				mark_type = false;
+			}			
+		}else{
+			if( $(this).attr('mark') == 1){
+				if(last == 1){
+					error = 1;					
+				}
+				rt += '，' + $.trim($(this).val());
+				mark_type = true;
+			}else{				
+				rt += ')\n'+ $(this).val();
+				mark_type = false;
+			}
+		}
+ 	 }
+	});
+	if(mark_type){
+		if(rt) rt += ')' ;
+	}//else{
+		//if(rt) rt += '\n' ;
+	//}
+	if(error == 1){
+		alert('选择子类原因时，必须选择主原因');
+		return false;
+	}
+	if($('#content').val()!='') {
+		if(rt){
+			rt += '\n';
+		}
+		rt += $('#content').val();
+	}
+	if(!rt) {
+		alert('请选择或填写回复内容！');
+		return false;
+	}
+	$.ajax({
+		url: "__URL__/reply_post",
+		data: 'content='+rt+'&id='+<?php echo $_GET['id'];?> ,
+		type: 'post',
+		dataType: 'json',
+		success: function(ret) {
+			if(ret['code']==0) {	//失败
+				alert(ret['msg']);
+				location.reload();//加载页面
+				return false;
+			} else if(ret['code']==1) {	//成功
+				//alert(ret['msg']);
+				//history.go(-1);
+				window.location.href="<?php echo $REFERER; ?>";
+			}
+		}
+	});
+}	
+</script>

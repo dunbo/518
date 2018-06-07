@@ -1,0 +1,132 @@
+<script>
+function submitChannel()
+{
+	var cids = '';
+	$('#channel_div').html('');
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+ this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+        // 点击后会删除父节点
+        item.find('input').click(function(){
+            $(this).parent().remove();
+        });
+		$('#channel_div').append(item);
+	})
+	//$.cookie('cids', '', {path: '/'});
+	tb_remove();
+}
+//主层动态变化数据
+function onclikChannel()
+{	
+	$('#channel_div').html('');
+	$(".TB_ajaxContent #channel_selected input:checked").each(function(){
+		var item = $('<label class="l_cid_'+this.value+'">' + $('#channel_selected .l_cid_' + this.value).html() + '</label>');
+		item.find('input').attr('checked', 'true');
+		item.find('input').unbind("click");
+		item.find('input').attr("onclick", '');
+		$('#channel_div').append(item);
+	})
+	//$.cookie('cids', '', {path: '/'});
+}
+
+function check_arr()
+{
+	$('.TB_ajaxContent #channel_selected').html($('#channel_div').html());
+    $('#channel_div input:checked').each(function(){
+        $('.TB_ajaxContent .l_cid_' + this.value).find('input').attr('checked', 'true');
+    });
+}
+
+function checkLen(obj, maxChars) {
+    if (obj.value.length > maxChars)
+        obj.value = obj.value.substring(0,maxChars);
+};
+
+
+// 点击搜索后（相当于重新打开页面，这时没有加载渠道的thickbox，所以需要在当前页面写一个点击事件），搜索栏-渠道的radio点击事件
+function selectChannel_tmp(obj,fselected,type)
+{
+    if (obj.checked == true) {
+        var item = $('<label class="l_cid_' + $(obj).val() + '">' + $('.l_cid_' + $(obj).val()).html() + '</label>');
+        item.find('input').attr('checked', true);
+        $('#channel_selected').append(item);
+        //alert(fselected);
+        if(type=="radio"){
+            tb_remove();
+        }
+        fselected();
+    } else {
+        $('.l_cid_' + $(obj).val() + ' input:checked').attr('checked', false);
+        $('#channel_selected .l_cid_' + obj.value).remove();
+        $('#channel_div .l_cid_' + obj.value).remove();
+        onclikChannel_c(obj.value);
+    }
+}
+
+function checkPost() {
+    // 检查强制升级版本不能为空
+    var force_update_version = $("#edit_content_form #force_update_version").val();
+    if (!force_update_version) {
+        alert("强制升级版本不能为空");
+        return false;
+    }
+    // 强制升级文案字数不能超出100个字
+    var force_update_note = $("#edit_content_form #force_update_note").val();
+    if (!force_update_note) {
+        alert("强制升级文案不能为空");
+        return false;
+    }
+    if (force_update_note.length > 100) {
+        alert("强制升级文案字数不能超出100个字");
+        return false;
+    }
+    return true;
+}
+
+</script>
+
+<form name="edit_content_form" id="edit_content_form" action="__URL__/edit_content" method="post" onsubmit="return checkPost();">
+<table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list" border=0>
+    <tbody>
+    <tr>
+        <td width="20%">强制升级版本：</td>
+        <td width="70%">
+            <a href="__APP__/Public/showVersion?append_id=selected_versions" class="thickbox"><font color="blue">请选择版本</font></a><br/>
+            <div id="selected_versions">
+                <input name="force_update_version" id="force_update_version" type="hidden" value="{$record.force_update_version}"/><label>{$record.force_update_version_show}</label>
+            </div>
+        </td>
+        <td width="10%"></td>
+    </tr>
+    <tr>
+        <td>渠道：</td>
+        <td>
+            <a href="__APP__/Public/showChannel?callback=submitChannel&ready=check_arr&selected=onclikChannel" class="thickbox"><font color="blue">请选择渠道</font></a><br/>
+            <div id="channel_div">
+                <volist name="cid_arr" id="cname">
+                    <label class="l_cid_{$key}"><input type="checkbox" name="cid[]" value="{$key}" onclick="selectChannel_tmp(this,onclikChannel,'checkbox')" checked="checked">{$cname}</label>
+                </volist>
+            </div>
+        </td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>强制升级文案：</td>
+        <td>
+            <textarea name="force_update_note" id="force_update_note" rows="6" cols="40">{$record.force_update_note}</textarea>
+        </td>
+        <td>限100字以内</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>
+            <input type="hidden" name="id" id="id" value="{$record.id}"/>
+            <input type="submit" value="提交"/>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <input type="button" value="取消" onclick="tb_remove()"/>
+        </td>
+        <td></td>
+    </tr>
+    </tbody>
+</table>
+</form>

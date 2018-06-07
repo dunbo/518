@@ -1,0 +1,140 @@
+<div style="position:relative;margin:5px;"><h2>黑名单</h2></div>
+<div>
+<label for="add_username">用户名：</label><input type="text" name="add_username" id="add_username" style="width:100px"/>
+<!-- <label for="add_uid">UID：</label><input type="text" name="add_uid" id="add_uid" style="width:100px"/> -->
+<label for="add_ip">IP：</label><input type="text" name="add_ip" id="add_ip" style="width:100px"/>
+<input type="submit" class="search_btn" style="display:inline-block;" onclick="ajax_search()" value="验证是否有效" />
+</div>
+<form method='post' action="__URL__/doadd">
+<div style="margin:5px;">
+黑名单用户/IP：<span id="uiparea"></span>
+<input type="hidden" name="uitype" id="uitype" value=""/>
+<input type="hidden" name="uip" id="uip" value=""/>
+<input type="hidden" name="username" id="uiusername" value=""/>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<th>禁止类型</th>
+			<th>有效期</th>
+		</tr>
+	</thead>
+	<tr>
+		<td><input type="checkbox" name="apply" id="apply"/><label for="apply">申请产品</label></td>
+		<td><input type="radio" name="apply_validity" value="1" id="apply_validity1"/><label for="apply_validity1">永久</label>
+        <input type="radio" name="apply_validity" value="2" id="apply_validity2"/><label for="apply_validity2">时间段
+        <input name="apply_time" id="apply_time" value="" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px;" /></label>
+        </td>
+	</tr>
+	<tr>
+		<td><input type="checkbox" name="posttest" id="posttest"/><label for="posttest">发表评测</label></td>
+		<td><input type="radio" name="posttest_validity" value="1" id="posttest_validity1"/><label for="posttest_validity1">永久</label>
+        <input type="radio" name="posttest_validity" value="2" id="posttest_validity2"/><label for="posttest_validity2">时间段
+        <input name="posttest_time" id="posttest_time" value="" type="text" class="Wdate" onClick="WdatePicker({startDate:'%y-%M-%d 00:00:00',dateFmt:'yyyy-MM-dd HH:mm:ss'})" style="width:140px;" /></label>
+        </td>
+	</tr>
+    <tr>
+      <td colspan="2" align="center">理由（必填）: <input type="text" style="width:400px;" name="reason" id="reason" value="" /></td>
+    </tr>
+    <tr>
+      <td colspan="2" align="center"><input type="submit" class="search_btn" style="display:inline-block;" name="submit" onclick="return check2()" id="submit" value="提交" /> <input type="button" class="search_btn" style="display:inline-block;" onclick="tb_remove();" value="取消" /></td>
+    </tr>
+</table>
+</form>
+
+<script type="text/javascript">
+function check2(){
+    var ui = document.getElementById('uitype').value;
+    if(ui == ''){
+        alert('用户名/IP 未验证！');
+        return false;
+    }
+    
+    var a = document.getElementById('apply').checked;
+    var b = document.getElementById('posttest').checked;
+    if(!a && !b){
+        alert('请选择封禁类型！');
+        return false;
+    }
+    
+    if(a == true){
+        var a1 = document.getElementById('apply_validity1').checked;
+        var a2 = document.getElementById('apply_validity2').checked;
+        if(a1 == false && a2 == false){
+            alert('请选择封禁申请产品时间！');
+            return false;
+        }
+        if(a2){
+            if(document.getElementById('apply_time').value == ''){
+                alert('请选择封禁申请产品时间！');
+                return false;
+            }
+        }
+        
+    }
+    if(b == true){
+        var a1 = document.getElementById('posttest_validity1').checked;
+        var a2 = document.getElementById('posttest_validity2').checked;
+        if(a1 == false && a2 == false){
+            alert('请选择封禁发表评测时间！');
+            return false;
+        }
+        if(a2){
+            if(document.getElementById('posttest_time').value == ''){
+                alert('请选择封禁发表评测时间！');
+                return false;
+            }
+        }
+        
+    }
+
+    var r = document.getElementById('reason').value;
+    if(r == ''){
+        alert('理由（必填） 不能为空');
+        return false;
+    }
+    return true;
+}
+function ajax_search(){
+    var u = document.getElementById('add_username').value;
+    var i = document.getElementById('add_ip').value;
+    if(u && i){
+        alert('用户名/IP 只能选其一');
+        return false;
+    }
+    if(u == '' && i == ''){
+        alert('用户名/IP 不能为空');
+        return false;
+    }
+    if(i){
+        if(ipvalidate(i)){
+            document.getElementById('uitype').value = 'ip';
+            document.getElementById('uip').value = i;
+            document.getElementById('uiparea').innerHTML = i;
+            return true;
+        }
+    }else if(u){
+        var formdata = new Object;
+        formdata.username = u;
+        $.ajax({
+            type: 'get',
+            url: '__URL__/ajax_search',
+            data:formdata,
+            dataType:'json',
+            success:function(e){
+                console.log(e);
+                if(e.code == 0){
+                    alert('用户名不存在');
+                    return false;
+                }
+                document.getElementById('uitype').value = 'user';
+                document.getElementById('uip').value = e.uid;
+                document.getElementById('uiusername').value = e.username;
+                document.getElementById('uiparea').innerHTML = e.username ;
+                return true;
+            }
+        });
+    }
+}
+
+</script>

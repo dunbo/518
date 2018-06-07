@@ -1,0 +1,114 @@
+<include file="../../Public/header"  />
+<link type="text/css" rel="stylesheet" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js' ></script>
+<link type="text/css" rel="stylesheet" href="/Public/css/thickbox.css" />
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="/Public/js/zhiyoo/common.js"></script>
+<style type="text/css">
+#platformId{float:left;margin-left:10px;}
+#platformId a{float:left;margin-right:5px;}
+.mOn{color:red;}
+.clear{ clear:both; float:none;}
+</style>
+<body>
+<script type="text/javascript">
+function checkinput(){
+	var objs = document.getElementsByClassName('inputbox');
+	var cnt = objs.length;
+	for(var i=0;i<cnt;i++){
+		if(isNaN(objs[i].value)){
+			alert('排序值不能为非数字，提交失败');
+			return false;
+		}
+	}
+	return true;
+}
+$(function(){
+	//$("#platformId a").eq({$platId}).addClass("mOn").siblings().removeClass("mOn");
+	$('#id{$platId}').addClass("mOn").siblings().removeClass("mOn");
+
+});
+</script>
+<form action="__URL__/edit_rank/platformid/{$platId}" method="post">
+<div style="margin-top:10px;">
+	<div id="platformId">
+        <if condition="$specialtype eq 1">
+        <a class="search_btn mOn" href="__URL__/special_column/">返回上级列表</a> 
+        <else />
+        <a class="search_btn mOn" href="__URL__/showColumn/">返回上级列表</a> 
+        </if>
+		
+	</div>
+
+	
+</div>
+<div class="clear"></div>
+<table border="0" cellpadding="0" cellspacing="0" class="table_list">
+	<thead>
+		<tr>
+			<?php if($platId){ ?>
+			<th width="60px">优先级</th>
+			<?php } ?>
+			<th width="55">栏目ID</th>
+			<th >栏目名称</th>
+			<th width="50">平台</th>
+			<th>封面</th>
+			<th>备注</th>
+			<th >筛选标签</th>
+			<th width="230px">筛选规则</th>
+			<th >内容数量</th>
+			<th width="70">查看编辑</th>
+			<th width="80">操作</th>
+			<th >前台展示状态</th>
+		</tr>
+	</thead>
+	<?php foreach($result as $key => $val){ ?>
+	<tr>
+		<?php if($platId){ ?>
+		<td>
+		<?php if(!$_GET['edit_rank']){ ?>
+		{$val.rank}
+		<?php }else{ ?>
+		<input type="text" value="{$val.rank}" name="rank[{$val.cid}]" class="inputbox" onkeyup="this.value=this.value.replace(/\D/g,'')" size="6" />
+		<?php } ?>
+		</td>
+		<?php } ?>
+		<td>{$val.cid}</td>
+		<td>{$val.name}</td>
+		<td>{$val.platformname}</td>
+		<td>
+			<if condition="$val.cover_img !=''">
+			<img src="<?php echo IMGATT_HOST;?>{$val.cover_img}" width="50" onclick="showImg(this,'');" style="cursor:pointer;" />
+			<else />无</if>
+		</td>
+		<td>{$val.common}</td>
+		<td><?php foreach($ruleinfo[$val['cid']] as $group){
+				if($group['name']) echo $group['name'].'：';
+				$i=0;
+				foreach($group['tag_arr'] as $tagid ){
+					$i++;$point=',';if($i==1) $point='';echo $point;
+					if($tags[$tags[$tagid]['parentid']]['tagname']) echo $tags[$tags[$tagid]['parentid']]['tagname'].' - ';
+					echo $tags[$tagid]['tagname'];
+				}
+		echo '<br/>';
+		}?></td>
+		<td>
+		<?php
+			$filter = $val["filter"];
+			echo $filterdata[$filter];
+		?>
+		</td>
+		<td>{$val.num}</td>
+		<td><a href="__URL__/{$val.filterusr}/cid/{$val.cid}" style="text-decoration:underline;color:blue;">查看编辑</a></td>
+		<td><a href="__URL__/add_column/cid/{$val.cid}/specialtype/{$specialtype |default=0}" class="thickbox" style="text-decoration:underline;color:blue;">编辑</a>&nbsp;&nbsp;<a href="__URL__/del_column/cid/{$val.cid}" onclick="return checkit();" style="text-decoration:underline;color:blue;">删除</a></td>
+		<td><?php if($val['status']==1) { ?><a href="__URL__/changestatus/status/2/cid/{$val.cid}" style="color:blue">启用</a>
+			<?php }else{ ?>
+				<a href="__URL__/changestatus/status/1/cid/{$val.cid}" style="color:red">隐藏</a>
+			<?php } ?>
+		</td>
+	</tr>
+	<?php } ?>
+</table>
+</form>
+</body>
+</html>

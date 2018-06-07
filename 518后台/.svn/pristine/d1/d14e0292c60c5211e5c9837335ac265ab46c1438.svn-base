@@ -1,0 +1,397 @@
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css"/>
+<script type="text/javascript" src='/Public/js/jquery-1.4.2.min.js'></script>
+<script type="text/javascript" src="/Public/js/jquery.colorPicker.js"></script>
+<link rel="stylesheet" type="text/css" href="/Public/css/colorPicker.css" />
+<link rel="stylesheet" type="text/css" href="/Public/css/style.css" />
+<script type="text/javascript" src="/Public/js/ajaxfileupload.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/kindeditor-min.js"></script>
+<script charset="utf-8" src="/Public/js/kindeditor/lang/zh_CN.js"></script>
+<script>
+	$(document).ready(function(){
+		my_select();
+	});
+	function my_select(){
+		var ap_type = $('#ap_type').val();
+		if(ap_type == 2){
+			$("tr[id^=type_1]").css('display','');
+			$("tr[id^=type_2]").css('display','');
+			$("tr[id^=type_3]").css('display','none');
+			$('#ap_desc_').text('参与步骤说明');
+		}else if(ap_type == 3){
+			$("tr[id^=type_1]").css('display','');
+			$("tr[id^=type_2]").css('display','none');
+			$("tr[id^=type_3]").css('display','');
+			$('#ap_desc_').text('结束页面说明');
+		}else if(ap_type == 1){
+			$("tr[id^=type_1]").css('display','none');
+			$("tr[id^=type_2]").css('display','none');
+			$("tr[id^=type_3]").css('display','none');
+			$('#ap_desc_').text('活动预告说明');
+		}
+	}
+
+	var count = 0;
+	function add_award_file(obj)
+	{
+		if (++count > 5) return false;
+		var file_row = "<p><input type='file' name='award_color_"+count+"' /></p>";
+		$(obj).parent().append(file_row);
+	}
+
+	function del_file(obj)
+	{
+		$(obj).parent().remove();
+	}
+
+	$(function(){
+        $('#ap_notice').colorPicker();
+        $('#bg_color').colorPicker();
+        $('#button_color').colorPicker();
+        $('#button_text_color').colorPicker();
+        $('#text_color').colorPicker();
+    });
+    //图片验证	
+function test(file_name)
+{
+	var result =/\.[^\.]+/.exec(file_name);
+	return result;
+}	
+function onUploadImgChange(sender,img,obj){
+	if(!$("#"+img).val()){
+		return false;
+	}
+    if( $("#"+img).val() && !sender.value.match( /.jpg|.gif|.png|.bmp|.jpeg/i ) )
+	{        
+        alert('图片格式无效！');   
+		remove_file(img);	
+        return false;       
+    }   
+	var ap_id = $('#ap_id').val();//图片名称后缀必须为小写，大些报错
+	var b=test(sender.value);
+	if( $("#"+img).val() &&  b!=".jpg"&&b!=".gif"&&b!=".png"&&b!=".bmp"&&b!=".jpeg")
+	{
+		alert('后缀只支持小写格式！');
+		if(!ap_id)
+		{
+			remove_file(img);	
+		}
+		else
+		{
+			var file = $("#"+img);
+			file.after(file.clone().val(""));
+			file.remove();
+		}
+		return false;  
+	}
+	
+	var imgSrc = check_img(sender);
+	console.log(imgSrc);
+    var img_url = imgSrc;
+    var newimg = new Image();
+    newimg.src = img_url;
+    // 加载完成执行
+    newimg.onload = function () {
+		// 打印
+		var w = newimg.width;
+		var h = newimg.height;
+		if((img == 'ap_imgurl' || img == 'bg_img' || img == 'bottom_color') && w != 640){
+			alert('宽必须640');  
+			remove_file(img);			
+			return false;    			
+		}
+		var objPreview = document.getElementById(obj); 
+		$('#'+img+'_del').remove();
+		str = '<button id="'+img+'_del" type="button" onclick="del_img(\''+img+'\');" >&nbsp;&nbsp;删&nbsp;&nbsp;除&nbsp;&nbsp;</button>';
+		$('#'+obj).closest('img').after(str);		
+		var imgs=document.getElementById(img);
+		if( sender.files &&  sender.files[0] ){ 
+			objPreview.style.display = 'block';        
+			objPreview.style.width = 'auto';        
+			objPreview.style.height = 'auto';
+			objPreview.src = window.URL.createObjectURL(imgs.files[0]);
+		}
+	}	
+} 	
+function del_img(img){
+	if(confirm('是否确认删除？')) {
+		remove_file(img);
+	}
+}
+function remove_file(file){
+	$('#'+file+'_div').removeAttr('src').css('display','none');
+	$('#'+file+'_del').remove();	
+	var file = $("#"+file);
+	file.after(file.clone().val(""));
+	file.remove();	
+	return false;   	
+}
+function check_img(obj){
+   var imgSrc = '';
+    if (obj.files && obj.files[0]) {
+        if (getOs() == 'Chrome') {
+            imgSrc = window.webkitURL.createObjectURL(obj.files[0]);
+        } else {
+            imgSrc = window.URL.createObjectURL(obj.files[0]);
+        }
+    } else {
+        //IE下，使用滤镜
+        obj.select();
+        //解决IE9下document.selection拒绝访问的错误
+        if (navigator.appName == "Microsoft Internet Explorer" && navigator.appVersion.match(/9./i) == "9.") {
+            obj.blur();
+        }
+        var imgSrc = document.selection.createRange().text;
+        document.selection.empty();
+    }
+	return imgSrc;
+}
+function getOs()
+{ 
+   var OsObject = ""; 
+   if(isIE = navigator.userAgent.indexOf("MSIE")!=-1) { 
+        return "MSIE"; 
+   }
+   if(isFirefox=navigator.userAgent.indexOf("Firefox")!=-1){ 
+        return "Firefox"; 
+   }
+   if(isChrome=navigator.userAgent.indexOf("Chrome")!=-1){ 
+        return "Chrome"; 
+   }
+   if(isSafari=navigator.userAgent.indexOf("Safari")!=-1) { 
+        return "Safari"; 
+   }
+   if(isOpera=navigator.userAgent.indexOf("Opera")!=-1){ 
+        return "Opera"; 
+   } 
+} 
+function checkinput(){
+	var ap_name = $.trim($('#ap_name').val());
+	if (!ap_name){
+		alert('活动名称不可为空');
+		return false;
+	}
+
+	var ap_id = $('#ap_id').val();
+	var ap_type = $('#ap_type').val();
+	if(!ap_id){
+		if (!$('#ap_imgurl').val()){ 
+			alert('请上传页面banner图'); 
+			return false;
+		}
+		if (!$('#popup_bg_pic').val()){ 
+			alert('请上传底框背景图片'); 
+			return false;
+		}
+		if (ap_type == '3') {
+			if (!$('#again_color').val()){ 
+				alert('请上传未出奖提示图片'); 
+				return false;
+			}
+			if (!$('#bottom_color').val()){ 
+				alert('请上传页面底部图片'); 
+				return false;
+			}
+		}
+		if (ap_type == '2') {
+			if (!$('#bottom_color').val()){ 
+				alert('请上传页面底部图片'); 
+				return false;
+			}
+			if (!$('#button_pic').val()){ 
+				alert('请上传按钮背景图片'); 
+				return false;
+			}
+			if (!$('#update_button_color').val()){ 
+				alert('请上传升级按钮背景图片'); 
+				return false;
+			}
+			if (!$('#desc_color').val()){ 
+				alert('请上传无SIM卡提示图片'); 
+				return false;
+			}
+		}			
+	}
+}
+//编辑器
+KindEditor.ready(function(K) {
+	window.editor = K.create('#ap_rule',{
+		allowImageRemote : false,
+		allowImageUpload : true,
+		items : [
+			'forecolor'
+		]
+	});
+	window.editor = K.create('#ap_award',{
+		allowImageRemote : false,
+		allowImageUpload : true,
+		items : [
+			'forecolor'
+		]
+	});
+	window.editor = K.create('#ap_desc',{
+		allowImageRemote : false,
+		allowImageUpload : true,
+		items : [
+			'forecolor'
+		]
+	});
+});
+KindEditor.options.cssData = 'body { font-size: 14px; }';
+</script>
+<body>
+<form action="__URL__/<?php if($_GET['ap_id']){ echo 'edit_comment_reply_do'; }else{ echo 'add_comment_reply_do'; } ?>" method="post" onsubmit="return checkinput();" enctype="multipart/form-data">
+<div style="margin:20px;">
+<a href="/index.php/Sendnum/CoActivity/comment_reply_list" class="search_btn">返回</a>&nbsp;&nbsp;
+<h2><span class="my_activate">添加/编辑活动页面</span><input type='hidden' name='ap_id' id='ap_id' value="{$list['ap_id']}"/></h2>
+
+<table border="1" cellpadding="3" cellspacing="0" width="100%" style="margin-top:40px;">
+	<tr>
+		<td width="100">活动名称</td>
+		<td colspan="2"><input type="text" id="ap_name" name="ap_name" value="{$list['ap_name']}" /></td>
+	</tr>
+	<tr>
+		<td>活动类型</td>
+		<td colspan="2">
+			<select name="ap_type" id="ap_type" onChange="my_select();">
+				<option value="1" <?php if($list['ap_type'] == 1) echo 'selected'; ?> >预告页面</option>
+				<option value="2" <?php if($list['ap_type'] == 2) echo 'selected'; ?> >活动页面</option>
+				<option value="3" <?php if($list['ap_type'] == 3) echo 'selected'; ?> >结束页面</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td id="ap_desc_">活动说明</td>
+		<td colspan="2"><textarea id="ap_desc" rows="5" cols="40" name="ap_desc"><?php if($list['ap_desc']){ echo $list['ap_desc']; } ?></textarea></td>
+	</tr>
+	<tr>
+		<td>底框背景图片</td>
+		<td width="270"><input type="file" name="popup_bg_pic" id="popup_bg_pic" onchange="onUploadImgChange(this,'popup_bg_pic','popup_bg_pic_div');" /></td>
+		<td>
+			<img id="popup_bg_pic_div" <?php if($list['popup_bg_pic']){ ?>src="{$IMGATT_HOST}{$list['popup_bg_pic']}" <?php } ?>/>
+		</td>
+	</tr>
+	<tr>
+		<td>标签背景图片</td>
+		<td><input type="file" name="warning_bgcolor" id="warning_bgcolor" onchange="onUploadImgChange(this,'warning_bgcolor','warning_bgcolor_div');" /></td>
+		<td>
+			<img id="warning_bgcolor_div" <?php if($list['warning_bgcolor']){ ?>src="{$IMGATT_HOST}{$list['warning_bgcolor']}" <?php } ?>/>
+		</td>
+	</tr>
+	<tr>
+		<td>页面banner图</td>
+		<td><p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p><input type="file" name="ap_imgurl" id="ap_imgurl" onchange="onUploadImgChange(this,'ap_imgurl','ap_imgurl_div');" /></td>
+		<td>
+			<img id="ap_imgurl_div" <?php if($list['ap_imgurl']){ ?>src="{$IMGATT_HOST}{$list['ap_imgurl']}" <?php } ?>/></td>
+	</tr>
+	<tr>
+		<td>页面文字颜色</td>
+		<td colspan="2"><input type="text" name="ap_notice" id="ap_notice" value="<?php echo $list['ap_notice'] ? $list['ap_notice'] : '#420b09'?>" /></td>
+	</tr>
+	<tr>
+		<td>页面背景颜色</td>
+		<td colspan="2"><input type="text" name="bg_color" id="bg_color" value="<?php echo $list['bg_color'] ? $list['bg_color'] : '#420b09'?>" /></td>
+	</tr>
+	<tr>
+		<td>页面背景图片</td>
+		<td><input type="file" name="bg_img" id="bg_img" onchange="onUploadImgChange(this,'bg_img','bg_img_div');" /></td>
+		<td>
+			<img id="bg_img_div" <?php if($list['bg_img']){ ?>src="{$IMGATT_HOST}{$list['bg_img']}" <?php } ?>/></td>
+	</tr>
+	<tr id="type_1_1">
+		<td>页面底部图片</td>
+		<td><p class="tips">尺寸：宽度640,高度根据手机相宽度自适应。大小尽量控制在200KB以内</p><input type="file" name="bottom_color" id="bottom_color" onchange="onUploadImgChange(this,'bottom_color','bottom_color_div');" /></td>
+		<td>
+			<img id="bottom_color_div" <?php if($list['bottom_color']){ ?>src="{$IMGATT_HOST}{$list['bottom_color']}" <?php } ?> /></td>
+	</tr>
+	<tr id="type_1_2">
+		<td>底部背景颜色</td>
+		<td colspan="2"><input type="text" name="button_color" id="button_color" value="<?php echo $list['button_color'] ? $list['button_color'] : '#420b09'?>"/></td>
+	</tr>
+	<tr id="type_2_2">
+		<td>按钮背景图片</td>
+		<td><input type="file" name="button_pic" id="button_pic" onchange="onUploadImgChange(this,'button_pic','button_pic_div');" /></td>
+		<td>
+			<img id="button_pic_div" <?php if($list['button_pic']){ ?>src="{$IMGATT_HOST}{$list['button_pic']}" <?php } ?>/></td>
+	</tr>
+	<tr id="type_2_3">
+		<td>按钮文字颜色</td>
+		<td colspan="2"><input type="text" name="button_text_color" id="button_text_color" value="<?php echo $list['button_text_color'] ? $list['button_text_color'] : '#420b09'?>" /></td>
+	</tr>
+	<tr id="type_2_4">
+		<td colspan="3"><h2>软件区域</h2></td>
+	</tr>
+	<tr id="type_2_5">
+		<td>软件展示样式</td>
+		<td colspan="2">&nbsp;&nbsp;<input type="radio" value="1" name="soft_style" <?php if($list['soft_style'] == 1) echo 'checked'; ?>/>&nbsp;1列&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="soft_style" value="2" <?php if($list['soft_style'] == 2) echo 'checked'; ?> />&nbsp;2列&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="soft_style" value="3" <?php if($list['soft_style'] == 3) echo 'checked'; ?> />&nbsp;3列</td>
+	</tr>
+	<tr id="type_2_6">
+		<td colspan="3"><h2>配置升级页</h2></td>
+	</tr>
+	<tr id="type_2_7">
+		<td>升级按钮图片</td>
+		<td><input type="file" name="update_button_color" id="update_button_color" onchange="onUploadImgChange(this,'update_button_color','update_button_color_div');" /></td>
+		<td>
+			<img id="update_button_color_div" <?php if($list['update_button_color']){ ?>src="{$IMGATT_HOST}{$list['update_button_color']}" <?php } ?>/></td>
+	</tr>
+	<tr id="type_2_8">
+		<td colspan="3"><h2>填写手机号</h2></td>
+	</tr>
+	<tr id="type_2_9">
+		<td>输入框背景图片</td>
+		<td><input type="file" name="rule_pic" id="rule_pic" onchange="onUploadImgChange(this,'rule_pic','rule_pic_div');" /></td>
+		<td>
+			<img id="rule_pic_div" <?php if($list['rule_pic']){ ?>src="{$IMGATT_HOST}{$list['rule_pic']}" <?php } ?>/></td>
+	</tr>
+	<tr id="type_2_10">
+		<td>输入框文字颜色</td>
+		<td colspan="2"><input type="text" name="text_color" id="text_color" value="<?php echo $list['text_color'] ? $list['text_color'] : '#420b09'?>" /></td>
+	</tr>
+	<tr id="type_2_11">
+		<td colspan="3"><h2>活动奖品</h2></td>
+	</tr>
+	<tr id="type_2_12">
+		<td>奖品图片</td>
+		<td colspan="2">
+		<p class='tips'>注意：按照一等奖、二等奖、三等奖...顺序逐个添加</p>
+		<input type="file" name="award_color_0" />&nbsp;&nbsp;<span onclick='add_award_file(this)'>[+]</span></td>
+	</tr>
+	<tr id="type_2_13">
+		<td>SIM卡提示图片</td>
+		<td><input type="file" name="desc_color" id="desc_color" onchange="onUploadImgChange(this,'desc_color','desc_color_div');" /></td>
+		<td>
+			<img id="desc_color_div" <?php if($list['desc_color']){ ?>src="{$IMGATT_HOST}{$list['desc_color']}" <?php } ?>/></td>
+	</tr>
+	<tr id="type_2_14">
+		<td colspan="3"><h2>活动规则</h2></td>
+	</tr>
+	<tr id="type_2_15">
+		<td>活动规则文案</td>
+		<td colspan="2"><textarea id="ap_rule" rows="5" cols="40" name="ap_rule" style="width:500px"><?php if($list['ap_rule']){ echo $list['ap_rule']; } ?></textarea></td>
+	</tr>
+	<tr id="type_3_1">
+		<td>中奖名单</td>
+		<td colspan="2">&nbsp;&nbsp;<input type="radio" value="1" name="is_filter" <?php if($list['is_filter'] == 1) echo 'checked'; ?> />&nbsp;已出&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="is_filter" value="2" <?php if($list['is_filter'] == 2) echo 'checked'; ?>/>&nbsp;未出</td>
+	</tr>
+	<tr id="type_3_2">
+		<td>未出奖提示图片</td>
+		<td><input type="file" name="again_color" id="again_color" onchange="onUploadImgChange(this,'again_color','again_color_div');" /></td>
+		<td>
+			<img id="again_color_div" <?php if($list['again_color']){ ?>src="{$IMGATT_HOST}{$list['again_color']}" <?php } ?> /></td>
+	</tr>
+	<tr id="type_3_3">
+		<td>中奖名单明细</td>
+		<td colspan="2"><textarea id="ap_award" rows="5" cols="40" name="ap_award" style="width:500px"><?php if($list['ap_award']){ echo $list['ap_award']; } ?></textarea></td>
+	</tr>
+</table>
+</div>
+<div style="margin-top:20px;margin-left:100px;">
+	<table>
+		<tr>
+			<td><input type="submit" class="search_btn" value="确定" /></td>
+			<td><a href="javascript:;" onclick="javascript:history.go(-1);" class="search_btn" >取消</a></td>
+		</tr>
+	</table>
+</div>
+</form>
+</body>
+</html>

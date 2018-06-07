@@ -1,0 +1,135 @@
+<include file="../../Public/new_header" />
+{//时间插件开始}
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+{//时间插件结束}
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<div class="main" >
+    <div class="content">
+		<div class="search_box" style="margin-top:10px;height: 37px">
+			<form method="get" action="__URL__/index">
+				<table cellspacing="0" cellpadding="0" width="99%" class="search_table">
+					<tbody>
+						<tr>                 
+							<td >渠道名称
+								<input type="text" style="width:140px" value="{$channel_name}" name="channel_name" id="channel_name" class="search_item_text">
+							</td>
+							<td >渠道ID
+								<input type="text" style="width:140px" name="id" id="id" value="{$id}" class="search_item_text">
+
+							</td>
+							<td >渠道编号
+								<input type="text" style="width:140px" name="channel_code" id="channel_code" value="{$channel_code}" class="search_item_text">
+
+							</td>
+							<td >状态
+								<select name="status" class="search_item_text">
+									<option value="">全部</option>
+									<option value="1" <if condition="$status eq '1'">selected ="selected"</if>>有效</option>
+									<option value="-1" <if condition="$status eq '-1'">selected ="selected"</if>>无效</option>
+								</select>
+
+							</td>
+							<td>
+								<input type="submit" onclick="" value="查询" style="float:left; height:30px;" class="search_btn">
+							</td>
+						</tr>
+
+					</tbody></table>
+			<input type="hidden" value="5580cb87fc83ace494fd9e28f5eecfa7" name="__hash__"></form>
+		</div>
+		<div style="float:left;margin-top:10px;margin-left:5px">
+            <a href='__URL__/add_sdk_channel?width=600&height=300&modal=true' style="float:left;" title="创建渠道" class="thickbox search_btn">创建渠道</a>
+        </div>
+		<div style="float:left;margin-top:10px;margin-left:5px">
+            <a href='javascript:void(0)' style="float:left;" onclick="import_out()" class="search_btn">导出</a>
+        </div>
+		<div style="margin-top:50px;width:auto;overflow:visible;">
+		<table class="table_list" >
+			<th><input type="checkbox" name="chk_all" onclick="checkAll(this)"></th><th>渠道优先级</th><th>渠道ID</th><th>渠道名称</th><th>游戏数量</th><th>创建日期</th><th>渠道编号</th><th>渠道类型</th><th>合作形式</th><th>渠道负责人</th><th>状态</th><th>操作</th>
+			<?php
+				foreach($channel_list as $k=>$v){
+					?>
+						<tr>
+							<td><input type="checkbox" name="id_<?php echo $v['id'];?>" value="<?php echo $v['id'];?>"></td>
+							<td><input type="text" style="text-align: center;width: 50px" value="<?php echo $v['rank'];?>" rel="<?php echo $v['id'] ?>-<?php echo $v['rank'] ?>"class="channel_rank"></td>
+							<td><?php echo $v['id'];?></td><td><?php echo $v['channel_name'];?></td>
+							<td><a href='__URL__/channel_game_info?<?php echo $param;?>&channel_id=<?php echo $v['id'];?>&channel_name=<?php echo $v['channel_name'];?>&channel_type=<?php echo $v['channel_type'];?>'><?php echo $v['num'];?></a></td><td><?php echo date("Y-m-d H:i:s",$v['add_tm']);?></td>
+							<td><?php echo $v['channel_code'];?></td>
+							<td><?php if($v['channel_type']=='0'){echo "普通渠道<br>(打包)";}else if($v['channel_type']=='1'){echo '融合渠道<br>(不打包)';}?></td>
+							<td><?php if($v['market_type'] == 1){ echo '单品网游';} else{ echo '安智市场（渠道）'; } ?></td>
+							<td><?php echo $v['admin_user_name'];?></td>
+							<td><?php if($v['status']=='1'){echo '有效';}else{echo '';}?></td>
+							<td>
+							<?php if($v['id']!= C('general_channel_id')){ ?>
+								<a href="__URL__/add_sdk_channel?id=<?php echo $v['id'];?>&channel_name=<?php echo $v['channel_name'];?>?&width=600&height=300&modal=true" class="thickbox" title="编辑渠道" >编辑</a><br>
+								<a href="javascript:void(0)" onclick="edit_status(<?php echo $v['id'];?>,<?php if($v['status']=='1'){echo '-1';}else{echo '1';}?>)"><?php if($v['status']=='1'){echo '无效';}else{echo '';}?></a><br>
+							<?php } ?>
+							<?php if($v['http_sta']!='1'){echo '<a href="__URL__/re_http?id='.$v['id'].'&type=1">重新发送</a>';} ?>
+							</td>
+						</tr>
+					<?php
+				}
+			?>
+		</table>
+		</div>
+		<div>
+		{$page}
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(".channel_rank").blur(function(){
+	var rank = $(this).val();
+	var info = $(this).attr('rel').split("-");
+	var id = info[0];
+	var last_rank = info[1];
+	if(last_rank!=rank){
+		var url = "__URL__/edit_rank?id=" + id + "&rank=" + rank+'&type=channel';
+		$.ajax({
+			type: "GET",
+			url: url,
+			success: function(response) {
+				alert('保存成功');
+			}
+		});
+	}
+
+})
+function edit_status(id,status){
+	if(status==1){
+		sta_name = '有效';
+	}else{
+		sta_name = '无效';
+	}
+	var str = '你确定要将该渠道置于'+sta_name+'吗';
+	if(confirm(str)){
+		window.location.href = '__URL__/edit_status?type=1&id='+id+'&status='+status;
+	}
+	
+}
+function checkAll(obj)
+{
+  var flag = $(obj).attr('checked') == 'checked';
+  $('input[name^=id_]').attr('checked', flag);
+}
+
+function import_out(){
+	var channel_name = $("#channel_name").val();
+	var id = $("#id").val();
+	var channel_code = $("#channel_code").val();
+	var choose_id_str = search_str ='';
+	$('input[name^=id_]').each(function(i){
+		if($(this).attr('checked') == 'checked'){
+			choose_id_str += $(this).val()+',';
+		}
+	});
+	search_str = "channel_name="+channel_name+"&id="+id+"&channel_code="+channel_code;
+	if(choose_id_str!=''){
+		search_str += "&id_str="+choose_id_str;
+	}
+	window.location.href = '__URL__/index?import_out=1&'+search_str;
+}
+</script>

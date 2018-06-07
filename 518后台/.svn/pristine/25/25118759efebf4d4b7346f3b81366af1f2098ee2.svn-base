@@ -1,0 +1,148 @@
+<include file="../../Public/new_header" />
+
+<link rel="stylesheet" type="text/css" href="/Public/css/tablelist.css" />
+<script type="text/javascript" src="__PUBLIC__/school/js/jquery-1.6.2.min.js"></script>
+<link rel="stylesheet" href="/Public/css/thickbox.css" type="text/css" media="screen" />
+<script type="text/javascript" src='/Public/js/thickbox-compressed.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>     
+<body>
+<div style="font-weight: bold;font-size: 20px">批量修改游戏广告库</div>
+<div style="margin-top: 15px">
+        <div style="float:left;margin-left: 30px;margin-top:3px;">游戏广告库：
+        <label><input type="radio" value="1" name="is_accept_ad" onclick='change_sta(1)'>是</label>&nbsp;&nbsp;
+            <label><input type="radio" value="0" name="is_accept_ad"  onclick='change_sta(0)'>否</label>
+        </div>
+        <div style="float:left;margin-left: 10px">
+             <label style="margin-left: 12px">推广周期：</label>
+            <label><input name="is_promotion_time" type="radio"  checked =true value='0'/>默认上线15天</label>
+            <label style="margin-left: 15px"></label>
+            <label><input name="is_promotion_time" type="radio" value='1'/> 配置推广周期</label>
+            <input id="start_tm" name="start_tm" type="text" class="Wdate" style="width:150px" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})" />至
+            <input id="end_tm" name="end_tm" type="text" class="Wdate" style="width:150px" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 00:00:00'})"/>
+            <label style="margin-left: 15px"></label>
+            <label><input name="is_promotion_time" type="radio" value='2'/>不设置</label>
+        </div>
+        <div  style="float:left;">
+            <a  style="margin-left:10px;margin-top: -5px" onclick="return check()"  class="search_btn">批量修改</a>
+        </div>
+        <div  style="float:left;">
+            <a style="margin-left:10px;margin-top: -5px" href="__URL__/edit_more_ad?height=100" class="thickbox search_btn">重新导入</a>
+        </div>
+        <input type="hidden" name="j_whitelist_soft" id="j_whitelist_soft" value="<?php echo $j_whitelist_soft;?>">
+        <div style="clear: both"></div>
+    <div style='margin-left:30px;display:none' id='update_error'>
+        <br>
+        修改失败列表：<a href="__URL__/pub_down_shield_csv/file_name/lianyunku.csv">下载</a>
+        <br>
+        <br>
+    </div>
+    <div id='export_hide_table'>
+    <table class="table_list" >
+        <th><input type="checkbox" name="chk_all" onclick="checkAll(this)"></th><th>包名</th><!-- <th>白名单软件名称</th> --><th>线上最新软件名称</th><th>游戏广告库</th><th>广告库备注</th><th>待提交备注</th>
+        <?php
+            foreach($whitelist_soft as $k=>$v){
+                ?>
+                <tr>
+                    <td><input type="checkbox" name="id_<?php echo $v['id'];?>" value="<?php echo $v['id'];?>"></td>
+                    <td><?php echo $v['package'];?></td>
+                    <!-- <td><?php echo $v['softname'];?></td> -->
+                    <td><?php echo $v['o_softname'];?></td>
+                    <td><?php if($v['is_accept_ad']==1){echo '是';}else{echo '否';}?></td>
+                    <td><?php echo $v['accept_ad_remark'];?></td>
+                    <td><?php echo $v['beizhu'];?></td>
+                </tr>
+                <?php
+            }
+        ?>
+
+    </table>
+    </div>
+</div>
+<div id='export_error'>
+<div style="margin-left: 10px">
+    <?php
+        if($num > 0){
+            echo "成功搜索软件：".$num."个";
+        }
+    ?>
+</div>
+<div style="margin-left: 10px;margin-top: 10px">
+    <?php
+        if(count($fail_soft) > 0){
+            echo "未找到软件：".count($fail_soft)."个<br>";
+            foreach($fail_soft as $v){
+                echo $v."<br>";
+            }
+        }
+    ?>
+</div>
+<div style="margin-left: 10px;margin-top: 10px">
+    <?php
+        if(count($repeat_pack) > 0){
+    echo "重复软件：".count($repeat_pack)."个<br>";
+    foreach($repeat_pack as $v){
+    echo $v."<br>";
+    }
+    }
+    ?>
+</div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+    function check(){
+        var is_accept_ad = $("input[name='is_accept_ad']:checked").val();
+        var is_promotion_time = $("input[name='is_promotion_time']:checked").val();
+        var start_tm = $("#start_tm").val();
+        var end_tm = $("#end_tm").val();
+        var info = $("#j_whitelist_soft").val();
+        if(is_accept_ad!=1&&is_accept_ad!=0){
+            alert('请选择是否接入广告');
+            return false;
+        }
+        var choose_id_str = search_str ='';
+        $('input[name^=id_]').each(function(i){
+            if($(this).attr('checked') == 'checked'){
+                choose_id_str += $(this).val()+',';
+            }
+        });
+        if(choose_id_str==''){
+            alert('请选择包名');return false;
+        }
+        var url = "__URL__/pub_update_ad_info";
+        $.ajax({
+            type: "POST",
+            url: url,
+            data:"is_accept_ad=" + is_accept_ad + "&id=" + choose_id_str+ "&start_tm=" + start_tm+ "&is_promotion_time=" + is_promotion_time+ "&end_tm=" + end_tm+"&info="+info,
+            success: function(data) {
+                var data = eval("("+data+")");
+                if(data['code']==1){
+                    alert(data['msg']);
+                    window.location.href = "__URL__/ShowWhitelist";
+                }else{
+                    alert(data['msg']);
+                    $('#update_error').show();
+                    $('#export_hide_table').hide();
+                    $('#export_error').hide();
+                    // window.location.reload();
+                }
+            }
+        });
+    }
+    function checkAll(obj)
+    {
+        var flag = $(obj).attr('checked') == 'checked';
+        $('input[name^=id_]').attr('checked', flag);
+    }
+    function change_sta(bs){
+        if(bs==1){
+            $('#start_tm').attr('disabled',false);
+            $('#end_tm').attr('disabled',false);
+            $("input[name='is_promotion_time']").attr('disabled',false);
+        }else{
+            $('#start_tm').attr('disabled','disabled');
+            $('#end_tm').attr('disabled','disabled');
+            $("input[name='is_promotion_time']").attr('disabled','disabled');
+        }
+    }
+</script>

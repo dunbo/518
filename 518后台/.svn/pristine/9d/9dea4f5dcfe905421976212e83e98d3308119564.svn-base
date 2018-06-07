@@ -1,0 +1,118 @@
+<include header="../Public/header"/>
+
+<link rel="stylesheet" href="/Public/css/tablelist.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="/Public/css/thickbox1.css" type="text/css" media="screen" />
+
+<script type="text/javascript" src='/Public/js/jquery.js'></script>
+<script type="text/javascript" src='/Public/js/thickbox.js'></script>
+<script type="text/javascript" src="/Public/js/My97DatePicker/WdatePicker.js"></script>
+
+<script>
+    function delete_author(id) {
+        if (!confirm("确定要删除该作者？")) {
+            return false;
+        }
+        // ajax请求判断此专题分类下有没有专题，有的话不可以删除
+        $.ajax({
+            url : '__URL__/delete_author',
+            type : 'get',
+            data: {id:id},
+            dataType: "json",
+            success:function(data){
+                if (data.status == 0) {
+                    alert(data.info);
+                    window.location.reload();
+                } else {
+                    alert(data.info);
+                }
+            }
+        });
+        return true;
+    }
+    
+    function move_to_author(from_author_id, from_author_name, obj) 
+	{
+        var to_author_id = obj.value;
+        var to_author_name = obj.options[obj.selectedIndex].text;
+        if (to_author_id == 0)
+		{
+            return false;
+		}
+			
+        if (!confirm("确定将【" + from_author_name + "】作者下的专题移动至【" + to_author_name + "】作者下？")) 
+		{
+            obj.value = 0;
+            return;
+        }
+        // 移动专题
+        obj.value = 0;
+        // ajax请求判断此专题分类下有没有专题，有的话不可以删除
+        $.ajax({
+            url : '__URL__/move_to_author',
+            type : 'get',
+            data: {from_author_id:from_author_id, to_author_id:to_author_id},
+            dataType: "json",
+            success:function(data)
+			{
+                if (data.status == 0) {
+                    alert("移动成功！！");
+                    window.location.reload();
+                } else {
+                    alert("移动失败！");
+                }
+            }
+        });
+        
+    }
+</script>
+
+<body>
+    <div class="search_box">
+        <table width="99%" cellpadding="0" cellspacing="0" class="search_table">
+            <tr>
+                <td><a class="search_btn" href="__URL__/feature">返回</a></td>
+                <td><a class="search_btn thickbox" href="__URL__/add_author?mm" class="thickbox">新增</a></td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <table cellpadding="0" cellspacing="0" style="margin-top:10px;" class="table_list">
+            <thead>
+                <tr>
+                    <th width="4%">ID</th>
+                    <th width="4%">作者</th>
+                    <th width="8%">作者头像</th>
+                    <th width="10%">更新时间</th>
+                    <th width="8%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="author_list" id="list">
+                    <tr>
+                        <td height="50">{$list.id}</td>
+                        <td>{$list.author_name}</td>
+                        <td><img class="pimg" src="<?php echo IMGATT_HOST;?>{$list.author_image}"  alt="作者头像" /></td>
+                        <td>{$list.update_tm|date="Y-m-d H:i:s",###}</td>
+                        <td>
+                            <a href="__URL__/edit_author?id={$list.id}" class="thickbox blue">编辑</a>
+                            <span>&nbsp;&nbsp;&nbsp;</span>|<span>&nbsp;&nbsp;&nbsp;</span>
+                            <a href="javascript:void(0)" class="blue" onclick="return delete_author({$list.id});">删除</a>
+                            <br/>
+                            移动至
+                            <select onchange="move_to_author('{$list.id}', '{$list.author_name}', this)" <if condition="$list.feature_count eq 0">disabled="disabled"</if>>
+                                <option value="0">请选择</option>
+                                <volist name="author_list" id="other_list">
+                                        <neq name="other_list.id" value="$list.id"><!--不可以移给自己-->
+                                            <option value="{$other_list.id}">{$other_list.author_name}</option>
+                                        </neq>
+                                </volist>
+                            </select>
+                            </if>
+                        </td>
+                    </tr>
+                </volist>
+            </tbody>
+        </table>
+        <center>{$page}</center>
+    </div>
+</body>
